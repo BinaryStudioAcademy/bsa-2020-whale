@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Whale.Shared", "Whale.Shared\Whale.Shared.csproj", "{81F6C3B9-117E-4152-A0D7-EE327CA56D65}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Whale.Shared", "Whale.Shared\Whale.Shared.csproj", "{81F6C3B9-117E-4152-A0D7-EE327CA56D65}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Whale.API", "Whale.API\Whale.API.csproj", "{49A4C9A6-D443-4DE9-B8DD-E4E36908A71D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{81F6C3B9-117E-4152-A0D7-EE327CA56D65}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81F6C3B9-117E-4152-A0D7-EE327CA56D65}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81F6C3B9-117E-4152-A0D7-EE327CA56D65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49A4C9A6-D443-4DE9-B8DD-E4E36908A71D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49A4C9A6-D443-4DE9-B8DD-E4E36908A71D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49A4C9A6-D443-4DE9-B8DD-E4E36908A71D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49A4C9A6-D443-4DE9-B8DD-E4E36908A71D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
