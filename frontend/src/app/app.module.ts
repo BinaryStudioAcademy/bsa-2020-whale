@@ -6,6 +6,8 @@ import { AppComponent } from './app.component';
 import { CoreModule } from './core/core.module';
 import { AuthService } from './core/auth/auth.service';
 
+import { LandingPageModule } from './scenes/landing-page/landing-page.module';
+
 @NgModule({
   declarations: [
     AppComponent
@@ -14,6 +16,7 @@ import { AuthService } from './core/auth/auth.service';
     BrowserModule,
     AppRoutingModule,
     CoreModule,
+    LandingPageModule
   ],
   providers: [AuthService],
   bootstrap: [AppComponent]

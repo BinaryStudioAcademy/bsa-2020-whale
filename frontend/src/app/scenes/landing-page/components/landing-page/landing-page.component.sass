@@ -1,0 +1,82 @@
+@import url(https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap)
+
+$bacground-darker: #f6f6f6
+
+.first-screen
+    background-image: url(/assets/img/first-screen-backgraund.jpg)
+    background-repeat: no-repeat
+    background-position: top
+    background-size: cover
+    height: 80%
+
+    .ui.header
+        margin-top: 4.5em
+
+.third-screen
+    background-color: $bacground-darker
+
+    .icon
+        width: 100px
+        height: 100px
+
+.screen_container
+    width: 100%
+    margin: auto
+    padding-top: 1em
+    padding-bottom: 3em
+    
+    .ui.header
+        line-height: 1.5em
+        font-family: 'Open Sans', sans-serif
+        font-size: 2em
+    
+    .ui.big.button
+        margin-top: 30px
+    
+    .screen_header
+        display: flex
+        justify-content: center
+        padding: 4em
+
+.content
+    display: flex
+    flex-direction: column
+    justify-content: space-between
+    width: 75%
+    margin: auto
+
+    .content_item
+        width: 100%
+        margin: 30px 0
+        display: flex
+        flex-direction: row
+        align-items: center
+
+        img
+            width: 150px
+            border-radius: 20px
+            margin: 0 40px
+
+.left
+    justify-content: flex-start
+
+.right
+    justify-content: flex-end
+    text-align: right
+
+.footer
+    display: flex
+    justify-content: center
+    margin-top: 20px
+    padding: 10px
+    background-color: $bacground-darker
+
+@media screen and (max-width: 768px)
+    .screen_container
+        .ui.header
+            font-size: 1.5em
+
+@media screen and (max-width: 500px)
+    .screen_container
+        .ui.header
+            font-size: 1.2em

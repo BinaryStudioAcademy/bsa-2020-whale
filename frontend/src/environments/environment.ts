@@ -12,7 +12,8 @@ export const environment = {
     storageBucket: 'bsa-whale.appspot.com',
     messagingSenderId: '893944865679',
     appId: '1:893944865679:web:9b055d730e3a27b66961fa'
- }
+ },
+  apiUrl: 'http://localhost:51569'
 };
 
 /*
