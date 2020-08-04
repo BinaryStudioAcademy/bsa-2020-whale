@@ -13,7 +13,14 @@
   </ItemGroup>
 
   <ItemGroup>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Whale.BLL\Whale.BLL.csproj" />
     <ProjectReference Include="..\Whale.DAL\Whale.DAL.csproj" />
+    <ProjectReference Include="..\Whale.BLL\Whale.API.csproj" />
+    <ProjectReference Include="..\Whale.BLL\Whale.Shared.csproj" />
+
   </ItemGroup>
 
 
