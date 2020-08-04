@@ -7,7 +7,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Whale.Shared", "Whale.Share
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Whale.API", "Whale.API\Whale.API.csproj", "{49A4C9A6-D443-4DE9-B8DD-E4E36908A71D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Whale.BLL", "Whale.BLL\Whale.BLL.csproj", "{CD035326-7D35-4344-B62B-99475ED0CFEA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Whale.DAL", "Whale.DAL\Whale.DAL.csproj", "{15CD1AC6-50E9-402C-8EA3-656FA4F655FA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Whale.BLL", "Whale.BLL\Whale.BLL.csproj", "{CD035326-7D35-4344-B62B-99475ED0CFEA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Whale.DAL", "Whale.DAL\Whale.DAL.csproj", "{AEE0FABE-4938-490C-9367-E68D08B06FAE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +26,18 @@ Global
 		{49A4C9A6-D443-4DE9-B8DD-E4E36908A71D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{49A4C9A6-D443-4DE9-B8DD-E4E36908A71D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{49A4C9A6-D443-4DE9-B8DD-E4E36908A71D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15CD1AC6-50E9-402C-8EA3-656FA4F655FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15CD1AC6-50E9-402C-8EA3-656FA4F655FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15CD1AC6-50E9-402C-8EA3-656FA4F655FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15CD1AC6-50E9-402C-8EA3-656FA4F655FA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CD035326-7D35-4344-B62B-99475ED0CFEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CD035326-7D35-4344-B62B-99475ED0CFEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD035326-7D35-4344-B62B-99475ED0CFEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CD035326-7D35-4344-B62B-99475ED0CFEA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AEE0FABE-4938-490C-9367-E68D08B06FAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEE0FABE-4938-490C-9367-E68D08B06FAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEE0FABE-4938-490C-9367-E68D08B06FAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEE0FABE-4938-490C-9367-E68D08B06FAE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
