@@ -4,6 +4,15 @@
 
 export const environment = {
   production: false,
+  firebase: {
+    apiKey: 'AIzaSyCdb8h9YMeJBdcIM5wK_w6Mcw7ZI1CVJAk',
+    authDomain: 'bsa-whale.firebaseapp.com',
+    databaseURL: 'https://bsa-whale.firebaseio.com',
+    projectId: 'bsa-whale',
+    storageBucket: 'bsa-whale.appspot.com',
+    messagingSenderId: '893944865679',
+    appId: '1:893944865679:web:9b055d730e3a27b66961fa'
+ },
   apiUrl: 'http://localhost:51569'
 };
 
