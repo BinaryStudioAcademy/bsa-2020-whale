@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace Whale.DAL
 {
-    public class Class1
+    public class WhaleDbContext:DbContext
     {
     }
 }
