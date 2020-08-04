@@ -18,8 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Whale.BLL\Whale.BLL.csproj" />
     <ProjectReference Include="..\Whale.DAL\Whale.DAL.csproj" />
-    <ProjectReference Include="..\Whale.BLL\Whale.API.csproj" />
-    <ProjectReference Include="..\Whale.BLL\Whale.Shared.csproj" />
+    <ProjectReference Include="..\Whale.Shared\Whale.Shared.csproj" />
 
   </ItemGroup>
 
