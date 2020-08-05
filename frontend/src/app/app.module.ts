@@ -9,6 +9,7 @@ import { AuthService } from './core/auth/auth.service';
 import { TokenInterceptorService } from './core/auth/token-interceptor.service';
 
 import { LandingPageModule } from './scenes/landing-page/landing-page.module';
+import { MeetingPageModule } from './scenes/meeting-page/meeting-page.module';
 
 @NgModule({
   declarations: [
@@ -19,11 +20,11 @@ import { LandingPageModule } from './scenes/landing-page/landing-page.module';
     AppRoutingModule,
     CoreModule,
     LandingPageModule,
-    HttpClientModule,
+    MeetingPageModule,
+    HttpClientModule
   ],
   providers: [
     AuthService,
-
     { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptorService, multi: true }
   ],
   bootstrap: [AppComponent]
