@@ -3,6 +3,7 @@ import { SignalRService } from '../services/signal-r.service'
 import { HubConnection } from '@aspnet/signalr';
 import { environment } from '../../../environments/environment';
 import { timeStamp } from 'console';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +12,18 @@ export class WebrtcSignalService {
 
   public signalHub: HubConnection;
   public connectionId: string;
+
+  private newClientConnected = new Subject<string>();
+  public newClientConnected$ = this.newClientConnected.asObservable();
+
+  private clientDisconnected = new Subject<string>();
+  public clientDisconnected$ = this.clientDisconnected.asObservable();
+
+  private signalOffer = new Subject<SignalData>();
+  public signalOffer$ = this.signalOffer.asObservable();
+
+  private signalAnswer = new Subject<SignalData>();
+  public signalAnswer$ = this.signalAnswer.asObservable();
 
   constructor(private hubService: SignalRService) {
     this.signalHub = hubService.registerHub('webrtcSignalHub', environment.meetingApiUrl);
@@ -21,26 +34,30 @@ export class WebrtcSignalService {
     });
 
     this.signalHub.on('NewClientConnected', (newConnectionId: string) => {
-      console.log(`New user connected: ${newConnectionId}`);
-      // send signal to new user here ?
-      this.signalHub.send('SignalOffer', newConnectionId, "fakeOffer");
+      this.newClientConnected.next(newConnectionId);
     });
 
     this.signalHub.on('ClientDisconnected', (disconnectedConnectionId: string) => {
-      console.log(`User disconnected: ${disconnectedConnectionId}`);
-      // remove tracks from disconnected user here ?
+      this.clientDisconnected.next(disconnectedConnectionId);
     });
 
     this.signalHub.on('SignalOffer', (fromConnectionId: string, signalOfferInfo: string /* TYPE ? */) => {
-      console.log(`Signal OFFER from: ${fromConnectionId}`);
-
-      // handle offer, create and send answer here ?
-      this.signalHub.send('SignalAnswer', fromConnectionId, "fakeAnswer");
+      this.signalOffer.next({ 
+        fromConnectionId: fromConnectionId, 
+        signalInfo: signalOfferInfo 
+      });
     });
 
     this.signalHub.on('SignalAnswer', (fromConnectionId: string, signalAnswerInfo: string /* TYPE ? */) => {
-      console.log(`Signal ANSWER from: ${fromConnectionId}`);
-      // handle answer here ?
+      this.signalAnswer.next({ 
+        fromConnectionId: fromConnectionId, 
+        signalInfo: signalAnswerInfo 
+      });
     });
   }
+}
+
+export interface SignalData {
+  fromConnectionId: string;
+  signalInfo: string; 
 }
