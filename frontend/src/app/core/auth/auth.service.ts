@@ -7,44 +7,41 @@ import { AngularFireAuth } from '@angular/fire/auth';
   })
 export class AuthService {
   private authUser: firebase.User = null;
-  private accessToken: string = null;
 
   constructor(public fireAuth: AngularFireAuth) {
       fireAuth.authState.subscribe(
         (user) => {
           if (user) {
             this.authUser = user;
-            user.getIdToken().then(token => this.accessToken = token);
           }
           else {
             this.authUser = null;
-            this.accessToken = null;
           }
         }
       );
   }
 
-  signInWithFacebook(): void {
+  public signInWithFacebook(): void {
     this.fireAuth.signInWithPopup(new auth.FacebookAuthProvider());
   }
 
-  signInWithGoogle(): void {
+  public signInWithGoogle(): void {
     this.fireAuth.signInWithPopup(new auth.GoogleAuthProvider());
   }
 
-  isLoggedIn(): boolean {
+  public isLoggedIn(): boolean {
     return this.authUser !== null;
   }
 
-  logout(): void {
+  public logout(): void {
     this.fireAuth.signOut();
   }
 
-  getAccessToken(): string {
-    return this.accessToken;
+  public getAccessToken(refresh: boolean = false): Promise<string> {
+    return this.authUser?.getIdToken(refresh);
   }
 
-  refreshToken(): Promise<string> {
-    return this.authUser.getIdToken(true);
+  public refreshToken(): Promise<string> {
+    return this.getAccessToken(true);
   }
 }

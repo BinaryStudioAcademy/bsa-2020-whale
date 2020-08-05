@@ -30,7 +30,7 @@ export class AppComponent {
   testGet()
   {
     console.log('g');
-    console.log(this.fireAuth.getAccessToken());
+    this.fireAuth.getAccessToken().then(c => console.log(c));
   }
   testLogIn()
   {
@@ -40,6 +40,6 @@ export class AppComponent {
   testRefresh()
   {
     console.log('r');
-    this.fireAuth.refreshToken().then(rr => console.log(rr));
+    console.log(this.fireAuth.refreshToken());
   }
 }
