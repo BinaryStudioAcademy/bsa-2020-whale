@@ -6,6 +6,7 @@ import { AppComponent } from './app.component';
 
 import { LandingPageModule } from './scenes/landing-page/landing-page.module';
 import { MeetingPageModule } from './scenes/meeting-page/meeting-page.module';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -15,7 +16,8 @@ import { MeetingPageModule } from './scenes/meeting-page/meeting-page.module';
     BrowserModule,
     AppRoutingModule,
     LandingPageModule,
-    MeetingPageModule
+    MeetingPageModule,
+    HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]
