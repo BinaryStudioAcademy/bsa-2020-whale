@@ -1,0 +1,35 @@
+<div *ngIf="isShowChat" class="chat">
+    <div class="comments">
+    </div>
+
+    <div class="ui input">
+        <input type="text" placeholder="Your message...">
+    </div>
+</div>
+
+<div class="content" >
+    <div class="users">
+        <div class="users__user" *ngFor="let user of users;">
+            <div class="ui cube shape">
+                <div class="sides">
+                    <div class="active side">
+                        <div class="users__user__info">
+                            <i style="float: left; margin-top: 4px" class="microphone icon"></i>
+                            <p style="float: left;">{{user}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="options">
+        <div class="options__buttons">
+            <i style="opacity: 0.8;" class="big microphone icon"></i>
+            <i style="margin-left: 10px; opacity: 0.8;" class="big video icon"></i>
+            <i (click)="showChat()" style="margin-left: 10px; opacity: 0.8;" class="big wechat icon"></i>
+            <i style="margin-left: 10px; opacity: 0.8;" class="big share square icon"></i>
+            <button style="margin-left: 200px;" class="ui inverted red button">Leave</button>
+        </div>           
+    </div>
+</div>
