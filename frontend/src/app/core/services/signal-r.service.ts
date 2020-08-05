@@ -10,15 +10,17 @@ export class SignalRService {
   constructor() {
   }
 
-  public registerHub(hubName: string): signalR.HubConnection {
-    const hubConnection = this.buildConnection(hubName);
+  public registerHub(hubName: string, url?: string): signalR.HubConnection {
+    const hubConnection = this.buildConnection(hubName, url);
     this.startConnection(hubConnection);
     return hubConnection;
   }
 
-  private buildConnection = (hubName: string): signalR.HubConnection => {
+  private buildConnection = (hubName: string, url?: string): signalR.HubConnection => {
+    const apiUrl = url ? url : environment.apiUrl;
+
     return new signalR.HubConnectionBuilder()
-    .withUrl(environment.apiUrl + "/" + hubName)
+    .withUrl(apiUrl + "/" + hubName)
     .build();
   }
 
