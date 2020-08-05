@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from './auth/auth.service';
-import { AuthGuard } from './auth/auth-guard.service';
+// import { AuthGuard } from './auth/auth-guard.service';
 import { AngularFireModule } from '@angular/fire';
 import { environment } from '../../environments/environment';
 
@@ -15,7 +15,8 @@ import { environment } from '../../environments/environment';
   exports: [
   ],
   providers: [
-    AuthService, AuthGuard
+    AuthService,
+    // AuthGuard
   ]
 })
 export class CoreModule { }

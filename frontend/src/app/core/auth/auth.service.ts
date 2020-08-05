@@ -9,6 +9,10 @@ export class AuthService {
   private authUser: firebase.User = null;
   private accessToken: string = null;
 
+  public get currentUser(): firebase.User {
+    return this.authUser;
+  }
+
   constructor(public fireAuth: AngularFireAuth) {
       fireAuth.authState.subscribe(
         (user) => {
