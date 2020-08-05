@@ -10,14 +10,12 @@
 <div class="content" >
     <div class="users">
         <div class="users__user" *ngFor="let user of users;">
-            <div class="ui cube shape">
-                <div class="sides">
-                    <div class="active side">
-                        <div class="users__user__info">
-                            <i style="float: left; margin-top: 4px" class="microphone icon"></i>
-                            <p style="float: left;">{{user}}</p>
-                        </div>
-                    </div>
+            <div class="ui card">
+                <div class="image">
+                  <img src="https://icons.iconarchive.com/icons/paomedia/small-n-flat/512/user-male-icon.png">
+                </div>
+                <div class="content">
+                  <a class="header">{{user}}</a>
                 </div>
             </div>
         </div>
