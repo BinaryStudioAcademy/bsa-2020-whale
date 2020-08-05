@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { WebrtcSignalService } from './core/services/webrtc-signal.service'
 
 @Component({
   selector: 'app-root',
@@ -7,4 +8,9 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'frontend';
+
+  constructor(private signalHubService: WebrtcSignalService) {
+    
+  }
+
 }
