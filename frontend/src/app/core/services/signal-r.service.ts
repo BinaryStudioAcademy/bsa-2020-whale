@@ -18,7 +18,7 @@ export class SignalRService {
 
   private buildConnection = (hubName: string): signalR.HubConnection => {
     return new signalR.HubConnectionBuilder()
-    .withUrl(environment.apiUrl + "/" + hubName)
+    .withUrl(`${environment.apiUrl}/${hubName}`)
     .build();
   }
 
@@ -26,8 +26,8 @@ export class SignalRService {
     hub
     .start()
     .catch(err => {
-      console.log("Error while starting connection:" + err);
-      setTimeout(function() {
+      console.log(`Error while starting connection:${err}`);
+      setTimeout(function(): void {
         this.startConnection();
       }, 3000);
     });
@@ -37,7 +37,7 @@ export class SignalRService {
     const eventEmitter = new EventEmitter<T>();
     hub.on(eventName, (response: T) => {
       eventEmitter.emit(response);
-    })
+    });
     return eventEmitter;
   }
 }
