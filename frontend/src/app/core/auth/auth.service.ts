@@ -8,6 +8,10 @@ import { AngularFireAuth } from '@angular/fire/auth';
 export class AuthService {
   private authUser: firebase.User = null;
 
+  public get currentUser(): firebase.User {
+    return this.authUser;
+  }
+
   constructor(public fireAuth: AngularFireAuth) {
       fireAuth.authState.subscribe(
         (user) => {
