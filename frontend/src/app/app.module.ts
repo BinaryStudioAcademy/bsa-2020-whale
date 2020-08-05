@@ -6,6 +6,7 @@ import { AppComponent } from './app.component';
 
 import { LandingPageModule } from './scenes/landing-page/landing-page.module';
 import { MeetingPageModule } from './scenes/meeting-page/meeting-page.module';
+import { ProfilePageModule } from './scenes/profile-page/profile-page.module';
 import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
@@ -17,6 +18,7 @@ import { HttpClientModule } from '@angular/common/http';
     AppRoutingModule,
     LandingPageModule,
     MeetingPageModule,
+    ProfilePageModule,
     HttpClientModule
   ],
   providers: [],
