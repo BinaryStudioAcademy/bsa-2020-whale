@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Whale.BLL\Whale.BLL.csproj" />
     <ProjectReference Include="..\Whale.DAL\Whale.DAL.csproj" />
   </ItemGroup>
 

@@ -19,6 +19,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Whale.BLL.Hubs;
 using Whale.DAL;
 
 namespace Whale.MeetingAPI
@@ -40,8 +41,17 @@ namespace Whale.MeetingAPI
             services.AddControllers();
             services.AddHealthChecks()
                     .AddDbContextCheck<WhaleDbContext>("DbContextHealthCheck");
-           
+
             //services.AddHealthChecksUI();
+            services.AddSignalR();
+            services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
+            {
+                builder
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials()
+                .WithOrigins("http://localhost:4200");
+            }));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,6 +61,8 @@ namespace Whale.MeetingAPI
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseCors("CorsPolicy");
 
             app.UseHttpsRedirection();
 
@@ -67,6 +79,8 @@ namespace Whale.MeetingAPI
                     Predicate = _ => true,
                     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
                 });
+
+                endpoints.MapHub<WebRtcSignalHub>("/webrtcSignalHub");
             });
         }
     }
