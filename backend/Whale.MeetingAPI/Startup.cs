@@ -40,6 +40,8 @@ namespace Whale.MeetingAPI
             services.AddControllers();
             services.AddHealthChecks()
                     .AddDbContextCheck<WhaleDbContext>("DbContextHealthCheck");
+           
+            //services.AddHealthChecksUI();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -59,14 +61,11 @@ namespace Whale.MeetingAPI
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHealthChecks("/healthAuth").WithMetadata(new AllowAnonymousAttribute()).RequireAuthorization();
                 endpoints.MapHealthChecks("/health", new HealthCheckOptions
                 {
-                    ResponseWriter = async (context, report) =>
-                    {
-                        context.Response.ContentType = "application/json; charset=utf-8";
-                        var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(report));
-                        await context.Response.Body.WriteAsync(bytes);
-                    }
+                    Predicate = _ => true,
+                    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
                 });
             });
         }
