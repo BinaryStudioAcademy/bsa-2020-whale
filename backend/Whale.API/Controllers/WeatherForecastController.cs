@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Whale.API.Models;
+using Whale.BLL.Services.Storage;
 
 namespace Whale.API.Controllers
 {
@@ -17,10 +20,12 @@ namespace Whale.API.Controllers
         };
 
         private readonly ILogger<WeatherForecastController> _logger;
+        private readonly BlobService _blobService;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, BlobService blobService)
         {
             _logger = logger;
+            _blobService = blobService;
         }
 
         [HttpGet]
@@ -34,6 +39,21 @@ namespace Whale.API.Controllers
                 Summary = Summaries[rng.Next(Summaries.Length)]
             })
             .ToArray();
+        }
+
+        [HttpPost]
+        [Route("save")]
+        public async Task<ActionResult<string>> Save()
+        {
+            var file = Request.Form.Files[0];
+            return Ok(await _blobService.SaveImage(file));
+        }
+
+        [HttpGet]
+        [Route("get/{fileName}")]
+        public async Task<ActionResult<string>> Save(string fileName)
+        {
+            return Ok(await _blobService.GetImage(fileName));
         }
     }
 }
