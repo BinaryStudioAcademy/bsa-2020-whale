@@ -27,7 +27,9 @@ export class HttpService {
     delete this.headers[key];
   }
 
-
+  
+  // GET
+  
   public getRequest<T>(url: string, httpParams?: any): Observable<T> {
     return this.http.get<T>(this.buildUrl(url), { headers: this.getHeaders(), params: httpParams })
       .pipe(
@@ -43,6 +45,8 @@ export class HttpService {
       );
   }
 
+  // POST
+  
   public postClearRequest<TRequest, TResponse>(url: string, payload: TRequest): Observable<TResponse> {
     return this.http.post<TResponse>(this.buildUrl(url), payload)
       .pipe(
@@ -64,6 +68,9 @@ export class HttpService {
       );
   }
 
+  
+  // PUT
+  
   public putRequest<TRequest, TResponse>(url: string, payload: TRequest): Observable<TResponse> {
     return this.http.put<TResponse>(this.buildUrl(url), payload, { headers: this.getHeaders() })
       .pipe(
@@ -78,6 +85,9 @@ export class HttpService {
       );
   }
 
+  
+  // DELETE
+  
   public deleteRequest<T>(url: string, httpParams?: any): Observable<T> {
     return this.http.delete<T>(this.buildUrl(url), { headers: this.getHeaders(), params: httpParams })
       .pipe(
@@ -92,6 +102,8 @@ export class HttpService {
       );
   }
 
+  // HELPERS
+  
   public buildUrl(url: string): string {
     if (url.startsWith('http://') || url.startsWith('https://')) {
       return url;
