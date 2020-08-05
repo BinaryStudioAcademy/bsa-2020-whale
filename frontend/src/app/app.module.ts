@@ -19,10 +19,11 @@ import { LandingPageModule } from './scenes/landing-page/landing-page.module';
     AppRoutingModule,
     CoreModule,
     LandingPageModule,
-    HttpClientModule
+    HttpClientModule,
   ],
   providers: [
     AuthService,
+
     { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptorService, multi: true }
   ],
   bootstrap: [AppComponent]

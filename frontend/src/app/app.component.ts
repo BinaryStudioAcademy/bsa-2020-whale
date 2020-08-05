@@ -16,39 +16,8 @@ export class AppComponent {
   {}
 
 /// REMOVE BEFORE MARGE
-  testlogGoogle()
-  {
-    console.log('g');
-    this.fireAuth.signInWithGoogle();
-  }
-  testlogFacebook()
-  {
-    console.log('f');
-    this.fireAuth.signInWithFacebook();
-  }
-  testLogOut()
-  {
-    console.log('l');
-    this.fireAuth.logout();
-  }
-  testGet()
-  {
-    console.log('g');
-    this.fireAuth.getAccessToken().then(c => console.log(c));
-  }
-  testLogIn()
-  {
-    console.log('li');
-    console.log(this.fireAuth.isLoggedIn());
-  }
-  testRefresh()
-  {
-    console.log('r');
-    console.log(this.fireAuth.refreshToken());
-  }
   sendHttp() {
     this.http.get('http://localhost:51569/weatherforecast').subscribe(r => console.log(r));
   }
-
 
 }

@@ -16,7 +16,7 @@ export class TokenInterceptorService implements HttpInterceptor {
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const token = this.authService.getAccessToken();
-    if (this.authService.currentUser && token) {
+    if (this.authService.isLoggedIn() && token) {
       return next.handle(req.clone({
         headers: req.headers.set('Authentication', `Bearer ${token}`)
       })).pipe(
@@ -26,6 +26,7 @@ export class TokenInterceptorService implements HttpInterceptor {
               console.log('Server response', next);
           },
           async error => {
+            console.log('ok?');
             if (error instanceof HttpResponse) {
               if (error.status === 401){
                 const refreshedToken = await this.authService.refreshToken();
