@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Whale.BLL.Services;
+using Whale.BLL.Services.Interfaces;
 using Whale.Shared.DTO.Contact;
 
 namespace Whale.API.Controllers
@@ -10,9 +10,9 @@ namespace Whale.API.Controllers
     [ApiController]
     public class ContactsController : ControllerBase
     {
-        private readonly ContactsService _contactsService;
+        private readonly IContactsService _contactsService;
 
-        public ContactsController(ContactsService contactsService)
+        public ContactsController(IContactsService contactsService)
         {
             _contactsService = contactsService;
         }
@@ -38,9 +38,9 @@ namespace Whale.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] ContactCreateDTO contactDTO)
         {
-            await _contactsService.CreateContactAsync(contactDTO);
+            var createdContact = await _contactsService.CreateContactAsync(contactDTO);
 
-            return Ok();
+            return Created($"{createdContact.Id}", createdContact);
         }
 
         [HttpDelete("{id}")]

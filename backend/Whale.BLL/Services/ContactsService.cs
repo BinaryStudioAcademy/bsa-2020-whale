@@ -8,10 +8,11 @@ using AutoMapper;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Whale.Shared.DTO.Contact;
+using Whale.BLL.Services.Interfaces;
 
 namespace Whale.BLL.Services
 {
-    public class ContactsService:BaseService
+    public class ContactsService:BaseService, IContactsService
     {
         public ContactsService(WhaleDbContext context, IMapper mapper) : base(context, mapper)
         {
@@ -29,14 +30,17 @@ namespace Whale.BLL.Services
 
         public async Task<ContactDTO> GetContactAsync(Guid contactId)
         {
-            var contact = await _context.Contacts.FirstOrDefaultAsync(c => c.Id == contactId);
+            var contact = await _context.Contacts
+                .Include(c => c.Owner)
+                .Include(c => c.Contactner)
+                .FirstOrDefaultAsync(c => c.Id == contactId);
 
             if (contact == null) throw new Exception("No such contact");
 
             return _mapper.Map<ContactDTO>(contact);
         }
 
-        public async Task CreateContactAsync(ContactCreateDTO contactDTO)
+        public async Task<ContactDTO> CreateContactAsync(ContactCreateDTO contactDTO)
         {
             var entity = _mapper.Map<Contact>(contactDTO);
 
@@ -46,11 +50,18 @@ namespace Whale.BLL.Services
 
             _context.Contacts.Add(entity);
             await _context.SaveChangesAsync();
+
+            var createdContact = await _context.Contacts
+                .Include(c => c.Owner)
+                .Include(c => c.Contactner)
+                .FirstAsync(c => c.Id == entity.Id);
+
+            return _mapper.Map<ContactDTO>(createdContact);
         }
 
         public async Task UpdateContactAsync(ContactEditDTO contactDTO)
         {
-            var entity = _context.Contacts.FirstOrDefault(c => c.OwnerId == contactDTO.OwnerId && c.ContactnerId == contactDTO.ContactnerId);
+            var entity = _context.Contacts.FirstOrDefault(c => c.Id == contactDTO.Id);
 
             if (entity == null) throw new Exception("No such contact");
 
