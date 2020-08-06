@@ -14,7 +14,6 @@ using Whale.BLL.Hubs;
 using Whale.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using AspNetCore.Firebase.Authentication.Extensions;
 
 namespace Whale.API
 {
@@ -42,20 +41,19 @@ namespace Whale.API
                 .AllowCredentials()
                 .WithOrigins("http://localhost:4200");
             }));
-            //services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            //    .AddJwtBearer(opt =>
-            //    {
-            //        opt.Authority = "https://securetoken.google.com/bsa-whale";
-            //        opt.TokenValidationParameters = new TokenValidationParameters
-            //        {
-            //            ValidateIssuer = true,
-            //            ValidIssuer = "https://securetoken.google.com/bsa-whale",
-            //            ValidateAudience = true,
-            //            ValidAudience = "bsa-whale",
-            //            ValidateLifetime = true
-            //        };
-            //    });
-            services.AddFirebaseAuthentication(Configuration["FirebaseAuthentication:Issuer"], Configuration["FirebaseAuthentication:Audience"]);
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(opt =>
+                {
+                    opt.Authority = Configuration["FirebaseAuthentication:Issuer"];
+                    opt.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = Configuration["FirebaseAuthentication:Issuer"],
+                        ValidateAudience = true,
+                        ValidAudience = Configuration["FirebaseAuthentication:Audience"],
+                        ValidateLifetime = true
+                    };
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

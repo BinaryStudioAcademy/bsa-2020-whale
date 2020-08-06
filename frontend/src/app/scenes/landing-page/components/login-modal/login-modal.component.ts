@@ -18,4 +18,8 @@ export class ConfirmModalComponent {
   public googleLogin(): void {
     this.auth.signInWithGoogle().then( status => this.Login.emit(status));
   }
+
+  public close(): void {
+    this.Login.emit(false);
+  }
 }

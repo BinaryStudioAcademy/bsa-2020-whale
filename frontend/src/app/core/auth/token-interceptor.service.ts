@@ -4,7 +4,6 @@ import { Observable, throwError, from } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { AuthService } from './auth.service';
 
-
 @Injectable({
   providedIn: 'root'
 })
@@ -15,10 +14,13 @@ export class TokenInterceptorService implements HttpInterceptor {
 
   intercept( req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
+    if (!this.authService.isLoggedIn()) {
+      return next.handle(req);
+    }
+
     if (!this.inflightAuthRequest) {
       this.inflightAuthRequest = from(this.authService.getToken());
     }
-
     return this.inflightAuthRequest.pipe(
       switchMap((token: string) => {
         this.inflightAuthRequest = null;

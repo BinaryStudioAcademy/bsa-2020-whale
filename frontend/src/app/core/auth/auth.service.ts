@@ -40,6 +40,7 @@ export class AuthService {
   public getToken(): Promise<string> {
     return this.authUser?.getIdToken();
   }
+
   public refreshToken(): Promise<string> {
     return this.authUser?.getIdToken(true);
   }
