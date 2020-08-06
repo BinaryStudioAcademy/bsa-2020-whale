@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Whale.BLL", "Whale.BLL\Whal
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Whale.DAL", "Whale.DAL\Whale.DAL.csproj", "{AEE0FABE-4938-490C-9367-E68D08B06FAE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Whale.MeetingAPI", "Whale.MeetingAPI\Whale.MeetingAPI.csproj", "{5F445CF6-662E-4027-AF7F-6E0DF1DAB0F1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{AEE0FABE-4938-490C-9367-E68D08B06FAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AEE0FABE-4938-490C-9367-E68D08B06FAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AEE0FABE-4938-490C-9367-E68D08B06FAE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F445CF6-662E-4027-AF7F-6E0DF1DAB0F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F445CF6-662E-4027-AF7F-6E0DF1DAB0F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F445CF6-662E-4027-AF7F-6E0DF1DAB0F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F445CF6-662E-4027-AF7F-6E0DF1DAB0F1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

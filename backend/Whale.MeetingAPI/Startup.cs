@@ -1,23 +1,28 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mime;
+using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Whale.BLL.Hubs;
 using Whale.DAL;
-using Microsoft.EntityFrameworkCore;
-using Whale.BLL.Providers;
-using Microsoft.IdentityModel.Tokens;
-using Whale.Shared.Services;
 
-namespace Whale.API
+namespace Whale.MeetingAPI
 {
     public class Startup
     {
@@ -32,8 +37,12 @@ namespace Whale.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<WhaleDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("WhaleDatabase")));
-            services.AddControllers();
 
+            services.AddControllers();
+            services.AddHealthChecks()
+                    .AddDbContextCheck<WhaleDbContext>("DbContextHealthCheck");
+
+            //services.AddHealthChecksUI();
             services.AddSignalR();
             services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
             {
@@ -42,24 +51,7 @@ namespace Whale.API
                 .AllowAnyHeader()
                 .AllowCredentials()
                 .WithOrigins("http://localhost:4200");
-        }));
-
-            services.AddTransient<FileStorageProvider>();
-
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(opt =>
-                {
-                    opt.Authority = Configuration["FirebaseAuthentication:Issuer"];
-                    opt.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidIssuer = Configuration["FirebaseAuthentication:Issuer"],
-                        ValidateAudience = true,
-                        ValidAudience = Configuration["FirebaseAuthentication:Audience"],
-                        ValidateLifetime = true
-                    };
-                });
-            services.AddScoped<RedisService>(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
+            }));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -72,16 +64,23 @@ namespace Whale.API
 
             app.UseCors("CorsPolicy");
 
-            app.UseRouting();
+            app.UseHttpsRedirection();
 
-            app.UseAuthentication();
+            app.UseRouting();
 
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<ChatHub>("/chatHub");
+                endpoints.MapHealthChecks("/healthAuth").WithMetadata(new AllowAnonymousAttribute()).RequireAuthorization();
+                endpoints.MapHealthChecks("/health", new HealthCheckOptions
+                {
+                    Predicate = _ => true,
+                    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+                });
+
+                endpoints.MapHub<WebRtcSignalHub>("/webrtcSignalHub");
             });
         }
     }

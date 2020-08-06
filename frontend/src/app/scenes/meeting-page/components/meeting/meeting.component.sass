@@ -1,0 +1,70 @@
+.content
+    height: 100%
+    overflow: hidden
+    
+@media screen and (max-width: 600px) 
+    .users__user
+        display: none
+
+//chat
+.chat
+    width: 300px
+    height: 90%
+    background-color: #ffffff
+    float: right
+
+.ui input 
+    width: 300px
+    height: 50px
+    background-color: #e6e6e6
+
+.comments
+    height: calc(100% - 50px)
+
+//users 
+.users
+    background-color: #ffffff
+    height: 90%
+    display: flex
+    flex-wrap: wrap
+    justify-content: center
+    align-items: center
+    overflow-y: scroll
+
+.users__user 
+    margin: 10px
+
+.users__user:hover .users__user__info 
+    opacity: 0.9
+
+//options
+.options
+    background-color: #f1f1f1
+    width: 100%
+    position: absolute
+    bottom: 0
+    height: 10%
+    text-align: center
+
+.options__buttons
+    margin-top: 24px
+
+.options__leave-button
+    margin-top: 24px
+    float: right
+
+.big.share.square.icon:hover, .big.microphone.icon:hover, .big.video.icon:hover, .big.wechat.icon:hover
+    opacity: 1 !important
+
+//scrollbar
+::-webkit-scrollbar 
+    width: 10px
+
+::-webkit-scrollbar-track 
+    background: #f1f1f1 
+ 
+::-webkit-scrollbar-thumb 
+    background: #888 
+
+::-webkit-scrollbar-thumb:hover 
+    background: #555

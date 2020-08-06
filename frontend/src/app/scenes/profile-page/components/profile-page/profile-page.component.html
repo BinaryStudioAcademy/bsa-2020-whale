@@ -1,0 +1,90 @@
+<div class="ui borderless fixed top tiny labeled icon main menu">
+    <div class="logo-item item">
+        <img class="mini ui circular image" src="https://img.icons8.com/flat_round/64/000000/whale--v1.png"/> 
+    </div>
+    <a class="home-item item">
+        <i class="home icon"></i>
+        Home
+    </a>
+    <a class="item">
+        <i class="clock outline icon"></i>
+        Meetings
+    </a>
+    <a class="item">
+        <i class="edit outline icon"></i>
+        Chat
+    </a>
+    <a class="contacts-item item">
+        <i class="address book outline icon"></i>
+        Contacts
+    </a>
+    <a class="notify-pic-item item">
+        <i class=" bell outline icon"></i>
+        Notifications
+    </a>    
+    <a (click)="settingsMenuVisible = !settingsMenuVisible" class="user-pic-item item message shared">
+        <img  class="ui tiny image user-pic" src="https://img.icons8.com/color/240/000000/user-male.png"/>
+    </a>
+    <div *ngIf="settingsMenuVisible" class = "dropdown-menu">
+        <div class="dropdown-menu-user">David Lones</div>
+        <div class="dropdown-menu-item">Settings</div>
+        <div class="dropdown-menu-item">Log Out</div>
+    </div>
+</div>
+<div class="profile-panel">
+    <div class="settings">
+        <div class="personal-container">
+            <div class="settings-item">
+                <div class="card">
+                        <img class="ui small image" src="https://img.icons8.com/color/240/000000/user-male.png/"/>
+                    <div class="content">
+                    <div class="ui mini bottom attached button">
+                        <i class="add icon"></i>
+                        Upload new image
+                    </div>
+                    </div>
+                </div>
+            </div>
+            <h3 class ="big name">David Lones</h3>
+            <div class="edit-button">
+                <button class="small ui basic button">
+                    <a>
+                        <i class="cog icon"></i> Edit
+                    </a>
+                </button>
+            </div>
+        </div>
+        <div class="ui section divider"></div>
+        <div class="personal-container">
+            <div class="settings-item">
+                <h4>Email address:</h4>
+            </div>
+            <span>user@email.com</span>
+            <div class="edit-button">
+                <button class="small ui basic button">
+                    <a>
+                        <i class="cog icon"></i> Edit
+                    </a>
+                </button>
+            </div>
+        </div>
+        <div class="ui section divider"></div>
+        <div class="personal-container">
+            <div class="settings-item">
+                <h4>Personal meeting id:</h4>
+            </div>
+            <span>1234-5678</span>
+            <div class="edit-button">
+                <button class="small ui basic button">
+                    <a>
+                        <i class="cog icon"></i> Edit
+                    </a>
+                </button>
+            </div>
+        </div>
+        <div class="ui section divider"></div>
+    </div>
+</div>
+<footer class="footer">
+    &copy; Powered by Binary Studio
+</footer>
