@@ -27,7 +27,14 @@ import { ToastrModule } from 'ngx-toastr';
     BrowserAnimationsModule,
     ToastrModule.forRoot({
       timeOut: 3000,
-      positionClass: 'toast-bottom-right'
+      positionClass: 'toast-bottom-right',
+      toastClass: 'ui message toast-container',
+      iconClasses: {
+        error: 'negative',
+        info: 'info',
+        success: 'positive',
+        warning: 'warning'
+      }
     })
   ],
   providers: [
