@@ -42,11 +42,13 @@ namespace Whale.API
             {
                 mc.AddProfile<ContactProfile>();
                 mc.AddProfile<UserProfile>();
+                mc.AddProfile<ScheduledMeetingProfile>();
             });
 
             services.AddSingleton(mappingConfig.CreateMapper());
 
             services.AddTransient<IContactsService, ContactsService>();
+            services.AddTransient<IScheduledMeetingsService, ScheduledMeetingsService>();
 
             services.AddSignalR();
             services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
