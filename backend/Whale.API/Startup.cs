@@ -12,6 +12,9 @@ using Microsoft.Extensions.Logging;
 using Whale.BLL.Hubs;
 using Whale.DAL;
 using Microsoft.EntityFrameworkCore;
+using Whale.BLL.Services;
+using AutoMapper;
+using Whale.BLL.MappingProfiles;
 
 namespace Whale.API
 {
@@ -29,6 +32,16 @@ namespace Whale.API
         {
             services.AddDbContext<WhaleDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("WhaleDatabase")));
             services.AddControllers();
+
+            var mappingConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile<ContactProfile>();
+                mc.AddProfile<UserProfile>();
+            });
+
+            services.AddSingleton(mappingConfig.CreateMapper());
+
+            services.AddTransient<ContactsService>();
 
             services.AddSignalR();
             services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
