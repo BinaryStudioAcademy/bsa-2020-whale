@@ -4,8 +4,7 @@ namespace Whale.Shared.DTO.Contact
 {
     public class ContactEditDTO
     {
-        public Guid OwnerId { get; set; }
-        public Guid ContactnerId { get; set; }
+        public Guid Id { get; set; }
         public bool IsBlocked { get; set; }
     }
 }

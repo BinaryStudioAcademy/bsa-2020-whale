@@ -19,6 +19,7 @@ using Whale.BLL.MappingProfiles;
 using Whale.BLL.Providers;
 using Microsoft.IdentityModel.Tokens;
 using Whale.Shared.Services;
+using Whale.BLL.Services.Interfaces;
 
 namespace Whale.API
 {
@@ -45,7 +46,7 @@ namespace Whale.API
 
             services.AddSingleton(mappingConfig.CreateMapper());
 
-            services.AddTransient<ContactsService>();
+            services.AddTransient<IContactsService, ContactsService>();
 
             services.AddSignalR();
             services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
