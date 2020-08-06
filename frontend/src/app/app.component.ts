@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { WebrtcSignalService, SignalData } from './core/services/webrtc-signal.service'
 
 @Component({
   selector: 'app-root',
