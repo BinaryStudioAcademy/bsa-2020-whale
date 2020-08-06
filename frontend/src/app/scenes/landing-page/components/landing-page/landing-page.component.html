@@ -4,8 +4,11 @@
             <b>Whale</b>
         </div>
         <div class="right menu">
-            <div class="item">
-                <a class="ui primary button">Log in</a>
+            <div class="item" *ngIf="auth.isLoggedIn()">
+                <a class="ui button" (click)="logOut()">Log Out</a>
+            </div>
+            <div class="item" *ngIf="!auth.isLoggedIn()">
+                <a class="ui primary button" (click)="logIn()">{{logInButtonText}}</a>
             </div>
         </div>
     </div>
@@ -21,7 +24,7 @@
                         where you can conduct business meetings or have a virtual party with your friends. ​ </h1>
                 </div>
                 <div class="ui text container ">
-                    <button class="ui big primary button">Sign up for free</button>
+                    <button class="ui big primary button" (click)="logIn()">Sign up for free</button>
                 </div>
             </div>
             <div class="six wide column"></div>
@@ -99,3 +102,5 @@
 <footer class="footer">
     &copy; Powered by Binary Studio
 </footer>
+
+<app-login-modal (Login)="onLogin($event)" *ngIf="showLogIn"></app-login-modal>
