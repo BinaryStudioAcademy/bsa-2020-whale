@@ -11,7 +11,7 @@
   },
   "private": true,
   "dependencies": {
-    "@angular/animations": "~10.0.6",
+    "@angular/animations": "^10.0.8",
     "@angular/common": "~10.0.6",
     "@angular/compiler": "~10.0.6",
     "@angular/forms": "~10.0.6",
@@ -19,6 +19,7 @@
     "@angular/platform-browser-dynamic": "~10.0.6",
     "@angular/router": "~10.0.6",
     "@aspnet/signalr": "^1.1.4",
+    "ngx-toastr": "^13.0.0",
     "rxjs": "~6.5.5",
     "semantic-ui-css": "^2.4.1",
     "tslib": "^2.0.0",
