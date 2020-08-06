@@ -26,7 +26,7 @@ export class WebrtcSignalService {
   public signalAnswer$ = this.signalAnswer.asObservable();
 
   constructor(private hubService: SignalRService) {
-    this.signalHub = hubService.registerHub('webrtcSignalHub', environment.meetingApiUrl);
+    this.signalHub = hubService.registerHub(environment.meetingApiUrl, 'webrtcSignalHub');
 
     this.signalHub.on('ThisClientConnected', (connectionId: string) => {
       console.log(`This is me: ${connectionId}`);
