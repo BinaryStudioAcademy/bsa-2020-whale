@@ -81,6 +81,7 @@ namespace Whale.MeetingAPI
                 });
 
                 endpoints.MapHub<WebRtcSignalHub>("/webrtcSignalHub");
+                endpoints.MapHub<ChatHub>("/chatHub");
             });
         }
     }
