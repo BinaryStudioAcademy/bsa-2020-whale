@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using MimeTypes;
 using System;
 using System.IO;
+using System.Net.Mime;
 using System.Threading.Tasks;
 
 namespace Whale.BLL.Services.Storage
@@ -28,15 +29,15 @@ namespace Whale.BLL.Services.Storage
 
             string fileName = "img_" + Guid.NewGuid().ToString() + MimeTypeMap.GetExtension(file.ContentType);
 
+
             CloudBlockBlob blockBlob = _container.GetBlockBlobReference(fileName);
-            using var ms = new MemoryStream();
-            await file.CopyToAsync(ms);
-            var fileBytes = ms.ToArray();
+            blockBlob.Properties.ContentType = file.ContentType;
+            using var stream = file.OpenReadStream();
 
-            await blockBlob.UploadFromByteArrayAsync(fileBytes, 0, fileBytes.Length);
-            ms.Close();
+            await blockBlob.UploadFromStreamAsync(stream);
+            stream.Close();
 
-            return blockBlob.Uri.ToString();
+            return blockBlob.Uri.AbsoluteUri;
         }
 
         public async Task<string> GetImage(string fileName)
