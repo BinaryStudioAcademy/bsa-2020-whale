@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,9 @@ using Microsoft.EntityFrameworkCore;
 using Whale.BLL.Services;
 using AutoMapper;
 using Whale.BLL.MappingProfiles;
+using Whale.BLL.Providers;
+using Microsoft.IdentityModel.Tokens;
+using Whale.Shared.Services;
 
 namespace Whale.API
 {
@@ -52,6 +56,23 @@ namespace Whale.API
                 .AllowCredentials()
                 .WithOrigins("http://localhost:4200");
         }));
+
+            services.AddTransient<FileStorageProvider>();
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(opt =>
+                {
+                    opt.Authority = Configuration["FirebaseAuthentication:Issuer"];
+                    opt.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = Configuration["FirebaseAuthentication:Issuer"],
+                        ValidateAudience = true,
+                        ValidAudience = Configuration["FirebaseAuthentication:Audience"],
+                        ValidateLifetime = true
+                    };
+                });
+            services.AddScoped<RedisService>(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -66,12 +87,13 @@ namespace Whale.API
 
             app.UseRouting();
 
+            app.UseAuthentication();
+
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<ChatHub>("/chatHub");
             });
         }
     }

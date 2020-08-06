@@ -7,12 +7,14 @@ $bacground-darker: #f6f6f6
     background-repeat: no-repeat
     background-position: top
     background-size: cover
-    height: 80%
+    height: 70%
+    min-height: 400px
+    max-height: 700px
 
     .ui.header
         margin-top: 4.5em
 
-.third-screen
+.second-screen
     background-color: $bacground-darker
 
     .icon
@@ -71,12 +73,28 @@ $bacground-darker: #f6f6f6
     padding: 10px
     background-color: $bacground-darker
 
+@media screen and (max-width: 992px)
+    .first-screen
+        .ui.header
+            margin-top: 3em
+
 @media screen and (max-width: 768px)
     .screen_container
         .ui.header
-            font-size: 1.5em
+            font-size: 1.8em
+    
+    .content
+        width: 100%
 
 @media screen and (max-width: 500px)
     .screen_container
         .ui.header
-            font-size: 1.2em
+            font-size: 1.3em
+
+    .content_item
+        margin: 10px 0
+
+        img
+            width: 150px
+            border-radius: 20px
+            margin: 0 10px
