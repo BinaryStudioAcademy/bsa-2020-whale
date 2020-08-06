@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using Whale.BLL.Hubs;
 using Whale.DAL;
 using Microsoft.EntityFrameworkCore;
+using Whale.BLL.Providers;
 using Microsoft.IdentityModel.Tokens;
 using Whale.Shared.Services;
 
@@ -41,7 +42,10 @@ namespace Whale.API
                 .AllowAnyHeader()
                 .AllowCredentials()
                 .WithOrigins("http://localhost:4200");
-            }));
+        }));
+
+            services.AddTransient<FileStorageProvider>();
+
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(opt =>
                 {
