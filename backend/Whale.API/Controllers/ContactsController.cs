@@ -40,7 +40,7 @@ namespace Whale.API.Controllers
         {
             var createdContact = await _contactsService.CreateContactAsync(contactDTO);
 
-            return Created($"{createdContact.Id}", createdContact);
+            return Created($"id/{createdContact.Id}", createdContact);
         }
 
         [HttpDelete("{id}")]
