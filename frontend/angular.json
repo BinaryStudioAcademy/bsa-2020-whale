@@ -51,7 +51,8 @@
             ],
             "styles": [
               "src/styles.sass",
-              "node_modules/semantic-ui-css/semantic.min.css"
+              "node_modules/semantic-ui-css/semantic.min.css",
+              "node_modules/ngx-toastr/toastr.css"
             ],
             "scripts": []
           },

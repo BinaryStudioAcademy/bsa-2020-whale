@@ -8,6 +8,8 @@ import { LandingPageModule } from './scenes/landing-page/landing-page.module';
 import { MeetingPageModule } from './scenes/meeting-page/meeting-page.module';
 import { ProfilePageModule } from './scenes/profile-page/profile-page.module';
 import { HttpClientModule } from '@angular/common/http';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
+import { ToastrModule } from 'ngx-toastr';
 
 @NgModule({
   declarations: [
@@ -19,7 +21,12 @@ import { HttpClientModule } from '@angular/common/http';
     LandingPageModule,
     MeetingPageModule,
     ProfilePageModule,
-    HttpClientModule
+    HttpClientModule,
+    BrowserAnimationsModule,
+    ToastrModule.forRoot({
+      timeOut: 3000,
+      positionClass: 'toast-bottom-right'
+    })
   ],
   providers: [],
   bootstrap: [AppComponent]
