@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 using Whale.BLL.Hubs;
 using Whale.DAL;
 using Microsoft.EntityFrameworkCore;
-using Whale.BLL.Services.Storage;
+using Whale.BLL.Providers;
 
 namespace Whale.API
 {
@@ -41,7 +41,7 @@ namespace Whale.API
                 .WithOrigins("http://localhost:4200");
         }));
 
-            services.AddTransient<BlobService>();
+            services.AddTransient<FileStorageProvider>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
