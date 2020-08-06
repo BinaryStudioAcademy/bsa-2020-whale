@@ -8,7 +8,8 @@ import { ProfilePageComponent } from '../scenes/profile-page/components/profile-
 
 
 const routes: Routes = [
-  { path: 'meeting-page', component: MeetingComponent },
+  // { path: 'meeting-page', component: MeetingComponent },
+  { path: 'meeting-page/:id/:pwd', component: MeetingComponent },
   { path: 'profile-page', component: ProfilePageComponent },
   { path: '**', component: LandingPageComponent }
 ];
