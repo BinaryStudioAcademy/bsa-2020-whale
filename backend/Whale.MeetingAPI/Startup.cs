@@ -20,7 +20,13 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Whale.BLL.Hubs;
+using Whale.BLL.Interfaces;
+using Whale.BLL.Services;
 using Whale.DAL;
+using Whale.Shared.Services;
+using AutoMapper;
+using Whale.BLL.MappingProfiles;
+using System.Reflection;
 
 namespace Whale.MeetingAPI
 {
@@ -37,6 +43,7 @@ namespace Whale.MeetingAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<WhaleDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("WhaleDatabase")));
+            services.AddTransient<IMeetingService, MeetingService>();
 
             services.AddControllers();
             services.AddHealthChecks()
@@ -52,6 +59,14 @@ namespace Whale.MeetingAPI
                 .AllowCredentials()
                 .WithOrigins("http://localhost:4200");
             }));
+
+            services.AddAutoMapper(cfg =>
+            {
+                cfg.AddProfile<MeetingProfile>();
+            },
+            Assembly.GetExecutingAssembly());
+
+            services.AddScoped(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
