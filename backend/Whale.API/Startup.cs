@@ -14,6 +14,7 @@ using Whale.BLL.Hubs;
 using Whale.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Whale.Shared.Services;
 
 namespace Whale.API
 {
@@ -54,6 +55,7 @@ namespace Whale.API
                         ValidateLifetime = true
                     };
                 });
+            services.AddScoped<RedisService>(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
