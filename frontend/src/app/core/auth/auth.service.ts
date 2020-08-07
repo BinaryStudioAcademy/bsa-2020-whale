@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { auth } from 'firebase';
 import { AngularFireAuth } from '@angular/fire/auth';
+import { UserRegistrationService } from '../services/user-registration.service';
 
 @Injectable({
     providedIn: 'root',
@@ -8,11 +9,19 @@ import { AngularFireAuth } from '@angular/fire/auth';
 export class AuthService {
   private authUser: firebase.User = null;
 
-  constructor(private fireAuth: AngularFireAuth) {
+  public get currentUser(): firebase.User {
+    return this.authUser;
+  }
+
+  constructor(
+    private fireAuth: AngularFireAuth,
+    private registrationService: UserRegistrationService
+    ) {
       fireAuth.authState.subscribe(
         (user) => {
           if (user) {
             this.authUser = user;
+            this.registrationService.registerUser(user);
           }
           else {
             this.authUser = null;
