@@ -11,8 +11,10 @@ import { environment } from '@env';
 })
 export class MeetingComponent implements OnInit, AfterViewInit {
   public peer: any;
-  @ViewChild('video') video: ElementRef;
+  //public videos: MediaStream[];
   @ViewChild('currentVideo') currentVideo: ElementRef;
+  @ViewChild('participants') participants: ElementRef;
+  public connectedStreams: string[] = [];
   public peerId: string;
 
   isShowChat = false;
@@ -21,8 +23,10 @@ export class MeetingComponent implements OnInit, AfterViewInit {
 
   constructor(private hubService: SignalRService) { }
   ngAfterViewInit(): void {
-    let video = this.video;
+    //let videos = this.videos;
     let currentVideo = this.currentVideo;
+    let participants = document.getElementById('participants');
+
 
     this.peer.on('call', function (call) {
       console.log("get call");
@@ -37,12 +41,18 @@ export class MeetingComponent implements OnInit, AfterViewInit {
 
         // show participant
         call.on('stream', function (answerStream) {
-          video.nativeElement.srcObject = answerStream;
-        });
-      }, err => {
+          if(!this.connectedStreams.includes(answerStream.id)){
+            this.connectedStreams.push(answerStream.id);
+            let videoElement = document.createElement('video');
+            videoElement.srcObject = answerStream;
+            videoElement.autoplay = true;
+            participants.appendChild(videoElement);
+          }
+        }.bind(this));
+      }.bind(this), err => {
         console.log('error', err);
       });
-    });
+    }.bind(this));
   }
 
   ngOnInit(): void {
@@ -92,8 +102,9 @@ export class MeetingComponent implements OnInit, AfterViewInit {
 
     let peer = this.peer;
     let peerId = this.peerId;
-    let video = this.video;
+    //let videos = this.videos;
     let currentVideo = this.currentVideo;
+    let participants = document.getElementById('participants');
 
     var getUserMedia = navigator.getUserMedia;
     getUserMedia({ video: true, audio: true }, function (stream) {
@@ -102,12 +113,18 @@ export class MeetingComponent implements OnInit, AfterViewInit {
 
       // when get answer show stream
       call.on('stream', function (answerStream) {
-        video.nativeElement.srcObject = answerStream;
-      });
+        if(!this.connectedStreams.includes(answerStream.id)){
+          this.connectedStreams.push(answerStream.id);
+          let videoElement = document.createElement('video');
+          videoElement.srcObject = answerStream;
+          videoElement.autoplay = true;
+          participants.appendChild(videoElement);
+        }
+      }.bind(this));
 
       // show stream from camera of current user
       currentVideo.nativeElement.srcObject = stream;
-    }, err => {
+    }.bind(this), err => {
       console.log('Failed to get local stream', err);
     });
   }
