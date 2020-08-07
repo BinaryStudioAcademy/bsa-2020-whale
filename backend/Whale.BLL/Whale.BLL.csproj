@@ -5,7 +5,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="10.0.0" />
+    <PackageReference Include="MediaTypeMap" Version="2.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
+    <PackageReference Include="Microsoft.Azure.Storage.Blob" Version="11.2.0" />
+    <PackageReference Include="Microsoft.Azure.Storage.Common" Version="11.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Whale.DAL\Whale.DAL.csproj" />
+    <ProjectReference Include="..\Whale.Shared\Whale.Shared.csproj" />
   </ItemGroup>
 
 </Project>
