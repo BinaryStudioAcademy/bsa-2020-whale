@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Whale.BLL.Services.Interfaces;
 using Whale.Shared.DTO.User;
+using Whale.Shared.Models;
 
 namespace Whale.API.Controllers
 {
@@ -18,23 +20,54 @@ namespace Whale.API.Controllers
         }
 
 
-        [HttpGet("id/{userId}")]
-        public async Task<IActionResult> Get(Guid userId)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(Guid id)
         {
-            var user = await _userService.GetUserAsync(userId);
+            var user = await _userService.GetUserAsync(id);
 
             if (user == null) return NotFound();
 
             return Ok(user);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] UserCreateDTO userDTO)
+        [HttpGet("email/{email}")]
+        public async Task<ActionResult<UserDTO>> GetUserByEmail(string email)
         {
-            var createdUser = await _userService.CreateUserAsync(userDTO);
+            if (!Regex.IsMatch(email,
+                @"^(?("")("".+?(?<!\\)""@)|(([0-9a-z]((\.(?!\.))|[-!#\$%&'\*\+/=\?\^`\{\}\|~\w])*)(?<=[0-9a-z])@))" +
+                @"(?(\[)(\[(\d{1,3}\.){3}\d{1,3}\])|(([0-9a-z][-0-9a-z]*[0-9a-z]*\.)+[a-z0-9][\-a-z0-9]{0,22}[a-z0-9]))$",
+                RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250)))
+                return BadRequest("Invaid email format");
 
-            return Created($"id/{createdUser.Id}", createdUser);
+            var result = await _userService.GetUserByEmail(email);
+
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
         }
+
+        [HttpPost]
+        public async Task<ActionResult<UserDTO>> AddUser([FromBody] UserModel user)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest("Invalid data");
+
+            var result = await _userService.CreateUser(user);
+
+            if (result == null)
+                return BadRequest("Such email already exists");
+
+            return Ok(result);
+        }
+
+        //[HttpPost]
+        //public async Task<IActionResult> Create([FromBody] UserCreateDTO userDTO)
+        //{
+        //    var createdUser = await _userService.CreateUserAsync(userDTO);
+
+        //    return Created($"id/{createdUser.Id}", createdUser);
+        //}
 
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] UserDTO userDTO)

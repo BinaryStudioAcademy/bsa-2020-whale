@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Whale.BLL.Services.Abstract;
@@ -8,6 +9,7 @@ using Whale.BLL.Services.Interfaces;
 using Whale.DAL;
 using Whale.DAL.Models;
 using Whale.Shared.DTO.User;
+using Whale.Shared.Models;
 
 namespace Whale.BLL.Services
 {
@@ -15,6 +17,11 @@ namespace Whale.BLL.Services
     {
         public UserService(WhaleDbContext context, IMapper mapper) : base(context, mapper)
         {
+        }
+
+        public async Task<IEnumerable<UserDTO>> GetAllUsers()
+        {
+            return _mapper.Map<IEnumerable<UserDTO>>(await _context.Users.ToListAsync());
         }
 
         public async Task<UserDTO> GetUserAsync(Guid userId)
@@ -25,6 +32,11 @@ namespace Whale.BLL.Services
             if (user == null) throw new Exception("No such user");
 
             return _mapper.Map<UserDTO>(user);
+        }
+
+        public async Task<UserDTO> GetUserByEmail(string email)
+        {
+            return _mapper.Map<UserDTO>(await _context.Users.FirstOrDefaultAsync(e => e.Email == email));
         }
 
         public async Task<UserDTO> CreateUserAsync(UserCreateDTO userDTO)
@@ -42,6 +54,26 @@ namespace Whale.BLL.Services
                 .FirstAsync(c => c.Id == entity.Id);
 
             return _mapper.Map<UserDTO>(createdUser);
+        }
+
+        public async Task<UserDTO> CreateUser(UserModel user)
+        {
+            var checkUser = _context.Users.Where(e => e.Email == user.Email);
+
+            if (checkUser.Count() > 0)
+                return null;
+
+            var newUser = _mapper.Map<User>(user);
+            var name = user.DisplayName
+                .Split(' ')
+                .Select(e => e.Trim())
+                .ToList();
+            newUser.FirstName = name[0];
+            newUser.SecondName = name.Count() > 0 ? name[1] : null;
+            await _context.Users.AddAsync(newUser);
+            await _context.SaveChangesAsync();
+
+            return _mapper.Map<UserDTO>(newUser);
         }
 
         public async Task UpdateUserAsync(UserDTO userDTO)

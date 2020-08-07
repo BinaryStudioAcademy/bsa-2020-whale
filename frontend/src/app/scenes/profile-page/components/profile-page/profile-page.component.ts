@@ -7,7 +7,6 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ProfilePageComponent implements OnInit {
 
-  settingsMenuVisible = false;
   constructor() { }
 
   ngOnInit(): void {
