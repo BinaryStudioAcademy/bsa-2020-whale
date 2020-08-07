@@ -1,8 +1,8 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import Peer from 'peerjs';
-import { WebrtcSignalService } from 'app/core/services/webrtc-signal.service';
 import { SignalRService } from 'app/core/services/signal-r.service';
 import { environment } from '@env';
+import { HubConnection } from '@aspnet/signalr';
 
 @Component({
   selector: 'app-meeting',
@@ -10,84 +10,57 @@ import { environment } from '@env';
   styleUrls: ['./meeting.component.sass']
 })
 export class MeetingComponent implements OnInit, AfterViewInit {
-  public peer: any;
-  //public videos: MediaStream[];
+  public peer: Peer;
   @ViewChild('currentVideo') currentVideo: ElementRef;
-  @ViewChild('participants') participants: ElementRef;
   public connectedStreams: string[] = [];
-  public peerId: string;
+  public recieverId: string;
+  public signalHub: HubConnection;
 
   isShowChat = false;
 
   //users = ['user 1', 'user 2', 'user 3', 'user 4', 'user 5', 'user 6', 'user 7', 'user 8'];
 
   constructor(private hubService: SignalRService) { }
-  ngAfterViewInit(): void {
-    //let videos = this.videos;
-    let currentVideo = this.currentVideo;
-    let participants = document.getElementById('participants');
 
-
-    this.peer.on('call', function (call) {
-      console.log("get call");
-
-      var getUserMedia = navigator.getUserMedia;
-      getUserMedia({ video: true, audio: true }, function (stream) {
-        // answer call
-        call.answer(stream);
-        
-        // show current user from camera
-        currentVideo.nativeElement.srcObject = stream;
-
-        // show participant
-        call.on('stream', function (answerStream) {
-          if(!this.connectedStreams.includes(answerStream.id)){
-            this.connectedStreams.push(answerStream.id);
-            let videoElement = document.createElement('video');
-            videoElement.srcObject = answerStream;
-            videoElement.autoplay = true;
-            participants.appendChild(videoElement);
-          }
-        }.bind(this));
-      }.bind(this), err => {
-        console.log('error', err);
-      });
-    }.bind(this));
-  }
 
   ngOnInit(): void {
     // create new peer
-    this.peer = new Peer({
-      config: {
-        iceServers: [
-          { urls: 'stun:stun1.l.google.com:19302' },
-          { urls: 'stun:stun2.l.google.com:19302' },
-          {
-            urls: 'turn:192.158.29.39:3478?transport=udp',
-            credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
-            username: '28224511:1379330808'
-          },
-          {
-            urls: 'turn:192.158.29.39:3478?transport=tcp',
-            credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
-            username: '28224511:1379330808'
-          }
-        ]
-      }
-    });
+    this.peer = new Peer(environment.peerOptions);
 
     // connect to signalR and on method "connect" write connectId into variable
-    let signalHub = this.hubService.registerHub(environment.meetingApiUrl, 'webrtcSignalHub');
-    signalHub.on("connect", (connectId) => {
+    this.signalHub = this.hubService.registerHub(environment.meetingApiUrl, 'webrtcSignalHub');
+
+    this.signalHub.on("onPeerConnectAsync", (connectId) => {
       if (connectId == this.peer.id) return;
+
       console.log("connectId: " + connectId);
-      this.peerId = connectId;
+      this.recieverId = connectId;
+      this.connect();
     });
 
     // when peer opened send my peer id everyone
-    this.peer.on('open', function (id) {
-      console.log('My peer ID is: ' + id);
-      signalHub.invoke("connect", id);
+    this.peer.on('open', (id) => this.onPeerOpen(id));
+  }
+
+  ngAfterViewInit(): void {
+    // when get call answer to it
+    this.peer.on('call', call => {
+      console.log("get call");
+
+      var getUserMedia = navigator.getUserMedia;
+      getUserMedia({ video: true, audio: true },
+        stream => {
+          // answer call
+          call.answer(stream);
+
+          // show current user from camera
+          this.currentVideo.nativeElement.srcObject = stream;
+
+          // show participant
+          call.on('stream', stream => this.showMediaStream(stream));
+        },
+        err => console.log('error', err)
+      );
     });
   }
 
@@ -95,41 +68,54 @@ export class MeetingComponent implements OnInit, AfterViewInit {
     this.isShowChat = !this.isShowChat;
   }
 
-  connect() {
-    console.log("connect with: " + this.peerId);
-
-    var conn = this.peer.connect(this.peerId);
-
-    let peer = this.peer;
-    let peerId = this.peerId;
-    //let videos = this.videos;
-    let currentVideo = this.currentVideo;
-    let participants = document.getElementById('participants');
+  private connect() {
+    console.log("connect with: " + this.recieverId);
 
     var getUserMedia = navigator.getUserMedia;
-    getUserMedia({ video: true, audio: true }, function (stream) {
-      // call
-      var call = peer.call(peerId, stream);
-
-      // when get answer show stream
-      call.on('stream', function (answerStream) {
-        if(!this.connectedStreams.includes(answerStream.id)){
-          this.connectedStreams.push(answerStream.id);
-          let videoElement = document.createElement('video');
-          videoElement.srcObject = answerStream;
-          videoElement.autoplay = true;
-          participants.appendChild(videoElement);
-        }
-      }.bind(this));
-
-      // show stream from camera of current user
-      currentVideo.nativeElement.srcObject = stream;
-    }.bind(this), err => {
-      console.log('Failed to get local stream', err);
-    });
+    getUserMedia(
+      { video: true, audio: true },
+      stream => this.onCallGetMediaSuccess(stream),
+      err => console.log('Failed to get local stream', err)
+    );
   }
 
   leave() {
 
+  }
+
+  // send message to all subscribers that added new user
+  private onPeerOpen(id: string) {
+    console.log('My peer ID is: ' + id);
+    this.signalHub.invoke("onPeerConnectAsync", id);
+  }
+
+  private onCallGetMediaSuccess(stream: MediaStream) {
+    // show current user from camera
+    this.currentVideo.nativeElement.srcObject = stream;
+
+    let call = this.peer.call(this.recieverId, stream);
+
+    // get answer and show other user
+    call.on('stream', stream => this.showMediaStream(stream));
+  }
+
+  // show mediaStream
+  private showMediaStream(stream: MediaStream) {
+    let participants = document.getElementById('participants');
+
+    if (!this.connectedStreams.includes(stream.id)) {
+      this.connectedStreams.push(stream.id);
+
+      let videoElement = this.createVideoElement(stream);
+      participants.appendChild(videoElement);
+    }
+  }
+
+  // create html element to show video
+  private createVideoElement(stream: MediaStream): HTMLElement {
+    let videoElement = document.createElement('video');
+    videoElement.srcObject = stream;
+    videoElement.autoplay = true;
+    return videoElement
   }
 }
