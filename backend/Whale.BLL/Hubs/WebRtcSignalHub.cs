@@ -35,5 +35,10 @@ namespace Whale.BLL.Hubs
 			// send signal to receiverConnectionId from Context.ConnectionId with signalInfo
 			await this.Clients.Client(receiverConnectionId).SendAsync("SignalAnswer", Context.ConnectionId, signalInfo);
 		}
+
+		public async Task connect(string id)
+		{
+			await Clients.All.SendAsync("connect", id);
+		}
 	}
 }

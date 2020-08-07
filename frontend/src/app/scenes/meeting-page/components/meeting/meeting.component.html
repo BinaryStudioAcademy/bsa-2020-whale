@@ -3,12 +3,12 @@
     </div>
 
     <div class="ui input">
-        <input type="text" placeholder="Your message...">
+        <input [(ngModel)]="peerId" id="input" type="text" placeholder="Your message...">
     </div>
 </div>
 
 <div class="content" >
-    <div class="users">
+    <!-- <div class="users">
         <div class="users__user" *ngFor="let user of users;">
             <div class="ui card">
                 <div class="image">
@@ -19,7 +19,10 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
+
+    Me: <video #currentVideo autoplay></video>
+    User: <video #video autoplay></video>
 
     <div class="options">
         <div class="options__buttons">
@@ -27,7 +30,8 @@
             <i style="margin-left: 10px; opacity: 0.8;" class="big video icon"></i>
             <i (click)="showChat()" style="margin-left: 10px; opacity: 0.8;" class="big wechat icon"></i>
             <i style="margin-left: 10px; opacity: 0.8;" class="big share square icon"></i>
-            <button style="margin-left: 200px;" class="ui inverted red button">Leave</button>
+            <button style="margin-left: 200px;" class="ui inverted red button" (click)="leave()">Leave</button>
+            <button *ngIf="peerId != undefined" class="ui button" (click)="connect()">connect</button>
         </div>           
     </div>
 </div>
