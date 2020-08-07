@@ -8,7 +8,11 @@ import { ProfilePageComponent } from '../scenes/profile-page/components/profile-
 
 
 const routes: Routes = [
+<<<<<<< Updated upstream
   // { path: 'meeting-page', component: MeetingComponent },
+=======
+  { path: 'home', component: HomePageComponent },
+>>>>>>> Stashed changes
   { path: 'meeting-page/:link', component: MeetingComponent },
   { path: 'profile-page', component: ProfilePageComponent },
   { path: '**', component: LandingPageComponent }
