@@ -20,7 +20,7 @@ export class MeetingService {
         return this.httpService.postFullRequest<MeetingCreate, MeetingLink>(`${this.routePrefix}`, meeting);
     }
 
-    public connectMeeting(link: MeetingLink): Observable<HttpResponse<Meeting>> {
-        return this.httpService.putFullRequest<MeetingLink, Meeting>(`${this.routePrefix}`, link);
+    public connectMeeting(link: string): Observable<HttpResponse<Meeting>> {
+        return this.httpService.getFullRequest<Meeting>(`${this.routePrefix}${link}`);
     }
 }

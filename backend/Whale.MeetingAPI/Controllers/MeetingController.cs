@@ -28,10 +28,10 @@ namespace Whale.API.Controllers
             return Created($"api/Projects/{link.Id}", link);
         }
 
-        [HttpPut]
-        public async Task<ActionResult<MeetingDTO>> ConnectToMeeting(MeetingLinkDTO link)
+        [HttpGet]
+        public async Task<ActionResult<MeetingDTO>> ConnectToMeeting(Guid id, string pwd)
         {
-            return Ok(await _meetingService.ConnectToMeeting(link));
+            return Ok(await _meetingService.ConnectToMeeting(new MeetingLinkDTO { Id = id, Password = pwd}));
         }
     }
 

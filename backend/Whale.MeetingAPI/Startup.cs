@@ -44,6 +44,7 @@ namespace Whale.MeetingAPI
         {
             services.AddDbContext<WhaleDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("WhaleDatabase")));
             services.AddTransient<IMeetingService, MeetingService>();
+            services.AddTransient<ChatHub>();
 
             services.AddControllers();
             services.AddHealthChecks()

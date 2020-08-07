@@ -5,7 +5,8 @@ import { MeetingLink } from '@shared/models/meeting/meeting-link';
 import { MeetingService } from 'app/core/services/meeting.service';
 import { takeUntil } from 'rxjs/operators';
 import { Meeting } from '@shared/models/meeting/meeting';
-
+import { SignalRService } from 'app/core/services/signal-r.service';
+import { environment } from 'environments/environment';
 @Component({
   selector: 'app-meeting',
   templateUrl: './meeting.component.html',
@@ -21,7 +22,8 @@ export class MeetingComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private meetingService: MeetingService
+    private meetingService: MeetingService,
+    private signalRService: SignalRService
   ) { }
   ngOnDestroy(): void {
     this.unsubscribe$.next();
@@ -32,21 +34,25 @@ export class MeetingComponent implements OnInit, OnDestroy {
     this.route.params
       .subscribe(
         (params: Params) => {
-          const id: string = params[`id`];
-          const password: string = params[`pwd`];
-          const link = {id, password} as MeetingLink;
+          const link: string = params[`link`];
           this.getMeeting(link);
         }
       );
   }
 
-  getMeeting(link: MeetingLink): void{
+  getMeeting(link: string): void{
     this.meetingService
       .connectMeeting(link)
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (resp) => {
           this.meeting = resp.body;
+          this.signalRService.registerHub(environment.meetingApiUrl, 'chatHub')
+            .then((hub) => {
+              hub.on('JoinedGroup', (contextId: string) => console.log(contextId + ' joined meeting'));
+              hub.invoke('JoinGroup', this.meeting.id)
+                 .catch(err => console.log(err.message));
+          });
         },
         (error) => {
           console.log(error.message);

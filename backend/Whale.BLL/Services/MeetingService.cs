@@ -33,7 +33,7 @@ namespace Whale.BLL.Services
             var meeting  = await _context.Meetings.FirstOrDefaultAsync(m => m.Id == linkDTO.Id);
             if (meeting == null)
                 throw new NotFoundException("Meeting", linkDTO.Id);
-
+  
             return _mapper.Map<MeetingDTO>(meeting);
         }
 
@@ -49,7 +49,7 @@ namespace Whale.BLL.Services
 
             _redisService.Connect();
 
-            var pwd = "11111";
+            var pwd = Guid.NewGuid().ToString();
             _redisService.Set(meeting.Id.ToString(), pwd);
 
             return new MeetingLinkDTO { Id = meeting.Id, Password = pwd };

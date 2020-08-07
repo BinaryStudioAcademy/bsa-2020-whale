@@ -43,7 +43,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
       .subscribe(
         (resp) => {
           this.meetingLink = resp.body;
-          this.router.navigate(['/meeting-page', this.meetingLink.id, this.meetingLink.password]);
+          this.router.navigate(['/meeting-page', `?id=${this.meetingLink.id}&pwd=${this.meetingLink.password}`]);
         },
         (error) => (console.log(error.message))
       );
