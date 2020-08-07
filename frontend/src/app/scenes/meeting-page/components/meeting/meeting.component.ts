@@ -3,6 +3,12 @@ import Peer from 'peerjs';
 import { SignalRService } from 'app/core/services/signal-r.service';
 import { environment } from '@env';
 import { HubConnection } from '@aspnet/signalr';
+import { Subject } from 'rxjs';
+import { ActivatedRoute, Router, Params } from '@angular/router';
+import { MeetingLink } from '@shared/models/meeting/meeting-link';
+import { MeetingService } from 'app/core/services/meeting.service';
+import { takeUntil } from 'rxjs/operators';
+import { Meeting } from '@shared/models/meeting/meeting';
 
 @Component({
   selector: 'app-meeting',
@@ -15,20 +21,34 @@ export class MeetingComponent implements OnInit, AfterViewInit {
   public connectedStreams: string[] = [];
   public recieverId: string;
   public signalHub: HubConnection;
+  public meeting: Meeting;
+  private unsubscribe$ = new Subject<void>();
 
   isShowChat = false;
 
   //users = ['user 1', 'user 2', 'user 3', 'user 4', 'user 5', 'user 6', 'user 7', 'user 8'];
 
-  constructor(private hubService: SignalRService) { }
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private meetingService: MeetingService,
+    private signalRService: SignalRService
+  ) { }
 
+  async ngOnInit() {
+    this.route.params
+      .subscribe(
+        (params: Params) => {
+          const link: string = params[`link`];
+          this.getMeeting(link);
+        }
+      );
 
-  ngOnInit(): void {
     // create new peer
     this.peer = new Peer(environment.peerOptions);
 
     // connect to signalR and on method "connect" write connectId into variable
-    this.signalHub = this.hubService.registerHub(environment.meetingApiUrl, 'webrtcSignalHub');
+    this.signalHub = await this.signalRService.registerHub(environment.meetingApiUrl, 'webrtcSignalHub');
 
     this.signalHub.on("onPeerConnectAsync", (connectId) => {
       if (connectId == this.peer.id) return;
@@ -62,6 +82,32 @@ export class MeetingComponent implements OnInit, AfterViewInit {
         err => console.log('error', err)
       );
     });
+  }
+
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
+  }
+
+  getMeeting(link: string): void {
+    this.meetingService
+      .connectMeeting(link)
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (resp) => {
+          this.meeting = resp.body;
+          this.signalRService.registerHub(environment.meetingApiUrl, 'chatHub')
+            .then((hub) => {
+              hub.on('JoinedGroup', (contextId: string) => console.log(contextId + ' joined meeting'));
+              hub.invoke('JoinGroup', this.meeting.id)
+                .catch(err => console.log(err.message));
+            });
+        },
+        (error) => {
+          console.log(error.message);
+          this.router.navigate(['/profile-page']);
+        }
+      );
   }
 
   showChat(): void {
