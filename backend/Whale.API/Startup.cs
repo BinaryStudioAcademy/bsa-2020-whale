@@ -48,6 +48,7 @@ namespace Whale.API
             services.AddSingleton(mappingConfig.CreateMapper());
 
             services.AddTransient<IContactsService, ContactsService>();
+            services.AddTransient<IUserService, UserService>();
             services.AddTransient<IScheduledMeetingsService, ScheduledMeetingsService>();
 
             services.AddSignalR();
