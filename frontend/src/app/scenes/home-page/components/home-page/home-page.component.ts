@@ -1,24 +1,18 @@
-<<<<<<< HEAD
-import { Component, OnInit } from '@angular/core';
-=======
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MeetingService } from 'app/core/services/meeting.service';
 import { Router } from '@angular/router';
 import { MeetingCreate } from '@shared/models/meeting/meeting-create';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
->>>>>>> feature/meeting
 
 @Component({
   selector: 'app-home-page',
   templateUrl: './home-page.component.html',
   styleUrls: ['./home-page.component.sass']
 })
-<<<<<<< HEAD
-export class HomePageComponent implements OnInit {
-=======
+
 export class HomePageComponent implements OnInit, OnDestroy {
->>>>>>> feature/meeting
+
   mainUser: UserModel = {
     id : 1,
     firstName: 'Daniel',
@@ -86,9 +80,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
   groupsVisibility = false;
   chatVisibility = false;
 
-<<<<<<< HEAD
-  constructor() { }
-=======
   private unsubscribe$ = new Subject<void>();
 
   constructor(
@@ -100,7 +91,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
   }
->>>>>>> feature/meeting
 
   ngOnInit(): void {
   }
@@ -118,8 +108,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.chatVisibility = !this.chatVisibility;
   }
 
-<<<<<<< HEAD
-=======
   createMeeting(): void{
     this.meetingService
       .createMeeting({
@@ -139,7 +127,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
       );
   }
 
->>>>>>> feature/meeting
 }
 export interface UserModel {
     id: number;
