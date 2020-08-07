@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Whale.API.Models;
+using Whale.API.Filters;
 
 namespace Whale.API.Controllers
 {
