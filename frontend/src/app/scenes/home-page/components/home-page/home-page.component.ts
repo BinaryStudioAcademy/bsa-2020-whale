@@ -1,11 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { MeetingService } from 'app/core/services/meeting.service';
+import { Router } from '@angular/router';
+import { MeetingCreate } from '@shared/models/meeting/meeting-create';
+import { takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+
 
 @Component({
   selector: 'app-home-page',
   templateUrl: './home-page.component.html',
   styleUrls: ['./home-page.component.sass']
 })
-export class HomePageComponent implements OnInit {
+
+export class HomePageComponent implements OnInit, OnDestroy {
+
   mainUser: UserModel = {
     id : 1,
     firstName: 'Daniel',
@@ -73,7 +81,17 @@ export class HomePageComponent implements OnInit {
   groupsVisibility = false;
   chatVisibility = false;
 
-  constructor() { }
+  private unsubscribe$ = new Subject<void>();
+
+  constructor(
+    private meetingService: MeetingService,
+    private router: Router
+  ) { }
+
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
+  }
 
   ngOnInit(): void {
   }
@@ -90,6 +108,27 @@ export class HomePageComponent implements OnInit {
   onGroupClick(): void {
     this.chatVisibility = !this.chatVisibility;
   }
+
+
+  createMeeting(): void{
+    this.meetingService
+      .createMeeting({
+        settings: '',
+        startTime: new Date(),
+        anonymousCount: 0,
+        isScheduled: false,
+        isRecurrent: false
+      } as MeetingCreate)
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (resp) => {
+          const meetingLink = resp.body;
+          this.router.navigate(['/meeting-page', `?id=${meetingLink.id}&pwd=${meetingLink.password}`]);
+        },
+        (error) => (console.log(error.message))
+      );
+  }
+
 
 }
 export interface UserModel {

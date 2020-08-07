@@ -1,7 +1,7 @@
 import { Component, OnInit} from '@angular/core';
 import { AuthService } from 'app/core/auth/auth.service';
-import { CommonModule } from '@angular/common';
-import { BrowserModule } from '@angular/platform-browser';
+import { SimpleModalService } from 'ngx-simple-modal';
+import { LoginModalComponent } from '../login-modal/login-modal.component';
 
 
 @Component({
@@ -10,26 +10,18 @@ import { BrowserModule } from '@angular/platform-browser';
   styleUrls: ['./landing-page.component.sass']
 })
 export class LandingPageComponent implements OnInit {
-  public showLogIn = false;
-  public logInButtonText = 'Log In';
-  constructor(public auth: AuthService) {
+  constructor(public auth: AuthService, private simpleModalService: SimpleModalService) {
   }
 
   ngOnInit(): void {
-
   }
 
   public logIn(): void {
-    this.showLogIn = !this.showLogIn;
-    this.logInButtonText = this.showLogIn ? 'Close' : 'Log In';
+      this.simpleModalService
+        .addModal(LoginModalComponent);
   }
 
   public logOut(): void {
     this.auth.logout();
-  }
-
-  public onLogin(success: boolean): void
-  {
-    this.logIn();
   }
 }
