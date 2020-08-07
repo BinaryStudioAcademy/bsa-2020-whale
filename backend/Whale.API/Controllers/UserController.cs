@@ -23,6 +23,9 @@ namespace Whale.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(Guid id)
         {
+            if (id == Guid.Empty)
+                return BadRequest("Invalid id");
+
             var user = await _userService.GetUserAsync(id);
 
             if (user == null) return NotFound();
