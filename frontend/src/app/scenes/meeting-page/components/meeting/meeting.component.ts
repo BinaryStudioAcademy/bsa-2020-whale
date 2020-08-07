@@ -15,8 +15,9 @@ import { environment } from 'environments/environment';
 export class MeetingComponent implements OnInit, OnDestroy {
   meeting: Meeting;
   isShowChat = false;
+  isShowParticipants = false;
 
-  users = ['user 1', 'user 2', 'user 3', 'user 4', 'user 5', 'user 6', 'user 7', 'user 8'];
+  users = ['user 1ssssssssssssssss', 'user 2', 'user 3', 'user 4', 'user 5', 'user 6', 'user 7', 'user 8', 'user 1ssssssssssssssss', 'user 2', 'user 3', 'user 4', 'user 5', 'user 6', 'user 7', 'user 8', 'user 1ssssssssssssssss', 'user 2', 'user 3', 'user 4', 'user 5', 'user 6', 'user 7', 'user 8', 'user 1ssssssssssssssss', 'user 2', 'user 3', 'user 4', 'user 5', 'user 6', 'user 7', 'user 8'];
 
   private unsubscribe$ = new Subject<void>();
   constructor(

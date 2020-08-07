@@ -53,7 +53,7 @@
     margin-top: 24px
     float: right
 
-.big.share.square.icon:hover, .big.microphone.icon:hover, .big.video.icon:hover, .big.wechat.icon:hover
+.big.share.square.icon:hover, .big.microphone.icon:hover, .big.video.icon:hover, .big.wechat.icon:hover, .big.users.icon:hover
     opacity: 1 !important
 
 //scrollbar
@@ -68,3 +68,32 @@
 
 ::-webkit-scrollbar-thumb:hover 
     background: #555
+
+.participants-button-container 
+    display: inline-block
+    margin-left: 5%
+
+.relative-container
+    position: relative
+
+.participants-container
+    position: absolute 
+    bottom: 25px 
+    right: 4px 
+    padding: 8px 0px 8px 0px 
+    max-height: 90vh 
+    overflow-y: scroll
+
+div div.item.participant
+    padding: 7px 12px 7px 12px
+    min-width: 110px
+    white-space: nowrap
+    cursor: default
+
+div div.participant:hover
+    background-color: rgb(241, 241, 241)
+
+.users-icon-fix
+    display: inline
+    background: none
+    opacity: 0.8
