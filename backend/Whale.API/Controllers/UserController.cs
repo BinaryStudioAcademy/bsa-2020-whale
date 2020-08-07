@@ -61,14 +61,6 @@ namespace Whale.API.Controllers
             return Ok(result);
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> Create([FromBody] UserCreateDTO userDTO)
-        //{
-        //    var createdUser = await _userService.CreateUserAsync(userDTO);
-
-        //    return Created($"id/{createdUser.Id}", createdUser);
-        //}
-
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] UserDTO userDTO)
         {
