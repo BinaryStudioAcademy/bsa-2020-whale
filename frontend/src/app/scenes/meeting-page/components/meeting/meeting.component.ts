@@ -34,6 +34,11 @@ export class MeetingComponent implements OnInit, AfterViewInit {
         
         // show current user from camera
         currentVideo.nativeElement.srcObject = stream;
+
+        // show participant
+        call.on('stream', function (answerStream) {
+          video.nativeElement.srcObject = answerStream;
+        });
       }, err => {
         console.log('error', err);
       });
