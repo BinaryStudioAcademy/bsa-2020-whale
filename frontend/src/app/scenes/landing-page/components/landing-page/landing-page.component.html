@@ -8,7 +8,7 @@
                 <a class="ui button" (click)="logOut()">Log Out</a>
             </div>
             <div class="item" *ngIf="!auth.isLoggedIn()">
-                <a class="ui primary button" (click)="logIn()">{{logInButtonText}}</a>
+                <a class="ui primary button" (click)="logIn()">Log In</a>
             </div>
         </div>
     </div>
@@ -102,5 +102,3 @@
 <footer class="footer">
     &copy; Powered by Binary Studio
 </footer>
-
-<app-login-modal (Login)="onLogin($event)" *ngIf="showLogIn"></app-login-modal>

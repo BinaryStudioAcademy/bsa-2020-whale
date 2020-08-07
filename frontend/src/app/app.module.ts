@@ -12,6 +12,7 @@ import { ProfilePageModule } from './scenes/profile-page/profile-page.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ngx-toastr';
 import { HomePageModule } from './scenes/home-page/home-page.module';
+import { SimpleModalModule } from 'ngx-simple-modal';
 
 @NgModule({
   declarations: [
@@ -37,7 +38,8 @@ import { HomePageModule } from './scenes/home-page/home-page.module';
         warning: 'warning'
       }
     }),
-    HomePageModule
+    HomePageModule,
+    SimpleModalModule
   ],
   providers: [
     AuthService,
