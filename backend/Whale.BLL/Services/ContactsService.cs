@@ -80,5 +80,31 @@ namespace Whale.BLL.Services
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task<ContactDTO> CreateContactFromEmailAsync(string ownerEmail, string contactnerEmail)
+        {
+            var owner = _context.Users.FirstOrDefaultAsync(u => u.Email == ownerEmail);
+            var contactner = _context.Users.FirstOrDefaultAsync(u => u.Email == contactnerEmail);
+            await Task.WhenAll(owner, contactner);
+            if (owner.Result is null)
+                throw new Exception("Owner invalid");
+            if (contactner.Result is null)
+                throw new Exception("Contactner invalid");
+
+            var contact = await _context.Contacts
+                .FirstOrDefaultAsync(c => c.ContactnerId == contactner.Result.Id && c.OwnerId == owner.Result.Id);
+            if (contact is object)
+                throw new Exception("Such contact is already exist");
+
+            contact = new Contact()
+            {
+                OwnerId = owner.Result.Id,
+                ContactnerId = contactner.Result.Id,
+                IsBlocked = false
+            };
+            _context.Contacts.Add(contact);
+            await _context.SaveChangesAsync();
+            return await GetContactAsync(contact.Id);
+        }
     }
 }
