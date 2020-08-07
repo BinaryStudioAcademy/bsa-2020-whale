@@ -32,7 +32,7 @@ namespace Whale.BLL.Services
 
             var meeting  = await _context.Meetings.FirstOrDefaultAsync(m => m.Id == linkDTO.Id);
             if (meeting == null)
-                throw new NotFoundException("Meeting", linkDTO.Id);
+                throw new NotFoundException("Meeting");
   
             return _mapper.Map<MeetingDTO>(meeting);
         }
