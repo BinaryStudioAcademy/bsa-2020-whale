@@ -11,6 +11,7 @@ import { MeetingPageModule } from './scenes/meeting-page/meeting-page.module';
 import { ProfilePageModule } from './scenes/profile-page/profile-page.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ngx-toastr';
+import { HomePageModule } from './scenes/home-page/home-page.module';
 
 @NgModule({
   declarations: [
@@ -35,7 +36,8 @@ import { ToastrModule } from 'ngx-toastr';
         success: 'positive',
         warning: 'warning'
       }
-    })
+    }),
+    HomePageModule
   ],
   providers: [
     AuthService,
