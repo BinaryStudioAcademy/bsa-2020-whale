@@ -7,6 +7,8 @@ import { AppComponent } from './app.component';
 import { LandingPageModule } from './scenes/landing-page/landing-page.module';
 import { MeetingPageModule } from './scenes/meeting-page/meeting-page.module';
 import { ProfilePageModule } from './scenes/profile-page/profile-page.module';
+import { ScheduleMeetingPageModule } from './scenes/schedule-meeting-page/schedule-meeting-page.module'
+
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 import { ToastrModule } from 'ngx-toastr';
@@ -21,6 +23,7 @@ import { ToastrModule } from 'ngx-toastr';
     LandingPageModule,
     MeetingPageModule,
     ProfilePageModule,
+    ScheduleMeetingPageModule,
     HttpClientModule,
     BrowserAnimationsModule,
     ToastrModule.forRoot({
