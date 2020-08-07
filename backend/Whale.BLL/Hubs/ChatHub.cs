@@ -7,15 +7,14 @@ namespace Whale.BLL.Hubs
 {
     public sealed class ChatHub : Hub
     {
-
-
-
+        [HubMethodName("JoinGroup")]
         public async Task Join(string groupName)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
-            await Clients.Group(groupName).SendAsync(Context.ConnectionId + " joined group");
+            await Clients.Group(groupName).SendAsync("JoinedGroup", Context.ConnectionId);
         }
 
+        [HubMethodName("SendGroupMessage")]
         public async Task SendMessage(string msg, string groupName)
         {
             await Clients.Group(groupName).SendAsync(msg);
