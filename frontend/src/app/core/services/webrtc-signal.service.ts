@@ -25,33 +25,49 @@ export class WebrtcSignalService {
   private signalAnswer = new Subject<SignalData>();
   public signalAnswer$ = this.signalAnswer.asObservable();
 
+  private signalPeerConected = new Subject<string>();
+  public signalPeerConected$ = this.signalPeerConected.asObservable();
+
+  private signalPeerDisconected = new Subject<string>();
+  public signalPeerDisconected$ = this.signalPeerDisconected.asObservable();
+
   constructor(private hubService: SignalRService) {
-    hubService.registerHub(environment.meetingApiUrl, 'webrtcSignalHub').then(hub => this.signalHub = hub);
+    hubService.registerHub(environment.meetingApiUrl, 'webrtcSignalHub').then(hub => {
+      this.signalHub = hub;
 
-    this.signalHub.on('ThisClientConnected', (connectionId: string) => {
-      console.log(`This is me: ${connectionId}`);
-      this.connectionId = connectionId;
-    });
-
-    this.signalHub.on('NewClientConnected', (newConnectionId: string) => {
-      this.newClientConnected.next(newConnectionId);
-    });
-
-    this.signalHub.on('ClientDisconnected', (disconnectedConnectionId: string) => {
-      this.clientDisconnected.next(disconnectedConnectionId);
-    });
-
-    this.signalHub.on('SignalOffer', (fromConnectionId: string, signalOfferInfo: string /* TYPE ? */) => {
-      this.signalOffer.next({ 
-        fromConnectionId: fromConnectionId, 
-        signalInfo: signalOfferInfo 
+      this.signalHub.on('ThisClientConnected', (connectionId: string) => {
+        console.log(`This is me: ${connectionId}`);
+        this.connectionId = connectionId;
       });
-    });
 
-    this.signalHub.on('SignalAnswer', (fromConnectionId: string, signalAnswerInfo: string /* TYPE ? */) => {
-      this.signalAnswer.next({ 
-        fromConnectionId: fromConnectionId, 
-        signalInfo: signalAnswerInfo 
+      this.signalHub.on('NewClientConnected', (newConnectionId: string) => {
+        this.newClientConnected.next(newConnectionId);
+      });
+
+      this.signalHub.on('ClientDisconnected', (disconnectedConnectionId: string) => {
+        this.clientDisconnected.next(disconnectedConnectionId);
+      });
+
+      this.signalHub.on('SignalOffer', (fromConnectionId: string, signalOfferInfo: string /* TYPE ? */) => {
+        this.signalOffer.next({
+          fromConnectionId: fromConnectionId,
+          signalInfo: signalOfferInfo
+        });
+      });
+
+      this.signalHub.on('SignalAnswer', (fromConnectionId: string, signalAnswerInfo: string /* TYPE ? */) => {
+        this.signalAnswer.next({
+          fromConnectionId: fromConnectionId,
+          signalInfo: signalAnswerInfo
+        });
+      });
+
+      this.signalHub.on('onPeerConnect', (connectedPeerId: string) => {
+        this.signalPeerConected.next(connectedPeerId);
+      });
+
+      this.signalHub.on('onPeerDisconnect', (disconnectedPeerId: string) => {
+        this.signalPeerDisconected.next(disconnectedPeerId);
       });
     });
   }
@@ -59,5 +75,5 @@ export class WebrtcSignalService {
 
 export interface SignalData {
   fromConnectionId: string;
-  signalInfo: string; 
+  signalInfo: string;
 }

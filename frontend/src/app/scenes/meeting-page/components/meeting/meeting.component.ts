@@ -9,6 +9,8 @@ import { MeetingLink } from '@shared/models/meeting/meeting-link';
 import { MeetingService } from 'app/core/services/meeting.service';
 import { takeUntil } from 'rxjs/operators';
 import { Meeting } from '@shared/models/meeting/meeting';
+import { WebrtcSignalService } from 'app/core/services/webrtc-signal.service';
+import { Toast, ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-meeting',
@@ -25,6 +27,7 @@ export class MeetingComponent implements OnInit, AfterViewInit {
   private unsubscribe$ = new Subject<void>();
   public connectedPeers = new Map<string, MediaStream>();
   isShowChat = false;
+  private webrtcSignalService: WebrtcSignalService;
 
   //users = ['user 1', 'user 2', 'user 3', 'user 4', 'user 5', 'user 6', 'user 7', 'user 8'];
 
@@ -32,8 +35,12 @@ export class MeetingComponent implements OnInit, AfterViewInit {
     private route: ActivatedRoute,
     private router: Router,
     private meetingService: MeetingService,
-    private signalRService: SignalRService
-  ) { }
+    private signalRService: SignalRService,
+    private toastr: ToastrService
+  ) 
+  { 
+    this.webrtcSignalService = new WebrtcSignalService(signalRService);
+  }
 
   async ngOnInit() {
     this.route.params
@@ -47,23 +54,35 @@ export class MeetingComponent implements OnInit, AfterViewInit {
     // create new peer
     this.peer = new Peer(environment.peerOptions);
 
-    // connect to signalR and on method "connect" write connectId into variable
+    // connect to signalR
     this.signalHub = await this.signalRService.registerHub(environment.meetingApiUrl, 'webrtcSignalHub');
 
-    this.signalHub.on("onPeerConnect", (connectId) => {
-      if (connectId == this.peer.id) return;
+    this.webrtcSignalService.signalPeerConected$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        peerId => {
+          if (peerId == this.peer.id) return;
 
-      console.log("connectId: " + connectId);
-      this.recieverId = connectId;
-      this.connect();
-    });
+          console.log("connectId: " + peerId);
+          this.recieverId = peerId;
+          this.connect();
+          this.toastr.success("Connected successfuly");
+        },
+        err => {
+          console.log(err.message);
+          this.toastr.error("Error occured when connected to meeting");
+          this.router.navigate(['/profile-page']);
+        }
+    );
 
-    this.signalHub.on("onPeerDisconnect", (peerId) => {
-      console.log(this.connectedPeers);
-      if(this.connectedPeers.has(peerId)) 
-        this.connectedPeers.delete(peerId);
-      console.log(this.connectedPeers);
-    });
+    this.webrtcSignalService.signalPeerDisconected$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (peerId) => {
+          if (this.connectedPeers.has(peerId))
+            this.connectedPeers.delete(peerId);
+        }
+      );
 
     // when peer opened send my peer id everyone
     this.peer.on('open', (id) => this.onPeerOpen(id));
