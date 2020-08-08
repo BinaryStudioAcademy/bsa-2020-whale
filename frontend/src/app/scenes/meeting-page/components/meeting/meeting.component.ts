@@ -23,7 +23,7 @@ export class MeetingComponent implements OnInit, AfterViewInit {
   public signalHub: HubConnection;
   public meeting: Meeting;
   private unsubscribe$ = new Subject<void>();
-
+  public connectedPeers = new Map<string, MediaStream>();
   isShowChat = false;
 
   //users = ['user 1', 'user 2', 'user 3', 'user 4', 'user 5', 'user 6', 'user 7', 'user 8'];
@@ -50,12 +50,19 @@ export class MeetingComponent implements OnInit, AfterViewInit {
     // connect to signalR and on method "connect" write connectId into variable
     this.signalHub = await this.signalRService.registerHub(environment.meetingApiUrl, 'webrtcSignalHub');
 
-    this.signalHub.on("onPeerConnectAsync", (connectId) => {
+    this.signalHub.on("onPeerConnect", (connectId) => {
       if (connectId == this.peer.id) return;
 
       console.log("connectId: " + connectId);
       this.recieverId = connectId;
       this.connect();
+    });
+
+    this.signalHub.on("onPeerDisconnect", (peerId) => {
+      console.log(this.connectedPeers);
+      if(this.connectedPeers.has(peerId)) 
+        this.connectedPeers.delete(peerId);
+      console.log(this.connectedPeers);
     });
 
     // when peer opened send my peer id everyone
@@ -77,7 +84,10 @@ export class MeetingComponent implements OnInit, AfterViewInit {
           this.currentVideo.nativeElement.srcObject = stream;
 
           // show participant
-          call.on('stream', stream => this.showMediaStream(stream));
+          call.on('stream', stream => {
+            this.showMediaStream(stream);
+            this.connectedPeers.set(call.peer, stream);
+          });
         },
         err => console.log('error', err)
       );
@@ -87,6 +97,8 @@ export class MeetingComponent implements OnInit, AfterViewInit {
   ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
+
+    this.destroyPeer();
   }
 
   getMeeting(link: string): void {
@@ -125,14 +137,22 @@ export class MeetingComponent implements OnInit, AfterViewInit {
     );
   }
 
-  leave() {
+  public leave() {
+    this.destroyPeer();
+    this.router.navigate(['/home']);
+  }
 
+  private destroyPeer(){
+    this.signalHub.invoke("onPeerDisconnect", this.peer.id);
+
+    this.peer.disconnect();
+    this.peer.destroy();
   }
 
   // send message to all subscribers that added new user
   private onPeerOpen(id: string) {
     console.log('My peer ID is: ' + id);
-    this.signalHub.invoke("onPeerConnectAsync", id);
+    this.signalHub.invoke("onPeerConnect", id);
   }
 
   private onCallGetMediaSuccess(stream: MediaStream) {
@@ -142,7 +162,11 @@ export class MeetingComponent implements OnInit, AfterViewInit {
     let call = this.peer.call(this.recieverId, stream);
 
     // get answer and show other user
-    call.on('stream', stream => this.showMediaStream(stream));
+    call.on('stream', stream => {
+      this.showMediaStream(stream);
+      console.log(`I made call me: ${this.peer.id} in call:${call.peer}`);
+      this.connectedPeers.set(call.peer, stream);
+    });
   }
 
   // show mediaStream

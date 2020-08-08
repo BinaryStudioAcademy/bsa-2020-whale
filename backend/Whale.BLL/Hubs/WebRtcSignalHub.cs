@@ -34,10 +34,16 @@ namespace Whale.BLL.Hubs
             await this.Clients.Client(receiverConnectionId).SendAsync("SignalAnswer", Context.ConnectionId, signalInfo);
         }
 
-        [HubMethodName("onPeerConnectAsync")]
+        [HubMethodName("onPeerConnect")]
         public async Task OnPeerConnectAsync(string id)
         {
-            await Clients.All.SendAsync("onPeerConnectAsync", id);
+            await Clients.All.SendAsync("onPeerConnect", id);
+        }
+
+        [HubMethodName("onPeerDisconnect")]
+        public async Task OnPeerUserDisconnectAsync(string id)
+        {
+            await Clients.All.SendAsync("onPeerDisconnect", id);
         }
     }
 }
