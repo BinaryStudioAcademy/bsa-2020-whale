@@ -7,6 +7,8 @@ import { takeUntil } from 'rxjs/operators';
 import { Meeting } from '@shared/models/meeting/meeting';
 import { SignalRService } from 'app/core/services/signal-r.service';
 import { environment } from 'environments/environment';
+import { BlobService } from './../../../../core/services/blob.service';
+
 @Component({
   selector: 'app-meeting',
   templateUrl: './meeting.component.html',
@@ -23,7 +25,8 @@ export class MeetingComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private meetingService: MeetingService,
-    private signalRService: SignalRService
+    private signalRService: SignalRService,
+    private blobService: BlobService
   ) { }
   ngOnDestroy(): void {
     this.unsubscribe$.next();
@@ -63,5 +66,13 @@ export class MeetingComponent implements OnInit, OnDestroy {
 
   showChat(): void {
     this.isShowChat = !this.isShowChat;
+  }
+
+  startRecording(): void {
+    this.blobService.startRecording();
+  }
+
+  stopRecording(): void {
+    this.blobService.stopRecording();
   }
 }
