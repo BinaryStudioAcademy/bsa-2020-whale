@@ -8,6 +8,13 @@
 </div>
 
 <div class="content" >
+    <div *ngIf="isShowParticipants" class="ui participants-container">
+        <div class="ui divided list">
+            <div *ngFor="let user of users" class="ui item participant">
+                {{user}}
+            </div>
+        </div>
+    </div>
     <div class="users">
         <div class="users__user" *ngFor="let user of users;">
             <div class="ui card">
@@ -31,13 +38,6 @@
             <div class="display-flex">
                 <div class="participants-button-container">
                     <div class="relative-container">
-                        <div *ngIf="isShowParticipants" class="ui segment participants-container">
-                            <div class="ui divided list">
-                                <div *ngFor="let user of users" class="ui item participant">
-                                    {{user}}
-                                </div>
-                            </div>
-                        </div>
                         <i class="users icon big users-icon-fix" (click)="isShowParticipants = !isShowParticipants"></i>
                     </div>    
                 </div>
