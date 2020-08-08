@@ -27,7 +27,15 @@ namespace Whale.BLL.Providers
             var container = _blobClient.GetContainerReference(contentType);
             await setPublicContainerPermissionsAsync(container);
 
-            string fileName = contentType + '_' + Guid.NewGuid().ToString() + MimeTypeMap.GetExtension(file.ContentType);
+            string fileName;
+            try
+            {
+                fileName = contentType + '_' + Guid.NewGuid().ToString() + MimeTypeMap.GetExtension(file.ContentType);
+            }
+            catch
+            {
+                fileName = contentType + '_' + Guid.NewGuid().ToString();
+            }
 
             CloudBlockBlob blockBlob = container.GetBlockBlobReference(fileName);
             blockBlob.Properties.ContentType = file.ContentType;
