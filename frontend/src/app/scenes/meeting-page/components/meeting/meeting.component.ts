@@ -17,17 +17,17 @@ import { Toast, ToastrService } from 'ngx-toastr';
   templateUrl: './meeting.component.html',
   styleUrls: ['./meeting.component.sass']
 })
-export class MeetingComponent implements OnInit, AfterViewInit {
+export class MeetingComponent implements OnInit {
   public peer: Peer;
   @ViewChild('currentVideo') currentVideo: ElementRef;
   public connectedStreams: string[] = [];
-  public recieverId: string;
   public signalHub: HubConnection;
   public meeting: Meeting;
   private unsubscribe$ = new Subject<void>();
   public connectedPeers = new Map<string, MediaStream>();
   isShowChat = false;
   private webrtcSignalService: WebrtcSignalService;
+  private currentUserStream: MediaStream;
 
   //users = ['user 1', 'user 2', 'user 3', 'user 4', 'user 5', 'user 6', 'user 7', 'user 8'];
 
@@ -37,8 +37,7 @@ export class MeetingComponent implements OnInit, AfterViewInit {
     private meetingService: MeetingService,
     private signalRService: SignalRService,
     private toastr: ToastrService
-  ) 
-  { 
+  ) {
     this.webrtcSignalService = new WebrtcSignalService(signalRService);
   }
 
@@ -51,12 +50,14 @@ export class MeetingComponent implements OnInit, AfterViewInit {
         }
       );
 
+    // connect to signalR
+    this.signalHub = await this.signalRService.registerHub(environment.meetingApiUrl, 'webrtcSignalHub');
+    this.currentUserStream = this.currentVideo.nativeElement.srcObject = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+
     // create new peer
     this.peer = new Peer(environment.peerOptions);
 
-    // connect to signalR
-    this.signalHub = await this.signalRService.registerHub(environment.meetingApiUrl, 'webrtcSignalHub');
-
+    // when someone connected to meeting
     this.webrtcSignalService.signalPeerConected$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
@@ -64,8 +65,7 @@ export class MeetingComponent implements OnInit, AfterViewInit {
           if (peerId == this.peer.id) return;
 
           console.log("connectId: " + peerId);
-          this.recieverId = peerId;
-          this.connect();
+          this.connect(peerId);
           this.toastr.success("Connected successfuly");
         },
         err => {
@@ -73,8 +73,9 @@ export class MeetingComponent implements OnInit, AfterViewInit {
           this.toastr.error("Error occured when connected to meeting");
           this.router.navigate(['/profile-page']);
         }
-    );
+      );
 
+    // when someone disconnected from meeting
     this.webrtcSignalService.signalPeerDisconected$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
@@ -86,30 +87,20 @@ export class MeetingComponent implements OnInit, AfterViewInit {
 
     // when peer opened send my peer id everyone
     this.peer.on('open', (id) => this.onPeerOpen(id));
-  }
 
-  ngAfterViewInit(): void {
+    
     // when get call answer to it
     this.peer.on('call', call => {
       console.log("get call");
 
-      var getUserMedia = navigator.getUserMedia;
-      getUserMedia({ video: true, audio: true },
-        stream => {
-          // answer call
-          call.answer(stream);
+      // show caller
+      call.on('stream', stream => {
+        this.showMediaStream(stream);
+        this.connectedPeers.set(call.peer, stream);
+      });
 
-          // show current user from camera
-          this.currentVideo.nativeElement.srcObject = stream;
-
-          // show participant
-          call.on('stream', stream => {
-            this.showMediaStream(stream);
-            this.connectedPeers.set(call.peer, stream);
-          });
-        },
-        err => console.log('error', err)
-      );
+      // send mediaStream to caller
+      call.answer(this.currentUserStream);
     });
   }
 
@@ -118,6 +109,9 @@ export class MeetingComponent implements OnInit, AfterViewInit {
     this.unsubscribe$.complete();
 
     this.destroyPeer();
+
+    this.currentUserStream.getTracks().forEach(track => track.stop());
+    console.log("destroyed", this.currentUserStream);
   }
 
   getMeeting(link: string): void {
@@ -145,23 +139,23 @@ export class MeetingComponent implements OnInit, AfterViewInit {
     this.isShowChat = !this.isShowChat;
   }
 
-  private connect() {
-    console.log("connect with: " + this.recieverId);
+  // call to peer
+  private connect(recieverPeerId: string) {
+    let call = this.peer.call(recieverPeerId, this.currentUserStream);
 
-    var getUserMedia = navigator.getUserMedia;
-    getUserMedia(
-      { video: true, audio: true },
-      stream => this.onCallGetMediaSuccess(stream),
-      err => console.log('Failed to get local stream', err)
-    );
+    // get answer and show other user
+    call.on('stream', stream => {
+      this.showMediaStream(stream);
+      this.connectedPeers.set(call.peer, stream);
+    });
   }
 
   public leave() {
-    this.destroyPeer();
+    this.ngOnDestroy();
     this.router.navigate(['/home']);
   }
 
-  private destroyPeer(){
+  private destroyPeer() {
     this.signalHub.invoke("onPeerDisconnect", this.peer.id);
 
     this.peer.disconnect();
@@ -172,20 +166,6 @@ export class MeetingComponent implements OnInit, AfterViewInit {
   private onPeerOpen(id: string) {
     console.log('My peer ID is: ' + id);
     this.signalHub.invoke("onPeerConnect", id);
-  }
-
-  private onCallGetMediaSuccess(stream: MediaStream) {
-    // show current user from camera
-    this.currentVideo.nativeElement.srcObject = stream;
-
-    let call = this.peer.call(this.recieverId, stream);
-
-    // get answer and show other user
-    call.on('stream', stream => {
-      this.showMediaStream(stream);
-      console.log(`I made call me: ${this.peer.id} in call:${call.peer}`);
-      this.connectedPeers.set(call.peer, stream);
-    });
   }
 
   // show mediaStream
