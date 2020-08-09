@@ -34,6 +34,18 @@ namespace Whale.BLL.Hubs
             await this.Clients.Client(receiverConnectionId).SendAsync("SignalAnswer", Context.ConnectionId, signalInfo);
         }
 
+        [HubMethodName("onConferenceStartRecording")]
+        public async Task OnConferenceStartRecording(string message)
+        {
+            await Clients.All.SendAsync("onConferenceStartRecording", message);
+        }
+
+        [HubMethodName("onConferenceStopRecording")]
+        public async Task OnConferenceStopRecording(string message)
+        {
+            await Clients.All.SendAsync("onConferenceStopRecording", message);
+        }
+
         [HubMethodName("onPeerConnect")]
         public async Task OnPeerConnectAsync(string id)
         {
