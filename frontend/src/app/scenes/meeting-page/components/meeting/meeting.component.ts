@@ -1,33 +1,34 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, AfterContentInit, EventEmitter } from '@angular/core';
 import Peer from 'peerjs';
 import { SignalRService } from 'app/core/services/signal-r.service';
 import { environment } from '@env';
-import { HubConnection } from '@aspnet/signalr';
 import { Subject } from 'rxjs';
 import { ActivatedRoute, Router, Params } from '@angular/router';
-import { MeetingLink } from '@shared/models/meeting/meeting-link';
 import { MeetingService } from 'app/core/services/meeting.service';
 import { takeUntil } from 'rxjs/operators';
 import { Meeting } from '@shared/models/meeting/meeting';
-import { WebrtcSignalService } from 'app/core/services/webrtc-signal.service';
-import { Toast, ToastrService } from 'ngx-toastr';
+import { WebrtcSignalService, SignalMethods } from 'app/core/services/webrtc-signal.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-meeting',
   templateUrl: './meeting.component.html',
   styleUrls: ['./meeting.component.sass']
 })
-export class MeetingComponent implements OnInit {
-  public peer: Peer;
+export class MeetingComponent implements OnInit, AfterContentInit {
   @ViewChild('currentVideo') currentVideo: ElementRef;
-  public connectedStreams: string[] = [];
-  public signalHub: HubConnection;
-  public meeting: Meeting;
-  private unsubscribe$ = new Subject<void>();
-  public connectedPeers = new Map<string, MediaStream>();
-  isShowChat = false;
+
   private webrtcSignalService: WebrtcSignalService;
+
+  public peer: Peer;
+  public connectedStreams: string[] = [];
+  public connectedPeers = new Map<string, MediaStream>();
+  public meeting: Meeting;
+  public isShowChat = false;
+
+  private unsubscribe$ = new Subject<void>();
   private currentUserStream: MediaStream;
+  private currentStreamLoaded = new EventEmitter<void>();
 
   //users = ['user 1', 'user 2', 'user 3', 'user 4', 'user 5', 'user 6', 'user 7', 'user 8'];
 
@@ -41,6 +42,10 @@ export class MeetingComponent implements OnInit {
     this.webrtcSignalService = new WebrtcSignalService(signalRService);
   }
 
+  ngAfterContentInit() {
+    this.currentStreamLoaded.subscribe(() => this.currentVideo.nativeElement.srcObject = this.currentUserStream);
+  }
+
   async ngOnInit() {
     this.route.params
       .subscribe(
@@ -50,9 +55,8 @@ export class MeetingComponent implements OnInit {
         }
       );
 
-    // connect to signalR
-    this.signalHub = await this.signalRService.registerHub(environment.meetingApiUrl, 'webrtcSignalHub');
-    this.currentUserStream = this.currentVideo.nativeElement.srcObject = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    this.currentUserStream /*= this.currentVideo.nativeElement.srcObject*/ = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    this.currentStreamLoaded.emit();
 
     // create new peer
     this.peer = new Peer(environment.peerOptions);
@@ -88,7 +92,7 @@ export class MeetingComponent implements OnInit {
     // when peer opened send my peer id everyone
     this.peer.on('open', (id) => this.onPeerOpen(id));
 
-    
+
     // when get call answer to it
     this.peer.on('call', call => {
       console.log("get call");
@@ -156,7 +160,7 @@ export class MeetingComponent implements OnInit {
   }
 
   private destroyPeer() {
-    this.signalHub.invoke("onPeerDisconnect", this.peer.id);
+    this.webrtcSignalService.invoke(SignalMethods.onPeerDisconnect, this.peer.id);
 
     this.peer.disconnect();
     this.peer.destroy();
@@ -165,7 +169,8 @@ export class MeetingComponent implements OnInit {
   // send message to all subscribers that added new user
   private onPeerOpen(id: string) {
     console.log('My peer ID is: ' + id);
-    this.signalHub.invoke("onPeerConnect", id);
+    this.webrtcSignalService.invoke(SignalMethods.onPeerConnect, id);
+    this.webrtcSignalService
   }
 
   // show mediaStream
