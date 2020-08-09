@@ -21,6 +21,12 @@ export class WebrtcSignalService {
   private signalOffer = new Subject<SignalData>();
   public signalOffer$ = this.signalOffer.asObservable();
 
+  private conferenceStartRecording = new Subject<string>();
+  public conferenceStartRecording$ = this.conferenceStartRecording.asObservable();
+
+  private conferenceStopRecording = new Subject<string>();
+  public conferenceStopRecording$ = this.conferenceStopRecording.asObservable();
+
   private signalAnswer = new Subject<SignalData>();
   public signalAnswer$ = this.signalAnswer.asObservable();
 
@@ -64,6 +70,14 @@ export class WebrtcSignalService {
           });
         });
 
+        this.signalHub.on('onConferenceStartRecording', (message: string) => {
+          this.conferenceStartRecording.next(message);
+        });
+
+        this.signalHub.on('onConferenceStopRecording', (message: string) => {
+          this.conferenceStopRecording.next(message);
+        });
+
         this.signalHub.on('onPeerConnect', (connectedPeerId: string) => {
           this.signalPeerConected.next(connectedPeerId);
         });
@@ -86,5 +100,7 @@ export interface SignalData {
 
 export enum SignalMethods {
   onPeerConnect,
-  onPeerDisconnect
+  onPeerDisconnect,
+  onConferenceStartRecording,
+  onConferenceStopRecording
 }

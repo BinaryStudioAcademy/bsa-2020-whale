@@ -9,7 +9,7 @@ import { takeUntil } from 'rxjs/operators';
 import { Meeting } from '@shared/models/meeting/meeting';
 import { WebrtcSignalService, SignalMethods } from 'app/core/services/webrtc-signal.service';
 import { ToastrService } from 'ngx-toastr';
-import { BlobService } from './../../../../core/services/blob.service';
+import { BlobService } from 'app/core/services/blob.service';
 
 @Component({
   selector: 'app-meeting',
@@ -198,9 +198,13 @@ export class MeetingComponent implements OnInit, AfterContentInit {
 
   startRecording(): void {
     this.blobService.startRecording();
+
+    this.webrtcSignalService.invoke(SignalMethods.onConferenceStartRecording, 'Conference start recording');
   }
 
   stopRecording(): void {
     this.blobService.stopRecording();
+
+    this.webrtcSignalService.invoke(SignalMethods.onConferenceStopRecording, 'Conference stop recording');
   }
 }
