@@ -43,14 +43,20 @@ namespace Whale.API.Controllers
 
             return Created($"id/{createdContact.Id}", createdContact);
         }
-        [HttpPost("{contactnerEmail}")]
-        public async Task<IActionResult> CreateFromEmail(string contactnerEmail)
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateFromEmail([FromQuery(Name = "email")] string contactnerEmail)
         {
-            var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
-            //Console.WriteLine(ownerEmail);
-            var createdContact = await _contactsService.CreateContactFromEmailAsync(ownerEmail, contactnerEmail);
+            try
+            {
+                var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+                var createdContact = await _contactsService.CreateContactFromEmailAsync(ownerEmail, contactnerEmail);
 
-            return Created($"id/{createdContact.Id}", createdContact);
+                return Created($"id/{createdContact.Id}", createdContact);
+            }
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
         }
 
         [HttpDelete("{id}")]

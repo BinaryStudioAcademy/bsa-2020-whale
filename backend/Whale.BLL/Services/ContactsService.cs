@@ -83,23 +83,22 @@ namespace Whale.BLL.Services
 
         public async Task<ContactDTO> CreateContactFromEmailAsync(string ownerEmail, string contactnerEmail)
         {
-            var owner = _context.Users.FirstOrDefaultAsync(u => u.Email == ownerEmail);
-            var contactner = _context.Users.FirstOrDefaultAsync(u => u.Email == contactnerEmail);
-            await Task.WhenAll(owner, contactner);
-            if (owner.Result is null)
+            var owner = await _context.Users.FirstOrDefaultAsync(u => u.Email == ownerEmail);
+            var contactner = await _context.Users.FirstOrDefaultAsync(u => u.Email == contactnerEmail);
+            if (owner is null)
                 throw new Exception("Owner invalid");
-            if (contactner.Result is null)
+            if (contactner is null)
                 throw new Exception("Contactner invalid");
 
             var contact = await _context.Contacts
-                .FirstOrDefaultAsync(c => c.ContactnerId == contactner.Result.Id && c.OwnerId == owner.Result.Id);
+                .FirstOrDefaultAsync(c => c.ContactnerId == contactner.Id && c.OwnerId == owner.Id);
             if (contact is object)
                 throw new Exception("Such contact is already exist");
 
             contact = new Contact()
             {
-                OwnerId = owner.Result.Id,
-                ContactnerId = contactner.Result.Id,
+                OwnerId = owner.Id,
+                ContactnerId = contactner.Id,
                 IsBlocked = false
             };
             _context.Contacts.Add(contact);

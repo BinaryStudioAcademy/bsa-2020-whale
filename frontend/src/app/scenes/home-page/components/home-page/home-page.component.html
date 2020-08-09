@@ -28,9 +28,9 @@
             </a>
         </a>
         <a (click) = "contactsVisibility=!contactsVisibility" class="item header">Contacts
-                <button (click) = "addNewContact()" class="ui mini basic button edit-button">
-                   New
-                </button>
+            <button (click) = "addNewContact(); $event.stopPropagation()" class="ui mini basic button edit-button">
+                New
+            </button>
         </a>
         <div [hidden] = "!contactsVisibility" *ngFor="let user of USERS" class="user-list ui middle aligned selection list">
             <div (click)="onUserClick()" class="item">
