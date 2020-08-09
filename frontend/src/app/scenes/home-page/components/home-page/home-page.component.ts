@@ -5,6 +5,7 @@ import { MeetingCreate } from '@shared/models/meeting/meeting-create';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 
+
 @Component({
   selector: 'app-home-page',
   templateUrl: './home-page.component.html',
@@ -108,6 +109,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.chatVisibility = !this.chatVisibility;
   }
 
+
   createMeeting(): void{
     this.meetingService
       .createMeeting({
@@ -126,6 +128,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
         (error) => (console.log(error.message))
       );
   }
+
 
 }
 export interface UserModel {

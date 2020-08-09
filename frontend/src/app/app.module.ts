@@ -15,6 +15,7 @@ import { ToastrModule } from 'ngx-toastr';
 import { HomePageModule } from './scenes/home-page/home-page.module';
 import { SimpleModalModule } from 'ngx-simple-modal';
 
+
 @NgModule({
   declarations: [
     AppComponent

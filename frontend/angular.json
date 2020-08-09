@@ -65,8 +65,7 @@
               "node_modules/semantic-ui-css/semantic.min.css",
               "node_modules/ngx-toastr/toastr.css"
             ],
-            "scripts": [
-            ]
+            "scripts": []
           },
           "configurations": {
             "production": {
@@ -157,6 +156,10 @@
           }
         }
       }
-    }},
-  "defaultProject": "frontend"
+    }
+  },
+  "defaultProject": "frontend",
+  "cli": {
+    "analytics": false
+  }
 }

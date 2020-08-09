@@ -3,12 +3,23 @@
     </div>
 
     <div class="ui input">
-        <input type="text" placeholder="Your message...">
+        <input [(ngModel)]="peerId" id="input" type="text" placeholder="Your message...">
     </div>
 </div>
 
 <div class="content" >
-    <div class="users">
+    <div *ngIf="isShowParticipants" class="ui participants-container">
+        <div class="invite-icon-container">
+            <i class="user plus icon"></i>
+        </div>
+        <div class="ui divided list">
+            <div *ngFor="let user of users" class="ui item participant">    
+                <img src="https://icons.iconarchive.com/icons/paomedia/small-n-flat/512/user-male-icon.png">
+                <span>{{user}}</span>
+            </div>
+        </div>
+    </div>
+    <!-- <div class="users">
         <div class="users__user" *ngFor="let user of users;">
             <div class="ui card">
                 <div class="image">
@@ -19,15 +30,32 @@
                 </div>
             </div>
         </div>
+    </div> -->
+
+    Me: <video #currentVideo autoplay="autoplay" [muted]="'muted'"></video>
+    Users: <div id="participants">
+
     </div>
 
     <div class="options">
-        <div class="options__buttons">
-            <i style="opacity: 0.8;" class="big microphone icon"></i>
-            <i style="margin-left: 10px; opacity: 0.8;" class="big video icon"></i>
-            <i (click)="showChat()" style="margin-left: 10px; opacity: 0.8;" class="big wechat icon"></i>
-            <i style="margin-left: 10px; opacity: 0.8;" class="big share square icon"></i>
-            <button style="margin-left: 200px;" class="ui inverted red button">Leave</button>
-        </div>           
+        <div class="ui container options__buttons">
+            <div>
+                <i style="opacity: 0.8;" class="big microphone icon"></i>
+                <i style="margin-left: 10px; opacity: 0.8;" class="big video icon"></i>
+            </div>
+            
+            <div class="display-flex">
+                <div class="participants-button-container">
+                    <div class="relative-container">
+                        <i class="users icon big users-icon-fix" (click)="isShowParticipants = !isShowParticipants"></i>
+                    </div>    
+                </div>
+                <i style="margin-left: 10px; opacity: 0.8;" class="big share square icon"></i>
+                <i (click)="showChat()" style="margin-left: 10px; opacity: 0.8;" class="big wechat icon"></i>
+            </div>
+            <div>
+                <button style="margin-left: 200px;" class="ui inverted red button" (click)="leave()">Leave</button>
+            </div>
+        </div>
     </div>
 </div>
