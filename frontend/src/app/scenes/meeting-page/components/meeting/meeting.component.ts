@@ -9,6 +9,7 @@ import { takeUntil } from 'rxjs/operators';
 import { Meeting } from '@shared/models/meeting/meeting';
 import { WebrtcSignalService, SignalMethods } from 'app/core/services/webrtc-signal.service';
 import { ToastrService } from 'ngx-toastr';
+import { BlobService } from './../../../../core/services/blob.service';
 
 @Component({
   selector: 'app-meeting',
@@ -25,19 +26,21 @@ export class MeetingComponent implements OnInit, AfterContentInit {
   public connectedPeers = new Map<string, MediaStream>();
   public meeting: Meeting;
   public isShowChat = false;
+  public isShowParticipants = false;
 
   private unsubscribe$ = new Subject<void>();
   private currentUserStream: MediaStream;
   private currentStreamLoaded = new EventEmitter<void>();
 
-  //users = ['user 1', 'user 2', 'user 3', 'user 4', 'user 5', 'user 6', 'user 7', 'user 8'];
+  users = ['user 1', 'user 2', 'user 3', 'user 4', 'user 5', 'user 6', 'user 7', 'user 8'];
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private meetingService: MeetingService,
     private signalRService: SignalRService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private blobService: BlobService
   ) {
     this.webrtcSignalService = new WebrtcSignalService(signalRService);
   }
@@ -191,5 +194,13 @@ export class MeetingComponent implements OnInit, AfterContentInit {
     videoElement.srcObject = stream;
     videoElement.autoplay = true;
     return videoElement
+  }
+
+  startRecording(): void {
+    this.blobService.startRecording();
+  }
+
+  stopRecording(): void {
+    this.blobService.stopRecording();
   }
 }
