@@ -1,18 +1,17 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ChatComponent } from './components/chat/chat.component';
 import { PageHeaderComponent } from './components/page-header/page-header.component';
-
+import { FormsModule } from '@angular/forms';
 
 
 @NgModule({
-  declarations: [ChatComponent, PageHeaderComponent],
+  declarations: [PageHeaderComponent],
   imports: [
-    CommonModule
+    CommonModule,
+    FormsModule
   ],
   exports: [
     CommonModule,
-    ChatComponent,
     PageHeaderComponent
   ]
 })

@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import { Subject, from, Observable } from 'rxjs';
 import { tap} from 'rxjs/operators';
 import { MeetingConnectionData } from '@shared/models/meeting/meeting-connect';
+import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
 
 @Injectable({
   providedIn: 'root'
@@ -24,6 +25,12 @@ export class MeetingSignalrService {
 
   private conferenceStopRecording = new Subject<string>();
   public conferenceStopRecording$ = this.conferenceStopRecording.asObservable();
+
+  private sendMessage = new Subject<MeetingMessage>();
+  public sendMessage$ = this.sendMessage.asObservable();
+
+  private getMessages = new Subject<MeetingMessage[]>();
+  public getMessages$ = this.getMessages.asObservable();
 
   constructor(private hubService: SignalRService) {
     from(hubService.registerHub(environment.meetingApiUrl, 'meeting')).pipe(
@@ -46,6 +53,14 @@ export class MeetingSignalrService {
         this.signalHub.on('OnUserDisconnect', (connectionData: MeetingConnectionData) => {
           this.signalUserDisconected.next(connectionData);
         });
+
+        this.signalHub.on('OnSendMessage', (message: MeetingMessage) => {
+          this.sendMessage.next(message);
+        });
+
+        this.signalHub.on('OnGetMessages', (messages: MeetingMessage[]) => {
+          this.getMessages.next(messages);
+        });
       });
   }
 
@@ -63,5 +78,7 @@ export enum SignalMethods {
   OnUserConnect,
   OnUserDisconnect,
   OnConferenceStartRecording,
-  OnConferenceStopRecording
+  OnConferenceStopRecording,
+  OnSendMessage,
+  OnGetMessages
 }

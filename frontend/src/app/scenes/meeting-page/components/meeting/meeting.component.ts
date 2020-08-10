@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, AfterContentInit, EventEmitter } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, AfterContentInit, EventEmitter, OnDestroy } from '@angular/core';
 import Peer from 'peerjs';
 import { SignalRService } from 'app/core/services/signal-r.service';
 import { environment } from '@env';
@@ -11,13 +11,15 @@ import { MeetingSignalrService, SignalMethods } from 'app/core/services/meeting-
 import { ToastrService } from 'ngx-toastr';
 import { BlobService } from 'app/core/services/blob.service';
 import { MeetingConnectionData } from '@shared/models/meeting/meeting-connect';
+import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
+import { MeetingMessageCreate } from '@shared/models/meeting/message/meeting-message-create';
 
 @Component({
   selector: 'app-meeting',
   templateUrl: './meeting.component.html',
   styleUrls: ['./meeting.component.sass']
 })
-export class MeetingComponent implements OnInit, AfterContentInit {
+export class MeetingComponent implements OnInit, OnDestroy, AfterContentInit {
   @ViewChild('currentVideo') currentVideo: ElementRef;
 
   private meetingSignalrService: MeetingSignalrService;
@@ -28,6 +30,9 @@ export class MeetingComponent implements OnInit, AfterContentInit {
   public meeting: Meeting;
   public isShowChat = false;
   public isShowParticipants = false;
+
+  public messages: MeetingMessage[] = [];
+  public msgText = '';
 
   private unsubscribe$ = new Subject<void>();
   private currentUserStream: MediaStream;
@@ -63,16 +68,16 @@ export class MeetingComponent implements OnInit, AfterContentInit {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         connectData => {
-          if (connectData.peerId == this.peer.id) return;
+          if (connectData.peerId == this.peer.id) { return; }
 
-          console.log("connected with peer: " + connectData.peerId);
+          console.log('connected with peer: ' + connectData.peerId);
           this.connect(connectData.peerId);
-          this.toastr.success("Connected successfuly");
+          this.toastr.success('Connected successfuly');
         },
         err => {
           console.log(err.message);
-          this.toastr.error("Error occured when connected to meeting");
-          this.router.navigate(['/profile-page']);
+          this.toastr.error('Error occured when connected to meeting');
+          this.router.navigate(['/home']);
         }
       );
 
@@ -81,18 +86,40 @@ export class MeetingComponent implements OnInit, AfterContentInit {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (connectionData) => {
-          if (this.connectedPeers.has(connectionData.peerId))
+          if (this.connectedPeers.has(connectionData.peerId)) {
             this.connectedPeers.delete(connectionData.peerId);
+          }
         }
       );
 
+    this.meetingSignalrService.getMessages$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        messages => {
+          this.messages = messages;
+        },
+        err => {
+          this.toastr.error('Error occured when getting messages');
+        }
+      );
+
+    this.meetingSignalrService.sendMessage$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        message => {
+          this.messages.push(message);
+        },
+        err => {
+          this.toastr.error('Error occured when sending message');
+        }
+      );
     // when peer opened send my peer id everyone
     this.peer.on('open', (id) => this.onPeerOpen(id));
 
 
     // when get call answer to it
     this.peer.on('call', call => {
-      console.log("get call");
+      console.log('get call');
 
       // show caller
       call.on('stream', stream => {
@@ -121,9 +148,10 @@ export class MeetingComponent implements OnInit, AfterContentInit {
       .subscribe(
         (resp) => {
           this.meeting = resp.body;
-          console.log("meeting: ", this.meeting);
-
+          console.log('meeting: ', this.meeting);
+          this.connectionData.groupId = this.meeting.id;
           this.meetingSignalrService.invoke(SignalMethods.OnUserConnect, this.connectionData);
+          this.meetingSignalrService.invoke(SignalMethods.OnGetMessages, this.meeting.id);
         },
         (error) => {
           console.log(error.message);
@@ -138,7 +166,7 @@ export class MeetingComponent implements OnInit, AfterContentInit {
 
   // call to peer
   private connect(recieverPeerId: string) {
-    let call = this.peer.call(recieverPeerId, this.currentUserStream);
+    const call = this.peer.call(recieverPeerId, this.currentUserStream);
 
     // get answer and show other user
     call.on('stream', stream => {
@@ -166,7 +194,7 @@ export class MeetingComponent implements OnInit, AfterContentInit {
     .subscribe(
       (params: Params) => {
         const link: string = params[`link`];
-        this.connectionData = {peerId: id, userId: '', groupId: link}
+        this.connectionData = {peerId: id, userId: '', groupId: ''};
         this.getMeeting(link);
       }
     );
@@ -174,22 +202,22 @@ export class MeetingComponent implements OnInit, AfterContentInit {
 
   // show mediaStream
   private showMediaStream(stream: MediaStream) {
-    let participants = document.getElementById('participants');
+    const participants = document.getElementById('participants');
 
     if (!this.connectedStreams.includes(stream.id)) {
       this.connectedStreams.push(stream.id);
 
-      let videoElement = this.createVideoElement(stream);
+      const videoElement = this.createVideoElement(stream);
       participants.appendChild(videoElement);
     }
   }
 
   // create html element to show video
   private createVideoElement(stream: MediaStream): HTMLElement {
-    let videoElement = document.createElement('video');
+    const videoElement = document.createElement('video');
     videoElement.srcObject = stream;
     videoElement.autoplay = true;
-    return videoElement
+    return videoElement;
   }
 
   startRecording(): void {
@@ -202,5 +230,14 @@ export class MeetingComponent implements OnInit, AfterContentInit {
     this.blobService.stopRecording();
 
     this.meetingSignalrService.invoke(SignalMethods.OnConferenceStopRecording, 'Conference stop recording');
+  }
+
+  sendMessage(): void {
+
+    this.meetingSignalrService.invoke(SignalMethods.OnSendMessage, {
+      authorId: '123',
+      meetingId: this.meeting.id,
+      message: this.msgText
+    } as MeetingMessageCreate);
   }
 }

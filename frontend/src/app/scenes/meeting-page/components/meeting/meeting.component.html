@@ -1,11 +1,32 @@
-<div *ngIf="isShowChat" class="chat">
-    <!-- <div class="comments">
-    </div>
+<div *ngIf="isShowChat" class="ui card chat">
 
-    <div class="ui input">
-        <input [(ngModel)]="peerId" id="input" type="text" placeholder="Your message...">
-    </div> -->
-    <app-chat></app-chat>
+        <div  class="ui chat-inner feed">
+          <div *ngFor="let message of messages" class="event">
+            <div class="label">
+                <img src="{{message?.author?.image}}">
+            </div>
+            <div class="content">
+                <div class="summary">
+                <a class="user">
+                    {{message?.author?.firstName}} {{message?.author?.lastName}}
+                </a> 
+                <div class="date">
+                  {{message?.sentDate}}
+                </div>
+                </div>
+                {{message?.message}}
+            </div>
+          </div>
+        </div>
+        <div class="ui form vertically-aligned">
+          <div class="ui icon input">
+            <div class="ui icon input">
+              <textarea rows="1" placeholder="Message..." [(ngModel)]="msgText" ></textarea>
+              <i aria-hidden="true" class="paper plane link icon blue" (click)="sendMessage()"></i>
+            </div>
+            
+          </div>
+        </div>
 </div>
 
 <div class="content" >
