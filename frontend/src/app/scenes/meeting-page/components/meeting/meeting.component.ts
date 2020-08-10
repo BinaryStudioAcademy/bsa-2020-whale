@@ -8,6 +8,7 @@ import { Meeting } from '@shared/models/meeting/meeting';
 import { SignalRService } from 'app/core/services/signal-r.service';
 import { environment } from 'environments/environment';
 import { BlobService } from './../../../../core/services/blob.service';
+import { PollDto } from '@shared/models/poll/poll-dto';
 
 @Component({
   selector: 'app-meeting',
@@ -16,8 +17,11 @@ import { BlobService } from './../../../../core/services/blob.service';
 })
 export class MeetingComponent implements OnInit, OnDestroy {
   meeting: Meeting;
+  poll: PollDto;
   isShowChat = false;
   isShowParticipants = false;
+  isPollCreating = false;
+  isShowPoll = false;
 
   users = ['user 1ssssssssssssssss', 'user 2', 'user 3', 'user 4', 'user 5', 'user 6', 'user 7', 'user 8', 'user 1ssssssssssssssss', 'user 2', 'user 3', 'user 4', 'user 5', 'user 6', 'user 7', 'user 8', 'user 1ssssssssssssssss', 'user 2', 'user 3', 'user 4', 'user 5', 'user 6', 'user 7', 'user 8', 'user 1ssssssssssssssss', 'user 2', 'user 3', 'user 4', 'user 5', 'user 6', 'user 7', 'user 8'];
 
@@ -56,6 +60,17 @@ export class MeetingComponent implements OnInit, OnDestroy {
               hub.on('JoinedGroup', (contextId: string) => console.log(contextId + ' joined meeting'));
               hub.invoke('JoinGroup', this.meeting.id)
                  .catch(err => console.log(err.message));
+          });
+
+          this.signalRService.registerHub(environment.meetingApiUrl, 'pollHub')
+            .then((hub) => {
+              hub.on('JoinedGroup', (contextId: string) => console.log(contextId + ' joined meeting'));
+              hub.invoke('JoinGroup', this.meeting.id)
+                 .catch(err => console.log(err.message));
+              hub.on('Poll', (poll: PollDto) => {
+                this.poll = poll;
+                this.isShowPoll = true;
+              });
           });
         },
         (error) => {

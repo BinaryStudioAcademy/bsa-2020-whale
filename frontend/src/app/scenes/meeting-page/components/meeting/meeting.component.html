@@ -43,11 +43,20 @@
                     </div>    
                 </div>
                 <i style="margin-left: 10px; opacity: 0.8;" class="big share square icon"></i>
-                <i (click)="showChat()" style="margin-left: 10px; opacity: 0.8;" class="big wechat icon"></i>
+                <i (click)="isPollCreating = !isPollCreating" class="big clipboard list icon"></i>
+                <i (click)="showChat()" style="opacity: 0.8;" class="big wechat icon"></i>
             </div>
             <div>
                 <button class="ui inverted red button">Leave</button>
             </div>
         </div>
     </div>
+</div>
+
+<div class="poll-create-container" *ngIf="isPollCreating">
+    <app-poll-create [meetingId]="meeting.id" (pollCreated)="isPollCreating = false"></app-poll-create>
+</div>
+
+<div class="poll-create-container" *ngIf="isShowPoll">
+    <app-poll [poll]="poll"></app-poll>
 </div>

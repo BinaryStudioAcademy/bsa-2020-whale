@@ -56,7 +56,25 @@
     margin-top: 24px
     float: right
 
-.big.share.square.icon:hover, .big.microphone.icon:hover, .big.video.icon:hover, .big.wechat.icon:hover, .big.users.icon:hover
+i.big.icon
+    opacity: 0.8
+
+i.big.icon:hover
+    opacity: 1
+    cursor: pointer
+
+i.big.icon.clipboard
+    margin-left: 3px
+
+i.big.icon.wechat
+    margin-left: 2px
+
+.big.share.square.icon:hover, 
+.big.microphone.icon:hover, 
+.big.video.icon:hover, 
+.big.wechat.icon:hover, 
+.big.users.icon:hover,
+.big.clipboard.icon:hover
     opacity: 1 !important
     cursor: pointer
 
@@ -115,3 +133,9 @@ div div.participant:hover
 
 .display-flex
     display: flex
+
+.poll-create-container
+    position: absolute
+    bottom: 11%
+    left: calc(50% - 175px) 
+    width: 350px
