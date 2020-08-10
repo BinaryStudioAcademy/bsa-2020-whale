@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Whale.BLL.Services.Interfaces;
 using Whale.Shared.DTO.Contact;
@@ -10,23 +9,19 @@ namespace Whale.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class ContactsController : ControllerBase
     {
         private readonly IContactsService _contactsService;
-        private readonly string email;
 
         public ContactsController(IContactsService contactsService)
         {
             _contactsService = contactsService;
-            email = HttpContext?.User.Claims
-                .FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
+        [HttpGet("{ownerId}")]
+        public async Task<IActionResult> GetAll(Guid ownerId)
         {
-            var contacts = await _contactsService.GetAllContactsAsync(email);
+            var contacts = await _contactsService.GetAllContactsAsync(ownerId);
 
             return Ok(contacts);
         }
@@ -34,13 +29,20 @@ namespace Whale.API.Controllers
         [HttpGet("id/{contactId}")]
         public async Task<IActionResult> Get(Guid contactId)
         {
-            var contact = await _contactsService.GetContactAsync(contactId, email);
+            var contact = await _contactsService.GetContactAsync(contactId);
 
             if (contact == null) return NotFound();
 
             return Ok(contact);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] ContactCreateDTO contactDTO)
+        {
+            var createdContact = await _contactsService.CreateContactAsync(contactDTO);
+
+            return Created($"id/{createdContact.Id}", createdContact);
+        }
         [HttpPost("create")]
         public async Task<IActionResult> CreateFromEmail([FromQuery(Name = "email")] string contactnerEmail)
         {
@@ -70,7 +72,7 @@ namespace Whale.API.Controllers
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] ContactEditDTO contactDTO)
         {
-            await _contactsService.UpdateContactAsync(contactDTO, email);
+            await _contactsService.UpdateContactAsync(contactDTO);
 
             return Ok();
         }

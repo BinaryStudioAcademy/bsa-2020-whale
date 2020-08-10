@@ -42,49 +42,22 @@ namespace Whale.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("FirstMemberId")
+                    b.Property<Guid>("ContactnerId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("PinnedMessageId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<bool>("IsBlocked")
+                        .HasColumnType("bit");
 
-                    b.Property<Guid>("SecondMemberId")
+                    b.Property<Guid>("OwnerId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FirstMemberId");
+                    b.HasIndex("ContactnerId");
 
-                    b.HasIndex("SecondMemberId");
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("Contacts");
-                });
-
-            modelBuilder.Entity("Whale.DAL.Models.ContactSetting", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ContactId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsBloked")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsMuted")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ContactId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ContactSettings");
                 });
 
             modelBuilder.Entity("Whale.DAL.Models.DirectMessage", b =>
@@ -105,8 +78,7 @@ namespace Whale.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ContactId")
-                        .IsUnique();
+                    b.HasIndex("ContactId");
 
                     b.ToTable("DirectMessages");
                 });
@@ -365,30 +337,15 @@ namespace Whale.DAL.Migrations
 
             modelBuilder.Entity("Whale.DAL.Models.Contact", b =>
                 {
-                    b.HasOne("Whale.DAL.Models.User", "FirstMember")
+                    b.HasOne("Whale.DAL.Models.User", "Contactner")
                         .WithMany()
-                        .HasForeignKey("FirstMemberId")
+                        .HasForeignKey("ContactnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Whale.DAL.Models.User", "SecondMember")
+                    b.HasOne("Whale.DAL.Models.User", "Owner")
                         .WithMany()
-                        .HasForeignKey("SecondMemberId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Whale.DAL.Models.ContactSetting", b =>
-                {
-                    b.HasOne("Whale.DAL.Models.Contact", "Contact")
-                        .WithMany()
-                        .HasForeignKey("ContactId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Whale.DAL.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -396,8 +353,8 @@ namespace Whale.DAL.Migrations
             modelBuilder.Entity("Whale.DAL.Models.DirectMessage", b =>
                 {
                     b.HasOne("Whale.DAL.Models.Contact", "Contact")
-                        .WithOne("PinnedMessage")
-                        .HasForeignKey("Whale.DAL.Models.DirectMessage", "ContactId")
+                        .WithMany()
+                        .HasForeignKey("ContactId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
