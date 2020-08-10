@@ -44,7 +44,10 @@ namespace Whale.MeetingAPI
         {
             services.AddDbContext<WhaleDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("WhaleDatabase")));
             services.AddTransient<IMeetingService, MeetingService>();
+            services.AddTransient<PollService>();
+
             services.AddTransient<ChatHub>();
+            services.AddTransient<PollHub>();
 
             services.AddControllers();
             services.AddHealthChecks()
@@ -64,6 +67,7 @@ namespace Whale.MeetingAPI
             services.AddAutoMapper(cfg =>
             {
                 cfg.AddProfile<MeetingProfile>();
+                cfg.AddProfile<PollProfile>();
             },
             Assembly.GetExecutingAssembly());
 
@@ -98,6 +102,7 @@ namespace Whale.MeetingAPI
 
                 endpoints.MapHub<WebRtcSignalHub>("/webrtcSignalHub");
                 endpoints.MapHub<ChatHub>("/chatHub");
+                endpoints.MapHub<PollHub>("/pollHub");
             });
         }
     }
