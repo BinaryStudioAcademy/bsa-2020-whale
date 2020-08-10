@@ -17,22 +17,13 @@ namespace Whale.API
 			var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 			var configuration = new ConfigurationBuilder()
 				.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-				.AddJsonFile(
-					$"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json",
-					optional: true)
 				.Build();
 
 			Log.Logger = new LoggerConfiguration()
-				.Enrich.FromLogContext()
 				.Enrich.WithExceptionDetails()
-				.Enrich.WithMachineName()
-				.WriteTo.Debug()
-				.WriteTo.Console()
 				.WriteTo.Elasticsearch(ConfigureElasticSink(configuration, environment))
-				.Enrich.WithProperty("Environment", environment)
-				.ReadFrom.Configuration(configuration)
+				.MinimumLevel.Error()
 				.CreateLogger();
-			Log.Logger.Information("Serilog configuration for Whale.API finished");
 		}
 		private static ElasticsearchSinkOptions ConfigureElasticSink(IConfigurationRoot configuration, string environment)
 		{

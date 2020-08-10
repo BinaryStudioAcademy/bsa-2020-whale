@@ -46,7 +46,6 @@ namespace Whale.MeetingAPI
             services.AddTransient<IMeetingService, MeetingService>();
             services.AddTransient<PollService>();
 
-            services.AddTransient<ChatHub>();
             services.AddTransient<PollHub>();
 
             services.AddControllers();
@@ -100,9 +99,8 @@ namespace Whale.MeetingAPI
                     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
                 });
 
-                endpoints.MapHub<WebRtcSignalHub>("/webrtcSignalHub");
-                endpoints.MapHub<ChatHub>("/chatHub");
                 endpoints.MapHub<PollHub>("/pollHub");
+                endpoints.MapHub<MeetingHub>("/meeting");
             });
         }
     }

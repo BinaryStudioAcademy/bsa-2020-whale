@@ -1,14 +1,18 @@
 <div *ngIf="isShowChat" class="chat">
-    <div class="comments">
+    <!-- <div class="comments">
     </div>
 
     <div class="ui input">
-        <input type="text" placeholder="Your message...">
-    </div>
+        <input [(ngModel)]="peerId" id="input" type="text" placeholder="Your message...">
+    </div> -->
+    <app-chat></app-chat>
 </div>
 
 <div class="content" >
     <div *ngIf="isShowParticipants" class="ui participants-container">
+        <div class="invite-icon-container">
+            <i class="user plus icon"></i>
+        </div>
         <div class="ui divided list">
             <div *ngFor="let user of users" class="ui item participant">    
                 <img src="https://icons.iconarchive.com/icons/paomedia/small-n-flat/512/user-male-icon.png">
@@ -16,7 +20,7 @@
             </div>
         </div>
     </div>
-    <div class="users">
+    <!-- <div class="users">
         <div class="users__user" *ngFor="let user of users;">
             <div class="ui card">
                 <div class="image">
@@ -27,7 +31,10 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
+
+    Me: <video #currentVideo autoplay="autoplay" [muted]="'muted'"></video>
+    Users: <div id="participants"></div>
 
     <div class="options">
         <div class="ui container options__buttons">
@@ -47,7 +54,7 @@
                 <i (click)="showChat()" style="opacity: 0.8;" class="big wechat icon"></i>
             </div>
             <div>
-                <button class="ui inverted red button">Leave</button>
+                <button style="margin-left: 200px;" class="ui inverted red button" (click)="leave()">Leave</button>
             </div>
         </div>
     </div>

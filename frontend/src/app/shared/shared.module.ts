@@ -2,14 +2,25 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChatComponent } from './components/chat/chat.component';
 import { PageHeaderComponent } from './components/page-header/page-header.component';
+
 import { PollCreateComponent } from './components/poll/poll-create/poll-create.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { PollComponent } from './components/poll/poll/poll.component';
 
+import { SpinerComponent } from './components/spiner/spiner.component';
+
+
 
 
 @NgModule({
-  declarations: [ChatComponent, PageHeaderComponent, PollCreateComponent, PollComponent],
+
+  declarations: [
+    ChatComponent, 
+    PageHeaderComponent, 
+    SpinerComponent,
+    PollCreateComponent,
+    PollComponent
+  ],
   imports: [
     CommonModule,
     ReactiveFormsModule
@@ -19,7 +30,8 @@ import { PollComponent } from './components/poll/poll/poll.component';
     ChatComponent,
     PageHeaderComponent,
     PollCreateComponent,
-    PollComponent
+    PollComponent,
+    SpinerComponent
   ]
 })
 export class SharedModule { }

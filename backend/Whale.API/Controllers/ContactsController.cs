@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Whale.BLL.Services.Interfaces;
@@ -41,6 +42,21 @@ namespace Whale.API.Controllers
             var createdContact = await _contactsService.CreateContactAsync(contactDTO);
 
             return Created($"id/{createdContact.Id}", createdContact);
+        }
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateFromEmail([FromQuery(Name = "email")] string contactnerEmail)
+        {
+            try
+            {
+                var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+                var createdContact = await _contactsService.CreateContactFromEmailAsync(ownerEmail, contactnerEmail);
+
+                return Created($"id/{createdContact.Id}", createdContact);
+            }
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
         }
 
         [HttpDelete("{id}")]

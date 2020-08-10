@@ -4,6 +4,8 @@ import { Router } from '@angular/router';
 import { MeetingCreate } from '@shared/models/meeting/meeting-create';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { SimpleModalService } from 'ngx-simple-modal';
+import { AddContactModalComponent } from '../add-contact-modal/add-contact-modal.component';
 
 
 @Component({
@@ -85,7 +87,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
   constructor(
     private meetingService: MeetingService,
-    private router: Router
+    private router: Router,
+    private simpleModalService: SimpleModalService
   ) { }
 
   ngOnDestroy(): void {
@@ -101,6 +104,10 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
   addNewContact(): void {
     console.log('contact clicked!');
+    this.simpleModalService
+        .addModal(AddContactModalComponent).subscribe ( contact =>
+          console.log(contact)
+          );
   }
   onUserClick(): void {
   this.chatVisibility = !this.chatVisibility;

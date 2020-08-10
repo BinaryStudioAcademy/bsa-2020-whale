@@ -2,13 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class BlobService {
-
-  constructor(
-    private http: HttpClient
-  ) { }
+  constructor(private http: HttpClient) {}
 
   recorder: MediaRecorder;
   stream: MediaStream;
@@ -17,7 +14,7 @@ export class BlobService {
     const mediaDevices = navigator.mediaDevices as any;
     this.stream = await mediaDevices.getDisplayMedia({
       video: { mediaSource: 'screen' },
-      audio: true
+      audio: true,
     });
 
     this.recorder = new MediaRecorder(this.stream);
@@ -42,8 +39,10 @@ export class BlobService {
 
     formData.append('meeting-record', blob, 'record');
 
-    this.http.post('http://localhost:51569/api/storage/save', formData, { responseType: 'text' }).subscribe(
-      (resp) => console.log(`video record: ${resp}`)
-    );
+    this.http
+      .post('http://localhost:51569/api/storage/save', formData, {
+        responseType: 'text',
+      })
+      .subscribe((resp) => console.log(`video record: ${resp}`));
   }
 }

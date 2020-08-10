@@ -20,7 +20,7 @@ using Whale.BLL.Providers;
 using Microsoft.IdentityModel.Tokens;
 using Whale.Shared.Services;
 using Whale.BLL.Services.Interfaces;
-using Whale.API.Filters;
+using Whale.API.Extensions;
 
 namespace Whale.API
 {
@@ -38,8 +38,6 @@ namespace Whale.API
         {
             services.AddDbContext<WhaleDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("WhaleDatabase")));
             services.AddControllers();
-            services.AddScoped<WhaleExceptionFilterAttribute>();
-            services.AddMvcCore(options => options.Filters.Add(typeof(WhaleExceptionFilterAttribute)));
             var mappingConfig = new MapperConfiguration(mc =>
             {
                 mc.AddProfile<ContactProfile>();
@@ -88,6 +86,8 @@ namespace Whale.API
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.ConfigureCustomExceptionMiddleware();
 
             app.UseCors("CorsPolicy");
 
