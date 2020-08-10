@@ -10,7 +10,9 @@ using Whale.BLL.Services.Abstract;
 using Whale.DAL;
 using Whale.DAL.Models;
 using Whale.Shared.DTO.Meeting;
+using Whale.Shared.DTO.Meeting.MeetingMessage;
 using Whale.Shared.Services;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Whale.BLL.Services
 {
@@ -53,6 +55,17 @@ namespace Whale.BLL.Services
             _redisService.Set(meeting.Id.ToString(), pwd);
 
             return new MeetingLinkDTO { Id = meeting.Id, Password = pwd };
+        }
+
+        public MeetingMessageDTO SendMessage(MeetingMessageCreateDTO msgDTO)
+        {
+            var message = _mapper.Map<MeetingMessageDTO>(msgDTO);
+            message.SentDate = DateTime.Now;
+            message.Id = Guid.NewGuid();
+            _redisService.Connect();
+            _redisService.Set(message.Id.ToString(), message);
+
+            return message;
         }
 
     }

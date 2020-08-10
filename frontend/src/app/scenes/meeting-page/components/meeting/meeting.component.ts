@@ -7,9 +7,10 @@ import { ActivatedRoute, Router, Params } from '@angular/router';
 import { MeetingService } from 'app/core/services/meeting.service';
 import { takeUntil } from 'rxjs/operators';
 import { Meeting } from '@shared/models/meeting/meeting';
-import { WebrtcSignalService, SignalMethods } from 'app/core/services/webrtc-signal.service';
+import { MeetingSignalrService, SignalMethods } from 'app/core/services/meeting-signalr.service';
 import { ToastrService } from 'ngx-toastr';
 import { BlobService } from 'app/core/services/blob.service';
+import { MeetingConnectionData } from '@shared/models/meeting/meeting-connect';
 
 @Component({
   selector: 'app-meeting',
@@ -19,7 +20,7 @@ import { BlobService } from 'app/core/services/blob.service';
 export class MeetingComponent implements OnInit, AfterContentInit {
   @ViewChild('currentVideo') currentVideo: ElementRef;
 
-  private webrtcSignalService: WebrtcSignalService;
+  private meetingSignalrService: MeetingSignalrService;
 
   public peer: Peer;
   public connectedStreams: string[] = [];
@@ -30,6 +31,7 @@ export class MeetingComponent implements OnInit, AfterContentInit {
 
   private unsubscribe$ = new Subject<void>();
   private currentUserStream: MediaStream;
+  private connectionData: MeetingConnectionData;
   private currentStreamLoaded = new EventEmitter<void>();
 
   users = ['user 1', 'user 2', 'user 3', 'user 4', 'user 5', 'user 6', 'user 7', 'user 8'];
@@ -42,7 +44,7 @@ export class MeetingComponent implements OnInit, AfterContentInit {
     private toastr: ToastrService,
     private blobService: BlobService
   ) {
-    this.webrtcSignalService = new WebrtcSignalService(signalRService);
+    this.meetingSignalrService = new MeetingSignalrService(signalRService);
   }
 
   ngAfterContentInit() {
@@ -50,29 +52,21 @@ export class MeetingComponent implements OnInit, AfterContentInit {
   }
 
   async ngOnInit() {
-    this.route.params
-      .subscribe(
-        (params: Params) => {
-          const link: string = params[`link`];
-          this.getMeeting(link);
-        }
-      );
-
-    this.currentUserStream /*= this.currentVideo.nativeElement.srcObject*/ = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    this.currentUserStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     this.currentStreamLoaded.emit();
 
     // create new peer
     this.peer = new Peer(environment.peerOptions);
 
     // when someone connected to meeting
-    this.webrtcSignalService.signalPeerConected$
+    this.meetingSignalrService.signalUserConected$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
-        peerId => {
-          if (peerId == this.peer.id) return;
+        connectData => {
+          if (connectData.peerId == this.peer.id) return;
 
-          console.log("connectId: " + peerId);
-          this.connect(peerId);
+          console.log("connected with peer: " + connectData.peerId);
+          this.connect(connectData.peerId);
           this.toastr.success("Connected successfuly");
         },
         err => {
@@ -83,12 +77,12 @@ export class MeetingComponent implements OnInit, AfterContentInit {
       );
 
     // when someone disconnected from meeting
-    this.webrtcSignalService.signalPeerDisconected$
+    this.meetingSignalrService.signalUserDisconected$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
-        (peerId) => {
-          if (this.connectedPeers.has(peerId))
-            this.connectedPeers.delete(peerId);
+        (connectionData) => {
+          if (this.connectedPeers.has(connectionData.peerId))
+            this.connectedPeers.delete(connectionData.peerId);
         }
       );
 
@@ -118,7 +112,6 @@ export class MeetingComponent implements OnInit, AfterContentInit {
     this.destroyPeer();
 
     this.currentUserStream.getTracks().forEach(track => track.stop());
-    console.log("destroyed", this.currentUserStream);
   }
 
   getMeeting(link: string): void {
@@ -128,16 +121,13 @@ export class MeetingComponent implements OnInit, AfterContentInit {
       .subscribe(
         (resp) => {
           this.meeting = resp.body;
-          this.signalRService.registerHub(environment.meetingApiUrl, 'chatHub')
-            .then((hub) => {
-              hub.on('JoinedGroup', (contextId: string) => console.log(contextId + ' joined meeting'));
-              hub.invoke('JoinGroup', this.meeting.id)
-                .catch(err => console.log(err.message));
-            });
+          console.log("meeting: ", this.meeting);
+
+          this.meetingSignalrService.invoke(SignalMethods.OnUserConnect, this.connectionData);
         },
         (error) => {
           console.log(error.message);
-          this.router.navigate(['/profile-page']);
+          this.router.navigate(['/home']);
         }
       );
   }
@@ -163,7 +153,7 @@ export class MeetingComponent implements OnInit, AfterContentInit {
   }
 
   private destroyPeer() {
-    this.webrtcSignalService.invoke(SignalMethods.onPeerDisconnect, this.peer.id);
+    this.meetingSignalrService.invoke(SignalMethods.OnUserDisconnect, this.connectionData);
 
     this.peer.disconnect();
     this.peer.destroy();
@@ -172,8 +162,14 @@ export class MeetingComponent implements OnInit, AfterContentInit {
   // send message to all subscribers that added new user
   private onPeerOpen(id: string) {
     console.log('My peer ID is: ' + id);
-    this.webrtcSignalService.invoke(SignalMethods.onPeerConnect, id);
-    this.webrtcSignalService
+    this.route.params
+    .subscribe(
+      (params: Params) => {
+        const link: string = params[`link`];
+        this.connectionData = {peerId: id, userId: '', groupId: link}
+        this.getMeeting(link);
+      }
+    );
   }
 
   // show mediaStream
@@ -199,12 +195,12 @@ export class MeetingComponent implements OnInit, AfterContentInit {
   startRecording(): void {
     this.blobService.startRecording();
 
-    this.webrtcSignalService.invoke(SignalMethods.onConferenceStartRecording, 'Conference start recording');
+    this.meetingSignalrService.invoke(SignalMethods.OnConferenceStartRecording, 'Conference start recording');
   }
 
   stopRecording(): void {
     this.blobService.stopRecording();
 
-    this.webrtcSignalService.invoke(SignalMethods.onConferenceStopRecording, 'Conference stop recording');
+    this.meetingSignalrService.invoke(SignalMethods.OnConferenceStopRecording, 'Conference stop recording');
   }
 }
