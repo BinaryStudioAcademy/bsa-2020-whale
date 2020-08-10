@@ -136,6 +136,9 @@ export class MeetingComponent implements OnInit, AfterContentInit {
         (resp) => {
           this.meeting = resp.body;
           console.log("meeting: ", this.meeting);
+
+          this.connectionData = {peerId: id, userId: '', groupId: link}
+          this.meetingSignalrService.invoke(SignalMethods.OnUserConnect, this.connectionData); // ! fix here
           // this.signalRService.registerHub(environment.meetingApiUrl, 'chatHub')
           //   .then((hub) => {
           //     //hub.on('JoinedGroup', (contextId: string) => console.log(contextId + ' joined meeting'));
@@ -186,8 +189,6 @@ export class MeetingComponent implements OnInit, AfterContentInit {
       (params: Params) => {
         const link: string = params[`link`];
         this.getMeeting(link);
-        this.connectionData = {peerId: id, userId: '', groupId: link}
-        this.meetingSignalrService.invoke(SignalMethods.OnUserConnect, this.connectionData); // ! fix here
       }
     );
   }
