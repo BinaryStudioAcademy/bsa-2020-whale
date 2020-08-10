@@ -2,6 +2,7 @@ import { Component, OnInit} from '@angular/core';
 import { AuthService } from 'app/core/auth/auth.service';
 import { SimpleModalService } from 'ngx-simple-modal';
 import { LoginModalComponent } from '../login-modal/login-modal.component';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -10,7 +11,10 @@ import { LoginModalComponent } from '../login-modal/login-modal.component';
   styleUrls: ['./landing-page.component.sass']
 })
 export class LandingPageComponent implements OnInit {
-  constructor(public auth: AuthService, private simpleModalService: SimpleModalService) {
+  constructor(
+    public auth: AuthService, 
+    private simpleModalService: SimpleModalService,
+    private router: Router) {
   }
 
   ngOnInit(): void {
@@ -23,5 +27,9 @@ export class LandingPageComponent implements OnInit {
 
   public logOut(): void {
     this.auth.logout();
+  }
+
+  public redirectToHome(): void {
+    this.router.navigate(['/home']);
   }
 }
