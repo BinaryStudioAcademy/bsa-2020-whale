@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { AuthService } from 'app/core/auth/auth.service';
 import { SimpleModalComponent } from 'ngx-simple-modal';
+import { Route } from '@angular/compiler/src/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login-modal',
@@ -8,7 +10,8 @@ import { SimpleModalComponent } from 'ngx-simple-modal';
   styleUrls: ['./login-modal.component.sass']
 })
 export class LoginModalComponent extends SimpleModalComponent<null, boolean> {
-  constructor(public auth: AuthService) {
+  constructor(public auth: AuthService,
+    private router: Router) {
     super();
   }
 
@@ -16,6 +19,7 @@ export class LoginModalComponent extends SimpleModalComponent<null, boolean> {
   {
     this.auth.signInWithFacebook().then( status => {
       this.result = status;
+      this.router.navigate(["/home"]);
       this.close();
       });
   }
@@ -23,6 +27,8 @@ export class LoginModalComponent extends SimpleModalComponent<null, boolean> {
   public googleLogin(): void {
     this.auth.signInWithGoogle().then( status => {
       this.result = status;
+      console.log(status);
+      this.router.navigate(["/home"]);
       this.close();
       });
   }
