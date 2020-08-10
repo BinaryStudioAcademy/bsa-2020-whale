@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from 'app/core/auth/auth.service';
 
 @Component({
   selector: 'app-page-header',
@@ -8,10 +10,17 @@ import { Component, OnInit } from '@angular/core';
 export class PageHeaderComponent implements OnInit {
 
   settingsMenuVisible = false;
-  constructor() { }
+  constructor(private router: Router, public auth: AuthService,
+    ) { }
 
 
   ngOnInit(): void {
+  }
+  goToPage(pageName: string): void{
+    this.router.navigate([`${pageName}`]);
+  }
+  logOut(): void{
+    this.auth.logout();
   }
 
 }

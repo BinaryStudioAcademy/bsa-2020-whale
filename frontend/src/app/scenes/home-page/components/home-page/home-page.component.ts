@@ -135,6 +135,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
         (error) => (console.log(error.message))
       );
   }
+  goToPage(pageName: string): void{
+    this.router.navigate([`${pageName}`]);
+  }
 
 
 }

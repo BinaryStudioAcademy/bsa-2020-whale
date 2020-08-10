@@ -1,6 +1,6 @@
 <div class="ui borderless fixed top tiny labeled icon main menu">
     <div class="logo-item item">
-        <img class="mini ui circular image" src="https://img.icons8.com/flat_round/64/000000/whale--v1.png"/> 
+        <img (click)="goToPage('home')" class="mini ui circular image" src="https://img.icons8.com/flat_round/64/000000/whale--v1.png"/> 
     </div>
     <!-- <a class="home-item item">
         <i class="home icon"></i>
@@ -26,8 +26,8 @@
         <img  class="ui tiny image user-pic" src="https://img.icons8.com/color/240/000000/user-male.png"/>
     </a>
     <div *ngIf="settingsMenuVisible" class = "dropdown-menu">
-        <div class="dropdown-menu-user">David Lones</div>
-        <div class="dropdown-menu-item">Settings</div>
-        <div class="dropdown-menu-item">Log Out</div>
+        <div class="dropdown-menu-user" (click)="goToPage('profile-page')">David Lones</div>
+        <div class="dropdown-menu-item" (click)="goToPage('setting-page')">Settings</div>
+        <div class="dropdown-menu-item" (click)="logOut()">Log Out</div>
     </div>
 </div>

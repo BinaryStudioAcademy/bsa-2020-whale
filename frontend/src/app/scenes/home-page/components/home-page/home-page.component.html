@@ -7,22 +7,22 @@
                     <div class="item">
                         <img class="ui user-pic image" src="{{mainUser.image}}" />
                         <div class="content">
-                            <a class="header">{{mainUser.firstName}} {{mainUser.lastName}}</a>
+                            <a class="header" (click)="goToPage('profile-page')">{{mainUser.firstName}} {{mainUser.lastName}}</a>
                         </div>
                     </div>
                 </div>
             </a>
             <a class="item">
-                <a class="item">
-                    <i class="clock outline icon"></i>
+                <a class="item"  (click)="goToPage('history')">
+                    <i class="clock outline icon" ></i>
                     Meetings history
                 </a>
 
-                <a class="item" (click)="createMeeting()">
-                    <i class="calendar alternate outline icon"></i>
+                <a class="item" (click)="goToPage('schedule-meeting')" >
+                    <i class="calendar alternate outline icon" ></i>
                     Schedule meeting
                 </a>
-                <a class="item">
+                <a class="item" (click)="createMeeting()">
                     <i class="share icon"></i>
                     Enter the meeting
                 </a>
@@ -97,17 +97,19 @@
         <div *ngIf="!chatVisibility" class="actions">
             <div class="vertically-aligned chat ui segment">
                 <div class="text-aligned">
-                    <img class=" ui centered small image" src="https://img.icons8.com/bubbles/100/000000/planner.png" />
-                    <span class="text-aligned">Schedule meeting</span>
+                    <img class=" ui centered small image" src="https://img.icons8.com/bubbles/100/000000/planner.png" 
+                    (click)="goToPage('schedule-meeting')"/>
+                    <span class="text-aligned" >Schedule meeting</span>
                 </div>
                 <div class="text-aligned">
                     <img class=" ui centered small image"
-                        src="https://img.icons8.com/bubbles/100/000000/todo-list.png" />
+                        src="https://img.icons8.com/bubbles/100/000000/todo-list.png"
+                        (click)="goToPage('history')" />
                     <span class="text-aligned">Meetings history</span>
                 </div>
-                <div class="text-aligned">
-                    <img class=" ui centered small image" src="https://img.icons8.com/bubbles/100/000000/forward.png" />
-                    <span class="text-aligned header">Enter the meeting </span>
+                <div class="text-aligned" (click)="createMeeting()">
+                    <img class=" ui centered small image" src="https://img.icons8.com/bubbles/100/000000/forward.png"/>
+                    <span class="text-aligned header" >Enter the meeting </span>
                 </div>
             </div>
 
