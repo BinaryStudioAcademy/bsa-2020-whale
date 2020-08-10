@@ -9,12 +9,12 @@ import { TokenInterceptorService } from './core/auth/token-interceptor.service';
 import { LandingPageModule } from './scenes/landing-page/landing-page.module';
 import { MeetingPageModule } from './scenes/meeting-page/meeting-page.module';
 import { ProfilePageModule } from './scenes/profile-page/profile-page.module';
-import { ScheduleMeetingPageModule } from './scenes/schedule-meeting-page/schedule-meeting-page.module'
+import { ScheduleMeetingPageModule } from './scenes/schedule-meeting-page/schedule-meeting-page.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ngx-toastr';
 import { HomePageModule } from './scenes/home-page/home-page.module';
 import { SimpleModalModule } from 'ngx-simple-modal';
-
+import {PagesModule} from './scenes/pages.module';
 
 @NgModule({
   declarations: [
@@ -30,6 +30,7 @@ import { SimpleModalModule } from 'ngx-simple-modal';
     ScheduleMeetingPageModule,
     HttpClientModule,
     BrowserAnimationsModule,
+    PagesModule,
     ToastrModule.forRoot({
       timeOut: 5000,
       positionClass: 'toast-bottom-right',
