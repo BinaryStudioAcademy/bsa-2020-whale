@@ -20,7 +20,6 @@ namespace Whale.API
 				.Build();
 
 			Log.Logger = new LoggerConfiguration()
-				.Enrich.WithExceptionDetails()
 				.WriteTo.Elasticsearch(ConfigureElasticSink(configuration, environment))
 				.MinimumLevel.Error()
 				.CreateLogger();
