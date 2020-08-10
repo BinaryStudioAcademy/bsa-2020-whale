@@ -39,9 +39,8 @@ export class BlobService {
 
     formData.append('meeting-record', blob, 'record');
 
-    // 51569
     this.http
-      .post('http://localhost:80/api/storage/save', formData, {
+      .post('http://localhost:51569/api/storage/save', formData, {
         responseType: 'text',
       })
       .subscribe((resp) => console.log(`video record: ${resp}`));
