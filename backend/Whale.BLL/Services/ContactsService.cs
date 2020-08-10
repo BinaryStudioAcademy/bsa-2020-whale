@@ -83,6 +83,8 @@ namespace Whale.BLL.Services
 
         public async Task<ContactDTO> CreateContactFromEmailAsync(string ownerEmail, string contactnerEmail)
         {
+            if(ownerEmail == contactnerEmail)
+                throw new Exception("You cannot add yourself to contacts");
             var owner = await _context.Users.FirstOrDefaultAsync(u => u.Email == ownerEmail);
             var contactner = await _context.Users.FirstOrDefaultAsync(u => u.Email == contactnerEmail);
             if (owner is null)
