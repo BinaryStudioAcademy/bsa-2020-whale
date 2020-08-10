@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Whale.DAL.Models;
 using Whale.Shared.DTO.Contact;
+using Whale.Shared.DTO.Contact.Setting;
 
 namespace Whale.BLL.MappingProfiles
 {
@@ -9,8 +10,8 @@ namespace Whale.BLL.MappingProfiles
         public ContactProfile()
         {
             CreateMap<Contact, ContactDTO>().ReverseMap();
-            CreateMap<Contact, ContactCreateDTO>().ReverseMap();
             CreateMap<Contact, ContactEditDTO>().ReverseMap();
+            CreateMap<ContactSetting, ContactSettingDTO>().ReverseMap();
         }
     }
 }
