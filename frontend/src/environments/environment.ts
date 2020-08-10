@@ -1,6 +1,7 @@
 // This file can be replaced during build by using the `fileReplacements` array.
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
+import freeice from "freeice";
 
 export const environment = {
   production: false,
@@ -16,28 +17,47 @@ export const environment = {
     appId: '1:893944865679:web:9b055d730e3a27b66961fa'
  },
  peerOptions: {
+  // ! default settings
   key: "peerjs",
   host: "0.peerjs.com",
   port: 443,
   path: "/",
   secure: true,
+  debug: 1,
+
+  // ! local server default settings
+  // key: "peerjs",
+  // host: "localhost",
+  // port: 9000,
+  // path: "/myapp",
+  // debug: 1,
+
+  // ! free ice services
   config: {
-    iceServers: [
-      { urls: 'stun:stun1.l.google.com:19302' },
-      { urls: 'stun:stun2.l.google.com:19302' },
-      {
-        urls: 'turn:192.158.29.39:3478?transport=udp',
-        credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
-        username: '28224511:1379330808'
-      },
-      {
-        urls: 'turn:192.158.29.39:3478?transport=tcp',
-        credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
-        username: '28224511:1379330808'
-      }
-    ]
-  },
-  debug: 1
+    iceServers: freeice()
+  }
+
+  // ! addtional
+  // ssl:{
+  //   key: "",
+  //   certificate: ""
+  // },
+  // config: {
+  //   iceServers: [
+  //     { urls: 'stun:stun1.l.google.com:19302' },
+  //     { urls: 'stun:stun2.l.google.com:19302' },
+  //     {
+  //       urls: 'turn:192.158.29.39:3478?transport=udp',
+  //       credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+  //       username: '28224511:1379330808'
+  //     },
+  //     {
+  //       urls: 'turn:192.158.29.39:3478?transport=tcp',
+  //       credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+  //       username: '28224511:1379330808'
+  //     }
+  //   ]
+  // }
  }
 };
 
