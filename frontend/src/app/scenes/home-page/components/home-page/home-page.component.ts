@@ -1,102 +1,61 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { MeetingService } from 'app/core/services/meeting.service';
-import { Router } from '@angular/router';
-import { MeetingCreate } from '@shared/models/meeting/meeting-create';
-import { takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
-import { SimpleModalService } from 'ngx-simple-modal';
-import { AddContactModalComponent } from '../add-contact-modal/add-contact-modal.component';
-
+import { Component, OnInit, EventEmitter } from '@angular/core';
+import { DirectMessage } from '@shared/models/message/message';
+import { User } from '@shared/models/user/user';
+import { Contact } from '@shared/models/contact/contact';
+import { SignalRService } from 'app/core/services/signal-r.service';
+import { HttpService } from 'app/core/services/http.service';
+import { HubConnection } from '@aspnet/signalr';
+import { environment } from '@env';
 
 @Component({
   selector: 'app-home-page',
   templateUrl: './home-page.component.html',
-  styleUrls: ['./home-page.component.sass']
+  styleUrls: ['./home-page.component.sass'],
 })
-
-export class HomePageComponent implements OnInit, OnDestroy {
-
-  mainUser: UserModel = {
-    id : 1,
+export class HomePageComponent implements OnInit {
+  mainUser: User = {
+    id: '07e0ab30-ddfb-4510-b831-df749e927bff',
     firstName: 'Daniel',
-    lastName: 'Louise',
-    image: 'https://img.icons8.com/color/240/000000/user-male.png'
+    secondName: 'Louise',
+    avatarUrl: 'https://img.icons8.com/color/240/000000/user-female.png',
+    email: 'newEmal@gmail.com',
+    phone: 'meow',
+    registrationDate: new Date(),
   };
-   USERS: UserModel[] = [
-      {
-        id : 1,
-        firstName: 'Lol',
-        lastName: 'Kek',
-        image: 'https://img.icons8.com/color/240/000000/user-male.png'
-      },
-      {
-        id : 2,
-        firstName: 'Scarlet',
-        lastName: 'Hara',
-        image: 'https://img.icons8.com/color/48/000000/kitty.png'
-      },
-      {
-        id : 3,
-        firstName: 'Mike',
-        lastName: 'Posne',
-        image: 'https://img.icons8.com/officel/80/000000/chatbot.png'
-      },
-      {
-        id : 1,
-        firstName: 'Lol',
-        lastName: 'Kek',
-        image: 'https://img.icons8.com/color/240/000000/user-male.png'
-      },
-      {
-        id : 2,
-        firstName: 'Scarlet',
-        lastName: 'Hara',
-        image: 'https://img.icons8.com/color/48/000000/kitty.png'
-      },
-      {
-        id : 3,
-        firstName: 'Mike',
-        lastName: 'Posne',
-        image: 'https://img.icons8.com/officel/80/000000/chatbot.png'
-      },
-      {
-        id : 1,
-        firstName: 'Lol',
-        lastName: 'Kek',
-        image: 'https://img.icons8.com/color/240/000000/user-male.png'
-      },
-      {
-        id : 2,
-        firstName: 'Scarlet',
-        lastName: 'Hara',
-        image: 'https://img.icons8.com/color/48/000000/kitty.png'
-      },
-      {
-        id : 3,
-        firstName: 'Mike',
-        lastName: 'Posne',
-        image: 'https://img.icons8.com/officel/80/000000/chatbot.png'
-      }
-    ];
+  contacts: Contact[];
 
   contactsVisibility = true;
   groupsVisibility = false;
   chatVisibility = false;
-
-  private unsubscribe$ = new Subject<void>();
-
+  private hubConnection: HubConnection;
+  directMessageRecieved = new EventEmitter<DirectMessage>();
+  messages: DirectMessage[] = [];
+  newMessage: DirectMessage = {
+    contactId: '',
+    message: '',
+    authorId: this.mainUser.id,
+    createdAt: new Date(),
+    attachment: false,
+  };
+  contactSelected: Contact;
   constructor(
-    private meetingService: MeetingService,
-    private router: Router,
-    private simpleModalService: SimpleModalService
-  ) { }
-
-  ngOnDestroy(): void {
-    this.unsubscribe$.next();
-    this.unsubscribe$.complete();
-  }
+    private signalRService: SignalRService,
+    private httpService: HttpService
+  ) {}
 
   ngOnInit(): void {
+    this.httpService
+      .getRequest<Contact[]>('/api/Contacts/' + this.mainUser.id)
+      .subscribe(
+        (data: Contact[]) => {
+          this.contacts = data;
+        },
+        (error) => console.log(error)
+      );
+    this.signalRService
+      .registerHub(environment.apiUrl, 'chatHub')
+      .then((conn) => (this.hubConnection = conn))
+      .catch((err) => console.log(err));
   }
 
   addNewGroup(): void {
@@ -104,43 +63,44 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
   addNewContact(): void {
     console.log('contact clicked!');
-    this.simpleModalService
-        .addModal(AddContactModalComponent).subscribe ( contact =>
-          console.log(contact)
-          );
   }
-  onUserClick(): void {
-  this.chatVisibility = !this.chatVisibility;
+  onUserClick(contact: Contact): void {
+    this.directMessageRecieved = this.signalRService.registerEvent<
+      DirectMessage
+    >(this.hubConnection, 'NewMessage');
+    this.directMessageRecieved.subscribe((message: DirectMessage) => {
+      this.messages.push(message);
+    });
+    this.chatVisibility = !this.chatVisibility;
+    if (this.chatVisibility === true) {
+      this.contactSelected = contact;
+      this.newMessage.contactId = contact.id;
+      this.newMessage.authorId = this.mainUser.id;
+      this.newMessage.createdAt = new Date();
+      this.httpService
+        .getRequest<DirectMessage[]>(
+          '/api/ContactChat/' + this.contactSelected.id
+        )
+        .subscribe(
+          (data: DirectMessage[]) => {
+            this.messages = data;
+          },
+          (error) => console.log(error)
+        );
+      this.hubConnection.invoke('JoinGroup', contact.id);
+    }
   }
+
   onGroupClick(): void {
     this.chatVisibility = !this.chatVisibility;
   }
-
-
-  createMeeting(): void{
-    this.meetingService
-      .createMeeting({
-        settings: '',
-        startTime: new Date(),
-        anonymousCount: 0,
-        isScheduled: false,
-        isRecurrent: false
-      } as MeetingCreate)
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(
-        (resp) => {
-          const meetingLink = resp.body;
-          this.router.navigate(['/meeting-page', `?id=${meetingLink.id}&pwd=${meetingLink.password}`]);
-        },
-        (error) => (console.log(error.message))
-      );
+  sendMessage(): void {
+    this.httpService
+      .postRequest<DirectMessage, void>('/api/ContactChat/', this.newMessage)
+      .subscribe((error) => console.log(error));
+    this.newMessage.message = '';
   }
-
-
-}
-export interface UserModel {
-    id: number;
-    firstName: string;
-    lastName: string;
-    image: string;
+  isContactActive(contact): boolean {
+    return this.contactSelected === contact;
+  }
 }

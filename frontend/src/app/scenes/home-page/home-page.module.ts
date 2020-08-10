@@ -4,14 +4,14 @@ import { HomePageComponent } from './components/home-page/home-page.component';
 import { SharedModule } from '@shared/shared.module';
 import { AddContactModalComponent } from './components/add-contact-modal/add-contact-modal.component';
 import { FormsModule } from '@angular/forms';
-
+import { ContactsChatComponent } from './contacts-chat/contacts-chat.component';
 
 @NgModule({
-  declarations: [HomePageComponent, AddContactModalComponent],
-  imports: [
-    CommonModule,
-    SharedModule,
-    FormsModule
-  ]
+  declarations: [
+    HomePageComponent,
+    AddContactModalComponent,
+    ContactsChatComponent,
+  ],
+  imports: [CommonModule, SharedModule, FormsModule],
 })
-export class HomePageModule { }
+export class HomePageModule {}
