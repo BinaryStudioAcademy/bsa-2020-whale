@@ -137,7 +137,6 @@ export class MeetingComponent implements OnInit, AfterContentInit {
           this.meeting = resp.body;
           console.log("meeting: ", this.meeting);
 
-          this.connectionData = {peerId: id, userId: '', groupId: link}
           this.meetingSignalrService.invoke(SignalMethods.OnUserConnect, this.connectionData); // ! fix here
           // this.signalRService.registerHub(environment.meetingApiUrl, 'chatHub')
           //   .then((hub) => {
@@ -188,6 +187,7 @@ export class MeetingComponent implements OnInit, AfterContentInit {
     .subscribe(
       (params: Params) => {
         const link: string = params[`link`];
+        this.connectionData = {peerId: id, userId: '', groupId: link}
         this.getMeeting(link);
       }
     );
