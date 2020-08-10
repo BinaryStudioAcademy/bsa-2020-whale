@@ -111,8 +111,9 @@ namespace Whale.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ContactId")
-                        .IsUnique();
+                    b.HasIndex("ContactId");
+
+                    b.HasIndex("AuthorId");
 
                     b.ToTable("DirectMessages");
                 });
