@@ -44,7 +44,6 @@ namespace Whale.MeetingAPI
         {
             services.AddDbContext<WhaleDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("WhaleDatabase")));
             services.AddTransient<IMeetingService, MeetingService>();
-            services.AddTransient<ChatHub>();
 
             services.AddControllers();
             services.AddHealthChecks()
@@ -96,8 +95,7 @@ namespace Whale.MeetingAPI
                     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
                 });
 
-                endpoints.MapHub<WebRtcSignalHub>("/webrtcSignalHub");
-                endpoints.MapHub<ChatHub>("/chatHub");
+                endpoints.MapHub<MeetingHub>("/meeting");
             });
         }
     }

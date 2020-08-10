@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { WebrtcSignalService, SignalData } from './core/services/webrtc-signal.service';
 import { AuthService } from './core/auth/auth.service';
 import { HttpClient } from '@angular/common/http';
 

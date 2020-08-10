@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Whale.BLL.Interfaces;
 using Whale.Shared.DTO.Meeting;
 using Whale.Shared.Services;
+using Whale.Shared.DTO.Meeting.MeetingMessage;
 
 namespace Whale.API.Controllers
 {
@@ -24,8 +25,7 @@ namespace Whale.API.Controllers
         [HttpPost]
         public async Task<ActionResult<MeetingLinkDTO>> CreateMeeting(MeetingCreateDTO meetingDto)
         {
-            var link = await _meetingService.CreateMeeting(meetingDto);
-            return Created($"api/Projects/{link.Id}", link);
+            return Ok(await _meetingService.CreateMeeting(meetingDto));
         }
 
         [HttpGet]
