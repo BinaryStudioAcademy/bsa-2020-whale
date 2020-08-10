@@ -32,11 +32,18 @@ namespace Whale.BLL.Hubs
             await Clients.Group(ConnectionData.GroupId).SendAsync("OnUserDisconnect", ConnectionData);
         }
 
-        [HubMethodName("SendGroupMessage")]
+        [HubMethodName("OnSendMessage")]
         public async Task SendMessage(MeetingMessageCreateDTO msgDTO)
         {
             var msg = _meetingService.SendMessage(msgDTO);
-            await Clients.Group(msgDTO.MeetingId).SendAsync("SentMessage", msg);
+            await Clients.Group(msgDTO.MeetingId).SendAsync("OnSendMessage", msg);
+        }
+
+        [HubMethodName("OnGetMessages")]
+        public async Task GetMessages(string groupName)
+        {
+            var messages = _meetingService.GetMessages(groupName);
+            await Clients.Caller.SendAsync("OnGetMessages", messages);
         }
 
         [HubMethodName("OnConferenceStartRecording")]

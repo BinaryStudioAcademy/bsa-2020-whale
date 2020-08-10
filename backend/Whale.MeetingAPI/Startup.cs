@@ -63,6 +63,7 @@ namespace Whale.MeetingAPI
             services.AddAutoMapper(cfg =>
             {
                 cfg.AddProfile<MeetingProfile>();
+                cfg.AddProfile<MeetingMessage>();
             },
             Assembly.GetExecutingAssembly());
 

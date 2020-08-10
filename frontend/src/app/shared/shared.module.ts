@@ -1,25 +1,12 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ChatComponent } from './components/chat/chat.component';
 import { PageHeaderComponent } from './components/page-header/page-header.component';
 import { SpinerComponent } from './components/spiner/spiner.component';
-
-
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
-  declarations: [
-    ChatComponent, 
-    PageHeaderComponent, 
-    SpinerComponent
-  ],
-  imports: [
-    CommonModule
-  ],
-  exports: [
-    CommonModule,
-    ChatComponent,
-    PageHeaderComponent,
-    SpinerComponent
-  ]
+  declarations: [PageHeaderComponent, SpinerComponent],
+  imports: [CommonModule, FormsModule],
+  exports: [CommonModule, PageHeaderComponent, SpinerComponent],
 })
-export class SharedModule { }
+export class SharedModule {}
