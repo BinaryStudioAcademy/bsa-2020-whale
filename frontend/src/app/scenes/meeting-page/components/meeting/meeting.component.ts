@@ -7,7 +7,6 @@ import { ActivatedRoute, Router, Params } from '@angular/router';
 import { MeetingService } from 'app/core/services/meeting.service';
 import { takeUntil } from 'rxjs/operators';
 import { Meeting } from '@shared/models/meeting/meeting';
-//import { WebrtcSignalService, SignalMethods } from 'app/core/services/webrtc-signal.service';
 import { MeetingSignalrService, SignalMethods } from 'app/core/services/meeting-signalr.service';
 import { ToastrService } from 'ngx-toastr';
 import { BlobService } from 'app/core/services/blob.service';
@@ -53,14 +52,6 @@ export class MeetingComponent implements OnInit, AfterContentInit {
   }
 
   async ngOnInit() {
-    // this.route.params
-    //   .subscribe(
-    //     (params: Params) => {
-    //       const link: string = params[`link`];
-    //       this.getMeeting(link);
-    //     }
-    //   );
-
     this.currentUserStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     this.currentStreamLoaded.emit();
 
@@ -121,11 +112,6 @@ export class MeetingComponent implements OnInit, AfterContentInit {
     this.destroyPeer();
 
     this.currentUserStream.getTracks().forEach(track => track.stop());
-    // this.signalRService.registerHub(environment.meetingApiUrl, 'chatHub')
-    //         .then((hub) => {
-    //           hub.invoke('Disconnect', this.meeting.id)
-    //             .catch(err => console.log(err.message));
-    //         });
   }
 
   getMeeting(link: string): void {
@@ -137,14 +123,7 @@ export class MeetingComponent implements OnInit, AfterContentInit {
           this.meeting = resp.body;
           console.log("meeting: ", this.meeting);
 
-          this.meetingSignalrService.invoke(SignalMethods.OnUserConnect, this.connectionData); // ! fix here
-          // this.signalRService.registerHub(environment.meetingApiUrl, 'chatHub')
-          //   .then((hub) => {
-          //     //hub.on('JoinedGroup', (contextId: string) => console.log(contextId + ' joined meeting'));
-          //     //hub.on('Disconnect', (contextId: string) => console.log(contextId + ' leave meeting'));
-          //     // hub.invoke('JoinGroup', this.meeting.id)
-          //     //   .catch(err => console.log(err.message));
-          //   });
+          this.meetingSignalrService.invoke(SignalMethods.OnUserConnect, this.connectionData);
         },
         (error) => {
           console.log(error.message);
@@ -174,7 +153,7 @@ export class MeetingComponent implements OnInit, AfterContentInit {
   }
 
   private destroyPeer() {
-    this.meetingSignalrService.invoke(SignalMethods.OnUserDisconnect, this.connectionData); // ! fix here
+    this.meetingSignalrService.invoke(SignalMethods.OnUserDisconnect, this.connectionData);
 
     this.peer.disconnect();
     this.peer.destroy();
