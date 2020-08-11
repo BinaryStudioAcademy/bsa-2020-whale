@@ -18,6 +18,7 @@ namespace Whale.API.Controllers
         public ContactsController(IContactsService contactsService)
         {
             _contactsService = contactsService;
+            
         }
 
         [HttpGet]
