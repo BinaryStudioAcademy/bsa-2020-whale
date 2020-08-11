@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Whale.Shared.DTO.Meeting;
 using Whale.Shared.DTO.Meeting.MeetingMessage;
 using Whale.BLL.Interfaces;
+using Whale.Shared.DTO.Poll;
 
 namespace Whale.BLL.Hubs
 {
@@ -49,6 +50,12 @@ namespace Whale.BLL.Hubs
         public async Task OnConferenceStopRecording(string message)
         {
             await Clients.All.SendAsync("OnConferenceStopRecording", message);
+        }
+
+        [HubMethodName("OnPollCreated")]
+        public async Task SendPollToGroup(PollDataDTO pollData)
+        {
+            await Clients.Group(pollData.GroupId).SendAsync("OnPoll", pollData.PollDto);
         }
     }
 }

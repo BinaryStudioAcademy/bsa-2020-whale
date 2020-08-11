@@ -18,12 +18,12 @@ namespace Whale.BLL.Services
 {
 	public class PollService : BaseService
 	{
-		private readonly IHubContext<PollHub> _pollHub;
+		private readonly IHubContext<MeetingHub> _meetingHub;
 
-		public PollService(WhaleDbContext context, IMapper mapper, IHubContext<PollHub> pollHub) 
+		public PollService(WhaleDbContext context, IMapper mapper, IHubContext<MeetingHub> meetingHub) 
 			: base(context, mapper) 
 		{
-			_pollHub = pollHub;
+			_meetingHub = meetingHub;
 		}
 
 		public async Task<PollDTO> GetPollByMeetingId(Guid meetingId)
@@ -49,7 +49,7 @@ namespace Whale.BLL.Services
 			await _context.SaveChangesAsync();
 
 			//_pollHub.Clients.Groups
-			await _pollHub.Clients.Group(pollEntity.MeetingId.ToString()).SendAsync("Poll", pollDto);
+			await _meetingHub.Clients.Group(pollEntity.MeetingId.ToString()).SendAsync("OnPoll", pollDto);
 
 			return pollDto;
 		}
