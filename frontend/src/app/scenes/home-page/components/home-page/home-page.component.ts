@@ -59,22 +59,12 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     console.log(this.ownerEmail);
-    this.stateService.getLoggeInUser(this.ownerEmail).subscribe(
+    this.stateService.getLoggedInUser().subscribe(
       (usr: User) => {
         this.loggedInUser = usr;
-        console.log(usr);
       },
       (error) => this.toastr.error(error)
     );
-
-    // public createContactByEmail(
-    //   email: string
-    // ): Observable<HttpResponse<Contact>> {
-    //   return this.httpService.postFullRequest<void, Contact>(
-    //     `${this.routePrefix}/create?email=${email}`,
-    //     null
-    //   );
-    // }
     this.httpService.getRequest<Contact[]>('/api/contacts').subscribe(
       (data: Contact[]) => {
         this.contacts = data;
@@ -87,13 +77,17 @@ export class HomePageComponent implements OnInit, OnDestroy {
     console.log('group clicked!');
   }
   addNewContact(): void {
-    console.log('contact clicked!');
     this.simpleModalService
       .addModal(AddContactModalComponent)
       .subscribe((contact) => console.log(contact));
   }
   visibilityChange(event): void {
     this.chatVisibility = event;
+    this.contactSelected = undefined;
+  }
+  onContactClick(contact: Contact): void {
+    this.chatVisibility = false;
+    this.contactSelected = contact;
   }
 
   onGroupClick(): void {

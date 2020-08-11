@@ -7,7 +7,9 @@
           <div class="item">
             <img class="ui user-pic image" src="{{ loggedInUser.avatarUrl }}" />
             <div class="content">
-              <a class="header">{{ loggedInUser.firstName }}</a>
+              <a class="header"
+                >{{ loggedInUser.firstName }} {{ loggedInUser.secondName }}</a
+              >
             </div>
           </div>
         </div>
@@ -47,16 +49,16 @@
       >
         <div
           [ngClass]="isContactActive(contact) ? 'active item' : 'item'"
-          (click)="onUserClick(contact)"
+          (click)="onContactClick(contact)"
         >
           <img
             class="ui avatar image"
-            src="{{ contact.contactner.avatarUrl }}"
+            src="{{ contact.secondMember.avatarUrl }}"
           />
           <div class="content">
             <div class="description">
-              {{ contact.contactner.firstName }}
-              {{ contact.contactner.secondName }}
+              {{ contact.secondMember.firstName }}
+              {{ contact.secondMember.secondName }}
             </div>
           </div>
         </div>
@@ -78,12 +80,12 @@
         <div (click)="onGroupClick()" class="item">
           <img
             class="ui avatar image"
-            src="{{ contact.contactner.avatarUrl }}"
+            src="{{ contact.secondMember.avatarUrl }}"
           />
           <div class="content">
             <div class="description">
-              {{ contact.contactner.firstName }}
-              {{ contact.contactner.secondName }}
+              {{ contact.secondMember.firstName }}
+              {{ contact.secondMember.secondName }}
             </div>
           </div>
         </div>

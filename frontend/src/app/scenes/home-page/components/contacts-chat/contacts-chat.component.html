@@ -2,15 +2,17 @@
   <div class="ui chat-inner feed">
     <div class="event chat-label">
       <div class="label">
-        <img src="{{ contactSelected.SecondMember.avatarUrl }}" />
+        <img src="{{ contactSelected.secondMember.avatarUrl }}" />
       </div>
       <div class="content">
         <div class="summary">
           <a class="user user-chat-label">
-            {{ contactSelected.SecondMember.firstName }}
-            {{ contactSelected.SecondMember.secondName }}
+            {{ contactSelected.secondMember.firstName }}
+            {{ contactSelected.secondMember.secondName }}
           </a>
-          <a (click)="close()">Close</a>
+          <a class="ui mini basic button edit-button" (click)="close()"
+            >Close chat</a
+          >
         </div>
       </div>
     </div>

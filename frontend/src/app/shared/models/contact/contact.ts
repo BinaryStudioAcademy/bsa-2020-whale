@@ -6,7 +6,7 @@ export interface Contact {
   FirstMemberId: string;
   FirstMember?: User;
   SecondMemberId: string;
-  SecondMember: User;
+  SecondMember?: User;
   PinnedMessage: DirectMessage;
   Settings;
   ContactnerSettings;

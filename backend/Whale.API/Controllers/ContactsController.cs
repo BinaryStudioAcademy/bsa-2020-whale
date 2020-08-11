@@ -14,18 +14,19 @@ namespace Whale.API.Controllers
     public class ContactsController : ControllerBase
     {
         private readonly IContactsService _contactsService;
-        private readonly string email;
 
         public ContactsController(IContactsService contactsService)
         {
             _contactsService = contactsService;
-            email = HttpContext?.User.Claims
-                .FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
+            string email = HttpContext?.User.Claims
+                .FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+            Console.WriteLine("email");
+            Console.WriteLine(email);
             var contacts = await _contactsService.GetAllContactsAsync(email);
             if (contacts == null) return NotFound();
 
@@ -35,6 +36,9 @@ namespace Whale.API.Controllers
         [HttpGet("id/{contactId}")]
         public async Task<IActionResult> Get(Guid contactId)
         {
+            string email = HttpContext?.User.Claims
+                .FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+
             var contact = await _contactsService.GetContactAsync(contactId, email);
 
             if (contact == null) return NotFound();
@@ -71,6 +75,9 @@ namespace Whale.API.Controllers
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] ContactEditDTO contactDTO)
         {
+            string email = HttpContext?.User.Claims
+                .FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+
             await _contactsService.UpdateContactAsync(contactDTO, email);
 
             return Ok();

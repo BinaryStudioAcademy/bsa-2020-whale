@@ -16,23 +16,25 @@ namespace Whale.API.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
-        private readonly string email;
 
         public UserController(IUserService userService)
         {
             _userService = userService;
-            email = HttpContext?.User.Claims
-               .FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+            
         }
 
         [HttpGet]
         public async Task<IActionResult> GetCurrentUser()
         {
-            var user = await _userService.GetUserByEmail(email);
 
-            if (user == null) return NotFound();
+            string email = HttpContext?.User.Claims
+                .FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+            Console.WriteLine("email");
+            Console.WriteLine(email);
+            var contacts = await _userService.GetUserByEmail(email);
+            if (contacts == null) return NotFound();
 
-            return Ok(user);
+            return Ok(contacts);
         }
 
         [HttpGet("id/{id}")]

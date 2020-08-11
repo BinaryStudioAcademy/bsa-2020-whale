@@ -1,4 +1,12 @@
-import { Component, OnInit, EventEmitter, Input, Output } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  EventEmitter,
+  Input,
+  Output,
+  AfterViewInit,
+  AfterContentInit,
+} from '@angular/core';
 import { DirectMessage } from '@shared/models/message/message';
 import { User } from '@shared/models/user/user';
 import { Contact } from '@shared/models/contact/contact';
@@ -16,7 +24,7 @@ import { Message } from '@angular/compiler/src/i18n/i18n_ast';
   templateUrl: './contacts-chat.component.html',
   styleUrls: ['./contacts-chat.component.sass'],
 })
-export class ContactsChatComponent implements OnInit {
+export class ContactsChatComponent implements OnInit, AfterContentInit {
   private hubConnection: HubConnection;
   @Input() contactSelected: Contact;
   @Output() chat: EventEmitter<boolean> = new EventEmitter<boolean>();
@@ -25,7 +33,7 @@ export class ContactsChatComponent implements OnInit {
   newMessage: DirectMessage = {
     contactId: '',
     message: '',
-    authorId: this.contactSelected.FirstMemberId,
+    authorId: '',
     createdAt: new Date(),
     attachment: false,
   };
@@ -47,11 +55,7 @@ export class ContactsChatComponent implements OnInit {
         });
       });
   }
-  onUserClick(contact: Contact): void {
-    this.contactSelected = contact;
-    this.newMessage.contactId = contact.Id;
-    this.newMessage.authorId = this.contactSelected.FirstMemberId;
-    this.newMessage.createdAt = new Date();
+  ngAfterContentInit() {
     this.httpService
       .getRequest<DirectMessage[]>(
         '/api/ContactChat/' + this.contactSelected.Id
@@ -62,9 +66,14 @@ export class ContactsChatComponent implements OnInit {
         },
         (error) => console.log(error)
       );
-    this.hubConnection.invoke('JoinGroup', contact.Id);
   }
   sendMessage(): void {
+    this.hubConnection.invoke('JoinGroup', this.contactSelected.Id);
+
+    console.log(this.contactSelected);
+    this.newMessage.contactId = this.contactSelected.Id;
+    this.newMessage.authorId = this.contactSelected.FirstMemberId;
+    this.newMessage.createdAt = new Date();
     this.httpService
       .postRequest<DirectMessage, void>('/api/ContactChat/', this.newMessage)
       .subscribe((error) => console.log(error));
