@@ -25,6 +25,7 @@ import { BlobService } from 'app/core/services/blob.service';
 import { MeetingConnectionData } from '@shared/models/meeting/meeting-connect';
 import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
 import { MeetingMessageCreate } from '@shared/models/meeting/message/meeting-message-create';
+import { UserService } from 'app/core/services/user.service';
 
 @Component({
   selector: 'app-meeting',
@@ -68,7 +69,8 @@ export class MeetingComponent implements OnInit, OnDestroy, AfterContentInit {
     private meetingService: MeetingService,
     private signalRService: SignalRService,
     private toastr: ToastrService,
-    private blobService: BlobService
+    private blobService: BlobService,
+    private userService: UserService
   ) {
     this.meetingSignalrService = new MeetingSignalrService(signalRService);
   }
@@ -271,7 +273,7 @@ export class MeetingComponent implements OnInit, OnDestroy, AfterContentInit {
 
   sendMessage(): void {
     this.meetingSignalrService.invoke(SignalMethods.OnSendMessage, {
-      authorId: '123',
+      authorEmail: this.userService.userEmail,
       meetingId: this.meeting.id,
       message: this.msgText,
     } as MeetingMessageCreate);
