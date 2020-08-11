@@ -35,7 +35,7 @@ namespace Whale.BLL.Hubs
         [HubMethodName("OnSendMessage")]
         public async Task SendMessage(MeetingMessageCreateDTO msgDTO)
         {
-            var msg = _meetingService.SendMessage(msgDTO);
+            var msg = await _meetingService.SendMessage(msgDTO);
             await Clients.Group(msgDTO.MeetingId).SendAsync("OnSendMessage", msg);
         }
 

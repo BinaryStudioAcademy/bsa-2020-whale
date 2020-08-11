@@ -2,15 +2,15 @@
   <div class="ui chat-inner feed">
     <div *ngFor="let message of messages" class="event">
       <div class="label">
-        <img src="{{ message?.author?.image }}" />
+        <img src="{{ message?.author?.avatarUrl }}" />
       </div>
       <div class="content">
         <div class="summary">
           <a class="user">
-            {{ message?.author?.firstName }} {{ message?.author?.lastName }}
+            {{ message?.author?.firstName }} {{ message?.author?.secondName }}
           </a>
           <div class="date">
-            {{ message?.sentDate }}
+            {{ message?.sentDate | dateFormat }}
           </div>
         </div>
         {{ message?.message }}

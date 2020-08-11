@@ -13,16 +13,19 @@ using Whale.Shared.DTO.Meeting;
 using Whale.Shared.DTO.Meeting.MeetingMessage;
 using Whale.Shared.Services;
 using Microsoft.AspNetCore.SignalR;
+using Whale.BLL.Services.Interfaces;
 
 namespace Whale.BLL.Services
 {
     public class MeetingService : BaseService, IMeetingService
     {
         private readonly RedisService _redisService;
+        private readonly IUserService _userService;
 
-        public MeetingService(WhaleDbContext context, IMapper mapper, RedisService redisService) : base(context, mapper)
+        public MeetingService(WhaleDbContext context, IMapper mapper, RedisService redisService, IUserService userService) : base(context, mapper)
         {
             _redisService = redisService;
+            _userService = userService;
         }
 
         public async Task<MeetingDTO> ConnectToMeeting(MeetingLinkDTO linkDTO)
@@ -57,11 +60,15 @@ namespace Whale.BLL.Services
             return new MeetingLinkDTO { Id = meeting.Id, Password = pwd };
         }
 
-        public MeetingMessageDTO SendMessage(MeetingMessageCreateDTO msgDTO)
+        public async Task<MeetingMessageDTO> SendMessage(MeetingMessageCreateDTO msgDTO)
         {
             var message = _mapper.Map<MeetingMessageDTO>(msgDTO);
             message.SentDate = DateTime.Now;
             message.Id = Guid.NewGuid().ToString();
+
+            var user = await _userService.GetUserByEmail(msgDTO.AuthorEmail);
+            message.Author = user ?? throw new NotFoundException("User");
+
             _redisService.Connect();
             var redisDTO = _redisService.Get<MeetingMessagesAndPasswordDTO>(msgDTO.MeetingId);
             redisDTO.Messages.Add(message);
