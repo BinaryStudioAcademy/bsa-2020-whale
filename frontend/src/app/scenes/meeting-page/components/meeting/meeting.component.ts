@@ -25,6 +25,7 @@ import { BlobService } from 'app/core/services/blob.service';
 import { MeetingConnectionData } from '@shared/models/meeting/meeting-connect';
 import { PollData } from '@shared/models/poll/poll-data';
 import { HttpService } from 'app/core/services/http.service';
+import { PollCreateDto } from 'app/shared/models/poll/poll-create-dto';
 
 @Component({
   selector: 'app-meeting',
@@ -250,11 +251,11 @@ export class MeetingComponent implements OnInit, AfterContentInit {
     );
   }
 
-  public onPollCreated(pollDto: PollDto) {
+  public onPollCreated(pollCreateDto: PollCreateDto) {
     this.httpService
-      .postRequest<PollDto, PollDto>(
+      .postRequest<PollCreateDto, PollDto>(
         environment.meetingApiUrl + '/api/polls',
-        pollDto
+        pollCreateDto
       )
       .subscribe(
         (response: PollDto) => {
@@ -263,11 +264,13 @@ export class MeetingComponent implements OnInit, AfterContentInit {
             groupId: this.connectionData.groupId,
             pollDto: response,
           };
-          console.log(pollData);
+
           this.meetingSignalrService.invoke(
             SignalMethods.OnPollCreated,
             pollData
           );
+
+          this.isPollCreating = false;
           this.toastr.success('Poll was created!', 'Success');
         },
         (error) => {

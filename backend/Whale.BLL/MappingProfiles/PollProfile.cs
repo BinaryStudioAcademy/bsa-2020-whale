@@ -12,6 +12,7 @@ namespace Whale.BLL.MappingProfiles
 	{
 		public PollProfile()
 		{
+			CreateMap<PollCreateDTO, Poll>();
 			CreateMap<Poll, PollDTO>();
 			CreateMap<PollDTO, Poll>();
 		}

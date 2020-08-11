@@ -1,50 +1,42 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { PollDto } from '@shared/models/poll/poll-dto';
 import { FormGroup, FormControl, FormArray, Validators } from '@angular/forms';
 import { HttpService } from 'app/core/services/http.service';
 import { ToastrService } from 'ngx-toastr';
-import { PollAnswerDto } from '../../../models/poll/poll-answer-dto'
+import { PollAnswerDto } from '../../../models/poll/poll-answer-dto';
+import { PollResultsDto } from '../../../models/poll/poll-results-dto';
+import { environment } from '@env';
 
 @Component({
   selector: 'app-poll',
   templateUrl: './poll.component.html',
-  styleUrls: ['./poll.component.sass']
+  styleUrls: ['./poll.component.sass'],
 })
 export class PollComponent implements OnInit {
-
   @Input() poll: PollDto;
+  @Output() pollAnswered = new EventEmitter<void>();
 
   public form: FormGroup;
   public answerTexts: string[] = [];
 
-  constructor(private httpService: HttpService) {
-  }
+  constructor(
+    private httpService: HttpService,
+    private toastr: ToastrService
+  ) {}
 
   ngOnInit(): void {
-    for(let i = 1; i < 5; i++) {
-      if(this.poll[`answer${i}`]) {
-        this.answerTexts.push(this.poll[`answer${i}`]);
-      }
-    }
-
-    console.log(this.answerTexts);
-
     this.form = new FormGroup({
       title: new FormControl(''),
-      answers: this.poll.isSingleChoice 
-               ? new FormControl([Validators.required])
-               : new FormArray([])
+      answers: this.poll.isSingleChoice
+        ? new FormControl([Validators.required])
+        : new FormArray([]),
     });
 
-    console.log(this.form.controls);
-
-    if(!this.poll.isSingleChoice) {
-      for(let i = 1; i < 5; i++) {
-        if(this.poll[`answer${i}`]) {
-          this.answers.controls.push(new FormControl(''));
-        }
-      }
-    } 
+    if (!this.poll.isSingleChoice) {
+      this.poll.answers.forEach((answer) => {
+        this.answers.controls.push(new FormControl(''));
+      });
+    }
   }
 
   get answers() {
@@ -52,13 +44,33 @@ export class PollComponent implements OnInit {
   }
 
   onSubmit() {
-    const pollAnswer: PollAnswerDto = {
-      pollId: 'POLL ID!!!!',
-      answers: this.poll.isSingleChoice  
-              ? this.form.controls.answers.value
-              : this.answers.controls.map(control => control.value).filter(value => value == true)
+    const answers: number[] = [];
+    if (!this.poll.isSingleChoice) {
+      this.answers.controls.forEach((control, index) => {
+        if (control.value) {
+          answers.push(index);
+        }
+      });
+    }
+
+    const pollAnswerDto: PollAnswerDto = {
+      pollId: this.poll.id,
+      userId: 'user',
+      answers: this.poll.isSingleChoice
+        ? [Number(this.form.controls.answers.value)]
+        : answers,
     };
 
-    console.log(pollAnswer);
+    this.httpService
+      .postRequest<PollAnswerDto, PollResultsDto>(
+        environment.meetingApiUrl + '/api/polls/answers',
+        pollAnswerDto
+      )
+      .subscribe((response: PollResultsDto) => {
+        this.toastr.success('Answer saved!');
+        //console.log(response);
+        console.log(response);
+        this.pollAnswered.emit();
+      });
   }
 }

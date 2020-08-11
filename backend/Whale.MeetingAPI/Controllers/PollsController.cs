@@ -19,18 +19,18 @@ namespace Whale.MeetingAPI.Controllers
 			_pollService = pollService;
 		}
 
-		[HttpGet]
-		public async Task<IActionResult> GetPollByMeetingId(Guid meetingId)
+		[HttpPost]
+		public async Task<IActionResult> PostPoll([FromBody] PollCreateDTO pollCreateDto)
 		{
-			var pollDto = await _pollService.GetPollByMeetingId(meetingId);
-			return Ok(pollDto);
+			var pollDto = await _pollService.CreatePoll(pollCreateDto);
+			return CreatedAtAction("PostPoll", pollDto);
 		}
 
-		[HttpPost]
-		public async Task<IActionResult> PostPoll(PollDTO pollDto)
+		[HttpPost("answers")]
+		public async Task<IActionResult> PostPollAnswer([FromBody] PollAnswerDTO pollAnswerDto)
 		{
-			await _pollService.CreatePoll(pollDto);
-			return CreatedAtAction("PostPoll", pollDto);
+			var results = await _pollService.SavePollAnswer(pollAnswerDto);
+			return Ok(results);
 		}
 	}
 }

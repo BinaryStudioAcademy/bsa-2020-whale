@@ -1,4 +1,5 @@
 export interface PollAnswerDto {
-    pollId: string;
-    answers: string[];
+  pollId: string;
+  userId: string;
+  answers: number[];
 }

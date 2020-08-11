@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormArray } from '@angular/forms';
-import { PollDto } from '../../../models/poll/poll-dto';
+import { PollCreateDto } from '../../../models/poll/poll-create-dto';
 import { HttpService } from 'app/core/services/http.service';
 import { env } from 'process';
 import { environment } from '@env';
@@ -13,7 +13,7 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class PollCreateComponent implements OnInit {
   @Input() meetingId: string;
-  @Output() pollCreated = new EventEmitter<PollDto>();
+  @Output() pollCreated = new EventEmitter<PollCreateDto>();
 
   public form: FormGroup;
 
@@ -49,31 +49,14 @@ export class PollCreateComponent implements OnInit {
   ngOnInit(): void {}
 
   public onSubmit() {
-    const pollDto: PollDto = {
+    const pollCreateDto: PollCreateDto = {
       meetingId: this.meetingId,
       title: this.form.controls.title.value,
       isAnonymous: this.form.controls.isAnonymous.value,
       isSingleChoice: this.form.controls.isSingleChoise.value,
-      answer1: this.answers.controls[0].value,
-      answer2: this.answers.controls[1].value,
-      answer3: this.answers.controls[2]?.value,
+      answers: this.answers.controls.map((ctrl) => ctrl.value),
     };
 
-    this.pollCreated.emit(pollDto);
-
-    this.httpService
-      .postRequest<PollDto, PollDto>(
-        environment.meetingApiUrl + '/api/polls',
-        pollDto
-      )
-      .subscribe(
-        (response: PollDto) => {
-          this.toastr.success('Poll was created!', 'Success');
-          this.pollCreated.emit();
-        },
-        (error) => {
-          this.toastr.error(error);
-        }
-      );
+    this.pollCreated.emit(pollCreateDto);
   }
 }

@@ -14,45 +14,70 @@ using Whale.DAL.Models;
 using Whale.DAL.Models.Poll;
 using Whale.Shared.DTO.Poll;
 using Whale.Shared.Helpers;
+using Whale.Shared.Services;
 
 namespace Whale.BLL.Services
 {
 	public class PollService : BaseService
 	{
 		private readonly IHubContext<MeetingHub> _meetingHub;
+		private readonly RedisService _redisService;
 
-		public PollService(WhaleDbContext context, IMapper mapper, IHubContext<MeetingHub> meetingHub) 
+		public PollService(WhaleDbContext context, IMapper mapper, IHubContext<MeetingHub> meetingHub, RedisService redisService) 
 			: base(context, mapper) 
 		{
 			_meetingHub = meetingHub;
+			this._redisService = redisService;
 		}
 
-		public async Task<PollDTO> GetPollByMeetingId(Guid meetingId)
+		public async Task<PollDTO> CreatePoll(PollCreateDTO pollDto)
 		{
-			Poll poll = await _context.Polls.FirstOrDefaultAsync(poll => poll.MeetingId == meetingId);
-
-			return _mapper.Map<PollDTO>(poll);
-		}
-
-		public async Task<PollDTO> CreatePoll(PollDTO pollDto)
-		{
-			Poll pollEntity = _mapper.Map<Poll>(pollDto);
-
 			if(!_context.Meetings.Any(meeting => meeting.Id == pollDto.MeetingId))
 			{
 				throw new NotFoundException(nameof(Meeting));
 			}
 
-			// validate properties
-			await ValidationHelper.ValidateProperties<Poll>(pollEntity);
+			Poll pollEntity = _mapper.Map<Poll>(pollDto);
+			pollEntity.Id = Guid.NewGuid();
 
-			await _context.AddAsync(pollEntity);
-			await _context.SaveChangesAsync();
+			_redisService.Connect();
+			// create set of Poll Results with poll Id key
+			_redisService.Set<Poll>(pollEntity.Id.ToString(), pollEntity);
 
-			//_pollHub.Clients.Groups
-			await _meetingHub.Clients.Group(pollEntity.MeetingId.ToString()).SendAsync("OnPoll", pollDto);
+			var pollDto2 = _mapper.Map<PollDTO>(pollEntity);
+			return pollDto2;
+		}
 
-			return pollDto;
+		public async Task<PollResultsDTO> SavePollAnswer(PollAnswerDTO pollAnswerDto)
+		{
+			pollAnswerDto.UserId = Guid.NewGuid().ToString();
+			_redisService.Connect();
+			_redisService.AddToSet<PollAnswerDTO>(pollAnswerDto.PollId.ToString() + nameof(PollAnswerDTO), pollAnswerDto);
+
+			var pollAnswerDtos = _redisService.GetSetMembers<PollAnswerDTO>(pollAnswerDto.PollId.ToString() + nameof(PollAnswerDTO));
+
+			var poll = _redisService.Get<Poll>(pollAnswerDto.PollId.ToString());
+			var meetingId = poll.MeetingId;
+			// signal
+
+			return GetPollResults(poll, pollAnswerDtos);
+		}
+
+		private PollResultsDTO GetPollResults(Poll poll, ICollection<PollAnswerDTO> pollAnswerDtos)
+		{
+			var answers = pollAnswerDtos.Select(answer => answer.Answers);
+
+			int[] results = new int[poll.Answers.Count];
+			var pollResultsDto = new PollResultsDTO { PollDto = _mapper.Map<PollDTO>(poll) };
+
+			for (int i = 0; i < poll.Answers.Count; i++) 
+			{
+				string answer = pollResultsDto.PollDto.Answers[i];
+				int answerVotedCount = answers.Count(subAnswer => subAnswer.Contains(i));
+				pollResultsDto.Results2.Add(answer, answerVotedCount);
+			}
+
+			return pollResultsDto;
 		}
 	}
 }

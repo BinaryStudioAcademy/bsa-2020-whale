@@ -1,5 +1,4 @@
-export interface PollDto {
-  id: string;
+export interface PollCreateDto {
   meetingId: string;
   title: string;
   isAnonymous: boolean;

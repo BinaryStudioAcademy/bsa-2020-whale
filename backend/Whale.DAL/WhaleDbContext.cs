@@ -19,7 +19,7 @@ namespace Whale.DAL
         public DbSet<GroupUser> GroupUsers { get; set; }
         public DbSet<Meeting> Meetings { get; set; }
         public DbSet<Participant> Participants { get; set; }
-        public DbSet<Poll> Polls { get; set; }
+        // public DbSet<Poll> Polls { get; set; }
         public DbSet<Record> Records { get; set; }
         public DbSet<Setting> Settings { get; set; }
         public DbSet<UserAchivement> UserAchivements { get; set; }

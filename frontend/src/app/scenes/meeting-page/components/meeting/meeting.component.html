@@ -89,5 +89,5 @@
 </div>
 
 <div class="poll-create-container" *ngIf="isShowPoll">
-  <app-poll [poll]="poll"></app-poll>
+  <app-poll [poll]="poll" (pollAnswered)="isShowPoll = false"></app-poll>
 </div>

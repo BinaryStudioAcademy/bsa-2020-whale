@@ -35,13 +35,27 @@ namespace Whale.Shared.Services
         {
             var db = _redis.GetDatabase();
             db.StringSet(key, JsonConvert.SerializeObject(value));
-
         }
         public T Get<T>(string key)
         {
             var db = _redis.GetDatabase();
             var value = db.StringGet(key);
             return value == value.IsNull ? default : JsonConvert.DeserializeObject<T>(value);
+        }
+
+        public void AddToSet<T>(string setKey, T value)
+        {
+            var db = _redis.GetDatabase();
+            db.SetAdd(setKey, JsonConvert.SerializeObject(value));
+        }
+
+        public ICollection<T> GetSetMembers<T>(string setKey)
+        {
+            var db = _redis.GetDatabase();
+            RedisValue[] values = db.SetMembers(setKey);
+            var stringValues = values.ToStringArray();
+            var json = $"[{String.Join(",", stringValues)}]";
+            return JsonConvert.DeserializeObject<ICollection<T>>(json);
         }
     }
 }

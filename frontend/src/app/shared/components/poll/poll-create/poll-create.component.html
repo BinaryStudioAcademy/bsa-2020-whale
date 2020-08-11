@@ -1,40 +1,66 @@
 <div class="ui segment">
-    <h3>Poll</h3>
-    <form class="ui form" [formGroup]="form" (ngSubmit)="onSubmit()">
-        <div class="field">
-            <label>Title</label>
-            <input type="text" formControlName="title">
+  <h3>Poll</h3>
+  <form class="ui form" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="field">
+      <label>Title</label>
+      <input type="text" formControlName="title" />
+    </div>
+    <div class="field">
+      <div class="inline field">
+        <div class="ui checkbox">
+          <input
+            type="checkbox"
+            tabindex="0"
+            formControlName="isAnonymous"
+            id="isAnonymous"
+          />
+          <label for="isAnonymous" class="default-cursor">Anonymous poll</label>
         </div>
-        <div class="field">
-            <div class="inline field">
-                <div class="ui checkbox">
-                    <input type="checkbox" tabindex="0" formControlName="isAnonymous" id="isAnonymous">
-                    <label for="isAnonymous" class="default-cursor">Anonymous poll</label>
-                </div>
-            </div>
+      </div>
+    </div>
+    <div class="field">
+      <div class="inline field">
+        <div class="ui checkbox">
+          <input
+            type="checkbox"
+            tabindex="0"
+            formControlName="isSingleChoise"
+            id="isSingleChoise"
+          />
+          <label for="isSingleChoise" class="default-cursor"
+            >Single choice</label
+          >
         </div>
-        <div class="field">
-            <div class="inline field">
-                <div class="ui checkbox">
-                    <input type="checkbox" tabindex="0" formControlName="isSingleChoise" id="isSingleChoise">
-                    <label for="isSingleChoise" class="default-cursor">Single choise</label>
-                </div>
-            </div>
+      </div>
+    </div>
+
+    <div formArrayName="answers" class="answers-container">
+      <div class="field" *ngFor="let answer of answers.controls; let i = index">
+        <label>Answer {{ i + 1 }}:</label>
+        <span
+          *ngIf="i > 1"
+          class="close-icon"
+          id="{{ i }}"
+          (click)="removeAnswer($event)"
+          >&times;</span
+        >
+        <div class="ui small input">
+          <input type="text" [formControlName]="i" />
         </div>
-        
-        <div formArrayName="answers" class="answers-container">
-            <div class="field" *ngFor="let answer of answers.controls; let i=index">
-                <label>Answer {{i + 1}}:</label>
-                <span *ngIf="i > 1" class="close-icon" id="{{i}}" (click)="removeAnswer($event)">&times;</span>
-                <div class="ui small input">
-                    <input type="text" [formControlName]="i">
-                </div>
-            </div>
-        </div>
-        
-        <button type="button" class="ui button answers-button" (click)="addAnswer()">Add answer</button>
-        <div class="flex-center">
-            <button class="ui button primary" type="submit" [disabled]="!form.valid">Create poll</button>
-        </div>
-    </form>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="ui button answers-button"
+      (click)="addAnswer()"
+    >
+      Add answer
+    </button>
+    <div class="flex-center">
+      <button class="ui button primary" type="submit" [disabled]="!form.valid">
+        Create poll
+      </button>
+    </div>
+  </form>
 </div>
