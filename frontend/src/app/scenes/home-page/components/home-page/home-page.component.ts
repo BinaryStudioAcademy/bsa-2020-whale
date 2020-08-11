@@ -21,6 +21,7 @@ import { Router } from '@angular/router';
 import { MeetingCreate } from '@shared/models/meeting/meeting-create';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { UserService } from 'app/core/services/user.service';
 
 @Component({
   selector: 'app-home-page',
@@ -34,6 +35,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
   contactsVisibility = true;
   groupsVisibility = false;
   chatVisibility = true;
+  ownerEmail: string;
   private hubConnection: HubConnection;
   contactSelected: Contact;
   private unsubscribe$ = new Subject<void>();
@@ -44,8 +46,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
     private httpService: HttpService,
     private simpleModalService: SimpleModalService,
     private meetingService: MeetingService,
-    private router: Router
-  ) {}
+    private router: Router,
+    private userService: UserService
+  ) {
+    this.ownerEmail = this.userService.userEmail;
+  }
 
   ngOnDestroy(): void {
     this.unsubscribe$.next();
@@ -53,13 +58,24 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.stateService.getLoggeInUser().subscribe(
+    console.log(this.ownerEmail);
+    this.stateService.getLoggeInUser(this.ownerEmail).subscribe(
       (usr: User) => {
         this.loggedInUser = usr;
+        console.log(usr);
       },
       (error) => this.toastr.error(error)
     );
-    this.httpService.getRequest<Contact[]>('/api/Contacts').subscribe(
+
+    // public createContactByEmail(
+    //   email: string
+    // ): Observable<HttpResponse<Contact>> {
+    //   return this.httpService.postFullRequest<void, Contact>(
+    //     `${this.routePrefix}/create?email=${email}`,
+    //     null
+    //   );
+    // }
+    this.httpService.getRequest<Contact[]>('/api/contacts').subscribe(
       (data: Contact[]) => {
         this.contacts = data;
       },

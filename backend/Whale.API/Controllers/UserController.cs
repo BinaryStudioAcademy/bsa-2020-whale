@@ -30,7 +30,7 @@ namespace Whale.API.Controllers
         {
             var user = await _userService.GetUserByEmail(email);
 
-            //if (user == null) return NotFound();
+            if (user == null) return NotFound();
 
             return Ok(user);
         }

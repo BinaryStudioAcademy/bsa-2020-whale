@@ -27,6 +27,7 @@ namespace Whale.API.Controllers
         public async Task<IActionResult> GetAll()
         {
             var contacts = await _contactsService.GetAllContactsAsync(email);
+            if (contacts == null) return NotFound();
 
             return Ok(contacts);
         }

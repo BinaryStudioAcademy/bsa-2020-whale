@@ -40,15 +40,6 @@
           </button>
         </a>
       </div>
-      <a (click)="contactsVisibility = !contactsVisibility" class="item header"
-        >Contacts
-        <button
-          (click)="addNewContact()"
-          class="ui mini basic button edit-button"
-        >
-          New
-        </button>
-      </a>
       <div
         [hidden]="!contactsVisibility"
         *ngFor="let contact of contacts"
