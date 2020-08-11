@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Whale.Shared.DTO.Contact;
 using Whale.BLL.Services.Interfaces;
+using Whale.BLL.Exceptions;
 
 namespace Whale.BLL.Services
 {
@@ -35,7 +36,7 @@ namespace Whale.BLL.Services
                 .Include(c => c.Contactner)
                 .FirstOrDefaultAsync(c => c.Id == contactId);
 
-            if (contact == null) throw new Exception("No such contact");
+            if (contact == null) throw new NotFoundException("Contact", contactId.ToString());
 
             return _mapper.Map<ContactDTO>(contact);
         }
@@ -46,7 +47,7 @@ namespace Whale.BLL.Services
 
             var contact = _context.Contacts.FirstOrDefault(c => c.ContactnerId == contactDTO.ContactnerId && c.OwnerId == contactDTO.OwnerId);
 
-            if (contact != null) throw new Exception("Such contact is already exist");
+            if (contact != null) throw new AlreadyExistsException("Contact");
 
             _context.Contacts.Add(entity);
             await _context.SaveChangesAsync();
@@ -63,7 +64,7 @@ namespace Whale.BLL.Services
         {
             var entity = _context.Contacts.FirstOrDefault(c => c.Id == contactDTO.Id);
 
-            if (entity == null) throw new Exception("No such contact");
+            if (entity == null) throw new NotFoundException("Contact", contactDTO.Id.ToString());
 
             entity.IsBlocked = contactDTO.IsBlocked;
 
@@ -84,18 +85,18 @@ namespace Whale.BLL.Services
         public async Task<ContactDTO> CreateContactFromEmailAsync(string ownerEmail, string contactnerEmail)
         {
             if(ownerEmail == contactnerEmail)
-                throw new Exception("You cannot add yourself to contacts");
+                throw new BaseCustomException("You cannot add yourself to contacts");
             var owner = await _context.Users.FirstOrDefaultAsync(u => u.Email == ownerEmail);
             var contactner = await _context.Users.FirstOrDefaultAsync(u => u.Email == contactnerEmail);
             if (owner is null)
-                throw new Exception("Owner invalid");
+                throw new NotFoundException("Owner", ownerEmail);
             if (contactner is null)
-                throw new Exception("Contactner invalid");
+                throw new NotFoundException("Contactner", contactnerEmail);
 
             var contact = await _context.Contacts
                 .FirstOrDefaultAsync(c => c.ContactnerId == contactner.Id && c.OwnerId == owner.Id);
             if (contact is object)
-                throw new Exception("Such contact is already exist");
+                throw new AlreadyExistsException("Contact");
 
             contact = new Contact()
             {

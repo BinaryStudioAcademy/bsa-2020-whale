@@ -20,6 +20,7 @@ using Whale.BLL.Providers;
 using Microsoft.IdentityModel.Tokens;
 using Whale.Shared.Services;
 using Whale.BLL.Services.Interfaces;
+using Whale.API.Middleware;
 using Whale.API.Extensions;
 using Whale.BLL.Interfaces;
 
@@ -93,7 +94,7 @@ namespace Whale.API
                 app.UseDeveloperExceptionPage();
             }
 
-            app.ConfigureCustomExceptionMiddleware();
+            app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseCors("CorsPolicy");
 

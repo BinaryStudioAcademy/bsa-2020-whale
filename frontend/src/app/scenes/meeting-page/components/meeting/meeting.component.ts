@@ -120,7 +120,7 @@ export class MeetingComponent
         },
         (err) => {
           console.log(err.message);
-          this.toastr.error('Error occured when connected to meeting');
+          this.toastr.error(err.Message);
           this.leave();
         }
       );
@@ -132,7 +132,7 @@ export class MeetingComponent
           this.currentParticipant = participant;
         },
         (err) => {
-          this.toastr.error('Error occured when getting participant');
+          this.toastr.error(err.Message);
         }
       );
 
