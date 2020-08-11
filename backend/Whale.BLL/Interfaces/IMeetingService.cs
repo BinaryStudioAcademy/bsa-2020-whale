@@ -13,7 +13,7 @@ namespace Whale.BLL.Interfaces
 
         Task<MeetingDTO> ConnectToMeeting(MeetingLinkDTO link);
 
-        MeetingMessageDTO SendMessage(MeetingMessageCreateDTO msgDTO);
+        Task<MeetingMessageDTO> SendMessage(MeetingMessageCreateDTO msgDTO);
 
         IEnumerable<MeetingMessageDTO> GetMessages(string groupName);
     }

@@ -1,5 +1,5 @@
 export interface MeetingMessageCreate {
-    authorId: string;
-    meetingId: string;
-    message: string;
+  authorEmail: string;
+  meetingId: string;
+  message: string;
 }

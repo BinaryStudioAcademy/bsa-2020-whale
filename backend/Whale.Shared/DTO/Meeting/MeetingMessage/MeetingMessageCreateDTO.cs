@@ -6,7 +6,7 @@ namespace Whale.Shared.DTO.Meeting.MeetingMessage
 {
     public class MeetingMessageCreateDTO
     {
-        public string AuthorId { get; set; }
+        public string AuthorEmail { get; set; }
         public string MeetingId { get; set; }
         public string Message { get; set; }
     }
