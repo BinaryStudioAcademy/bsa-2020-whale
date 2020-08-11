@@ -25,13 +25,15 @@ namespace Whale.API.Controllers
         [HttpPost]
         public async Task<ActionResult<MeetingLinkDTO>> CreateMeeting(MeetingCreateDTO meetingDto)
         {
-            return Ok(await _meetingService.CreateMeeting(meetingDto));
+            var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+            return Ok(await _meetingService.CreateMeeting(meetingDto, ownerEmail));
         }
 
         [HttpGet]
         public async Task<ActionResult<MeetingDTO>> ConnectToMeeting(Guid id, string pwd)
         {
-            return Ok(await _meetingService.ConnectToMeeting(new MeetingLinkDTO { Id = id, Password = pwd}));
+            var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+            return Ok(await _meetingService.ConnectToMeeting(new MeetingLinkDTO { Id = id, Password = pwd}, ownerEmail));
         }
     }
 

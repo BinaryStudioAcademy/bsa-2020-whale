@@ -20,10 +20,12 @@ export class ProfilePageComponent implements OnInit {
 
   public isShowCamera = false;
   public isImageCropped = false;
+  isShowUploadFile: boolean;
 
   imageChangedEvent: any = '';
   userPhotoFromCamera: any = '';
   croppedImage: any = '';
+  fileToUpload: File;
 
   ngOnInit(): void {}
 
@@ -39,8 +41,41 @@ export class ProfilePageComponent implements OnInit {
     this.isImageCropped = true;
   }
 
+  public uploadFile(event): void {
+    this.isShowCamera = false;
+    this.imageChangedEvent = event;
+    this.fileToUpload = event.target.files[0];
+    if (!this.fileToUpload) {
+      event.target.value = '';
+      return;
+    }
+
+    const size = this.fileToUpload.size / 1024 / 1024;
+
+    if (size > 5) {
+      this.toastr.error("File can't be heavier than ~5MB");
+    }
+    this.isShowUploadFile = true;
+  }
+
+  public imageCroppedUpload(event: ImageCroppedEvent): void {
+    // Preview
+    this.croppedImage = event.base64;
+  }
+
+  public SendImage(): void {
+    const blob = this.dataURLtoBlob(this.croppedImage);
+    this.postBlob(blob);
+    this.croppedImage = '';
+    this.userPhotoFromCamera = '';
+    this.isShowUploadFile = false;
+  }
+
   public showCamera(): void {
     this.isShowCamera = !this.isShowCamera;
+    this.isShowUploadFile = false;
+    this.userPhotoFromCamera = '';
+    this.imageChangedEvent = '';
 
     if (this.isShowCamera) {
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -120,7 +155,7 @@ export class ProfilePageComponent implements OnInit {
       this.video.nativeElement.pause();
 
       this.userPhotoFromCamera = '';
-      
+
       this.isShowCamera = false;
     }
 

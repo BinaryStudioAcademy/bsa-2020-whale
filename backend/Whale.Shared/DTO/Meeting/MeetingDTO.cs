@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Whale.Shared.DTO.Participant;
 
 namespace Whale.Shared.DTO.Meeting
 {
@@ -12,5 +13,7 @@ namespace Whale.Shared.DTO.Meeting
         public int AnonymousCount { get; set; }
         public bool IsScheduled { get; set; }
         public bool IsRecurrent { get; set; }
+
+        public ICollection<ParticipantDTO> Participants { get; set; }
     }
 }

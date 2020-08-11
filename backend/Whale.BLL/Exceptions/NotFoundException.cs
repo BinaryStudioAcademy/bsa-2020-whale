@@ -1,16 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Whale.BLL.Exceptions
 {
-    public sealed class NotFoundException : Exception
+    public sealed class NotFoundException : BaseCustomException
     {
-        public NotFoundException(string name, int id)
-            : base($"Entity {name} with id ({id}) was not found.")
+        public NotFoundException(string name, string id, bool isLogged = false)
+            : base($"Entity {name} with id ({id}) was not found.", isLogged)
         {
+            _httpError = 404;
         }
-
-        public NotFoundException(string name) : base($"Entity {name} was not found.") { }
+        public NotFoundException(string name, bool isLogged = false) : base($"Entity {name} was not found.", isLogged)
+        {
+            _httpError = 404;
+        }
     }
 }

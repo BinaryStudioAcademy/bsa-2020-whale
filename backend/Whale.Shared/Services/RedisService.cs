@@ -17,6 +17,11 @@ namespace Whale.Shared.Services
         {
             _redisHost = connectionString;
         }
+        public async Task ConnectAsync()
+        {
+                var configString = $"{_redisHost}";
+                _redis = await ConnectionMultiplexer.ConnectAsync(configString);
+        }
         public void Connect()
         {
             try
@@ -31,6 +36,7 @@ namespace Whale.Shared.Services
             }
             //Log.Debug("Connected to Redis");
         }
+
         public void Set<T>(string key, T value)
         {
             var db = _redis.GetDatabase();
@@ -42,6 +48,25 @@ namespace Whale.Shared.Services
             var db = _redis.GetDatabase();
             var value = db.StringGet(key);
             return value == value.IsNull ? default : JsonConvert.DeserializeObject<T>(value);
+        }
+
+        public async Task SetAsync<T>(string key, T value)
+        {
+            var db = _redis.GetDatabase();
+            await db.StringSetAsync(key, JsonConvert.SerializeObject(value));
+
+        }
+        public async Task<T> GetAsync<T>(string key)
+        {
+            var db = _redis.GetDatabase();
+            var value = await db.StringGetAsync(key);
+            return value == value.IsNull ? default : JsonConvert.DeserializeObject<T>(value);
+        }
+
+        public async Task RemoveAsync(string key)
+        {
+            var db = _redis.GetDatabase();
+            await db.KeyDeleteAsync(key);
         }
     }
 }

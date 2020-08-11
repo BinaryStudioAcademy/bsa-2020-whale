@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Whale.BLL.Exceptions
+﻿namespace Whale.BLL.Exceptions
 {
-    public sealed class InvalidCredentials: Exception
+    public sealed class InvalidCredentials: BaseCustomException
     {
         public InvalidCredentials() : base("Invalid credentials") { }
     }
