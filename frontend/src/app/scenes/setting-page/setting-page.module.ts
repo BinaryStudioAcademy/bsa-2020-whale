@@ -8,12 +8,11 @@ import { BrowserModule } from '@angular/platform-browser';
 import { SharedModule } from '@shared/shared.module';
 
 @NgModule({
-  declarations: [SettingPageComponent, SettingVideoComponent, SettingAudioComponent],
-  imports: [
-    CommonModule,
-    FormsModule,
-    BrowserModule,
-    SharedModule
-    ]
+  declarations: [
+    SettingPageComponent,
+    SettingVideoComponent,
+    SettingAudioComponent,
+  ],
+  imports: [CommonModule, FormsModule, BrowserModule, SharedModule],
 })
-export class SettingPageModule { }
+export class SettingPageModule {}

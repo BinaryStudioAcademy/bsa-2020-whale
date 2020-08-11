@@ -1,104 +1,136 @@
-<div *ngIf="isShowChat" class="ui card chat">
-  <div class="ui chat-inner feed">
-    <div *ngFor="let message of messages" class="event">
-      <div class="label">
-        <img src="{{ message?.author?.avatarUrl }}" />
-      </div>
-      <div class="content">
-        <div class="summary">
-          <a class="user">
-            {{ message?.author?.firstName }} {{ message?.author?.secondName }}
-          </a>
-          <div class="date">
-            {{ message?.sentDate | dateFormat }}
-          </div>
+<div #mainArea>
+  <div *ngIf="isShowChat" class="ui card chat">
+    <div class="ui chat-inner feed">
+      <div *ngFor="let message of messages" class="event">
+        <div class="label">
+          <img src="{{ message?.author?.avatarUrl }}" />
         </div>
-        {{ message?.message }}
+        <div class="content">
+          <div class="summary">
+            <a class="user">
+              {{ message?.author?.firstName }} {{ message?.author?.secondName }}
+            </a>
+            <div class="date">
+              {{ message?.sentDate | dateFormat }}
+            </div>
+          </div>
+          {{ message?.message }}
+        </div>
       </div>
     </div>
-  </div>
-  <div class="ui form vertically-aligned">
-    <div class="ui icon input">
+    <div class="ui form vertically-aligned">
       <div class="ui icon input">
-        <textarea
-          rows="1"
-          placeholder="Message..."
-          [(ngModel)]="msgText"
-        ></textarea>
-        <i
-          aria-hidden="true"
-          class="paper plane link icon blue"
-          (click)="sendMessage()"
-        ></i>
+        <div class="ui icon input">
+          <textarea
+            rows="1"
+            placeholder="Message..."
+            [(ngModel)]="msgText"
+          ></textarea>
+          <i
+            aria-hidden="true"
+            class="paper plane link icon blue"
+            (click)="sendMessage()"
+          ></i>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<div class="content">
-  <div *ngIf="isShowParticipants" class="ui participants-container">
-    <div class="invite-icon-container">
-      <i class="user plus icon"></i>
-    </div>
-    <div class="ui divided list">
-      <div *ngFor="let user of users" class="ui item participant">
-        <img
-          src="https://icons.iconarchive.com/icons/paomedia/small-n-flat/512/user-male-icon.png"
-        />
-        <span>{{ user }}</span>
+  <div class="content">
+    <div *ngIf="isShowParticipants" class="ui participants-container">
+      <div class="invite-icon-container">
+        <i class="user plus icon"></i>
+      </div>
+      <div class="ui divided list">
+        <div *ngFor="let user of users" class="ui item participant">
+          <img
+            src="https://icons.iconarchive.com/icons/paomedia/small-n-flat/512/user-male-icon.png"
+          />
+          <span>{{ user }}</span>
+        </div>
       </div>
     </div>
-  </div>
-  <!-- <div class="users">
-        <div class="users__user" *ngFor="let user of users;">
-            <div class="ui card">
-                <div class="image">
-                  <img src="https://icons.iconarchive.com/icons/paomedia/small-n-flat/512/user-male-icon.png">
-                </div>
-                <div class="content">
-                  <a class="header">{{user}}</a>
+    <!-- <div class="users">
+            <div class="users__user" *ngFor="let user of users;">
+                <div class="ui card">
+                    <div class="image">
+                    <img src="https://icons.iconarchive.com/icons/paomedia/small-n-flat/512/user-male-icon.png">
+                    </div>
+                    <div class="content">
+                    <a class="header">{{user}}</a>
+                    </div>
                 </div>
             </div>
+        </div> -->
+
+    <div class="tools" ngDraggable>
+      <i style="opacity: 0.8;" class="big microphone icon block"></i>
+      <i style="opacity: 0.8;" class="big video icon block"></i>
+      <i
+        style="opacity: 0.8;"
+        class="users icon big users-icon-fix block"
+        (click)="isShowParticipants = !isShowParticipants"
+      ></i>
+      <i style="opacity: 0.8;" class="big share square icon block"></i>
+      <i
+        (click)="showChat()"
+        style="opacity: 0.8;"
+        class="big wechat icon block"
+      ></i>
+      <i
+        (click)="closeFullscreen()"
+        style="opacity: 0.8;"
+        class="big desktop icon block"
+      ></i>
+    </div>
+
+    Me:
+    <video #currentVideo autoplay="autoplay" [muted]="'muted'"></video> Users:
+    <div id="participants"></div>
+
+    <div class="options">
+      <div class="ui container options__buttons">
+        <div>
+          <i style="opacity: 0.8;" class="big microphone icon"></i>
+          <i
+            style="margin-left: 10px; opacity: 0.8;"
+            class="big video icon"
+          ></i>
         </div>
-    </div> -->
 
-  Me: <video #currentVideo autoplay="autoplay" [muted]="'muted'"></video> Users:
-  <div id="participants"></div>
-
-  <div class="options">
-    <div class="ui container options__buttons">
-      <div>
-        <i style="opacity: 0.8;" class="big microphone icon"></i>
-        <i style="margin-left: 10px; opacity: 0.8;" class="big video icon"></i>
-      </div>
-
-      <div class="display-flex">
-        <div class="participants-button-container">
-          <div class="relative-container">
-            <i
-              class="users icon big users-icon-fix"
-              (click)="isShowParticipants = !isShowParticipants"
-            ></i>
+        <div class="display-flex">
+          <div class="participants-button-container">
+            <div class="relative-container">
+              <i
+                class="users icon big users-icon-fix"
+                (click)="isShowParticipants = !isShowParticipants"
+              ></i>
+            </div>
           </div>
+          <i
+            style="margin-left: 10px; opacity: 0.8;"
+            class="big share square icon"
+          ></i>
+          <i
+            (click)="showChat()"
+            style="margin-left: 10px; opacity: 0.8;"
+            class="big wechat icon"
+          ></i>
+          <i
+            (click)="goFullscreen()"
+            style="margin-left: 10px; opacity: 0.8;"
+            class="big desktop icon"
+          ></i>
         </div>
-        <i
-          style="margin-left: 10px; opacity: 0.8;"
-          class="big share square icon"
-        ></i>
-        <i
-          (click)="showChat()"
-          style="margin-left: 10px; opacity: 0.8;"
-          class="big wechat icon"
-        ></i>
-      </div>
-      <div>
-        <button
-          style="margin-left: 200px;"
-          class="ui inverted red button"
-          (click)="leave()"
-        >
-          Leave
-        </button>
+        <div>
+          <button
+            style="margin-left: 200px;"
+            class="ui inverted red button"
+            (click)="leave()"
+          >
+            Leave
+          </button>
+        </div>
       </div>
     </div>
   </div>

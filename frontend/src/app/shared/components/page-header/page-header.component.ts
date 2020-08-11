@@ -5,23 +5,18 @@ import { AuthService } from 'app/core/auth/auth.service';
 @Component({
   selector: 'app-page-header',
   templateUrl: './page-header.component.html',
-  styleUrls: ['./page-header.component.sass']
+  styleUrls: ['./page-header.component.sass'],
 })
 export class PageHeaderComponent implements OnInit {
-
   settingsMenuVisible = false;
-  constructor(private router: Router, public auth: AuthService,
-    ) { }
+  constructor(private router: Router, public auth: AuthService) {}
 
-
-  ngOnInit(): void {
-  }
-  goToPage(pageName: string): void{
+  ngOnInit(): void {}
+  goToPage(pageName: string): void {
     this.router.navigate([`${pageName}`]);
   }
-  logOut(): void{
+  logOut(): void {
     this.auth.logout();
     this.router.navigate(['']);
   }
-
 }

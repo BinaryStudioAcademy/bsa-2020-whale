@@ -5,13 +5,8 @@ import { SharedModule } from '@shared/shared.module';
 import { AddContactModalComponent } from './components/add-contact-modal/add-contact-modal.component';
 import { FormsModule } from '@angular/forms';
 
-
 @NgModule({
   declarations: [HomePageComponent, AddContactModalComponent],
-  imports: [
-    CommonModule,
-    SharedModule,
-    FormsModule
-  ]
+  imports: [CommonModule, SharedModule, FormsModule],
 })
-export class HomePageModule { }
+export class HomePageModule {}

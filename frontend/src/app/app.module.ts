@@ -14,12 +14,11 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ngx-toastr';
 import { HomePageModule } from './scenes/home-page/home-page.module';
 import { SimpleModalModule } from 'ngx-simple-modal';
-import {PagesModule} from './scenes/pages.module';
+import { AngularDraggableModule } from 'angular2-draggable';
+import { PagesModule } from './scenes/pages.module';
 
 @NgModule({
-  declarations: [
-    AppComponent
-  ],
+  declarations: [AppComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -29,6 +28,7 @@ import {PagesModule} from './scenes/pages.module';
     ProfilePageModule,
     ScheduleMeetingPageModule,
     HttpClientModule,
+    AngularDraggableModule,
     BrowserAnimationsModule,
     PagesModule,
     ToastrModule.forRoot({
@@ -39,16 +39,20 @@ import {PagesModule} from './scenes/pages.module';
         error: 'negative',
         info: 'info',
         success: 'positive',
-        warning: 'warning'
-      }
+        warning: 'warning',
+      },
     }),
     HomePageModule,
-    SimpleModalModule
+    SimpleModalModule,
   ],
   providers: [
     AuthService,
-    { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptorService, multi: true }
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: TokenInterceptorService,
+      multi: true,
+    },
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

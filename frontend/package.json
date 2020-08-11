@@ -23,6 +23,7 @@
     "@aspnet/signalr": "^1.1.4",
     "@types/dom-mediacapture-record": "^1.0.7",
     "cropperjs": "^1.5.7",
+    "angular2-draggable": "^2.3.2",
     "decibel-meter": "^2.0.0",
     "firebase": "^7.17.1",
     "freeice": "^2.2.2",

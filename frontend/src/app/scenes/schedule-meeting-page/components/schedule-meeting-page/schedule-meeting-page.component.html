@@ -4,31 +4,39 @@
     <div class="ui twelve wide column segment margin-auto">
       <h1>Schedule meeting</h1>
       <form class="ui form" [formGroup]="form" (ngSubmit)="onSubmit()">
-   
         <div class="field">
           <label>Topic</label>
-          <input type="text" formControlName="topic">
+          <input type="text" formControlName="topic" />
         </div>
-    
+
         <div class="ui segment">
           <div class="ten wide field">
             <label>Start</label>
             <div class="fields">
               <div class="field">
-                <dp-date-picker [config]="config" theme="dp-material" formControlName="date"></dp-date-picker> 
+                <dp-date-picker
+                  [config]="config"
+                  theme="dp-material"
+                  formControlName="date"
+                ></dp-date-picker>
               </div>
               <div class="field">
-                <dp-date-picker [config]="timeConfig" mode="time" theme="dp-material" formControlName="time"></dp-date-picker> 
+                <dp-date-picker
+                  [config]="timeConfig"
+                  mode="time"
+                  theme="dp-material"
+                  formControlName="time"
+                ></dp-date-picker>
               </div>
             </div>
-          </div>            
-          
+          </div>
+
           <div class="nine wide field">
             <label>Duration</label>
             <div class="three fields">
               <div class="seven wide field">
                 <div class="ui right labeled input">
-                  <input type="number" formControlName="durationHours">
+                  <input type="number" formControlName="durationHours" />
                   <div class="ui basic label">
                     <span class="text smaller default-cursor">hr</span>
                   </div>
@@ -36,7 +44,7 @@
               </div>
               <div class="seven wide field">
                 <div class="ui right labeled input">
-                  <input type="number" formControlName="durationMinutes">
+                  <input type="number" formControlName="durationMinutes" />
                   <div class="ui basic label">
                     <span class="text smaller default-cursor">min</span>
                   </div>
@@ -51,15 +59,29 @@
             <div class="fields">
               <div class="field">
                 <div class="ui radio checkbox">
-                  <input type="radio" formControlName="isGeneratedMeetingID" id="generatedMeetingID" value="true">
-                  <label for="generatedMeetingID" class="default-cursor">Generate Automatically</label>
+                  <input
+                    type="radio"
+                    formControlName="isGeneratedMeetingID"
+                    id="generatedMeetingID"
+                    value="true"
+                  />
+                  <label for="generatedMeetingID" class="default-cursor"
+                    >Generate Automatically</label
+                  >
                 </div>
               </div>
               <div class="field"></div>
               <div class="field">
                 <div class="ui radio checkbox">
-                  <input type="radio" formControlName="isGeneratedMeetingID" value="" id="personalMeetingID">
-                  <label for="personalMeetingID" class="default-cursor">Personal meeting ID (id)</label>
+                  <input
+                    type="radio"
+                    formControlName="isGeneratedMeetingID"
+                    value=""
+                    id="personalMeetingID"
+                  />
+                  <label for="personalMeetingID" class="default-cursor"
+                    >Personal meeting ID (id)</label
+                  >
                 </div>
               </div>
             </div>
@@ -70,25 +92,45 @@
             <label>Password</label>
             <div class="inline field">
               <div class="ui checkbox">
-                <input type="checkbox" tabindex="0" formControlName="isPasswordEnabled" id="isPasswordEnabled">
-                <label for="isPasswordEnabled" class="default-cursor">Set room password</label>
+                <input
+                  type="checkbox"
+                  tabindex="0"
+                  formControlName="isPasswordEnabled"
+                  id="isPasswordEnabled"
+                />
+                <label for="isPasswordEnabled" class="default-cursor"
+                  >Set room password</label
+                >
               </div>
             </div>
             <div class="field">
               <div class="ui input">
-                <input type="text" placeholder="Password" formControlName="password" [attr.disabled]="form.controls.isPasswordEnabled.value ? null : true">
+                <input
+                  type="text"
+                  placeholder="Password"
+                  formControlName="password"
+                  [attr.disabled]="
+                    form.controls.isPasswordEnabled.value ? null : true
+                  "
+                />
               </div>
             </div>
           </div>
         </div>
         <div class="ui segment">
-
           <div class="field">
             <label>Video</label>
             <div class="inline field">
               <div class="ui checkbox">
-                <input type="checkbox" tabindex="0" formControlName="isDisableVideo" id="isDisableVideo">
-                <label for="isDisableVideo" class="default-cursor">Disable video upon entry</label>
+                <input
+                  type="checkbox"
+                  tabindex="0"
+                  formControlName="isDisableVideo"
+                  id="isDisableVideo"
+                />
+                <label for="isDisableVideo" class="default-cursor"
+                  >Disable video upon entry</label
+                >
               </div>
             </div>
           </div>
@@ -96,17 +138,31 @@
             <label>Audio</label>
             <div class="inline field">
               <div class="ui checkbox">
-                <input type="checkbox" tabindex="0" formControlName="isDisableAudio" id="isDisableAudio">
-                <label for="isDisableAudio" class="default-cursor">Mute participants upon entry</label>
+                <input
+                  type="checkbox"
+                  tabindex="0"
+                  formControlName="isDisableAudio"
+                  id="isDisableAudio"
+                />
+                <label for="isDisableAudio" class="default-cursor"
+                  >Mute participants upon entry</label
+                >
               </div>
             </div>
           </div>
         </div>
         <!-- recurring meeting ? -->
-        <button class="ui button primary" type="submit" [disabled]="!form.valid">Schedule meeting</button>
-        <button class="ui button" type="button" (click)="cancelSchedule()">Cancel</button>
+        <button
+          class="ui button primary"
+          type="submit"
+          [disabled]="!form.valid"
+        >
+          Schedule meeting
+        </button>
+        <button class="ui button" type="button" (click)="cancelSchedule()">
+          Cancel
+        </button>
       </form>
     </div>
   </div>
 </div>
-
