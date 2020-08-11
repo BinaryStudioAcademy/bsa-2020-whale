@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Whale.DAL.Models;
+using Whale.DAL.Models.Poll;
 
 namespace Whale.DAL
 {

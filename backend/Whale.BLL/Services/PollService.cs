@@ -11,6 +11,7 @@ using Whale.BLL.Hubs;
 using Whale.BLL.Services.Abstract;
 using Whale.DAL;
 using Whale.DAL.Models;
+using Whale.DAL.Models.Poll;
 using Whale.Shared.DTO.Poll;
 using Whale.Shared.Helpers;
 
