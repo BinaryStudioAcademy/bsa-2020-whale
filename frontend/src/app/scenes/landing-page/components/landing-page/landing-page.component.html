@@ -27,9 +27,11 @@
                         where you can conduct business meetings or have a virtual party with your friends. ​ </h1>
                 </div>
                 <div class="ui text container ">
-                    <button class="ui big primary button" (click)="logIn()">
-                        <span *ngIf="!auth.isLoggedIn()">Sign up for free</span>
-                        <span *ngIf="auth.isLoggedIn()">Go to homepage</span>
+                    <button class="ui big primary button" (click)="logIn()" *ngIf="!auth.isLoggedIn()">
+                        <span >Sign up for free</span>
+                    </button>
+                    <button class="ui big primary button" (click)="redirectToHome()" *ngIf="auth.isLoggedIn()">
+                        <span >Go to homepage</span>
                     </button>
                 </div>
             </div>

@@ -21,6 +21,7 @@ export class PageHeaderComponent implements OnInit {
   }
   logOut(): void{
     this.auth.logout();
+    this.router.navigate(['']);
   }
 
 }
