@@ -176,7 +176,7 @@ export class MeetingComponent implements OnInit, OnDestroy, AfterContentInit {
         (resp) => {
           this.meeting = resp.body;
           console.log('meeting: ', this.meeting);
-          this.connectionData.groupId = this.meeting.id;
+          this.connectionData.meetingId = this.meeting.id;
           this.meetingSignalrService.invoke(
             SignalMethods.OnUserConnect,
             this.connectionData
@@ -228,7 +228,16 @@ export class MeetingComponent implements OnInit, OnDestroy, AfterContentInit {
     console.log('My peer ID is: ' + id);
     this.route.params.subscribe((params: Params) => {
       const link: string = params[`link`];
-      this.connectionData = { peerId: id, userId: '', groupId: '' };
+      const urlParams = new URLSearchParams(link);
+      const groupId = urlParams.get('id');
+      const groupPwd = urlParams.get('pwd');
+
+      this.connectionData = {
+        peerId: id,
+        userId: '',
+        meetingId: groupId,
+        meetingPwd: groupPwd,
+      };
       this.getMeeting(link);
     });
   }
