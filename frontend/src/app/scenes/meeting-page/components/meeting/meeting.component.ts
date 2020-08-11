@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, AfterContentInit, EventEmitter } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, AfterContentInit, EventEmitter, Inject } from '@angular/core';
 import Peer from 'peerjs';
 import { SignalRService } from 'app/core/services/signal-r.service';
 import { environment } from '@env';
@@ -10,13 +10,14 @@ import { Meeting } from '@shared/models/meeting/meeting';
 import { WebrtcSignalService, SignalMethods } from 'app/core/services/webrtc-signal.service';
 import { ToastrService } from 'ngx-toastr';
 import { BlobService } from './../../../../core/services/blob.service';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
   selector: 'app-meeting',
   templateUrl: './meeting.component.html',
   styleUrls: ['./meeting.component.sass']
 })
-export class MeetingComponent implements OnInit, AfterContentInit {
+export class MeetingComponent implements OnInit, AfterContentInit, AfterViewInit {
   @ViewChild('currentVideo') currentVideo: ElementRef;
 
   private webrtcSignalService: WebrtcSignalService;
@@ -34,15 +35,23 @@ export class MeetingComponent implements OnInit, AfterContentInit {
 
   users = ['user 1', 'user 2', 'user 3', 'user 4', 'user 5', 'user 6', 'user 7', 'user 8'];
 
+  @ViewChild('mainArea', { static: false }) mainArea: ElementRef;
+  private elem: any;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private meetingService: MeetingService,
     private signalRService: SignalRService,
     private toastr: ToastrService,
-    private blobService: BlobService
+    private blobService: BlobService,
+    @Inject(DOCUMENT) private document: any
   ) {
     this.webrtcSignalService = new WebrtcSignalService(signalRService);
+  }
+
+  ngAfterViewInit(): void {
+    this.elem = this.mainArea.nativeElement;
   }
 
   ngAfterContentInit() {
@@ -202,5 +211,29 @@ export class MeetingComponent implements OnInit, AfterContentInit {
 
   stopRecording(): void {
     this.blobService.stopRecording();
+  }
+
+  goFullscreen(): void {
+    if (this.elem.requestFullscreen) {
+      this.elem.requestFullscreen();
+    } else if (this.elem.mozRequestFullScreen) {
+      this.elem.mozRequestFullScreen();
+    } else if (this.elem.webkitRequestFullscreen) {
+      this.elem.webkitRequestFullscreen();
+    } else if (this.elem.msRequestFullscreen) {
+      this.elem.msRequestFullscreen();
+    }
+  }
+
+  closeFullscreen(): void {
+    if (this.document.exitFullscreen) {
+      this.document.exitFullscreen();
+    } else if (this.document.mozCancelFullScreen) {
+      this.document.mozCancelFullScreen();
+    } else if (this.document.webkitExitFullscreen) {
+      this.document.webkitExitFullscreen();
+    } else if (this.document.msExitFullscreen) {
+      this.document.msExitFullscreen();
+    }
   }
 }

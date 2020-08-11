@@ -14,6 +14,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ngx-toastr';
 import { HomePageModule } from './scenes/home-page/home-page.module';
 import { SimpleModalModule } from 'ngx-simple-modal';
+import { AngularDraggableModule } from 'angular2-draggable';
 
 
 @NgModule({
@@ -29,6 +30,7 @@ import { SimpleModalModule } from 'ngx-simple-modal';
     ProfilePageModule,
     ScheduleMeetingPageModule,
     HttpClientModule,
+    AngularDraggableModule,
     BrowserAnimationsModule,
     ToastrModule.forRoot({
       timeOut: 5000,
