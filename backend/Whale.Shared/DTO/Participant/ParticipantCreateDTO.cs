@@ -7,7 +7,7 @@ namespace Whale.Shared.DTO.Participant
     public class ParticipantCreateDTO
     {
         public ParticipantRole Role { get; set; }
-        public Guid UserId { get; set; }
+        public string UserEmail { get; set; }
         public Guid MeetingId { get; set; }
     }
 }
