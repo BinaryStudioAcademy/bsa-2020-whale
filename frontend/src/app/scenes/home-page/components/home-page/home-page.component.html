@@ -13,19 +13,33 @@
         </div>
       </a>
       <a class="item">
-        <a class="item">
+        <a class="item" (click)="goToPage('history')">
           <i class="clock outline icon"></i>
           Meetings history
         </a>
-        <a class="item">
+
+        <a class="item" (click)="goToPage('schedule-meeting')">
           <i class="calendar alternate outline icon"></i>
           Schedule meeting
         </a>
-        <a class="item">
+        <a class="item" (click)="createMeeting()">
           <i class="share icon"></i>
           Enter the meeting
         </a>
       </a>
+      <div class="relative">
+        <a
+          (click)="contactsVisibility = !contactsVisibility"
+          class="item header"
+          >Contacts
+          <button
+            (click)="addNewContact(); $event.stopPropagation()"
+            class="ui mini basic button edit-button"
+          >
+            New
+          </button>
+        </a>
+      </div>
       <a (click)="contactsVisibility = !contactsVisibility" class="item header"
         >Contacts
         <button

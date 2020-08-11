@@ -1,21 +1,57 @@
-<div class="ui dimmer modals page visible active" style="display: flex !important;" (click)="cancel(contactForm.dirty)">
-    <div class="ui mini modal visible active" (click)="$event.stopPropagation()">
-        <div class="header">
-            Add new contact
-        </div>
-        <form class="ui form" #contactForm="ngForm" (ngSubmit)="submit()">
-            <div class="content">
-                <div class="ui segment">
-                    <div class="field">
-                        <label>Contactner Email</label>
-                        <input type="text" name="email" [(ngModel)]="contactnerEmail" #email="ngModel" placeholder="Email" required email>
-                        <div class="ui error message" *ngIf="email.invalid && email.touched" style="display: block;">Email invalid</div>
-                        <div class="ui error message" *ngIf="email.value === ownerEmail" style="display: block;">You cannot add yourself to contacts</div>
-                    </div>  
-                    <button class="ui button primary" type="submit" [disabled]="contactForm.invalid || ownerEmail === email.value">Add</button>
-                    <button class="ui button" type="button" (click)="cancel(contactForm.dirty)">Close</button>
-                </div>
-            </div>
-        </form>
+<div
+  class="ui dimmer modals page visible active"
+  style="display: flex !important;"
+  (click)="cancel(contactForm.dirty)"
+>
+  <div class="ui mini modal visible active" (click)="$event.stopPropagation()">
+    <div class="header">
+      Add new contact
     </div>
-</div>  
+    <form class="ui form" #contactForm="ngForm" (ngSubmit)="submit()">
+      <div class="content">
+        <div class="ui segment">
+          <div class="field">
+            <label>Contactner Email</label>
+            <input
+              type="text"
+              name="email"
+              [(ngModel)]="contactnerEmail"
+              #email="ngModel"
+              placeholder="Email"
+              required
+              email
+            />
+            <div
+              class="ui error message"
+              *ngIf="email.invalid && email.touched"
+              style="display: block;"
+            >
+              Email invalid
+            </div>
+            <div
+              class="ui error message"
+              *ngIf="email.value === ownerEmail"
+              style="display: block;"
+            >
+              You cannot add yourself to contacts
+            </div>
+          </div>
+          <button
+            class="ui button primary"
+            type="submit"
+            [disabled]="contactForm.invalid || ownerEmail === email.value"
+          >
+            Add
+          </button>
+          <button
+            class="ui button"
+            type="button"
+            (click)="cancel(contactForm.dirty)"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

@@ -5,6 +5,7 @@ namespace Whale.Shared.DTO.Meeting
     {
         public string UserId { get; set; }
         public string PeerId { get; set; }
-        public string GroupId { get; set; }
+        public string MeetingId { get; set; }
+        public string MeetingPwd { get; set; }
     }
 }

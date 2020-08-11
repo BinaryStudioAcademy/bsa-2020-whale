@@ -1,19 +1,13 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ChatComponent } from './components/chat/chat.component';
 import { PageHeaderComponent } from './components/page-header/page-header.component';
-
-
+import { SpinerComponent } from './components/spiner/spiner.component';
+import { FormsModule } from '@angular/forms';
+import { DateFormatPipe } from './pipes/date-format.pipe';
 
 @NgModule({
-  declarations: [ChatComponent, PageHeaderComponent],
-  imports: [
-    CommonModule
-  ],
-  exports: [
-    CommonModule,
-    ChatComponent,
-    PageHeaderComponent
-  ]
+  declarations: [PageHeaderComponent, SpinerComponent, DateFormatPipe],
+  imports: [CommonModule, FormsModule],
+  exports: [CommonModule, PageHeaderComponent, SpinerComponent, DateFormatPipe],
 })
-export class SharedModule { }
+export class SharedModule {}
