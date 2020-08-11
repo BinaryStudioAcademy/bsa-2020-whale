@@ -1,11 +1,20 @@
-import { Component, OnInit, EventEmitter } from '@angular/core';
-import { DirectMessage } from '@shared/models/message/message';
+import {
+  Component,
+  OnInit,
+  EventEmitter,
+  ViewChild,
+  Output,
+} from '@angular/core';
 import { User } from '@shared/models/user/user';
 import { Contact } from '@shared/models/contact/contact';
 import { SignalRService } from 'app/core/services/signal-r.service';
 import { HttpService } from 'app/core/services/http.service';
 import { HubConnection } from '@aspnet/signalr';
-import { environment } from '@env';
+import { SimpleModalService } from 'ngx-simple-modal';
+import { AddContactModalComponent } from '../add-contact-modal/add-contact-modal.component';
+import { ContactsChatComponent } from '../contacts-chat/contacts-chat.component';
+import { ToastrService } from 'ngx-toastr';
+import { UpstateService } from 'app/core/services/upstate.service';
 
 @Component({
   selector: 'app-home-page',
@@ -13,92 +22,62 @@ import { environment } from '@env';
   styleUrls: ['./home-page.component.sass'],
 })
 export class HomePageComponent implements OnInit {
-  mainUser: User = {
-    id: '07e0ab30-ddfb-4510-b831-df749e927bff',
-    firstName: 'Daniel',
-    secondName: 'Louise',
-    avatarUrl: 'https://img.icons8.com/color/240/000000/user-female.png',
-    email: 'newEmal@gmail.com',
-    phone: 'meow',
-    registrationDate: new Date(),
-  };
+  private counterComponent: ContactsChatComponent;
   contacts: Contact[];
-
+  loggedInUser: User;
   contactsVisibility = true;
   groupsVisibility = false;
-  chatVisibility = false;
+  chatVisibility = true;
   private hubConnection: HubConnection;
-  directMessageRecieved = new EventEmitter<DirectMessage>();
-  messages: DirectMessage[] = [];
-  newMessage: DirectMessage = {
-    contactId: '',
-    message: '',
-    authorId: this.mainUser.id,
-    createdAt: new Date(),
-    attachment: false,
-  };
   contactSelected: Contact;
+
   constructor(
+    private toastr: ToastrService,
+    private stateService: UpstateService,
     private signalRService: SignalRService,
-    private httpService: HttpService
+    private httpService: HttpService,
+    private simpleModalService: SimpleModalService
   ) {}
 
   ngOnInit(): void {
-    this.httpService
-      .getRequest<Contact[]>('/api/Contacts/' + this.mainUser.id)
-      .subscribe(
-        (data: Contact[]) => {
-          this.contacts = data;
-        },
-        (error) => console.log(error)
-      );
-    this.signalRService
-      .registerHub(environment.apiUrl, 'chatHub')
-      .then((conn) => (this.hubConnection = conn))
-      .catch((err) => console.log(err));
+    this.stateService.getLoggeInUser().subscribe(
+      (usr: User) => {
+        this.loggedInUser = usr;
+      },
+      (error) => this.toastr.error(error)
+    );
+    this.httpService.getRequest<Contact[]>('/api/Contacts').subscribe(
+      (data: Contact[]) => {
+        this.contacts = data;
+      },
+      (error) => this.toastr.error(error)
+    );
   }
 
   addNewGroup(): void {
     console.log('group clicked!');
   }
   addNewContact(): void {
-    console.log('contact clicked!');
+    this.simpleModalService.addModal(AddContactModalComponent).subscribe(
+      (contact) => console.log(contact),
+      (error) => this.toastr.error(error)
+    );
+    this.stateService.getLoggeInUser().subscribe(
+      (usr: User) => {
+        console.log(usr);
+      },
+      (error) => this.toastr.error(error)
+    );
   }
   onUserClick(contact: Contact): void {
-    this.directMessageRecieved = this.signalRService.registerEvent<
-      DirectMessage
-    >(this.hubConnection, 'NewMessage');
-    this.directMessageRecieved.subscribe((message: DirectMessage) => {
-      this.messages.push(message);
-    });
-    this.chatVisibility = !this.chatVisibility;
-    if (this.chatVisibility === true) {
-      this.contactSelected = contact;
-      this.newMessage.contactId = contact.id;
-      this.newMessage.authorId = this.mainUser.id;
-      this.newMessage.createdAt = new Date();
-      this.httpService
-        .getRequest<DirectMessage[]>(
-          '/api/ContactChat/' + this.contactSelected.id
-        )
-        .subscribe(
-          (data: DirectMessage[]) => {
-            this.messages = data;
-          },
-          (error) => console.log(error)
-        );
-      this.hubConnection.invoke('JoinGroup', contact.id);
-    }
+    this.contactSelected = contact;
+  }
+  visibilityChange(event): void {
+    this.chatVisibility = event;
   }
 
   onGroupClick(): void {
     this.chatVisibility = !this.chatVisibility;
-  }
-  sendMessage(): void {
-    this.httpService
-      .postRequest<DirectMessage, void>('/api/ContactChat/', this.newMessage)
-      .subscribe((error) => console.log(error));
-    this.newMessage.message = '';
   }
   isContactActive(contact): boolean {
     return this.contactSelected === contact;

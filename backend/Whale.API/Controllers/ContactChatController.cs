@@ -16,7 +16,6 @@ namespace Whale.API.Controllers
     public class ContactChatController : ControllerBase
     {
         private readonly ContactChatService _chatService;
-        //private readonly ContactsService _contactsService;
 
         public ContactChatController(ContactChatService chatService)
         {
