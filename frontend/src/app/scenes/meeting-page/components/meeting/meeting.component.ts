@@ -153,7 +153,7 @@ export class MeetingComponent
       .subscribe(
         (connectionData) => {
           this.toastr.show('Meeting ended');
-          this.router.navigate(['/home']);
+          this.leave();
         },
         (err) => {
           this.toastr.error('Error occured when ending meeting');
