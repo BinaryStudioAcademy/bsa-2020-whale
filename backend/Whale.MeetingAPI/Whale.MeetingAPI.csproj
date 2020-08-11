@@ -24,5 +24,9 @@
     <ProjectReference Include="..\Whale.DAL\Whale.DAL.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+
 
 </Project>
