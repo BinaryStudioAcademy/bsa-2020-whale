@@ -7,6 +7,7 @@ import {
   AfterContentInit,
   EventEmitter,
   OnDestroy,
+  Inject,
 } from '@angular/core';
 import Peer from 'peerjs';
 import { SignalRService } from 'app/core/services/signal-r.service';
@@ -21,6 +22,7 @@ import {
   SignalMethods,
 } from 'app/core/services/meeting-signalr.service';
 import { ToastrService } from 'ngx-toastr';
+import { DOCUMENT } from '@angular/common';
 import { BlobService } from 'app/core/services/blob.service';
 import { MeetingConnectionData } from '@shared/models/meeting/meeting-connect';
 import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
@@ -32,7 +34,8 @@ import { UserService } from 'app/core/services/user.service';
   templateUrl: './meeting.component.html',
   styleUrls: ['./meeting.component.sass'],
 })
-export class MeetingComponent implements OnInit, OnDestroy, AfterContentInit {
+export class MeetingComponent
+  implements OnInit, AfterContentInit, AfterViewInit, OnDestroy {
   @ViewChild('currentVideo') currentVideo: ElementRef;
 
   private meetingSignalrService: MeetingSignalrService;
@@ -63,6 +66,9 @@ export class MeetingComponent implements OnInit, OnDestroy, AfterContentInit {
     'user 8',
   ];
 
+  @ViewChild('mainArea', { static: false }) mainArea: ElementRef;
+  private elem: any;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -70,9 +76,14 @@ export class MeetingComponent implements OnInit, OnDestroy, AfterContentInit {
     private signalRService: SignalRService,
     private toastr: ToastrService,
     private blobService: BlobService,
+    @Inject(DOCUMENT) private document: any,
     private userService: UserService
   ) {
     this.meetingSignalrService = new MeetingSignalrService(signalRService);
+  }
+
+  ngAfterViewInit(): void {
+    this.elem = this.mainArea.nativeElement;
   }
 
   ngAfterContentInit() {
@@ -286,5 +297,29 @@ export class MeetingComponent implements OnInit, OnDestroy, AfterContentInit {
       meetingId: this.meeting.id,
       message: this.msgText,
     } as MeetingMessageCreate);
+  }
+
+  goFullscreen(): void {
+    if (this.elem.requestFullscreen) {
+      this.elem.requestFullscreen();
+    } else if (this.elem.mozRequestFullScreen) {
+      this.elem.mozRequestFullScreen();
+    } else if (this.elem.webkitRequestFullscreen) {
+      this.elem.webkitRequestFullscreen();
+    } else if (this.elem.msRequestFullscreen) {
+      this.elem.msRequestFullscreen();
+    }
+  }
+
+  closeFullscreen(): void {
+    if (this.document.exitFullscreen) {
+      this.document.exitFullscreen();
+    } else if (this.document.mozCancelFullScreen) {
+      this.document.mozCancelFullScreen();
+    } else if (this.document.webkitExitFullscreen) {
+      this.document.webkitExitFullscreen();
+    } else if (this.document.msExitFullscreen) {
+      this.document.msExitFullscreen();
+    }
   }
 }

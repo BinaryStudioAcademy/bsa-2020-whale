@@ -8,15 +8,19 @@ import { UserService } from 'app/core/services/user.service';
 @Component({
   selector: 'app-add-contact-modal',
   templateUrl: './add-contact-modal.component.html',
-  styleUrls: ['./add-contact-modal.component.sass']
+  styleUrls: ['./add-contact-modal.component.sass'],
 })
-export class AddContactModalComponent extends SimpleModalComponent<null, Contact> {
+export class AddContactModalComponent extends SimpleModalComponent<
+  null,
+  Contact
+> {
   public contactnerEmail: string;
   public ownerEmail: string;
   constructor(
     private contactCervice: ContactService,
     private toastr: ToastrService,
-    private userService: UserService) {
+    private userService: UserService
+  ) {
     super();
     this.ownerEmail = userService.userEmail;
   }
@@ -28,16 +32,15 @@ export class AddContactModalComponent extends SimpleModalComponent<null, Contact
         this.close();
       },
       (error) => this.toastr.error(error)
-      );
+    );
   }
 
   public cancel(dirty: boolean): void {
     if (dirty) {
       if (confirm('Are you sure want to leave?')) {
-          this.close();
+        this.close();
       }
-    }
-    else {
+    } else {
       this.close();
     }
   }

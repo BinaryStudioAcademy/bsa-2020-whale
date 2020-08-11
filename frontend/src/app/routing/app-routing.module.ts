@@ -11,10 +11,11 @@ import { SettingPageComponent } from '../scenes/setting-page/setting-page/settin
 const routes: Routes = [
   { path: 'home', component: HomePageComponent },
   { path: 'setting-page', component: SettingPageComponent },
-  { path: 'meeting-page/:link', component: MeetingComponent, canActivate: [CheckAccessToMediaGuard] },
+  // { path: 'meeting-page/:link', component: MeetingComponent, canActivate: [CheckAccessToMediaGuard] },
+  { path: 'meeting-page', component: MeetingComponent },
   { path: 'profile-page', component: ProfilePageComponent },
-  { path: 'schedule-meeting', component: ScheduleMeetingPageComponent},
-  { path: '**', component: LandingPageComponent }
+  { path: 'schedule-meeting', component: ScheduleMeetingPageComponent },
+  { path: '**', component: LandingPageComponent },
 ];
 
 /*GuardExanple:
@@ -28,6 +29,6 @@ const routes: Routes = [
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}
