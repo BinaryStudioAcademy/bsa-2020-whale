@@ -21,15 +21,15 @@ namespace Whale.BLL.Hubs
         [HubMethodName("OnUserConnect")]
         public async Task Join(MeetingConnectDTO connectionData)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, connectionData.GroupId);
-            await Clients.Group(connectionData.GroupId).SendAsync("OnUserConnect", connectionData);
+            await Groups.AddToGroupAsync(Context.ConnectionId, connectionData.MeetingId);
+            await Clients.Group(connectionData.MeetingId).SendAsync("OnUserConnect", connectionData);
         }
 
         [HubMethodName("OnUserDisconnect")]
         public async Task Disconnect(MeetingConnectDTO ConnectionData)
         {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, ConnectionData.GroupId);
-            await Clients.Group(ConnectionData.GroupId).SendAsync("OnUserDisconnect", ConnectionData);
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, ConnectionData.MeetingId);
+            await Clients.Group(ConnectionData.MeetingId).SendAsync("OnUserDisconnect", ConnectionData);
         }
 
         [HubMethodName("OnSendMessage")]
