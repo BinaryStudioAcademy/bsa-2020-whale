@@ -1,0 +1,88 @@
+.action-buttons
+    display: none
+    position: absolute
+    top: 5px
+    right: 0
+    &:hover
+        display: block
+
+.ui.card:hover .small.ellipsis.vertical.icon, 
+.ui.card:hover .blue.microphone.icon
+    display: block
+
+.blue.microphone.icon
+    display: none
+
+.ui.card:hover .participant-name-wrapper
+    padding-right: 20px
+
+video
+    width: 100%
+    display: inherit
+    position: relative
+    border-radius: inherit
+    z-index: 9
+
+.participant-avatar-container
+    width: 100%
+    height: calc(100% - 5px)
+    border-radius: inherit
+    
+.participant-initials
+    position: absolute
+    top: 50%
+    left: 50%
+    font-size: 5rem
+    transform: translate(-50%, -50%)
+
+.participant-name-wrapper
+    display: flex
+    i
+        padding-right: 5px
+
+.header
+    max-width: -webkit-fill-available
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+.content
+    position: relative
+
+.small.ellipsis.vertical.icon
+    display: none
+    position: absolute
+    top: 50%
+    right: 5px
+    transform: translate(0, -50%)
+
+.inverted-text
+    padding: 0 5px
+    color: white
+    background-color: #0E6EB8
+    border-radius: 5px
+
+.current-user-actions,
+.other-participant-actions
+    display: none
+    margin: 0
+    background-color: rgba(#f4f4f9, 0.7)
+    border-radius: 5px
+    border: solid 1px rgba(grey, 0.5)
+    overflow: hidden
+    z-index: 10
+    ul
+        margin: 0
+        padding: 0
+        list-style: none
+        overflow: hidden
+        li
+            padding: 10px
+            border-top: solid 1px rgba(grey, 0.7)
+            cursor: pointer
+            overflow: hidden
+            &:hover
+                background-color: rgba(#e4e4e9, 0.9)
+                font-weight: 500
+            &:first-child
+                border-top: 0

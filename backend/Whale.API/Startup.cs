@@ -21,6 +21,8 @@ using Microsoft.IdentityModel.Tokens;
 using Whale.Shared.Services;
 using Whale.BLL.Services.Interfaces;
 using Whale.API.Middleware;
+using Whale.API.Extensions;
+using Whale.BLL.Interfaces;
 
 namespace Whale.API
 {
@@ -43,6 +45,9 @@ namespace Whale.API
                 mc.AddProfile<ContactProfile>();
                 mc.AddProfile<UserProfile>();
                 mc.AddProfile<ScheduledMeetingProfile>();
+                mc.AddProfile<MeetingProfile>();
+                mc.AddProfile<MeetingMessage>();
+                mc.AddProfile<ParticipantProfile>();
             });
 
             services.AddSingleton(mappingConfig.CreateMapper());
@@ -50,6 +55,8 @@ namespace Whale.API
             services.AddTransient<IContactsService, ContactsService>();
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<IScheduledMeetingsService, ScheduledMeetingsService>();
+            services.AddTransient<IMeetingService, MeetingService>();
+            services.AddTransient<ParticipantService>();
 
             services.AddSignalR();
             services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
