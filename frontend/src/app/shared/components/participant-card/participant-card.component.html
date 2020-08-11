@@ -1,0 +1,45 @@
+<div class="ui card">
+  <div class="image">
+    <video class="video" autoplay muted></video>
+    <p class="participant-initials"></p>
+  </div>
+  <div class="content">
+    <div class="participant-name-wrapper">
+      <i
+        class="microphone icon"
+        *ngIf="isParticipantMuted || data.isCurrentUser || data.isUserHost"
+        [ngClass]="isParticipantMuted ? 'red' : 'blue'"
+        [class.slash]="
+          (!isMicrophoneHovered && isParticipantMuted) ||
+          (isMicrophoneHovered &&
+            !data.isCurrentUser &&
+            isMicrophoneHovered && !data.isUserHost)
+        "
+        (mouseenter)="isMicrophoneHovered = true"
+        (mouseleave)="isMicrophoneHovered = false"
+        (click)="data.isCurrentUser || data.isUserHost ? switchMute() : ''"
+      ></i>
+      <a class="header"></a>
+    </div>
+    <i class="small blue ellipsis vertical icon"></i>
+  </div>
+</div>
+<div class="current-user-actions">
+  <ul>
+    <li (click)="switchMute()">
+      {{ isParticipantMuted ? "Unmute My Audio" : "Mute My Audio" }}
+    </li>
+    <li (click)="switchVideo()">Stop Video</li>
+    <li (click)="pinVideo()">Pin Video</li>
+    <li (click)="hideCurrentCard()">Hide Self View</li>
+  </ul>
+</div>
+<div class="other-participant-actions">
+  <ul>
+    <li (click)="pinVideo()">Pin Video</li>
+    <li *ngIf="data.isUserHost" (click)="switchVideo()">Stop Video</li>
+    <li *ngIf="data.isUserHost && !isParticipantMuted" (click)="switchMute()">
+      Mute Audio
+    </li>
+  </ul>
+</div>
