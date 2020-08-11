@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Whale.BLL.Exceptions;
 using Whale.BLL.Services.Abstract;
 using Whale.BLL.Services.Interfaces;
 using Whale.DAL;
@@ -29,14 +30,17 @@ namespace Whale.BLL.Services
             var user = await _context.Users
                 .FirstOrDefaultAsync(c => c.Id == userId);
 
-            if (user == null) throw new Exception("No such user");
+            if (user == null) throw new NotFoundException("User", userId.ToString());
 
             return _mapper.Map<UserDTO>(user);
         }
 
         public async Task<UserDTO> GetUserByEmail(string email)
         {
-            return _mapper.Map<UserDTO>(await _context.Users.FirstOrDefaultAsync(e => e.Email == email));
+            var user = await _context.Users.FirstOrDefaultAsync(e => e.Email == email);
+            if (user == null) throw new NotFoundException("User", email);
+
+            return _mapper.Map<UserDTO>(user);
         }
 
         public async Task<UserDTO> CreateUserAsync(UserCreateDTO userDTO)
@@ -45,7 +49,7 @@ namespace Whale.BLL.Services
 
             var user = _context.Users.FirstOrDefault(c => c.Email == userDTO.Email);
 
-            if (user != null) throw new Exception("Such user is already exist");
+            if (user != null) throw new AlreadyExistsException("User", userDTO.Email);
 
             _context.Users.Add(entity);
             await _context.SaveChangesAsync();
@@ -61,7 +65,7 @@ namespace Whale.BLL.Services
             var checkUser = _context.Users.Where(e => e.Email == user.Email);
 
             if (checkUser.Count() > 0)
-                return null;
+                throw new AlreadyExistsException("User", user.Email);
 
             var newUser = _mapper.Map<User>(user);
             var name = user.DisplayName
@@ -80,7 +84,7 @@ namespace Whale.BLL.Services
         {
             var entity = _context.Users.FirstOrDefault(c => c.Id == userDTO.Id);
 
-            if (entity == null) throw new Exception("No such user");
+            if (entity == null) throw new NotFoundException("User", userDTO.Id.ToString());
 
             var user = _mapper.Map<User>(userDTO);
 
@@ -93,7 +97,7 @@ namespace Whale.BLL.Services
         {
             var user = _context.Users.FirstOrDefault(c => c.Id == userId);
 
-            if (user == null) return false;
+            if (user == null) throw new NotFoundException("User", userId.ToString());
 
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();

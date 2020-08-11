@@ -20,14 +20,7 @@ namespace Whale.API.Controllers
         [HttpGet("{Id}", Name = "ScheduledGet")]
         public async Task<IActionResult> GetAsync(Guid Id)
         {
-            try
-            {
-                return Ok(await _scheduledMeetingService.GetAsync(Id));
-            }
-            catch (Exception e)
-            {
-                return NotFound(e.Message);
-            }
+            return Ok(await _scheduledMeetingService.GetAsync(Id));
         }
 
         [HttpPost]
@@ -46,15 +39,8 @@ namespace Whale.API.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteAsync(Guid id)
         {
-            try
-            {
-                await _scheduledMeetingService.DeleteAsync(id);
-                return NoContent();
-            }
-            catch (Exception e)
-            {
-                return NotFound(e.Message);
-            }
+            await _scheduledMeetingService.DeleteAsync(id);
+            return NoContent();
         }
     }
 }

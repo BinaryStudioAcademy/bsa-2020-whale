@@ -31,7 +31,7 @@ export class AddContactModalComponent extends SimpleModalComponent<
         this.result = resp.body;
         this.close();
       },
-      (error) => this.toastr.error(error)
+      (error) => this.toastr.error(error.Message)
     );
   }
 

@@ -116,8 +116,8 @@ export class MeetingComponent
           this.toastr.success('Connected successfuly');
         },
         (err) => {
-          console.log(err.message);
-          this.toastr.error('Error occured when connected to meeting');
+          console.log(err.Message);
+          this.toastr.error(err.Message);
           this.router.navigate(['/home']);
         }
       );
