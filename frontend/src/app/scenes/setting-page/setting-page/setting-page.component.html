@@ -1,0 +1,22 @@
+<app-page-header></app-page-header>
+<div class="ui container grid">
+  <div class="ui large aligned selection list four wide column card">
+    <div class="title">Setting</div>
+    <div class="item" id="videoHeader">
+      <i class="video icon"></i>
+      <div class="content">
+        <div class="header" (click)="changeVideo()">Video</div>
+      </div>
+    </div>
+    <div class="item" id="audioHeader">
+      <i class="microphone icon"></i>
+      <div class="content">
+        <div class="header" (click)="changeAudio()">Audio</div>
+      </div>
+    </div>
+  </div>
+  <div class="ui actions ten wide column action">
+    <app-setting-video *ngIf="isVideo"></app-setting-video>
+    <app-setting-audio *ngIf="isAudio"></app-setting-audio>
+  </div>
+</div>

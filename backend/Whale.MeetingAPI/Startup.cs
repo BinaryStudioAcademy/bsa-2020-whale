@@ -27,6 +27,7 @@ using Whale.Shared.Services;
 using AutoMapper;
 using Whale.BLL.MappingProfiles;
 using System.Reflection;
+using Whale.BLL.Services.Interfaces;
 
 namespace Whale.MeetingAPI
 {
@@ -44,7 +45,7 @@ namespace Whale.MeetingAPI
         {
             services.AddDbContext<WhaleDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("WhaleDatabase")));
             services.AddTransient<IMeetingService, MeetingService>();
-            services.AddTransient<ChatHub>();
+            services.AddTransient<IUserService, UserService>();
 
             services.AddControllers();
             services.AddHealthChecks()
@@ -64,6 +65,8 @@ namespace Whale.MeetingAPI
             services.AddAutoMapper(cfg =>
             {
                 cfg.AddProfile<MeetingProfile>();
+                cfg.AddProfile<MeetingMessage>();
+                cfg.AddProfile<UserProfile>();
             },
             Assembly.GetExecutingAssembly());
 
@@ -96,8 +99,7 @@ namespace Whale.MeetingAPI
                     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
                 });
 
-                endpoints.MapHub<WebRtcSignalHub>("/webrtcSignalHub");
-                endpoints.MapHub<ChatHub>("/chatHub");
+                endpoints.MapHub<MeetingHub>("/meeting");
             });
         }
     }

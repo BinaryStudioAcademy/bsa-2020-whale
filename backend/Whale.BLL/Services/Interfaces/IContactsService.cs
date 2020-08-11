@@ -12,5 +12,6 @@ namespace Whale.BLL.Services.Interfaces
         Task<ContactDTO> CreateContactAsync(ContactCreateDTO contactDTO);
         Task UpdateContactAsync(ContactEditDTO contactDTO);
         Task<bool> DeleteContactAsync(Guid contactId);
+        Task<ContactDTO> CreateContactFromEmailAsync(string ownerEmail, string contactnerEmail);
     }
 }
