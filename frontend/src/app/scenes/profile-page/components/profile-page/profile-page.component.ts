@@ -119,6 +119,8 @@ export class ProfilePageComponent implements OnInit {
       this.video.nativeElement.srcObject.getTracks()[0].stop();
       this.video.nativeElement.pause();
 
+      this.userPhotoFromCamera = '';
+
       this.isShowCamera = false;
     }
 
