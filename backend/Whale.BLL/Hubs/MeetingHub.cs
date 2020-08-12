@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Whale.Shared.DTO.Meeting;
 using Whale.Shared.DTO.Meeting.MeetingMessage;
 using Whale.BLL.Interfaces;
+using Whale.Shared.DTO.Poll;
 using Whale.BLL.Services;
 
 namespace Whale.BLL.Hubs
@@ -25,7 +26,8 @@ namespace Whale.BLL.Hubs
         public async Task Join(MeetingConnectDTO connectionData)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, connectionData.MeetingId);
-            var participant =  await _participantService.GetMeetingParticipantByEmail(Guid.Parse(connectionData.MeetingId), connectionData.UserEmail);
+            var participant = await _participantService.GetMeetingParticipantByEmail(Guid.Parse(connectionData.MeetingId), connectionData.UserEmail);
+
             connectionData.Participant = participant;
             await Clients.Group(connectionData.MeetingId).SendAsync("OnUserConnect", connectionData);
             await Clients.Caller.SendAsync("OnParticipantConnect", participant);
@@ -36,6 +38,7 @@ namespace Whale.BLL.Hubs
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, ConnectionData.MeetingId);
             await Clients.Group(ConnectionData.MeetingId).SendAsync("OnUserDisconnect", ConnectionData);
+
             if (await _meetingService.ParticipantDisconnect(ConnectionData.MeetingId, ConnectionData.UserEmail))
             {
                 await Clients.Group(ConnectionData.MeetingId).SendAsync("OnMeetingEnded", ConnectionData);
@@ -66,6 +69,12 @@ namespace Whale.BLL.Hubs
         public async Task OnConferenceStopRecording(string message)
         {
             await Clients.All.SendAsync("OnConferenceStopRecording", message);
+        }
+
+        [HubMethodName("OnPollCreated")]
+        public async Task SendPollToGroup(PollDataDTO pollData)
+        {
+            await Clients.Group(pollData.GroupId).SendAsync("OnPoll", pollData.PollDto);
         }
     }
 }

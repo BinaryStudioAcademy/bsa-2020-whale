@@ -7,6 +7,8 @@ import { tap } from 'rxjs/operators';
 import { MeetingConnectionData } from '@shared/models/meeting/meeting-connect';
 import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
 import { Participant } from '@shared/models/participant/participant';
+import { PollDto } from '@shared/models/poll/poll-dto';
+import { PollResultsDto } from '@shared/models/poll/poll-results-dto';
 
 @Injectable({
   providedIn: 'root',
@@ -38,6 +40,12 @@ export class MeetingSignalrService {
 
   private getMessages = new Subject<MeetingMessage[]>();
   public getMessages$ = this.getMessages.asObservable();
+
+  private pollReceived = new Subject<PollDto>();
+  public pollReceived$ = this.pollReceived.asObservable();
+
+  private pollResultsReceived = new Subject<PollResultsDto>();
+  public pollResultsReceived$ = this.pollResultsReceived.asObservable();
 
   constructor(private hubService: SignalRService) {
     from(hubService.registerHub(environment.meetingApiUrl, 'meeting'))
@@ -90,6 +98,14 @@ export class MeetingSignalrService {
         this.signalHub.on('OnGetMessages', (messages: MeetingMessage[]) => {
           this.getMessages.next(messages);
         });
+
+        this.signalHub.on('OnPoll', (poll: PollDto) => {
+          this.pollReceived.next(poll);
+        });
+
+        this.signalHub.on('OnPollResults', (pollResultsDto: PollResultsDto) => {
+          this.pollResultsReceived.next(pollResultsDto);
+        });
       });
   }
 
@@ -110,4 +126,6 @@ export enum SignalMethods {
   OnConferenceStopRecording,
   OnSendMessage,
   OnGetMessages,
+  OnPoll,
+  OnPollCreated,
 }

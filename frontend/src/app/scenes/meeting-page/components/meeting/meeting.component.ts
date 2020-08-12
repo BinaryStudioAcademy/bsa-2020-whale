@@ -17,6 +17,7 @@ import { ActivatedRoute, Router, Params } from '@angular/router';
 import { MeetingService } from 'app/core/services/meeting.service';
 import { takeUntil } from 'rxjs/operators';
 import { Meeting } from '@shared/models/meeting/meeting';
+import { PollDto } from '@shared/models/poll/poll-dto';
 import {
   MeetingSignalrService,
   SignalMethods,
@@ -25,6 +26,11 @@ import { ToastrService } from 'ngx-toastr';
 import { DOCUMENT } from '@angular/common';
 import { BlobService } from 'app/core/services/blob.service';
 import { MeetingConnectionData } from '@shared/models/meeting/meeting-connect';
+
+import { PollData } from '@shared/models/poll/poll-data';
+import { HttpService } from 'app/core/services/http.service';
+import { PollCreateDto } from 'app/shared/models/poll/poll-create-dto';
+import { PollResultsDto } from '@shared/models/poll/poll-results-dto';
 import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
 import { MeetingMessageCreate } from '@shared/models/meeting/message/meeting-message-create';
 import { UserService } from 'app/core/services/user.service';
@@ -38,6 +44,15 @@ import { ParticipantRole } from '@shared/models/participant/participant-role';
 })
 export class MeetingComponent
   implements OnInit, AfterContentInit, AfterViewInit, OnDestroy {
+  meeting: Meeting;
+  poll: PollDto;
+  pollResults: PollResultsDto;
+  isShowChat = false;
+  isShowParticipants = false;
+  isPollCreating = false;
+  isShowPoll = false;
+  isShowPollResults = false;
+
   @ViewChild('currentVideo') currentVideo: ElementRef;
 
   private meetingSignalrService: MeetingSignalrService;
@@ -45,9 +60,6 @@ export class MeetingComponent
   public peer: Peer;
   public connectedStreams: string[] = [];
   public connectedPeers = new Map<string, MediaStream>();
-  public meeting: Meeting;
-  public isShowChat = false;
-  public isShowParticipants = false;
 
   public messages: MeetingMessage[] = [];
   public msgText = '';
@@ -79,6 +91,7 @@ export class MeetingComponent
     private signalRService: SignalRService,
     private toastr: ToastrService,
     private blobService: BlobService,
+    private httpService: HttpService,
     @Inject(DOCUMENT) private document: any,
     private userService: UserService
   ) {
@@ -181,6 +194,21 @@ export class MeetingComponent
           this.toastr.error('Error occured when sending message');
         }
       );
+
+    this.meetingSignalrService.pollReceived$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe((poll: PollDto) => {
+        this.poll = poll;
+        this.isShowPoll = true;
+      });
+
+    this.meetingSignalrService.pollResultsReceived$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe((pollResultsDto: PollResultsDto) => {
+        console.log(pollResultsDto);
+        this.handlePollResults(pollResultsDto);
+      });
+
     // when peer opened send my peer id everyone
     this.peer.on('open', (id) => this.onPeerOpen(id));
 
@@ -205,6 +233,7 @@ export class MeetingComponent
   }
 
   getMeeting(link: string): void {
+    console.log('get meeting');
     this.meetingService
       .connectMeeting(link)
       .pipe(takeUntil(this.unsubscribe$))
@@ -327,6 +356,53 @@ export class MeetingComponent
       SignalMethods.OnConferenceStopRecording,
       'Conference stop recording'
     );
+  }
+
+  onPollIconClick() {
+    if (this.poll) {
+      this.isShowPoll = !this.isShowPoll;
+    } else if (this.pollResults || this.isShowPoll) {
+      this.isShowPollResults = !this.isShowPollResults;
+    } else {
+      this.isPollCreating = !this.isPollCreating;
+    }
+  }
+
+  public onPollCreated(pollCreateDto: PollCreateDto) {
+    this.httpService
+      .postRequest<PollCreateDto, PollDto>(
+        environment.meetingApiUrl + '/api/polls',
+        pollCreateDto
+      )
+      .subscribe(
+        (response: PollDto) => {
+          const pollData: PollData = {
+            userId: this.connectionData.userEmail,
+            groupId: this.connectionData.meetingId,
+            pollDto: response,
+          };
+
+          this.meetingSignalrService.invoke(
+            SignalMethods.OnPollCreated,
+            pollData
+          );
+
+          this.isPollCreating = false;
+          this.toastr.success('Poll was created!', 'Success');
+        },
+        (error) => {
+          this.toastr.error(error);
+        }
+      );
+  }
+
+  public handlePollResults(pollResultsDto: PollResultsDto) {
+    this.pollResults = pollResultsDto;
+    if (this.isShowPoll) {
+      console.log('if');
+      return;
+    }
+    this.isShowPollResults = true;
   }
 
   sendMessage(): void {
