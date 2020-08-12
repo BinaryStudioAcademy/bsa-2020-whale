@@ -60,13 +60,13 @@ export class HomePageComponent implements OnInit, OnDestroy {
       (usr: User) => {
         this.loggedInUser = usr;
       },
-      (error) => this.toastr.error(error)
+      (error) => this.toastr.error(error.Message)
     );
     this.httpService.getRequest<Contact[]>('/api/contacts').subscribe(
       (data: Contact[]) => {
         this.contacts = data;
       },
-      (error) => this.toastr.error(error)
+      (error) => this.toastr.error(error.Message)
     );
     this.ownerEmail = this.userService.userEmail;
     console.log(this.ownerEmail);
