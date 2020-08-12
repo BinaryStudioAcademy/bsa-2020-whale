@@ -52,9 +52,9 @@ namespace Whale.BLL.Services
 		{
 			pollAnswerDto.UserId = Guid.NewGuid().ToString();
 			_redisService.Connect();
-			_redisService.AddToSet<PollAnswerDTO>(pollAnswerDto.PollId.ToString() + nameof(PollAnswerDTO), pollAnswerDto);
+			await _redisService.AddToSet<PollAnswerDTO>(pollAnswerDto.PollId.ToString() + nameof(PollAnswerDTO), pollAnswerDto);
 
-			var pollAnswerDtos = _redisService.GetSetMembers<PollAnswerDTO>(pollAnswerDto.PollId.ToString() + nameof(PollAnswerDTO));
+			var pollAnswerDtos = await _redisService.GetSetMembers<PollAnswerDTO>(pollAnswerDto.PollId.ToString() + nameof(PollAnswerDTO));
 			var poll = _redisService.Get<Poll>(pollAnswerDto.PollId.ToString());
 			var pollResultsDto = GetPollResults(poll, pollAnswerDtos);
 			// signal
