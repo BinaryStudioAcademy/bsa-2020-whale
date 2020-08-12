@@ -5,10 +5,10 @@
       <a class="item">
         <div class="ui very relaxed horizontal list">
           <div class="item">
-            <img class="ui user-pic image" src="{{ mainUser.image }}" />
+            <img class="ui user-pic image" src="{{ loggedInUser.avatarUrl }}" />
             <div class="content">
-              <a class="header" (click)="goToPage('profile-page')"
-                >{{ mainUser.firstName }} {{ mainUser.lastName }}</a
+              <a class="header"
+                >{{ loggedInUser.firstName }} {{ loggedInUser.secondName }}</a
               >
             </div>
           </div>
@@ -41,42 +41,51 @@
             New
           </button>
         </a>
+      </div>
+      <div
+        [hidden]="!contactsVisibility"
+        *ngFor="let contact of contacts"
+        class="user-list ui middle aligned selection list"
+      >
         <div
-          [hidden]="!contactsVisibility"
-          *ngFor="let user of USERS"
-          class="user-list ui middle aligned selection list"
+          [ngClass]="isContactActive(contact) ? 'active item' : 'item'"
+          (click)="onContactClick(contact)"
         >
-          <div (click)="onUserClick()" class="item">
-            <img class="ui avatar image" src="{{ user.image }}" />
-            <div class="content">
-              <div class="description">
-                {{ user.firstName }} {{ user.lastName }}
-              </div>
+          <img
+            class="ui avatar image"
+            src="{{ contact.secondMember.avatarUrl }}"
+          />
+          <div class="content">
+            <div class="description">
+              {{ contact.secondMember.firstName }}
+              {{ contact.secondMember.secondName }}
             </div>
           </div>
         </div>
       </div>
-      <div class="relative">
-        <a (click)="groupsVisibility = !groupsVisibility" class="item header"
-          >Groups
-          <button
-            (click)="addNewGroup()"
-            class="ui mini basic button edit-button"
-          >
-            New
-          </button>
-        </a>
-        <div
-          [hidden]="!groupsVisibility"
-          *ngFor="let user of USERS"
-          class="user-list ui middle aligned selection list"
+      <a (click)="groupsVisibility = !groupsVisibility" class="item header"
+        >Groups
+        <button
+          (click)="addNewGroup()"
+          class="ui mini basic button edit-button"
         >
-          <div (click)="onGroupClick()" class="item">
-            <img class="ui avatar image" src="{{ user.image }}" />
-            <div class="content">
-              <div class="description">
-                {{ user.firstName }} {{ user.lastName }}
-              </div>
+          New
+        </button>
+      </a>
+      <div
+        [hidden]="!groupsVisibility"
+        *ngFor="let contact of contacts"
+        class="user-list ui middle aligned selection list"
+      >
+        <div (click)="onGroupClick()" class="item">
+          <img
+            class="ui avatar image"
+            src="{{ contact.secondMember.avatarUrl }}"
+          />
+          <div class="content">
+            <div class="description">
+              {{ contact.secondMember.firstName }}
+              {{ contact.secondMember.secondName }}
             </div>
           </div>
         </div>
@@ -85,45 +94,18 @@
   </div>
 
   <div class="right-col">
-    <div *ngIf="chatVisibility" class="actions">
-      <div class="chat ui secondary segment">
-        <div class="ui chat-inner feed">
-          <div *ngFor="let user of USERS" class="event">
-            <div class="label">
-              <img src="{{ user.image }}" />
-            </div>
-            <div class="content">
-              <div class="summary">
-                <a class="user"> {{ user.firstName }} {{ user.lastName }} </a>
-                <div class="date">
-                  1 Hour Ago
-                </div>
-              </div>
-              Hi! I am {{ user.firstName }}
-            </div>
-          </div>
-        </div>
-        <div class="ui form vertically-aligned">
-          <div class="field">
-            <textarea
-              rows="2"
-              placeholder="Print your message there"
-            ></textarea>
-          </div>
-          <button class="ui button tiny send">
-            Send
-            <i class="paper plane outline icon"></i>
-          </button>
-        </div>
-      </div>
-    </div>
     <div *ngIf="!chatVisibility" class="actions">
+      <app-contacts-chat
+        [contactSelected]="contactSelected"
+        (chat)="visibilityChange($event)"
+      ></app-contacts-chat>
+    </div>
+    <div *ngIf="chatVisibility" class="actions">
       <div class="vertically-aligned chat ui segment">
         <div class="text-aligned">
           <img
             class="ui centered small image"
             src="https://img.icons8.com/bubbles/100/000000/planner.png"
-            (click)="goToPage('schedule-meeting')"
           />
           <span class="text-aligned">Schedule meeting</span>
         </div>
@@ -131,11 +113,10 @@
           <img
             class="ui centered small image"
             src="https://img.icons8.com/bubbles/100/000000/todo-list.png"
-            (click)="goToPage('history')"
           />
           <span class="text-aligned">Meetings history</span>
         </div>
-        <div class="text-aligned" (click)="createMeeting()">
+        <div class="text-aligned">
           <img
             class="ui centered small image"
             src="https://img.icons8.com/bubbles/100/000000/forward.png"
