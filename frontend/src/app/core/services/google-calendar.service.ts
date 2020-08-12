@@ -7,21 +7,11 @@ import { AuthService } from '../auth/auth.service';
 export class GoogleCalendarService {
   constructor() {}
 
-  public async insertEvent() {
+  public async insertEvent(event: gapi.client.calendar.Event) {
+    console.log(event);
     const insert = await gapi.client.calendar.events.insert({
       calendarId: 'primary',
-      resource: {
-        start: {
-          dateTime: this.hoursFromNow(2),
-          timeZone: 'America/Los_Angeles',
-        },
-        end: {
-          dateTime: this.hoursFromNow(3),
-          timeZone: 'America/Los_Angeles',
-        },
-        summary: 'Have Fun!!!',
-        description: 'Do some cool stuff and have a fun time doing it',
-      },
+      resource: event,
     });
   }
 

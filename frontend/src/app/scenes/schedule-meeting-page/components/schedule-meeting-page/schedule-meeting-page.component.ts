@@ -4,6 +4,8 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { HttpService } from '../../../../core/services/http.service';
 import { ToastrService } from 'ngx-toastr';
 import { GoogleCalendarService } from 'app/core/services/google-calendar.service';
+import moment from 'moment';
+import { AuthService } from 'app/core/auth/auth.service';
 
 @Component({
   selector: 'app-schedule-meeting-page',
@@ -32,7 +34,8 @@ export class ScheduleMeetingPageComponent implements OnInit {
   constructor(
     private httpService: HttpService,
     private toastr: ToastrService,
-    private calendarService: GoogleCalendarService
+    private calendarService: GoogleCalendarService,
+    private authService: AuthService
   ) {
     const today: Date = new Date();
 
@@ -112,7 +115,48 @@ export class ScheduleMeetingPageComponent implements OnInit {
     return date;
   }
 
-  public addEventToCalendar() {
-    this.calendarService.insertEvent();
+  public async addEventToCalendar() {
+    let startTime = this.createDateTime(
+      this.form.controls.date.value,
+      this.form.controls.time.value
+    );
+
+    let endTime = this.getEndDate(
+      startTime,
+      this.form.controls.durationHours.value,
+      this.form.controls.durationMinutes.value
+    );
+
+    let userName = this.authService.currentUser.displayName;
+    let userEmail = this.authService.currentUser.email;
+
+    const event = {
+      summary: this.form.controls.topic.value,
+      start: ({
+        dateTime: startTime.toISOString(),
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      } as unknown) as gapi.client.calendar.EventDateTime,
+      end: ({
+        dateTime: endTime.toISOString(),
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      } as unknown) as gapi.client.calendar.EventDateTime,
+      creator: {
+        displayName: userName,
+        email: userEmail,
+      },
+    } as gapi.client.calendar.Event;
+
+    this.calendarService.insertEvent(event);
+  }
+
+  private getEndDate(
+    startDate: Date,
+    durationHours: number,
+    durationMinutes: number
+  ): Date {
+    return moment(startDate)
+      .add(durationHours, 'h')
+      .add(durationMinutes, 'm')
+      .toDate();
   }
 }

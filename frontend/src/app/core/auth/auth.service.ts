@@ -10,6 +10,7 @@ import { environment } from '@env';
   providedIn: 'root',
 })
 export class AuthService {
+  public currentUser: firebase.User;
   public user$: Observable<firebase.User>;
   public isSignedIn: boolean = false;
 
@@ -22,9 +23,11 @@ export class AuthService {
     this.user$.subscribe((user) => {
       if (user) {
         this.registrationService.registerUser(user);
+        this.currentUser = user;
         this.isSignedIn = true;
       } else {
         this.isSignedIn = false;
+        this.currentUser = null;
       }
       return of(user);
     });
