@@ -73,7 +73,7 @@ namespace Whale.BLL.Services
                 .Select(e => e.Trim())
                 .ToList();
             newUser.FirstName = name[0];
-            newUser.SecondName = name.Count() > 0 ? name[1] : null;
+            newUser.SecondName = name.Count() > 1 ? name[1] : null;
             await _context.Users.AddAsync(newUser);
             await _context.SaveChangesAsync();
 
@@ -86,9 +86,14 @@ namespace Whale.BLL.Services
 
             if (entity == null) throw new NotFoundException("User", userDTO.Id.ToString());
 
-            var user = _mapper.Map<User>(userDTO);
+            entity.FirstName = userDTO.FirstName;
+            entity.SecondName = userDTO.SecondName;
+            entity.Email = userDTO.Email;
+            entity.AvatarUrl = userDTO.AvatarUrl;
+            entity.RegistrationDate = entity.RegistrationDate;
+            entity.Phone = userDTO.Phone;
 
-            _context.Users.Update(user);
+            _context.Users.Update(entity);
 
             await _context.SaveChangesAsync();
         }
