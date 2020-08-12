@@ -11,7 +11,9 @@
 
     <div style="text-align: center;">
       <div style="margin-bottom: 15px;" class="ui buttons">
-        <label class="ui button" for="file">Upload from file</label>
+        <label (click)="closeCamera()" class="ui button" for="file"
+          >Upload from file</label
+        >
         <input
           hidden
           type="file"
