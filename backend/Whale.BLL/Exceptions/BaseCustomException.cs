@@ -4,22 +4,18 @@ namespace Whale.BLL.Exceptions
 {
     public class BaseCustomException : Exception
     {
-        public bool _isLogged = false; //If true - exception will be written to log
         public int _httpError = 400;
 
-        public BaseCustomException(bool isLogged = false) : base()
+        public BaseCustomException() : base()
         {
-            _isLogged = isLogged;
         }
 
-        public BaseCustomException(string message, Exception innerException, bool isLogged = false) : base(message, innerException)
+        public BaseCustomException(string message, Exception innerException) : base(message, innerException)
         {
-            _isLogged = isLogged;
         }
 
-        public BaseCustomException(string message, bool isLogged = false) : base(message)
+        public BaseCustomException(string message) : base(message)
         {
-            _isLogged = isLogged;
         }
     }
 }
