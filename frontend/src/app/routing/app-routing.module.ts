@@ -10,7 +10,11 @@ import { SettingPageComponent } from '../scenes/setting-page/setting-page/settin
 
 const routes: Routes = [
   { path: 'home', component: HomePageComponent },
-  { path: 'setting-page', component: SettingPageComponent },
+  {
+    path: 'setting-page',
+    component: SettingPageComponent,
+    canActivate: [CheckAccessToMediaGuard],
+  },
   {
     path: 'meeting-page/:link',
     component: MeetingComponent,

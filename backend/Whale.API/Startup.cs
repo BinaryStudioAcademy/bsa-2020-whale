@@ -46,6 +46,7 @@ namespace Whale.API
                 mc.AddProfile<ContactProfile>();
                 mc.AddProfile<UserProfile>();
                 mc.AddProfile<ScheduledMeetingProfile>();
+                mc.AddProfile<DirectMessageProfile>();
                 mc.AddProfile<MeetingProfile>();
                 mc.AddProfile<MeetingMessage>();
                 mc.AddProfile<ParticipantProfile>();
@@ -56,6 +57,7 @@ namespace Whale.API
             services.AddTransient<IContactsService, ContactsService>();
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<IScheduledMeetingsService, ScheduledMeetingsService>();
+            services.AddTransient<ContactChatService>();
             services.AddTransient<IMeetingService, MeetingService>();
             services.AddTransient<ParticipantService>();
 
@@ -122,6 +124,7 @@ namespace Whale.API
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<ChatHub>("/chatHub");
             });
         }
     }

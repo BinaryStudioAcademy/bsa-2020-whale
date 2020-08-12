@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Whale.Shared.DTO.Contact;
 using Whale.BLL.Services.Interfaces;
+using Whale.Shared.DTO.Contact.Setting;
 using Whale.BLL.Exceptions;
 
 namespace Whale.BLL.Services
@@ -16,59 +17,58 @@ namespace Whale.BLL.Services
     public class ContactsService:BaseService, IContactsService
     {
         public ContactsService(WhaleDbContext context, IMapper mapper) : base(context, mapper)
-        {
-        }
+        { }
 
-        public async Task<IEnumerable<ContactDTO>> GetAllContactsAsync(Guid ownerId)
+        public async Task<IEnumerable<ContactDTO>> GetAllContactsAsync(string userEmail)
         {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+
             var contacts = await _context.Contacts
-                .Include(c => c.Owner)
-                .Include(c => c.Contactner)
-                .Where(c => c.OwnerId == ownerId).ToListAsync();
+                .Include(c => c.FirstMember)
+                .Include(c => c.SecondMember)
+                .Include(c => c.PinnedMessage)
+                .Where(c => c.FirstMemberId == user.Id || c.SecondMemberId == user.Id)
+                .ToListAsync();
+            var dtoContacts = _mapper.Map<IEnumerable<ContactDTO>>(contacts);
+            dtoContacts = dtoContacts.GroupJoin(_context.ContactSettings,
+                c => c.Id, s => s.ContactId, (c, s) =>
+                {
+                    c.Settings = _mapper.Map<ContactSettingDTO>(s.FirstOrDefault( ss => ss.UserId == user.Id));
+                    c.ContactnerSettings = _mapper.Map<ContactSettingDTO>(s.FirstOrDefault(ss => ss.UserId != user.Id));
+                    return c;
+                });
 
-            return _mapper.Map<IEnumerable<ContactDTO>>(contacts);
+            return dtoContacts;
         }
 
-        public async Task<ContactDTO> GetContactAsync(Guid contactId)
+        public async Task<ContactDTO> GetContactAsync(Guid contactId, string userEmail)
         {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+
             var contact = await _context.Contacts
-                .Include(c => c.Owner)
-                .Include(c => c.Contactner)
+                .Include(c => c.FirstMember)
+                .Include(c => c.SecondMember)
+                .Include(c => c.PinnedMessage)
                 .FirstOrDefaultAsync(c => c.Id == contactId);
-
             if (contact == null) throw new NotFoundException("Contact", contactId.ToString());
-
-            return _mapper.Map<ContactDTO>(contact);
+            var dtoContact = _mapper.Map<ContactDTO>(contact);
+            var settings = _context.ContactSettings.Where(s => s.ContactId == contactId);
+            dtoContact.Settings = _mapper.Map<ContactSettingDTO>(
+                await settings.FirstOrDefaultAsync(s => s.UserId == user.Id));
+            dtoContact.ContactnerSettings = _mapper.Map<ContactSettingDTO>(
+                await settings.FirstOrDefaultAsync(s => s.UserId != user.Id));
+            return dtoContact;
         }
 
-        public async Task<ContactDTO> CreateContactAsync(ContactCreateDTO contactDTO)
-        {
-            var entity = _mapper.Map<Contact>(contactDTO);
-
-            var contact = _context.Contacts.FirstOrDefault(c => c.ContactnerId == contactDTO.ContactnerId && c.OwnerId == contactDTO.OwnerId);
-
-            if (contact != null) throw new AlreadyExistsException("Contact");
-
-            _context.Contacts.Add(entity);
-            await _context.SaveChangesAsync();
-
-            var createdContact = await _context.Contacts
-                .Include(c => c.Owner)
-                .Include(c => c.Contactner)
-                .FirstAsync(c => c.Id == entity.Id);
-
-            return _mapper.Map<ContactDTO>(createdContact);
-        }
-
-        public async Task UpdateContactAsync(ContactEditDTO contactDTO)
+        public async Task UpdateContactAsync(ContactEditDTO contactDTO, string userEmail)
         {
             var entity = _context.Contacts.FirstOrDefault(c => c.Id == contactDTO.Id);
 
             if (entity == null) throw new NotFoundException("Contact", contactDTO.Id.ToString());
 
-            entity.IsBlocked = contactDTO.IsBlocked;
-
             await _context.SaveChangesAsync();
+
+
         }
 
         public async Task<bool> DeleteContactAsync(Guid contactId)
@@ -94,19 +94,38 @@ namespace Whale.BLL.Services
                 throw new NotFoundException("Contactner", contactnerEmail);
 
             var contact = await _context.Contacts
-                .FirstOrDefaultAsync(c => c.ContactnerId == contactner.Id && c.OwnerId == owner.Id);
+                .FirstOrDefaultAsync(c =>
+                (c.FirstMemberId == contactner.Id && c.SecondMemberId == owner.Id) || 
+                (c.SecondMemberId == contactner.Id && c.FirstMemberId == owner.Id));
             if (contact is object)
                 throw new AlreadyExistsException("Contact");
 
             contact = new Contact()
             {
-                OwnerId = owner.Id,
-                ContactnerId = contactner.Id,
-                IsBlocked = false
+                FirstMemberId = owner.Id,
+                SecondMemberId = contactner.Id
             };
             _context.Contacts.Add(contact);
             await _context.SaveChangesAsync();
-            return await GetContactAsync(contact.Id);
+            Console.WriteLine(contact.Id);
+            var ownerSettings = new ContactSetting()
+            {
+                ContactId = contact.Id,
+                UserId = owner.Id,
+                IsBloked = false,
+                IsMuted = false
+            };
+            var contactnerSettings = new ContactSetting()
+            {
+                ContactId = contact.Id,
+                UserId = contactner.Id,
+                IsBloked = false,
+                IsMuted = false
+            };
+            _context.ContactSettings.Add(ownerSettings);
+            _context.ContactSettings.Add(contactnerSettings);
+            await _context.SaveChangesAsync();
+            return await GetContactAsync(contact.Id, ownerEmail);
         }
     }
 }

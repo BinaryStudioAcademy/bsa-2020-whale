@@ -1,16 +1,19 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Whale.BLL.Exceptions;
 using Whale.BLL.Services.Interfaces;
+using System.Text.RegularExpressions;
 using Whale.Shared.DTO.User;
 using Whale.Shared.Models;
+using System.Linq;
 
 namespace Whale.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -18,8 +21,24 @@ namespace Whale.API.Controllers
         public UserController(IUserService userService)
         {
             _userService = userService;
+            
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+
+            string email = HttpContext?.User.Claims
+                .FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+            Console.WriteLine("email");
+            Console.WriteLine(email);
+            var contacts = await _userService.GetUserByEmail(email);
+            if (contacts == null) return NotFound();
+
+            return Ok(contacts);
+        }
+
+        
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(Guid id)
         {
