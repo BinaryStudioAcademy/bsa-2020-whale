@@ -13,7 +13,8 @@
           (!isMicrophoneHovered && isParticipantMuted) ||
           (isMicrophoneHovered &&
             !data.isCurrentUser &&
-            isMicrophoneHovered && !data.isUserHost)
+            isMicrophoneHovered &&
+            !data.isUserHost)
         "
         (mouseenter)="isMicrophoneHovered = true"
         (mouseleave)="isMicrophoneHovered = false"

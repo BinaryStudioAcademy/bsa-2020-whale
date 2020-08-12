@@ -83,7 +83,6 @@
         class="big desktop icon block"
       ></i>
     </div>
-
     Me:
     <video #currentVideo autoplay="autoplay" [muted]="'muted'"></video> Users:
     <div id="participants"></div>
@@ -111,6 +110,7 @@
             style="margin-left: 10px; opacity: 0.8;"
             class="big share square icon"
           ></i>
+          <i (click)="onPollIconClick()" class="big clipboard list icon"></i>
           <i
             (click)="showChat()"
             style="margin-left: 10px; opacity: 0.8;"
@@ -134,4 +134,22 @@
       </div>
     </div>
   </div>
+</div>
+
+<div class="poll-create-container" *ngIf="isPollCreating">
+  <app-poll-create
+    [meetingId]="meeting.id"
+    (pollCreated)="onPollCreated($event)"
+  ></app-poll-create>
+</div>
+
+<div class="poll-create-container" *ngIf="isShowPoll">
+  <app-poll
+    [poll]="poll"
+    (pollAnswered)="isShowPoll = false; poll = null"
+  ></app-poll>
+</div>
+
+<div class="poll-create-container" *ngIf="isShowPollResults">
+  <app-poll-results [pollResults]="pollResults"></app-poll-results>
 </div>

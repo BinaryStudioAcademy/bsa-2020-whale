@@ -5,13 +5,8 @@ import { SharedModule } from '@shared/shared.module';
 import { FormsModule } from '@angular/forms';
 import { AngularDraggableModule } from 'angular2-draggable';
 
-
 @NgModule({
   declarations: [MeetingComponent],
-  imports: [
-    SharedModule,
-    FormsModule,
-    AngularDraggableModule
-  ]
+  imports: [SharedModule, FormsModule, AngularDraggableModule],
 })
-export class MeetingPageModule { }
+export class MeetingPageModule {}

@@ -13,9 +13,9 @@ using Whale.Shared.DTO.Participant;
 
 namespace Whale.BLL.Services
 {
-    public class ParticipantService: BaseService
+    public class ParticipantService : BaseService
     {
-        public ParticipantService(WhaleDbContext context, IMapper mapper) : base(context, mapper){ }
+        public ParticipantService(WhaleDbContext context, IMapper mapper) : base(context, mapper) { }
 
         public async Task<ParticipantDTO> CreateParticipantAsync(ParticipantCreateDTO participantDto)
         {
@@ -45,7 +45,7 @@ namespace Whale.BLL.Services
         {
             var entity = await _context.Participants.FirstOrDefaultAsync(p => p.Id == participantDto.Id);
 
-            if (entity == null) 
+            if (entity == null)
                 throw new NotFoundException("Participant");
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == participantDto.UserId);
