@@ -22,7 +22,7 @@ export class AddContactModalComponent extends SimpleModalComponent<
     private userService: UserService
   ) {
     super();
-    this.ownerEmail = userService.userEmail;
+    userService.userEmail.subscribe((user) => (this.ownerEmail = user));
   }
 
   public submit(): void {

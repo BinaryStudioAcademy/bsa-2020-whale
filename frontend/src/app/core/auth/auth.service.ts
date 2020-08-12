@@ -2,48 +2,41 @@ import { Injectable } from '@angular/core';
 import { auth } from 'firebase';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { UserRegistrationService } from '../services/user-registration.service';
-import { Observable } from 'rxjs';
-
-declare var gapi: any;
+import { Observable, of, from } from 'rxjs';
+import { mergeMap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private authUser: firebase.User = null;
   public user$: Observable<firebase.User>;
-
-  public get currentUser(): firebase.User {
-    return this.authUser;
-  }
+  public isSignedIn: boolean = false;
 
   constructor(
     private fireAuth: AngularFireAuth,
     private registrationService: UserRegistrationService
   ) {
-    fireAuth.authState.subscribe((user) => {
-      if (user) {
-        this.authUser = user;
-        this.registrationService.registerUser(user);
-      } else {
-        this.authUser = null;
-      }
-    });
-
     this.initClient();
     this.user$ = fireAuth.authState;
+    this.user$.subscribe((user) => {
+      if (user) {
+        this.registrationService.registerUser(user);
+        this.isSignedIn = true;
+      } else {
+        this.isSignedIn = false;
+      }
+      return of(user);
+    });
   }
 
   // Initialize the Google API client with desired scopes
   initClient() {
     gapi.load('client', () => {
-      console.log('loaded client');
-
       // It's OK to expose these credentials, they are client safe.
       gapi.client.init({
         apiKey: 'AIzaSyCOuwbwANkbbZT5hSpwpIDvXdZuce9fhZc', // * <- api key from firebase
         clientId:
-          '456439221439-70lmrohq9fr01b534qdj3cunid377b89.apps.googleusercontent.com', // * <= google clientId
+          '893944865679-eav20gfr3sbintikhq42dhhc414loq4p.apps.googleusercontent.com', // * <= google clientId
         discoveryDocs: [
           'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest',
         ],
@@ -79,19 +72,17 @@ export class AuthService {
     //return await this.fireAuth.signInWithPopup(new auth.GoogleAuthProvider()) !== null;
   }
 
-  public isLoggedIn(): boolean {
-    return this.authUser !== null;
+  public logout(): Observable<void> {
+    return from(this.fireAuth.signOut());
   }
 
-  public logout(): Promise<void> {
-    return this.fireAuth.signOut();
+  public getToken(): Observable<string> {
+    return this.fireAuth.idToken;
   }
 
-  public getToken(): Promise<string> {
-    return this.authUser?.getIdToken();
-  }
-
-  public refreshToken(): Promise<string> {
-    return this.authUser?.getIdToken(true);
+  public refreshToken(): Observable<string> {
+    return this.user$.pipe(
+      mergeMap(async (user) => await user.getIdToken(true))
+    );
   }
 }

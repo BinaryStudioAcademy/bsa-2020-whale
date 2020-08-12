@@ -280,14 +280,16 @@ export class MeetingComponent
       const groupId = urlParams.get('id');
       const groupPwd = urlParams.get('pwd');
 
-      this.connectionData = {
-        peerId: id,
-        userEmail: this.userService.userEmail,
-        meetingId: groupId,
-        meetingPwd: groupPwd,
-        participant: this.currentParticipant,
-      };
-      this.getMeeting(link);
+      this.userService.userEmail.subscribe((email) => {
+        this.connectionData = {
+          peerId: id,
+          userEmail: email,
+          meetingId: groupId,
+          meetingPwd: groupPwd,
+          participant: this.currentParticipant,
+        };
+        this.getMeeting(link);
+      });
     });
   }
 
@@ -330,11 +332,13 @@ export class MeetingComponent
   }
 
   sendMessage(): void {
-    this.meetingSignalrService.invoke(SignalMethods.OnSendMessage, {
-      authorEmail: this.userService.userEmail,
-      meetingId: this.meeting.id,
-      message: this.msgText,
-    } as MeetingMessageCreate);
+    this.userService.userEmail.subscribe((email) => {
+      this.meetingSignalrService.invoke(SignalMethods.OnSendMessage, {
+        authorEmail: email,
+        meetingId: this.meeting.id,
+        message: this.msgText,
+      } as MeetingMessageCreate);
+    });
 
     this.msgText = '';
   }

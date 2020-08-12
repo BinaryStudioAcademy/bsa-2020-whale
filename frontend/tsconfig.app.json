@@ -2,6 +2,15 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
+    "types": [
+      "gapi",
+      "gapi.auth2",
+      "dom-mediacapture-record"
+    ],
+    "typeRoots": [
+      "node_modules/@types",
+      "./@types"
+    ],
     "outDir": "./out-tsc/app",
     "baseUrl": "src",
     "paths": {
