@@ -8,30 +8,26 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { PollComponent } from './components/poll/poll/poll.component';
 
 import { SpinerComponent } from './components/spiner/spiner.component';
-
-
-
+import { PollResultsComponent } from './components/poll/poll-results/poll-results.component';
 
 @NgModule({
-
   declarations: [
-    ChatComponent, 
-    PageHeaderComponent, 
+    ChatComponent,
+    PageHeaderComponent,
     SpinerComponent,
     PollCreateComponent,
-    PollComponent
+    PollComponent,
+    PollResultsComponent,
   ],
-  imports: [
-    CommonModule,
-    ReactiveFormsModule
-  ],
+  imports: [CommonModule, ReactiveFormsModule],
   exports: [
     CommonModule,
     ChatComponent,
     PageHeaderComponent,
     PollCreateComponent,
     PollComponent,
-    SpinerComponent
-  ]
+    PollResultsComponent,
+    SpinerComponent,
+  ],
 })
-export class SharedModule { }
+export class SharedModule {}

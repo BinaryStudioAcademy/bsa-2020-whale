@@ -6,6 +6,7 @@ import { Subject, from, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { MeetingConnectionData } from '@shared/models/meeting/meeting-connect';
 import { PollDto } from '@shared/models/poll/poll-dto';
+import { PollResultsDto } from '@shared/models/poll/poll-results-dto';
 
 @Injectable({
   providedIn: 'root',
@@ -28,6 +29,9 @@ export class MeetingSignalrService {
 
   private pollReceived = new Subject<PollDto>();
   public pollReceived$ = this.pollReceived.asObservable();
+
+  private pollResultsReceived = new Subject<PollResultsDto>();
+  public pollResultsReceived$ = this.pollResultsReceived.asObservable();
 
   constructor(private hubService: SignalRService) {
     from(hubService.registerHub(environment.meetingApiUrl, 'meeting'))
@@ -60,8 +64,11 @@ export class MeetingSignalrService {
         );
 
         this.signalHub.on('OnPoll', (poll: PollDto) => {
-          console.log('OnPoll service');
           this.pollReceived.next(poll);
+        });
+
+        this.signalHub.on('OnPollResults', (pollResultsDto: PollResultsDto) => {
+          this.pollResultsReceived.next(pollResultsDto);
         });
       });
   }

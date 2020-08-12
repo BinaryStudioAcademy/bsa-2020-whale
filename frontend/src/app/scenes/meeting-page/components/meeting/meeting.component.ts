@@ -26,6 +26,7 @@ import { MeetingConnectionData } from '@shared/models/meeting/meeting-connect';
 import { PollData } from '@shared/models/poll/poll-data';
 import { HttpService } from 'app/core/services/http.service';
 import { PollCreateDto } from 'app/shared/models/poll/poll-create-dto';
+import { PollResultsDto } from '@shared/models/poll/poll-results-dto';
 
 @Component({
   selector: 'app-meeting',
@@ -35,10 +36,12 @@ import { PollCreateDto } from 'app/shared/models/poll/poll-create-dto';
 export class MeetingComponent implements OnInit, AfterContentInit {
   meeting: Meeting;
   poll: PollDto;
+  pollResults: PollResultsDto;
   isShowChat = false;
   isShowParticipants = false;
   isPollCreating = false;
   isShowPoll = false;
+  isShowPollResults = false;
 
   @ViewChild('currentVideo') currentVideo: ElementRef;
 
@@ -125,6 +128,13 @@ export class MeetingComponent implements OnInit, AfterContentInit {
         this.isShowPoll = true;
       });
 
+    this.meetingSignalrService.pollResultsReceived$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe((pollResultsDto: PollResultsDto) => {
+        console.log(pollResultsDto);
+        this.handlePollResults(pollResultsDto);
+      });
+
     // when peer opened send my peer id everyone
     this.peer.on('open', (id) => this.onPeerOpen(id));
 
@@ -208,7 +218,16 @@ export class MeetingComponent implements OnInit, AfterContentInit {
     console.log('My peer ID is: ' + id);
     this.route.params.subscribe((params: Params) => {
       const link: string = params[`link`];
-      this.connectionData = { peerId: id, userId: '', groupId: link };
+      const urlParams = new URLSearchParams(link);
+      const groupId = urlParams.get('id');
+      const groupPwd = urlParams.get('pwd');
+
+      this.connectionData = {
+        peerId: id,
+        meetingId: groupId,
+        meetingPwd: groupPwd,
+        userEmail: 'da',
+      };
       this.getMeeting(link);
     });
   }
@@ -251,6 +270,16 @@ export class MeetingComponent implements OnInit, AfterContentInit {
     );
   }
 
+  onPollIconClick() {
+    if (this.poll) {
+      this.isShowPoll = !this.isShowPoll;
+    } else if (this.pollResults || this.isShowPoll) {
+      this.isShowPollResults = !this.isShowPollResults;
+    } else {
+      this.isPollCreating = !this.isPollCreating;
+    }
+  }
+
   public onPollCreated(pollCreateDto: PollCreateDto) {
     this.httpService
       .postRequest<PollCreateDto, PollDto>(
@@ -260,8 +289,8 @@ export class MeetingComponent implements OnInit, AfterContentInit {
       .subscribe(
         (response: PollDto) => {
           const pollData: PollData = {
-            userId: this.connectionData.userId,
-            groupId: this.connectionData.groupId,
+            userId: this.connectionData.userEmail,
+            groupId: this.connectionData.meetingId,
             pollDto: response,
           };
 
@@ -277,5 +306,14 @@ export class MeetingComponent implements OnInit, AfterContentInit {
           this.toastr.error(error);
         }
       );
+  }
+
+  public handlePollResults(pollResultsDto: PollResultsDto) {
+    this.pollResults = pollResultsDto;
+    if (this.isShowPoll) {
+      console.log('if');
+      return;
+    }
+    this.isShowPollResults = true;
   }
 }

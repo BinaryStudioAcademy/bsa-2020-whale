@@ -58,10 +58,7 @@
           style="margin-left: 10px; opacity: 0.8;"
           class="big share square icon"
         ></i>
-        <i
-          (click)="isPollCreating = !isPollCreating"
-          class="big clipboard list icon"
-        ></i>
+        <i (click)="onPollIconClick()" class="big clipboard list icon"></i>
         <i
           (click)="showChat()"
           style="opacity: 0.8;"
@@ -89,5 +86,12 @@
 </div>
 
 <div class="poll-create-container" *ngIf="isShowPoll">
-  <app-poll [poll]="poll" (pollAnswered)="isShowPoll = false"></app-poll>
+  <app-poll
+    [poll]="poll"
+    (pollAnswered)="isShowPoll = false; poll = null"
+  ></app-poll>
+</div>
+
+<div class="poll-create-container" *ngIf="isShowPollResults">
+  <app-poll-results [pollResults]="pollResults"></app-poll-results>
 </div>

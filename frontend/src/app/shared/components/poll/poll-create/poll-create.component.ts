@@ -19,7 +19,7 @@ export class PollCreateComponent implements OnInit {
 
   constructor(private httpService: HttpService, private toastr: ToastrService) {
     this.form = new FormGroup({
-      title: new FormControl(''),
+      title: new FormControl('', Validators.required),
       isAnonymous: new FormControl(false),
       isSingleChoise: new FormControl(false),
 
@@ -49,6 +49,22 @@ export class PollCreateComponent implements OnInit {
   ngOnInit(): void {}
 
   public onSubmit() {
+    let areAnswersRepeat: boolean;
+
+    this.answers.controls.forEach((ctrl) => {
+      if (
+        this.answers.controls.find((ctrlInner) => ctrlInner.value == ctrl.value)
+      ) {
+        areAnswersRepeat = true;
+        return;
+      }
+    });
+
+    if (areAnswersRepeat) {
+      this.toastr.error('Answers must be unique', 'Error');
+      return;
+    }
+
     const pollCreateDto: PollCreateDto = {
       meetingId: this.meetingId,
       title: this.form.controls.title.value,

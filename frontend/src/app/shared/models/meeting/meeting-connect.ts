@@ -1,5 +1,6 @@
-export interface MeetingConnectionData{
-    userId: string,
-    peerId: string,
-    groupId: string
+export interface MeetingConnectionData {
+  userEmail: string;
+  peerId: string;
+  meetingId: string;
+  meetingPwd: string;
 }

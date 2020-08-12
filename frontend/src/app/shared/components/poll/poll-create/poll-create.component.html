@@ -3,7 +3,23 @@
   <form class="ui form" [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="field">
       <label>Title</label>
-      <input type="text" formControlName="title" />
+      <div class="ui input">
+        <input
+          type="text"
+          formControlName="title"
+          [class.invalid]="
+            form.controls.title.touched && form.controls.title.invalid
+          "
+        />
+      </div>
+      <div
+        *ngIf="form.controls.title.touched && form.controls.title.invalid"
+        class="errors-container"
+      >
+        <span *ngIf="form.controls.title.errors.required"
+          >Title is required.</span
+        >
+      </div>
     </div>
     <div class="field">
       <div class="inline field">
@@ -27,9 +43,9 @@
             formControlName="isSingleChoise"
             id="isSingleChoise"
           />
-          <label for="isSingleChoise" class="default-cursor"
-            >Single choice</label
-          >
+          <label for="isSingleChoise" class="default-cursor">
+            Single choice
+          </label>
         </div>
       </div>
     </div>
@@ -45,7 +61,25 @@
           >&times;</span
         >
         <div class="ui small input">
-          <input type="text" [formControlName]="i" />
+          <input
+            type="text"
+            [formControlName]="i"
+            [class.invalid]="
+              i < 2 &&
+              answers.controls[i].touched &&
+              answers.controls[i].invalid
+            "
+          />
+        </div>
+        <div
+          *ngIf="
+            i < 2 && answers.controls[i].touched && answers.controls[i].invalid
+          "
+          class="errors-container"
+        >
+          <span *ngIf="i < 2 && answers.controls[i].errors.required"
+            >This answer is required.</span
+          >
         </div>
       </div>
     </div>

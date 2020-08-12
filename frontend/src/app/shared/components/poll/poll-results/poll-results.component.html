@@ -1,0 +1,7 @@
+<div class="ui segment">
+  <p>{{ pollResults.title }}</p>
+  <div *ngFor="let answer of answers">
+    <p>{{ pollResults.results[answer] }} {{ answer }}</p>
+  </div>
+  <p>{{ pollResults.totalVoted }} participants voted so far</p>
+</div>

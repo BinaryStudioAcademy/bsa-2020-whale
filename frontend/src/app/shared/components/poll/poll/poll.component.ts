@@ -53,6 +53,8 @@ export class PollComponent implements OnInit {
       });
     }
 
+    this.pollAnswered.emit();
+
     const pollAnswerDto: PollAnswerDto = {
       pollId: this.poll.id,
       userId: 'user',
@@ -68,9 +70,6 @@ export class PollComponent implements OnInit {
       )
       .subscribe((response: PollResultsDto) => {
         this.toastr.success('Answer saved!');
-        //console.log(response);
-        console.log(response);
-        this.pollAnswered.emit();
       });
   }
 }
