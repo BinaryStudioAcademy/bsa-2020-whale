@@ -69,7 +69,7 @@ namespace Whale.BLL.Services
                 FirstMemberId = (contact.FirstMemberId == user.Id) ? contact.FirstMemberId : contact.SecondMemberId,
                 FirstMember = _mapper.Map<UserDTO>((contact.FirstMemberId == user.Id) ? contact.FirstMember : contact.SecondMember),
                 SecondMemberId = (contact.SecondMemberId == user.Id) ? contact.FirstMemberId : contact.SecondMemberId,
-                SecondMember = _mapper.Map<UserDTO>((contact.SecondMemberId == user.Id) ? contact.FirstMemberId : contact.SecondMemberId),
+                SecondMember = _mapper.Map<UserDTO>((contact.SecondMemberId == user.Id) ? contact.FirstMember : contact.SecondMember),
                 PinnedMessage = _mapper.Map<DirectMessageDTO>(contact.PinnedMessage),
                 Settings = _mapper.Map<ContactSettingDTO>((contact.FirstMemberId == user.Id) ? contact.FirstMemberSettings : contact.SecondMemberSettings),
                 ContactnerSettings = _mapper.Map<ContactSettingDTO>((contact.SecondMemberId == user.Id) ? contact.FirstMemberSettings : contact.SecondMemberSettings),
@@ -141,7 +141,6 @@ namespace Whale.BLL.Services
             };
             _context.Contacts.Add(contact);
             await _context.SaveChangesAsync();
-            Console.WriteLine(contact.Id);  
             return await GetContactAsync(contact.Id, ownerEmail);
         }
     }
