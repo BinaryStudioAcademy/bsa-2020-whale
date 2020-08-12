@@ -5,10 +5,13 @@
       <a class="item">
         <div class="ui very relaxed horizontal list">
           <div class="item">
-            <img class="ui user-pic image" src="{{ loggedInUser.avatarUrl }}" />
+            <img
+              class="ui user-pic image"
+              src="{{ loggedInUser?.avatarUrl }}"
+            />
             <div class="content">
               <a class="header"
-                >{{ loggedInUser.firstName }} {{ loggedInUser.secondName }}</a
+                >{{ loggedInUser?.firstName }} {{ loggedInUser?.secondName }}</a
               >
             </div>
           </div>
@@ -53,12 +56,12 @@
         >
           <img
             class="ui avatar image"
-            src="{{ contact.secondMember.avatarUrl }}"
+            src="{{ contact?.secondMember.avatarUrl }}"
           />
           <div class="content">
             <div class="description">
-              {{ contact.secondMember.firstName }}
-              {{ contact.secondMember.secondName }}
+              {{ contact?.secondMember.firstName }}
+              {{ contact?.secondMember.secondName }}
             </div>
           </div>
         </div>
