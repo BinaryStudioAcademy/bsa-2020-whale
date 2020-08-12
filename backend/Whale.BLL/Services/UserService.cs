@@ -82,9 +82,14 @@ namespace Whale.BLL.Services
 
             if (entity == null) throw new Exception("No such user");
 
-            var user = _mapper.Map<User>(userDTO);
+            entity.FirstName = userDTO.FirstName;
+            entity.SecondName = userDTO.SecondName;
+            entity.Email = userDTO.Email;
+            entity.AvatarUrl = userDTO.AvatarUrl;
+            entity.RegistrationDate = entity.RegistrationDate;
+            entity.Phone = userDTO.Phone;
 
-            _context.Users.Update(user);
+            _context.Users.Update(entity);
 
             await _context.SaveChangesAsync();
         }
