@@ -6,6 +6,8 @@ import {
   AfterViewInit,
   AfterContentInit,
   EventEmitter,
+  OnDestroy,
+  Inject,
 } from '@angular/core';
 import Peer from 'peerjs';
 import { SignalRService } from 'app/core/services/signal-r.service';
@@ -21,19 +23,27 @@ import {
   SignalMethods,
 } from 'app/core/services/meeting-signalr.service';
 import { ToastrService } from 'ngx-toastr';
+import { DOCUMENT } from '@angular/common';
 import { BlobService } from 'app/core/services/blob.service';
 import { MeetingConnectionData } from '@shared/models/meeting/meeting-connect';
+
 import { PollData } from '@shared/models/poll/poll-data';
 import { HttpService } from 'app/core/services/http.service';
 import { PollCreateDto } from 'app/shared/models/poll/poll-create-dto';
 import { PollResultsDto } from '@shared/models/poll/poll-results-dto';
+import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
+import { MeetingMessageCreate } from '@shared/models/meeting/message/meeting-message-create';
+import { UserService } from 'app/core/services/user.service';
+import { Participant } from '@shared/models/participant/participant';
+import { ParticipantRole } from '@shared/models/participant/participant-role';
 
 @Component({
   selector: 'app-meeting',
   templateUrl: './meeting.component.html',
   styleUrls: ['./meeting.component.sass'],
 })
-export class MeetingComponent implements OnInit, AfterContentInit {
+export class MeetingComponent
+  implements OnInit, AfterContentInit, AfterViewInit, OnDestroy {
   meeting: Meeting;
   poll: PollDto;
   pollResults: PollResultsDto;
@@ -51,6 +61,10 @@ export class MeetingComponent implements OnInit, AfterContentInit {
   public connectedStreams: string[] = [];
   public connectedPeers = new Map<string, MediaStream>();
 
+  public messages: MeetingMessage[] = [];
+  public msgText = '';
+  public currentParticipant: Participant;
+
   private unsubscribe$ = new Subject<void>();
   private currentUserStream: MediaStream;
   private connectionData: MeetingConnectionData;
@@ -67,6 +81,9 @@ export class MeetingComponent implements OnInit, AfterContentInit {
     'user 8',
   ];
 
+  @ViewChild('mainArea', { static: false }) mainArea: ElementRef;
+  private elem: any;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -74,9 +91,15 @@ export class MeetingComponent implements OnInit, AfterContentInit {
     private signalRService: SignalRService,
     private toastr: ToastrService,
     private blobService: BlobService,
-    private httpService: HttpService
+    private httpService: HttpService,
+    @Inject(DOCUMENT) private document: any,
+    private userService: UserService
   ) {
     this.meetingSignalrService = new MeetingSignalrService(signalRService);
+  }
+
+  ngAfterViewInit(): void {
+    this.elem = this.mainArea.nativeElement;
   }
 
   ngAfterContentInit() {
@@ -100,16 +123,29 @@ export class MeetingComponent implements OnInit, AfterContentInit {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (connectData) => {
-          if (connectData.peerId == this.peer.id) return;
-
+          this.meeting.participants.push(connectData.participant);
+          if (connectData.peerId == this.peer.id) {
+            return;
+          }
           console.log('connected with peer: ' + connectData.peerId);
           this.connect(connectData.peerId);
           this.toastr.success('Connected successfuly');
         },
         (err) => {
           console.log(err.message);
-          this.toastr.error('Error occured when connected to meeting');
-          this.router.navigate(['/profile-page']);
+          this.toastr.error(err.Message);
+          this.leave();
+        }
+      );
+
+    this.meetingSignalrService.participantConected$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (participant) => {
+          this.currentParticipant = participant;
+        },
+        (err) => {
+          this.toastr.error(err.Message);
         }
       );
 
@@ -117,9 +153,47 @@ export class MeetingComponent implements OnInit, AfterContentInit {
     this.meetingSignalrService.signalUserDisconected$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((connectionData) => {
-        if (this.connectedPeers.has(connectionData.peerId))
+        this.meeting.participants = this.meeting.participants.filter(
+          (p) => p.id !== connectionData.participant.id
+        );
+        if (this.connectedPeers.has(connectionData.peerId)) {
           this.connectedPeers.delete(connectionData.peerId);
+        }
       });
+
+    this.meetingSignalrService.meetingEnded$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (connectionData) => {
+          this.toastr.show('Meeting ended');
+          this.leave();
+        },
+        (err) => {
+          this.toastr.error('Error occured when ending meeting');
+        }
+      );
+
+    this.meetingSignalrService.getMessages$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (messages) => {
+          this.messages = messages;
+        },
+        (err) => {
+          this.toastr.error('Error occured when getting messages');
+        }
+      );
+
+    this.meetingSignalrService.sendMessage$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (message) => {
+          this.messages.push(message);
+        },
+        (err) => {
+          this.toastr.error('Error occured when sending message');
+        }
+      );
 
     this.meetingSignalrService.pollReceived$
       .pipe(takeUntil(this.unsubscribe$))
@@ -156,10 +230,6 @@ export class MeetingComponent implements OnInit, AfterContentInit {
   ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
-
-    this.destroyPeer();
-
-    this.currentUserStream.getTracks().forEach((track) => track.stop());
   }
 
   getMeeting(link: string): void {
@@ -171,14 +241,19 @@ export class MeetingComponent implements OnInit, AfterContentInit {
         (resp) => {
           this.meeting = resp.body;
           console.log('meeting: ', this.meeting);
+          this.connectionData.meetingId = this.meeting.id;
           this.meetingSignalrService.invoke(
             SignalMethods.OnUserConnect,
             this.connectionData
           );
+          this.meetingSignalrService.invoke(
+            SignalMethods.OnGetMessages,
+            this.meeting.id
+          );
         },
         (error) => {
           console.log(error.message);
-          this.router.navigate(['/home']);
+          this.leaveUnConnected();
         }
       );
   }
@@ -189,7 +264,7 @@ export class MeetingComponent implements OnInit, AfterContentInit {
 
   // call to peer
   private connect(recieverPeerId: string) {
-    let call = this.peer.call(recieverPeerId, this.currentUserStream);
+    const call = this.peer.call(recieverPeerId, this.currentUserStream);
 
     // get answer and show other user
     call.on('stream', (stream) => {
@@ -198,17 +273,29 @@ export class MeetingComponent implements OnInit, AfterContentInit {
     });
   }
 
-  public leave() {
-    this.ngOnDestroy();
+  leaveUnConnected(): void {
+    this.currentUserStream.getTracks().forEach((track) => track.stop());
+    this.destroyPeer();
     this.router.navigate(['/home']);
   }
 
-  private destroyPeer() {
-    this.meetingSignalrService.invoke(
-      SignalMethods.OnUserDisconnect,
-      this.connectionData
-    );
+  public leave(): void {
+    let canLeave = true;
+    if (this.currentParticipant?.role === ParticipantRole.Host) {
+      canLeave = confirm('You will end current meeting!');
+    }
+    if (canLeave) {
+      this.currentUserStream.getTracks().forEach((track) => track.stop());
+      this.destroyPeer();
+      this.meetingSignalrService.invoke(
+        SignalMethods.OnUserDisconnect,
+        this.connectionData
+      );
+      this.router.navigate(['/home']);
+    }
+  }
 
+  private destroyPeer() {
     this.peer.disconnect();
     this.peer.destroy();
   }
@@ -224,9 +311,10 @@ export class MeetingComponent implements OnInit, AfterContentInit {
 
       this.connectionData = {
         peerId: id,
+        userEmail: this.userService.userEmail,
         meetingId: groupId,
         meetingPwd: groupPwd,
-        userEmail: 'da',
+        participant: this.currentParticipant,
       };
       this.getMeeting(link);
     });
@@ -234,19 +322,19 @@ export class MeetingComponent implements OnInit, AfterContentInit {
 
   // show mediaStream
   private showMediaStream(stream: MediaStream) {
-    let participants = document.getElementById('participants');
+    const participants = document.getElementById('participants');
 
     if (!this.connectedStreams.includes(stream.id)) {
       this.connectedStreams.push(stream.id);
 
-      let videoElement = this.createVideoElement(stream);
+      const videoElement = this.createVideoElement(stream);
       participants.appendChild(videoElement);
     }
   }
 
   // create html element to show video
   private createVideoElement(stream: MediaStream): HTMLElement {
-    let videoElement = document.createElement('video');
+    const videoElement = document.createElement('video');
     videoElement.srcObject = stream;
     videoElement.autoplay = true;
     return videoElement;
@@ -315,5 +403,39 @@ export class MeetingComponent implements OnInit, AfterContentInit {
       return;
     }
     this.isShowPollResults = true;
+  }
+
+  sendMessage(): void {
+    this.meetingSignalrService.invoke(SignalMethods.OnSendMessage, {
+      authorEmail: this.userService.userEmail,
+      meetingId: this.meeting.id,
+      message: this.msgText,
+    } as MeetingMessageCreate);
+
+    this.msgText = '';
+  }
+
+  goFullscreen(): void {
+    if (this.elem.requestFullscreen) {
+      this.elem.requestFullscreen();
+    } else if (this.elem.mozRequestFullScreen) {
+      this.elem.mozRequestFullScreen();
+    } else if (this.elem.webkitRequestFullscreen) {
+      this.elem.webkitRequestFullscreen();
+    } else if (this.elem.msRequestFullscreen) {
+      this.elem.msRequestFullscreen();
+    }
+  }
+
+  closeFullscreen(): void {
+    if (this.document.exitFullscreen) {
+      this.document.exitFullscreen();
+    } else if (this.document.mozCancelFullScreen) {
+      this.document.mozCancelFullScreen();
+    } else if (this.document.webkitExitFullscreen) {
+      this.document.webkitExitFullscreen();
+    } else if (this.document.msExitFullscreen) {
+      this.document.msExitFullscreen();
+    }
   }
 }

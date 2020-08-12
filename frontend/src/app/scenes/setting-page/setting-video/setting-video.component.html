@@ -1,0 +1,10 @@
+<div class="ui container">
+  <video class="video" autoplay playsinline></video>
+  <div class="custom-select ui compact menu">
+    <select [(ngModel)]="device" class="select">
+      <option *ngFor="let c of videoDevices" [value]="c" [selected]="c">{{
+        c.label
+      }}</option>
+    </select>
+  </div>
+</div>

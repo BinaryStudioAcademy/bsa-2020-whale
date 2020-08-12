@@ -5,6 +5,8 @@ import { environment } from '../../../environments/environment';
 import { Subject, from, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { MeetingConnectionData } from '@shared/models/meeting/meeting-connect';
+import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
+import { Participant } from '@shared/models/participant/participant';
 import { PollDto } from '@shared/models/poll/poll-dto';
 import { PollResultsDto } from '@shared/models/poll/poll-results-dto';
 
@@ -21,11 +23,23 @@ export class MeetingSignalrService {
   private signalUserDisconected = new Subject<MeetingConnectionData>();
   public signalUserDisconected$ = this.signalUserDisconected.asObservable();
 
+  private participantConected = new Subject<Participant>();
+  public participantConected$ = this.participantConected.asObservable();
+
+  private meetingEnded = new Subject<MeetingConnectionData>();
+  public meetingEnded$ = this.meetingEnded.asObservable();
+
   private conferenceStartRecording = new Subject<string>();
   public conferenceStartRecording$ = this.conferenceStartRecording.asObservable();
 
   private conferenceStopRecording = new Subject<string>();
   public conferenceStopRecording$ = this.conferenceStopRecording.asObservable();
+
+  private sendMessage = new Subject<MeetingMessage>();
+  public sendMessage$ = this.sendMessage.asObservable();
+
+  private getMessages = new Subject<MeetingMessage[]>();
+  public getMessages$ = this.getMessages.asObservable();
 
   private pollReceived = new Subject<PollDto>();
   public pollReceived$ = this.pollReceived.asObservable();
@@ -57,11 +71,33 @@ export class MeetingSignalrService {
         );
 
         this.signalHub.on(
+          'OnParticipantConnect',
+          (participant: Participant) => {
+            this.participantConected.next(participant);
+          }
+        );
+
+        this.signalHub.on(
           'OnUserDisconnect',
           (connectionData: MeetingConnectionData) => {
             this.signalUserDisconected.next(connectionData);
           }
         );
+
+        this.signalHub.on(
+          'OnMeetingEnded',
+          (connectionData: MeetingConnectionData) => {
+            this.meetingEnded.next(connectionData);
+          }
+        );
+
+        this.signalHub.on('OnSendMessage', (message: MeetingMessage) => {
+          this.sendMessage.next(message);
+        });
+
+        this.signalHub.on('OnGetMessages', (messages: MeetingMessage[]) => {
+          this.getMessages.next(messages);
+        });
 
         this.signalHub.on('OnPoll', (poll: PollDto) => {
           this.pollReceived.next(poll);
@@ -88,6 +124,8 @@ export enum SignalMethods {
   OnUserDisconnect,
   OnConferenceStartRecording,
   OnConferenceStopRecording,
+  OnSendMessage,
+  OnGetMessages,
   OnPoll,
   OnPollCreated,
 }

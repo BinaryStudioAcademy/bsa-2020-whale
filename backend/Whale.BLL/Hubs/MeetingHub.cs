@@ -27,6 +27,7 @@ namespace Whale.BLL.Hubs
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, connectionData.MeetingId);
             var participant = await _participantService.GetMeetingParticipantByEmail(Guid.Parse(connectionData.MeetingId), connectionData.UserEmail);
+
             connectionData.Participant = participant;
             await Clients.Group(connectionData.MeetingId).SendAsync("OnUserConnect", connectionData);
             await Clients.Caller.SendAsync("OnParticipantConnect", participant);
@@ -37,17 +38,25 @@ namespace Whale.BLL.Hubs
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, ConnectionData.MeetingId);
             await Clients.Group(ConnectionData.MeetingId).SendAsync("OnUserDisconnect", ConnectionData);
-            //if (await _meetingService.ParticipantDisconnect(ConnectionData.MeetingId, ConnectionData.UserEmail))
-            //{
-            //    await Clients.Group(ConnectionData.MeetingId).SendAsync("OnMeetingEnded", ConnectionData);
-            //}
+
+            if (await _meetingService.ParticipantDisconnect(ConnectionData.MeetingId, ConnectionData.UserEmail))
+            {
+                await Clients.Group(ConnectionData.MeetingId).SendAsync("OnMeetingEnded", ConnectionData);
+            }
         }
 
-        [HubMethodName("SendGroupMessage")]
+        [HubMethodName("OnSendMessage")]
         public async Task SendMessage(MeetingMessageCreateDTO msgDTO)
         {
-            var msg = _meetingService.SendMessage(msgDTO);
-            await Clients.Group(msgDTO.MeetingId).SendAsync("SentMessage", msg);
+            var msg = await _meetingService.SendMessage(msgDTO);
+            await Clients.Group(msgDTO.MeetingId).SendAsync("OnSendMessage", msg);
+        }
+
+        [HubMethodName("OnGetMessages")]
+        public async Task GetMessages(string groupName)
+        {
+            var messages = await _meetingService.GetMessagesAsync(groupName);
+            await Clients.Caller.SendAsync("OnGetMessages", messages);
         }
 
         [HubMethodName("OnConferenceStartRecording")]

@@ -9,7 +9,7 @@
 //chat
 .chat
     width: 300px
-    height: 90%
+    height: 90vh
     background-color: #ffffff
     float: right
 
@@ -40,11 +40,37 @@
 //options
 .options
     background-color: #f1f1f1
-    width: 100%
+    width: 100% 
     position: absolute
     bottom: 0
-    height: 10%
-    text-align: center
+    height: 10vh
+    text-align: center    
+
+div:fullscreen
+    .options
+        display: none
+    .chat
+        height: 100vh
+
+div:-webkit-full-screen
+    .options
+        display: none
+
+div:moz-full-screen
+    .options
+        display: none
+
+div:fullscreen
+    .users
+        height: 100%
+
+div:-webkit-full-screen
+    .users
+        height: 100%
+
+div:moz-full-screen
+    .users
+        height: 100%
 
 .options__buttons
     margin-top: 24px
@@ -69,12 +95,7 @@ i.big.icon.clipboard
 i.big.icon.wechat
     margin-left: 2px
 
-.big.share.square.icon:hover, 
-.big.microphone.icon:hover, 
-.big.video.icon:hover, 
-.big.wechat.icon:hover, 
-.big.users.icon:hover,
-.big.clipboard.icon:hover
+.big.share.square.icon:hover, .big.microphone.icon:hover, .big.video.icon:hover, .big.wechat.icon:hover, .big.users.icon:hover, .big.desktop.icon:hover, .big.clipboard.icon:hover
     opacity: 1 !important
     cursor: pointer
 
@@ -153,3 +174,71 @@ i.icon
 i.icon:hover
     opacity: 1
     cursor: pointer
+
+
+.block
+    margin: 10px 10px 10px 0px
+
+.users-icon-fix.block
+    padding-top: 15px
+
+.tools
+    width: 310px
+    height: 50px
+    background-color: #f1f1f1
+    position: absolute
+    left: 40%
+    bottom: 15%
+    display: none
+    border-radius: 4px
+    box-shadow: 0px 0px 3px grey
+    opacity: 0.7
+    text-align: center
+    z-index: 10
+
+.tools:active
+    opacity: 1
+    box-shadow: 0px 0px 6px grey
+    
+div:fullscreen
+    .tools
+        display: block
+
+div:-webkit-full-screen
+    .tools
+        display: block
+
+div:moz-full-screen
+    .tools
+        display: block
+
+.chat-inner
+    overflow-y: scroll
+    padding-top: 2em
+    padding-left: 2em
+    padding-right: 2em
+    margin-bottom: 0
+    width: 100%
+    height: 100%
+
+.ui.placeholder.segment.field
+        max-width: 20rem
+
+
+.vertically-aligned
+    display: flex
+    justify-content: center
+    align-items: center
+
+.text-aligned
+    text-align: center
+
+
+.ui.input
+    width: 100%
+    textarea
+        padding-right: 50px
+        min-height: 50px
+        max-height: 40vh
+    .icon
+        margin-right: 10px

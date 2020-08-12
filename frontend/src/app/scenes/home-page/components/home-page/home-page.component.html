@@ -1,116 +1,148 @@
 <app-page-header></app-page-header>
 <div class="home-panel">
-    <div class="left-col">
-        <div class="ui left vertical menu bar">
-            <a class="item">
-                <div class="ui very relaxed horizontal list">
-                    <div class="item">
-                        <img class="ui user-pic image" src="{{mainUser.image}}" />
-                        <div class="content">
-                            <a class="header">{{mainUser.firstName}} {{mainUser.lastName}}</a>
-                        </div>
-                    </div>
-                </div>
-            </a>
-            <a class="item">
-                <a class="item">
-                    <i class="clock outline icon"></i>
-                    Meetings history
-                </a>
-
-                <a class="item" (click)="createMeeting()">
-                    <i class="calendar alternate outline icon"></i>
-                    Schedule meeting
-                </a>
-                <a class="item">
-                    <i class="share icon"></i>
-                    Enter the meeting
-                </a>
-            </a>
-            <div class="relative">
-                <a (click)="contactsVisibility=!contactsVisibility" class="item header">Contacts
-                    <button (click)="addNewContact(); $event.stopPropagation()"
-                        class="ui mini basic button edit-button">
-                        New
-                    </button>
-                </a>
-                <div [hidden]="!contactsVisibility" *ngFor="let user of USERS"
-                    class="user-list ui middle aligned selection list">
-                    <div (click)="onUserClick()" class="item">
-                        <img class="ui avatar image" src="{{user.image}}">
-                        <div class="content">
-                            <div class="description">{{user.firstName}} {{user.lastName}}</div>
-                        </div>
-                    </div>
-                </div>
+  <div class="left-col">
+    <div class="ui left vertical menu bar">
+      <a class="item">
+        <div class="ui very relaxed horizontal list">
+          <div class="item">
+            <img class="ui user-pic image" src="{{ mainUser.image }}" />
+            <div class="content">
+              <a class="header" (click)="goToPage('profile-page')"
+                >{{ mainUser.firstName }} {{ mainUser.lastName }}</a
+              >
             </div>
-            <div class="relative">
-                <a (click)="groupsVisibility=!groupsVisibility" class="item header">Groups
-                    <button (click)="addNewGroup()" class="ui mini basic button edit-button">
-                        New
-                    </button>
-                </a>
-                <div [hidden]="!groupsVisibility" *ngFor="let user of USERS"
-                    class="user-list ui middle aligned selection list">
-                    <div (click)="onGroupClick()" class="item">
-                        <img class="ui avatar image" src="{{user.image}}">
-                        <div class="content">
-                            <div class="description">{{user.firstName}} {{user.lastName}}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
+      </a>
+      <a class="item">
+        <a class="item" (click)="goToPage('history')">
+          <i class="clock outline icon"></i>
+          Meetings history
+        </a>
+
+        <a class="item" (click)="goToPage('schedule-meeting')">
+          <i class="calendar alternate outline icon"></i>
+          Schedule meeting
+        </a>
+        <a class="item" (click)="createMeeting()">
+          <i class="share icon"></i>
+          Enter the meeting
+        </a>
+      </a>
+      <div class="relative">
+        <a
+          (click)="contactsVisibility = !contactsVisibility"
+          class="item header"
+          >Contacts
+          <button
+            (click)="addNewContact(); $event.stopPropagation()"
+            class="ui mini basic button edit-button"
+          >
+            New
+          </button>
+        </a>
+        <div
+          [hidden]="!contactsVisibility"
+          *ngFor="let user of USERS"
+          class="user-list ui middle aligned selection list"
+        >
+          <div (click)="onUserClick()" class="item">
+            <img class="ui avatar image" src="{{ user.image }}" />
+            <div class="content">
+              <div class="description">
+                {{ user.firstName }} {{ user.lastName }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="relative">
+        <a (click)="groupsVisibility = !groupsVisibility" class="item header"
+          >Groups
+          <button
+            (click)="addNewGroup()"
+            class="ui mini basic button edit-button"
+          >
+            New
+          </button>
+        </a>
+        <div
+          [hidden]="!groupsVisibility"
+          *ngFor="let user of USERS"
+          class="user-list ui middle aligned selection list"
+        >
+          <div (click)="onGroupClick()" class="item">
+            <img class="ui avatar image" src="{{ user.image }}" />
+            <div class="content">
+              <div class="description">
+                {{ user.firstName }} {{ user.lastName }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <div class="right-col">
-        <div *ngIf="chatVisibility" class="actions">
-            <div class="chat ui secondary segment">
-                <div class="ui chat-inner feed">
-                    <div *ngFor="let user of USERS" class="event">
-                        <div class="label">
-                            <img src="{{user.image}}">
-                        </div>
-                        <div class="content">
-                            <div class="summary">
-                                <a class="user">
-                                    {{user.firstName}} {{user.lastName}}
-                                </a>
-                                <div class="date">
-                                    1 Hour Ago
-                                </div>
-                            </div>
-                            Hi! I am {{user.firstName}}
-                        </div>
-                    </div>
-                </div>
-                <div class="ui form vertically-aligned">
-                    <div class="field">
-                        <textarea rows="2" placeholder="Print your message there"></textarea>
-                    </div>
-                    <button class="ui button tiny send">Send
-                        <i class="paper plane outline icon"></i>
-                    </button>
-                </div>
+  <div class="right-col">
+    <div *ngIf="chatVisibility" class="actions">
+      <div class="chat ui secondary segment">
+        <div class="ui chat-inner feed">
+          <div *ngFor="let user of USERS" class="event">
+            <div class="label">
+              <img src="{{ user.image }}" />
             </div>
-        </div>
-        <div *ngIf="!chatVisibility" class="actions">
-            <div class="vertically-aligned chat ui segment">
-                <div class="text-aligned">
-                    <img class=" ui centered small image" src="https://img.icons8.com/bubbles/100/000000/planner.png" />
-                    <span class="text-aligned">Schedule meeting</span>
+            <div class="content">
+              <div class="summary">
+                <a class="user"> {{ user.firstName }} {{ user.lastName }} </a>
+                <div class="date">
+                  1 Hour Ago
                 </div>
-                <div class="text-aligned">
-                    <img class=" ui centered small image"
-                        src="https://img.icons8.com/bubbles/100/000000/todo-list.png" />
-                    <span class="text-aligned">Meetings history</span>
-                </div>
-                <div class="text-aligned">
-                    <img class=" ui centered small image" src="https://img.icons8.com/bubbles/100/000000/forward.png" />
-                    <span class="text-aligned header">Enter the meeting </span>
-                </div>
+              </div>
+              Hi! I am {{ user.firstName }}
             </div>
-
+          </div>
         </div>
+        <div class="ui form vertically-aligned">
+          <div class="field">
+            <textarea
+              rows="2"
+              placeholder="Print your message there"
+            ></textarea>
+          </div>
+          <button class="ui button tiny send">
+            Send
+            <i class="paper plane outline icon"></i>
+          </button>
+        </div>
+      </div>
     </div>
+    <div *ngIf="!chatVisibility" class="actions">
+      <div class="vertically-aligned chat ui segment">
+        <div class="text-aligned">
+          <img
+            class="ui centered small image"
+            src="https://img.icons8.com/bubbles/100/000000/planner.png"
+            (click)="goToPage('schedule-meeting')"
+          />
+          <span class="text-aligned">Schedule meeting</span>
+        </div>
+        <div class="text-aligned">
+          <img
+            class="ui centered small image"
+            src="https://img.icons8.com/bubbles/100/000000/todo-list.png"
+            (click)="goToPage('history')"
+          />
+          <span class="text-aligned">Meetings history</span>
+        </div>
+        <div class="text-aligned" (click)="createMeeting()">
+          <img
+            class="ui centered small image"
+            src="https://img.icons8.com/bubbles/100/000000/forward.png"
+          />
+          <span class="text-aligned header">Enter the meeting </span>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
