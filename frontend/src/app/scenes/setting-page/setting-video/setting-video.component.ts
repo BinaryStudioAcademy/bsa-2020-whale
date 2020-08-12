@@ -7,7 +7,7 @@ import { BrowserMediaDevice } from '../browser-media-device';
   styleUrls: ['./setting-video.component.sass'],
 })
 export class SettingVideoComponent implements OnInit, OnDestroy {
-  public constraints = { video: false, audio: false };
+  public constraints = { video: true, audio: false };
   public browserMediaDevice = new BrowserMediaDevice();
   public videoDevices: MediaDeviceInfo[];
   public device: MediaDeviceInfo;

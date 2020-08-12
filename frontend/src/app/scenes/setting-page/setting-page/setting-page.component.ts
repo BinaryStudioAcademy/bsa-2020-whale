@@ -16,13 +16,13 @@ export class SettingPageComponent implements OnInit, OnDestroy {
     this.isVideo = true;
     this.isAudio = false;
     document.getElementById('audioHeader').style.background = '#FFFFFF';
-    document.getElementById('videoHeader').style.background = '#b0b0b0';
+    document.getElementById('videoHeader').style.background = '#dbdbdb';
   }
   // tslint:disable-next-line: typedef
   changeAudio() {
     this.isVideo = false;
     this.isAudio = true;
     document.getElementById('videoHeader').style.background = '#FFFFFF';
-    document.getElementById('audioHeader').style.background = '#b0b0b0';
+    document.getElementById('audioHeader').style.background = '#dbdbdb';
   }
 }
