@@ -45,4 +45,14 @@ export class BlobService {
       })
       .subscribe((resp) => console.log(`video record: ${resp}`));
   }
+
+  public postBlobUploadImage(blob: Blob) {
+    const formData = new FormData();
+
+    formData.append('user-image', blob, 'image');
+
+    return this.http.post('http://localhost:51569/api/storage/save', formData, {
+      responseType: 'text',
+    });
+  }
 }

@@ -16,7 +16,7 @@ const routes: Routes = [
     component: MeetingComponent,
     canActivate: [CheckAccessToMediaGuard],
   },
-  // { path: 'meeting-page', component: MeetingComponent },
+  //{ path: 'meeting-page', component: MeetingComponent },
   { path: 'profile-page', component: ProfilePageComponent },
   { path: 'schedule-meeting', component: ScheduleMeetingPageComponent },
   { path: '**', component: LandingPageComponent },

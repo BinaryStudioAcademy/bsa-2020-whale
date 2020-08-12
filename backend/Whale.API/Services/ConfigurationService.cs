@@ -7,6 +7,8 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Serilog.Exceptions;
+using Serilog.Filters;
+using Whale.API.Models;
 
 namespace Whale.API
 {
@@ -21,6 +23,7 @@ namespace Whale.API
 
 			Log.Logger = new LoggerConfiguration()
 				.Enrich.WithExceptionDetails()
+				.Enrich.WithReleaseNumber()
 				.WriteTo.Elasticsearch(ConfigureElasticSink(configuration, environment))
 				.MinimumLevel.Error()
 				.CreateLogger();
