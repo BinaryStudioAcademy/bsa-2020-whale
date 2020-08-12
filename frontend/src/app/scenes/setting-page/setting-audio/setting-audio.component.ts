@@ -25,7 +25,6 @@ export class SettingAudioComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.constraints.audio = true;
     this.browserMediaDevice
       .getAudioInputList()
       .then((res) => (this.inputDevices = res))
@@ -45,7 +44,7 @@ export class SettingAudioComponent implements OnInit, OnDestroy {
     if (this.inputDevice === undefined) {
       this.inputDevice = this.inputDevices[0];
     }
-    console.log(this.inputDevices);
+    console.log(this.outputDevice);
     this.meter
       .connect(this.inputDevice)
       .catch((err) => alert('Connection Error'));
