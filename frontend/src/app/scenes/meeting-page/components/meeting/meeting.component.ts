@@ -123,10 +123,10 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (connectData) => {
-          this.meeting.participants.push(connectData.participant);
           if (connectData.peerId == this.peer.id) {
             return;
           }
+          this.meeting.participants.push(connectData.participant);
           console.log('connected with peer: ' + connectData.peerId);
           this.connect(connectData.peerId);
           this.toastr.success('Connected successfuly');
@@ -260,6 +260,7 @@ export class MeetingComponent
 
   showChat(): void {
     this.isShowChat = !this.isShowChat;
+    console.log('participants: ', this.meeting.participants);
   }
 
   // call to peer
@@ -347,6 +348,11 @@ export class MeetingComponent
       SignalMethods.OnConferenceStartRecording,
       'Conference start recording'
     );
+  }
+
+  turnOffCamera(): void {
+    this.currentUserStream.getTracks().forEach((track) => track.stop());
+    this.currentUserStream = null;
   }
 
   stopRecording(): void {

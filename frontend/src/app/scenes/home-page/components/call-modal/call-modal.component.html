@@ -1,0 +1,22 @@
+<div class="ui dimmer modals page visible active" (click)="close()">
+  <div class="ui mini modal visible active" (click)="$event.stopPropagation()">
+    <div class="header">
+      {{ secondMember?.firstName }} {{ secondMember?.secondName }}
+    </div>
+    <div class="content">
+      <img
+        class="ui centered circular small image"
+        src="{{ secondMember?.avatarUrl }}"
+      />
+    </div>
+
+    <div class="icon-wrapper">
+      <i
+        *ngIf="!isCaller"
+        class="phone green circular large icon"
+        (click)="confirm()"
+      ></i>
+      <i class="phone red circular large icon" (click)="close()"></i>
+    </div>
+  </div>
+</div>
