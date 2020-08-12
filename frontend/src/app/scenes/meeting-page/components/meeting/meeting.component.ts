@@ -33,9 +33,9 @@ import { PollCreateDto } from 'app/shared/models/poll/poll-create-dto';
 import { PollResultsDto } from '@shared/models/poll/poll-results-dto';
 import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
 import { MeetingMessageCreate } from '@shared/models/meeting/message/meeting-message-create';
-import { UserService } from 'app/core/services/user.service';
 import { Participant } from '@shared/models/participant/participant';
 import { ParticipantRole } from '@shared/models/participant/participant-role';
+import { AuthService } from 'app/core/auth/auth.service';
 
 @Component({
   selector: 'app-meeting',
@@ -93,7 +93,7 @@ export class MeetingComponent
     private blobService: BlobService,
     private httpService: HttpService,
     @Inject(DOCUMENT) private document: any,
-    private userService: UserService
+    private authService: AuthService
   ) {
     this.meetingSignalrService = new MeetingSignalrService(signalRService);
   }
@@ -311,7 +311,7 @@ export class MeetingComponent
 
       this.connectionData = {
         peerId: id,
-        userEmail: this.userService.userEmail,
+        userEmail: this.authService.currentUser.email,
         meetingId: groupId,
         meetingPwd: groupPwd,
         participant: this.currentParticipant,
@@ -407,7 +407,7 @@ export class MeetingComponent
 
   sendMessage(): void {
     this.meetingSignalrService.invoke(SignalMethods.OnSendMessage, {
-      authorEmail: this.userService.userEmail,
+      authorEmail: this.authService.currentUser.email,
       meetingId: this.meeting.id,
       message: this.msgText,
     } as MeetingMessageCreate);
