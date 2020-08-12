@@ -11,6 +11,8 @@ using Whale.Shared.DTO.Contact;
 using Whale.BLL.Services.Interfaces;
 using Whale.Shared.DTO.Contact.Setting;
 using Whale.BLL.Exceptions;
+using Whale.Shared.DTO.User;
+using Whale.Shared.DTO.DirectMessage;
 
 namespace Whale.BLL.Services
 {
@@ -23,20 +25,23 @@ namespace Whale.BLL.Services
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
 
-            var contacts = await _context.Contacts
+            var dtoContacts = await _context.Contacts
                 .Include(c => c.FirstMember)
                 .Include(c => c.SecondMember)
                 .Include(c => c.PinnedMessage)
                 .Where(c => c.FirstMemberId == user.Id || c.SecondMemberId == user.Id)
-                .ToListAsync();
-            var dtoContacts = _mapper.Map<IEnumerable<ContactDTO>>(contacts);
-            dtoContacts = dtoContacts.GroupJoin(_context.ContactSettings,
-                c => c.Id, s => s.ContactId, (c, s) =>
+                .GroupJoin(_context.ContactSettings,
+                c => c.Id, s => s.ContactId, (c, s) => new ContactDTO()
                 {
-                    c.Settings = _mapper.Map<ContactSettingDTO>(s.FirstOrDefault( ss => ss.UserId == user.Id));
-                    c.ContactnerSettings = _mapper.Map<ContactSettingDTO>(s.FirstOrDefault(ss => ss.UserId != user.Id));
-                    return c;
-                });
+                    Id = c.Id,
+                    FirstMemberId = (c.FirstMemberId == user.Id) ? c.FirstMemberId : c.SecondMemberId,
+                    FirstMember = _mapper.Map<UserDTO>((c.FirstMemberId == user.Id) ? c.FirstMember : c.SecondMember),
+                    SecondMemberId = (c.SecondMemberId == user.Id) ? c.SecondMemberId : c.FirstMemberId,
+                    SecondMember = _mapper.Map<UserDTO>((c.SecondMemberId == user.Id) ? c.SecondMember : c.FirstMember),
+                    PinnedMessage = _mapper.Map<DirectMessageDTO>(c.PinnedMessage),
+                    Settings = _mapper.Map<ContactSettingDTO>(s.FirstOrDefault(ss => ss.UserId == user.Id)),
+                    ContactnerSettings = _mapper.Map<ContactSettingDTO>(s.FirstOrDefault(ss => ss.UserId != user.Id))
+                }).ToListAsync();
 
             return dtoContacts;
         }
@@ -51,12 +56,21 @@ namespace Whale.BLL.Services
                 .Include(c => c.PinnedMessage)
                 .FirstOrDefaultAsync(c => c.Id == contactId);
             if (contact == null) throw new NotFoundException("Contact", contactId.ToString());
-            var dtoContact = _mapper.Map<ContactDTO>(contact);
             var settings = _context.ContactSettings.Where(s => s.ContactId == contactId);
-            dtoContact.Settings = _mapper.Map<ContactSettingDTO>(
-                await settings.FirstOrDefaultAsync(s => s.UserId == user.Id));
-            dtoContact.ContactnerSettings = _mapper.Map<ContactSettingDTO>(
-                await settings.FirstOrDefaultAsync(s => s.UserId != user.Id));
+            var dtoContact = new ContactDTO()
+            {
+                Id = contact.Id,
+                FirstMemberId = (contact.FirstMemberId == user.Id) ? contact.FirstMemberId : contact.SecondMemberId,
+                FirstMember = _mapper.Map<UserDTO>((contact.FirstMemberId == user.Id) ? contact.FirstMember : contact.SecondMember),
+                SecondMemberId = (contact.SecondMemberId == user.Id) ? contact.SecondMemberId : contact.FirstMemberId,
+                SecondMember = _mapper.Map<UserDTO>((contact.SecondMemberId == user.Id) ? contact.SecondMember : contact.FirstMember),
+                PinnedMessage = _mapper.Map<DirectMessageDTO>(contact.PinnedMessage),
+                Settings = _mapper.Map<ContactSettingDTO>(
+                    await settings.FirstOrDefaultAsync(s => s.UserId == user.Id)),
+                ContactnerSettings = _mapper.Map<ContactSettingDTO>(
+                    await settings.FirstOrDefaultAsync(s => s.UserId != user.Id))
+            };
+
             return dtoContact;
         }
 
@@ -67,8 +81,6 @@ namespace Whale.BLL.Services
             if (entity == null) throw new NotFoundException("Contact", contactDTO.Id.ToString());
 
             await _context.SaveChangesAsync();
-
-
         }
 
         public async Task<bool> DeleteContactAsync(Guid contactId)
