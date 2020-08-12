@@ -25,23 +25,44 @@ namespace Whale.BLL.Services
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
 
-            var dtoContacts = await _context.Contacts
+            /* var dtoContacts = _context.Contacts
+                 .Include(c => c.FirstMember)
+                 .Include(c => c.SecondMember)
+                 .Include(c => c.PinnedMessage)
+                 .Where(c => c.FirstMemberId == user.Id || c.SecondMemberId == user.Id)
+                 .GroupJoin(_context.ContactSettings,
+                 c => c.Id, s => s.ContactId, (c, s) => new ContactDTO()
+                 {
+                     Id = c.Id,
+                     FirstMemberId = (c.FirstMemberId == user.Id) ? c.FirstMemberId : c.SecondMemberId,
+                     FirstMember = _mapper.Map<UserDTO>((c.FirstMemberId == user.Id) ? c.FirstMember : c.SecondMember),
+                     SecondMemberId = (c.SecondMemberId == user.Id) ? c.SecondMemberId : c.FirstMemberId,
+                     SecondMember = _mapper.Map<UserDTO>((c.SecondMemberId == user.Id) ? c.SecondMember : c.FirstMember),
+                     PinnedMessage = _mapper.Map<DirectMessageDTO>(c.PinnedMessage),
+
+                 });*/
+            var dtoContacts = _context.Contacts
                 .Include(c => c.FirstMember)
                 .Include(c => c.SecondMember)
                 .Include(c => c.PinnedMessage)
                 .Where(c => c.FirstMemberId == user.Id || c.SecondMemberId == user.Id)
-                .GroupJoin(_context.ContactSettings,
-                c => c.Id, s => s.ContactId, (c, s) => new ContactDTO()
+                .Select(c => new ContactDTO()
                 {
                     Id = c.Id,
                     FirstMemberId = (c.FirstMemberId == user.Id) ? c.FirstMemberId : c.SecondMemberId,
                     FirstMember = _mapper.Map<UserDTO>((c.FirstMemberId == user.Id) ? c.FirstMember : c.SecondMember),
-                    SecondMemberId = (c.SecondMemberId == user.Id) ? c.SecondMemberId : c.FirstMemberId,
-                    SecondMember = _mapper.Map<UserDTO>((c.SecondMemberId == user.Id) ? c.SecondMember : c.FirstMember),
+                    SecondMemberId = (c.FirstMemberId == user.Id) ? c.SecondMemberId : c.FirstMemberId,
+                    SecondMember = _mapper.Map<UserDTO>((c.FirstMemberId == user.Id) ? c.SecondMember : c.FirstMember),
                     PinnedMessage = _mapper.Map<DirectMessageDTO>(c.PinnedMessage),
-                    Settings = _mapper.Map<ContactSettingDTO>(s.FirstOrDefault(ss => ss.UserId == user.Id)),
-                    ContactnerSettings = _mapper.Map<ContactSettingDTO>(s.FirstOrDefault(ss => ss.UserId != user.Id))
-                }).ToListAsync();
+                    Settings = _mapper.Map<ContactSettingDTO>(_context.ContactSettings.FirstOrDefault(s => s.ContactId == c.Id && s.UserId == user.Id)),
+                    ContactnerSettings = _mapper.Map<ContactSettingDTO>(_context.ContactSettings.FirstOrDefault(s => s.ContactId == c.Id && s.UserId != user.Id))
+                });/*.GroupJoin(_context.ContactSettings,
+                c => c.Id, s => s.ContactId, (c, s) =>
+                { 
+                    c.Settings = _mapper.Map<ContactSettingDTO>(s.FirstOrDefault(ss => ss.UserId == c.FirstMemberId));
+                    c.ContactnerSettings = _mapper.Map<ContactSettingDTO>(s.FirstOrDefault(ss => ss.UserId == c.SecondMemberId));
+                    return c;
+                });*/
 
             return dtoContacts;
         }
