@@ -49,19 +49,21 @@ export class PollCreateComponent implements OnInit {
   ngOnInit(): void {}
 
   public onSubmit() {
-    let areAnswersRepeat: boolean;
+    let areAnswersRepeat: boolean = false;
 
-    this.answers.controls.forEach((ctrl) => {
-      if (
-        this.answers.controls.find((ctrlInner) => ctrlInner.value == ctrl.value)
-      ) {
-        areAnswersRepeat = true;
-        return;
-      }
+    let options = this.answers.controls.map((ctrl) => ctrl.value);
+
+    options.forEach((option, index) => {
+      options.forEach((opt, i) => {
+        if (option == opt && index != i) {
+          areAnswersRepeat = true;
+          return true;
+        }
+      });
     });
 
     if (areAnswersRepeat) {
-      this.toastr.error('Answers must be unique', 'Error');
+      this.toastr.error('Options must be unique', 'Error');
       return;
     }
 

@@ -52,7 +52,7 @@
 
     <div formArrayName="answers" class="answers-container">
       <div class="field" *ngFor="let answer of answers.controls; let i = index">
-        <label>Answer {{ i + 1 }}:</label>
+        <label>Option {{ i + 1 }}:</label>
         <span
           *ngIf="i > 1"
           class="close-icon"
@@ -78,7 +78,7 @@
           class="errors-container"
         >
           <span *ngIf="i < 2 && answers.controls[i].errors.required"
-            >This answer is required.</span
+            >This option is required.</span
           >
         </div>
       </div>
@@ -89,7 +89,7 @@
       class="ui button answers-button"
       (click)="addAnswer()"
     >
-      Add answer
+      Add option
     </button>
     <div class="flex-center">
       <button class="ui button primary" type="submit" [disabled]="!form.valid">

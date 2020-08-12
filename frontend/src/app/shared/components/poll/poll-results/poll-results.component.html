@@ -1,7 +1,15 @@
 <div class="ui segment">
-  <p>{{ pollResults.title }}</p>
-  <div *ngFor="let answer of answers">
-    <p>{{ pollResults.results[answer] }} {{ answer }}</p>
+  <h4>{{ pollResults.title }}</h4>
+  <div class="ui four column grid padding-bottom-25px">
+    <div *ngFor="let answer of answers" class="row no-padding">
+      <!-- <p>{{ pollResults.results[answer] }} {{ answer }}</p> -->
+      <div class="two wide column">{{ pollResults.results[answer] }}%</div>
+      <div class="fourteen wide column">
+        {{ answer }}
+      </div>
+    </div>
   </div>
-  <p>{{ pollResults.totalVoted }} participants voted so far</p>
+  <div>
+    <p>{{ pollResults.totalVoted }} people voted so far</p>
+  </div>
 </div>
