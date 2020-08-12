@@ -62,19 +62,13 @@ namespace Whale.BLL.Services
 
         public async Task UpdateContactAsync(ContactEditDTO contactDTO, string userEmail)
         {
-            var entity = _mapper.Map<Contact>(contactDTO);
+            var entity = _context.Contacts.FirstOrDefault(c => c.Id == contactDTO.Id);
 
-            var contact = _context.Contacts.FirstOrDefault(c => c.ContactnerId == contactDTO.ContactnerId && c.OwnerId == contactDTO.OwnerId);
+            if (entity == null) throw new NotFoundException("Contact", contactDTO.Id.ToString());
 
-            if (contact != null) throw new AlreadyExistsException("Contact");
-            entity.PinnedMessageId = contactDTO.PinnedMessageId;
-            settingsEntity.IsBloked = contactDTO.Settings.IsBloked;
-            settingsEntity.IsMuted = contactDTO.Settings.IsMuted;
-
-            _context.Contacts.Add(entity);
             await _context.SaveChangesAsync();
 
-           
+
         }
 
         public async Task<bool> DeleteContactAsync(Guid contactId)

@@ -6,6 +6,8 @@ import {
   Output,
   AfterViewInit,
   AfterContentInit,
+  OnChanges,
+  SimpleChanges,
 } from '@angular/core';
 import { DirectMessage } from '@shared/models/message/message';
 import { User } from '@shared/models/user/user';
@@ -18,14 +20,17 @@ import { HubConnection } from '@aspnet/signalr';
 import { Subject, from, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Message } from '@angular/compiler/src/i18n/i18n_ast';
+import { Console } from 'console';
+import { stringify } from 'querystring';
 
 @Component({
   selector: 'app-contacts-chat',
   templateUrl: './contacts-chat.component.html',
   styleUrls: ['./contacts-chat.component.sass'],
 })
-export class ContactsChatComponent implements OnInit, AfterContentInit {
+export class ContactsChatComponent implements OnInit, OnChanges {
   private hubConnection: HubConnection;
+  currContactId: string;
   @Input() contactSelected: Contact;
   @Output() chat: EventEmitter<boolean> = new EventEmitter<boolean>();
   directMessageRecieved = new EventEmitter<DirectMessage>();
@@ -42,6 +47,19 @@ export class ContactsChatComponent implements OnInit, AfterContentInit {
     private httpService: HttpService
   ) {}
 
+  ngOnChanges(changes: SimpleChanges) {
+    this.currContactId = changes['contactSelected'].currentValue.id;
+    console.log(this.contactSelected);
+    this.httpService
+      .getRequest<DirectMessage[]>('/api/ContactChat/' + this.currContactId)
+      .subscribe(
+        (data: DirectMessage[]) => {
+          this.messages = data;
+        },
+        (error) => console.log(error)
+      );
+    this.hubConnection.invoke('JoinGroup', this.currContactId);
+  }
   ngOnInit(): void {
     from(this.signalRService.registerHub(environment.apiUrl, 'chatHub'))
       .pipe(
@@ -55,21 +73,8 @@ export class ContactsChatComponent implements OnInit, AfterContentInit {
         });
       });
   }
-  ngAfterContentInit() {
-    this.httpService
-      .getRequest<DirectMessage[]>(
-        '/api/ContactChat/' + this.contactSelected.Id
-      )
-      .subscribe(
-        (data: DirectMessage[]) => {
-          this.messages = data;
-        },
-        (error) => console.log(error)
-      );
-  }
-  sendMessage(): void {
-    this.hubConnection.invoke('JoinGroup', this.contactSelected.Id);
 
+  sendMessage(): void {
     console.log(this.contactSelected);
     this.newMessage.contactId = this.contactSelected.Id;
     this.newMessage.authorId = this.contactSelected.FirstMemberId;

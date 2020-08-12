@@ -48,9 +48,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
     private meetingService: MeetingService,
     private router: Router,
     private userService: UserService
-  ) {
-    this.ownerEmail = this.userService.userEmail;
-  }
+  ) {}
 
   ngOnDestroy(): void {
     this.unsubscribe$.next();
@@ -58,7 +56,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    console.log(this.ownerEmail);
     this.stateService.getLoggedInUser().subscribe(
       (usr: User) => {
         this.loggedInUser = usr;
@@ -71,6 +68,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
       },
       (error) => this.toastr.error(error)
     );
+    this.ownerEmail = this.userService.userEmail;
+    console.log(this.ownerEmail);
   }
 
   addNewGroup(): void {
