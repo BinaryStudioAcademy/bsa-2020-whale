@@ -1,0 +1,41 @@
+<div class="ui segment">
+  <h3>Poll</h3>
+  <h4>{{ poll.title }}</h4>
+  <form class="ui form" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div *ngIf="poll.isSingleChoice" class="answers-container">
+      <div class="field" *ngFor="let answer of poll.answers; let i = index">
+        <div class="ui radio checkbox">
+          <input
+            type="radio"
+            formControlName="answers"
+            id="{{ i }}"
+            value="{{ i }}"
+          />
+          <label class="default-cursor">{{ answer }}</label>
+        </div>
+      </div>
+    </div>
+    <div
+      *ngIf="!poll.isSingleChoice"
+      formArrayName="answers"
+      class="answers-container"
+    >
+      <div class="field" *ngFor="let answer of poll.answers; let i = index">
+        <div class="ui checkbox">
+          <input
+            type="checkbox"
+            formControlName="{{ i }}"
+            id="{{ i }}"
+            value="{{ i }}"
+          />
+          <label class="default-cursor">{{ answer }}</label>
+        </div>
+      </div>
+    </div>
+    <div class="flex-center">
+      <button class="ui button primary" type="submit" [disabled]="!form.valid">
+        Submit answer
+      </button>
+    </div>
+  </form>
+</div>

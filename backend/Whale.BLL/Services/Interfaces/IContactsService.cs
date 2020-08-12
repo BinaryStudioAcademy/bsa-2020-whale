@@ -7,10 +7,9 @@ namespace Whale.BLL.Services.Interfaces
 {
     public interface IContactsService
     {
-        Task<IEnumerable<ContactDTO>> GetAllContactsAsync(Guid ownerId);
-        Task<ContactDTO> GetContactAsync(Guid contactId);
-        Task<ContactDTO> CreateContactAsync(ContactCreateDTO contactDTO);
-        Task UpdateContactAsync(ContactEditDTO contactDTO);
+        Task<IEnumerable<ContactDTO>> GetAllContactsAsync(string userEmail);
+        Task<ContactDTO> GetContactAsync(Guid contactId, string userEmail);
+        Task UpdateContactAsync(ContactEditDTO contactDTO, string userEmail);
         Task<bool> DeleteContactAsync(Guid contactId);
         Task<ContactDTO> CreateContactFromEmailAsync(string ownerEmail, string contactnerEmail);
     }

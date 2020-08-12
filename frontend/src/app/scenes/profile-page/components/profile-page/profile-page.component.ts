@@ -52,7 +52,6 @@ export class ProfilePageComponent implements OnInit {
   }
 
   public uploadFile(event): void {
-    this.isShowCamera = false;
     this.imageChangedEvent = event;
     this.fileToUpload = event.target.files[0];
     if (!this.fileToUpload) {
@@ -105,16 +104,29 @@ export class ProfilePageComponent implements OnInit {
     this.userPhotoFromCamera = '';
     this.imageChangedEvent = '';
 
-    if (this.isShowCamera) {
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
-          this.video.nativeElement.srcObject = stream;
-          this.video.nativeElement.play();
-        });
-      }
+    if (
+      this.isShowCamera &&
+      navigator.mediaDevices &&
+      navigator.mediaDevices.getUserMedia
+    ) {
+      navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+        this.video.nativeElement.srcObject = stream;
+        this.video.nativeElement.play();
+      });
     } else if (!this.isShowCamera) {
       this.video.nativeElement.srcObject.getTracks()[0].stop();
       this.video.nativeElement.pause();
+    }
+  }
+
+  public closeCamera(): void {
+    if (this.video != null) {
+      this.video.nativeElement.srcObject.getTracks()[0].stop();
+      this.video.nativeElement.pause();
+
+      this.userPhotoFromCamera = '';
+
+      this.isShowCamera = false;
     }
   }
 
@@ -180,14 +192,7 @@ export class ProfilePageComponent implements OnInit {
   }
 
   closeModal(): void {
-    if (this.video != null) {
-      this.video.nativeElement.srcObject.getTracks()[0].stop();
-      this.video.nativeElement.pause();
-
-      this.userPhotoFromCamera = '';
-
-      this.isShowCamera = false;
-    }
+    this.closeCamera();
 
     this.modal.nativeElement.style.display = 'none';
   }

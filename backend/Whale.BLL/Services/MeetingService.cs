@@ -15,6 +15,7 @@ using Whale.Shared.Services;
 using Whale.BLL.Services.Interfaces;
 using Whale.Shared.DTO.Participant;
 using System.Linq;
+using Whale.Shared.Helper;
 
 namespace Whale.BLL.Services
 {
@@ -23,13 +24,15 @@ namespace Whale.BLL.Services
         private readonly RedisService _redisService;
         private readonly IUserService _userService;
         private readonly ParticipantService _participantService;
+        private readonly EncryptService _encryptService;
 
-        public MeetingService(WhaleDbContext context, IMapper mapper, RedisService redisService, IUserService userService, ParticipantService participantService)
+        public MeetingService(WhaleDbContext context, IMapper mapper, RedisService redisService, IUserService userService, ParticipantService participantService,EncryptService encryptService)
             : base(context, mapper)
         {
             _redisService = redisService;
             _userService = userService;
             _participantService = participantService;
+            _encryptService = encryptService;
         }
 
         public async Task<MeetingDTO> ConnectToMeeting(MeetingLinkDTO linkDTO, string userEmail)
@@ -71,7 +74,7 @@ namespace Whale.BLL.Services
 
             await _redisService.ConnectAsync();
 
-            var pwd = Guid.NewGuid().ToString();
+            var pwd = _encryptService.EncryptString(Guid.NewGuid().ToString());
             await _redisService.SetAsync(meeting.Id.ToString(), new MeetingMessagesAndPasswordDTO { Password = pwd });
 
             await _participantService.CreateParticipantAsync(new ParticipantCreateDTO

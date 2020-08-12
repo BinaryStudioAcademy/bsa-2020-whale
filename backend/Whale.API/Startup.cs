@@ -22,6 +22,8 @@ using Whale.Shared.Services;
 using Whale.BLL.Services.Interfaces;
 using Whale.API.Middleware;
 using Whale.BLL.Interfaces;
+using Microsoft.OpenApi.Models;
+using Whale.Shared.Helper;
 
 namespace Whale.API
 {
@@ -44,6 +46,7 @@ namespace Whale.API
                 mc.AddProfile<ContactProfile>();
                 mc.AddProfile<UserProfile>();
                 mc.AddProfile<ScheduledMeetingProfile>();
+                mc.AddProfile<DirectMessageProfile>();
                 mc.AddProfile<MeetingProfile>();
                 mc.AddProfile<MeetingMessage>();
                 mc.AddProfile<ParticipantProfile>();
@@ -54,6 +57,7 @@ namespace Whale.API
             services.AddTransient<IContactsService, ContactsService>();
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<IScheduledMeetingsService, ScheduledMeetingsService>();
+            services.AddTransient<ContactChatService>();
             services.AddTransient<IMeetingService, MeetingService>();
             services.AddTransient<ParticipantService>();
 
@@ -83,6 +87,13 @@ namespace Whale.API
                     };
                 });
             services.AddScoped<RedisService>(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Whale API", Version = "v1" });
+            });
+            services.AddScoped(x => new EncryptService(Configuration.GetValue<string>("EncryptSettings:key")));
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -91,6 +102,13 @@ namespace Whale.API
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+
+                app.UseSwagger();
+
+                app.UseSwaggerUI(options =>
+                {
+                    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Whale API v1");
+                });
             }
 
             app.UseMiddleware<ExceptionMiddleware>();
@@ -106,6 +124,7 @@ namespace Whale.API
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<ChatHub>("/chatHub");
             });
         }
     }
