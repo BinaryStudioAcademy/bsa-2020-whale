@@ -23,6 +23,7 @@ using Whale.BLL.Services.Interfaces;
 using Whale.API.Middleware;
 using Whale.BLL.Interfaces;
 using Microsoft.OpenApi.Models;
+using Whale.Shared.Helper;
 
 namespace Whale.API
 {
@@ -89,6 +90,8 @@ namespace Whale.API
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Whale API", Version = "v1" });
             });
+            services.AddScoped(x => new EncryptService(Configuration.GetValue<string>("EncryptSettings:key")));
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

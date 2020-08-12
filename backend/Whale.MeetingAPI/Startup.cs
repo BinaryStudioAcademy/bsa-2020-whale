@@ -29,6 +29,7 @@ using Whale.BLL.MappingProfiles;
 using System.Reflection;
 using Whale.BLL.Services.Interfaces;
 using Microsoft.OpenApi.Models;
+using Whale.Shared.Helper;
 
 namespace Whale.MeetingAPI
 {
@@ -83,6 +84,8 @@ namespace Whale.MeetingAPI
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Meeting API", Version = "v1" });
             });
+            services.AddScoped(x => new EncryptService(Configuration.GetValue<string>("EncryptSettings:key")));
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
