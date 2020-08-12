@@ -9,7 +9,7 @@
 //chat
 .chat
     width: 300px
-    height: 90%
+    height: 90vh
     background-color: #ffffff
     float: right
 
@@ -43,12 +43,14 @@
     width: 100% 
     position: absolute
     bottom: 0
-    height: 10%
+    height: 10vh
     text-align: center    
 
 div:fullscreen
     .options
         display: none
+    .chat
+        height: 100vh
 
 div:-webkit-full-screen
     .options
@@ -80,7 +82,20 @@ div:moz-full-screen
     margin-top: 24px
     float: right
 
-.big.share.square.icon:hover, .big.microphone.icon:hover, .big.video.icon:hover, .big.wechat.icon:hover, .big.users.icon:hover, .big.desktop.icon:hover
+i.big.icon
+    opacity: 0.8
+
+i.big.icon:hover
+    opacity: 1
+    cursor: pointer
+
+i.big.icon.clipboard
+    margin-left: 3px
+
+i.big.icon.wechat
+    margin-left: 2px
+
+.big.share.square.icon:hover, .big.microphone.icon:hover, .big.video.icon:hover, .big.wechat.icon:hover, .big.users.icon:hover, .big.desktop.icon:hover, .big.clipboard.icon:hover
     opacity: 1 !important
     cursor: pointer
 
@@ -146,12 +161,20 @@ div div.participant:hover
 .display-flex
     display: flex
 
+
+.poll-create-container
+    position: absolute
+    bottom: 11%
+    left: calc(50% - 175px) 
+    width: 350px
+
 i.icon 
     opacity: 0.8
 
 i.icon:hover
     opacity: 1
     cursor: pointer
+
 
 .block
     margin: 10px 10px 10px 0px
@@ -171,6 +194,7 @@ i.icon:hover
     box-shadow: 0px 0px 3px grey
     opacity: 0.7
     text-align: center
+    z-index: 10
 
 .tools:active
     opacity: 1

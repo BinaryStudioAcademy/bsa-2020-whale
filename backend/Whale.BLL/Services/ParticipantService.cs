@@ -13,13 +13,13 @@ using Whale.Shared.DTO.Participant;
 
 namespace Whale.BLL.Services
 {
-    public class ParticipantService: BaseService
+    public class ParticipantService : BaseService
     {
-        public ParticipantService(WhaleDbContext context, IMapper mapper) : base(context, mapper){ }
+        public ParticipantService(WhaleDbContext context, IMapper mapper) : base(context, mapper) { }
 
         public async Task<ParticipantDTO> CreateParticipantAsync(ParticipantCreateDTO participantDto)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == participantDto.UserId);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == participantDto.UserEmail);
             if (user == null)
                 throw new NotFoundException("User");
 
@@ -28,6 +28,7 @@ namespace Whale.BLL.Services
                 throw new NotFoundException("Meeting");
 
             var entity = _mapper.Map<Participant>(participantDto);
+            entity.UserId = user.Id;
 
             await _context.Participants.AddAsync(entity);
             await _context.SaveChangesAsync();
@@ -44,7 +45,7 @@ namespace Whale.BLL.Services
         {
             var entity = await _context.Participants.FirstOrDefaultAsync(p => p.Id == participantDto.Id);
 
-            if (entity == null) 
+            if (entity == null)
                 throw new NotFoundException("Participant");
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == participantDto.UserId);
@@ -97,6 +98,12 @@ namespace Whale.BLL.Services
                 .Include(p => p.Meeting)
                 .Where(p => p.MeetingId == meetingId)
                 .Select(p => _mapper.Map<ParticipantDTO>(p));
+        }
+
+        public async Task<ParticipantDTO> GetMeetingParticipantByEmail(Guid meetingId, string email)
+        {
+            var participants = await GetMeetingParticipantsAsync(meetingId);
+            return participants.FirstOrDefault(p => p.User.Email == email);
         }
     }
 }

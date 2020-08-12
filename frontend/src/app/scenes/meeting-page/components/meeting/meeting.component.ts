@@ -17,6 +17,7 @@ import { ActivatedRoute, Router, Params } from '@angular/router';
 import { MeetingService } from 'app/core/services/meeting.service';
 import { takeUntil } from 'rxjs/operators';
 import { Meeting } from '@shared/models/meeting/meeting';
+import { PollDto } from '@shared/models/poll/poll-dto';
 import {
   MeetingSignalrService,
   SignalMethods,
@@ -25,9 +26,16 @@ import { ToastrService } from 'ngx-toastr';
 import { DOCUMENT } from '@angular/common';
 import { BlobService } from 'app/core/services/blob.service';
 import { MeetingConnectionData } from '@shared/models/meeting/meeting-connect';
+
+import { PollData } from '@shared/models/poll/poll-data';
+import { HttpService } from 'app/core/services/http.service';
+import { PollCreateDto } from 'app/shared/models/poll/poll-create-dto';
+import { PollResultsDto } from '@shared/models/poll/poll-results-dto';
 import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
 import { MeetingMessageCreate } from '@shared/models/meeting/message/meeting-message-create';
 import { UserService } from 'app/core/services/user.service';
+import { Participant } from '@shared/models/participant/participant';
+import { ParticipantRole } from '@shared/models/participant/participant-role';
 
 @Component({
   selector: 'app-meeting',
@@ -36,6 +44,15 @@ import { UserService } from 'app/core/services/user.service';
 })
 export class MeetingComponent
   implements OnInit, AfterContentInit, AfterViewInit, OnDestroy {
+  meeting: Meeting;
+  poll: PollDto;
+  pollResults: PollResultsDto;
+  isShowChat = false;
+  isShowParticipants = false;
+  isPollCreating = false;
+  isShowPoll = false;
+  isShowPollResults = false;
+
   @ViewChild('currentVideo') currentVideo: ElementRef;
 
   private meetingSignalrService: MeetingSignalrService;
@@ -43,12 +60,10 @@ export class MeetingComponent
   public peer: Peer;
   public connectedStreams: string[] = [];
   public connectedPeers = new Map<string, MediaStream>();
-  public meeting: Meeting;
-  public isShowChat = false;
-  public isShowParticipants = false;
 
   public messages: MeetingMessage[] = [];
   public msgText = '';
+  public currentParticipant: Participant;
 
   private unsubscribe$ = new Subject<void>();
   private currentUserStream: MediaStream;
@@ -76,6 +91,7 @@ export class MeetingComponent
     private signalRService: SignalRService,
     private toastr: ToastrService,
     private blobService: BlobService,
+    private httpService: HttpService,
     @Inject(DOCUMENT) private document: any,
     private userService: UserService
   ) {
@@ -107,18 +123,29 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (connectData) => {
+          this.meeting.participants.push(connectData.participant);
           if (connectData.peerId == this.peer.id) {
             return;
           }
-
           console.log('connected with peer: ' + connectData.peerId);
           this.connect(connectData.peerId);
           this.toastr.success('Connected successfuly');
         },
         (err) => {
           console.log(err.message);
-          this.toastr.error('Error occured when connected to meeting');
-          this.router.navigate(['/home']);
+          this.toastr.error(err.Message);
+          this.leave();
+        }
+      );
+
+    this.meetingSignalrService.participantConected$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (participant) => {
+          this.currentParticipant = participant;
+        },
+        (err) => {
+          this.toastr.error(err.Message);
         }
       );
 
@@ -126,10 +153,25 @@ export class MeetingComponent
     this.meetingSignalrService.signalUserDisconected$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((connectionData) => {
+        this.meeting.participants = this.meeting.participants.filter(
+          (p) => p.id !== connectionData.participant.id
+        );
         if (this.connectedPeers.has(connectionData.peerId)) {
           this.connectedPeers.delete(connectionData.peerId);
         }
       });
+
+    this.meetingSignalrService.meetingEnded$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (connectionData) => {
+          this.toastr.show('Meeting ended');
+          this.leave();
+        },
+        (err) => {
+          this.toastr.error('Error occured when ending meeting');
+        }
+      );
 
     this.meetingSignalrService.getMessages$
       .pipe(takeUntil(this.unsubscribe$))
@@ -152,6 +194,21 @@ export class MeetingComponent
           this.toastr.error('Error occured when sending message');
         }
       );
+
+    this.meetingSignalrService.pollReceived$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe((poll: PollDto) => {
+        this.poll = poll;
+        this.isShowPoll = true;
+      });
+
+    this.meetingSignalrService.pollResultsReceived$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe((pollResultsDto: PollResultsDto) => {
+        console.log(pollResultsDto);
+        this.handlePollResults(pollResultsDto);
+      });
+
     // when peer opened send my peer id everyone
     this.peer.on('open', (id) => this.onPeerOpen(id));
 
@@ -173,13 +230,10 @@ export class MeetingComponent
   ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
-
-    this.destroyPeer();
-
-    this.currentUserStream.getTracks().forEach((track) => track.stop());
   }
 
   getMeeting(link: string): void {
+    console.log('get meeting');
     this.meetingService
       .connectMeeting(link)
       .pipe(takeUntil(this.unsubscribe$))
@@ -199,7 +253,7 @@ export class MeetingComponent
         },
         (error) => {
           console.log(error.message);
-          this.router.navigate(['/home']);
+          this.leaveUnConnected();
         }
       );
   }
@@ -219,17 +273,29 @@ export class MeetingComponent
     });
   }
 
-  public leave() {
-    this.ngOnDestroy();
+  leaveUnConnected(): void {
+    this.currentUserStream.getTracks().forEach((track) => track.stop());
+    this.destroyPeer();
     this.router.navigate(['/home']);
   }
 
-  private destroyPeer() {
-    this.meetingSignalrService.invoke(
-      SignalMethods.OnUserDisconnect,
-      this.connectionData
-    );
+  public leave(): void {
+    let canLeave = true;
+    if (this.currentParticipant?.role === ParticipantRole.Host) {
+      canLeave = confirm('You will end current meeting!');
+    }
+    if (canLeave) {
+      this.currentUserStream.getTracks().forEach((track) => track.stop());
+      this.destroyPeer();
+      this.meetingSignalrService.invoke(
+        SignalMethods.OnUserDisconnect,
+        this.connectionData
+      );
+      this.router.navigate(['/home']);
+    }
+  }
 
+  private destroyPeer() {
     this.peer.disconnect();
     this.peer.destroy();
   }
@@ -245,9 +311,10 @@ export class MeetingComponent
 
       this.connectionData = {
         peerId: id,
-        userId: '',
+        userEmail: this.userService.userEmail,
         meetingId: groupId,
         meetingPwd: groupPwd,
+        participant: this.currentParticipant,
       };
       this.getMeeting(link);
     });
@@ -291,12 +358,61 @@ export class MeetingComponent
     );
   }
 
+  onPollIconClick() {
+    if (this.poll) {
+      this.isShowPoll = !this.isShowPoll;
+    } else if (this.pollResults || this.isShowPoll) {
+      this.isShowPollResults = !this.isShowPollResults;
+    } else {
+      this.isPollCreating = !this.isPollCreating;
+    }
+  }
+
+  public onPollCreated(pollCreateDto: PollCreateDto) {
+    this.httpService
+      .postRequest<PollCreateDto, PollDto>(
+        environment.meetingApiUrl + '/api/polls',
+        pollCreateDto
+      )
+      .subscribe(
+        (response: PollDto) => {
+          const pollData: PollData = {
+            userId: this.connectionData.userEmail,
+            groupId: this.connectionData.meetingId,
+            pollDto: response,
+          };
+
+          this.meetingSignalrService.invoke(
+            SignalMethods.OnPollCreated,
+            pollData
+          );
+
+          this.isPollCreating = false;
+          this.toastr.success('Poll was created!', 'Success');
+        },
+        (error) => {
+          this.toastr.error(error);
+        }
+      );
+  }
+
+  public handlePollResults(pollResultsDto: PollResultsDto) {
+    this.pollResults = pollResultsDto;
+    if (this.isShowPoll) {
+      console.log('if');
+      return;
+    }
+    this.isShowPollResults = true;
+  }
+
   sendMessage(): void {
     this.meetingSignalrService.invoke(SignalMethods.OnSendMessage, {
       authorEmail: this.userService.userEmail,
       meetingId: this.meeting.id,
       message: this.msgText,
     } as MeetingMessageCreate);
+
+    this.msgText = '';
   }
 
   goFullscreen(): void {

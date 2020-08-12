@@ -2,6 +2,9 @@ import { Component, ViewChild, ElementRef, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ImageCroppedEvent } from 'ngx-image-cropper';
 import { ToastrService } from 'ngx-toastr';
+import { BlobService } from '../../../../core/services/blob.service';
+import { User } from '@shared/models/user';
+import { HttpService } from '../../../../core/services/http.service';
 
 @Component({
   selector: 'app-profile-page',
@@ -20,14 +23,23 @@ export class ProfilePageComponent implements OnInit {
 
   public isShowCamera = false;
   public isImageCropped = false;
+  isShowUploadFile: boolean;
 
   imageChangedEvent: any = '';
   userPhotoFromCamera: any = '';
   croppedImage: any = '';
+  fileToUpload: File;
+  avatarURL = '';
+  userMockup = {} as User;
 
   ngOnInit(): void {}
 
-  public constructor(private http: HttpClient, private toastr: ToastrService) {}
+  public constructor(
+    private http: HttpClient,
+    private toastr: ToastrService,
+    private blobService: BlobService,
+    private httpService: HttpService
+  ) {}
 
   fileChangeEvent(event: any): void {}
   imageLoaded(): void {}
@@ -39,8 +51,59 @@ export class ProfilePageComponent implements OnInit {
     this.isImageCropped = true;
   }
 
+  public uploadFile(event): void {
+    this.isShowCamera = false;
+    this.imageChangedEvent = event;
+    this.fileToUpload = event.target.files[0];
+    if (!this.fileToUpload) {
+      event.target.value = '';
+      return;
+    }
+
+    const size = this.fileToUpload.size / 1024 / 1024;
+
+    if (size > 5) {
+      this.toastr.error("File can't be heavier than ~5MB");
+    }
+    this.isShowUploadFile = true;
+  }
+
+  public imageCroppedUpload(event: ImageCroppedEvent): void {
+    // Preview
+    this.croppedImage = event.base64;
+  }
+
+  public SendImage(): void {
+    const blob = this.dataURLtoBlob(this.croppedImage);
+    this.blobService.postBlobUploadImage(blob).subscribe((resp) => {
+      console.log(`image: ${resp}`);
+      this.avatarURL = resp;
+      if (this.avatarURL !== '') {
+        this.userMockup.id = '216D29C0-C230-4DEB-B40D-EDF67D906D3A';
+        this.userMockup.firstName = 'Alex';
+        this.userMockup.secondName = 'Belokon';
+        this.userMockup.email = 'alex.belokon.onyx@gmail.com';
+        this.userMockup.avatarUrl = this.avatarURL;
+        this.httpService
+          .putFullRequest<User, string>(
+            `http://localhost:51569/api/user`,
+            this.userMockup
+          )
+          .subscribe((response) => console.log(`image: ${response.body}`));
+      }
+    });
+
+    this.croppedImage = '';
+    this.userPhotoFromCamera = '';
+    this.isShowUploadFile = false;
+    this.imageChangedEvent = '';
+  }
+
   public showCamera(): void {
     this.isShowCamera = !this.isShowCamera;
+    this.isShowUploadFile = false;
+    this.userPhotoFromCamera = '';
+    this.imageChangedEvent = '';
 
     if (this.isShowCamera) {
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -74,12 +137,14 @@ export class ProfilePageComponent implements OnInit {
     const size = blob.size / 1024 / 1024;
 
     if (size < 5) {
-      this.postBlob(blob);
+      this.blobService.postBlobUploadImage(blob).subscribe((resp) => {
+        console.log(`image: ${resp}`);
+      });
     } else {
       this.toastr.error('File size is too large');
     }
   }
-
+  /*
   private postBlob(blob: Blob): void {
     const formData = new FormData();
 
@@ -90,7 +155,7 @@ export class ProfilePageComponent implements OnInit {
         responseType: 'text',
       })
       .subscribe((resp) => console.log(`image: ${resp}`));
-  }
+  }*/
 
   private dataURLtoBlob(dataURL: any): Blob {
     let byteString: string;

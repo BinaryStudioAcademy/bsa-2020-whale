@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Whale.BLL.Exceptions
+﻿namespace Whale.BLL.Exceptions
 {
-    public sealed class InvalidTokenException : Exception
+    public sealed class InvalidTokenException : BaseCustomException
     {
         public InvalidTokenException(string tokenName) : base($"Invalid {tokenName} token.") { }
     }

@@ -22,20 +22,33 @@
         <i class="address book outline icon"></i>
         Contacts
     </a> -->
-  <a class="notify-pic-item item">
+  <a (click)="showNotificationsMenu()" class="notify-pic-item item">
     <i class="bell outline icon"></i>
-    Notifications
+    <a *ngIf="notificationsList.length > 0" class="ui teal circular label">{{
+      notificationsList.length
+    }}</a>
+
+    <div
+      *ngIf="isNotificationsVisible"
+      style="width: 200px;"
+      class="dropdown-menu"
+    >
+      <div
+        *ngFor="let notification of notificationsList"
+        class="dropdown-menu-item notification"
+      >
+        <span>{{ notification.time | date: "short" }}</span>
+        <p>{{ notification.text }}</p>
+      </div>
+    </div>
   </a>
-  <a
-    (click)="settingsMenuVisible = !settingsMenuVisible"
-    class="user-pic-item item message shared"
-  >
+  <a (click)="showSettingsMenu()" class="user-pic-item item message shared">
     <img
       class="ui tiny image user-pic"
       src="https://img.icons8.com/color/240/000000/user-male.png"
     />
   </a>
-  <div *ngIf="settingsMenuVisible" class="dropdown-menu">
+  <div *ngIf="settingsMenuVisible" style="right: 0;" class="dropdown-menu">
     <div class="dropdown-menu-user" (click)="goToPage('profile-page')">
       David Lones
     </div>
