@@ -21,13 +21,11 @@ namespace Whale.API.Controllers
         public UserController(IUserService userService)
         {
             _userService = userService;
-            
         }
 
         [HttpGet]
         public async Task<IActionResult> GetCurrentUser()
         {
-
             string email = HttpContext?.User.Claims
                 .FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
             Console.WriteLine("email");
@@ -37,7 +35,6 @@ namespace Whale.API.Controllers
 
             return Ok(contacts);
         }
-
         
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(Guid id)

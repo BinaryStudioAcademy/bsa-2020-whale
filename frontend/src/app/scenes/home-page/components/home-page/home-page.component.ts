@@ -21,7 +21,7 @@ import { Router } from '@angular/router';
 import { MeetingCreate } from '@shared/models/meeting/meeting-create';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
-import { UserService } from 'app/core/services/user.service';
+import { AuthService } from 'app/core/auth/auth.service';
 
 @Component({
   selector: 'app-home-page',
@@ -47,7 +47,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
     private simpleModalService: SimpleModalService,
     private meetingService: MeetingService,
     private router: Router,
-    private userService: UserService
+    private authService: AuthService
   ) {}
 
   ngOnDestroy(): void {
@@ -60,15 +60,15 @@ export class HomePageComponent implements OnInit, OnDestroy {
       (usr: User) => {
         this.loggedInUser = usr;
       },
-      (error) => this.toastr.error(error)
+      (error) => this.toastr.error(error.Message)
     );
     this.httpService.getRequest<Contact[]>('/api/contacts').subscribe(
       (data: Contact[]) => {
         this.contacts = data;
       },
-      (error) => this.toastr.error(error)
+      (error) => this.toastr.error(error.Message)
     );
-    this.ownerEmail = this.userService.userEmail;
+    this.ownerEmail = this.authService.currentUser.email;
     console.log(this.ownerEmail);
   }
 

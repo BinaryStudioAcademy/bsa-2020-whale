@@ -21,22 +21,16 @@ namespace Whale.API.Middleware
             {
                 await _next(httpContext);
             }
-            catch (BaseCustomException ex)
-            {
-                if(ex._isLogged)
-                    Log.Logger.Error(ex, ex.Message);
-                await HandleExceptionAsync(httpContext, ex, true);
-            }
             catch (Exception e)
             {
                 Log.Logger.Error(e, e.Message);
                 await HandleExceptionAsync(httpContext, e);
             }
         }
-        private Task HandleExceptionAsync(HttpContext context, Exception exception, bool isCustom = false)
+        private Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             context.Response.ContentType = "application/json";
-            if (isCustom)
+            if (exception is BaseCustomException)
                 context.Response.StatusCode = (exception as BaseCustomException)._httpError;
             else
                 context.Response.StatusCode = 500;

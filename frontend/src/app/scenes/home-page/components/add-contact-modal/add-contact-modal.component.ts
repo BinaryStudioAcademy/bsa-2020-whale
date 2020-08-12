@@ -3,7 +3,7 @@ import { SimpleModalComponent } from 'ngx-simple-modal';
 import { Contact } from 'app/shared/models/contact/contact';
 import { ContactService } from 'app/core/services/contact.service';
 import { ToastrService } from 'ngx-toastr';
-import { UserService } from 'app/core/services/user.service';
+import { AuthService } from 'app/core/auth/auth.service';
 
 @Component({
   selector: 'app-add-contact-modal',
@@ -19,10 +19,10 @@ export class AddContactModalComponent extends SimpleModalComponent<
   constructor(
     private contactCervice: ContactService,
     private toastr: ToastrService,
-    private userService: UserService
+    private authService: AuthService
   ) {
     super();
-    this.ownerEmail = userService.userEmail;
+    this.ownerEmail = authService.currentUser.email;
   }
 
   public submit(): void {
