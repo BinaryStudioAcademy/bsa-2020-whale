@@ -47,7 +47,10 @@ namespace Whale.MeetingAPI
         {
             services.AddDbContext<WhaleDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("WhaleDatabase")));
             services.AddTransient<IMeetingService, MeetingService>();
+
+            services.AddTransient<PollService>();
             services.AddTransient<IUserService, UserService>();
+
             services.AddTransient<ParticipantService>();
 
             services.AddControllers();
@@ -68,6 +71,7 @@ namespace Whale.MeetingAPI
             services.AddAutoMapper(cfg =>
             {
                 cfg.AddProfile<MeetingProfile>();
+                cfg.AddProfile<PollProfile>();
                 cfg.AddProfile<MeetingMessage>();
                 cfg.AddProfile<UserProfile>();
                 cfg.AddProfile<ParticipantProfile>();
