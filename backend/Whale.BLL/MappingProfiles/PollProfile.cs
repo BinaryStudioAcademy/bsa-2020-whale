@@ -15,6 +15,9 @@ namespace Whale.BLL.MappingProfiles
 			CreateMap<PollCreateDTO, Poll>();
 			CreateMap<Poll, PollDTO>();
 			CreateMap<PollDTO, Poll>();
+			CreateMap<Poll, PollResultsDTO>()
+				.ForMember(poll => poll.PollId, opt => opt.MapFrom(poll => poll.Id))
+				.ForMember(poll => poll.Results, opt => opt.Ignore());
 		}
 	}
 }

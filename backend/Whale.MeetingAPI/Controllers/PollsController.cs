@@ -29,8 +29,8 @@ namespace Whale.MeetingAPI.Controllers
 		[HttpPost("answers")]
 		public async Task<IActionResult> PostPollAnswer([FromBody] PollAnswerDTO pollAnswerDto)
 		{
-			var results = await _pollService.SavePollAnswer(pollAnswerDto);
-			return Ok(results);
+			await _pollService.SavePollAnswer(pollAnswerDto);
+			return Ok();
 		}
 	}
 }

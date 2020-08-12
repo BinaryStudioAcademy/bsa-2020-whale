@@ -48,34 +48,36 @@ namespace Whale.BLL.Services
 			return pollDto2;
 		}
 
-		public async Task<PollResultsDTO> SavePollAnswer(PollAnswerDTO pollAnswerDto)
+		public async Task SavePollAnswer(PollAnswerDTO pollAnswerDto)
 		{
 			pollAnswerDto.UserId = Guid.NewGuid().ToString();
 			_redisService.Connect();
 			_redisService.AddToSet<PollAnswerDTO>(pollAnswerDto.PollId.ToString() + nameof(PollAnswerDTO), pollAnswerDto);
 
 			var pollAnswerDtos = _redisService.GetSetMembers<PollAnswerDTO>(pollAnswerDto.PollId.ToString() + nameof(PollAnswerDTO));
-
 			var poll = _redisService.Get<Poll>(pollAnswerDto.PollId.ToString());
-			var meetingId = poll.MeetingId;
+			var pollResultsDto = GetPollResults(poll, pollAnswerDtos);
 			// signal
-
-			return GetPollResults(poll, pollAnswerDtos);
+			await _meetingHub.Clients.Group(poll.MeetingId.ToString()).SendAsync("OnPollResults", pollResultsDto);
 		}
 
 		private PollResultsDTO GetPollResults(Poll poll, ICollection<PollAnswerDTO> pollAnswerDtos)
 		{
-			var answers = pollAnswerDtos.Select(answer => answer.Answers);
+			var answerVariants = poll.Answers.ToList();
 
-			int[] results = new int[poll.Answers.Count];
-			var pollResultsDto = new PollResultsDTO { PollDto = _mapper.Map<PollDTO>(poll) };
+			var answerResults = pollAnswerDtos.Select(answer => answer.Answers);
+			int totalChecked = answerResults.Select(array => array.Length).Sum();
 
-			for (int i = 0; i < poll.Answers.Count; i++) 
+			var pollResultsDto = _mapper.Map<PollResultsDTO>(poll);
+			
+			for (int i = 0; i < answerVariants.Count; i++)
 			{
-				string answer = pollResultsDto.PollDto.Answers[i];
-				int answerVotedCount = answers.Count(subAnswer => subAnswer.Contains(i));
-				pollResultsDto.Results2.Add(answer, answerVotedCount);
+				int answerVotedCount = answerResults.Count(array => array.Contains(i));
+				int percentage = answerVotedCount * 100 / totalChecked;
+				pollResultsDto.Results.Add(answerVariants[i], percentage);
 			}
+
+			pollResultsDto.TotalVoted = answerResults.Count();
 
 			return pollResultsDto;
 		}

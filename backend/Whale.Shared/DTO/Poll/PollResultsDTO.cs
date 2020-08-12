@@ -6,9 +6,11 @@ namespace Whale.Shared.DTO.Poll
 {
 	public class PollResultsDTO
 	{
-		public PollDTO PollDto { get; set; }
-		public int[] Results { get; set; }
+		public Guid PollId { get; set; }
+		public string Title { get; set; }
+		public bool IsAnonymous { get; set; }
+		public int TotalVoted { get; set; }
+		public Dictionary<string, int> Results { get; set; } = new Dictionary<string, int>();
 
-		public Dictionary<string, int> Results2 { get; set; } = new Dictionary<string, int>();
 	}
 }
