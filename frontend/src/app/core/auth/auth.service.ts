@@ -4,6 +4,7 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import { UserRegistrationService } from '../services/user-registration.service';
 import { Observable, of, from } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
+import { environment } from '@env';
 
 @Injectable({
   providedIn: 'root',
@@ -34,7 +35,7 @@ export class AuthService {
     gapi.load('client', () => {
       // It's OK to expose these credentials, they are client safe.
       gapi.client.init({
-        apiKey: 'AIzaSyCOuwbwANkbbZT5hSpwpIDvXdZuce9fhZc', // * <- api key from firebase
+        apiKey: environment.firebase.apiKey, // * <- api key from firebase
         clientId:
           '893944865679-eav20gfr3sbintikhq42dhhc414loq4p.apps.googleusercontent.com', // * <= google clientId
         discoveryDocs: [

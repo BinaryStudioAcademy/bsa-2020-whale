@@ -5,7 +5,8 @@
     "types": [
       "gapi",
       "gapi.auth2",
-      "dom-mediacapture-record"
+      "dom-mediacapture-record",
+      "gapi.client.calendar"
     ],
     "typeRoots": [
       "node_modules/@types",
