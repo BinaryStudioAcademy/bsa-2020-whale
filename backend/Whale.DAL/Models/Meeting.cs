@@ -13,6 +13,6 @@ namespace Whale.DAL.Models
         public bool IsScheduled { get; set; }
         public bool IsRecurrent { get; set; }
 
-        public IEnumerable<Participant> Participants { get; set; }
+        public ICollection<Participant> Participants { get; set; }
     }
 }

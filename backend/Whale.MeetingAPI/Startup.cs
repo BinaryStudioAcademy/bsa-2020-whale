@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -53,7 +54,8 @@ namespace Whale.MeetingAPI
 
             services.AddTransient<ParticipantService>();
 
-            services.AddControllers();
+            services.AddControllers()
+                    .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
             services.AddHealthChecks()
                     .AddDbContextCheck<WhaleDbContext>("DbContextHealthCheck");
 

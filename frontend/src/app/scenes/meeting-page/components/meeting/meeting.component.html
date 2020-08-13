@@ -22,8 +22,10 @@
       <div class="ui icon input">
         <div class="ui icon input">
           <textarea
+            (keyup.enter)="sendMessage()"
             rows="1"
-            placeholder="Message..."
+            placeholder="Enter to send.
+Enter+Shift for new line."
             [(ngModel)]="msgText"
           ></textarea>
           <i
