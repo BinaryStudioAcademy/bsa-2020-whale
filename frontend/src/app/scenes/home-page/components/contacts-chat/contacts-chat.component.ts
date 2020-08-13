@@ -22,6 +22,8 @@ import { tap } from 'rxjs/operators';
 import { Message } from '@angular/compiler/src/i18n/i18n_ast';
 import { Console } from 'console';
 import { stringify } from 'querystring';
+import { SimpleModalService } from 'ngx-simple-modal';
+import { CallModalComponent } from '../call-modal/call-modal.component';
 
 @Component({
   selector: 'app-contacts-chat',
@@ -44,7 +46,8 @@ export class ContactsChatComponent implements OnInit, OnChanges {
   };
   constructor(
     private signalRService: SignalRService,
-    private httpService: HttpService
+    private httpService: HttpService,
+    private simpleModalService: SimpleModalService
   ) {}
 
   ngOnChanges(changes: SimpleChanges) {
@@ -92,5 +95,10 @@ export class ContactsChatComponent implements OnInit, OnChanges {
   }
   close(): void {
     this.chat.emit(true);
+  }
+
+  public call(): void {
+    console.log(this.contactSelected);
+    this.simpleModalService.addModal(CallModalComponent, this.contactSelected);
   }
 }

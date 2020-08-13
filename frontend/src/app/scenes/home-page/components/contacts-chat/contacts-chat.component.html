@@ -11,6 +11,8 @@
             {{ contactSelected.secondMember.secondName }}
             {{ contactSelected.secondMember.email }}
           </a>
+          <i class="phone icon" (click)="call()"></i>
+
           <a class="ui mini basic button edit-button" (click)="close()"
             >Close chat</a
           >

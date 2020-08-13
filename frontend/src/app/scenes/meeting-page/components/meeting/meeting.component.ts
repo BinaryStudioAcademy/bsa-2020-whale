@@ -267,6 +267,7 @@ export class MeetingComponent
 
   showChat(): void {
     this.isShowChat = !this.isShowChat;
+    console.log('participants: ', this.meeting.participants);
   }
 
   // call to peer
@@ -360,6 +361,11 @@ export class MeetingComponent
     );
   }
 
+  turnOffCamera(): void {
+    this.currentUserStream.getTracks().forEach((track) => track.stop());
+    this.currentUserStream = null;
+  }
+
   stopRecording(): void {
     this.blobService.stopRecording();
 
@@ -433,7 +439,9 @@ export class MeetingComponent
   }
 
   onCopyIconClick(): void {
-    this.simpleModalService.addModal(CopyClipboardComponent, {message: this.document.location.href});
+    this.simpleModalService.addModal(CopyClipboardComponent, {
+      message: this.document.location.href,
+    });
   }
 
   sendMessage(): void {
