@@ -6,6 +6,7 @@ import { BlobService } from '../../../../core/services/blob.service';
 import { User } from '@shared/models/user';
 import { HttpService } from '../../../../core/services/http.service';
 import { AuthService } from '../../../../core/auth/auth.service';
+import { FormGroup, FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-profile-page',
@@ -24,6 +25,12 @@ export class ProfilePageComponent implements OnInit {
 
   public isShowCamera = false;
   public isImageCropped = false;
+  public editName = false;
+  updatedUser: User;
+
+  public editTelephone = false;
+  editTelephon: string;
+
   isShowUploadFile: boolean;
   loggedInUser: User;
   public routePrefix = '/api/user';
@@ -197,6 +204,7 @@ export class ProfilePageComponent implements OnInit {
         .subscribe(
           (userFromDB: User) => {
             this.loggedInUser = userFromDB;
+            this.updatedUser = this.loggedInUser;
           },
           (error) => this.toastr.error(error.Message)
         );
@@ -211,5 +219,28 @@ export class ProfilePageComponent implements OnInit {
     this.closeCamera();
     this.GetAvatar();
     this.modal.nativeElement.style.display = 'none';
+  }
+
+  saveEditedUsername(): void {
+    this.editName = !this.editName;
+    this.httpService
+      .putRequest<User, User>(`${this.routePrefix}`, this.updatedUser)
+      .subscribe(
+        (updUser: User) => {
+          this.GetAvatar();
+        },
+        (error) => this.toastr.error(error.Message)
+      );
+  }
+  saveEditedTelephone(): void {
+    this.editTelephone = !this.editTelephone;
+    this.httpService
+      .putRequest<User, User>(`${this.routePrefix}`, this.updatedUser)
+      .subscribe(
+        (updUser: User) => {
+          this.GetAvatar();
+        },
+        (error) => this.toastr.error(error.Message)
+      );
   }
 }
