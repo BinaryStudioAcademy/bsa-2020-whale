@@ -1,59 +1,160 @@
 <app-page-header></app-page-header>
 
-<div class="profile-panel">
-    <div class="settings">
-        <div class="personal-container">
-            <div class="settings-item">
-                <div class="card">
-                        <img class="ui small image" src="https://img.icons8.com/color/240/000000/user-male.png/"/>
-                    <div class="content">
-                    <div class="ui mini bottom attached button">
-                        <i class="add icon"></i>
-                        Upload new image
-                    </div>
-                    </div>
-                </div>
-            </div>
-            <h3 class ="big name">David Lones</h3>
-            <div class="edit-button">
-                <button class="small ui basic button">
-                    <a>
-                        <i class="cog icon"></i> Edit
-                    </a>
-                </button>
-            </div>
-        </div>
-        <div class="ui section divider"></div>
-        <div class="personal-container">
-            <div class="settings-item">
-                <h4>Email address:</h4>
-            </div>
-            <span>user@email.com</span>
-            <div class="edit-button">
-                <button class="small ui basic button">
-                    <a>
-                        <i class="cog icon"></i> Edit
-                    </a>
-                </button>
-            </div>
-        </div>
-        <div class="ui section divider"></div>
-        <div class="personal-container">
-            <div class="settings-item">
-                <h4>Personal meeting id:</h4>
-            </div>
-            <span>1234-5678</span>
-            <div class="edit-button">
-                <button class="small ui basic button">
-                    <a>
-                        <i class="cog icon"></i> Edit
-                    </a>
-                </button>
-            </div>
-        </div>
-        <div class="ui section divider"></div>
+<div #cameraModal class="modal">
+  <div class="modal-content">
+    <i
+      (click)="closeModal()"
+      #closeUploadModal
+      class="window close icon"
+      style="position: absolute; right: 21%;"
+    ></i>
+
+    <div style="text-align: center;">
+      <div style="margin-bottom: 15px;" class="ui buttons">
+        <label (click)="closeCamera()" class="ui button" for="file"
+          >Upload from file</label
+        >
+        <input
+          hidden
+          type="file"
+          id="file"
+          (change)="uploadFile($event)"
+          accept="image/*"
+        />
+        <div class="or"></div>
+        <button (click)="showCamera()" class="ui button">Make photo</button>
+      </div>
     </div>
+
+    <div *ngIf="isShowCamera" class="camera-canvas">
+      <image-cropper
+        [imageChangedEvent]="imageChangedEvent"
+        [maintainAspectRatio]="true"
+        [aspectRatio]="4 / 3"
+        [imageURL]="userPhotoFromCamera"
+        format="png"
+        (imageCropped)="imageCropped($event)"
+        (imageLoaded)="imageLoaded()"
+        (cropperReady)="cropperReady()"
+        (loadImageFailed)="loadImageFailed()"
+      ></image-cropper>
+      <!-- <img [src]="croppedImage" /> -->
+
+      <div>
+        <video #video id="video" width="75%" height="auto" autoplay></video>
+      </div>
+      <button (click)="capture()" class="ui button">Make photo</button>
+      <button
+        *ngIf="isImageCropped"
+        (click)="saveAvatarFromCamera()"
+        class="ui button"
+      >
+        Save
+      </button>
+      <canvas #canvas id="canvas" width="640" height="480"></canvas>
+      <ul>
+        <li *ngFor="let c of captures">
+          <img src="{{ c }}" height="50" />
+        </li>
+      </ul>
+    </div>
+    <div
+      *ngIf="isShowUploadFile"
+      style="
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        align-items: center;
+      "
+    >
+      <div
+        style="
+          display: flex;
+          width: 100%;
+          justify-content: space-evenly;
+          align-items: center;
+        "
+      >
+        <image-cropper
+          style="width: 350px; height: 250px; float: left;"
+          [imageChangedEvent]="imageChangedEvent"
+          [maintainAspectRatio]="true"
+          [aspectRatio]="1 / 1"
+          [cropperMinWidth]="128"
+          [resizeToWidth]="128"
+          [onlyScaleDown]="true"
+          format="jpeg"
+          (imageCropped)="imageCroppedUpload($event)"
+        ></image-cropper>
+        <img
+          [src]="croppedImage"
+          style="width: 128px; height: 128px; float: left;"
+        />
+      </div>
+      <div style="margin-top: 20px;">
+        <button (click)="SendImage()" class="ui button">
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="profile-panel">
+  <div class="settings">
+    <div class="personal-container">
+      <div class="settings-item">
+        <div class="card">
+          <img class="ui small image" src="{{ loggedInUser?.avatarUrl }}" />
+          <div class="content">
+            <div
+              (click)="openModal()"
+              #showUploadModal
+              class="ui mini bottom attached button"
+            >
+              <i class="add icon"></i>
+              Upload new image
+            </div>
+          </div>
+        </div>
+      </div>
+      <h3 class="big name">
+        {{ loggedInUser?.firstName }} {{ loggedInUser?.secondName }}
+      </h3>
+      <div class="edit-button">
+        <button class="small ui basic button">
+          <a> <i class="cog icon"></i> Edit </a>
+        </button>
+      </div>
+    </div>
+    <div class="ui section divider"></div>
+    <div class="personal-container">
+      <div class="settings-item">
+        <h4>Email address:</h4>
+      </div>
+      <span>user@email.com</span>
+      <div class="edit-button">
+        <button class="small ui basic button">
+          <a> <i class="cog icon"></i> Edit </a>
+        </button>
+      </div>
+    </div>
+    <div class="ui section divider"></div>
+    <div class="personal-container">
+      <div class="settings-item">
+        <h4>Personal meeting id:</h4>
+      </div>
+      <span>1234-5678</span>
+      <div class="edit-button">
+        <button class="small ui basic button">
+          <a> <i class="cog icon"></i> Edit </a>
+        </button>
+      </div>
+    </div>
+    <div class="ui section divider"></div>
+  </div>
 </div>
 <footer class="footer">
-    &copy; Powered by Binary Studio
+  &copy; Powered by Binary Studio
 </footer>

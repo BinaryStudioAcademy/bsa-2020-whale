@@ -27,6 +27,9 @@ using Whale.Shared.Services;
 using AutoMapper;
 using Whale.BLL.MappingProfiles;
 using System.Reflection;
+using Whale.BLL.Services.Interfaces;
+using Microsoft.OpenApi.Models;
+using Whale.Shared.Helper;
 
 namespace Whale.MeetingAPI
 {
@@ -44,7 +47,11 @@ namespace Whale.MeetingAPI
         {
             services.AddDbContext<WhaleDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("WhaleDatabase")));
             services.AddTransient<IMeetingService, MeetingService>();
-            services.AddTransient<ChatHub>();
+
+            services.AddTransient<PollService>();
+            services.AddTransient<IUserService, UserService>();
+
+            services.AddTransient<ParticipantService>();
 
             services.AddControllers();
             services.AddHealthChecks()
@@ -64,10 +71,21 @@ namespace Whale.MeetingAPI
             services.AddAutoMapper(cfg =>
             {
                 cfg.AddProfile<MeetingProfile>();
+                cfg.AddProfile<PollProfile>();
+                cfg.AddProfile<MeetingMessage>();
+                cfg.AddProfile<UserProfile>();
+                cfg.AddProfile<ParticipantProfile>();
             },
             Assembly.GetExecutingAssembly());
 
             services.AddScoped(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Meeting API", Version = "v1" });
+            });
+            services.AddScoped(x => new EncryptService(Configuration.GetValue<string>("EncryptSettings:key")));
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -76,6 +94,13 @@ namespace Whale.MeetingAPI
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+
+                app.UseSwagger();
+
+                app.UseSwaggerUI(options =>
+                {
+                    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Meeting API v1");
+                });
             }
 
             app.UseCors("CorsPolicy");
@@ -96,8 +121,7 @@ namespace Whale.MeetingAPI
                     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
                 });
 
-                endpoints.MapHub<WebRtcSignalHub>("/webrtcSignalHub");
-                endpoints.MapHub<ChatHub>("/chatHub");
+                endpoints.MapHub<MeetingHub>("/meeting");
             });
         }
     }

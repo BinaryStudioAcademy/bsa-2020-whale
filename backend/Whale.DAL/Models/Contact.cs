@@ -1,17 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
 using Whale.DAL.Abstraction;
 
 namespace Whale.DAL.Models
 {
-    public class Contact:BaseEntity
+    public class Contact : BaseEntity
     {
-        public Guid OwnerId { get; set; }
-        public User Owner { get; set; }
-        public Guid ContactnerId { get; set; }
-        public User Contactner { get; set; }
-        public bool IsBlocked { get; set; }
+        public Guid FirstMemberId { get; set; }
+        public User FirstMember { get; set; }
+        public Guid SecondMemberId { get; set; }
+        public User SecondMember { get; set; }
+        public Guid? PinnedMessageId { get; set; }
+        public DirectMessage PinnedMessage { get; set; }
+        public ContactSetting FirstMemberSettings { get; set; }
+        public ContactSetting SecondMemberSettings { get; set; }
     }
 }

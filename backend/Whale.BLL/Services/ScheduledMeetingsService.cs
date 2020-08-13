@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Whale.BLL.Exceptions;
 using Whale.BLL.Services.Abstract;
 using Whale.BLL.Services.Interfaces;
 using Whale.DAL;
@@ -18,12 +19,11 @@ namespace Whale.BLL.Services
 
         public async Task<ScheduledMeetingDTO> GetAsync(Guid uid)
         {
-            Console.WriteLine("1");
             var meeting = await _context.Meetings
                 .Where(m => m.IsRecurrent && m.IsScheduled)
                 .FirstOrDefaultAsync(s => s.Id == uid);
             if (meeting is null)
-                throw new Exception("Scheduled Meeting not found");
+                throw new NotFoundException("Scheduled Meeting", uid.ToString());
 
             return _mapper.Map<ScheduledMeetingDTO>(meeting);
         }
@@ -39,7 +39,8 @@ namespace Whale.BLL.Services
         {
             var meeting = _context.Meetings.FirstOrDefault(m => m.Id == scheduledMeeting.Id);
 
-            if (meeting is null) throw new Exception("Scheduled Meeting not found");
+            if (meeting is null) 
+                throw new NotFoundException("Scheduled Meeting", scheduledMeeting.Id.ToString());
 
             meeting.Settings = scheduledMeeting.Settings;
             meeting.StartTime = scheduledMeeting.ScheduledTime;
@@ -52,7 +53,8 @@ namespace Whale.BLL.Services
         {
             var meeting = _context.Meetings.FirstOrDefault(c => c.Id == id);
 
-            if (meeting is null) throw new Exception("Scheduled Meeting not found");
+            if (meeting is null)
+                throw new NotFoundException("Scheduled Meeting", id.ToString());
 
             _context.Meetings.Remove(meeting);
             await _context.SaveChangesAsync();

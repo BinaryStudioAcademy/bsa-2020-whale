@@ -1,0 +1,46 @@
+<div class="custom-select">
+  <div class="select">
+    Microphone:
+    <div class="ui compact menu">
+      <select [(ngModel)]="inputDevice" class="menu">
+        <option *ngFor="let c of inputDevices" [value]="c" [selected]="c">{{
+          c.label
+        }}</option>
+      </select>
+    </div>
+  </div>
+  <div class="wrapper">
+    <audio></audio>
+    <button class="ui button" (click)="onChange()">Check input level</button>
+    <progress class="bar" value="{{ this.db }}" max="100"></progress>
+  </div>
+  <div class="wrapper">
+    <label class="visually-hidden" for="volume">Volume microphone: </label>
+    <input
+      [(ngModel)]="volume"
+      (ngModelChange)="changeVolume($event)"
+      id="volume"
+      class="slider"
+      type="range"
+      min="0"
+      max="100"
+      step="1"
+    />
+  </div>
+</div>
+<div class="custom-select">
+  <div class="select">
+    Speaker:
+    <div class="ui compact menu">
+      <select [(ngModel)]="outputDevice">
+        <option
+          class="item"
+          *ngFor="let c of outputDevices"
+          [value]="c"
+          [selected]="c"
+          >{{ c.label }}</option
+        >
+      </select>
+    </div>
+  </div>
+</div>

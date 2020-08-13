@@ -8,19 +8,25 @@ import { MeetingLink } from '../../shared/models/meeting/meeting-link';
 import { Meeting } from '../../shared/models/meeting/meeting';
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root',
 })
-
 export class MeetingService {
-    public routePrefix = `${environment.meetingApiUrl}/api/meeting`;
+  public routePrefix = `${environment.apiUrl}/api/meeting`;
 
-    constructor(private httpService: HttpService){}
+  constructor(private httpService: HttpService) {}
 
-    public createMeeting(meeting: MeetingCreate): Observable<HttpResponse<MeetingLink>> {
-        return this.httpService.postFullRequest<MeetingCreate, MeetingLink>(`${this.routePrefix}`, meeting);
-    }
+  public createMeeting(
+    meeting: MeetingCreate
+  ): Observable<HttpResponse<MeetingLink>> {
+    return this.httpService.postFullRequest<MeetingCreate, MeetingLink>(
+      `${this.routePrefix}`,
+      meeting
+    );
+  }
 
-    public connectMeeting(link: string): Observable<HttpResponse<Meeting>> {
-        return this.httpService.getFullRequest<Meeting>(`${this.routePrefix}${link}`);
-    }
+  public connectMeeting(link: string): Observable<HttpResponse<Meeting>> {
+    return this.httpService.getFullRequest<Meeting>(
+      `${this.routePrefix}${link}`
+    );
+  }
 }

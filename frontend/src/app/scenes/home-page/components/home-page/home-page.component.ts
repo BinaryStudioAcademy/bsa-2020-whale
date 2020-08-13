@@ -1,95 +1,55 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  EventEmitter,
+  ViewChild,
+  Output,
+  OnDestroy,
+} from '@angular/core';
+import { User } from '@shared/models/user/user';
+import { Contact } from '@shared/models/contact/contact';
+import { SignalRService } from 'app/core/services/signal-r.service';
+import { HttpService } from 'app/core/services/http.service';
+import { HubConnection } from '@aspnet/signalr';
+import { SimpleModalService } from 'ngx-simple-modal';
+import { AddContactModalComponent } from '../add-contact-modal/add-contact-modal.component';
+import { ContactsChatComponent } from '../contacts-chat/contacts-chat.component';
+import { ToastrService } from 'ngx-toastr';
+import { UpstateService } from 'app/core/services/upstate.service';
 import { MeetingService } from 'app/core/services/meeting.service';
 import { Router } from '@angular/router';
 import { MeetingCreate } from '@shared/models/meeting/meeting-create';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
-import { SimpleModalService } from 'ngx-simple-modal';
-import { AddContactModalComponent } from '../add-contact-modal/add-contact-modal.component';
-
+import { AuthService } from 'app/core/auth/auth.service';
 
 @Component({
   selector: 'app-home-page',
   templateUrl: './home-page.component.html',
-  styleUrls: ['./home-page.component.sass']
+  styleUrls: ['./home-page.component.sass'],
 })
-
 export class HomePageComponent implements OnInit, OnDestroy {
-
-  mainUser: UserModel = {
-    id : 1,
-    firstName: 'Daniel',
-    lastName: 'Louise',
-    image: 'https://img.icons8.com/color/240/000000/user-male.png'
-  };
-   USERS: UserModel[] = [
-      {
-        id : 1,
-        firstName: 'Lol',
-        lastName: 'Kek',
-        image: 'https://img.icons8.com/color/240/000000/user-male.png'
-      },
-      {
-        id : 2,
-        firstName: 'Scarlet',
-        lastName: 'Hara',
-        image: 'https://img.icons8.com/color/48/000000/kitty.png'
-      },
-      {
-        id : 3,
-        firstName: 'Mike',
-        lastName: 'Posne',
-        image: 'https://img.icons8.com/officel/80/000000/chatbot.png'
-      },
-      {
-        id : 1,
-        firstName: 'Lol',
-        lastName: 'Kek',
-        image: 'https://img.icons8.com/color/240/000000/user-male.png'
-      },
-      {
-        id : 2,
-        firstName: 'Scarlet',
-        lastName: 'Hara',
-        image: 'https://img.icons8.com/color/48/000000/kitty.png'
-      },
-      {
-        id : 3,
-        firstName: 'Mike',
-        lastName: 'Posne',
-        image: 'https://img.icons8.com/officel/80/000000/chatbot.png'
-      },
-      {
-        id : 1,
-        firstName: 'Lol',
-        lastName: 'Kek',
-        image: 'https://img.icons8.com/color/240/000000/user-male.png'
-      },
-      {
-        id : 2,
-        firstName: 'Scarlet',
-        lastName: 'Hara',
-        image: 'https://img.icons8.com/color/48/000000/kitty.png'
-      },
-      {
-        id : 3,
-        firstName: 'Mike',
-        lastName: 'Posne',
-        image: 'https://img.icons8.com/officel/80/000000/chatbot.png'
-      }
-    ];
-
+  private counterComponent: ContactsChatComponent;
+  contacts: Contact[];
+  loggedInUser: User;
   contactsVisibility = true;
   groupsVisibility = false;
-  chatVisibility = false;
-
+  chatVisibility = true;
+  ownerEmail: string;
+  public routePrefix = '/api/user/email';
+  private hubConnection: HubConnection;
+  contactSelected: Contact;
   private unsubscribe$ = new Subject<void>();
-
   constructor(
+    private toastr: ToastrService,
+    private stateService: UpstateService,
+    private signalRService: SignalRService,
+    private httpService: HttpService,
+    private simpleModalService: SimpleModalService,
     private meetingService: MeetingService,
     private router: Router,
-    private simpleModalService: SimpleModalService
-  ) { }
+    private authService: AuthService
+  ) {}
 
   ngOnDestroy(): void {
     this.unsubscribe$.next();
@@ -97,50 +57,76 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.authService.user$.subscribe((user) => {
+      this.httpService
+        .getRequest<User>(`${this.routePrefix}/${user.email}`)
+        .subscribe(
+          (userFromDB: User) => {
+            this.loggedInUser = userFromDB;
+            this.ownerEmail = this.loggedInUser?.email;
+          },
+          (error) => this.toastr.error(error.Message)
+        );
+      this.httpService.getRequest<Contact[]>('/api/contacts').subscribe(
+        (data: Contact[]) => {
+          this.contacts = data;
+        },
+        (error) => this.toastr.error(error.Message)
+      );
+    });
   }
 
   addNewGroup(): void {
     console.log('group clicked!');
   }
   addNewContact(): void {
-    console.log('contact clicked!');
     this.simpleModalService
-        .addModal(AddContactModalComponent).subscribe ( contact =>
-          console.log(contact)
-          );
+      .addModal(AddContactModalComponent)
+      .subscribe((contact) => console.log(contact));
   }
-  onUserClick(): void {
-  this.chatVisibility = !this.chatVisibility;
+  visibilityChange(event): void {
+    this.chatVisibility = event;
+    this.contactSelected = undefined;
   }
+  onContactClick(contact: Contact): void {
+    this.chatVisibility = false;
+    this.contactSelected = contact;
+  }
+
   onGroupClick(): void {
     this.chatVisibility = !this.chatVisibility;
   }
-
-
-  createMeeting(): void{
+  isContactActive(contact): boolean {
+    return this.contactSelected === contact;
+  }
+  createMeeting(): void {
     this.meetingService
       .createMeeting({
         settings: '',
         startTime: new Date(),
         anonymousCount: 0,
         isScheduled: false,
-        isRecurrent: false
+        isRecurrent: false,
       } as MeetingCreate)
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (resp) => {
           const meetingLink = resp.body;
-          this.router.navigate(['/meeting-page', `?id=${meetingLink.id}&pwd=${meetingLink.password}`]);
+          this.router.navigate([
+            '/meeting-page',
+            `?id=${meetingLink.id}&pwd=${meetingLink.password}`,
+          ]);
         },
-        (error) => (console.log(error.message))
+        (error) => console.log(error.message)
       );
   }
-
-
+  goToPage(pageName: string): void {
+    this.router.navigate([`${pageName}`]);
+  }
 }
 export interface UserModel {
-    id: number;
-    firstName: string;
-    lastName: string;
-    image: string;
+  id: number;
+  firstName: string;
+  lastName: string;
+  image: string;
 }

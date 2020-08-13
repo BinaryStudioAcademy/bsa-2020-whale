@@ -42,22 +42,56 @@ namespace Whale.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ContactnerId")
+                    b.Property<Guid>("FirstMemberId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("IsBlocked")
-                        .HasColumnType("bit");
+                    b.Property<Guid?>("FirstMemberSettingsId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("OwnerId")
+                    b.Property<Guid?>("PinnedMessageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SecondMemberId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("SecondMemberSettingsId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ContactnerId");
+                    b.HasIndex("FirstMemberId");
 
-                    b.HasIndex("OwnerId");
+                    b.HasIndex("FirstMemberSettingsId");
+
+                    b.HasIndex("PinnedMessageId");
+
+                    b.HasIndex("SecondMemberId");
+
+                    b.HasIndex("SecondMemberSettingsId");
 
                     b.ToTable("Contacts");
+                });
+
+            modelBuilder.Entity("Whale.DAL.Models.ContactSetting", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsBloked")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsMuted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ContactSettings");
                 });
 
             modelBuilder.Entity("Whale.DAL.Models.DirectMessage", b =>
@@ -69,14 +103,22 @@ namespace Whale.DAL.Migrations
                     b.Property<bool>("Attachment")
                         .HasColumnType("bit");
 
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("ContactId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
 
                     b.HasIndex("ContactId");
 
@@ -199,48 +241,6 @@ namespace Whale.DAL.Migrations
                     b.ToTable("Participants");
                 });
 
-            modelBuilder.Entity("Whale.DAL.Models.Poll", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Answer1")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Answer2")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Answer3")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Answer4")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Answer5")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsAnonymous")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsSingleChoice")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("MeetingId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Title")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MeetingId");
-
-                    b.ToTable("Polls");
-                });
-
             modelBuilder.Entity("Whale.DAL.Models.Record", b =>
                 {
                     b.Property<Guid>("Id")
@@ -337,21 +337,48 @@ namespace Whale.DAL.Migrations
 
             modelBuilder.Entity("Whale.DAL.Models.Contact", b =>
                 {
-                    b.HasOne("Whale.DAL.Models.User", "Contactner")
+                    b.HasOne("Whale.DAL.Models.User", "FirstMember")
                         .WithMany()
-                        .HasForeignKey("ContactnerId")
+                        .HasForeignKey("FirstMemberId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Whale.DAL.Models.User", "Owner")
+                    b.HasOne("Whale.DAL.Models.ContactSetting", "FirstMemberSettings")
                         .WithMany()
-                        .HasForeignKey("OwnerId")
+                        .HasForeignKey("FirstMemberSettingsId");
+
+                    b.HasOne("Whale.DAL.Models.DirectMessage", "PinnedMessage")
+                        .WithMany()
+                        .HasForeignKey("PinnedMessageId");
+
+                    b.HasOne("Whale.DAL.Models.User", "SecondMember")
+                        .WithMany()
+                        .HasForeignKey("SecondMemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Whale.DAL.Models.ContactSetting", "SecondMemberSettings")
+                        .WithMany()
+                        .HasForeignKey("SecondMemberSettingsId");
+                });
+
+            modelBuilder.Entity("Whale.DAL.Models.ContactSetting", b =>
+                {
+                    b.HasOne("Whale.DAL.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
             modelBuilder.Entity("Whale.DAL.Models.DirectMessage", b =>
                 {
+                    b.HasOne("Whale.DAL.Models.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Whale.DAL.Models.Contact", "Contact")
                         .WithMany()
                         .HasForeignKey("ContactId")
@@ -403,15 +430,6 @@ namespace Whale.DAL.Migrations
                     b.HasOne("Whale.DAL.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Whale.DAL.Models.Poll", b =>
-                {
-                    b.HasOne("Whale.DAL.Models.Meeting", "Meeting")
-                        .WithMany()
-                        .HasForeignKey("MeetingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

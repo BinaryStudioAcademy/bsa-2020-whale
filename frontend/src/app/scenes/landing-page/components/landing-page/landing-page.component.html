@@ -1,104 +1,142 @@
 <div class="ui large top fixed borderless main menu">
-    <div class="ui container">
-        <div class="left item">
-            <b>Whale</b>
-        </div>
-        <div class="right menu">
-            <div class="item" *ngIf="auth.isLoggedIn()">
-                <a class="ui button" (click)="logOut()">Log Out</a>
-            </div>
-            <div class="item" *ngIf="!auth.isLoggedIn()">
-                <a class="ui primary button" (click)="logIn()">Log In</a>
-            </div>
-        </div>
+  <div class="ui container">
+    <div class="left item">
+      <b>Whale</b>
     </div>
+    <div class="right menu">
+      <div class="item" *ngIf="auth.isSignedIn">
+        <a class="ui primary button" (click)="redirectToHome()">Profile</a>
+      </div>
+      <div class="item" *ngIf="auth.isSignedIn">
+        <a class="ui button" (click)="logOut()">Log Out</a>
+      </div>
+      <div class="item" *ngIf="!auth.isSignedIn">
+        <a class="ui primary button" (click)="logIn()">Log In</a>
+      </div>
+    </div>
+  </div>
 </div>
 
-
 <div class="screen_container first-screen ui segment">
-    <div class="ui container">
-        <div class="ui grid">
-            <div class="ten wide column">
-                <div class="ui container">
-                    <h1 class="ui header">Whale: A cloud-based video conferencing app with advanced abilities
-                        where you can conduct business meetings or have a virtual party with your friends. ​ </h1>
-                </div>
-                <div class="ui text container ">
-                    <button class="ui big primary button" (click)="logIn()">Sign up for free</button>
-                </div>
-            </div>
-            <div class="six wide column"></div>
+  <div class="ui container">
+    <div class="ui grid">
+      <div class="ten wide column">
+        <div class="ui container">
+          <h1 class="ui header">
+            Whale: A cloud-based video conferencing app with advanced abilities
+            where you can conduct business meetings or have a virtual party with
+            your friends. ​
+          </h1>
         </div>
+        <div class="ui text container">
+          <button
+            class="ui big primary button"
+            (click)="logIn()"
+            *ngIf="!auth.isSignedIn"
+          >
+            <span>Sign up for free</span>
+          </button>
+          <button
+            class="ui big primary button"
+            (click)="redirectToHome()"
+            *ngIf="auth.isSignedIn"
+          >
+            <span>Go to homepage</span>
+          </button>
+        </div>
+      </div>
+      <div class="six wide column"></div>
     </div>
+  </div>
 </div>
 
 <div class="screen_container second-screen ui center aligned">
-    <div class="ui container"> 
-        <div class="screen_header">
-            <h1 class="ui header">Why Whale?</h1>
-        </div>
-        <div class="ui four column stackable doubling grid">
-            <div class="ui column center aligned">
-                <img class="icon fl" src="assets/img/meeting-icon.png">
-                <h2>No limits</h2>
-                <div>Unlimited call length and number of participants to meet with all the people you rarely see</div>
-            </div>
-            <div class="ui column center aligned">
-                <img class="icon" src="assets/img/call-recording-icon.png">
-                <h2>Call recordings</h2>
-                <div>You can record your meetings and then view them whenever you want</div>
-            </div>
-            <div class="ui column center aligned">
-                <img class="icon" src="assets/img/noise-reduction-icon.png">
-                <h2>Noise reduction</h2>
-                <div>No one will notice if you’re taking a walk in a windy park during a meeting</div>
-            </div>
-            <div class="ui column center aligned">
-                <img class="icon" src="assets/img/custom-background-icon.png">
-                <h2>Custom backgrounds</h2>
-                <div>Background replacement to look professional even during BBQ party</div>
-            </div>
-        </div>
+  <div class="ui container">
+    <div class="screen_header">
+      <h1 class="ui header">Why Whale?</h1>
     </div>
+    <div class="ui four column stackable doubling grid">
+      <div class="ui column center aligned">
+        <img class="icon fl" src="assets/img/meeting-icon.png" />
+        <h2>No limits</h2>
+        <div>
+          Unlimited call length and number of participants to meet with all the
+          people you rarely see
+        </div>
+      </div>
+      <div class="ui column center aligned">
+        <img class="icon" src="assets/img/call-recording-icon.png" />
+        <h2>Call recordings</h2>
+        <div>
+          You can record your meetings and then view them whenever you want
+        </div>
+      </div>
+      <div class="ui column center aligned">
+        <img class="icon" src="assets/img/noise-reduction-icon.png" />
+        <h2>Noise reduction</h2>
+        <div>
+          No one will notice if you’re taking a walk in a windy park during a
+          meeting
+        </div>
+      </div>
+      <div class="ui column center aligned">
+        <img class="icon" src="assets/img/custom-background-icon.png" />
+        <h2>Custom backgrounds</h2>
+        <div>
+          Background replacement to look professional even during BBQ party
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="screen_container third-screen ui center aligned">
-    <div class="ui container">
-        <div class="screen_header">
-            <h1 class="ui header">What you can do?</h1>
-        </div>
-        <div class="content">
-            <div class="content_item left">
-                <div>
-                    <img src="assets/img/call-friends-and-family.jpg">
-                </div>
-                <div>
-                    <h1>Call friends and family</h1>
-                    <div>Arrange meetings with friends, relatives and colleagues who live far away from you</div>
-                </div>
-            </div>
-            <div class="content_item right">
-                <div>
-                    <h1>Organize conferences and webinars</h1>
-                    <div>Keep your team connected with our video conferencing platform. Multiple participants can share their screens simultaneously and co-annotate for a more interactive meeting.</div>
-                </div>
-                <div>
-                    <img src="assets/img/webinar.jpg">
-                </div>
-            </div>
-            <div class="content_item left">
-                <div>
-                    <img src="assets/img/chat.jpg">
-                </div>
-                <div>
-                    <h1>Chat with friends</h1>
-                    <div>Create private chatrooms with groups, searchable history and integrated file sharing,</div>
-                </div>
-            </div>
-        </div>
+  <div class="ui container">
+    <div class="screen_header">
+      <h1 class="ui header">What you can do?</h1>
     </div>
+    <div class="content">
+      <div class="content_item left">
+        <div>
+          <img src="assets/img/call-friends-and-family.jpg" />
+        </div>
+        <div>
+          <h1>Call friends and family</h1>
+          <div>
+            Arrange meetings with friends, relatives and colleagues who live far
+            away from you
+          </div>
+        </div>
+      </div>
+      <div class="content_item right">
+        <div>
+          <h1>Organize conferences and webinars</h1>
+          <div>
+            Keep your team connected with our video conferencing platform.
+            Multiple participants can share their screens simultaneously and
+            co-annotate for a more interactive meeting.
+          </div>
+        </div>
+        <div>
+          <img src="assets/img/webinar.jpg" />
+        </div>
+      </div>
+      <div class="content_item left">
+        <div>
+          <img src="assets/img/chat.jpg" />
+        </div>
+        <div>
+          <h1>Chat with friends</h1>
+          <div>
+            Create private chatrooms with groups, searchable history and
+            integrated file sharing,
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <footer class="footer">
-    &copy; Powered by Binary Studio
+  &copy; Powered by Binary Studio
 </footer>

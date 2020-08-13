@@ -14,17 +14,11 @@ namespace Whale.BLL.Hubs
             await Clients.Group(groupName).SendAsync("JoinedGroup", Context.ConnectionId);
         }
 
-        [HubMethodName("SendGroupMessage")]
-        public async Task SendMessage(string msg, string groupName)
-        {
-            await Clients.Group(groupName).SendAsync(msg);
-        }
-
         public async Task Disconnect(string groupName)
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
             await Clients.Group(groupName).SendAsync(Context.ConnectionId + " jeft groupS");
         }
-            
+
     }
 }

@@ -1,0 +1,21 @@
+<div class="ui segment">
+    <h4>Statistics</h4>
+    <div class="ui two statistics mini">
+        <div class="statistic">
+            <div class="value">
+                {{meetingTimeUnix | date:'HH:mm:ss':'UTC'}}
+            </div>
+            <div class="label">
+                Meeting Duration
+            </div>
+        </div>
+        <div class="statistic">
+            <div class="value">
+                {{userTimeUnix | date:'HH:mm:ss':'UTC'}}
+            </div>
+            <div class="label">
+                Your Presence
+            </div>
+        </div>
+    </div>
+</div>
