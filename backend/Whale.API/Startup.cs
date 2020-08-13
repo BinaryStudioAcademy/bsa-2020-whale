@@ -1,15 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Whale.BLL.Hubs;
 using Whale.DAL;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +14,8 @@ using Whale.BLL.Providers;
 using Microsoft.IdentityModel.Tokens;
 using Whale.Shared.Services;
 using Whale.BLL.Services.Interfaces;
+using Whale.DAL.Settings;
+using Whale.API.Extensions;
 using Whale.API.Middleware;
 using Whale.BLL.Interfaces;
 using Microsoft.OpenApi.Models;
@@ -29,9 +25,15 @@ namespace Whale.API
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment hostingEnvironment)
         {
-            Configuration = configuration;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(hostingEnvironment.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{hostingEnvironment.EnvironmentName}.json", reloadOnChange: true, optional: true)
+                .AddEnvironmentVariables();
+
+            Configuration = builder.Build();
         }
 
         public IConfiguration Configuration { get; }
@@ -71,7 +73,7 @@ namespace Whale.API
                 .WithOrigins("http://localhost:4200");
         }));
 
-            services.AddTransient<FileStorageProvider>();
+            services.AddTransient<FileStorageProvider>(x => new FileStorageProvider(Configuration.Bind<BlobStorageSettings>("BlobStorageSettings")));
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(opt =>

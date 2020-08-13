@@ -146,6 +146,7 @@ export class MeetingComponent
       .subscribe(
         (participant) => {
           this.currentParticipant = participant;
+          this.connectionData.participant = participant;
         },
         (err) => {
           this.toastr.error(err.Message);
@@ -312,14 +313,16 @@ export class MeetingComponent
       const groupId = urlParams.get('id');
       const groupPwd = urlParams.get('pwd');
 
-      this.connectionData = {
-        peerId: id,
-        userEmail: this.authService.currentUser.email,
-        meetingId: groupId,
-        meetingPwd: groupPwd,
-        participant: this.currentParticipant,
-      };
-      this.getMeeting(link);
+      this.authService.user$.subscribe((user) => {
+        this.connectionData = {
+          peerId: id,
+          userEmail: this.authService.currentUser.email,
+          meetingId: groupId,
+          meetingPwd: groupPwd,
+          participant: this.currentParticipant, // this.currentParticipant is undefined here
+        };
+        this.getMeeting(link);
+      });
     });
   }
 
@@ -410,7 +413,7 @@ export class MeetingComponent
 
   onStatisticsIconClick(): void {
     if (!this.meetingStatistics) {
-      if  (!this.meeting) {
+      if (!this.meeting) {
         this.toastr.warning('Something went wrong. Try again later.');
         this.route.params.subscribe((params: Params) => {
           this.getMeeting(params[`link`]);
@@ -418,7 +421,7 @@ export class MeetingComponent
       }
       this.meetingStatistics = {
         startTime: this.meeting.startTime,
-        userJoinTime: this.contectedAt
+        userJoinTime: this.contectedAt,
       };
     }
     this.isShowStatistics = !this.isShowStatistics;

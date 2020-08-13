@@ -6,6 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 import { GoogleCalendarService } from 'app/core/services/google-calendar.service';
 import moment from 'moment';
 import { AuthService } from 'app/core/auth/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-schedule-meeting-page',
@@ -35,7 +36,8 @@ export class ScheduleMeetingPageComponent implements OnInit {
     private httpService: HttpService,
     private toastr: ToastrService,
     private calendarService: GoogleCalendarService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {
     const today: Date = new Date();
 
@@ -77,10 +79,12 @@ export class ScheduleMeetingPageComponent implements OnInit {
     //   (resp) => console.log(resp),
     //   (error) => this.toastr.error(error, 'Error')
     // );
+    this.toastr.success('saved successfuly');
+    this.router.navigate(['/home']);
   }
 
   public cancelSchedule() {
-    console.log('cancel update');
+    this.router.navigate(['/home']);
   }
 
   createStringFromDate(date: Date): string {

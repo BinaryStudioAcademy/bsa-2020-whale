@@ -5,8 +5,8 @@ import freeice from 'freeice';
 
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:51569',
-  meetingApiUrl: 'http://localhost:55842',
+  apiUrl: 'http://localhost:4201',
+  meetingApiUrl: 'http://localhost:4202',
   firebase: {
     apiKey: 'AIzaSyCdb8h9YMeJBdcIM5wK_w6Mcw7ZI1CVJAk',
     authDomain: 'bsa-whale.firebaseapp.com',
@@ -16,6 +16,8 @@ export const environment = {
     messagingSenderId: '893944865679',
     appId: '1:893944865679:web:9b055d730e3a27b66961fa',
   },
+  googleClientId:
+    '893944865679-eav20gfr3sbintikhq42dhhc414loq4p.apps.googleusercontent.com',
   peerOptions: {
     // ! default settings
     key: 'peerjs',

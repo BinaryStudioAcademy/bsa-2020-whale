@@ -22,9 +22,9 @@ export class AuthService {
     this.user$ = fireAuth.authState;
     this.user$.subscribe((user) => {
       if (user) {
-        this.registrationService.registerUser(user);
-        this.currentUser = user;
         this.isSignedIn = true;
+        this.currentUser = user;
+        this.registrationService.registerUser(user);
       } else {
         this.isSignedIn = false;
         this.currentUser = null;
@@ -39,8 +39,7 @@ export class AuthService {
       // It's OK to expose these credentials, they are client safe.
       gapi.client.init({
         apiKey: environment.firebase.apiKey, // * <- api key from firebase
-        clientId:
-          '893944865679-eav20gfr3sbintikhq42dhhc414loq4p.apps.googleusercontent.com', // * <= google clientId
+        clientId: environment.googleClientId, // * <= google clientId
         discoveryDocs: [
           'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest',
         ],
