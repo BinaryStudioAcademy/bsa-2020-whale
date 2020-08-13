@@ -102,7 +102,12 @@
     <div class="personal-container">
       <div class="settings-item">
         <div class="card">
-          <img class="ui small image" src="{{ loggedInUser?.avatarUrl }}" />
+          <i (click)="removeAvatar()" class="trash icon"></i>
+          <img
+            #avatar
+            class="ui small image"
+            src="{{ loggedInUser?.avatarUrl }}"
+          />
           <div class="content">
             <div
               (click)="openModal()"

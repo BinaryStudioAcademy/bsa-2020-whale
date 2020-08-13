@@ -8,6 +8,7 @@ import { HttpService } from '../../../../core/services/http.service';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { FormGroup, FormControl } from '@angular/forms';
 import { filter } from 'rxjs/operators';
+import Avatar from 'avatar-initials';
 
 @Component({
   selector: 'app-profile-page',
@@ -23,6 +24,9 @@ export class ProfilePageComponent implements OnInit {
 
   @ViewChild('cameraModal')
   public modal: ElementRef;
+
+  @ViewChild('avatar')
+  public avatar: ElementRef;
 
   public isShowCamera = false;
   public isImageCropped = false;
@@ -41,7 +45,6 @@ export class ProfilePageComponent implements OnInit {
   croppedImage: any = '';
   fileToUpload: File;
   avatarURL = '';
-  userMockup = {} as User;
 
   ngOnInit(): void {
     this.GetAvatar();
@@ -92,13 +95,12 @@ export class ProfilePageComponent implements OnInit {
       console.log(`image: ${resp}`);
       this.avatarURL = resp;
       if (this.avatarURL !== '') {
-        this.userMockup.id = this.loggedInUser.id;
-        this.userMockup.firstName = this.loggedInUser.firstName;
-        this.userMockup.secondName = this.loggedInUser.secondName;
-        this.userMockup.email = this.loggedInUser.email;
-        this.userMockup.avatarUrl = this.avatarURL;
+        this.loggedInUser.avatarUrl = this.avatarURL;
         this.httpService
-          .putFullRequest<User, string>(`${this.routePrefix}`, this.userMockup)
+          .putFullRequest<User, string>(
+            `${this.routePrefix}`,
+            this.loggedInUser
+          )
           .subscribe((response) => console.log(`image: ${response.body}`));
       }
     });
@@ -188,6 +190,21 @@ export class ProfilePageComponent implements OnInit {
       });
   }
 
+  public removeAvatar(): void {
+    const avatar = new Avatar(this.avatar, {
+      useGravatar: false,
+      initials: `${this.loggedInUser.firstName[0]}${this.loggedInUser?.secondName[0]}`,
+      initial_fg: '#ffffff',
+      initial_bg: '#00325c',
+      initial_font_family: "'Lato', 'Lato-Regular', 'Helvetica Neue'",
+    });
+
+    this.loggedInUser.avatarUrl = avatar.element.src;
+    this.httpService
+      .putFullRequest<User, string>(`${this.routePrefix}`, this.loggedInUser)
+      .subscribe((response) => console.log(`image: ${response.body}`));
+  }
+
   openModal(): void {
     this.modal.nativeElement.style.display = 'block';
   }
@@ -209,6 +226,7 @@ export class ProfilePageComponent implements OnInit {
         (error) => this.toastr.error(error.Message)
       );
   }
+
   saveEditedTelephone(): void {
     this.editTelephone = !this.editTelephone;
     this.httpService
