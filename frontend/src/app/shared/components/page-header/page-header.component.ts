@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from 'app/core/auth/auth.service';
 import { Notification } from 'app/shared/models/notification/notification';
+import { User } from '@shared/models/user';
+import { HttpService } from '../../../core/services/http.service';
 
 @Component({
   selector: 'app-page-header',
@@ -11,6 +13,8 @@ import { Notification } from 'app/shared/models/notification/notification';
 export class PageHeaderComponent implements OnInit {
   settingsMenuVisible = false;
   isNotificationsVisible = false;
+  loggedInUser: User;
+  public routePrefix = '/api/user';
 
   notification1: Notification = {
     text: 'Missed call from USER',
@@ -31,7 +35,11 @@ export class PageHeaderComponent implements OnInit {
     this.notification3,
   ];
 
-  constructor(private router: Router, public auth: AuthService) {}
+  constructor(
+    private router: Router,
+    public auth: AuthService,
+    private httpService: HttpService
+  ) {}
 
   public showNotificationsMenu(): void {
     if (this.settingsMenuVisible) {
@@ -49,7 +57,15 @@ export class PageHeaderComponent implements OnInit {
     this.settingsMenuVisible = !this.settingsMenuVisible;
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.auth.user$.subscribe((user) => {
+      this.httpService
+        .getRequest<User>(`${this.routePrefix}/email/${user.email}`)
+        .subscribe((userFromDB: User) => {
+          this.loggedInUser = userFromDB;
+        });
+    });
+  }
   goToPage(pageName: string): void {
     this.router.navigate([`${pageName}`]);
   }

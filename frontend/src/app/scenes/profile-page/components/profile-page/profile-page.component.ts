@@ -5,6 +5,7 @@ import { ToastrService } from 'ngx-toastr';
 import { BlobService } from '../../../../core/services/blob.service';
 import { User } from '@shared/models/user';
 import { HttpService } from '../../../../core/services/http.service';
+import { AuthService } from '../../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-profile-page',
@@ -24,6 +25,8 @@ export class ProfilePageComponent implements OnInit {
   public isShowCamera = false;
   public isImageCropped = false;
   isShowUploadFile: boolean;
+  loggedInUser: User;
+  public routePrefix = '/api/user';
 
   imageChangedEvent: any = '';
   userPhotoFromCamera: any = '';
@@ -32,13 +35,16 @@ export class ProfilePageComponent implements OnInit {
   avatarURL = '';
   userMockup = {} as User;
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.GetAvatar();
+  }
 
   public constructor(
     private http: HttpClient,
     private toastr: ToastrService,
     private blobService: BlobService,
-    private httpService: HttpService
+    private httpService: HttpService,
+    private authService: AuthService
   ) {}
 
   fileChangeEvent(event: any): void {}
@@ -84,10 +90,7 @@ export class ProfilePageComponent implements OnInit {
         this.userMockup.email = 'alex.belokon.onyx@gmail.com';
         this.userMockup.avatarUrl = this.avatarURL;
         this.httpService
-          .putFullRequest<User, string>(
-            `http://localhost:51569/api/user`,
-            this.userMockup
-          )
+          .putFullRequest<User, string>(`${this.routePrefix}`, this.userMockup)
           .subscribe((response) => console.log(`image: ${response.body}`));
       }
     });
@@ -187,13 +190,26 @@ export class ProfilePageComponent implements OnInit {
     return new Blob([ia], { type: mimeString });
   }
 
+  private GetAvatar(): void {
+    this.authService.user$.subscribe((user) => {
+      this.httpService
+        .getRequest<User>(`${this.routePrefix}/email/${user.email}`)
+        .subscribe(
+          (userFromDB: User) => {
+            this.loggedInUser = userFromDB;
+          },
+          (error) => this.toastr.error(error.Message)
+        );
+    });
+  }
+
   openModal(): void {
     this.modal.nativeElement.style.display = 'block';
   }
 
   closeModal(): void {
     this.closeCamera();
-
+    this.GetAvatar();
     this.modal.nativeElement.style.display = 'none';
   }
 }
