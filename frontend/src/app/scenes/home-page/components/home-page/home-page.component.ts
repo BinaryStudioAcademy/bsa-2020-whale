@@ -88,7 +88,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.simpleModalService
       .addModal(AddContactModalComponent)
       .subscribe((contact) => {
-        this.contacts.push(contact);
+        if (contact !== undefined) {
+          this.contacts.push(contact);
+        }
       });
   }
   visibilityChange(event): void {
