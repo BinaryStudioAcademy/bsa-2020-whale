@@ -73,9 +73,16 @@
         class="big desktop icon block"
       ></i>
     </div>
+    <div class="users" *ngIf="mediaData.length > 1">
+      <app-participant-card
+        *ngFor="let data of mediaData"
+        [data]="data"
+      ></app-participant-card>
+    </div>
     Me:
     <video
       #currentVideo
+      *ngIf="mediaData.length <= 1"
       autoplay="autoplay"
       class="participant-fullscreen"
       [muted]="'muted'"

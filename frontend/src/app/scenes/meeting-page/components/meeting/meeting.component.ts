@@ -38,6 +38,7 @@ import { ParticipantRole } from '@shared/models/participant/participant-role';
 import { Statistics } from '@shared/models/statistics/statistics';
 import { AuthService } from 'app/core/auth/auth.service';
 import { UserMediaData } from '@shared/models/media/user-media-data';
+import { connectableObservableDescriptor } from 'rxjs/internal/observable/ConnectableObservable';
 
 @Component({
   selector: 'app-meeting',
@@ -65,6 +66,7 @@ export class MeetingComponent
   public connectedStreams: string[] = [];
   public mediaData: UserMediaData[] = [];
   public connectedPeers = new Map<string, MediaStream>();
+  public peerParticipants = new Map<string, Participant>();
 
   public messages: MeetingMessage[] = [];
   public msgText = '';
@@ -74,6 +76,7 @@ export class MeetingComponent
   private currentUserStream: MediaStream;
   private connectionData: MeetingConnectionData;
   private currentStreamLoaded = new EventEmitter<void>();
+  private connectionsData: MeetingConnectionData[] = [];
   private contectedAt = new Date();
 
   users = [
@@ -128,7 +131,14 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (connectData) => {
+          this.connectionsData.push(connectData);
+          console.log(connectData);
           this.meeting.participants.push(connectData.participant);
+          this.peerParticipants.set(
+            connectData.peerId,
+            connectData.participant
+          );
+          console.log(this.meeting);
           if (connectData.peerId == this.peer.id) {
             return;
           }
@@ -146,15 +156,19 @@ export class MeetingComponent
     this.meetingSignalrService.participantConected$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
-        (participant) => {
-          this.currentParticipant = participant;
+        (participants) => {
+          participants.forEach((p) => this.meeting.participants.push(p));
+
+          this.currentParticipant = participants.find(
+            (p) => p.user.email === this.authService.currentUser.email
+          );
           this.mediaData.push({
-            id: participant.id,
-            userFirstName: participant.user.firstName,
-            userLastName: participant.user.secondName,
-            avatarUrl: participant.user.avatarUrl,
+            id: this.currentParticipant.id,
+            userFirstName: this.currentParticipant.user.firstName,
+            userLastName: this.currentParticipant.user.secondName,
+            avatarUrl: this.currentParticipant.user.avatarUrl,
             isCurrentUser: true,
-            isUserHost: participant.role == ParticipantRole.Host,
+            isUserHost: this.currentParticipant.role == ParticipantRole.Host,
             stream: this.currentUserStream,
           });
         },
@@ -229,10 +243,29 @@ export class MeetingComponent
     // when get call answer to it
     this.peer.on('call', (call) => {
       console.log('get call');
-
       // show caller
       call.on('stream', (stream) => {
-        this.showMediaStream(stream);
+        debugger;
+        if (!this.connectedStreams.includes(stream.id)) {
+          this.showMediaStream(stream);
+          this.connectedStreams.push(stream.id);
+          call;
+          console.log(call.peer, 'call peer');
+
+          const participant = this.meeting.participants[0]; //this.meeting.participants.find(p => p.streamId == stream.id);
+
+          console.log(stream.id);
+          console.log(this.meeting);
+          console.log(participant);
+          this.mediaData.push({
+            id: participant?.id,
+            userFirstName: participant?.user?.firstName,
+            userLastName: participant?.user?.secondName,
+            isCurrentUser: false,
+            isUserHost: participant?.role === ParticipantRole.Host,
+            stream: stream,
+          });
+        }
         this.connectedPeers.set(call.peer, stream);
       });
 
@@ -282,8 +315,23 @@ export class MeetingComponent
 
     // get answer and show other user
     call.on('stream', (stream) => {
-      this.showMediaStream(stream);
-      this.connectedPeers.set(call.peer, stream);
+      //this.showMediaStream(stream);
+      this.connectedStreams.push(stream.id);
+      const connectedPeer = this.connectedPeers.get(call.peer);
+      if (!connectedPeer || connectedPeer.id !== stream.id) {
+        var participant = this.meeting.participants.find(
+          (p) => p.streamId == stream.id
+        );
+        this.mediaData.push({
+          id: participant.id,
+          userFirstName: participant.user.firstName,
+          userLastName: participant.user.secondName,
+          isCurrentUser: this.currentUserStream.id === stream.id,
+          isUserHost: participant.role === ParticipantRole.Host,
+          stream: stream,
+        });
+        this.connectedPeers.set(call.peer, stream);
+      }
     });
   }
 
@@ -328,6 +376,7 @@ export class MeetingComponent
         userEmail: this.authService.currentUser.email,
         meetingId: groupId,
         meetingPwd: groupPwd,
+        streamId: this.currentUserStream.id,
         participant: this.currentParticipant,
       };
       this.getMeeting(link);
@@ -340,19 +389,24 @@ export class MeetingComponent
     const participants = document.getElementById('participants');
 
     if (!this.connectedStreams.includes(stream.id)) {
-      this.connectedStreams.push(stream.id);
-
-      const videoElement = this.createVideoElement(stream);
-      participants.appendChild(videoElement);
+      //debugger
+      //this.createParticipantCard(this.currentParticipant, this.currentUserStream)
     }
   }
 
-  // create html element to show video
-  private createVideoElement(stream: MediaStream): HTMLElement {
-    const videoElement = document.createElement('video');
-    videoElement.srcObject = stream;
-    videoElement.autoplay = true;
-    return videoElement;
+  // // create html element to show video
+  private createParticipantCard(
+    participant: Participant,
+    stream: MediaStream
+  ): void {
+    this.mediaData.push({
+      id: participant.id,
+      userFirstName: participant.user.firstName,
+      userLastName: participant.user.secondName,
+      isCurrentUser: stream.id == this.currentUserStream.id,
+      isUserHost: participant.role == ParticipantRole.Host,
+      stream: stream,
+    });
   }
 
   startRecording(): void {
