@@ -37,6 +37,8 @@ import { Participant } from '@shared/models/participant/participant';
 import { ParticipantRole } from '@shared/models/participant/participant-role';
 import { Statistics } from '@shared/models/statistics/statistics';
 import { AuthService } from 'app/core/auth/auth.service';
+import { CopyClipboardComponent } from '@shared/components/copy-clipboard/copy-clipboard.component';
+import { SimpleModalService } from 'ngx-simple-modal';
 
 @Component({
   selector: 'app-meeting',
@@ -97,7 +99,8 @@ export class MeetingComponent
     private blobService: BlobService,
     private httpService: HttpService,
     @Inject(DOCUMENT) private document: any,
-    private authService: AuthService
+    private authService: AuthService,
+    private simpleModalService: SimpleModalService
   ) {
     this.meetingSignalrService = new MeetingSignalrService(signalRService);
   }
@@ -425,6 +428,10 @@ export class MeetingComponent
       };
     }
     this.isShowStatistics = !this.isShowStatistics;
+  }
+
+  onCopyIconClick(): void {
+    this.simpleModalService.addModal(CopyClipboardComponent, {message: this.document.location.href});
   }
 
   sendMessage(): void {
