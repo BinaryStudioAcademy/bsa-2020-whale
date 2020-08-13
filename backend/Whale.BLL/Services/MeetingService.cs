@@ -62,7 +62,7 @@ namespace Whale.BLL.Services
             return meetingDTO;
         }
 
-        public async Task<MeetingLinkDTO> CreateMeeting(MeetingCreateDTO meetingDTO, string userEmail)
+        public async Task<MeetingLinkDTO> CreateMeeting(MeetingCreateDTO meetingDTO, IEnumerable<string> userEmails)
         {
             var meeting = _mapper.Map<Meeting>(meetingDTO);
             if (!meeting.IsScheduled)
@@ -77,12 +77,15 @@ namespace Whale.BLL.Services
             var pwd = _encryptService.EncryptString(Guid.NewGuid().ToString());
             await _redisService.SetAsync(meeting.Id.ToString(), new MeetingMessagesAndPasswordDTO { Password = pwd });
 
-            await _participantService.CreateParticipantAsync(new ParticipantCreateDTO
+            foreach (var userEmail in userEmails)
             {
-                Role = Shared.DTO.Participant.ParticipantRole.Host,
-                UserEmail = userEmail,
-                MeetingId = meeting.Id
-            });
+                await _participantService.CreateParticipantAsync(new ParticipantCreateDTO
+                {
+                    Role = Shared.DTO.Participant.ParticipantRole.Host,
+                    UserEmail = userEmail,
+                    MeetingId = meeting.Id
+                });
+            }
 
             return new MeetingLinkDTO { Id = meeting.Id, Password = pwd };
         }
@@ -118,7 +121,7 @@ namespace Whale.BLL.Services
                 throw new NotFoundException("Participant");
 
             var isHost = participant.Role == Shared.DTO.Participant.ParticipantRole.Host;
-            await _participantService.DeleteParticipantAsync(participant.Id);
+            //await _participantService.DeleteParticipantAsync(participant.Id);
             if (isHost)
             {
                 await _redisService.ConnectAsync();
