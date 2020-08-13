@@ -1,5 +1,5 @@
 <spiner *ngIf="isMeetingLoading" size="'massive'"></spiner>
-<app-page-header [isUserLoadig]="isUserLoadig"></app-page-header>
+<app-page-header></app-page-header>
 <div class="home-panel">
   <div class="left-col">
     <div class="ui left vertical menu bar">
@@ -24,7 +24,6 @@
           <i class="clock outline icon"></i>
           Meetings history
         </a>
-
         <a class="item" (click)="goToPage('schedule-meeting')">
           <i class="calendar alternate outline icon"></i>
           Schedule meeting

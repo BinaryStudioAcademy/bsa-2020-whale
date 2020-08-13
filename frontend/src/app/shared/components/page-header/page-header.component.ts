@@ -4,6 +4,7 @@ import { AuthService } from 'app/core/auth/auth.service';
 import { Notification } from 'app/shared/models/notification/notification';
 import { User } from '@shared/models/user';
 import { HttpService } from '../../../core/services/http.service';
+import { tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-page-header',
@@ -11,7 +12,7 @@ import { HttpService } from '../../../core/services/http.service';
   styleUrls: ['./page-header.component.sass'],
 })
 export class PageHeaderComponent implements OnInit {
-  @Input() isUserLoadig: boolean;
+  public isUserLoadig: boolean = true;
 
   settingsMenuVisible = false;
   isNotificationsVisible = false;
@@ -63,6 +64,7 @@ export class PageHeaderComponent implements OnInit {
     this.auth.user$.subscribe((user) => {
       this.httpService
         .getRequest<User>(`${this.routePrefix}/email/${user.email}`)
+        .pipe(tap(() => (this.isUserLoadig = false)))
         .subscribe((userFromDB: User) => {
           this.loggedInUser = userFromDB;
         });
