@@ -115,40 +115,114 @@
           </div>
         </div>
       </div>
-      <h3 class="big name">
+      <h3 *ngIf="!editName" class="big name">
         {{ loggedInUser?.firstName }} {{ loggedInUser?.secondName }}
       </h3>
-      <div class="edit-button">
+      <div (click)="editName = !editName" *ngIf="!editName" class="edit-button">
         <button class="small ui basic button">
           <a> <i class="cog icon"></i> Edit </a>
         </button>
       </div>
+      <form
+        *ngIf="editName"
+        class="ui form"
+        #nameForm="ngForm"
+        (ngSubmit)="saveEditedUsername()"
+      >
+        <div class="field">
+          <label>First Name</label>
+          <input
+            placeholder="First Name"
+            type="text"
+            id="frstName"
+            name="firstName"
+            [(ngModel)]="updatedUser.firstName"
+            required
+          />
+          <label>Second Name</label>
+          <input
+            placeholder="Second Name"
+            type="text"
+            id="scndName"
+            name="secondName"
+            [(ngModel)]="updatedUser.secondName"
+            required
+          />
+        </div>
+        <div class="edit-button">
+          <button
+            type="submit"
+            [disabled]="!nameForm.valid"
+            class="small ui button"
+          >
+            <a> <i class="check icon"></i> Save </a>
+          </button>
+        </div>
+      </form>
+      <!-- <div *ngIf="editName" class="edit-button">
+        <button class="small ui button">
+          <a> <i class="check icon"></i> Save </a>
+        </button>
+      </div> -->
     </div>
     <div class="ui section divider"></div>
     <div class="personal-container">
       <div class="settings-item">
-        <h4>Email address:</h4>
+        <h4>Email:</h4>
       </div>
-      <span>{{ loggedInUser.email }}</span>
+      <span>{{ loggedInUser?.email }}</span>
       <div class="edit-button">
         <button class="small ui basic button">
           <a> <i class="cog icon"></i> Edit </a>
         </button>
       </div>
+      <span>{{ loggedInUser?.email }}</span>
     </div>
     <div class="ui section divider"></div>
     <div class="personal-container">
       <div class="settings-item">
-        <h4>Personal meeting id:</h4>
+        <h4>Telephone:</h4>
       </div>
-      <span>1234-5678</span>
-      <div class="edit-button">
+      <span *ngIf="!editTelephone">{{ loggedInUser?.phone }}</span>
+      <div
+        (click)="editTelephone = !editTelephone"
+        *ngIf="!editTelephone"
+        class="edit-button"
+      >
         <button class="small ui basic button">
           <a> <i class="cog icon"></i> Edit </a>
         </button>
       </div>
+      <form
+        *ngIf="editTelephone"
+        class="ui form"
+        #telephoneForm="ngForm"
+        (ngSubmit)="saveEditedTelephone()"
+      >
+        <div class="field">
+          <input
+            placeholder="Phone"
+            type="tel"
+            pattern="[0-9]{12}"
+            id="userTelephone"
+            name="phone"
+            [(ngModel)]="updatedUser.phone"
+            required
+          />
+        </div>
+        <div class="edit-button">
+          <button
+            type="submit"
+            [disabled]="!telephoneForm.valid"
+            class="small ui button"
+          >
+            <a> <i class="check icon"></i> Save </a>
+          </button>
+        </div>
+      </form>
     </div>
-    <div class="ui section divider"></div>
+
+    <!-- <div class="ui section divider"></div> -->
   </div>
 </div>
 <footer class="footer">

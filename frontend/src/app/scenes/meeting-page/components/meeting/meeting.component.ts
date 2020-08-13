@@ -15,7 +15,7 @@ import { environment } from '@env';
 import { Subject } from 'rxjs';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { MeetingService } from 'app/core/services/meeting.service';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, filter } from 'rxjs/operators';
 import { Meeting } from '@shared/models/meeting/meeting';
 import { PollDto } from '@shared/models/poll/poll-dto';
 import {
@@ -126,10 +126,10 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (connectData) => {
-          this.meeting.participants.push(connectData.participant);
           if (connectData.peerId == this.peer.id) {
             return;
           }
+          this.meeting.participants.push(connectData.participant);
           console.log('connected with peer: ' + connectData.peerId);
           this.connect(connectData.peerId);
           this.toastr.success('Connected successfuly');
@@ -146,6 +146,7 @@ export class MeetingComponent
       .subscribe(
         (participant) => {
           this.currentParticipant = participant;
+          this.connectionData.participant = participant;
         },
         (err) => {
           this.toastr.error(err.Message);
@@ -312,14 +313,18 @@ export class MeetingComponent
       const groupId = urlParams.get('id');
       const groupPwd = urlParams.get('pwd');
 
-      this.connectionData = {
-        peerId: id,
-        userEmail: this.authService.currentUser.email,
-        meetingId: groupId,
-        meetingPwd: groupPwd,
-        participant: this.currentParticipant,
-      };
-      this.getMeeting(link);
+      this.authService.user$
+        .pipe(filter((user) => Boolean(user)))
+        .subscribe((user) => {
+          this.connectionData = {
+            peerId: id,
+            userEmail: this.authService.currentUser.email,
+            meetingId: groupId,
+            meetingPwd: groupPwd,
+            participant: this.currentParticipant, // this.currentParticipant is undefined here
+          };
+          this.getMeeting(link);
+        });
     });
   }
 
@@ -410,7 +415,7 @@ export class MeetingComponent
 
   onStatisticsIconClick(): void {
     if (!this.meetingStatistics) {
-      if  (!this.meeting) {
+      if (!this.meeting) {
         this.toastr.warning('Something went wrong. Try again later.');
         this.route.params.subscribe((params: Params) => {
           this.getMeeting(params[`link`]);
@@ -418,7 +423,7 @@ export class MeetingComponent
       }
       this.meetingStatistics = {
         startTime: this.meeting.startTime,
-        userJoinTime: this.contectedAt
+        userJoinTime: this.contectedAt,
       };
     }
     this.isShowStatistics = !this.isShowStatistics;

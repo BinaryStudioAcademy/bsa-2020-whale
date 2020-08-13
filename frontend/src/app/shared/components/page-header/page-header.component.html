@@ -43,6 +43,7 @@
     </div>
   </a>
   <a (click)="showSettingsMenu()" class="user-pic-item item message shared">
+    <spiner *ngIf="isUserLoadig" [size]="'small'"></spiner>
     <img class="ui tiny image user-pic" src="{{ loggedInUser?.avatarUrl }}" />
   </a>
   <div *ngIf="settingsMenuVisible" style="right: 0;" class="dropdown-menu">

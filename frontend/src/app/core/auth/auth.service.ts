@@ -3,7 +3,7 @@ import { auth } from 'firebase';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { UserRegistrationService } from '../services/user-registration.service';
 import { Observable, of, from } from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
+import { mergeMap, filter } from 'rxjs/operators';
 import { environment } from '@env';
 
 @Injectable({
@@ -21,6 +21,7 @@ export class AuthService {
     this.initClient();
     this.user$ = fireAuth.authState;
     this.user$.subscribe((user) => {
+      console.log('user: ', user);
       if (user) {
         this.isSignedIn = true;
         this.currentUser = user;
@@ -39,8 +40,7 @@ export class AuthService {
       // It's OK to expose these credentials, they are client safe.
       gapi.client.init({
         apiKey: environment.firebase.apiKey, // * <- api key from firebase
-        clientId:
-          '893944865679-eav20gfr3sbintikhq42dhhc414loq4p.apps.googleusercontent.com', // * <= google clientId
+        clientId: environment.googleClientId, // * <= google clientId
         discoveryDocs: [
           'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest',
         ],
@@ -83,6 +83,7 @@ export class AuthService {
 
   public refreshToken(): Observable<string> {
     return this.user$.pipe(
+      filter((user) => Boolean(user)),
       mergeMap(async (user) => await user.getIdToken(true))
     );
   }

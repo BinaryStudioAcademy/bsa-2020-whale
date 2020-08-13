@@ -8,18 +8,18 @@ import {
 } from '@angular/router';
 import { Observable, from } from 'rxjs';
 import { tap, map, catchError } from 'rxjs/operators';
+import { ToastrService } from 'ngx-toastr';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CheckAccessToMediaGuard implements CanActivate {
-  constructor(private router: Router) {}
+  constructor(private router: Router, private toastr: ToastrService) {}
 
   async canActivate(
     next: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Promise<boolean | UrlTree> {
-    //return this.router.createUrlTree(['/home']);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
@@ -27,13 +27,9 @@ export class CheckAccessToMediaGuard implements CanActivate {
       });
       return stream.active;
     } catch {
+      window.location.reload();
+      alert('Cannot access the camera and microphone');
       return this.router.createUrlTree(['/home']);
     }
   }
-
-  // getUserMedia(){
-  //   const stream = ;
-  //   console.log("This is guard", (stream));
-  //   return true;
-  // }
 }
