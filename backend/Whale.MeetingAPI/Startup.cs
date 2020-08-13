@@ -65,7 +65,7 @@ namespace Whale.MeetingAPI
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials()
-                .WithOrigins("http://localhost:4200", "http://bsa2020-whale.westeurope.cloudapp.azure.com/");
+                .WithOrigins("http://localhost:4200", "http://bsa2020-whale.westeurope.cloudapp.azure.com");
             }));
 
             services.AddAutoMapper(cfg =>
