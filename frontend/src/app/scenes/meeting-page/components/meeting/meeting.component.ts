@@ -126,10 +126,10 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (connectData) => {
-          this.meeting.participants.push(connectData.participant);
           if (connectData.peerId == this.peer.id) {
             return;
           }
+          this.meeting.participants.push(connectData.participant);
           console.log('connected with peer: ' + connectData.peerId);
           this.connect(connectData.peerId);
           this.toastr.success('Connected successfuly');
