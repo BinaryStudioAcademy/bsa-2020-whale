@@ -36,6 +36,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
   groupsVisibility = false;
   chatVisibility = true;
   ownerEmail: string;
+  public routePrefix = '/api/user/email';
   private hubConnection: HubConnection;
   contactSelected: Contact;
   private unsubscribe$ = new Subject<void>();
@@ -56,19 +57,24 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.stateService.getLoggedInUser().subscribe(
-      (usr: User) => {
-        this.loggedInUser = usr;
-      },
-      (error) => this.toastr.error(error.Message)
-    );
+    this.authService.user$.subscribe((user) => {
+      this.httpService
+        .getRequest<User>(`${this.routePrefix}/${user.email}`)
+        .subscribe(
+          (userFromDB: User) => {
+            this.loggedInUser = userFromDB;
+          },
+          (error) => this.toastr.error(error.Message)
+        );
+    });
+
     this.httpService.getRequest<Contact[]>('/api/contacts').subscribe(
       (data: Contact[]) => {
         this.contacts = data;
       },
       (error) => this.toastr.error(error.Message)
     );
-    this.ownerEmail = this.authService.currentUser.email;
+    this.ownerEmail = this.loggedInUser?.email;
     console.log(this.ownerEmail);
   }
 

@@ -106,10 +106,7 @@
     <div class="personal-container">
       <div class="settings-item">
         <div class="card">
-          <img
-            class="ui small image"
-            src="https://img.icons8.com/color/240/000000/user-male.png/"
-          />
+          <img class="ui small image" src="{{ loggedInUser?.avatarUrl }}" />
           <div class="content">
             <div
               (click)="openModal()"
@@ -122,7 +119,9 @@
           </div>
         </div>
       </div>
-      <h3 class="big name">David Lones</h3>
+      <h3 class="big name">
+        {{ loggedInUser?.firstName }} {{ loggedInUser?.secondName }}
+      </h3>
       <div class="edit-button">
         <button class="small ui basic button">
           <a> <i class="cog icon"></i> Edit </a>
