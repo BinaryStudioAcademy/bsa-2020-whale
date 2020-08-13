@@ -32,10 +32,4 @@ export class CheckAccessToMediaGuard implements CanActivate {
       return this.router.createUrlTree(['/home']);
     }
   }
-
-  // getUserMedia(){
-  //   const stream = ;
-  //   console.log("This is guard", (stream));
-  //   return true;
-  // }
 }

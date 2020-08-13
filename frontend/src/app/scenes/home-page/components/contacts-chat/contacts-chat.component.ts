@@ -71,9 +71,6 @@ export class ContactsChatComponent implements OnInit, OnChanges {
         this.hubConnection.on('NewMessage', (message: DirectMessage) => {
           this.messages.push(message);
         });
-        this.hubConnection.on('JoinedGroup', (message: DirectMessage) => {
-          this.messages.push(message);
-        });
         this.hubConnection.invoke('JoinGroup', this.contactSelected.id);
       });
   }
