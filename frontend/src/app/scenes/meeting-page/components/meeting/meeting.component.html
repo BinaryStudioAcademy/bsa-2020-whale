@@ -73,6 +73,7 @@
       ></i>
       <i style="opacity: 0.8;" class="big share square icon block"></i>
       <i (click)="onPollIconClick()" class="big clipboard list icon"></i>
+      <i (click)="onStatisticsIconClick()" class="big chart bar icon"></i>
       <i
         (click)="showChat()"
         style="opacity: 0.8;"
@@ -112,6 +113,7 @@
             class="big share square icon"
           ></i>
           <i (click)="onPollIconClick()" class="big clipboard list icon"></i>
+          <i (click)="onStatisticsIconClick()" class="big chart bar icon"></i>
           <i
             (click)="showChat()"
             style="margin-left: 10px; opacity: 0.8;"
@@ -151,5 +153,9 @@
 
   <div class="poll-create-container" *ngIf="isShowPollResults">
     <app-poll-results [pollResults]="pollResults"></app-poll-results>
+  </div>
+
+  <div class="poll-create-container" *ngIf="isShowStatistics">
+    <app-meeting-statistics [statistic]="meetingStatistics"></app-meeting-statistics>
   </div>
 </div>
