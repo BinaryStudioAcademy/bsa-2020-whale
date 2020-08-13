@@ -7,33 +7,28 @@ import { HomePageComponent } from '../scenes/home-page/components/home-page/home
 import { ScheduleMeetingPageComponent } from 'app/scenes/schedule-meeting-page/components/schedule-meeting-page/schedule-meeting-page.component';
 import { CheckAccessToMediaGuard } from 'app/core/guards/check-access-to-media.guard';
 import { SettingPageComponent } from '../scenes/setting-page/setting-page/setting-page.component';
+import { canActivate, redirectUnauthorizedTo, redirectLoggedInTo, AngularFireAuthGuard } from '@angular/fire/auth-guard';
+
+const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['/']);
+const redirectLoggedToHome = () => redirectLoggedInTo(['home']);
 
 const routes: Routes = [
-  { path: 'home', component: HomePageComponent },
+  { path: 'home', component: HomePageComponent, ...canActivate (redirectUnauthorizedToLogin)},
   {
     path: 'setting-page',
     component: SettingPageComponent,
-    canActivate: [CheckAccessToMediaGuard],
+    canActivate: [CheckAccessToMediaGuard, AngularFireAuthGuard], data: { authGuardPipe: redirectUnauthorizedToLogin }
   },
   {
     path: 'meeting-page/:link',
     component: MeetingComponent,
-    canActivate: [CheckAccessToMediaGuard],
+    canActivate: [CheckAccessToMediaGuard, AngularFireAuthGuard], data: { authGuardPipe: redirectUnauthorizedToLogin }
   },
-  //{ path: 'meeting-page', component: MeetingComponent },
-  { path: 'profile-page', component: ProfilePageComponent },
-  { path: 'schedule-meeting', component: ScheduleMeetingPageComponent },
-  { path: '**', component: LandingPageComponent },
+  // { path: 'meeting-page', component: MeetingComponent },
+  { path: 'profile-page', component: ProfilePageComponent, ...canActivate (redirectUnauthorizedToLogin)},
+  { path: 'schedule-meeting', component: ScheduleMeetingPageComponent, ...canActivate (redirectUnauthorizedToLogin)},
+  { path: '**', component: LandingPageComponent, ...canActivate (redirectLoggedToHome)},
 ];
-
-/*GuardExanple:
-{
-    path: 'loginNeOk',
-    component: AppComponent,
-    canActivate: [AngularFireAuthGuard],
-    data: { authGuardPipe: () => redirectUnauthorizedTo(['logIn'])}
-  },
-*/
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
