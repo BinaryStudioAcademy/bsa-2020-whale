@@ -49,6 +49,7 @@
   >
     <div class="field">
       <textarea
+        (keydown.enter)="chatForm.valid && sendMessage()"
         rows="2"
         placeholder="Print your message there"
         type="text"
@@ -67,4 +68,7 @@
       Send <i class="paper plane outline icon"></i>
     </button>
   </form>
+  <div class="ui pointing mini label">
+    Enter to send. Enter+Shift for new line.
+  </div>
 </div>
