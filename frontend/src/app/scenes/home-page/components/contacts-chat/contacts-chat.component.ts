@@ -48,17 +48,17 @@ export class ContactsChatComponent implements OnInit, OnChanges {
   ) {}
 
   ngOnChanges(changes: SimpleChanges) {
-    this.currContactId = changes['contactSelected'].currentValue.id;
-    console.log(this.contactSelected);
     this.httpService
-      .getRequest<DirectMessage[]>('/api/ContactChat/' + this.currContactId)
+      .getRequest<DirectMessage[]>(
+        '/api/ContactChat/' + this.contactSelected.id
+      )
       .subscribe(
         (data: DirectMessage[]) => {
           this.messages = data;
         },
         (error) => console.log(error)
       );
-    this.hubConnection.invoke('JoinGroup', this.currContactId);
+    this.hubConnection?.invoke('JoinGroup', this.contactSelected.id);
   }
   ngOnInit(): void {
     from(this.signalRService.registerHub(environment.apiUrl, 'chatHub'))
@@ -71,18 +71,27 @@ export class ContactsChatComponent implements OnInit, OnChanges {
         this.hubConnection.on('NewMessage', (message: DirectMessage) => {
           this.messages.push(message);
         });
+        this.hubConnection.on('JoinedGroup', (message: DirectMessage) => {
+          this.messages.push(message);
+        });
+        this.hubConnection.invoke('JoinGroup', this.contactSelected.id);
       });
   }
 
   sendMessage(): void {
-    console.log(this.contactSelected);
-    this.newMessage.contactId = this.contactSelected.Id;
-    this.newMessage.authorId = this.contactSelected.FirstMemberId;
+    this.newMessage.contactId = this.contactSelected.id;
+    this.newMessage.authorId = this.contactSelected.firstMemberId;
     this.newMessage.createdAt = new Date();
+    console.log('newMsg');
+    console.log(this.newMessage);
     this.httpService
       .postRequest<DirectMessage, void>('/api/ContactChat/', this.newMessage)
-      .subscribe((error) => console.log(error));
-    this.newMessage.message = '';
+      .subscribe(
+        () => {
+          this.newMessage.message = '';
+        },
+        (error) => console.log(error)
+      );
   }
   close(): void {
     this.chat.emit(true);

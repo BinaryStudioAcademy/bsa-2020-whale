@@ -25,7 +25,6 @@ namespace Whale.BLL.Services
         public async Task<ICollection<DirectMessageDTO>> GetAllContactsMessagesAsync(Guid contactId)
         {
             var messages = await _context.DirectMessages
-                .Include(msg => msg.Contact)
                 .Include(msg=>msg.Author)
                 .OrderBy(msg=>msg.CreatedAt)
                 .Where(p => p.ContactId == contactId) // Filter here
@@ -33,7 +32,7 @@ namespace Whale.BLL.Services
             if (messages == null) throw new Exception("No messages");
             return _mapper.Map<ICollection<DirectMessageDTO>>(messages);
         }
-        public async Task<DirectMessageCreateDTO> CreateDirectMessage(DirectMessageCreateDTO directMessageDto)
+        public async Task<DirectMessageDTO> CreateDirectMessage(DirectMessageCreateDTO directMessageDto)
         {
             var messageEntity = _mapper.Map<DirectMessage>(directMessageDto);
             messageEntity.CreatedAt = DateTime.UtcNow;
@@ -41,14 +40,12 @@ namespace Whale.BLL.Services
             await _context.SaveChangesAsync();
 
             var createdMessage = await _context.DirectMessages
-                .Include(msg => msg.Contact)
                 .Include(msg => msg.Author)
                 .FirstAsync(msg => msg.Id == messageEntity.Id);
-
             var createdMessageDTO = _mapper.Map<DirectMessageDTO>(createdMessage);
-            await _chatHub.Clients.Group(createdMessageDTO.ContactId.ToString()).SendAsync("NewMessage", createdMessageDTO);
+            await _chatHub.Clients.Group(directMessageDto.ContactId.ToString()).SendAsync("NewMessage", createdMessageDTO);
 
-            return directMessageDto;
+            return createdMessageDTO;
         }
     }
 }

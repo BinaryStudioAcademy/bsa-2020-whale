@@ -11,6 +11,8 @@ using Whale.Shared.DTO.Contact;
 using Whale.BLL.Services.Interfaces;
 using Whale.Shared.DTO.Contact.Setting;
 using Whale.BLL.Exceptions;
+using Whale.Shared.DTO.User;
+using Whale.Shared.DTO.DirectMessage;
 
 namespace Whale.BLL.Services
 {
@@ -22,41 +24,57 @@ namespace Whale.BLL.Services
         public async Task<IEnumerable<ContactDTO>> GetAllContactsAsync(string userEmail)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+            if (user is null)
+                throw new NotFoundException("User", userEmail);
 
-            var contacts = await _context.Contacts
-                .Include(c => c.FirstMember)
-                .Include(c => c.SecondMember)
-                .Include(c => c.PinnedMessage)
-                .Where(c => c.FirstMemberId == user.Id || c.SecondMemberId == user.Id)
-                .ToListAsync();
-            var dtoContacts = _mapper.Map<IEnumerable<ContactDTO>>(contacts);
-            dtoContacts = dtoContacts.GroupJoin(_context.ContactSettings,
-                c => c.Id, s => s.ContactId, (c, s) =>
-                {
-                    c.Settings = _mapper.Map<ContactSettingDTO>(s.FirstOrDefault( ss => ss.UserId == user.Id));
-                    c.ContactnerSettings = _mapper.Map<ContactSettingDTO>(s.FirstOrDefault(ss => ss.UserId != user.Id));
-                    return c;
-                });
+            var contacts = _context.Contacts
+                 .Include(c => c.FirstMember)
+                 .Include(c => c.SecondMember)
+                 .Include(c => c.PinnedMessage)
+                 .Include(c => c.FirstMemberSettings)
+                 .Include(c => c.SecondMemberSettings)
+                 .Where(c => c.FirstMemberId == user.Id || c.SecondMemberId == user.Id)
+                 .Select(c => new ContactDTO()
+                 {
+                     Id = c.Id,
+                     FirstMemberId = (c.FirstMemberId == user.Id) ? c.FirstMemberId : c.SecondMemberId,
+                     FirstMember = _mapper.Map<UserDTO>((c.FirstMemberId == user.Id) ? c.FirstMember : c.SecondMember),
+                     SecondMemberId = (c.SecondMemberId == user.Id) ? c.FirstMemberId : c.SecondMemberId,
+                     SecondMember = _mapper.Map<UserDTO>((c.SecondMemberId == user.Id) ? c.FirstMember : c.SecondMember),
+                     PinnedMessage = _mapper.Map<DirectMessageDTO>(c.PinnedMessage),
+                     Settings = _mapper.Map<ContactSettingDTO>((c.FirstMemberId == user.Id) ? c.FirstMemberSettings : c.SecondMemberSettings),
+                     ContactnerSettings = _mapper.Map<ContactSettingDTO>((c.SecondMemberId == user.Id) ? c.FirstMemberSettings : c.SecondMemberSettings),
+                 });
 
-            return dtoContacts;
+            return contacts;
         }
 
         public async Task<ContactDTO> GetContactAsync(Guid contactId, string userEmail)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+            if (user is null)
+                throw new NotFoundException("User", userEmail);
 
             var contact = await _context.Contacts
                 .Include(c => c.FirstMember)
                 .Include(c => c.SecondMember)
                 .Include(c => c.PinnedMessage)
+                .Include(c => c.FirstMemberSettings)
+                .Include(c => c.SecondMemberSettings)
                 .FirstOrDefaultAsync(c => c.Id == contactId);
             if (contact == null) throw new NotFoundException("Contact", contactId.ToString());
-            var dtoContact = _mapper.Map<ContactDTO>(contact);
-            var settings = _context.ContactSettings.Where(s => s.ContactId == contactId);
-            dtoContact.Settings = _mapper.Map<ContactSettingDTO>(
-                await settings.FirstOrDefaultAsync(s => s.UserId == user.Id));
-            dtoContact.ContactnerSettings = _mapper.Map<ContactSettingDTO>(
-                await settings.FirstOrDefaultAsync(s => s.UserId != user.Id));
+            var dtoContact = new ContactDTO()
+            {
+                Id = contact.Id,
+                FirstMemberId = (contact.FirstMemberId == user.Id) ? contact.FirstMemberId : contact.SecondMemberId,
+                FirstMember = _mapper.Map<UserDTO>((contact.FirstMemberId == user.Id) ? contact.FirstMember : contact.SecondMember),
+                SecondMemberId = (contact.SecondMemberId == user.Id) ? contact.FirstMemberId : contact.SecondMemberId,
+                SecondMember = _mapper.Map<UserDTO>((contact.SecondMemberId == user.Id) ? contact.FirstMember : contact.SecondMember),
+                PinnedMessage = _mapper.Map<DirectMessageDTO>(contact.PinnedMessage),
+                Settings = _mapper.Map<ContactSettingDTO>((contact.FirstMemberId == user.Id) ? contact.FirstMemberSettings : contact.SecondMemberSettings),
+                ContactnerSettings = _mapper.Map<ContactSettingDTO>((contact.SecondMemberId == user.Id) ? contact.FirstMemberSettings : contact.SecondMemberSettings),
+            };
+
             return dtoContact;
         }
 
@@ -67,8 +85,6 @@ namespace Whale.BLL.Services
             if (entity == null) throw new NotFoundException("Contact", contactDTO.Id.ToString());
 
             await _context.SaveChangesAsync();
-
-
         }
 
         public async Task<bool> DeleteContactAsync(Guid contactId)
@@ -95,35 +111,35 @@ namespace Whale.BLL.Services
 
             var contact = await _context.Contacts
                 .FirstOrDefaultAsync(c =>
-                (c.FirstMemberId == contactner.Id && c.SecondMemberId == owner.Id) || 
+                (c.FirstMemberId == contactner.Id && c.SecondMemberId == owner.Id) ||
                 (c.SecondMemberId == contactner.Id && c.FirstMemberId == owner.Id));
             if (contact is object)
                 throw new AlreadyExistsException("Contact");
 
-            contact = new Contact()
-            {
-                FirstMemberId = owner.Id,
-                SecondMemberId = contactner.Id
-            };
-            _context.Contacts.Add(contact);
-            await _context.SaveChangesAsync();
-            Console.WriteLine(contact.Id);
             var ownerSettings = new ContactSetting()
             {
-                ContactId = contact.Id,
                 UserId = owner.Id,
                 IsBloked = false,
                 IsMuted = false
             };
             var contactnerSettings = new ContactSetting()
             {
-                ContactId = contact.Id,
                 UserId = contactner.Id,
                 IsBloked = false,
                 IsMuted = false
             };
             _context.ContactSettings.Add(ownerSettings);
             _context.ContactSettings.Add(contactnerSettings);
+            await _context.SaveChangesAsync();
+
+            contact = new Contact()
+            {
+                FirstMemberId = owner.Id,
+                SecondMemberId = contactner.Id,
+                FirstMemberSettings = ownerSettings,
+                SecondMemberSettings = contactnerSettings,
+            };
+            _context.Contacts.Add(contact);
             await _context.SaveChangesAsync();
             return await GetContactAsync(contact.Id, ownerEmail);
         }

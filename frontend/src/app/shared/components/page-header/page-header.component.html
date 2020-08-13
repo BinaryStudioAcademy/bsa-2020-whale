@@ -43,10 +43,7 @@
     </div>
   </a>
   <a (click)="showSettingsMenu()" class="user-pic-item item message shared">
-    <img
-      class="ui tiny image user-pic"
-      src="https://img.icons8.com/color/240/000000/user-male.png"
-    />
+    <img class="ui tiny image user-pic" src="{{ loggedInUser?.avatarUrl }}" />
   </a>
   <div *ngIf="settingsMenuVisible" style="right: 0;" class="dropdown-menu">
     <div class="dropdown-menu-user" (click)="goToPage('profile-page')">

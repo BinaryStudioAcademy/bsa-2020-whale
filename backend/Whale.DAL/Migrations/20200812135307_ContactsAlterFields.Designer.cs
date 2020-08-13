@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Whale.DAL;
 
 namespace Whale.DAL.Migrations
 {
     [DbContext(typeof(WhaleDbContext))]
-    partial class WhaleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200812135307_ContactsAlterFields")]
+    partial class ContactsAlterFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,7 +50,7 @@ namespace Whale.DAL.Migrations
                     b.Property<Guid?>("FirstMemberSettingsId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("PinnedMessageId")
+                    b.Property<Guid>("PinnedMessageId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("SecondMemberId")
@@ -62,8 +64,6 @@ namespace Whale.DAL.Migrations
                     b.HasIndex("FirstMemberId");
 
                     b.HasIndex("FirstMemberSettingsId");
-
-                    b.HasIndex("PinnedMessageId");
 
                     b.HasIndex("SecondMemberId");
 
@@ -120,7 +120,8 @@ namespace Whale.DAL.Migrations
 
                     b.HasIndex("AuthorId");
 
-                    b.HasIndex("ContactId");
+                    b.HasIndex("ContactId")
+                        .IsUnique();
 
                     b.ToTable("DirectMessages");
                 });
@@ -347,10 +348,6 @@ namespace Whale.DAL.Migrations
                         .WithMany()
                         .HasForeignKey("FirstMemberSettingsId");
 
-                    b.HasOne("Whale.DAL.Models.DirectMessage", "PinnedMessage")
-                        .WithMany()
-                        .HasForeignKey("PinnedMessageId");
-
                     b.HasOne("Whale.DAL.Models.User", "SecondMember")
                         .WithMany()
                         .HasForeignKey("SecondMemberId")
@@ -380,8 +377,8 @@ namespace Whale.DAL.Migrations
                         .IsRequired();
 
                     b.HasOne("Whale.DAL.Models.Contact", "Contact")
-                        .WithMany()
-                        .HasForeignKey("ContactId")
+                        .WithOne("PinnedMessage")
+                        .HasForeignKey("Whale.DAL.Models.DirectMessage", "ContactId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
