@@ -68,10 +68,7 @@ export class AuthService {
 
     const credential = auth.GoogleAuthProvider.credential(token);
 
-    return (
-      (await this.fireAuth.signInAndRetrieveDataWithCredential(credential)) !==
-      null
-    );
+    return (await this.fireAuth.signInWithCredential(credential)) !== null;
 
     //return await this.fireAuth.signInWithPopup(new auth.GoogleAuthProvider()) !== null;
   }
@@ -80,8 +77,8 @@ export class AuthService {
     return from(this.fireAuth.signOut());
   }
 
-  public getToken(): Observable<string> {
-    return this.fireAuth.idToken;
+  public getToken(): Promise<string> {
+    return this.currentUser.getIdToken();
   }
 
   public refreshToken(): Observable<string> {
