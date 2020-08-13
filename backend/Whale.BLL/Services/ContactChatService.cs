@@ -43,7 +43,7 @@ namespace Whale.BLL.Services
                 .Include(msg => msg.Author)
                 .FirstAsync(msg => msg.Id == messageEntity.Id);
             var createdMessageDTO = _mapper.Map<DirectMessageDTO>(createdMessage);
-            await _chatHub.Clients.Group(directMessageDto.ContactId.ToString()).SendAsync("NewMessage", createdMessageDTO);
+            await _chatHub.Clients.Group(directMessageDto.ContactId.ToString()).SendAsync("NewMessageReceived", createdMessageDTO);
 
             return createdMessageDTO;
         }
