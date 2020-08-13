@@ -53,18 +53,6 @@ Enter+Shift for new line."
         </div>
       </div>
     </div>
-    <!-- <div class="users">
-            <div class="users__user" *ngFor="let user of users;">
-                <div class="ui card">
-                    <div class="image">
-                    <img src="https://icons.iconarchive.com/icons/paomedia/small-n-flat/512/user-male-icon.png">
-                    </div>
-                    <div class="content">
-                    <a class="header">{{user}}</a>
-                    </div>
-                </div>
-            </div>
-        </div> -->
 
     <div class="tools" ngDraggable>
       <i style="opacity: 0.8;" class="big microphone icon block"></i>
@@ -88,9 +76,20 @@ Enter+Shift for new line."
         class="big desktop icon block"
       ></i>
     </div>
-    Me:
-    <video #currentVideo autoplay="autoplay" [muted]="'muted'"></video> Users:
-    <div id="participants"></div>
+    <div class="users" *ngIf="mediaData.length > 1">
+      <app-participant-card
+        *ngFor="let data of mediaData"
+        [data]="data"
+      ></app-participant-card>
+    </div>
+
+    <video
+      #currentVideo
+      *ngIf="mediaData.length <= 1"
+      autoplay="autoplay"
+      class="participant-fullscreen"
+      [muted]="'muted'"
+    ></video>
 
     <div class="options">
       <div class="ui container options__buttons">

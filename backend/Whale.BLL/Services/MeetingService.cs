@@ -121,6 +121,7 @@ namespace Whale.BLL.Services
                 throw new NotFoundException("Participant");
 
             var isHost = participant.Role == Shared.DTO.Participant.ParticipantRole.Host;
+            await _participantService.DeleteParticipantAsync(participant.Id);
             if (isHost)
             {
                 await _redisService.ConnectAsync();

@@ -37,6 +37,7 @@ import { Participant } from '@shared/models/participant/participant';
 import { ParticipantRole } from '@shared/models/participant/participant-role';
 import { Statistics } from '@shared/models/statistics/statistics';
 import { AuthService } from 'app/core/auth/auth.service';
+import { UserMediaData } from '@shared/models/media/user-media-data';
 import { CopyClipboardComponent } from '@shared/components/copy-clipboard/copy-clipboard.component';
 import { SimpleModalService } from 'ngx-simple-modal';
 
@@ -47,48 +48,36 @@ import { SimpleModalService } from 'ngx-simple-modal';
 })
 export class MeetingComponent
   implements OnInit, AfterContentInit, AfterViewInit, OnDestroy {
-  meeting: Meeting;
-  poll: PollDto;
-  pollResults: PollResultsDto;
-  meetingStatistics: Statistics;
-  isShowChat = false;
-  isShowParticipants = false;
-  isPollCreating = false;
-  isShowPoll = false;
-  isShowPollResults = false;
-  isShowStatistics = false;
+  public meeting: Meeting;
+  public poll: PollDto;
+  public pollResults: PollResultsDto;
+  public meetingStatistics: Statistics;
+  public isShowChat = false;
+  public isShowParticipants = false;
+  public isPollCreating = false;
+  public isShowPoll = false;
+  public isShowPollResults = false;
+  public isShowStatistics = false;
 
   @ViewChild('currentVideo') currentVideo: ElementRef;
 
-  private meetingSignalrService: MeetingSignalrService;
-
   public peer: Peer;
   public connectedStreams: string[] = [];
+  public mediaData: UserMediaData[] = [];
   public connectedPeers = new Map<string, MediaStream>();
-
   public messages: MeetingMessage[] = [];
   public msgText = '';
   public currentParticipant: Participant;
 
+  private meetingSignalrService: MeetingSignalrService;
   private unsubscribe$ = new Subject<void>();
   private currentUserStream: MediaStream;
   private connectionData: MeetingConnectionData;
   private currentStreamLoaded = new EventEmitter<void>();
   private contectedAt = new Date();
-
-  users = [
-    'user 1',
-    'user 2',
-    'user 3',
-    'user 4',
-    'user 5',
-    'user 6',
-    'user 7',
-    'user 8',
-  ];
+  private elem: any;
 
   @ViewChild('mainArea', { static: false }) mainArea: ElementRef;
-  private elem: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -105,17 +94,7 @@ export class MeetingComponent
     this.meetingSignalrService = new MeetingSignalrService(signalRService);
   }
 
-  ngAfterViewInit(): void {
-    this.elem = this.mainArea.nativeElement;
-  }
-
-  ngAfterContentInit() {
-    this.currentStreamLoaded.subscribe(
-      () => (this.currentVideo.nativeElement.srcObject = this.currentUserStream)
-    );
-  }
-
-  async ngOnInit() {
+  public async ngOnInit() {
     this.currentUserStream = await navigator.mediaDevices.getUserMedia({
       video: true,
       audio: true,
@@ -129,6 +108,9 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (connectData) => {
+          console.log(connectData);
+          this.meeting.participants.push(connectData.participant);
+          console.log(this.meeting);
           if (connectData.peerId == this.peer.id) {
             return;
           }
@@ -147,9 +129,21 @@ export class MeetingComponent
     this.meetingSignalrService.participantConected$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
-        (participant) => {
-          this.currentParticipant = participant;
-          this.connectionData.participant = participant;
+        (participants) => {
+          participants.forEach((p) => this.meeting.participants.push(p));
+
+          this.currentParticipant = participants.find(
+            (p) => p.user.email === this.authService.currentUser.email
+          );
+          this.mediaData.push({
+            id: this.currentParticipant.id,
+            userFirstName: this.currentParticipant.user.firstName,
+            userLastName: this.currentParticipant.user.secondName,
+            avatarUrl: this.currentParticipant.user.avatarUrl,
+            isCurrentUser: true,
+            isUserHost: this.currentParticipant.role == ParticipantRole.Host,
+            stream: this.currentUserStream,
+          });
         },
         (err) => {
           this.toastr.error(err.Message);
@@ -222,10 +216,29 @@ export class MeetingComponent
     // when get call answer to it
     this.peer.on('call', (call) => {
       console.log('get call');
-
       // show caller
       call.on('stream', (stream) => {
-        this.showMediaStream(stream);
+        debugger;
+        if (!this.connectedStreams.includes(stream.id)) {
+          this.showMediaStream(stream);
+          this.connectedStreams.push(stream.id);
+          call;
+          console.log(call.peer, 'call peer');
+
+          const participant = this.meeting.participants[0]; //to-do this.meeting.participants.find(p => p.streamId == stream.id);
+
+          console.log(stream.id);
+          console.log(this.meeting);
+          console.log(participant);
+          this.mediaData.push({
+            id: participant?.id,
+            userFirstName: participant?.user?.firstName,
+            userLastName: participant?.user?.secondName,
+            isCurrentUser: false,
+            isUserHost: participant?.role === ParticipantRole.Host,
+            stream: stream,
+          });
+        }
         this.connectedPeers.set(call.peer, stream);
       });
 
@@ -234,57 +247,22 @@ export class MeetingComponent
     });
   }
 
-  ngOnDestroy(): void {
+  public ngAfterViewInit(): void {
+    this.elem = this.mainArea.nativeElement;
+  }
+
+  public ngAfterContentInit() {
+    this.currentStreamLoaded.subscribe(
+      () => (this.currentVideo.nativeElement.srcObject = this.currentUserStream)
+    );
+
+  public ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
   }
 
-  getMeeting(link: string): void {
-    console.log('get meeting');
-    this.meetingService
-      .connectMeeting(link)
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(
-        (resp) => {
-          this.meeting = resp.body;
-          console.log('meeting: ', this.meeting);
-          this.connectionData.meetingId = this.meeting.id;
-          this.meetingSignalrService.invoke(
-            SignalMethods.OnUserConnect,
-            this.connectionData
-          );
-          this.meetingSignalrService.invoke(
-            SignalMethods.OnGetMessages,
-            this.meeting.id
-          );
-        },
-        (error) => {
-          console.log(error.message);
-          this.leaveUnConnected();
-        }
-      );
-  }
-
-  showChat(): void {
+  public showChat(): void {
     this.isShowChat = !this.isShowChat;
-    console.log('participants: ', this.meeting.participants);
-  }
-
-  // call to peer
-  private connect(recieverPeerId: string) {
-    const call = this.peer.call(recieverPeerId, this.currentUserStream);
-
-    // get answer and show other user
-    call.on('stream', (stream) => {
-      this.showMediaStream(stream);
-      this.connectedPeers.set(call.peer, stream);
-    });
-  }
-
-  leaveUnConnected(): void {
-    this.currentUserStream.getTracks().forEach((track) => track.stop());
-    this.destroyPeer();
-    this.router.navigate(['/home']);
   }
 
   public leave(): void {
@@ -303,56 +281,7 @@ export class MeetingComponent
     }
   }
 
-  private destroyPeer() {
-    this.peer.disconnect();
-    this.peer.destroy();
-  }
-
-  // send message to all subscribers that added new user
-  private onPeerOpen(id: string) {
-    console.log('My peer ID is: ' + id);
-    this.route.params.subscribe((params: Params) => {
-      const link: string = params[`link`];
-      const urlParams = new URLSearchParams(link);
-      const groupId = urlParams.get('id');
-      const groupPwd = urlParams.get('pwd');
-
-      this.authService.user$
-        .pipe(filter((user) => Boolean(user)))
-        .subscribe((user) => {
-          this.connectionData = {
-            peerId: id,
-            userEmail: this.authService.currentUser.email,
-            meetingId: groupId,
-            meetingPwd: groupPwd,
-            participant: this.currentParticipant, // this.currentParticipant is undefined here
-          };
-          this.getMeeting(link);
-        });
-    });
-  }
-
-  // show mediaStream
-  private showMediaStream(stream: MediaStream) {
-    const participants = document.getElementById('participants');
-
-    if (!this.connectedStreams.includes(stream.id)) {
-      this.connectedStreams.push(stream.id);
-
-      const videoElement = this.createVideoElement(stream);
-      participants.appendChild(videoElement);
-    }
-  }
-
-  // create html element to show video
-  private createVideoElement(stream: MediaStream): HTMLElement {
-    const videoElement = document.createElement('video');
-    videoElement.srcObject = stream;
-    videoElement.autoplay = true;
-    return videoElement;
-  }
-
-  startRecording(): void {
+  public startRecording(): void {
     this.blobService.startRecording();
 
     this.meetingSignalrService.invoke(
@@ -375,7 +304,7 @@ export class MeetingComponent
     );
   }
 
-  onPollIconClick() {
+  public onPollIconClick() {
     if (this.poll) {
       this.isShowPoll = !this.isShowPoll;
     } else if (this.pollResults || this.isShowPoll) {
@@ -422,7 +351,7 @@ export class MeetingComponent
     this.isShowPollResults = true;
   }
 
-  onStatisticsIconClick(): void {
+  public onStatisticsIconClick(): void {
     if (!this.meetingStatistics) {
       if (!this.meeting) {
         this.toastr.warning('Something went wrong. Try again later.');
@@ -438,13 +367,13 @@ export class MeetingComponent
     this.isShowStatistics = !this.isShowStatistics;
   }
 
-  onCopyIconClick(): void {
+  public onCopyIconClick(): void {
     this.simpleModalService.addModal(CopyClipboardComponent, {
       message: this.document.location.href,
     });
   }
 
-  sendMessage(): void {
+  public sendMessage(): void {
     this.meetingSignalrService.invoke(SignalMethods.OnSendMessage, {
       authorEmail: this.authService.currentUser.email,
       meetingId: this.meeting.id,
@@ -454,7 +383,7 @@ export class MeetingComponent
     this.msgText = '';
   }
 
-  goFullscreen(): void {
+  public goFullscreen(): void {
     if (this.elem.requestFullscreen) {
       this.elem.requestFullscreen();
     } else if (this.elem.mozRequestFullScreen) {
@@ -466,7 +395,7 @@ export class MeetingComponent
     }
   }
 
-  closeFullscreen(): void {
+  public closeFullscreen(): void {
     if (this.document.exitFullscreen) {
       this.document.exitFullscreen();
     } else if (this.document.mozCancelFullScreen) {
@@ -476,5 +405,119 @@ export class MeetingComponent
     } else if (this.document.msExitFullscreen) {
       this.document.msExitFullscreen();
     }
+  }
+
+  // call to peer
+  private connect(recieverPeerId: string) {
+    const call = this.peer.call(recieverPeerId, this.currentUserStream);
+
+    // get answer and show other user
+    call.on('stream', (stream) => {
+      //this.showMediaStream(stream);
+      this.connectedStreams.push(stream.id);
+      const connectedPeer = this.connectedPeers.get(call.peer);
+      if (!connectedPeer || connectedPeer.id !== stream.id) {
+        var participant = this.meeting.participants.find(
+          (p) => p.streamId == stream.id
+        );
+        this.mediaData.push({
+          id: participant.id,
+          userFirstName: participant.user.firstName,
+          userLastName: participant.user.secondName,
+          isCurrentUser: this.currentUserStream.id === stream.id,
+          isUserHost: participant.role === ParticipantRole.Host,
+          stream: stream,
+        });
+        this.connectedPeers.set(call.peer, stream);
+      }
+    });
+  }
+
+  private destroyPeer() {
+    this.peer.disconnect();
+    this.peer.destroy();
+  }
+
+  private getMeeting(link: string): void {
+    console.log('get meeting');
+    this.meetingService
+      .connectMeeting(link)
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (resp) => {
+          this.meeting = resp.body;
+          console.log('meeting: ', this.meeting);
+          this.connectionData.meetingId = this.meeting.id;
+          this.meetingSignalrService.invoke(
+            SignalMethods.OnUserConnect,
+            this.connectionData
+          );
+          this.meetingSignalrService.invoke(
+            SignalMethods.OnGetMessages,
+            this.meeting.id
+          );
+        },
+        (error) => {
+          console.log(error.message);
+          this.leaveUnConnected();
+        }
+      );
+  }
+
+  private leaveUnConnected(): void {
+    this.currentUserStream.getTracks().forEach((track) => track.stop());
+    this.destroyPeer();
+    this.router.navigate(['/home']);
+  }
+
+  // send message to all subscribers that added new user
+  private onPeerOpen(id: string) {
+    console.log('My peer ID is: ' + id);
+    this.route.params.subscribe((params: Params) => {
+      const link: string = params[`link`];
+      const urlParams = new URLSearchParams(link);
+      const groupId = urlParams.get('id');
+      const groupPwd = urlParams.get('pwd');
+
+      this.authService.user$
+        .pipe(filter((user) => Boolean(user)))
+        .subscribe((user) => {
+          this.connectionData = {
+            peerId: id,
+            userEmail: this.authService.currentUser.email,
+            meetingId: groupId,
+            meetingPwd: groupPwd,
+            streamId: this.currentUserStream.id,
+            participant: this.currentParticipant, // this.currentParticipant is undefined here
+          };
+          this.getMeeting(link);
+        });
+    });
+  }
+
+  // show mediaStream
+  private showMediaStream(stream: MediaStream) {
+    debugger;
+    const participants = document.getElementById('participants');
+
+    if (!this.connectedStreams.includes(stream.id)) {
+      //debugger
+      //this.createParticipantCard(this.currentParticipant, this.currentUserStream)
+    }
+  }
+
+  // // create html element to show video
+  private createParticipantCard(
+    participant: Participant,
+    stream: MediaStream
+  ): void {
+    this.mediaData.push({
+      id: participant.id,
+      userFirstName: participant.user.firstName,
+      userLastName: participant.user.secondName,
+      isCurrentUser: stream.id == this.currentUserStream.id,
+      isUserHost: participant.role == ParticipantRole.Host,
+      stream: stream,
+    });
   }
 }

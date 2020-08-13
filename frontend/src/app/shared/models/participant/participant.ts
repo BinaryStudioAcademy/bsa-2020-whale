@@ -6,5 +6,6 @@ export interface Participant {
   id: string;
   role: ParticipantRole;
   user: User;
+  streamId: string;
   meeting: Meeting;
 }
