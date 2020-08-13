@@ -5,10 +5,10 @@
       <select [(ngModel)]="inputDevice" class="menu select">
         <option
           class="label"
-          *ngFor="let c of getLabelList(inputDevices)"
+          *ngFor="let c of inputDevices"
           [value]="c"
           [selected]="c"
-          >{{ c }}</option
+          >{{ c.label }}</option
         >
       </select>
     </div>
@@ -41,10 +41,10 @@
       <select [(ngModel)]="outputDevice">
         <option
           class="item"
-          *ngFor="let c of getLabelList(outputDevices)"
+          *ngFor="let c of outputDevices"
           [value]="c"
           [selected]="c"
-          >{{ c }}</option
+          >{{ c.label }}</option
         >
       </select>
     </div>

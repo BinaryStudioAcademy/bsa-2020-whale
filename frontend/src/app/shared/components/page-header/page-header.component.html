@@ -48,7 +48,7 @@
   </a>
   <div *ngIf="settingsMenuVisible" style="right: 0;" class="dropdown-menu">
     <div class="dropdown-menu-user" (click)="goToPage('profile-page')">
-      David Lones
+      {{ loggedInUser?.firstName }} {{ loggedInUser?.lastName }}
     </div>
     <div class="dropdown-menu-item" (click)="goToPage('setting-page')">
       Settings
