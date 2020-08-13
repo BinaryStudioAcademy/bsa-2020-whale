@@ -15,7 +15,7 @@ import { environment } from '@env';
 import { Subject } from 'rxjs';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { MeetingService } from 'app/core/services/meeting.service';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, filter } from 'rxjs/operators';
 import { Meeting } from '@shared/models/meeting/meeting';
 import { PollDto } from '@shared/models/poll/poll-dto';
 import {
@@ -38,7 +38,8 @@ import { ParticipantRole } from '@shared/models/participant/participant-role';
 import { Statistics } from '@shared/models/statistics/statistics';
 import { AuthService } from 'app/core/auth/auth.service';
 import { UserMediaData } from '@shared/models/media/user-media-data';
-import { connectableObservableDescriptor } from 'rxjs/internal/observable/ConnectableObservable';
+import { CopyClipboardComponent } from '@shared/components/copy-clipboard/copy-clipboard.component';
+import { SimpleModalService } from 'ngx-simple-modal';
 
 @Component({
   selector: 'app-meeting',
@@ -102,7 +103,8 @@ export class MeetingComponent
     private blobService: BlobService,
     private httpService: HttpService,
     @Inject(DOCUMENT) private document: any,
-    private authService: AuthService
+    private authService: AuthService,
+    private simpleModalService: SimpleModalService
   ) {
     this.meetingSignalrService = new MeetingSignalrService(signalRService);
   }
@@ -142,6 +144,7 @@ export class MeetingComponent
           if (connectData.peerId == this.peer.id) {
             return;
           }
+          this.meeting.participants.push(connectData.participant);
           console.log('connected with peer: ' + connectData.peerId);
           this.connect(connectData.peerId);
           this.toastr.success('Connected successfuly');
@@ -371,15 +374,19 @@ export class MeetingComponent
       const groupId = urlParams.get('id');
       const groupPwd = urlParams.get('pwd');
 
-      this.connectionData = {
-        peerId: id,
-        userEmail: this.authService.currentUser.email,
-        meetingId: groupId,
-        meetingPwd: groupPwd,
-        streamId: this.currentUserStream.id,
-        participant: this.currentParticipant,
-      };
-      this.getMeeting(link);
+      this.authService.user$
+        .pipe(filter((user) => Boolean(user)))
+        .subscribe((user) => {
+          this.connectionData = {
+            peerId: id,
+            userEmail: this.authService.currentUser.email,
+            meetingId: groupId,
+            meetingPwd: groupPwd,
+            streamId: this.currentUserStream.id,
+            participant: this.currentParticipant, // this.currentParticipant is undefined here
+          };
+          this.getMeeting(link);
+        });
     });
   }
 
@@ -488,6 +495,12 @@ export class MeetingComponent
       };
     }
     this.isShowStatistics = !this.isShowStatistics;
+  }
+
+  onCopyIconClick(): void {
+    this.simpleModalService.addModal(CopyClipboardComponent, {
+      message: this.document.location.href,
+    });
   }
 
   sendMessage(): void {

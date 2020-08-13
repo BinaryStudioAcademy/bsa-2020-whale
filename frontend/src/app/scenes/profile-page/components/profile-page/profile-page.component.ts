@@ -6,6 +6,9 @@ import { BlobService } from '../../../../core/services/blob.service';
 import { User } from '@shared/models/user';
 import { HttpService } from '../../../../core/services/http.service';
 import { AuthService } from '../../../../core/auth/auth.service';
+import { FormGroup, FormControl } from '@angular/forms';
+import { filter } from 'rxjs/operators';
+import Avatar from 'avatar-initials';
 
 @Component({
   selector: 'app-profile-page',
@@ -22,8 +25,17 @@ export class ProfilePageComponent implements OnInit {
   @ViewChild('cameraModal')
   public modal: ElementRef;
 
+  @ViewChild('avatar')
+  public avatar: ElementRef;
+
   public isShowCamera = false;
   public isImageCropped = false;
+  public editName = false;
+  updatedUser: User;
+
+  public editTelephone = false;
+  editTelephon: string;
+
   isShowUploadFile: boolean;
   loggedInUser: User;
   public routePrefix = '/api/user';
@@ -33,7 +45,6 @@ export class ProfilePageComponent implements OnInit {
   croppedImage: any = '';
   fileToUpload: File;
   avatarURL = '';
-  userMockup = {} as User;
 
   ngOnInit(): void {
     this.GetAvatar();
@@ -84,13 +95,12 @@ export class ProfilePageComponent implements OnInit {
       console.log(`image: ${resp}`);
       this.avatarURL = resp;
       if (this.avatarURL !== '') {
-        this.userMockup.id = '216D29C0-C230-4DEB-B40D-EDF67D906D3A';
-        this.userMockup.firstName = 'Alex';
-        this.userMockup.secondName = 'Belokon';
-        this.userMockup.email = 'alex.belokon.onyx@gmail.com';
-        this.userMockup.avatarUrl = this.avatarURL;
+        this.loggedInUser.avatarUrl = this.avatarURL;
         this.httpService
-          .putFullRequest<User, string>(`${this.routePrefix}`, this.userMockup)
+          .putFullRequest<User, string>(
+            `${this.routePrefix}`,
+            this.loggedInUser
+          )
           .subscribe((response) => console.log(`image: ${response.body}`));
       }
     });
@@ -146,32 +156,6 @@ export class ProfilePageComponent implements OnInit {
     this.userPhotoFromCamera = dataURL;
   }
 
-  public saveAvatarFromCamera(): void {
-    const blob = this.dataURLtoBlob(this.croppedImage);
-
-    const size = blob.size / 1024 / 1024;
-
-    if (size < 5) {
-      this.blobService.postBlobUploadImage(blob).subscribe((resp) => {
-        console.log(`image: ${resp}`);
-      });
-    } else {
-      this.toastr.error('File size is too large');
-    }
-  }
-  /*
-  private postBlob(blob: Blob): void {
-    const formData = new FormData();
-
-    formData.append('user-image', blob, 'image');
-
-    this.http
-      .post('http://localhost:51569/api/storage/save', formData, {
-        responseType: 'text',
-      })
-      .subscribe((resp) => console.log(`image: ${resp}`));
-  }*/
-
   private dataURLtoBlob(dataURL: any): Blob {
     let byteString: string;
     if (dataURL.split(',')[0].indexOf('base64') >= 0) {
@@ -191,16 +175,34 @@ export class ProfilePageComponent implements OnInit {
   }
 
   private GetAvatar(): void {
-    this.authService.user$.subscribe((user) => {
-      this.httpService
-        .getRequest<User>(`${this.routePrefix}/email/${user.email}`)
-        .subscribe(
-          (userFromDB: User) => {
-            this.loggedInUser = userFromDB;
-          },
-          (error) => this.toastr.error(error.Message)
-        );
+    this.authService.user$
+      .pipe(filter((user) => Boolean(user)))
+      .subscribe((user) => {
+        this.httpService
+          .getRequest<User>(`${this.routePrefix}/email/${user.email}`)
+          .subscribe(
+            (userFromDB: User) => {
+              this.loggedInUser = userFromDB;
+              this.updatedUser = this.loggedInUser;
+            },
+            (error) => this.toastr.error(error.Message)
+          );
+      });
+  }
+
+  public removeAvatar(): void {
+    const avatar = new Avatar(this.avatar, {
+      useGravatar: false,
+      initials: `${this.loggedInUser.firstName[0]}${this.loggedInUser?.secondName[0]}`,
+      initial_fg: '#ffffff',
+      initial_bg: '#00325c',
+      initial_font_family: "'Lato', 'Lato-Regular', 'Helvetica Neue'",
     });
+
+    this.loggedInUser.avatarUrl = avatar.element.src;
+    this.httpService
+      .putFullRequest<User, string>(`${this.routePrefix}`, this.loggedInUser)
+      .subscribe((response) => console.log(`image: ${response.body}`));
   }
 
   openModal(): void {
@@ -211,5 +213,29 @@ export class ProfilePageComponent implements OnInit {
     this.closeCamera();
     this.GetAvatar();
     this.modal.nativeElement.style.display = 'none';
+  }
+
+  saveEditedUsername(): void {
+    this.editName = !this.editName;
+    this.httpService
+      .putRequest<User, User>(`${this.routePrefix}`, this.updatedUser)
+      .subscribe(
+        (updUser: User) => {
+          this.GetAvatar();
+        },
+        (error) => this.toastr.error(error.Message)
+      );
+  }
+
+  saveEditedTelephone(): void {
+    this.editTelephone = !this.editTelephone;
+    this.httpService
+      .putRequest<User, User>(`${this.routePrefix}`, this.updatedUser)
+      .subscribe(
+        (updUser: User) => {
+          this.GetAvatar();
+        },
+        (error) => this.toastr.error(error.Message)
+      );
   }
 }

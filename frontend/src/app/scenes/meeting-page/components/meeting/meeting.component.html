@@ -42,11 +42,12 @@
         <i class="user plus icon"></i>
       </div>
       <div class="ui divided list">
-        <div *ngFor="let user of users" class="ui item participant">
-          <img
-            src="https://icons.iconarchive.com/icons/paomedia/small-n-flat/512/user-male-icon.png"
-          />
-          <span>{{ user }}</span>
+        <div
+          *ngFor="let participant of meeting.participants"
+          class="ui item participant"
+        >
+          <img src="{{ participant.user.avatarUrl }}" />
+          <span>{{ participant.user.firstName }}</span>
         </div>
       </div>
     </div>
@@ -115,6 +116,7 @@
           ></i>
           <i (click)="onPollIconClick()" class="big clipboard list icon"></i>
           <i (click)="onStatisticsIconClick()" class="big chart bar icon"></i>
+          <i (click)="onCopyIconClick()" class="big copy icon"></i>
           <i
             (click)="showChat()"
             style="margin-left: 10px; opacity: 0.8;"

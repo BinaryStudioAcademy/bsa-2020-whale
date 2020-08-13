@@ -16,6 +16,8 @@ export const environment = {
     messagingSenderId: '893944865679',
     appId: '1:893944865679:web:9b055d730e3a27b66961fa',
   },
+  googleClientId:
+    '893944865679-eav20gfr3sbintikhq42dhhc414loq4p.apps.googleusercontent.com',
   peerOptions: {
     // ! default settings
     key: 'peerjs',
