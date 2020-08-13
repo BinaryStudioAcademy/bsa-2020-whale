@@ -68,10 +68,7 @@ export class AuthService {
 
     const credential = auth.GoogleAuthProvider.credential(token);
 
-    return (
-      (await this.fireAuth.signInAndRetrieveDataWithCredential(credential)) !==
-      null
-    );
+    return (await this.fireAuth.signInWithCredential(credential)) !== null;
 
     //return await this.fireAuth.signInWithPopup(new auth.GoogleAuthProvider()) !== null;
   }
