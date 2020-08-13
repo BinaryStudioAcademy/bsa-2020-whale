@@ -422,7 +422,7 @@ namespace Whale.DAL.Migrations
             modelBuilder.Entity("Whale.DAL.Models.Participant", b =>
                 {
                     b.HasOne("Whale.DAL.Models.Meeting", "Meeting")
-                        .WithMany("Participants")
+                        .WithMany()
                         .HasForeignKey("MeetingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
