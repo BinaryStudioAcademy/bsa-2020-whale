@@ -1,12 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, AfterViewInit } from '@angular/core';
 
 @Component({
   selector: 'spiner',
   templateUrl: './spiner.component.html',
   styleUrls: ['./spiner.component.sass'],
 })
-export class SpinerComponent implements OnInit {
+export class SpinerComponent {
+  @Input() size: string;
   constructor() {}
-
-  ngOnInit(): void {}
 }
