@@ -19,7 +19,7 @@ import { UpstateService } from 'app/core/services/upstate.service';
 import { MeetingService } from 'app/core/services/meeting.service';
 import { Router } from '@angular/router';
 import { MeetingCreate } from '@shared/models/meeting/meeting-create';
-import { takeUntil, tap } from 'rxjs/operators';
+import { takeUntil, tap, filter } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { AuthService } from 'app/core/auth/auth.service';
 
@@ -58,27 +58,30 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.authService.user$.subscribe((user) => {
-      this.httpService
-        .getRequest<User>(`${this.routePrefix}/${user.email}`)
-        .pipe(tap(() => (this.isUserLoadig = false)))
-        .subscribe(
-          (userFromDB: User) => {
-            this.loggedInUser = userFromDB;
-            this.ownerEmail = this.loggedInUser?.email;
-          },
-          (error) => this.toastr.error(error.Message)
-        );
-      this.httpService
-        .getRequest<Contact[]>('/api/contacts')
-        .pipe(tap(() => (this.isContactsLoading = false)))
-        .subscribe(
-          (data: Contact[]) => {
-            this.contacts = data;
-          },
-          (error) => this.toastr.error(error.Message)
-        );
-    });
+    this.authService.user$
+      .pipe(filter((user) => Boolean(user)))
+      .subscribe((user) => {
+        this.httpService
+          .getRequest<User>(`${this.routePrefix}/${user.email}`)
+          .pipe(tap(() => (this.isUserLoadig = false)))
+          .subscribe(
+            (userFromDB: User) => {
+              this.loggedInUser = userFromDB;
+              this.ownerEmail = this.loggedInUser?.email;
+            },
+            (error) => this.toastr.error(error.Message)
+          );
+
+        this.httpService
+          .getRequest<Contact[]>('/api/contacts')
+          .pipe(tap(() => (this.isContactsLoading = false)))
+          .subscribe(
+            (data: Contact[]) => {
+              this.contacts = data;
+            },
+            (error) => this.toastr.error(error.Message)
+          );
+      });
   }
 
   addNewGroup(): void {
