@@ -255,6 +255,7 @@ export class MeetingComponent
     this.currentStreamLoaded.subscribe(
       () => (this.currentVideo.nativeElement.srcObject = this.currentUserStream)
     );
+  }
 
   public ngOnDestroy(): void {
     this.unsubscribe$.next();
