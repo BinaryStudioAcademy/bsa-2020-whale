@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using Whale.BLL.Interfaces;
+using Whale.BLL.Services.Interfaces;
 using Whale.DAL;
 using Whale.Shared.DTO.Call;
 
@@ -10,10 +11,12 @@ namespace Whale.BLL.Hubs
     public sealed class ChatHub : Hub
     {
         private readonly IMeetingService _meetingService;
+        private readonly IContactsService _contactsService;
 
-        public ChatHub(IMeetingService meetingService)
+        public ChatHub(IMeetingService meetingService, IContactsService contactsService)
         {
             _meetingService = meetingService;
+            _contactsService = contactsService;
         }
 
         [HubMethodName("JoinGroup")]
@@ -33,7 +36,9 @@ namespace Whale.BLL.Hubs
         public async Task StartCall(StartCallDTO startCallDTO)
         {
             var link = await _meetingService.CreateMeeting(startCallDTO.Meeting, startCallDTO.Emails);
-            await Clients.Group(startCallDTO.ContactId).SendAsync("OnStartCall", link);
+            var contact = await _contactsService.GetContactAsync(startCallDTO.ContactId, startCallDTO.Emails[0]);
+            await Clients.OthersInGroup(startCallDTO.ContactId.ToString()).SendAsync("OnStartCallOthers", new CallDTO { MeetingLink = link, Contact = contact });
+            await Clients.Caller.SendAsync("OnStartCallCaller", link);
         }
 
         [HubMethodName("OnTakeCall")]
