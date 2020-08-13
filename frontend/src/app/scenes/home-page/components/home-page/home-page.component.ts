@@ -19,7 +19,7 @@ import { UpstateService } from 'app/core/services/upstate.service';
 import { MeetingService } from 'app/core/services/meeting.service';
 import { Router } from '@angular/router';
 import { MeetingCreate } from '@shared/models/meeting/meeting-create';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, tap } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { AuthService } from 'app/core/auth/auth.service';
 
@@ -29,7 +29,6 @@ import { AuthService } from 'app/core/auth/auth.service';
   styleUrls: ['./home-page.component.sass'],
 })
 export class HomePageComponent implements OnInit, OnDestroy {
-  private counterComponent: ContactsChatComponent;
   contacts: Contact[];
   loggedInUser: User;
   contactsVisibility = true;
@@ -37,13 +36,15 @@ export class HomePageComponent implements OnInit, OnDestroy {
   chatVisibility = true;
   ownerEmail: string;
   public routePrefix = '/api/user/email';
-  private hubConnection: HubConnection;
   contactSelected: Contact;
+
+  public isContactsLoading = true;
+  public isUserLoadig = true;
+  public isMeetingLoading = false;
+
   private unsubscribe$ = new Subject<void>();
   constructor(
     private toastr: ToastrService,
-    private stateService: UpstateService,
-    private signalRService: SignalRService,
     private httpService: HttpService,
     private simpleModalService: SimpleModalService,
     private meetingService: MeetingService,
@@ -60,6 +61,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.authService.user$.subscribe((user) => {
       this.httpService
         .getRequest<User>(`${this.routePrefix}/${user.email}`)
+        .pipe(tap(() => (this.isUserLoadig = false)))
         .subscribe(
           (userFromDB: User) => {
             this.loggedInUser = userFromDB;
@@ -67,12 +69,15 @@ export class HomePageComponent implements OnInit, OnDestroy {
           },
           (error) => this.toastr.error(error.Message)
         );
-      this.httpService.getRequest<Contact[]>('/api/contacts').subscribe(
-        (data: Contact[]) => {
-          this.contacts = data;
-        },
-        (error) => this.toastr.error(error.Message)
-      );
+      this.httpService
+        .getRequest<Contact[]>('/api/contacts')
+        .pipe(tap(() => (this.isContactsLoading = false)))
+        .subscribe(
+          (data: Contact[]) => {
+            this.contacts = data;
+          },
+          (error) => this.toastr.error(error.Message)
+        );
     });
   }
 
@@ -82,7 +87,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
   addNewContact(): void {
     this.simpleModalService
       .addModal(AddContactModalComponent)
-      .subscribe((contact) => console.log(contact));
+      .subscribe((contact) => {
+        this.contacts.push(contact);
+      });
   }
   visibilityChange(event): void {
     this.chatVisibility = event;
@@ -100,6 +107,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
     return this.contactSelected === contact;
   }
   createMeeting(): void {
+    this.isMeetingLoading = true;
     this.meetingService
       .createMeeting({
         settings: '',

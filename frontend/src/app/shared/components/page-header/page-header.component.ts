@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from 'app/core/auth/auth.service';
 import { Notification } from 'app/shared/models/notification/notification';
@@ -11,6 +11,8 @@ import { HttpService } from '../../../core/services/http.service';
   styleUrls: ['./page-header.component.sass'],
 })
 export class PageHeaderComponent implements OnInit {
+  @Input() isUserLoadig: boolean;
+
   settingsMenuVisible = false;
   isNotificationsVisible = false;
   loggedInUser: User;

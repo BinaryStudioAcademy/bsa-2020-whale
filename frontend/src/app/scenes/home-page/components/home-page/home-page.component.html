@@ -1,8 +1,10 @@
-<app-page-header></app-page-header>
+<spiner *ngIf="isMeetingLoading" size="'massive'"></spiner>
+<app-page-header [isUserLoadig]="isUserLoadig"></app-page-header>
 <div class="home-panel">
   <div class="left-col">
     <div class="ui left vertical menu bar">
       <a class="item">
+        <spiner *ngIf="isUserLoadig" size="'small'"></spiner>
         <div class="ui very relaxed horizontal list">
           <div class="item">
             <img
@@ -33,6 +35,7 @@
         </a>
       </a>
       <div class="relative">
+        <spiner *ngIf="isContactsLoading" [size]="'medium'"></spiner>
         <a
           (click)="contactsVisibility = !contactsVisibility"
           class="item header"
@@ -44,51 +47,51 @@
             New
           </button>
         </a>
-      </div>
-      <div
-        [hidden]="!contactsVisibility"
-        *ngFor="let contact of contacts"
-        class="user-list ui middle aligned selection list"
-      >
         <div
-          [ngClass]="isContactActive(contact) ? 'active item' : 'item'"
-          (click)="onContactClick(contact)"
+          [hidden]="!contactsVisibility"
+          *ngFor="let contact of contacts"
+          class="user-list ui middle aligned selection list"
         >
-          <img
-            class="ui avatar image"
-            src="{{ contact?.secondMember.avatarUrl }}"
-          />
-          <div class="content">
-            <div class="description">
-              {{ contact?.secondMember.firstName }}
-              {{ contact?.secondMember.secondName }}
+          <div
+            [ngClass]="isContactActive(contact) ? 'active item' : 'item'"
+            (click)="onContactClick(contact)"
+          >
+            <img
+              class="ui avatar image"
+              src="{{ contact?.secondMember.avatarUrl }}"
+            />
+            <div class="content">
+              <div class="description">
+                {{ contact?.secondMember.firstName }}
+                {{ contact?.secondMember.secondName }}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <a (click)="groupsVisibility = !groupsVisibility" class="item header"
-        >Groups
-        <button
-          (click)="addNewGroup()"
-          class="ui mini basic button edit-button"
+        <a (click)="groupsVisibility = !groupsVisibility" class="item header"
+          >Groups
+          <button
+            (click)="addNewGroup()"
+            class="ui mini basic button edit-button"
+          >
+            New
+          </button>
+        </a>
+        <div
+          [hidden]="!groupsVisibility"
+          *ngFor="let contact of contacts"
+          class="user-list ui middle aligned selection list"
         >
-          New
-        </button>
-      </a>
-      <div
-        [hidden]="!groupsVisibility"
-        *ngFor="let contact of contacts"
-        class="user-list ui middle aligned selection list"
-      >
-        <div (click)="onGroupClick()" class="item">
-          <img
-            class="ui avatar image"
-            src="{{ contact.secondMember.avatarUrl }}"
-          />
-          <div class="content">
-            <div class="description">
-              {{ contact.secondMember.firstName }}
-              {{ contact.secondMember.secondName }}
+          <div (click)="onGroupClick()" class="item">
+            <img
+              class="ui avatar image"
+              src="{{ contact.secondMember.avatarUrl }}"
+            />
+            <div class="content">
+              <div class="description">
+                {{ contact.secondMember.firstName }}
+                {{ contact.secondMember.secondName }}
+              </div>
             </div>
           </div>
         </div>
