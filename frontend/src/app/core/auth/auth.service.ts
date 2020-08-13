@@ -22,9 +22,9 @@ export class AuthService {
     this.user$ = fireAuth.authState;
     this.user$.subscribe((user) => {
       if (user) {
-        this.registrationService.registerUser(user);
-        this.currentUser = user;
         this.isSignedIn = true;
+        this.currentUser = user;
+        this.registrationService.registerUser(user);
       } else {
         this.isSignedIn = false;
         this.currentUser = null;
