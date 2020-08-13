@@ -92,8 +92,7 @@ export class ContactsChatComponent implements OnInit, OnChanges {
   }
 
   public call(): void {
-    this.simpleModalService
-      .addModal(CallModalComponent, this.contactSelected)
-      .subscribe((res) => console.log(res));
+    console.log(this.contactSelected);
+    this.simpleModalService.addModal(CallModalComponent, this.contactSelected);
   }
 }

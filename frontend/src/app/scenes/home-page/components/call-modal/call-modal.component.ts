@@ -9,7 +9,7 @@ import { DirectMessage } from '@shared/models/message/message';
   templateUrl: './call-modal.component.html',
   styleUrls: ['./call-modal.component.sass'],
 })
-export class CallModalComponent extends SimpleModalComponent<Contact, boolean>
+export class CallModalComponent extends SimpleModalComponent<Contact, null>
   implements Contact {
   id: string;
   firstMemberId: string;
@@ -20,13 +20,7 @@ export class CallModalComponent extends SimpleModalComponent<Contact, boolean>
   settings: any;
   contactnerSettings: any;
 
-  isCaller = false;
-
   constructor() {
     super();
-  }
-  confirm(): void {
-    this.result = true;
-    this.close();
   }
 }

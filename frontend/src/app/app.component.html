@@ -1,1 +1,7 @@
 <router-outlet></router-outlet>
+
+<app-incoming-call
+  *ngIf="contactCalling"
+  [contact]="contactCalling"
+  (closeEvent)="closeAnswerCall()"
+></app-incoming-call>

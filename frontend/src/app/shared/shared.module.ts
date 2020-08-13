@@ -9,6 +9,8 @@ import { PollResultsComponent } from './components/poll/poll-results/poll-result
 import { FormsModule } from '@angular/forms';
 import { DateFormatPipe } from './pipes/date-format.pipe';
 import { ParticipantCardComponent } from './components/participant-card/participant-card.component';
+import { IncomingCallComponent } from './components/incoming-call/incoming-call.component';
+import { AngularDraggableModule } from 'angular2-draggable';
 
 @NgModule({
   declarations: [
@@ -19,8 +21,14 @@ import { ParticipantCardComponent } from './components/participant-card/particip
     PollCreateComponent,
     PollComponent,
     PollResultsComponent,
+    IncomingCallComponent,
   ],
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    AngularDraggableModule,
+  ],
   exports: [
     CommonModule,
     PageHeaderComponent,
@@ -30,6 +38,7 @@ import { ParticipantCardComponent } from './components/participant-card/particip
     SpinerComponent,
     DateFormatPipe,
     ParticipantCardComponent,
+    IncomingCallComponent,
   ],
 })
 export class SharedModule {}
