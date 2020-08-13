@@ -88,16 +88,17 @@ export class ScheduleMeetingPageComponent implements OnInit {
   }
 
   createStringFromDate(date: Date): string {
-    const pieces: string[] = date
-      .toLocaleDateString()
-      .split('/')
-      .map((piece) => {
-        if (piece.length === 1) {
-          return '0' + piece;
-        } else {
-          return piece;
-        }
-      });
+    let pieces: string[] = [];
+    pieces.push(`${date.getDate()}`);
+    pieces.push(`${date.getMonth()}`);
+    pieces.push(`${date.getFullYear()}`);
+    pieces = pieces.map((piece) => {
+      if (piece.length === 1) {
+        return '0' + piece;
+      } else {
+        return piece;
+      }
+    });
 
     return pieces.join('/');
   }
