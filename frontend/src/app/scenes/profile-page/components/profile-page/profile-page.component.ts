@@ -7,6 +7,7 @@ import { User } from '@shared/models/user';
 import { HttpService } from '../../../../core/services/http.service';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { FormGroup, FormControl } from '@angular/forms';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-profile-page',
@@ -91,10 +92,10 @@ export class ProfilePageComponent implements OnInit {
       console.log(`image: ${resp}`);
       this.avatarURL = resp;
       if (this.avatarURL !== '') {
-        this.userMockup.id = '216D29C0-C230-4DEB-B40D-EDF67D906D3A';
-        this.userMockup.firstName = 'Alex';
-        this.userMockup.secondName = 'Belokon';
-        this.userMockup.email = 'alex.belokon.onyx@gmail.com';
+        this.userMockup.id = this.loggedInUser.id;
+        this.userMockup.firstName = this.loggedInUser.firstName;
+        this.userMockup.secondName = this.loggedInUser.secondName;
+        this.userMockup.email = this.loggedInUser.email;
         this.userMockup.avatarUrl = this.avatarURL;
         this.httpService
           .putFullRequest<User, string>(`${this.routePrefix}`, this.userMockup)
@@ -153,32 +154,6 @@ export class ProfilePageComponent implements OnInit {
     this.userPhotoFromCamera = dataURL;
   }
 
-  public saveAvatarFromCamera(): void {
-    const blob = this.dataURLtoBlob(this.croppedImage);
-
-    const size = blob.size / 1024 / 1024;
-
-    if (size < 5) {
-      this.blobService.postBlobUploadImage(blob).subscribe((resp) => {
-        console.log(`image: ${resp}`);
-      });
-    } else {
-      this.toastr.error('File size is too large');
-    }
-  }
-  /*
-  private postBlob(blob: Blob): void {
-    const formData = new FormData();
-
-    formData.append('user-image', blob, 'image');
-
-    this.http
-      .post('http://localhost:51569/api/storage/save', formData, {
-        responseType: 'text',
-      })
-      .subscribe((resp) => console.log(`image: ${resp}`));
-  }*/
-
   private dataURLtoBlob(dataURL: any): Blob {
     let byteString: string;
     if (dataURL.split(',')[0].indexOf('base64') >= 0) {
@@ -198,17 +173,19 @@ export class ProfilePageComponent implements OnInit {
   }
 
   private GetAvatar(): void {
-    this.authService.user$.subscribe((user) => {
-      this.httpService
-        .getRequest<User>(`${this.routePrefix}/email/${user.email}`)
-        .subscribe(
-          (userFromDB: User) => {
-            this.loggedInUser = userFromDB;
-            this.updatedUser = this.loggedInUser;
-          },
-          (error) => this.toastr.error(error.Message)
-        );
-    });
+    this.authService.user$
+      .pipe(filter((user) => Boolean(user)))
+      .subscribe((user) => {
+        this.httpService
+          .getRequest<User>(`${this.routePrefix}/email/${user.email}`)
+          .subscribe(
+            (userFromDB: User) => {
+              this.loggedInUser = userFromDB;
+              this.updatedUser = this.loggedInUser;
+            },
+            (error) => this.toastr.error(error.Message)
+          );
+      });
   }
 
   openModal(): void {
