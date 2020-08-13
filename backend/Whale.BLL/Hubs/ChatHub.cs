@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Whale.BLL.Interfaces;
 using Whale.BLL.Services.Interfaces;
@@ -35,9 +36,11 @@ namespace Whale.BLL.Hubs
         [HubMethodName("OnStartCall")]
         public async Task StartCall(StartCallDTO startCallDTO)
         {
-            var link = await _meetingService.CreateMeeting(startCallDTO.Meeting, startCallDTO.Emails);
-            var contact = await _contactsService.GetContactAsync(startCallDTO.ContactId, startCallDTO.Emails[0]);
-            await Clients.OthersInGroup(startCallDTO.ContactId.ToString()).SendAsync("OnStartCallOthers", new CallDTO { MeetingLink = link, Contact = contact });
+            var contact = await _contactsService.GetContactAsync(startCallDTO.ContactId, startCallDTO.Email);
+            var link = await _meetingService.CreateMeeting(startCallDTO.Meeting, new List<string> { contact.FirstMember.Email, contact.SecondMember.Email });
+            
+            await Groups.AddToGroupAsync(Context.ConnectionId, startCallDTO.ContactId.ToString());
+            await Clients.OthersInGroup(startCallDTO.ContactId.ToString()).SendAsync("OnStartCallOthers", new CallDTO { MeetingLink = link, Contact = contact, CallerEmail = startCallDTO.Email });
             await Clients.Caller.SendAsync("OnStartCallCaller", link);
         }
 
@@ -50,7 +53,7 @@ namespace Whale.BLL.Hubs
         [HubMethodName("OnDeclineCall")]
         public async Task DeclineCall(DeclineCallDTO declineCallDTO)
         {
-            await _meetingService.ParticipantDisconnect(declineCallDTO.ContactId, declineCallDTO.Email);
+            await _meetingService.ParticipantDisconnect(declineCallDTO.MeetingId, declineCallDTO.Email);
             await Clients.OthersInGroup(declineCallDTO.ContactId).SendAsync("OnDeclineCall");
         }
     }

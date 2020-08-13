@@ -1,47 +1,65 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { AuthService } from './core/auth/auth.service';
 import { HttpClient } from '@angular/common/http';
 import { Contact } from '@shared/models/contact/contact';
-import { User } from '@shared/models/user/user';
-import { ChatSignalrService } from './core/services/chat-signalr.service';
 import { SignalRService } from './core/services/signal-r.service';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { from } from 'rxjs';
+import { tap, filter } from 'rxjs/operators';
 import { Call } from '@shared/models/call/call';
+import { environment } from '@env';
+import { HubConnection } from '@aspnet/signalr';
+import { HttpService } from './core/services/http.service';
+import { User } from 'firebase';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.sass'],
 })
-export class AppComponent implements OnInit, OnDestroy {
+export class AppComponent implements OnInit {
   title = 'frontend';
   call: Call;
-  private chatSignalrService: ChatSignalrService;
+  user: User;
 
-  private unsubscribe$ = new Subject<void>();
+  private hubConnection: HubConnection;
+
   constructor(
     public fireAuth: AuthService,
     private http: HttpClient,
-    private signalRService: SignalRService
-  ) {
-    this.chatSignalrService = new ChatSignalrService(this.signalRService);
-  }
-  ngOnDestroy(): void {
-    this.unsubscribe$.next();
-    this.unsubscribe$.complete();
-  }
+    private signalRService: SignalRService,
+    private httpService: HttpService,
+    private authService: AuthService
+  ) {}
+
   ngOnInit(): void {
-    this.chatSignalrService.startCallOthers$
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(
-        (call) => {
-          this.call = call;
-        },
-        (err) => {
-          this.closeIncomingCall();
-        }
-      );
+    from(this.signalRService.registerHub(environment.apiUrl, 'chatHub'))
+      .pipe(
+        tap((hub) => {
+          this.hubConnection = hub;
+        })
+      )
+      .subscribe(() => {
+        this.hubConnection.on('OnStartCallOthers', (call: Call) => {
+          if (this.user.email !== call.callerEmail) {
+            this.call = call;
+          }
+        });
+      });
+
+    this.authService.user$
+      .pipe(filter((user) => Boolean(user)))
+      .subscribe((user) => {
+        this.user = user;
+
+        this.httpService
+          .getRequest<Contact[]>('/api/contacts')
+          .pipe()
+          .subscribe((data: Contact[]) => {
+            data.forEach((contact) => {
+              this.hubConnection.invoke('JoinGroup', contact.id);
+            });
+          });
+      });
   }
 
   closeIncomingCall(): void {

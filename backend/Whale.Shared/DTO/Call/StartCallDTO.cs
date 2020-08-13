@@ -9,6 +9,7 @@ namespace Whale.Shared.DTO.Call
     {
         public Guid ContactId { get; set; }
         public MeetingCreateDTO Meeting { get; set; }
-        public List<string> Emails { get; set; }
+        public string Email { get; set; }
+
     }
 }

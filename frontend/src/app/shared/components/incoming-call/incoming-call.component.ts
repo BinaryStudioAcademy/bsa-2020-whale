@@ -7,16 +7,13 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { Call } from '@shared/models/call/call';
-import {
-  ChatSignalrService,
-  SignalMethods,
-} from 'app/core/services/chat-signalr.service';
 import { SignalRService } from 'app/core/services/signal-r.service';
 import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Subject, from } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { CallDecline } from '@shared/models/call/call-decline';
-
+import { environment } from '@env';
+import { HubConnection } from '@aspnet/signalr';
 @Component({
   selector: 'app-incoming-call',
   templateUrl: './incoming-call.component.html',
@@ -26,39 +23,44 @@ export class IncomingCallComponent implements OnInit, OnDestroy {
   @Input() call: Call;
   @Output() closeEvent = new EventEmitter();
 
-  private chatSignalrService: ChatSignalrService;
-
+  private hubConnection: HubConnection;
   private unsubscribe$ = new Subject<void>();
-  constructor(private signalRService: SignalRService, private router: Router) {
-    this.chatSignalrService = new ChatSignalrService(this.signalRService);
-  }
+  constructor(private signalRService: SignalRService, private router: Router) {}
   ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
   }
 
   ngOnInit(): void {
-    this.chatSignalrService.declineCall$
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(() => this.close());
+    from(this.signalRService.registerHub(environment.apiUrl, 'chatHub'))
+      .pipe(
+        tap((hub) => {
+          this.hubConnection = hub;
+        })
+      )
+      .subscribe(() => {
+        this.hubConnection.on('OnDeclineCall', () => {
+          this.close();
+        });
+
+        this.hubConnection.invoke('JoinGroup', this.call.contact.id);
+      });
   }
 
   confirm(): void {
-    this.chatSignalrService.invoke(
-      SignalMethods.OnTakeCall,
-      this.call.contact.id
-    );
+    this.hubConnection.invoke('OnTakeCall', this.call.contact.id);
     this.close();
     this.router.navigate([
       '/meeting-page',
-      `?id=${this.call.link.id}&pwd=${this.call.link.password}`,
+      `?id=${this.call.meetingLink.id}&pwd=${this.call.meetingLink.password}`,
     ]);
   }
 
   decline(): void {
-    this.chatSignalrService.invoke(SignalMethods.OnDeclineCall, {
+    this.hubConnection.invoke('OnDeclineCall', {
       contactId: this.call.contact.id,
       email: this.call.contact.firstMember.email,
+      meetingId: this.call.meetingLink.id,
     } as CallDecline);
     this.close();
   }

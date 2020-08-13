@@ -1,21 +1,18 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { SimpleModalComponent } from 'ngx-simple-modal';
 import { Contact } from '@shared/models/contact/contact';
 import { User } from '@shared/models/user/user';
 import { DirectMessage } from '@shared/models/message/message';
-import {
-  ChatSignalrService,
-  SignalMethods,
-} from '../../../../core/services/chat-signalr.service';
 import { SignalRService } from '../../../../core/services/signal-r.service';
-import { takeUntil } from 'rxjs/operators';
-import { Subject, from } from 'rxjs';
-import { ToastrService } from 'ngx-toastr';
+import { from } from 'rxjs';
 import { MeetingLink } from '@shared/models/meeting/meeting-link';
 import { Router } from '@angular/router';
 import { CallStart } from '@shared/models/call/call-start';
 import { CallDecline } from '@shared/models/call/call-decline';
 import { MeetingCreate } from '@shared/models/meeting/meeting-create';
+import { HubConnection } from '@aspnet/signalr';
+import { environment } from '@env';
+import { tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-call-modal',
@@ -23,7 +20,7 @@ import { MeetingCreate } from '@shared/models/meeting/meeting-create';
   styleUrls: ['./call-modal.component.sass'],
 })
 export class CallModalComponent extends SimpleModalComponent<Contact, null>
-  implements Contact, OnInit, OnDestroy {
+  implements Contact, OnInit {
   id: string;
   firstMemberId: string;
   firstMember?: User;
@@ -33,66 +30,55 @@ export class CallModalComponent extends SimpleModalComponent<Contact, null>
   settings: any;
   contactnerSettings: any;
 
-  private chatSignalrService: ChatSignalrService;
   link: MeetingLink;
+  private hubConnection: HubConnection;
 
-  private unsubscribe$ = new Subject<void>();
-  constructor(
-    private signalRService: SignalRService,
-    private toastr: ToastrService,
-    private router: Router
-  ) {
+  constructor(private signalRService: SignalRService, private router: Router) {
     super();
-    this.chatSignalrService = new ChatSignalrService(this.signalRService);
-  }
-  ngOnDestroy(): void {
-    this.unsubscribe$.next();
-    this.unsubscribe$.complete();
   }
   ngOnInit(): void {
-    this.chatSignalrService.startCallCaller$
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(
-        (link) => {
-          this.link = link;
-        },
-        (err) => {
-          this.toastr.error(err.message);
-          this.decline();
-        }
-      );
-
-    this.chatSignalrService.declineCall$
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(() => this.close());
-
-    this.chatSignalrService.takeCall$
-      .pipe(takeUntil(this.unsubscribe$))
+    from(this.signalRService.registerHub(environment.apiUrl, 'chatHub'))
+      .pipe(
+        tap((hub) => {
+          this.hubConnection = hub;
+        })
+      )
       .subscribe(() => {
-        this.router.navigate([
-          '/meeting-page',
-          `?id=${this.link.id}&pwd=${this.link.password}`,
-        ]);
-        this.close();
-      });
+        this.hubConnection.on('OnStartCallCaller', (link: MeetingLink) => {
+          this.link = link;
+        });
 
-    this.chatSignalrService.invoke(SignalMethods.OnStartCall, {
-      contactId: this.id,
-      meeting: {
-        settings: '',
-        startTime: new Date(),
-        anonymousCount: 0,
-        isScheduled: false,
-        isRecurrent: false,
-      } as MeetingCreate,
-      emails: [this.firstMember.email, this.secondMember.email],
-    } as CallStart);
+        this.hubConnection.on('OnDeclineCall', () => {
+          this.close();
+        });
+
+        this.hubConnection.on('OnTakeCall', () => {
+          this.router.navigate([
+            '/meeting-page',
+            `?id=${this.link.id}&pwd=${this.link.password}`,
+          ]);
+          this.close();
+        });
+
+        this.hubConnection.invoke('OnStartCall', {
+          contactId: this.id,
+          meeting: {
+            settings: '',
+            startTime: new Date(),
+            anonymousCount: 0,
+            isScheduled: false,
+            isRecurrent: false,
+          } as MeetingCreate,
+          email: this.firstMember.email,
+        } as CallStart);
+      });
   }
 
   decline(): void {
-    this.chatSignalrService.invoke(SignalMethods.OnDeclineCall, {
+    this.hubConnection.invoke('OnDeclineCall', {
       contactId: this.id,
       email: this.firstMember.email,
+      meetingId: this.link.id,
     } as CallDecline);
     this.close();
   }

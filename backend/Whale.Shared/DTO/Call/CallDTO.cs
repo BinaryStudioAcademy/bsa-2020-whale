@@ -10,5 +10,6 @@ namespace Whale.Shared.DTO.Call
     {
         public MeetingLinkDTO MeetingLink { get; set; }
         public ContactDTO Contact { get; set; }
+        public string CallerEmail { get; set; }
     }
 }
