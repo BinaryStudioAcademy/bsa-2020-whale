@@ -16,6 +16,7 @@ import { HomePageModule } from './scenes/home-page/home-page.module';
 import { SimpleModalModule } from 'ngx-simple-modal';
 import { AngularDraggableModule } from 'angular2-draggable';
 import { PagesModule } from './scenes/pages.module';
+import { SharedModule } from '@shared/shared.module';
 
 @NgModule({
   declarations: [AppComponent],
@@ -31,6 +32,7 @@ import { PagesModule } from './scenes/pages.module';
     AngularDraggableModule,
     BrowserAnimationsModule,
     PagesModule,
+    SharedModule,
     ToastrModule.forRoot({
       timeOut: 5000,
       positionClass: 'toast-bottom-right',

@@ -255,7 +255,6 @@ export class MeetingComponent
     this.currentStreamLoaded.subscribe(
       () => (this.currentVideo.nativeElement.srcObject = this.currentUserStream)
     );
-  }
 
   public ngOnDestroy(): void {
     this.unsubscribe$.next();
@@ -291,7 +290,12 @@ export class MeetingComponent
     );
   }
 
-  public stopRecording(): void {
+  turnOffCamera(): void {
+    this.currentUserStream.getTracks().forEach((track) => track.stop());
+    this.currentUserStream = null;
+  }
+
+  stopRecording(): void {
     this.blobService.stopRecording();
 
     this.meetingSignalrService.invoke(

@@ -12,7 +12,7 @@ import { tap, filter } from 'rxjs/operators';
   styleUrls: ['./page-header.component.sass'],
 })
 export class PageHeaderComponent implements OnInit {
-  public isUserLoadig: boolean = true;
+  public isUserLoadig = true;
 
   settingsMenuVisible = false;
   isNotificationsVisible = false;
@@ -74,7 +74,6 @@ export class PageHeaderComponent implements OnInit {
     this.router.navigate([`${pageName}`]);
   }
   logOut(): void {
-    this.auth.logout();
-    this.router.navigate(['']);
+    this.auth.logout().subscribe( () => this.router.navigate(['/']));
   }
 }

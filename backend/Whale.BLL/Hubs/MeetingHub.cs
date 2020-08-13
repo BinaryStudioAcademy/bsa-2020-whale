@@ -9,6 +9,7 @@ using Whale.BLL.Interfaces;
 using Whale.Shared.DTO.Poll;
 using Whale.BLL.Services;
 using Whale.Shared.DTO.Participant;
+using Whale.Shared.DTO.Call;
 
 namespace Whale.BLL.Hubs
 {
