@@ -7,6 +7,7 @@ import { User } from '@shared/models/user';
 import { HttpService } from '../../../../core/services/http.service';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { FormGroup, FormControl } from '@angular/forms';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-profile-page',
@@ -198,17 +199,19 @@ export class ProfilePageComponent implements OnInit {
   }
 
   private GetAvatar(): void {
-    this.authService.user$.subscribe((user) => {
-      this.httpService
-        .getRequest<User>(`${this.routePrefix}/email/${user.email}`)
-        .subscribe(
-          (userFromDB: User) => {
-            this.loggedInUser = userFromDB;
-            this.updatedUser = this.loggedInUser;
-          },
-          (error) => this.toastr.error(error.Message)
-        );
-    });
+    this.authService.user$
+      .pipe(filter((user) => Boolean(user)))
+      .subscribe((user) => {
+        this.httpService
+          .getRequest<User>(`${this.routePrefix}/email/${user.email}`)
+          .subscribe(
+            (userFromDB: User) => {
+              this.loggedInUser = userFromDB;
+              this.updatedUser = this.loggedInUser;
+            },
+            (error) => this.toastr.error(error.Message)
+          );
+      });
   }
 
   openModal(): void {

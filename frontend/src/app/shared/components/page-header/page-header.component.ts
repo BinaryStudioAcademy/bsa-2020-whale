@@ -4,7 +4,7 @@ import { AuthService } from 'app/core/auth/auth.service';
 import { Notification } from 'app/shared/models/notification/notification';
 import { User } from '@shared/models/user';
 import { HttpService } from '../../../core/services/http.service';
-import { tap } from 'rxjs/operators';
+import { tap, filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-page-header',
@@ -61,7 +61,7 @@ export class PageHeaderComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.auth.user$.subscribe((user) => {
+    this.auth.user$.pipe(filter((user) => Boolean(user))).subscribe((user) => {
       this.httpService
         .getRequest<User>(`${this.routePrefix}/email/${user.email}`)
         .pipe(tap(() => (this.isUserLoadig = false)))
