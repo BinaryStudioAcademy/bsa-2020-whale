@@ -77,8 +77,8 @@ export class AuthService {
     return from(this.fireAuth.signOut());
   }
 
-  public getToken(): Promise<string> {
-    return this.currentUser.getIdToken();
+  public getToken(): Observable<string> {
+    return this.fireAuth.idToken;
   }
 
   public refreshToken(): Observable<string> {

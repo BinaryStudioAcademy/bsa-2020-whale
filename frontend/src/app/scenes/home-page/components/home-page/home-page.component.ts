@@ -63,19 +63,17 @@ export class HomePageComponent implements OnInit, OnDestroy {
         .subscribe(
           (userFromDB: User) => {
             this.loggedInUser = userFromDB;
+            this.ownerEmail = this.loggedInUser?.email;
           },
           (error) => this.toastr.error(error.Message)
         );
+      this.httpService.getRequest<Contact[]>('/api/contacts').subscribe(
+        (data: Contact[]) => {
+          this.contacts = data;
+        },
+        (error) => this.toastr.error(error.Message)
+      );
     });
-
-    this.httpService.getRequest<Contact[]>('/api/contacts').subscribe(
-      (data: Contact[]) => {
-        this.contacts = data;
-      },
-      (error) => this.toastr.error(error.Message)
-    );
-    this.ownerEmail = this.loggedInUser?.email;
-    console.log(this.ownerEmail);
   }
 
   addNewGroup(): void {

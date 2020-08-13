@@ -26,7 +26,7 @@ export class TokenInterceptorService implements HttpInterceptor {
     }
 
     if (!this.inflightAuthRequest) {
-      this.inflightAuthRequest = from(this.authService.getToken());
+      this.inflightAuthRequest = this.authService.getToken();
     }
     return this.inflightAuthRequest.pipe(
       switchMap((token: string) => {
