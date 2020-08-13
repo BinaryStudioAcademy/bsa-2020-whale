@@ -82,7 +82,7 @@ Enter+Shift for new line."
         [data]="data"
       ></app-participant-card>
     </div>
-    Me:
+
     <video
       #currentVideo
       *ngIf="mediaData.length <= 1"
@@ -90,8 +90,6 @@ Enter+Shift for new line."
       class="participant-fullscreen"
       [muted]="'muted'"
     ></video>
-    Users:
-    <div id="participants"></div>
 
     <div class="options">
       <div class="ui container options__buttons">
