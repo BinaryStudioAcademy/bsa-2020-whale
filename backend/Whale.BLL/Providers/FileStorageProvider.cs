@@ -1,22 +1,23 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
-using Microsoft.Extensions.Configuration;
 using MimeTypes;
 using System;
 using System.Threading.Tasks;
+using Whale.DAL.Settings;
 
 namespace Whale.BLL.Providers
 {
     public class FileStorageProvider
     {
         private CloudBlobClient _blobClient;
+        private BlobStorageSettings _settings;
 
-        public FileStorageProvider(IConfiguration configuration)
+        public FileStorageProvider(BlobStorageSettings settings)
         {
-            string connectionString = configuration.GetConnectionString("AzureBlobStorage");
+            _settings = settings;
 
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(connectionString);
+            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(_settings.ConnectionString);
             _blobClient = storageAccount.CreateCloudBlobClient();
         }
 
@@ -24,8 +25,8 @@ namespace Whale.BLL.Providers
         {
             string contentType = file.ContentType.Split('/')[0];
 
-            var container = _blobClient.GetContainerReference(contentType);
-            await setPublicContainerPermissionsAsync(container);
+            var container = _blobClient.GetContainerReference(_settings.ImageContainerName);
+            await SetPublicContainerPermissionsAsync(container);
 
             string fileName;
             try
@@ -47,7 +48,7 @@ namespace Whale.BLL.Providers
             return blockBlob.Uri.AbsoluteUri;
         }
 
-        private async Task setPublicContainerPermissionsAsync(CloudBlobContainer container)
+        private async Task SetPublicContainerPermissionsAsync(CloudBlobContainer container)
         {
             await container.CreateIfNotExistsAsync();
             BlobContainerPermissions permissions = new BlobContainerPermissions

@@ -31,7 +31,7 @@ namespace Whale.API.Controllers
         [HttpGet]
         public async Task<ActionResult<MeetingDTO>> ConnectToMeeting(Guid id, string pwd)
         {
-            return Ok(await _meetingService.ConnectToMeeting(new MeetingLinkDTO { Id = id, Password = pwd}));
+            return Ok(await _meetingService.ConnectToMeeting(new MeetingLinkDTO { Id = id, Password = pwd }));
         }
     }
 
