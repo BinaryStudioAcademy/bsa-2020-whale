@@ -37,6 +37,7 @@ import { Participant } from '@shared/models/participant/participant';
 import { ParticipantRole } from '@shared/models/participant/participant-role';
 import { Statistics } from '@shared/models/statistics/statistics';
 import { AuthService } from 'app/core/auth/auth.service';
+import { UserMediaData } from '@shared/models/media/user-media-data';
 
 @Component({
   selector: 'app-meeting',
@@ -62,6 +63,7 @@ export class MeetingComponent
 
   public peer: Peer;
   public connectedStreams: string[] = [];
+  public mediaData: UserMediaData[] = [];
   public connectedPeers = new Map<string, MediaStream>();
 
   public messages: MeetingMessage[] = [];
@@ -146,6 +148,15 @@ export class MeetingComponent
       .subscribe(
         (participant) => {
           this.currentParticipant = participant;
+          this.mediaData.push({
+            id: participant.id,
+            userFirstName: participant.user.firstName,
+            userLastName: participant.user.secondName,
+            avatarUrl: participant.user.avatarUrl,
+            isCurrentUser: true,
+            isUserHost: participant.role == ParticipantRole.Host,
+            stream: this.currentUserStream,
+          });
         },
         (err) => {
           this.toastr.error(err.Message);
@@ -325,6 +336,7 @@ export class MeetingComponent
 
   // show mediaStream
   private showMediaStream(stream: MediaStream) {
+    debugger;
     const participants = document.getElementById('participants');
 
     if (!this.connectedStreams.includes(stream.id)) {
@@ -410,7 +422,7 @@ export class MeetingComponent
 
   onStatisticsIconClick(): void {
     if (!this.meetingStatistics) {
-      if  (!this.meeting) {
+      if (!this.meeting) {
         this.toastr.warning('Something went wrong. Try again later.');
         this.route.params.subscribe((params: Params) => {
           this.getMeeting(params[`link`]);
@@ -418,7 +430,7 @@ export class MeetingComponent
       }
       this.meetingStatistics = {
         startTime: this.meeting.startTime,
-        userJoinTime: this.contectedAt
+        userJoinTime: this.contectedAt,
       };
     }
     this.isShowStatistics = !this.isShowStatistics;

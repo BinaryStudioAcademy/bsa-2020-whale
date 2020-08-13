@@ -50,18 +50,6 @@
         </div>
       </div>
     </div>
-    <!-- <div class="users">
-            <div class="users__user" *ngFor="let user of users;">
-                <div class="ui card">
-                    <div class="image">
-                    <img src="https://icons.iconarchive.com/icons/paomedia/small-n-flat/512/user-male-icon.png">
-                    </div>
-                    <div class="content">
-                    <a class="header">{{user}}</a>
-                    </div>
-                </div>
-            </div>
-        </div> -->
 
     <div class="tools" ngDraggable>
       <i style="opacity: 0.8;" class="big microphone icon block"></i>
@@ -86,7 +74,13 @@
       ></i>
     </div>
     Me:
-    <video #currentVideo autoplay="autoplay" [muted]="'muted'"></video> Users:
+    <video
+      #currentVideo
+      autoplay="autoplay"
+      class="participant-fullscreen"
+      [muted]="'muted'"
+    ></video>
+    Users:
     <div id="participants"></div>
 
     <div class="options">
@@ -156,6 +150,8 @@
   </div>
 
   <div class="poll-create-container" *ngIf="isShowStatistics">
-    <app-meeting-statistics [statistic]="meetingStatistics"></app-meeting-statistics>
+    <app-meeting-statistics
+      [statistic]="meetingStatistics"
+    ></app-meeting-statistics>
   </div>
 </div>
