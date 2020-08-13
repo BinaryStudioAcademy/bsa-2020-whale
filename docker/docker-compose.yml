@@ -1,13 +1,13 @@
 version: '3.1'
 services:
   client:
-    image: whale-client #krasnovnikita/bsa2020-whale:client
+    image: krasnovnikita/bsa2020-whale:client
     container_name: 'whale-client'
     ports:
-      - "4200:80" #80:80 
+      - "80:80"
 
   whaleapi:
-    image: whale-api #krasnovnikita/bsa2020-whale:whale-api
+    image: krasnovnikita/bsa2020-whale:whale-api
     container_name: 'whale-api'
     ports:
       - "4201:4201"
@@ -20,7 +20,7 @@ services:
       ASPNETCORE_URLS: http://+:4201
 
   meetingapi:
-    image: meeting-api #krasnovnikita/bsa2020-whale:meeting-api
+    image: krasnovnikita/bsa2020-whale:meeting-api
     container_name: 'meeting-api'
     ports:
       - "4202:4202"
