@@ -35,6 +35,7 @@ import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
 import { MeetingMessageCreate } from '@shared/models/meeting/message/meeting-message-create';
 import { Participant } from '@shared/models/participant/participant';
 import { ParticipantRole } from '@shared/models/participant/participant-role';
+import { Statistics } from '@shared/models/statistics/statistics';
 import { AuthService } from 'app/core/auth/auth.service';
 
 @Component({
@@ -47,11 +48,13 @@ export class MeetingComponent
   meeting: Meeting;
   poll: PollDto;
   pollResults: PollResultsDto;
+  meetingStatistics: Statistics;
   isShowChat = false;
   isShowParticipants = false;
   isPollCreating = false;
   isShowPoll = false;
   isShowPollResults = false;
+  isShowStatistics = false;
 
   @ViewChild('currentVideo') currentVideo: ElementRef;
 
@@ -69,6 +72,7 @@ export class MeetingComponent
   private currentUserStream: MediaStream;
   private connectionData: MeetingConnectionData;
   private currentStreamLoaded = new EventEmitter<void>();
+  private contectedAt = new Date();
 
   users = [
     'user 1',
@@ -114,7 +118,6 @@ export class MeetingComponent
       audio: true,
     });
     this.currentStreamLoaded.emit();
-
     // create new peer
     this.peer = new Peer(environment.peerOptions);
 
@@ -403,6 +406,22 @@ export class MeetingComponent
       return;
     }
     this.isShowPollResults = true;
+  }
+
+  onStatisticsIconClick(): void {
+    if (!this.meetingStatistics) {
+      if  (!this.meeting) {
+        this.toastr.warning('Something went wrong. Try again later.');
+        this.route.params.subscribe((params: Params) => {
+          this.getMeeting(params[`link`]);
+        });
+      }
+      this.meetingStatistics = {
+        startTime: this.meeting.startTime,
+        userJoinTime: this.contectedAt
+      };
+    }
+    this.isShowStatistics = !this.isShowStatistics;
   }
 
   sendMessage(): void {

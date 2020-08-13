@@ -9,6 +9,7 @@ import { PollResultsComponent } from './components/poll/poll-results/poll-result
 import { FormsModule } from '@angular/forms';
 import { DateFormatPipe } from './pipes/date-format.pipe';
 import { ParticipantCardComponent } from './components/participant-card/participant-card.component';
+import { MeetingStatisticsComponent } from './components/meeting-statistics/meeting-statistics.component';
 
 @NgModule({
   declarations: [
@@ -19,6 +20,7 @@ import { ParticipantCardComponent } from './components/participant-card/particip
     PollCreateComponent,
     PollComponent,
     PollResultsComponent,
+    MeetingStatisticsComponent,
   ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
   exports: [
@@ -30,6 +32,7 @@ import { ParticipantCardComponent } from './components/participant-card/particip
     SpinerComponent,
     DateFormatPipe,
     ParticipantCardComponent,
+    MeetingStatisticsComponent,
   ],
 })
 export class SharedModule {}
