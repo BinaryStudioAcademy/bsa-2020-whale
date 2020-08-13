@@ -28,6 +28,7 @@
     "@types/gapi": "0.0.39",
     "@types/gapi.auth2": "0.0.52",
     "angular2-draggable": "^2.3.2",
+    "avatar-initials": "^4.1.1",
     "cropperjs": "^1.5.7",
     "decibel-meter": "^2.0.0",
     "firebase": "^7.17.1",
