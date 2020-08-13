@@ -40,7 +40,7 @@ export class BlobService {
     formData.append('meeting-record', blob, 'record');
 
     this.http
-      .post('http://localhost:51569/api/storage/save', formData, {
+      .post('http://localhost:4201/api/storage/save', formData, {
         responseType: 'text',
       })
       .subscribe((resp) => console.log(`video record: ${resp}`));
@@ -51,7 +51,7 @@ export class BlobService {
 
     formData.append('user-image', blob, 'image');
 
-    return this.http.post('http://localhost:51569/api/storage/save', formData, {
+    return this.http.post('http://localhost:4201/api/storage/save', formData, {
       responseType: 'text',
     });
   }
