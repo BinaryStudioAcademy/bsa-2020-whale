@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { DateFormatPipe } from './pipes/date-format.pipe';
 import { ParticipantCardComponent } from './components/participant-card/participant-card.component';
 import { MeetingStatisticsComponent } from './components/meeting-statistics/meeting-statistics.component';
+import { CopyClipboardComponent } from './components/copy-clipboard/copy-clipboard.component';
 
 @NgModule({
   declarations: [
@@ -21,6 +22,7 @@ import { MeetingStatisticsComponent } from './components/meeting-statistics/meet
     PollComponent,
     PollResultsComponent,
     MeetingStatisticsComponent,
+    CopyClipboardComponent,
   ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
   exports: [
