@@ -7,27 +7,50 @@ import { HomePageComponent } from '../scenes/home-page/components/home-page/home
 import { ScheduleMeetingPageComponent } from 'app/scenes/schedule-meeting-page/components/schedule-meeting-page/schedule-meeting-page.component';
 import { CheckAccessToMediaGuard } from 'app/core/guards/check-access-to-media.guard';
 import { SettingPageComponent } from '../scenes/setting-page/setting-page/setting-page.component';
-import { canActivate, redirectUnauthorizedTo, redirectLoggedInTo, AngularFireAuthGuard } from '@angular/fire/auth-guard';
+import {
+  canActivate,
+  redirectUnauthorizedTo,
+  redirectLoggedInTo,
+  AngularFireAuthGuard,
+} from '@angular/fire/auth-guard';
 
 const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['/']);
 const redirectLoggedToHome = () => redirectLoggedInTo(['home']);
 
 const routes: Routes = [
-  { path: 'home', component: HomePageComponent, ...canActivate (redirectUnauthorizedToLogin)},
+  {
+    path: 'home',
+    component: HomePageComponent,
+    ...canActivate(redirectUnauthorizedToLogin),
+  },
   {
     path: 'setting-page',
     component: SettingPageComponent,
-    canActivate: [CheckAccessToMediaGuard, AngularFireAuthGuard], data: { authGuardPipe: redirectUnauthorizedToLogin }
+    canActivate: [CheckAccessToMediaGuard, AngularFireAuthGuard],
+    data: { authGuardPipe: redirectUnauthorizedToLogin },
   },
   {
     path: 'meeting-page/:link',
     component: MeetingComponent,
-    canActivate: [CheckAccessToMediaGuard, AngularFireAuthGuard], data: { authGuardPipe: redirectUnauthorizedToLogin }
+    canActivate: [CheckAccessToMediaGuard, AngularFireAuthGuard],
+    data: { authGuardPipe: redirectUnauthorizedToLogin },
   },
   // { path: 'meeting-page', component: MeetingComponent },
-  { path: 'profile-page', component: ProfilePageComponent, ...canActivate (redirectUnauthorizedToLogin)},
-  { path: 'schedule-meeting', component: ScheduleMeetingPageComponent, ...canActivate (redirectUnauthorizedToLogin)},
-  { path: '**', component: LandingPageComponent, ...canActivate (redirectLoggedToHome)},
+  {
+    path: 'profile-page',
+    component: ProfilePageComponent,
+    ...canActivate(redirectUnauthorizedToLogin),
+  },
+  {
+    path: 'schedule-meeting',
+    component: ScheduleMeetingPageComponent,
+    ...canActivate(redirectUnauthorizedToLogin),
+  },
+  {
+    path: '**',
+    component: LandingPageComponent,
+    ...canActivate(redirectLoggedToHome),
+  },
 ];
 
 @NgModule({
