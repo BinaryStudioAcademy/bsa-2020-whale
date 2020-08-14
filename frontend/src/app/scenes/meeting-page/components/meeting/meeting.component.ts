@@ -278,7 +278,7 @@ export class MeetingComponent
       canLeave = confirm('You will end current meeting!');
     }
     if (canLeave) {
-      this.currentUserStream.getTracks().forEach((track) => track.stop());
+      this.currentUserStream?.getTracks().forEach((track) => track.stop());
       this.destroyPeer();
       this.meetingSignalrService.invoke(
         SignalMethods.OnUserDisconnect,
