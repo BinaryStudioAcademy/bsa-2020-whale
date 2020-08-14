@@ -84,12 +84,12 @@
           <div (click)="onGroupClick()" class="item">
             <img
               class="ui avatar image"
-              src="{{ contact.secondMember.avatarUrl }}"
+              src="{{ contact.secondMember?.avatarUrl }}"
             />
             <div class="content">
               <div class="description">
-                {{ contact.secondMember.firstName }}
-                {{ contact.secondMember.secondName }}
+                {{ contact.secondMember?.firstName }}
+                {{ contact.secondMember?.secondName }}
               </div>
             </div>
           </div>
@@ -107,7 +107,7 @@
     </div>
     <div *ngIf="chatVisibility" class="actions">
       <div class="vertically-aligned chat ui segment">
-        <div class="text-aligned">
+        <div class="text-aligned" (click)="goToPage('schedule-meeting')">
           <img
             class="ui centered small image"
             src="https://img.icons8.com/bubbles/100/000000/planner.png"
@@ -121,7 +121,7 @@
           />
           <span class="text-aligned">Meetings history</span>
         </div>
-        <div class="text-aligned">
+        <div class="text-aligned" (click)="createMeeting()">
           <img
             class="ui centered small image"
             src="https://img.icons8.com/bubbles/100/000000/forward.png"

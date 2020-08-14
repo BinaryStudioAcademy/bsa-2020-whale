@@ -26,7 +26,11 @@ namespace Whale.API.Controllers
         public async Task<ActionResult<MeetingLinkDTO>> CreateMeeting(MeetingCreateDTO meetingDto)
         {
             var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
-            return Ok(await _meetingService.CreateMeeting(meetingDto, ownerEmail));
+            var emails = new List<string>
+            {
+                ownerEmail
+            };
+            return Ok(await _meetingService.CreateMeeting(meetingDto, emails));
         }
 
         [HttpGet]

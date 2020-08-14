@@ -44,11 +44,7 @@
         <video #video id="video" width="75%" height="auto" autoplay></video>
       </div>
       <button (click)="capture()" class="ui button">Make photo</button>
-      <button
-        *ngIf="isImageCropped"
-        (click)="saveAvatarFromCamera()"
-        class="ui button"
-      >
+      <button *ngIf="isImageCropped" (click)="SendImage()" class="ui button">
         Save
       </button>
       <canvas #canvas id="canvas" width="640" height="480"></canvas>
@@ -106,7 +102,12 @@
     <div class="personal-container">
       <div class="settings-item">
         <div class="card">
-          <img class="ui small image" src="{{ loggedInUser?.avatarUrl }}" />
+          <i (click)="removeAvatar()" class="trash icon"></i>
+          <img
+            #avatar
+            class="ui small image"
+            src="{{ loggedInUser?.avatarUrl }}"
+          />
           <div class="content">
             <div
               (click)="openModal()"
@@ -175,6 +176,11 @@
         <h4>Email:</h4>
       </div>
       <span>{{ loggedInUser?.email }}</span>
+      <div class="edit-button">
+        <button class="small ui basic button">
+          <a> <i class="cog icon"></i> Edit </a>
+        </button>
+      </div>
     </div>
     <div class="ui section divider"></div>
     <div class="personal-container">

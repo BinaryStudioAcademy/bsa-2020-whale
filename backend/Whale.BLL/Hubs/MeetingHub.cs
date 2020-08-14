@@ -8,6 +8,8 @@ using Whale.Shared.DTO.Meeting.MeetingMessage;
 using Whale.BLL.Interfaces;
 using Whale.Shared.DTO.Poll;
 using Whale.BLL.Services;
+using Whale.Shared.DTO.Participant;
+using Whale.Shared.DTO.Call;
 
 namespace Whale.BLL.Hubs
 {
@@ -15,6 +17,7 @@ namespace Whale.BLL.Hubs
     {
         private readonly IMeetingService _meetingService;
         private readonly ParticipantService _participantService;
+        private readonly Dictionary<string, List<ParticipantDTO>> _participants = new Dictionary<string, List<ParticipantDTO>>();
 
         public MeetingHub(IMeetingService meetingService, ParticipantService participantService)
         {
@@ -27,10 +30,25 @@ namespace Whale.BLL.Hubs
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, connectionData.MeetingId);
             var participant = await _participantService.GetMeetingParticipantByEmail(Guid.Parse(connectionData.MeetingId), connectionData.UserEmail);
+            participant.StreamId = connectionData.StreamId;
+            _participants.TryGetValue(connectionData.MeetingId, out var groupParticipants);
+            if (groupParticipants == null)
+            {
+                _participants[connectionData.MeetingId] = new List<ParticipantDTO>()
+                {
+                    participant
+                };
+            }
+            else
+            {
+                groupParticipants.Add(participant);
+                _participants[connectionData.MeetingId] = groupParticipants;
+            }
+         
 
             connectionData.Participant = participant;
             await Clients.Group(connectionData.MeetingId).SendAsync("OnUserConnect", connectionData);
-            await Clients.Caller.SendAsync("OnParticipantConnect", participant);
+            await Clients.Caller.SendAsync("OnParticipantConnect", _participants[connectionData.MeetingId]);
         }
 
         [HubMethodName("OnUserDisconnect")]

@@ -24,6 +24,8 @@ import { Message } from '@angular/compiler/src/i18n/i18n_ast';
 import { Console } from 'console';
 import { stringify } from 'querystring';
 import { HttpResponse } from '@angular/common/http';
+import { SimpleModalService } from 'ngx-simple-modal';
+import { CallModalComponent } from '../call-modal/call-modal.component';
 
 @Component({
   selector: 'app-contacts-chat',
@@ -53,7 +55,8 @@ export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
   constructor(
     private signalRService: SignalRService,
     private httpService: HttpService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private simpleModalService: SimpleModalService
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -124,5 +127,10 @@ export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
   close(): void {
     this.chat.emit(true);
     this.hubConnection.invoke('Disconnect', this.contactSelected.id);
+  }
+
+  public call(): void {
+    console.log(this.contactSelected);
+    this.simpleModalService.addModal(CallModalComponent, this.contactSelected);
   }
 }

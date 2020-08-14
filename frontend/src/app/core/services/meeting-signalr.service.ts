@@ -23,7 +23,7 @@ export class MeetingSignalrService {
   private signalUserDisconected = new Subject<MeetingConnectionData>();
   public signalUserDisconected$ = this.signalUserDisconected.asObservable();
 
-  private participantConected = new Subject<Participant>();
+  private participantConected = new Subject<Participant[]>();
   public participantConected$ = this.participantConected.asObservable();
 
   private meetingEnded = new Subject<MeetingConnectionData>();
@@ -72,8 +72,8 @@ export class MeetingSignalrService {
 
         this.signalHub.on(
           'OnParticipantConnect',
-          (participant: Participant) => {
-            this.participantConected.next(participant);
+          (participants: Participant[]) => {
+            this.participantConected.next(participants);
           }
         );
 

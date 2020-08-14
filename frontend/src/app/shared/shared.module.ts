@@ -10,6 +10,9 @@ import { FormsModule } from '@angular/forms';
 import { DateFormatPipe } from './pipes/date-format.pipe';
 import { ParticipantCardComponent } from './components/participant-card/participant-card.component';
 import { MeetingStatisticsComponent } from './components/meeting-statistics/meeting-statistics.component';
+import { CopyClipboardComponent } from './components/copy-clipboard/copy-clipboard.component';
+import { IncomingCallComponent } from './components/incoming-call/incoming-call.component';
+import { AngularDraggableModule } from 'angular2-draggable';
 
 @NgModule({
   declarations: [
@@ -21,8 +24,15 @@ import { MeetingStatisticsComponent } from './components/meeting-statistics/meet
     PollComponent,
     PollResultsComponent,
     MeetingStatisticsComponent,
+    CopyClipboardComponent,
+    IncomingCallComponent,
   ],
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    AngularDraggableModule,
+  ],
   exports: [
     CommonModule,
     PageHeaderComponent,
@@ -33,6 +43,7 @@ import { MeetingStatisticsComponent } from './components/meeting-statistics/meet
     DateFormatPipe,
     ParticipantCardComponent,
     MeetingStatisticsComponent,
+    IncomingCallComponent,
   ],
 })
 export class SharedModule {}

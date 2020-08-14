@@ -1,0 +1,21 @@
+<div
+  class="ui dimmer modals page visible active"
+  style="display: flex !important;"
+  (click)="close()"
+>
+  <div class="ui mini modal visible active" (click)="$event.stopPropagation()">
+    <h3 class="header">Copy to clipboard</h3>
+    <div class="content">
+      <div class="ui action input">
+        <input type="text" [value]="message" #copyinput />
+        <button
+          class="ui right labeled icon button"
+          (click)="onCopy(copyinput)"
+        >
+          <i class="copy icon"></i>
+          Copy
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
