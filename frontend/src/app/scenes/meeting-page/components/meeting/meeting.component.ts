@@ -340,6 +340,7 @@ export class MeetingComponent
   }
 
   public onPollIconClick() {
+    this.isShowStatistics = false;
     if (this.poll) {
       this.isShowPoll = !this.isShowPoll;
     } else if (this.pollResults || this.isShowPoll) {
@@ -387,6 +388,9 @@ export class MeetingComponent
   }
 
   public onStatisticsIconClick(): void {
+    this.isShowPoll =  false;
+    this.isPollCreating = false;
+    this.isShowPollResults = false;
     if (!this.meetingStatistics) {
       if (!this.meeting) {
         this.toastr.warning('Something went wrong. Try again later.');
