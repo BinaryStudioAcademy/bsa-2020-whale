@@ -226,12 +226,13 @@ export class MeetingComponent
       call.on('stream', (stream) => {
         debugger;
         if (!this.connectedStreams.includes(stream.id)) {
-          this.showMediaStream(stream);
           this.connectedStreams.push(stream.id);
           call;
           console.log(call.peer, 'call peer');
 
-          const participant = this.meeting.participants[0]; //to-do this.meeting.participants.find(p => p.streamId == stream.id);
+          const participant = this.meeting.participants.find(
+            (p) => p.streamId == stream.id
+          );
 
           console.log(stream.id);
           console.log(this.meeting);
@@ -510,32 +511,6 @@ export class MeetingComponent
           };
           this.getMeeting(link);
         });
-    });
-  }
-
-  // show mediaStream
-  private showMediaStream(stream: MediaStream) {
-    debugger;
-    const participants = document.getElementById('participants');
-
-    if (!this.connectedStreams.includes(stream.id)) {
-      //debugger
-      //this.createParticipantCard(this.currentParticipant, this.currentUserStream)
-    }
-  }
-
-  // // create html element to show video
-  private createParticipantCard(
-    participant: Participant,
-    stream: MediaStream
-  ): void {
-    this.mediaData.push({
-      id: participant.id,
-      userFirstName: participant.user.firstName,
-      userLastName: participant.user.secondName,
-      isCurrentUser: stream.id == this.currentUserStream.id,
-      isUserHost: participant.role == ParticipantRole.Host,
-      stream: stream,
     });
   }
 }
