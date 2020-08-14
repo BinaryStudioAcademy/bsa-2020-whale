@@ -76,6 +76,8 @@ export class MeetingComponent
   private currentStreamLoaded = new EventEmitter<void>();
   private contectedAt = new Date();
   private elem: any;
+  private isMicrophoneMuted = false;
+  private isCameraMuted = false;
 
   @ViewChild('mainArea', { static: false }) mainArea: ElementRef;
 
@@ -293,9 +295,30 @@ export class MeetingComponent
     );
   }
 
+  turnOffMicrophone(): void {
+    if (!this.isMicrophoneMuted) {
+      this.currentUserStream
+        .getAudioTracks()
+        .forEach((track) => (track.enabled = false));
+    } else {
+      this.currentUserStream
+        .getAudioTracks()
+        .forEach((track) => (track.enabled = true));
+    }
+    this.isMicrophoneMuted = !this.isMicrophoneMuted;
+  }
+
   turnOffCamera(): void {
-    this.currentUserStream.getTracks().forEach((track) => track.stop());
-    this.currentUserStream = null;
+    if (!this.isCameraMuted) {
+      this.currentUserStream
+        .getVideoTracks()
+        .forEach((track) => (track.enabled = false));
+    } else {
+      this.currentUserStream
+        .getVideoTracks()
+        .forEach((track) => (track.enabled = true));
+    }
+    this.isCameraMuted = !this.isCameraMuted;
   }
 
   stopRecording(): void {
