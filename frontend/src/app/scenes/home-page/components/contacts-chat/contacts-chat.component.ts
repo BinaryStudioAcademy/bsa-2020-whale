@@ -19,7 +19,7 @@ import { environment } from '@env';
 import { Injectable } from '@angular/core';
 import { HubConnection } from '@aspnet/signalr';
 import { Subject, from, Observable } from 'rxjs';
-import { tap, takeUntil } from 'rxjs/operators';
+import { tap, takeUntil, take } from 'rxjs/operators';
 import { Message } from '@angular/compiler/src/i18n/i18n_ast';
 import { Console } from 'console';
 import { stringify } from 'querystring';
@@ -117,7 +117,7 @@ export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
         '/api/ContactChat/',
         this.newMessage
       )
-      .pipe(takeUntil(this.unsubscribe$))
+      .pipe(take(1))
       .subscribe(
         () => (this.newMessage.message = ''),
         (error) => this.toastr.error(error.Message)
