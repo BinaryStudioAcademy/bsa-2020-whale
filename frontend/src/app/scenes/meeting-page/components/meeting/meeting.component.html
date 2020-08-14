@@ -58,26 +58,17 @@ Enter+Shift for new line."
 
   <div class="content">
     <div class="tools" ngDraggable>
-      <i style="opacity: 0.8;" class="big microphone icon block"></i>
-      <i style="opacity: 0.8;" class="big video icon block"></i>
+      <i class="big microphone icon block"></i>
+      <i class="big video icon block"></i>
       <i
-        style="opacity: 0.8;"
         class="users icon big users-icon-fix block"
         (click)="isShowParticipants = !isShowParticipants"
       ></i>
-      <i style="opacity: 0.8;" class="big share square icon block"></i>
+      <i class="big share square icon block"></i>
       <i (click)="onPollIconClick()" class="big clipboard list icon"></i>
       <i (click)="onStatisticsIconClick()" class="big chart bar icon"></i>
-      <i
-        (click)="showChat()"
-        style="opacity: 0.8;"
-        class="big wechat icon block"
-      ></i>
-      <i
-        (click)="closeFullscreen()"
-        style="opacity: 0.8;"
-        class="big desktop icon block"
-      ></i>
+      <i (click)="showChat()" class="big wechat icon block"></i>
+      <i (click)="closeFullscreen()" class="big desktop icon block"></i>
     </div>
     <div class="users" *ngIf="mediaData.length > 1">
       <app-participant-card
@@ -95,21 +86,17 @@ Enter+Shift for new line."
     ></video>
 
     <div class="options">
-      <div class="ui container options__buttons">
-        <div>
+      <div class="ui options__buttons">
+        <div class="inner-block">
+          <i class="big microphone icon" (click)="toggleMicro()"></i>
           <i
-            style="opacity: 0.8;"
-            class="big microphone icon"
-            (click)="toggleMicro()"
-          ></i>
-          <i
-            style="margin-left: 10px; opacity: 0.8;"
+            style="margin-left: 10px;"
             class="big video icon"
             (click)="toggleCamera()"
           ></i>
         </div>
 
-        <div class="display-flex">
+        <div class="display-flex inner-block">
           <div class="participants-button-container">
             <div class="relative-container">
               <i
@@ -130,30 +117,23 @@ Enter+Shift for new line."
             class="big stop circle icon"
           ></i>
 
-          <i
-            style="margin-left: 10px; opacity: 0.8;"
-            class="big share square icon"
-          ></i>
+          <i style="margin-left: 10px;" class="big share square icon"></i>
           <i (click)="onPollIconClick()" class="big clipboard list icon"></i>
           <i (click)="onStatisticsIconClick()" class="big chart bar icon"></i>
           <i (click)="onCopyIconClick()" class="big copy icon"></i>
           <i
             (click)="showChat()"
-            style="margin-left: 10px; opacity: 0.8;"
+            style="margin-left: 10px;"
             class="big wechat icon"
           ></i>
           <i
             (click)="goFullscreen()"
-            style="margin-left: 10px; opacity: 0.8;"
+            style="margin-left: 10px;"
             class="big desktop icon"
           ></i>
         </div>
         <div>
-          <button
-            style="margin-left: 200px;"
-            class="ui inverted red button"
-            (click)="leave()"
-          >
+          <button class="ui red button" (click)="leave()">
             Leave
           </button>
         </div>

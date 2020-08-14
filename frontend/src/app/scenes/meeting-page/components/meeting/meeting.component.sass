@@ -62,12 +62,12 @@ app-participant-card
 
 //options
 .options
-    background-color: #f1f1f1
+    background-color: #ffffff
     position: fixed
     bottom: 0
     right: 0
     left: 0
-    height: 10vh
+    height: 60px
     text-align: center   
     z-index: 10
 
@@ -110,16 +110,19 @@ div:moz-full-screen
         height: 100%
 
 .options__buttons
-    margin-top: 24px
+    margin-top: 10px
     display: flex
     justify-content: space-between
+    padding: 0 20px
+    .inner-block
+        border: 1px solid lightgray
+        padding: 5px 10px
+        border-radius: 10px
+        background-color: gainsboro
     
 .options__leave-button
     margin-top: 24px
     float: right
-
-i.big.icon
-    opacity: 0.8
 
 i.big.icon:hover
     opacity: 1
@@ -157,7 +160,6 @@ i.big.icon.wechat
 
 .participants-button-container 
     display: inline-block
-    margin-left: 5%
 
 .relative-container
     position: relative
@@ -203,7 +205,6 @@ div div.participant:hover
 .users-icon-fix
     display: inline
     background: none
-    opacity: 0.8
 
 .display-flex
     display: flex
