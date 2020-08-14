@@ -1,6 +1,10 @@
 <div class="ui card">
   <div class="image">
-    <video class="video" autoplay muted></video>
+    <video
+      class="video"
+      autoplay
+      [muted]="data.isCurrentUser ? 'muted' : ''"
+    ></video>
     <p class="participant-initials"></p>
   </div>
   <div class="content">
