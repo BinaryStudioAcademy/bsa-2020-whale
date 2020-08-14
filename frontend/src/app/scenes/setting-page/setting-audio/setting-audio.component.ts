@@ -17,9 +17,11 @@ export class SettingAudioComponent implements OnInit, OnDestroy {
   public audio;
   public meter = new DecibelMeter('meter');
   public db: number;
-  public volume;
+  public volume = 50;
   public recordedChunks: [];
   public recorder;
+  public audioContext = new AudioContext();
+  gainN = this.audioContext.createGain();
   constructor() {}
   ngOnDestroy(): void {
     this.constraints.audio = false;
@@ -42,7 +44,7 @@ export class SettingAudioComponent implements OnInit, OnDestroy {
   }
   // tslint:disable-next-line: typedef
   changeVolume(vol: number) {
-    this.audio.volume = this.volume;
+    this.volume = vol;
   }
   getLabelList(list: MediaDeviceInfo[]) {
     return list.map((x) => x.label.slice(0, 38) + '...');
@@ -84,7 +86,9 @@ export class SettingAudioComponent implements OnInit, OnDestroy {
     this.recordedChunks = this.recorder.getBlob();
     const blob = new Blob([this.recorder.getBlob()], { type: 'audio/webm' });
     const blobURL = window.URL.createObjectURL(blob);
-    const audio0 = new Audio(blobURL);
-    audio0.play();
+    this.audio = new Audio(blobURL);
+    console.log(this.volume);
+    this.audio.volume = this.volume / 100;
+    this.audio.play();
   }
 }
