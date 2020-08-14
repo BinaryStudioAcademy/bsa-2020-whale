@@ -88,49 +88,63 @@ Enter+Shift for new line."
     <div class="options">
       <div class="ui options__buttons">
         <div class="inner-block">
+          <span *ngIf="!isScreenRecording" data-tooltip="Toggle Microphone" data-position="top left">
           <i class="big microphone icon" (click)="toggleMicro()"></i>
+          </span>
+          <span *ngIf="!isScreenRecording" data-tooltip="Toggle Webcam">
           <i
             style="margin-left: 10px;"
             class="big video icon"
             (click)="toggleCamera()"
           ></i>
+          </span>
         </div>
 
         <div class="display-flex inner-block">
           <div class="participants-button-container">
-            <div class="relative-container">
+            <div class="relative-container" data-tooltip="Participants" data-position="top left">
               <i
                 class="users icon big users-icon-fix"
                 (click)="isShowParticipants = !isShowParticipants"
               ></i>
             </div>
           </div>
-
-          <i
-            *ngIf="!isScreenRecording"
+          <span *ngIf="!isScreenRecording" data-tooltip="Start Recording" data-position="top left">
+            <i
             (click)="startRecording()"
             class="big circle icon"
-          ></i>
-          <i
-            *ngIf="isScreenRecording"
-            (click)="stopRecording()"
-            class="big stop circle icon"
-          ></i>
-
-          <i style="margin-left: 10px;" class="big share square icon"></i>
-          <i (click)="onPollIconClick()" class="big clipboard list icon"></i>
-          <i (click)="onStatisticsIconClick()" class="big chart bar icon"></i>
-          <i (click)="onCopyIconClick()" class="big copy icon"></i>
-          <i
-            (click)="showChat()"
-            style="margin-left: 10px;"
-            class="big wechat icon"
-          ></i>
-          <i
-            (click)="goFullscreen()"
-            style="margin-left: 10px;"
-            class="big desktop icon"
-          ></i>
+            ></i>
+          </span>
+          <span *ngIf="isScreenRecording" data-tooltip="Stop Recording" data-position="top left">
+            <i
+              (click)="stopRecording()"
+              class="big stop circle icon"
+            ></i>
+          </span>
+          <span data-tooltip="??????????????????????" data-position="top left">
+            <i style="margin-left: 10px;" class="big share square icon"></i>
+          </span>
+          <span data-tooltip="Poolls">
+            <i (click)="onPollIconClick()" class="big clipboard list icon"></i></span>
+          <span data-tooltip="Statistics">
+            <i (click)="onStatisticsIconClick()" class="big chart bar icon"></i></span>
+          <span data-tooltip="Copy Link" data-position="top right">
+            <i (click)="onCopyIconClick()" class="big copy icon"></i>
+          </span>
+          <span data-tooltip="Chat" data-position="top right">
+            <i
+              (click)="showChat()"
+              style="margin-left: 10px;"
+              class="big wechat icon"
+            ></i>
+          </span>
+          <span data-tooltip="Fullscreen" data-position="top right">
+            <i
+              (click)="goFullscreen()"
+              style="margin-left: 10px;"
+              class="big desktop icon"
+            ></i>
+          </span>
         </div>
         <div>
           <button class="ui red button" (click)="leave()">
