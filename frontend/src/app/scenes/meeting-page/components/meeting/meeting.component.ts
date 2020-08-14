@@ -59,6 +59,7 @@ export class MeetingComponent
   public isShowPollResults = false;
   public isShowStatistics = false;
   public isScreenRecording = false;
+  public isCameraOn = true;
 
   @ViewChild('currentVideo') currentVideo: ElementRef;
 
@@ -300,9 +301,18 @@ export class MeetingComponent
     this.isScreenRecording = true;
   }
 
-  turnOffCamera(): void {
-    this.currentUserStream.getTracks().forEach((track) => track.stop());
-    this.currentUserStream = null;
+  toggleCamera(): void {
+    if (this.isCameraOn) {
+      //this.currentUserStream.getTracks().forEach((track) => track.stop());
+      this.currentUserStream
+        .getVideoTracks()
+        .forEach((track) => (track.enabled = false));
+    } else {
+      this.currentUserStream
+        .getVideoTracks()
+        .forEach((track) => (track.enabled = true));
+    }
+    this.isCameraOn = !this.isCameraOn;
   }
 
   stopRecording(): void {
