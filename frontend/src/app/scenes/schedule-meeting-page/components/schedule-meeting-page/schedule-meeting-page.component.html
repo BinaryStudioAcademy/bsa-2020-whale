@@ -19,14 +19,14 @@
           <div class="ten wide field">
             <label>Start</label>
             <div class="fields">
-              <div class="field">
+              <div class="field start-input">
                 <dp-date-picker
                   [config]="config"
                   theme="dp-material"
                   formControlName="date"
                 ></dp-date-picker>
               </div>
-              <div class="field">
+              <div class="field start-input">
                 <dp-date-picker
                   [config]="timeConfig"
                   mode="time"
@@ -39,19 +39,19 @@
 
           <div class="nine wide field">
             <label>Duration</label>
-            <div class="three fields">
-              <div class="seven wide field">
-                <div class="ui right labeled input">
+            <div class="fields">
+              <div class="field">
+                <div class="ui right labeled input duration-input">
                   <input type="number" formControlName="durationHours" />
-                  <div class="ui basic label">
+                  <div class="ui basic label flex-vertical-center">
                     <span class="text smaller default-cursor">hr</span>
                   </div>
                 </div>
               </div>
-              <div class="seven wide field">
-                <div class="ui right labeled input">
+              <div class="field">
+                <div class="ui right labeled input duration-input">
                   <input type="number" formControlName="durationMinutes" />
-                  <div class="ui basic label">
+                  <div class="ui basic label flex-vertical-center">
                     <span class="text smaller default-cursor">min</span>
                   </div>
                 </div>

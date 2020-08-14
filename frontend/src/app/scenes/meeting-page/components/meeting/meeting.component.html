@@ -1,4 +1,4 @@
-<div #mainArea>
+<div #mainArea class="bg-white">
   <div *ngIf="isShowChat" class="ui chat card">
     <div class="ui chat-inner feed">
       <div *ngFor="let message of messages" class="event">
@@ -48,7 +48,10 @@ Enter+Shift for new line."
         class="ui item participant"
       >
         <img src="{{ participant.user.avatarUrl }}" />
-        <span>{{ participant.user.firstName }}</span>
+        <span
+          >{{ participant.user.firstName }}
+          {{ participant.user.lastName ? participant.user.lastName : "" }}</span
+        >
       </div>
     </div>
   </div>

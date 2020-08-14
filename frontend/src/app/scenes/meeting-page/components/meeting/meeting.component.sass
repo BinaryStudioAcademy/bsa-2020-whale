@@ -1,6 +1,9 @@
+.bg-white
+    background-color: white
+
 .content
     height: 100%
-    background-color: white
+    //background-color: white
     overflow: hidden
     
 @media screen and (max-width: 600px) 
@@ -73,25 +76,37 @@ div:fullscreen
         display: none
     .chat
         height: 100vh
+    .participants-container
+        height: 100%
 
 div:-webkit-full-screen
     .options
         display: none
+    .participants-container
+        height: 100%
 
 div:moz-full-screen
     .options
         display: none
+    .participants-container
+        height: 100%
 
 div:fullscreen
     .users
         height: 100%
+    .participants-container
+        height: 100%
 
 div:-webkit-full-screen
     .users
         height: 100%
+    .participants-container
+        height: 100%
 
 div:moz-full-screen
     .users
+        height: 100%
+    .participants-container
         height: 100%
 
 .options__buttons
@@ -148,8 +163,8 @@ i.big.icon.wechat
     position: relative
 
 .participants-container
-    max-height: 90vh
-    min-width: 100px
+    height: 90vh
+    min-width: 150px
     max-width: 300px
     background-color: white
     overflow-y: scroll
@@ -160,6 +175,7 @@ i.big.icon.wechat
     -moz-box-shadow: 1px 1px 5px 0px #4e4e4ebf
     box-shadow: 1px 1px 5px 0px #4e4e4ebf
     margin-right: 8px
+    padding-left: 5px
     padding-bottom: 20px
 
 div.invite-icon-container
