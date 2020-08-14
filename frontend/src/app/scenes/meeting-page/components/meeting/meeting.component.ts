@@ -58,6 +58,7 @@ export class MeetingComponent
   public isShowPoll = false;
   public isShowPollResults = false;
   public isShowStatistics = false;
+  public isScreenRecording = false;
 
   @ViewChild('currentVideo') currentVideo: ElementRef;
 
@@ -294,6 +295,8 @@ export class MeetingComponent
       SignalMethods.OnConferenceStartRecording,
       'Conference start recording'
     );
+
+    this.isScreenRecording = true;
   }
 
   turnOffCamera(): void {
@@ -302,6 +305,8 @@ export class MeetingComponent
   }
 
   stopRecording(): void {
+    this.isScreenRecording = false;
+
     this.blobService.stopRecording();
 
     this.meetingSignalrService.invoke(
