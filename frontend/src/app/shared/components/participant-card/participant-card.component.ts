@@ -78,7 +78,9 @@ export class ParticipantCardComponent implements OnInit {
       : this.elRef.nativeElement.querySelector('.other-participant-actions');
 
     this.video.srcObject = this.data.stream;
-    this.participantName.textContent = `${this.data.userFirstName} ${this.data.userLastName}`.trim();
+    this.participantName.textContent = `${this.data.userFirstName} ${
+      this.data.userLastName ? this.data.userLastName : ''
+    }`.trim();
 
     if (this.data.avatarUrl) {
       this.participantContainer.style.background = `url(${this.data.avatarUrl})`;
@@ -92,7 +94,7 @@ export class ParticipantCardComponent implements OnInit {
       participantInitials.textContent = `${this.data.userFirstName.slice(
         0,
         1
-      )} ${this.data.userLastName.slice(0, 1)}`;
+      )} ${this.data.userLastName?.slice(0, 1)}`;
     }
   }
 
