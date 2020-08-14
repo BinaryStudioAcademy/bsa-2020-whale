@@ -43,6 +43,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
 
     this.form = new FormGroup({
       topic: new FormControl('UserNameS meeting etc'),
+      description: new FormControl(),
       date: new FormControl(this.createStringFromDate(today)),
       time: new FormControl(`${today.getHours() + 1}:30`),
       durationHours: new FormControl(1),
@@ -60,6 +61,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
 
   public onSubmit() {
     console.log(this.form.controls.topic.value);
+    console.log(this.form.controls.description.value);
     console.log(
       this.createDateTime(
         this.form.controls.date.value,
@@ -79,7 +81,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
     //   (resp) => console.log(resp),
     //   (error) => this.toastr.error(error, 'Error')
     // );
-    this.toastr.success('saved successfuly');
+    this.toastr.success('Meeting scheduled!');
     this.router.navigate(['/home']);
   }
 
