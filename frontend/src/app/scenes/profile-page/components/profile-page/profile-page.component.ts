@@ -38,6 +38,7 @@ export class ProfilePageComponent implements OnInit {
 
   isShowUploadFile: boolean;
   loggedInUser: User;
+  updatedUserDB: User;
   public routePrefix = '/api/user';
 
   imageChangedEvent: any = '';
@@ -96,10 +97,13 @@ export class ProfilePageComponent implements OnInit {
       this.avatarURL = resp;
       if (this.avatarURL !== '') {
         this.loggedInUser.avatarUrl = this.avatarURL;
+        const name = this.avatarURL.split('/').pop();
+        this.updatedUserDB = this.loggedInUser;
+        this.updatedUserDB.avatarUrl = name;
         this.httpService
           .putFullRequest<User, string>(
             `${this.routePrefix}`,
-            this.loggedInUser
+            this.updatedUserDB
           )
           .subscribe((response) => console.log(`image: ${response.body}`));
       }
@@ -183,7 +187,13 @@ export class ProfilePageComponent implements OnInit {
           .subscribe(
             (userFromDB: User) => {
               this.loggedInUser = userFromDB;
-              this.updatedUser = this.loggedInUser;
+              this.blobService
+                .GetImageByName(userFromDB.avatarUrl)
+                .subscribe((fullLink: string) => {
+                  this.loggedInUser.avatarUrl = fullLink;
+                  this.updatedUser = this.loggedInUser;
+                });
+              console.log(this.loggedInUser);
             },
             (error) => this.toastr.error(error.Message)
           );

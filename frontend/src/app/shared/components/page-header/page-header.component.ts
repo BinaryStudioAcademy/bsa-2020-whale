@@ -5,6 +5,7 @@ import { Notification } from 'app/shared/models/notification/notification';
 import { User } from '@shared/models/user';
 import { HttpService } from '../../../core/services/http.service';
 import { tap, filter } from 'rxjs/operators';
+import { BlobService } from '../../../core/services/blob.service';
 
 @Component({
   selector: 'app-page-header',
@@ -41,7 +42,8 @@ export class PageHeaderComponent implements OnInit {
   constructor(
     private router: Router,
     public auth: AuthService,
-    private httpService: HttpService
+    private httpService: HttpService,
+    private blobService: BlobService
   ) {}
 
   public showNotificationsMenu(): void {
@@ -67,6 +69,11 @@ export class PageHeaderComponent implements OnInit {
         .pipe(tap(() => (this.isUserLoadig = false)))
         .subscribe((userFromDB: User) => {
           this.loggedInUser = userFromDB;
+          this.blobService
+            .GetImageByName(userFromDB.avatarUrl)
+            .subscribe((fullLink: string) => {
+              this.loggedInUser.avatarUrl = fullLink;
+            });
         });
     });
   }
@@ -74,6 +81,6 @@ export class PageHeaderComponent implements OnInit {
     this.router.navigate([`${pageName}`]);
   }
   logOut(): void {
-    this.auth.logout().subscribe( () => this.router.navigate(['/']));
+    this.auth.logout().subscribe(() => this.router.navigate(['/']));
   }
 }
