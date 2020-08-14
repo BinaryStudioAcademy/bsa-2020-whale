@@ -1,8 +1,15 @@
 <div class="ui container">
   <video class="video" autoplay playsinline></video>
   <div class="custom-select ui compact menu">
-    <select [(ngModel)]="device" class="select">
-      <option *ngFor="let c of videoDevices" [value]="c" [selected]="c"
+    <select
+      [(ngModel)]="deviceId"
+      class="select"
+      (ngModelChange)="changeState($event)"
+    >
+      <option
+        *ngFor="let c of videoDevices"
+        [value]="c.deviceId"
+        [selected]="c.deviceId == deviceId"
         ><span>{{ c.label }}</span></option
       >
     </select>

@@ -37,7 +37,7 @@ namespace Whale.BLL.Hubs
         public async Task StartCall(StartCallDTO startCallDTO)
         {
             var contact = await _contactsService.GetContactAsync(startCallDTO.ContactId, startCallDTO.Email);
-            var link = await _meetingService.CreateMeeting(startCallDTO.Meeting, new List<string> { contact.FirstMember.Email, contact.SecondMember.Email });
+            var link = await _meetingService.CreateMeeting(startCallDTO.Meeting, startCallDTO.Email);
             
             await Groups.AddToGroupAsync(Context.ConnectionId, startCallDTO.ContactId.ToString());
             await Clients.OthersInGroup(startCallDTO.ContactId.ToString()).SendAsync("OnStartCallOthers", new CallDTO { MeetingLink = link, Contact = contact, CallerEmail = startCallDTO.Email });

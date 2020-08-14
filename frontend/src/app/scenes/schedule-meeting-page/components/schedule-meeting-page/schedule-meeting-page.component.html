@@ -1,12 +1,18 @@
 <app-page-header></app-page-header>
-<div class="ui container">
+<div class="ui container main-container">
   <div class="ui grid">
     <div class="ui twelve wide column segment margin-auto">
       <h1>Schedule meeting</h1>
       <form class="ui form" [formGroup]="form" (ngSubmit)="onSubmit()">
-        <div class="field">
-          <label>Topic</label>
-          <input type="text" formControlName="topic" />
+        <div class="ui segment">
+          <div class="field">
+            <label>Topic</label>
+            <input type="text" formControlName="topic" />
+          </div>
+          <div class="field">
+            <label>Description</label>
+            <textarea type="text" formControlName="description"></textarea>
+          </div>
         </div>
 
         <div class="ui segment">

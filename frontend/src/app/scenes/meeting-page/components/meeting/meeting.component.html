@@ -115,6 +115,18 @@ Enter+Shift for new line."
               ></i>
             </div>
           </div>
+
+          <i
+            *ngIf="!isScreenRecording"
+            (click)="startRecording()"
+            class="big circle icon"
+          ></i>
+          <i
+            *ngIf="isScreenRecording"
+            (click)="stopRecording()"
+            class="big stop circle icon"
+          ></i>
+
           <i
             style="margin-left: 10px; opacity: 0.8;"
             class="big share square icon"

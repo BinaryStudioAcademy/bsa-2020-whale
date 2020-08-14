@@ -74,6 +74,6 @@ export class PageHeaderComponent implements OnInit {
     this.router.navigate([`${pageName}`]);
   }
   logOut(): void {
-    this.auth.logout().subscribe( () => this.router.navigate(['/']));
+    this.auth.logout().subscribe(() => this.router.navigate(['/']));
   }
 }

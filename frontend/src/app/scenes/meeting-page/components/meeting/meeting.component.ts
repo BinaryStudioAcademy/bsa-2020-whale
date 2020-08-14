@@ -58,6 +58,7 @@ export class MeetingComponent
   public isShowPoll = false;
   public isShowPollResults = false;
   public isShowStatistics = false;
+  public isScreenRecording = false;
 
   @ViewChild('currentVideo') currentVideo: ElementRef;
 
@@ -112,10 +113,17 @@ export class MeetingComponent
         (connectData) => {
           console.log(connectData);
           console.log(this.meeting);
-          if (connectData.peerId == this.peer.id) {
+          if (connectData.peerId === this.peer.id) {
             return;
           }
-          this.meeting.participants.push(connectData.participant);
+          const index = this.meeting.participants.findIndex(
+            (p) => p.id === connectData.participant.id
+          );
+          if (index >= 0) {
+            this.meeting.participants[index] = connectData.participant;
+          } else {
+            this.meeting.participants.push(connectData.participant);
+          }
           console.log('connected with peer: ' + connectData.peerId);
           this.connect(connectData.peerId);
           this.toastr.success('Connected successfuly');
@@ -135,10 +143,6 @@ export class MeetingComponent
             (p) => p.user.email === this.authService.currentUser.email
           );
 
-          const currentUserCardStream = new MediaStream();
-          currentUserCardStream.addTrack(
-            this.currentUserStream.getVideoTracks()[0]
-          );
           this.mediaData.push({
             id: this.currentParticipant.id,
             userFirstName: this.currentParticipant.user.firstName,
@@ -146,7 +150,7 @@ export class MeetingComponent
             avatarUrl: this.currentParticipant.user.avatarUrl,
             isCurrentUser: true,
             isUserHost: this.currentParticipant.role == ParticipantRole.Host,
-            stream: currentUserCardStream,
+            stream: this.currentUserStream,
           });
         },
         (err) => {
@@ -293,6 +297,8 @@ export class MeetingComponent
       SignalMethods.OnConferenceStartRecording,
       'Conference start recording'
     );
+
+    this.isScreenRecording = true;
   }
 
   turnOffMicrophone(): void {
@@ -322,6 +328,8 @@ export class MeetingComponent
   }
 
   stopRecording(): void {
+    this.isScreenRecording = false;
+
     this.blobService.stopRecording();
 
     this.meetingSignalrService.invoke(
