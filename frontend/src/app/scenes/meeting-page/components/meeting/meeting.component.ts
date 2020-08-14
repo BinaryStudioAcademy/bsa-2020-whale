@@ -60,6 +60,7 @@ export class MeetingComponent
   public isShowStatistics = false;
   public isScreenRecording = false;
   public isCameraOn = true;
+  public isMicroOn = true;
 
   @ViewChild('currentVideo') currentVideo: ElementRef;
 
@@ -303,7 +304,6 @@ export class MeetingComponent
 
   toggleCamera(): void {
     if (this.isCameraOn) {
-      //this.currentUserStream.getTracks().forEach((track) => track.stop());
       this.currentUserStream
         .getVideoTracks()
         .forEach((track) => (track.enabled = false));
@@ -313,6 +313,19 @@ export class MeetingComponent
         .forEach((track) => (track.enabled = true));
     }
     this.isCameraOn = !this.isCameraOn;
+  }
+
+  toggleMicro(): void {
+    if (this.isMicroOn) {
+      this.currentUserStream
+        .getAudioTracks()
+        .forEach((track) => (track.enabled = false));
+    } else {
+      this.currentUserStream
+        .getAudioTracks()
+        .forEach((track) => (track.enabled = true));
+    }
+    this.isMicroOn = !this.isMicroOn;
   }
 
   stopRecording(): void {
