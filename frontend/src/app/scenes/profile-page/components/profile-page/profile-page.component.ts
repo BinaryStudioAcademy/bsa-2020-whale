@@ -193,7 +193,7 @@ export class ProfilePageComponent implements OnInit {
   public removeAvatar(): void {
     const avatar = new Avatar(this.avatar, {
       useGravatar: false,
-      initials: `${this.loggedInUser.firstName[0]}${this.loggedInUser?.secondName[0]}`,
+      initials: `${this.loggedInUser.firstName[0]}`,
       initial_fg: '#ffffff',
       initial_bg: '#00325c',
       initial_font_family: "'Lato', 'Lato-Regular', 'Helvetica Neue'",
