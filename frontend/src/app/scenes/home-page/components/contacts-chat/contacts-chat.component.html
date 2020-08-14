@@ -51,7 +51,7 @@
   >
     <div class="field">
       <textarea
-        (keydown.enter)="chatForm.valid && sendMessage()"
+        (keydown.enter)="onEnterKeyPress($event, chatForm.valid)"
         rows="2"
         placeholder="Print your message there"
         type="text"

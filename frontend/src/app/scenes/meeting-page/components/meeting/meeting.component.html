@@ -22,7 +22,7 @@
       <div class="ui icon input">
         <div class="ui icon input">
           <textarea
-            (keyup.enter)="sendMessage()"
+            (keydown.enter)="onEnterKeyPress($event)"
             rows="1"
             placeholder="Enter to send.
 Enter+Shift for new line."

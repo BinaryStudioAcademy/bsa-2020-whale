@@ -381,6 +381,13 @@ export class MeetingComponent
     this.msgText = '';
   }
 
+  public onEnterKeyPress(event: KeyboardEvent): void {
+    event.preventDefault();
+    if (this.msgText.length) {
+      this.sendMessage();
+    }
+  }
+
   public goFullscreen(): void {
     if (this.elem.requestFullscreen) {
       this.elem.requestFullscreen();
