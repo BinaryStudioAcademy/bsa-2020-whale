@@ -26,7 +26,7 @@ namespace Whale.BLL.Services
         private readonly ParticipantService _participantService;
         private readonly EncryptService _encryptService;
 
-        public MeetingService(WhaleDbContext context, IMapper mapper, RedisService redisService, IUserService userService, ParticipantService participantService,EncryptService encryptService)
+        public MeetingService(WhaleDbContext context, IMapper mapper, RedisService redisService, IUserService userService, ParticipantService participantService, EncryptService encryptService)
             : base(context, mapper)
         {
             _redisService = redisService;
@@ -38,15 +38,15 @@ namespace Whale.BLL.Services
         public async Task<MeetingDTO> ConnectToMeeting(MeetingLinkDTO linkDTO, string userEmail)
         {
             await _redisService.ConnectAsync();
-            var redisDTO = await  _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(linkDTO.Id.ToString());
+            var redisDTO = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(linkDTO.Id.ToString());
             if (redisDTO.Password != linkDTO.Password)
                 throw new InvalidCredentials();
 
-            var meeting  = await _context.Meetings.FirstOrDefaultAsync(m => m.Id == linkDTO.Id);
+            var meeting = await _context.Meetings.FirstOrDefaultAsync(m => m.Id == linkDTO.Id);
             if (meeting == null)
                 throw new NotFoundException("Meeting");
 
-            if((await _participantService.GetMeetingParticipantByEmail(meeting.Id, userEmail)) == null)
+            if ((await _participantService.GetMeetingParticipantByEmail(meeting.Id, userEmail)) == null)
             {
                 await _participantService.CreateParticipantAsync(new ParticipantCreateDTO
                 {
@@ -57,12 +57,12 @@ namespace Whale.BLL.Services
             }
 
             var meetingDTO = _mapper.Map<MeetingDTO>(meeting);
-            meetingDTO.Participants =  (await _participantService.GetMeetingParticipantsAsync(meeting.Id)).ToList();
+            meetingDTO.Participants = (await _participantService.GetMeetingParticipantsAsync(meeting.Id)).ToList();
 
             return meetingDTO;
         }
 
-        public async Task<MeetingLinkDTO> CreateMeeting(MeetingCreateDTO meetingDTO, IEnumerable<string> userEmails)
+        public async Task<MeetingLinkDTO> CreateMeeting(MeetingCreateDTO meetingDTO, string userEmail)
         {
             var meeting = _mapper.Map<Meeting>(meetingDTO);
             if (!meeting.IsScheduled)
@@ -77,15 +77,13 @@ namespace Whale.BLL.Services
             var pwd = _encryptService.EncryptString(Guid.NewGuid().ToString());
             await _redisService.SetAsync(meeting.Id.ToString(), new MeetingMessagesAndPasswordDTO { Password = pwd });
 
-            foreach (var userEmail in userEmails)
+            await _participantService.CreateParticipantAsync(new ParticipantCreateDTO
             {
-                await _participantService.CreateParticipantAsync(new ParticipantCreateDTO
-                {
-                    Role = Shared.DTO.Participant.ParticipantRole.Host,
-                    UserEmail = userEmail,
-                    MeetingId = meeting.Id
-                });
-            }
+                Role = Shared.DTO.Participant.ParticipantRole.Host,
+                UserEmail = userEmail,
+                MeetingId = meeting.Id
+            });
+
 
             return new MeetingLinkDTO { Id = meeting.Id, Password = pwd };
         }

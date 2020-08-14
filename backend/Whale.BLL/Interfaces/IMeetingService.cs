@@ -9,7 +9,7 @@ namespace Whale.BLL.Interfaces
 {
     public interface IMeetingService
     {
-        Task<MeetingLinkDTO> CreateMeeting(MeetingCreateDTO meetingDto, IEnumerable<string> userEmails);
+        Task<MeetingLinkDTO> CreateMeeting(MeetingCreateDTO meetingDto, string userEmail);
 
         Task<MeetingDTO> ConnectToMeeting(MeetingLinkDTO link, string userEmail);
 
