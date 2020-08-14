@@ -101,4 +101,11 @@ export class ContactsChatComponent implements OnInit, OnChanges {
     console.log(this.contactSelected);
     this.simpleModalService.addModal(CallModalComponent, this.contactSelected);
   }
+
+  public onEnterKeyPress(event: KeyboardEvent, valid: boolean): void {
+    event.preventDefault();
+    if (valid) {
+      this.sendMessage();
+    }
+  }
 }
