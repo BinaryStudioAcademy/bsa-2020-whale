@@ -110,10 +110,17 @@ export class MeetingComponent
         (connectData) => {
           console.log(connectData);
           console.log(this.meeting);
-          if (connectData.peerId == this.peer.id) {
+          if (connectData.peerId === this.peer.id) {
             return;
           }
-          this.meeting.participants.push(connectData.participant);
+          const index = this.meeting.participants.findIndex(
+            (p) => p.id === connectData.participant.id
+          );
+          if (index >= 0) {
+            this.meeting.participants[index] = connectData.participant;
+          } else {
+            this.meeting.participants.push(connectData.participant);
+          }
           console.log('connected with peer: ' + connectData.peerId);
           this.connect(connectData.peerId);
           this.toastr.success('Connected successfuly');
