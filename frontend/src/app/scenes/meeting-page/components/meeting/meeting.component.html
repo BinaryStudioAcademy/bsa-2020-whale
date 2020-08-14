@@ -22,7 +22,7 @@
       <div class="ui icon input">
         <div class="ui icon input">
           <textarea
-            (keyup.enter)="sendMessage()"
+            (keydown.enter)="onEnterKeyPress($event)"
             rows="1"
             placeholder="Enter to send.
 Enter+Shift for new line."
@@ -38,22 +38,22 @@ Enter+Shift for new line."
     </div>
   </div>
 
-  <div class="content">
-    <div *ngIf="isShowParticipants" class="ui participants-container">
-      <div class="invite-icon-container">
-        <i class="user plus icon"></i>
-      </div>
-      <div class="ui divided list">
-        <div
-          *ngFor="let participant of meeting.participants"
-          class="ui item participant"
-        >
-          <img src="{{ participant.user.avatarUrl }}" />
-          <span>{{ participant.user.firstName }}</span>
-        </div>
+  <div *ngIf="isShowParticipants" class="ui participants-container">
+    <div class="invite-icon-container">
+      <i class="user plus icon"></i>
+    </div>
+    <div class="ui divided list">
+      <div
+        *ngFor="let participant of meeting.participants"
+        class="ui item participant"
+      >
+        <img src="{{ participant.user.avatarUrl }}" />
+        <span>{{ participant.user.firstName }}</span>
       </div>
     </div>
+  </div>
 
+  <div class="content">
     <div class="tools" ngDraggable>
       <i style="opacity: 0.8;" class="big microphone icon block"></i>
       <i style="opacity: 0.8;" class="big video icon block"></i>

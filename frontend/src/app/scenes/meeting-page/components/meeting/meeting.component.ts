@@ -109,7 +109,6 @@ export class MeetingComponent
       .subscribe(
         (connectData) => {
           console.log(connectData);
-          this.meeting.participants.push(connectData.participant);
           console.log(this.meeting);
           if (connectData.peerId == this.peer.id) {
             return;
@@ -130,8 +129,6 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (participants) => {
-          participants.forEach((p) => this.meeting.participants.push(p));
-
           this.currentParticipant = participants.find(
             (p) => p.user.email === this.authService.currentUser.email
           );
@@ -382,6 +379,13 @@ export class MeetingComponent
     } as MeetingMessageCreate);
 
     this.msgText = '';
+  }
+
+  public onEnterKeyPress(event: KeyboardEvent): void {
+    event.preventDefault();
+    if (this.msgText.length) {
+      this.sendMessage();
+    }
   }
 
   public goFullscreen(): void {
