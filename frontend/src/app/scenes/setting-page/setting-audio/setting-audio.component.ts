@@ -12,16 +12,14 @@ export class SettingAudioComponent implements OnInit, OnDestroy {
   public browserMediaDevice = new BrowserMediaDevice();
   public inputDevices: MediaDeviceInfo[];
   public outputDevices: MediaDeviceInfo[];
-  public inputDevice: MediaDeviceInfo;
-  public outputDevice: MediaDeviceInfo;
+  public inputDeviceId: string;
+  public outputDeviceId: string;
   public audio;
   public meter = new DecibelMeter('meter');
   public db: number;
   public volume = 50;
   public recordedChunks: [];
   public recorder;
-  public audioContext = new AudioContext();
-  gainN = this.audioContext.createGain();
   constructor() {}
   ngOnDestroy(): void {
     this.constraints.audio = false;
@@ -30,11 +28,17 @@ export class SettingAudioComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.browserMediaDevice
       .getAudioInputList()
-      .then((res) => (this.inputDevices = res))
+      .then((res) => {
+        this.inputDevices = res;
+        this.inputDeviceId = this.inputDevices[0].deviceId;
+      })
       .catch((error) => console.log(error));
     this.browserMediaDevice
       .getAudioOutputList()
-      .then((res) => (this.outputDevices = res))
+      .then((res) => {
+        this.outputDevices = res;
+        this.outputDeviceId = this.outputDevices[0].deviceId;
+      })
       .catch((error) => console.log(error));
     this.audio = document.getElementsByTagName('audio');
 
@@ -46,16 +50,10 @@ export class SettingAudioComponent implements OnInit, OnDestroy {
   changeVolume(vol: number) {
     this.volume = vol;
   }
-  getLabelList(list: MediaDeviceInfo[]) {
-    return list.map((x) => x.label.slice(0, 38) + '...');
-  }
-  // tslint:disable-next-line: typedef
   async testMicro() {
-    if (this.inputDevice === undefined) {
-      this.inputDevice = this.inputDevices[0];
-    }
+    console.log(this.inputDeviceId);
     this.meter
-      .connect(this.inputDevice)
+      .connect(this.inputDevices.find((x) => x.deviceId === this.inputDeviceId))
       .catch((err) => alert('Connection Error'));
     this.meter.on('sample', (dB, percent, value) => (this.db = dB + 100));
     this.meter.listen();
@@ -87,8 +85,19 @@ export class SettingAudioComponent implements OnInit, OnDestroy {
     const blob = new Blob([this.recorder.getBlob()], { type: 'audio/webm' });
     const blobURL = window.URL.createObjectURL(blob);
     this.audio = new Audio(blobURL);
-    console.log(this.volume);
     this.audio.volume = this.volume / 100;
     this.audio.play();
+  }
+  public async changeState(event: any) {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: false,
+      audio: { deviceId: event.label },
+    });
+    this.handleSuccess(stream);
+  }
+  async handleSuccess(stream): Promise<void> {
+    const audio = document.querySelector('audio');
+    window.MSStream = stream;
+    audio.srcObject = stream;
   }
 }
