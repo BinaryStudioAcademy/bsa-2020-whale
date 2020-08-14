@@ -97,11 +97,15 @@ Enter+Shift for new line."
     <div class="options">
       <div class="ui container options__buttons">
         <div>
-          <i style="opacity: 0.8;" class="big microphone icon"></i>
+          <i
+            style="opacity: 0.8;"
+            class="big microphone icon"
+            (click)="toggleMicro()"
+          ></i>
           <i
             style="margin-left: 10px; opacity: 0.8;"
             class="big video icon"
-            (click)="turnOffCamera()"
+            (click)="toggleCamera()"
           ></i>
         </div>
 
