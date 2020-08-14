@@ -140,10 +140,6 @@ export class MeetingComponent
             (p) => p.user.email === this.authService.currentUser.email
           );
 
-          const currentUserCardStream = new MediaStream();
-          currentUserCardStream.addTrack(
-            this.currentUserStream.getVideoTracks()[0]
-          );
           this.mediaData.push({
             id: this.currentParticipant.id,
             userFirstName: this.currentParticipant.user.firstName,
@@ -151,7 +147,7 @@ export class MeetingComponent
             avatarUrl: this.currentParticipant.user.avatarUrl,
             isCurrentUser: true,
             isUserHost: this.currentParticipant.role == ParticipantRole.Host,
-            stream: currentUserCardStream,
+            stream: this.currentUserStream,
           });
         },
         (err) => {
