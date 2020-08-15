@@ -1,17 +1,23 @@
-<div class="ui dimmer modals page visible active" style="display: flex !important;" (click)="cancel()">
-    <div class="ui mini modal visible active" (click)="$event.stopPropagation()">
-        <div class="header">
-            Sign In
-        </div>
-        <div class="actions">
-            <button class="ui labeled icon google plus button login" (click)="googleLogin()">
-                <i class="google icon"></i>
-                Sign in with Google
-            </button>
-            <button class="ui labeled icon facebook button login" (click)="facebookLogin()">
-                <i class="facebook f icon"></i>
-                Sign in with Facebook
-            </button>
-        </div>
+<div class="ui dimmer modals page visible active" (click)="cancel()">
+  <div class="ui mini modal visible active" (click)="$event.stopPropagation()">
+    <div class="header">
+      Sign In
     </div>
-</div>  
+    <div class="actions">
+      <button
+        class="ui labeled icon google plus button login"
+        (click)="googleLogin()"
+      >
+        <i class="google icon"></i>
+        Sign in with Google
+      </button>
+      <button
+        class="ui labeled icon facebook button login"
+        (click)="facebookLogin()"
+      >
+        <i class="facebook f icon"></i>
+        Sign in with Facebook
+      </button>
+    </div>
+  </div>
+</div>

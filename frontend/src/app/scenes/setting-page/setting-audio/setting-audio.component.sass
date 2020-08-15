@@ -2,21 +2,20 @@
     margin: 4%
     margin-top: 0
     position: relative 
-option
-    width: 90%
-    overflow-wrap: break-word
 
 select
     box-shadow: 0 2px 3px rgba(#DDDDDF, 0.1) inset
     border: none
     border-radius: 10px
     width: 100%
+
 .select
     display: flex
     justify-content: space-between
     align-items: center
+
 .custom-select select 
-    appearance: none  
+    appearance: none
     display: flex
     justify-content: space-between
     padding: 0px 24px
@@ -25,8 +24,20 @@ select
     border: none
     border-radius: 10px
     width: 100%
+select:hover
+    cursor: pointer
+    
+.custom-select:after
+    content: '<>'
+    -webkit-transform: rotate(90deg)
+    -moz-transform: rotate(90deg)
+    position: absolute
+    top: 10px
+    right: 5px
+
 .button
     padding-left: 5px
+
 .wrapper
     display: flex
     justify-content: space-between
@@ -98,3 +109,4 @@ input[type=range]::-moz-range-thumb
   border-radius: 5px
   cursor: pointer
   -webkit-appearance: none
+

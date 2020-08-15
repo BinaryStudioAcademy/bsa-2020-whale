@@ -1,6 +1,5 @@
 <div
   class="ui dimmer modals page visible active"
-  style="display: flex !important;"
   (click)="cancel(contactForm.dirty)"
 >
   <div class="ui mini modal visible active" (click)="$event.stopPropagation()">
@@ -24,15 +23,10 @@
             <div
               class="ui error message"
               *ngIf="email.invalid && email.touched"
-              style="display: block;"
             >
               Email invalid
             </div>
-            <div
-              class="ui error message"
-              *ngIf="email.value === ownerEmail"
-              style="display: block;"
-            >
+            <div class="ui error message" *ngIf="email.value === ownerEmail">
               You cannot add yourself to contacts
             </div>
           </div>

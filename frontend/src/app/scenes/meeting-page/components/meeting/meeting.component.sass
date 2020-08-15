@@ -62,12 +62,12 @@ app-participant-card
 
 //options
 .options
-    background-color: #f1f1f1
+    background-color: #ffffff
     position: fixed
     bottom: 0
     right: 0
     left: 0
-    height: 10vh
+    height: 60px
     text-align: center   
     z-index: 10
 
@@ -110,16 +110,19 @@ div:moz-full-screen
         height: 100%
 
 .options__buttons
-    margin-top: 24px
+    margin-top: 10px
     display: flex
     justify-content: space-between
+    padding: 0 20px
+    .inner-block
+        border: 1px solid lightgray
+        padding: 5px 10px
+        border-radius: 10px
+        background-color: gainsboro
     
 .options__leave-button
     margin-top: 24px
     float: right
-
-i.big.icon
-    opacity: 0.8
 
 i.big.icon:hover
     opacity: 1
@@ -157,7 +160,6 @@ i.big.icon.wechat
 
 .participants-button-container 
     display: inline-block
-    margin-left: 5%
 
 .relative-container
     position: relative
@@ -203,7 +205,6 @@ div div.participant:hover
 .users-icon-fix
     display: inline
     background: none
-    opacity: 0.8
 
 .display-flex
     display: flex
@@ -214,8 +215,8 @@ div div.participant:hover
     left: calc(50% - 175px) 
     max-height: 80%
     width: 350px
-    z-index: 101
     overflow-y: scroll
+    z-index: 2
 
 i.icon 
     opacity: 0.8
@@ -231,18 +232,22 @@ i.icon:hover
     padding-top: 15px
 
 .tools
-    width: 310px
-    height: 50px
-    background-color: #f1f1f1
+    padding: 0 10px
+    min-height: 50px
     position: absolute
-    left: 40%
+    width: fit-content
+    background-color: #f1f1f1
+    margin-left: auto
+    margin-right: auto
+    left: 0
+    right: 0
     bottom: 15%
     display: none
     border-radius: 4px
     box-shadow: 0px 0px 3px grey
     opacity: 0.7
     text-align: center
-    z-index: 10
+    z-index: 1100
 
 .tools:active
     opacity: 1
@@ -294,3 +299,12 @@ div:moz-full-screen
     background: #a7a7a7
     border: 0px
     margin-top: 12px
+
+[data-tooltip]:before
+    margin-bottom: 10px
+
+[data-tooltip]:after
+    margin-bottom: 15px
+
+.big-left-margin
+    margin-left: 10px
