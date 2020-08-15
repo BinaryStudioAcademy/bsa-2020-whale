@@ -139,6 +139,7 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (participants) => {
+          this.meeting.participants.push(...participants);
           this.currentParticipant = participants.find(
             (p) => p.user.email === this.authService.currentUser.email
           );
@@ -229,7 +230,6 @@ export class MeetingComponent
         debugger;
         if (!this.connectedStreams.includes(stream.id)) {
           this.connectedStreams.push(stream.id);
-          call;
           console.log(call.peer, 'call peer');
 
           const participant = this.meeting.participants.find(
@@ -280,9 +280,11 @@ export class MeetingComponent
     if (this.currentParticipant?.role === ParticipantRole.Host) {
       canLeave = confirm('You will end current meeting!');
     }
+
     if (canLeave) {
       this.currentUserStream?.getTracks().forEach((track) => track.stop());
       this.destroyPeer();
+      this.connectionData.participant = this.currentParticipant;
       this.meetingSignalrService.invoke(
         SignalMethods.OnUserDisconnect,
         this.connectionData
@@ -388,7 +390,7 @@ export class MeetingComponent
   }
 
   public onStatisticsIconClick(): void {
-    this.isShowPoll =  false;
+    this.isShowPoll = false;
     this.isPollCreating = false;
     this.isShowPollResults = false;
     if (!this.meetingStatistics) {
@@ -459,7 +461,6 @@ export class MeetingComponent
 
     // get answer and show other user
     call.on('stream', (stream) => {
-      //this.showMediaStream(stream);
       this.connectedStreams.push(stream.id);
       const connectedPeer = this.connectedPeers.get(call.peer);
       if (!connectedPeer || connectedPeer.id !== stream.id) {
