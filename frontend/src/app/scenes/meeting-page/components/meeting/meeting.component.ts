@@ -163,7 +163,6 @@ export class MeetingComponent
     this.meetingSignalrService.signalParticipantLeft$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((connectionData) => {
-        debugger;
         this.meeting.participants = this.meeting.participants.filter(
           (p) => p.id !== connectionData.participant.id
         );
@@ -189,7 +188,6 @@ export class MeetingComponent
     this.meetingSignalrService.signalParticipantDisconnected$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((participant) => {
-        debugger;
         this.meeting.participants = this.meeting.participants.filter(
           (p) => p.id !== participant.id
         );
@@ -327,7 +325,7 @@ export class MeetingComponent
       this.destroyPeer();
       this.connectionData.participant = this.currentParticipant;
       this.meetingSignalrService.invoke(
-        SignalMethods.OnUserDisconnect,
+        SignalMethods.OnParticipantLeft,
         this.connectionData
       );
       this.router.navigate(['/home']);

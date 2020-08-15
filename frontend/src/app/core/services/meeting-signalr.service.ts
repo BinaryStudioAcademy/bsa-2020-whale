@@ -131,7 +131,7 @@ export interface SignalData {
 
 export enum SignalMethods {
   OnUserConnect,
-  OnUserDisconnect,
+  OnParticipantLeft,
   OnConferenceStartRecording,
   OnConferenceStopRecording,
   OnSendMessage,
