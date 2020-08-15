@@ -71,10 +71,8 @@ Enter+Shift for new line."
       <i (click)="closeFullscreen()" class="big desktop icon block"></i>
     </div>
     <div class="users" *ngIf="mediaData.length > 1">
-      <app-participant-card
-        *ngFor="let data of mediaData"
-        [data]="data"
-      ></app-participant-card>
+      <app-participant-card *ngFor="let data of mediaData" [data]="data">
+      </app-participant-card>
     </div>
 
     <video
@@ -89,14 +87,13 @@ Enter+Shift for new line."
       <div class="ui options__buttons">
         <div class="inner-block">
           <span *ngIf="!isScreenRecording" data-tooltip="Toggle Microphone" data-position="top left">
-          <i class="big microphone icon" (click)="toggleMicro()"></i>
+            <i class="big microphone icon" (click)="toggleMicro()"></i>
           </span>
           <span *ngIf="!isScreenRecording" data-tooltip="Toggle Webcam">
-          <i
-            style="margin-left: 10px;"
-            class="big video icon"
-            (click)="toggleCamera()"
-          ></i>
+            <i
+              class="big video icon big-left-margin"
+              (click)="toggleCamera()"
+            ></i>
           </span>
         </div>
 
@@ -122,7 +119,7 @@ Enter+Shift for new line."
             ></i>
           </span>
           <span data-tooltip="Share Screen" data-position="top left">
-            <i style="margin-left: 10px;" class="big share square icon"></i>
+            <i class="big share square icon big-left-margin"></i>
           </span>
           <span data-tooltip="Poolls">
             <i (click)="onPollIconClick()" class="big clipboard list icon"></i></span>
@@ -132,18 +129,10 @@ Enter+Shift for new line."
             <i (click)="onCopyIconClick()" class="big copy icon"></i>
           </span>
           <span data-tooltip="Chat" data-position="top right">
-            <i
-              (click)="showChat()"
-              style="margin-left: 10px;"
-              class="big wechat icon"
-            ></i>
+            <i (click)="showChat()" class="big wechat icon big-left-margin"></i>
           </span>
           <span data-tooltip="Fullscreen" data-position="top right">
-            <i
-              (click)="goFullscreen()"
-              style="margin-left: 10px;"
-              class="big desktop icon"
-            ></i>
+            <i (click)="goFullscreen()" class="big desktop icon big-left-margin"></i>
           </span>
         </div>
         <div>
