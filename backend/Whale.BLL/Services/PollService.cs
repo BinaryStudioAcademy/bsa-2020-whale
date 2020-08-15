@@ -30,56 +30,135 @@ namespace Whale.BLL.Services
 			this._redisService = redisService;
 		}
 
-		public async Task<PollDTO> CreatePoll(PollCreateDTO pollDto)
+		public async Task<PollDTO> CreatePoll(PollCreateDTO pollCreateDto)
 		{
-			if(!_context.Meetings.Any(meeting => meeting.Id == pollDto.MeetingId))
+			if(!_context.Meetings.Any(meeting => meeting.Id == pollCreateDto.MeetingId))
 			{
 				throw new NotFoundException(nameof(Meeting));
 			}
 
-			Poll pollEntity = _mapper.Map<Poll>(pollDto);
+			Poll pollEntity = _mapper.Map<Poll>(pollCreateDto);
 			pollEntity.Id = Guid.NewGuid();
 
 			_redisService.Connect();
-			// create set of Poll Results with poll Id key
-			_redisService.Set<Poll>(pollEntity.Id.ToString(), pollEntity);
+			await _redisService.AddToSet<Poll>(pollEntity.MeetingId.ToString() + nameof(Poll), pollEntity);
 
-			var pollDto2 = _mapper.Map<PollDTO>(pollEntity);
-			return pollDto2;
-		}
-
-		public async Task SavePollAnswer(PollAnswerDTO pollAnswerDto)
-		{
-			pollAnswerDto.UserId = Guid.NewGuid().ToString();
-			_redisService.Connect();
-			await _redisService.AddToSet<PollAnswerDTO>(pollAnswerDto.PollId.ToString() + nameof(PollAnswerDTO), pollAnswerDto);
-
-			var pollAnswerDtos = await _redisService.GetSetMembers<PollAnswerDTO>(pollAnswerDto.PollId.ToString() + nameof(PollAnswerDTO));
-			var poll = _redisService.Get<Poll>(pollAnswerDto.PollId.ToString());
-			var pollResultsDto = GetPollResults(poll, pollAnswerDtos);
-			// signal
-			await _meetingHub.Clients.Group(poll.MeetingId.ToString()).SendAsync("OnPollResults", pollResultsDto);
-		}
-
-		private PollResultsDTO GetPollResults(Poll poll, ICollection<PollAnswerDTO> pollAnswerDtos)
-		{
-			var answerVariants = poll.Answers.ToList();
-
-			var answerResults = pollAnswerDtos.Select(answer => answer.Answers);
-			int totalChecked = answerResults.Select(array => array.Length).Sum();
-
-			var pollResultsDto = _mapper.Map<PollResultsDTO>(poll);
-			
-			for (int i = 0; i < answerVariants.Count; i++)
+			var emptyPollResult = new PollResult
 			{
-				int answerVotedCount = answerResults.Count(array => array.Contains(i));
-				int percentage = answerVotedCount * 100 / totalChecked;
-				pollResultsDto.Results.Add(answerVariants[i], percentage);
+				PollId = pollEntity.Id,
+				Title = pollEntity.Title,
+				IsAnonymous = pollEntity.IsAnonymous,
+			};
+
+			// fill emptyPollResult's OptionResults
+			foreach (var option in pollEntity.Options)
+			{
+				var optionResult = new OptionResult
+				{
+					Option = option
+				};
+				emptyPollResult.OptionResults.Add(optionResult);
 			}
 
-			pollResultsDto.TotalVoted = answerResults.Count();
+			await _redisService.AddToSet<PollResult>(pollEntity.MeetingId.ToString() + nameof(PollResult), emptyPollResult);
 
-			return pollResultsDto;
+			var pollDto = _mapper.Map<PollDTO>(pollEntity);
+			return pollDto;
+		}
+
+		public async Task SavePollAnswer(VoteDTO voteDto)
+		{
+			_redisService.Connect();
+
+			var voteEntity = _mapper.Map<Vote>(voteDto);
+
+			string resultSetKey = voteDto.MeetingId + nameof(PollResult);
+			var pollResults = await _redisService.GetSetMembers<PollResult>(resultSetKey);
+			var pollResult = pollResults.FirstOrDefault(result => result.PollId == voteDto.Poll.Id);
+
+			await _redisService.DeleteSetMember<PollResult>(resultSetKey, pollResult);
+
+
+			// include user's vote in OptionResults
+			foreach(string choosedOption in voteDto.ChoosedOptions)
+			{
+				OptionResult optionResult = pollResult.OptionResults.FirstOrDefault(optResult => optResult.Option == choosedOption);
+				if(!pollResult.IsAnonymous)
+				{
+					optionResult.VotedUsers.Add(voteEntity.User);
+				}
+				optionResult.VoteCount += 1;
+			}
+
+			pollResult.TotalVoted += 1;
+			pollResult.VoteCount += voteDto.ChoosedOptions.Length;
+
+
+			await _redisService.AddToSet<PollResult>(resultSetKey, pollResult);
+
+			// signal
+			await _meetingHub.Clients.Group(voteDto.MeetingId.ToString()).SendAsync("OnPollResults", pollResult);
+		}
+
+		public async Task<PollsAndResultsDTO> GetPolls(string meetingId, string userEmail)
+		{
+			_redisService.Connect();
+
+			var polls = await _redisService.GetSetMembers<Poll>(meetingId + nameof(Poll));
+			var pollResults = await _redisService.GetSetMembers<PollResult>(meetingId + nameof(PollResult));
+
+
+			var resultsToSend = pollResults
+				.Where(pollResult => pollResult.OptionResults
+				.Any(optRes =>  optRes.VotedUsers
+				.Any(user => user.Email == userEmail)));
+
+			var pollsToSend = new List<Poll>();
+
+			foreach (var poll in polls)
+			{
+				if(!resultsToSend.Any(result => result.PollId == poll.Id))
+				{
+					pollsToSend.Add(poll);
+				}
+			}
+
+			var pollsAndResultsDTO = new PollsAndResultsDTO
+			{
+				Polls = _mapper.Map<ICollection<PollDTO>>(pollsToSend),
+				Results = _mapper.Map<ICollection<PollResultDTO>>(resultsToSend),
+			};
+
+			return pollsAndResultsDTO;
 		}
 	}
 }
+
+//var pollsAndResults = polls.Join(
+//	pollResults,
+//	poll => poll.Id,
+//	pollResult => pollResult.PollId,
+//	(poll, pollResult) => new
+//	{
+//		Poll = poll,
+//		Result = pollResult
+//	}
+//);
+
+//var pollsToSend = new List<Poll>();
+//var resultsToSend = new List<PollResult>();
+//int voteCount = 0;
+
+//foreach (var pollAndResult in pollsAndResults)
+//{
+//	voteCount += pollAndResult.Result.OptionResults.Sum(optRes => optRes.VotedUsers.Count);
+
+//	if(pollAndResult.Result.OptionResults.Any(optRes => optRes.VotedUsers.Any(user => user.Email == userEmail)))
+//	{
+//		resultsToSend.Add(pollAndResult.Result);
+//	}
+//	else
+//	{
+//		pollsToSend.Add(pollAndResult.Poll);
+//	}
+//}

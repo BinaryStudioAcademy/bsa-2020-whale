@@ -2,8 +2,6 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormArray } from '@angular/forms';
 import { PollCreateDto } from '../../../models/poll/poll-create-dto';
 import { HttpService } from 'app/core/services/http.service';
-import { env } from 'process';
-import { environment } from '@env';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
@@ -17,52 +15,40 @@ export class PollCreateComponent implements OnInit {
 
   public form: FormGroup;
 
-  constructor(private httpService: HttpService, private toastr: ToastrService) {
+  constructor(private toastr: ToastrService) {
     this.form = new FormGroup({
       title: new FormControl('', Validators.required),
       isAnonymous: new FormControl(false),
       isSingleChoise: new FormControl(false),
-
-      answers: new FormArray([
+      options: new FormArray([
         new FormControl('', Validators.required),
         new FormControl('', Validators.required),
       ]),
     });
   }
 
-  get answers() {
-    return this.form.get('answers') as FormArray;
+  get options() {
+    return this.form.get('options') as FormArray;
   }
 
-  addAnswer() {
-    if (this.answers.length == 5) {
-      this.toastr.warning('Maximum 5 answers', 'Warning');
+  addOption() {
+    if (this.options.length == 5) {
+      this.toastr.warning('Maximum 5 options', 'Warning');
       return;
     }
-    this.answers.push(new FormControl(''));
+    this.options.push(new FormControl(''));
   }
 
-  removeAnswer(event: MouseEvent) {
-    this.answers.removeAt(Number((<HTMLSpanElement>event.target).id));
+  removeOption(event: MouseEvent) {
+    this.options.removeAt(Number((<HTMLSpanElement>event.target).id));
   }
 
   ngOnInit(): void {}
 
   public onSubmit() {
-    let areAnswersRepeat: boolean = false;
+    let options = this.options.controls.map((ctrl) => ctrl.value);
 
-    let options = this.answers.controls.map((ctrl) => ctrl.value);
-
-    options.forEach((option, index) => {
-      options.forEach((opt, i) => {
-        if (option == opt && index != i) {
-          areAnswersRepeat = true;
-          return true;
-        }
-      });
-    });
-
-    if (areAnswersRepeat) {
+    if (new Set(options).size !== options.length) {
       this.toastr.error('Options must be unique', 'Error');
       return;
     }
@@ -72,7 +58,7 @@ export class PollCreateComponent implements OnInit {
       title: this.form.controls.title.value,
       isAnonymous: this.form.controls.isAnonymous.value,
       isSingleChoice: this.form.controls.isSingleChoise.value,
-      answers: this.answers.controls.map((ctrl) => ctrl.value),
+      options: this.options.controls.map((ctrl) => ctrl.value),
     };
 
     this.pollCreated.emit(pollCreateDto);

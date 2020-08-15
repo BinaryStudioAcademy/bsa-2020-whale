@@ -8,7 +8,9 @@ import { MeetingConnectionData } from '@shared/models/meeting/meeting-connect';
 import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
 import { Participant } from '@shared/models/participant/participant';
 import { PollDto } from '@shared/models/poll/poll-dto';
-import { PollResultsDto } from '@shared/models/poll/poll-results-dto';
+import { PollResultDto } from '@shared/models/poll/poll-result-dto';
+import { VoteDto } from '@shared/models/poll/vote-dto';
+import { VoterDto } from '@shared/models/poll/voter-dto';
 
 @Injectable({
   providedIn: 'root',
@@ -44,8 +46,8 @@ export class MeetingSignalrService {
   private pollReceived = new Subject<PollDto>();
   public pollReceived$ = this.pollReceived.asObservable();
 
-  private pollResultsReceived = new Subject<PollResultsDto>();
-  public pollResultsReceived$ = this.pollResultsReceived.asObservable();
+  private pollResultReceived = new Subject<PollResultDto>();
+  public pollResultReceived$ = this.pollResultReceived.asObservable();
 
   constructor(private hubService: SignalRService) {
     from(hubService.registerHub(environment.meetingApiUrl, 'meeting'))
@@ -103,8 +105,8 @@ export class MeetingSignalrService {
           this.pollReceived.next(poll);
         });
 
-        this.signalHub.on('OnPollResults', (pollResultsDto: PollResultsDto) => {
-          this.pollResultsReceived.next(pollResultsDto);
+        this.signalHub.on('OnPollResults', (pollResultDto: PollResultDto) => {
+          this.pollResultReceived.next(pollResultDto);
         });
       });
   }

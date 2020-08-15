@@ -27,10 +27,31 @@ namespace Whale.MeetingAPI.Controllers
 		}
 
 		[HttpPost("answers")]
-		public async Task<IActionResult> PostPollAnswer([FromBody] PollAnswerDTO pollAnswerDto)
+		public async Task<IActionResult> PostPollAnswer([FromBody] VoteDTO pollAnswerDto)
 		{
-			await _pollService.SavePollAnswer(pollAnswerDto);
-			return Ok();
+			try
+			{
+				await _pollService.SavePollAnswer(pollAnswerDto);
+				return Ok();
+			}
+			catch(Exception e)
+			{
+				return BadRequest(e);
+			}
+		}
+
+		[HttpGet]
+		public async Task<IActionResult> GetPollsAndResults(string meetingId, string userEmail)
+		{
+			try
+			{
+				var pollsAndResultsDto = await _pollService.GetPolls(meetingId, userEmail);
+				return Ok(pollsAndResultsDto);
+			}
+			catch (Exception e)
+			{
+				return BadRequest(e);
+			}
 		}
 	}
 }

@@ -5,5 +5,5 @@ export interface PollDto {
   isAnonymous: boolean;
   isSingleChoice: boolean;
 
-  answers: string[];
+  options: string[];
 }

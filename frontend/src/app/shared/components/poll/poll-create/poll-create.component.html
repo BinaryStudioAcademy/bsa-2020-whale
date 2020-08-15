@@ -50,14 +50,14 @@
       </div>
     </div>
 
-    <div formArrayName="answers" class="answers-container">
-      <div class="field" *ngFor="let answer of answers.controls; let i = index">
+    <div formArrayName="options" class="answers-container">
+      <div class="field" *ngFor="let option of options.controls; let i = index">
         <label>Option {{ i + 1 }}:</label>
         <span
           *ngIf="i > 1"
           class="close-icon"
           id="{{ i }}"
-          (click)="removeAnswer($event)"
+          (click)="removeoption($event)"
           >&times;</span
         >
         <div class="ui small input">
@@ -66,18 +66,18 @@
             [formControlName]="i"
             [class.invalid]="
               i < 2 &&
-              answers.controls[i].touched &&
-              answers.controls[i].invalid
+              options.controls[i].touched &&
+              options.controls[i].invalid
             "
           />
         </div>
         <div
           *ngIf="
-            i < 2 && answers.controls[i].touched && answers.controls[i].invalid
+            i < 2 && options.controls[i].touched && options.controls[i].invalid
           "
           class="errors-container"
         >
-          <span *ngIf="i < 2 && answers.controls[i].errors.required"
+          <span *ngIf="i < 2 && options.controls[i].errors.required"
             >This option is required.</span
           >
         </div>
@@ -87,7 +87,7 @@
     <button
       type="button"
       class="ui button answers-button"
-      (click)="addAnswer()"
+      (click)="addOption()"
     >
       Add option
     </button>

@@ -30,7 +30,7 @@ import { MeetingConnectionData } from '@shared/models/meeting/meeting-connect';
 import { PollData } from '@shared/models/poll/poll-data';
 import { HttpService } from 'app/core/services/http.service';
 import { PollCreateDto } from 'app/shared/models/poll/poll-create-dto';
-import { PollResultsDto } from '@shared/models/poll/poll-results-dto';
+import { PollResultDto } from '@shared/models/poll/poll-result-dto';
 import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
 import { MeetingMessageCreate } from '@shared/models/meeting/message/meeting-message-create';
 import { Participant } from '@shared/models/participant/participant';
@@ -40,6 +40,8 @@ import { AuthService } from 'app/core/auth/auth.service';
 import { UserMediaData } from '@shared/models/media/user-media-data';
 import { CopyClipboardComponent } from '@shared/components/copy-clipboard/copy-clipboard.component';
 import { SimpleModalService } from 'ngx-simple-modal';
+import { PollsAndResultsDto } from '@shared/models/poll/polls-and-results-dto';
+import { HttpParams } from '@angular/common/http';
 
 @Component({
   selector: 'app-meeting',
@@ -49,8 +51,8 @@ import { SimpleModalService } from 'ngx-simple-modal';
 export class MeetingComponent
   implements OnInit, AfterContentInit, AfterViewInit, OnDestroy {
   public meeting: Meeting;
-  public poll: PollDto;
-  public pollResults: PollResultsDto;
+  public polls: PollDto[] = [];
+  public pollResults: PollResultDto[] = [];
   public meetingStatistics: Statistics;
   public isShowChat = false;
   public isShowParticipants = false;
@@ -59,6 +61,8 @@ export class MeetingComponent
   public isShowPollResults = false;
   public isShowStatistics = false;
   public isScreenRecording = false;
+  public isCameraOn = true;
+  public isMicroOn = true;
 
   @ViewChild('currentVideo') currentVideo: ElementRef;
 
@@ -111,7 +115,20 @@ export class MeetingComponent
         (connectData) => {
           console.log(connectData);
           console.log(this.meeting);
+
           if (connectData.peerId === this.peer.id) {
+            this.httpService
+              .getRequest<PollsAndResultsDto>(
+                environment.meetingApiUrl + '/api/polls',
+                new HttpParams()
+                  .set('meetingId', this.meeting.id)
+                  .set('userEmail', connectData.participant.user.email)
+              )
+              .subscribe((pollsAndResults: PollsAndResultsDto) => {
+                console.error(pollsAndResults);
+                this.polls = pollsAndResults.polls;
+                this.pollResults = pollsAndResults.results;
+              });
             return;
           }
           const index = this.meeting.participants.findIndex(
@@ -122,6 +139,7 @@ export class MeetingComponent
           } else {
             this.meeting.participants.push(connectData.participant);
           }
+
           console.log('connected with peer: ' + connectData.peerId);
           this.connect(connectData.peerId);
           this.toastr.success('Connected successfuly');
@@ -205,15 +223,14 @@ export class MeetingComponent
     this.meetingSignalrService.pollReceived$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((poll: PollDto) => {
-        this.poll = poll;
+        this.polls.push(poll);
         this.isShowPoll = true;
       });
 
-    this.meetingSignalrService.pollResultsReceived$
+    this.meetingSignalrService.pollResultReceived$
       .pipe(takeUntil(this.unsubscribe$))
-      .subscribe((pollResultsDto: PollResultsDto) => {
-        console.log(pollResultsDto);
-        this.handlePollResults(pollResultsDto);
+      .subscribe((pollResultDto: PollResultDto) => {
+        this.handlePollResults(pollResultDto);
       });
 
     // when peer opened send my peer id everyone
@@ -226,12 +243,13 @@ export class MeetingComponent
       call.on('stream', (stream) => {
         debugger;
         if (!this.connectedStreams.includes(stream.id)) {
-          this.showMediaStream(stream);
           this.connectedStreams.push(stream.id);
           call;
           console.log(call.peer, 'call peer');
 
-          const participant = this.meeting.participants[0]; //to-do this.meeting.participants.find(p => p.streamId == stream.id);
+          const participant = this.meeting.participants.find(
+            (p) => p.streamId == stream.id
+          );
 
           console.log(stream.id);
           console.log(this.meeting);
@@ -278,7 +296,7 @@ export class MeetingComponent
       canLeave = confirm('You will end current meeting!');
     }
     if (canLeave) {
-      this.currentUserStream.getTracks().forEach((track) => track.stop());
+      this.currentUserStream?.getTracks().forEach((track) => track.stop());
       this.destroyPeer();
       this.meetingSignalrService.invoke(
         SignalMethods.OnUserDisconnect,
@@ -299,9 +317,30 @@ export class MeetingComponent
     this.isScreenRecording = true;
   }
 
-  turnOffCamera(): void {
-    this.currentUserStream.getTracks().forEach((track) => track.stop());
-    this.currentUserStream = null;
+  toggleCamera(): void {
+    if (this.isCameraOn) {
+      this.currentUserStream
+        .getVideoTracks()
+        .forEach((track) => (track.enabled = false));
+    } else {
+      this.currentUserStream
+        .getVideoTracks()
+        .forEach((track) => (track.enabled = true));
+    }
+    this.isCameraOn = !this.isCameraOn;
+  }
+
+  toggleMicro(): void {
+    if (this.isMicroOn) {
+      this.currentUserStream
+        .getAudioTracks()
+        .forEach((track) => (track.enabled = false));
+    } else {
+      this.currentUserStream
+        .getAudioTracks()
+        .forEach((track) => (track.enabled = true));
+    }
+    this.isMicroOn = !this.isMicroOn;
   }
 
   stopRecording(): void {
@@ -315,14 +354,14 @@ export class MeetingComponent
     );
   }
 
-  public onPollIconClick() {
-    if (this.poll) {
-      this.isShowPoll = !this.isShowPoll;
-    } else if (this.pollResults || this.isShowPoll) {
-      this.isShowPollResults = !this.isShowPollResults;
-    } else {
-      this.isPollCreating = !this.isPollCreating;
-    }
+  onPollIconClick() {
+    this.isPollCreating = false;
+    this.isShowPoll = !this.isShowPoll;
+  }
+
+  public onNewPollClick() {
+    this.isShowPoll = false;
+    this.isPollCreating = true;
   }
 
   public onPollCreated(pollCreateDto: PollCreateDto) {
@@ -353,16 +392,26 @@ export class MeetingComponent
       );
   }
 
-  public handlePollResults(pollResultsDto: PollResultsDto) {
-    this.pollResults = pollResultsDto;
-    if (this.isShowPoll) {
-      console.log('if');
-      return;
+  public onPollAnswered(poll: PollDto) {
+    const pollIndex = this.polls.findIndex((p) => p.id == poll.id);
+    this.polls.splice(pollIndex, 1);
+  }
+
+  public handlePollResults(pollResultDto: PollResultDto) {
+    const pollResultIndex = this.pollResults.findIndex(
+      (result) => result.pollId == pollResultDto.pollId
+    );
+    if (pollResultIndex != -1) {
+      this.pollResults[pollResultIndex] = pollResultDto;
+    } else {
+      this.pollResults.push(pollResultDto);
     }
-    this.isShowPollResults = true;
   }
 
   public onStatisticsIconClick(): void {
+    this.isShowPoll = false;
+    this.isPollCreating = false;
+    this.isShowPollResults = false;
     if (!this.meetingStatistics) {
       if (!this.meeting) {
         this.toastr.warning('Something went wrong. Try again later.');
@@ -510,32 +559,6 @@ export class MeetingComponent
           };
           this.getMeeting(link);
         });
-    });
-  }
-
-  // show mediaStream
-  private showMediaStream(stream: MediaStream) {
-    debugger;
-    const participants = document.getElementById('participants');
-
-    if (!this.connectedStreams.includes(stream.id)) {
-      //debugger
-      //this.createParticipantCard(this.currentParticipant, this.currentUserStream)
-    }
-  }
-
-  // // create html element to show video
-  private createParticipantCard(
-    participant: Participant,
-    stream: MediaStream
-  ): void {
-    this.mediaData.push({
-      id: participant.id,
-      userFirstName: participant.user.firstName,
-      userLastName: participant.user.secondName,
-      isCurrentUser: stream.id == this.currentUserStream.id,
-      isUserHost: participant.role == ParticipantRole.Host,
-      stream: stream,
     });
   }
 }

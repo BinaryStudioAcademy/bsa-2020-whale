@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Whale.Shared.DTO.User;
 
 namespace Whale.Shared.DTO.Poll
 {
-	public class PollResultsDTO
+	public class PollResultDTO
 	{
-		public Guid PollId { get; set; }
+		public string PollId { get; set; }
 		public string Title { get; set; }
 		public bool IsAnonymous { get; set; }
+		public List<OptionResultDTO> OptionResults { get; set; }
 		public int TotalVoted { get; set; }
-		public Dictionary<string, int> Results { get; set; } = new Dictionary<string, int>();
-
+		public int VoteCount { get; set; }
 	}
 }

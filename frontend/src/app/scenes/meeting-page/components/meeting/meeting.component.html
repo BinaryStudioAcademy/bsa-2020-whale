@@ -101,7 +101,6 @@ Enter+Shift for new line."
           <i
             style="margin-left: 10px; opacity: 0.8;"
             class="big video icon"
-            (click)="turnOffCamera()"
           ></i>
         </div>
 
@@ -163,20 +162,52 @@ Enter+Shift for new line."
     ></app-poll-create>
   </div>
 
-  <div class="poll-create-container" *ngIf="isShowPoll">
+  <!-- <div class="poll-create-container" *ngIf="isShowPoll">
     <app-poll
       [poll]="poll"
+      [user]="currentParticipant.user"
       (pollAnswered)="isShowPoll = false; poll = null"
     ></app-poll>
   </div>
 
   <div class="poll-create-container" *ngIf="isShowPollResults">
-    <app-poll-results [pollResults]="pollResults"></app-poll-results>
+    <app-poll-results [pollResult]="pollResults"></app-poll-results>
   </div>
 
   <div class="poll-create-container" *ngIf="isShowStatistics">
     <app-meeting-statistics
       [statistic]="meetingStatistics"
     ></app-meeting-statistics>
+  </div> -->
+  <div class="poll-create-container" *ngIf="isPollCreating">
+    <app-poll-create
+      [meetingId]="meeting.id"
+      (pollCreated)="onPollCreated($event)"
+    ></app-poll-create>
+  </div>
+
+  <div class="ui poll-create-container segment" *ngIf="isShowPoll">
+    <button *ngIf="currentParticipant.role == 1" (click)="onNewPollClick()">
+      New poll
+    </button>
+    <div class="ui segment">
+      <!--POLLS CONTAINER -->
+      <h3>Polls</h3>
+      <div *ngFor="let pollx of polls; let i = index">
+        <hr class="poll-divider" />
+        <app-poll
+          [poll]="pollx"
+          [user]="currentParticipant.user"
+          (pollAnswered)="onPollAnswered($event)"
+        ></app-poll>
+      </div>
+    </div>
+    <div class="ui segment">
+      <h3>Results</h3>
+      <div *ngFor="let pollxResult of pollResults; let i = index">
+        <hr class="poll-divider" />
+        <app-poll-results [pollResult]="pollxResult"></app-poll-results>
+      </div>
+    </div>
   </div>
 </div>
