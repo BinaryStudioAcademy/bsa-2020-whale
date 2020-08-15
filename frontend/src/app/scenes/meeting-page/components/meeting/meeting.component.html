@@ -131,7 +131,7 @@ Enter+Shift for new line."
           <span data-tooltip="Share Screen" data-position="top left">
             <i class="big share square icon big-left-margin"></i>
           </span>
-          <span data-tooltip="Poolls">
+          <span data-tooltip="Polls">
             <i (click)="onPollIconClick()" class="big clipboard list icon"></i
           ></span>
           <span data-tooltip="Statistics">
@@ -175,21 +175,28 @@ Enter+Shift for new line."
 
   <div class="poll-create-container" *ngIf="isShowPollResults">
     <app-poll-results [pollResult]="pollResults"></app-poll-results>
-  </div>
+  </div> -->
 
   <div class="poll-create-container" *ngIf="isShowStatistics">
     <app-meeting-statistics
       [statistic]="meetingStatistics"
     ></app-meeting-statistics>
-  </div> -->
-  <div class="poll-create-container" *ngIf="isPollCreating">
+  </div>
+
+  <div
+    class="ui poll-create-container overflow-scroll segment"
+    *ngIf="isPollCreating"
+  >
     <app-poll-create
       [meetingId]="meeting.id"
       (pollCreated)="onPollCreated($event)"
     ></app-poll-create>
   </div>
 
-  <div class="ui poll-create-container segment" *ngIf="isShowPoll">
+  <div
+    class="ui poll-create-container overflow-scroll segment"
+    *ngIf="isShowPoll"
+  >
     <button *ngIf="currentParticipant.role == 1" (click)="onNewPollClick()">
       New poll
     </button>

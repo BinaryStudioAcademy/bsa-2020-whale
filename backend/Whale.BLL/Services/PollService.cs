@@ -83,10 +83,7 @@ namespace Whale.BLL.Services
 			foreach(string choosedOption in voteDto.ChoosedOptions)
 			{
 				OptionResult optionResult = pollResult.OptionResults.FirstOrDefault(optResult => optResult.Option == choosedOption);
-				if(!pollResult.IsAnonymous)
-				{
-					optionResult.VotedUsers.Add(voteEntity.User);
-				}
+				optionResult.VotedUsers.Add(voteEntity.User);
 				optionResult.VoteCount += 1;
 			}
 
@@ -95,6 +92,14 @@ namespace Whale.BLL.Services
 
 
 			await _redisService.AddToSet<PollResult>(resultSetKey, pollResult);
+
+			if (pollResult.IsAnonymous)
+			{
+				foreach (var optionResult in pollResult.OptionResults)
+				{
+					optionResult.VotedUsers = new List<Voter>();
+				}
+			}
 
 			// signal
 			await _meetingHub.Clients.Group(voteDto.MeetingId.ToString()).SendAsync("OnPollResults", pollResult);
@@ -110,8 +115,19 @@ namespace Whale.BLL.Services
 
 			var resultsToSend = pollResults
 				.Where(pollResult => pollResult.OptionResults
-				.Any(optRes =>  optRes.VotedUsers
-				.Any(user => user.Email == userEmail)));
+				.Any(optRes => optRes.VotedUsers
+				.Any(user => user.Email == userEmail))).ToList();
+
+			foreach(var result in resultsToSend)
+			{
+				if(result.IsAnonymous)
+				{
+					foreach(var optionResult in result.OptionResults)
+					{
+						optionResult.VotedUsers = new List<Voter>();
+					}
+				}
+			}
 
 			var pollsToSend = new List<Poll>();
 
