@@ -20,8 +20,11 @@ export class MeetingSignalrService {
   private signalUserConected = new Subject<MeetingConnectionData>();
   public signalUserConected$ = this.signalUserConected.asObservable();
 
-  private signalUserDisconected = new Subject<MeetingConnectionData>();
-  public signalUserDisconected$ = this.signalUserDisconected.asObservable();
+  private signalParticipantLeft = new Subject<MeetingConnectionData>();
+  public signalParticipantLeft$ = this.signalParticipantLeft.asObservable();
+
+  private signalParticipantDisconnected = new Subject<Participant>();
+  public signalParticipantDisconnected$ = this.signalParticipantDisconnected.asObservable();
 
   private participantConected = new Subject<Participant[]>();
   public participantConected$ = this.participantConected.asObservable();
@@ -78,9 +81,16 @@ export class MeetingSignalrService {
         );
 
         this.signalHub.on(
-          'OnUserDisconnect',
+          'OnParticipantLeft',
           (connectionData: MeetingConnectionData) => {
-            this.signalUserDisconected.next(connectionData);
+            this.signalParticipantLeft.next(connectionData);
+          }
+        );
+
+        this.signalHub.on(
+          'OnParticipantDisconnected',
+          (disconnectedParticipant: Participant) => {
+            this.signalParticipantDisconnected.next(disconnectedParticipant);
           }
         );
 

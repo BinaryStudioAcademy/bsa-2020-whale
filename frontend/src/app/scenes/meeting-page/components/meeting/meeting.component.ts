@@ -159,15 +159,56 @@ export class MeetingComponent
         }
       );
 
-    // when someone disconnected from meeting
-    this.meetingSignalrService.signalUserDisconected$
+    // when someone left meeting
+    this.meetingSignalrService.signalParticipantLeft$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((connectionData) => {
+        debugger;
         this.meeting.participants = this.meeting.participants.filter(
           (p) => p.id !== connectionData.participant.id
         );
+
         if (this.connectedPeers.has(connectionData.peerId)) {
           this.connectedPeers.delete(connectionData.peerId);
+        }
+
+        const disconectedMediaDataIndex = this.mediaData.findIndex(
+          (m) => m.stream.id == connectionData.participant.streamId
+        );
+        if (disconectedMediaDataIndex) {
+          this.mediaData.splice(disconectedMediaDataIndex, 1);
+          const secondName = ` ${
+            connectionData.participant.user.secondName ?? ''
+          }`;
+          this.toastr.show(
+            `${connectionData.participant.user.firstName}${secondName} left`
+          );
+        }
+      });
+
+    this.meetingSignalrService.signalParticipantDisconnected$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe((participant) => {
+        debugger;
+        this.meeting.participants = this.meeting.participants.filter(
+          (p) => p.id !== participant.id
+        );
+
+        this.connectedPeers = new Map(
+          [...this.connectedPeers].filter(
+            ([_, v]) => v.id !== participant.streamId
+          )
+        );
+
+        const disconectedMediaDataIndex = this.mediaData.findIndex(
+          (m) => m.stream.id == participant.streamId
+        );
+        if (disconectedMediaDataIndex) {
+          this.mediaData.splice(disconectedMediaDataIndex, 1);
+          const secondName = ` ${participant.user.secondName ?? ''}`;
+          this.toastr.show(
+            `${participant.user.firstName}${secondName} disconnected`
+          );
         }
       });
 

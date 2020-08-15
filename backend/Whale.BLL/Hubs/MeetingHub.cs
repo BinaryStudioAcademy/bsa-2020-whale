@@ -8,6 +8,7 @@ using Whale.BLL.Interfaces;
 using Whale.Shared.DTO.Poll;
 using Whale.BLL.Services;
 using Whale.Shared.DTO.Participant;
+using System.Linq;
 
 namespace Whale.BLL.Hubs
 {
@@ -15,7 +16,7 @@ namespace Whale.BLL.Hubs
     {
         private readonly IMeetingService _meetingService;
         private readonly ParticipantService _participantService;
-        private readonly static Dictionary<string, List<ParticipantDTO>> _participants = 
+        private readonly static Dictionary<string, List<ParticipantDTO>> _groupsParticipants = 
             new Dictionary<string, List<ParticipantDTO>>();
 
         public MeetingHub(IMeetingService meetingService, ParticipantService participantService)
@@ -32,31 +33,52 @@ namespace Whale.BLL.Hubs
                 Guid.Parse(connectionData.MeetingId), connectionData.UserEmail);
             participant.StreamId = connectionData.StreamId;
             connectionData.Participant = participant;
+            connectionData.Participant.ActiveConnectionId = Context.ConnectionId;
 
-            if (_participants.TryGetValue(connectionData.MeetingId, out var groupParticipants))
+            if (_groupsParticipants.TryGetValue(connectionData.MeetingId, out var groupParticipants))
             {
                 groupParticipants.Add(participant);
             }
             else
             {
-                _participants[connectionData.MeetingId] = new List<ParticipantDTO> { participant };
+                _groupsParticipants[connectionData.MeetingId] = new List<ParticipantDTO> { participant };
             }
          
             await Clients.Group(connectionData.MeetingId).SendAsync("OnUserConnect", connectionData);
-            await Clients.Caller.SendAsync("OnParticipantConnect", _participants[connectionData.MeetingId]);
+            await Clients.Caller.SendAsync("OnParticipantConnect", _groupsParticipants[connectionData.MeetingId]);
         }
 
-        [HubMethodName("OnUserDisconnect")]
-        public async Task Disconnect(MeetingConnectDTO ConnectionData)
+        public async override Task OnDisconnectedAsync(Exception exception)
         {
-            var disconnectedParticipant = _participants[ConnectionData.MeetingId].Find(p => p.Id == ConnectionData.Participant.Id);
-            _participants[ConnectionData.MeetingId].Remove(disconnectedParticipant);
+            var disconectedParticipantInGroups = _groupsParticipants
+                .Where(g => g.Value.Any(p => p.ActiveConnectionId == Context.ConnectionId))
+                .ToList();
+
+            foreach(var group in disconectedParticipantInGroups)
+            {
+                var disconnectedParticipant = group.Value.Find(p => p.ActiveConnectionId == Context.ConnectionId);
+
+                _groupsParticipants[group.Key].Remove(disconnectedParticipant);
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, group.Key);
+                await Clients.Group(group.Key).SendAsync("OnParticipantDisconnected", disconnectedParticipant);
+            }
+
+            await base.OnDisconnectedAsync(exception);
+        }
+
+        [HubMethodName("OnParticipantLeft")]
+        public async Task ParticipantLeft(MeetingConnectDTO ConnectionData)
+        {
+            var disconnectedParticipant = _groupsParticipants[ConnectionData.MeetingId].Find(p => p.Id == ConnectionData.Participant.Id);
+
+            ConnectionData.Participant = disconnectedParticipant;
+            _groupsParticipants[ConnectionData.MeetingId].Remove(disconnectedParticipant);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, ConnectionData.MeetingId);
-            await Clients.Group(ConnectionData.MeetingId).SendAsync("OnUserDisconnect", ConnectionData);
+            await Clients.Group(ConnectionData.MeetingId).SendAsync("OnParticipantLeft", ConnectionData);
 
             if (await _meetingService.ParticipantDisconnect(ConnectionData.MeetingId, ConnectionData.UserEmail))
             {
-                await Clients.Group(ConnectionData.MeetingId).SendAsync("OnMeetingEnded", ConnectionData);
+               await Clients.Group(ConnectionData.MeetingId).SendAsync("OnMeetingEnded", ConnectionData);
             }
         }
 
