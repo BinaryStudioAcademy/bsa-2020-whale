@@ -17,7 +17,6 @@ import { ActivatedRoute, Router, Params } from '@angular/router';
 import { MeetingService } from 'app/core/services/meeting.service';
 import { takeUntil, filter } from 'rxjs/operators';
 import { Meeting } from '@shared/models/meeting/meeting';
-import { PollDto } from '@shared/models/poll/poll-dto';
 import {
   MeetingSignalrService,
   SignalMethods,
@@ -27,10 +26,9 @@ import { DOCUMENT } from '@angular/common';
 import { BlobService } from 'app/core/services/blob.service';
 import { MeetingConnectionData } from '@shared/models/meeting/meeting-connect';
 
-import { PollData } from '@shared/models/poll/poll-data';
 import { HttpService } from 'app/core/services/http.service';
+import { PollService } from 'app/core/services/poll.service';
 import { PollCreateDto } from 'app/shared/models/poll/poll-create-dto';
-import { PollResultsDto } from '@shared/models/poll/poll-results-dto';
 import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
 import { MeetingMessageCreate } from '@shared/models/meeting/message/meeting-message-create';
 import { Participant } from '@shared/models/participant/participant';
@@ -49,14 +47,9 @@ import { SimpleModalService } from 'ngx-simple-modal';
 export class MeetingComponent
   implements OnInit, AfterContentInit, AfterViewInit, OnDestroy {
   public meeting: Meeting;
-  public poll: PollDto;
-  public pollResults: PollResultsDto;
   public meetingStatistics: Statistics;
   public isShowChat = false;
   public isShowParticipants = false;
-  public isPollCreating = false;
-  public isShowPoll = false;
-  public isShowPollResults = false;
   public isShowStatistics = false;
   public isScreenRecording = false;
   public isCameraOn = true;
@@ -73,6 +66,7 @@ export class MeetingComponent
   public currentParticipant: Participant;
 
   private meetingSignalrService: MeetingSignalrService;
+  public pollService: PollService;
   private unsubscribe$ = new Subject<void>();
   private currentUserStream: MediaStream;
   private connectionData: MeetingConnectionData;
@@ -97,6 +91,12 @@ export class MeetingComponent
     private simpleModalService: SimpleModalService
   ) {
     this.meetingSignalrService = new MeetingSignalrService(signalRService);
+    this.pollService = new PollService(
+      this.meetingSignalrService,
+      this.httpService,
+      this.toastr,
+      this.unsubscribe$
+    );
   }
 
   public async ngOnInit() {
@@ -115,9 +115,15 @@ export class MeetingComponent
         (connectData) => {
           console.log(connectData);
           console.log(this.meeting);
+
           if (connectData.peerId === this.peer.id) {
+            this.pollService.getPollsAndResults(
+              this.meeting.id,
+              connectData.participant.user.email
+            );
             return;
           }
+
           const index = this.meeting.participants.findIndex(
             (p) => p.id === connectData.participant.id
           );
@@ -126,6 +132,7 @@ export class MeetingComponent
           } else {
             this.meeting.participants.push(connectData.participant);
           }
+
           console.log('connected with peer: ' + connectData.peerId);
           this.connect(connectData.peerId);
           this.toastr.success('Connected successfuly');
@@ -245,20 +252,6 @@ export class MeetingComponent
           this.toastr.error('Error occured when sending message');
         }
       );
-
-    this.meetingSignalrService.pollReceived$
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe((poll: PollDto) => {
-        this.poll = poll;
-        this.isShowPoll = true;
-      });
-
-    this.meetingSignalrService.pollResultsReceived$
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe((pollResultsDto: PollResultsDto) => {
-        console.log(pollResultsDto);
-        this.handlePollResults(pollResultsDto);
-      });
 
     // when peer opened send my peer id everyone
     this.peer.on('open', (id) => this.onPeerOpen(id));
@@ -382,58 +375,11 @@ export class MeetingComponent
     );
   }
 
-  public onPollIconClick() {
-    this.isShowStatistics = false;
-    if (this.poll) {
-      this.isShowPoll = !this.isShowPoll;
-    } else if (this.pollResults || this.isShowPoll) {
-      this.isShowPollResults = !this.isShowPollResults;
-    } else {
-      this.isPollCreating = !this.isPollCreating;
-    }
-  }
-
-  public onPollCreated(pollCreateDto: PollCreateDto) {
-    this.httpService
-      .postRequest<PollCreateDto, PollDto>(
-        environment.meetingApiUrl + '/api/polls',
-        pollCreateDto
-      )
-      .subscribe(
-        (response: PollDto) => {
-          const pollData: PollData = {
-            userId: this.connectionData.userEmail,
-            groupId: this.connectionData.meetingId,
-            pollDto: response,
-          };
-
-          this.meetingSignalrService.invoke(
-            SignalMethods.OnPollCreated,
-            pollData
-          );
-
-          this.isPollCreating = false;
-          this.toastr.success('Poll was created!', 'Success');
-        },
-        (error) => {
-          this.toastr.error(error);
-        }
-      );
-  }
-
-  public handlePollResults(pollResultsDto: PollResultsDto) {
-    this.pollResults = pollResultsDto;
-    if (this.isShowPoll) {
-      console.log('if');
-      return;
-    }
-    this.isShowPollResults = true;
-  }
-
   public onStatisticsIconClick(): void {
-    this.isShowPoll = false;
-    this.isPollCreating = false;
-    this.isShowPollResults = false;
+    this.pollService.isShowPoll = false;
+    this.pollService.isPollCreating = false;
+    this.pollService.isShowPollResults = false;
+
     if (!this.meetingStatistics) {
       if (!this.meeting) {
         this.toastr.warning('Something went wrong. Try again later.');

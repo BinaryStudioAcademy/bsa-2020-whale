@@ -1,12 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Whale.DAL.Abstraction;
 
 namespace Whale.DAL.Models.Poll
 {
-	class PollResult
-	{
-		public Guid PollAnswerId { get; set; }
-		public Guid UserId { get; set; }
-	}
+    public class PollResult : BaseEntity
+    {
+        public Guid PollId { get; set; }
+        public string Title { get; set; }
+        public bool IsAnonymous { get; set; }
+        public List<OptionResult> OptionResults { get; set; } = new List<OptionResult>();
+        public int TotalVoted { get; set; }
+        public int VoteCount { get; set; }
+    }
 }
