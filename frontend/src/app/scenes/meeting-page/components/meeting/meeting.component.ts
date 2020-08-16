@@ -54,22 +54,23 @@ export class MeetingComponent
   public isScreenRecording = false;
   public isCameraOn = true;
   public isMicroOn = true;
+  public isShowCurrentParticipantCard = true;
 
   @ViewChild('currentVideo') currentVideo: ElementRef;
 
   public peer: Peer;
-  public connectedStreams: string[] = [];
+  public connectedStreams: MediaStream[] = [];
   public mediaData: UserMediaData[] = [];
   public connectedPeers = new Map<string, MediaStream>();
   public messages: MeetingMessage[] = [];
   public msgText = '';
   public currentParticipant: Participant;
+  public connectionData: MeetingConnectionData;
 
   private meetingSignalrService: MeetingSignalrService;
   public pollService: PollService;
   private unsubscribe$ = new Subject<void>();
   private currentUserStream: MediaStream;
-  private connectionData: MeetingConnectionData;
   private currentStreamLoaded = new EventEmitter<void>();
   private contectedAt = new Date();
   private elem: any;
@@ -153,15 +154,7 @@ export class MeetingComponent
             (p) => p.user.email === this.authService.currentUser.email
           );
 
-          this.mediaData.push({
-            id: this.currentParticipant.id,
-            userFirstName: this.currentParticipant.user.firstName,
-            userLastName: this.currentParticipant.user.secondName,
-            avatarUrl: this.currentParticipant.user.avatarUrl,
-            isCurrentUser: true,
-            isUserHost: this.currentParticipant.role == ParticipantRole.Host,
-            stream: this.currentUserStream,
-          });
+          this.createParticipantCard(this.currentParticipant);
         },
         (err) => {
           this.toastr.error(err.Message);
@@ -262,25 +255,15 @@ export class MeetingComponent
       // show caller
       call.on('stream', (stream) => {
         debugger;
-        if (!this.connectedStreams.includes(stream.id)) {
-          this.connectedStreams.push(stream.id);
+        if (!this.connectedStreams.includes(stream)) {
+          this.connectedStreams.push(stream);
           console.log(call.peer, 'call peer');
 
           const participant = this.meeting.participants.find(
             (p) => p.streamId == stream.id
           );
 
-          console.log(stream.id);
-          console.log(this.meeting);
-          console.log(participant);
-          this.mediaData.push({
-            id: participant?.id,
-            userFirstName: participant?.user?.firstName,
-            userLastName: participant?.user?.secondName,
-            isCurrentUser: false,
-            isUserHost: participant?.role === ParticipantRole.Host,
-            stream: stream,
-          });
+          this.createParticipantCard(participant);
         }
         this.connectedPeers.set(call.peer, stream);
       });
@@ -442,26 +425,48 @@ export class MeetingComponent
     }
   }
 
+  // card actions
+  public hideViewEventHandler(mediaDataId): void {
+    debugger;
+    this.mediaData = this.mediaData.filter((d) => d.id != mediaDataId);
+    this.isShowCurrentParticipantCard = false;
+  }
+
+  public createParticipantCard(
+    participant: Participant,
+    shouldPrepend = false
+  ): void {
+    var newMediaData = {
+      id: participant.id,
+      userFirstName: participant.user.firstName,
+      userLastName: participant.user.secondName,
+      avatarUrl: participant.user.avatarUrl,
+      isCurrentUser: participant.id === this.currentParticipant.id,
+      isUserHost: participant.role == ParticipantRole.Host,
+      stream:
+        participant.id === this.currentParticipant.id
+          ? this.currentUserStream
+          : this.connectedStreams.find((s) => s.id === participant.streamId),
+    };
+
+    shouldPrepend
+      ? this.mediaData.unshift(newMediaData)
+      : this.mediaData.push(newMediaData);
+  }
+
   // call to peer
   private connect(recieverPeerId: string) {
     const call = this.peer.call(recieverPeerId, this.currentUserStream);
 
     // get answer and show other user
     call.on('stream', (stream) => {
-      this.connectedStreams.push(stream.id);
+      this.connectedStreams.push(stream);
       const connectedPeer = this.connectedPeers.get(call.peer);
       if (!connectedPeer || connectedPeer.id !== stream.id) {
         var participant = this.meeting.participants.find(
           (p) => p.streamId == stream.id
         );
-        this.mediaData.push({
-          id: participant.id,
-          userFirstName: participant.user.firstName,
-          userLastName: participant.user.secondName,
-          isCurrentUser: this.currentUserStream.id === stream.id,
-          isUserHost: participant.role === ParticipantRole.Host,
-          stream: stream,
-        });
+        this.createParticipantCard(participant);
         this.connectedPeers.set(call.peer, stream);
       }
     });
