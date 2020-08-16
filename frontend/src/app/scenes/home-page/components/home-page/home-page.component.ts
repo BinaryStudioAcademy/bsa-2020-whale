@@ -22,6 +22,8 @@ import { MeetingCreate } from '@shared/models/meeting/meeting-create';
 import { takeUntil, tap, filter } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { AuthService } from 'app/core/auth/auth.service';
+import { LinkTypeEnum } from '@shared/Enums/LinkTypeEnum';
+import { BlobService } from '../../../../core/services/blob.service';
 
 @Component({
   selector: 'app-home-page',
@@ -49,7 +51,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
     private simpleModalService: SimpleModalService,
     private meetingService: MeetingService,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private blobService: BlobService
   ) {}
 
   ngOnDestroy(): void {
@@ -66,7 +69,16 @@ export class HomePageComponent implements OnInit, OnDestroy {
           .pipe(tap(() => (this.isUserLoadig = false)))
           .subscribe(
             (userFromDB: User) => {
-              this.loggedInUser = userFromDB;
+              if (userFromDB.linkType === LinkTypeEnum.Internal) {
+                this.blobService
+                  .GetImageByName(userFromDB.avatarUrl)
+                  .subscribe((fullLink: string) => {
+                    userFromDB.avatarUrl = fullLink;
+                    this.loggedInUser = userFromDB;
+                  });
+              } else {
+                this.loggedInUser = userFromDB;
+              }
               this.ownerEmail = this.loggedInUser?.email;
             },
             (error) => this.toastr.error(error.Message)
