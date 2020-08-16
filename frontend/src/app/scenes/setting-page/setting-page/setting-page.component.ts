@@ -10,7 +10,9 @@ export class SettingPageComponent implements OnInit, OnDestroy {
   isAudio = true;
   constructor() {}
   ngOnDestroy(): void {}
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.changeAudio();
+  }
   // tslint:disable-next-line: typedef
   changeVideo() {
     this.isVideo = true;
