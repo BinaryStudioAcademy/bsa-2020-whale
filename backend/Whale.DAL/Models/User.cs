@@ -11,6 +11,7 @@ namespace Whale.DAL.Models
         public string SecondName { get; set; }
         public DateTime RegistrationDate { get; set; }
         public string AvatarUrl { get; set; }
+        public LinkTypeEnum LinkType { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }
     }

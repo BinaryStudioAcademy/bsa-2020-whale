@@ -297,6 +297,9 @@ namespace Whale.DAL.Migrations
                     b.Property<string>("FirstName")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("LinkType")
+                        .HasColumnType("int");
+
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
 
@@ -422,7 +425,7 @@ namespace Whale.DAL.Migrations
             modelBuilder.Entity("Whale.DAL.Models.Participant", b =>
                 {
                     b.HasOne("Whale.DAL.Models.Meeting", "Meeting")
-                        .WithMany()
+                        .WithMany("Participants")
                         .HasForeignKey("MeetingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
