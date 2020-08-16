@@ -86,45 +86,57 @@ Enter+Shift for new line."
     <div class="options">
       <div class="ui options__buttons">
         <div class="inner-block">
-          <span *ngIf="!isScreenRecording" data-tooltip="Toggle Microphone" data-position="top left">
-            <i class="big microphone icon" (click)="toggleMicro()"></i>
+          <span
+            *ngIf="!isScreenRecording"
+            data-tooltip="Toggle Microphone"
+            data-position="top left"
+          >
+            <i class="big microphone icon" (click)="turnOffMicrophone()"></i>
           </span>
           <span *ngIf="!isScreenRecording" data-tooltip="Toggle Webcam">
             <i
               class="big video icon big-left-margin"
-              (click)="toggleCamera()"
+              (click)="turnOffCamera()"
             ></i>
           </span>
         </div>
 
         <div class="display-flex inner-block">
           <div class="participants-button-container">
-            <div class="relative-container" data-tooltip="Participants" data-position="top left">
+            <div
+              class="relative-container"
+              data-tooltip="Participants"
+              data-position="top left"
+            >
               <i
                 class="users icon big users-icon-fix"
                 (click)="isShowParticipants = !isShowParticipants"
               ></i>
             </div>
           </div>
-          <span *ngIf="!isScreenRecording" data-tooltip="Start Recording" data-position="top left">
-            <i
-            (click)="startRecording()"
-            class="big circle icon"
-            ></i>
+          <span
+            *ngIf="!isScreenRecording"
+            data-tooltip="Start Recording"
+            data-position="top left"
+          >
+            <i (click)="startRecording()" class="big circle icon"></i>
           </span>
-          <span *ngIf="isScreenRecording" data-tooltip="Stop Recording" data-position="top left">
-            <i
-              (click)="stopRecording()"
-              class="big stop circle icon"
-            ></i>
+          <span
+            *ngIf="isScreenRecording"
+            data-tooltip="Stop Recording"
+            data-position="top left"
+          >
+            <i (click)="stopRecording()" class="big stop circle icon"></i>
           </span>
           <span data-tooltip="Share Screen" data-position="top left">
             <i class="big share square icon big-left-margin"></i>
           </span>
           <span data-tooltip="Poolls">
-            <i (click)="onPollIconClick()" class="big clipboard list icon"></i></span>
+            <i (click)="onPollIconClick()" class="big clipboard list icon"></i
+          ></span>
           <span data-tooltip="Statistics">
-            <i (click)="onStatisticsIconClick()" class="big chart bar icon"></i></span>
+            <i (click)="onStatisticsIconClick()" class="big chart bar icon"></i
+          ></span>
           <span data-tooltip="Copy Link" data-position="top right">
             <i (click)="onCopyIconClick()" class="big copy icon"></i>
           </span>
@@ -132,7 +144,10 @@ Enter+Shift for new line."
             <i (click)="showChat()" class="big wechat icon big-left-margin"></i>
           </span>
           <span data-tooltip="Fullscreen" data-position="top right">
-            <i (click)="goFullscreen()" class="big desktop icon big-left-margin"></i>
+            <i
+              (click)="goFullscreen()"
+              class="big desktop icon big-left-margin"
+            ></i>
           </span>
         </div>
         <div>
