@@ -202,6 +202,13 @@ Enter+Shift for new line."
       <h3>Polls</h3>
       <div *ngFor="let pollx of pollService.polls; let i = index">
         <hr class="poll-divider" />
+        <span
+          *ngIf="currentParticipant.role == 1"
+          class="delete-poll-icon"
+          (click)="pollService.onDeletePollIconClick(pollx)"
+        >
+          &times;
+        </span>
         <app-poll
           [poll]="pollx"
           [user]="currentParticipant.user"
@@ -213,6 +220,15 @@ Enter+Shift for new line."
       <h3>Results</h3>
       <div *ngFor="let pollxResult of pollService.pollResults; let i = index">
         <hr class="poll-divider" />
+        <span
+          *ngIf="currentParticipant.role == 1"
+          class="delete-poll-icon"
+          (click)="
+            pollService.onDeletePollResultIconClick(pollxResult, meeting.id)
+          "
+        >
+          &times;
+        </span>
         <app-poll-results [pollResult]="pollxResult"></app-poll-results>
       </div>
     </div>

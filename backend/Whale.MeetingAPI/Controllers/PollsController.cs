@@ -53,5 +53,12 @@ namespace Whale.MeetingAPI.Controllers
 				return BadRequest(e);
 			}
 		}
+
+		[HttpDelete]
+		public async Task<IActionResult> DeletePoll(string meetingId, string pollId)
+		{
+			await _pollService.DeletePoll(meetingId, pollId);
+			return NoContent();
+		}
 	}
 }

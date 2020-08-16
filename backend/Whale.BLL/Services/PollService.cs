@@ -147,6 +147,26 @@ namespace Whale.BLL.Services
 
 			return pollsAndResultsDTO;
 		}
+
+		public async Task DeletePoll(string meetingId, string pollId)
+		{
+			_redisService.Connect();
+
+			string pollsKey = meetingId + nameof(Poll);
+			string resultsKey = meetingId + nameof(PollResult);
+
+			var polls = await _redisService.GetSetMembers<Poll>(pollsKey);
+			var pollResults = await _redisService.GetSetMembers<PollResult>(resultsKey);
+
+			var pollToDelete = polls.FirstOrDefault(poll => poll.Id.ToString() == pollId);
+			var resultToDelete = pollResults.FirstOrDefault(result => result.PollId.ToString() == pollId);
+
+			await _redisService.DeleteSetMember(pollsKey, pollToDelete);
+			await _redisService.DeleteSetMember(resultsKey, resultToDelete);
+
+			// signal
+			await _meetingHub.Clients.Group(meetingId).SendAsync("OnPollDeleted", pollId);
+		}
 	}
 }
 

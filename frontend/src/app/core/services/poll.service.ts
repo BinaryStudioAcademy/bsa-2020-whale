@@ -19,6 +19,8 @@ import { Subject } from 'rxjs';
   providedIn: 'root',
 })
 export class PollService {
+  private route = environment.meetingApiUrl + '/api/polls';
+
   public polls: PollDto[] = [];
   public pollResults: PollResultDto[] = [];
 
@@ -42,6 +44,12 @@ export class PollService {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((pollResultDto: PollResultDto) => {
         this.onPollResultReceived(pollResultDto);
+      });
+
+    this.meetingSignalrService.pollDeleted$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe((pollId: string) => {
+        this.onPollDeleted(pollId);
       });
   }
 
@@ -114,6 +122,20 @@ export class PollService {
     }
   }
 
+  public onPollDeleted(pollId: string) {
+    const pollIndex = this.polls.findIndex((poll) => poll.id == pollId);
+    if (pollIndex != -1) {
+      this.polls.splice(pollIndex, 1);
+    }
+
+    const resultIndex = this.pollResults.findIndex(
+      (result) => result.pollId == pollId
+    );
+    if (resultIndex != -1) {
+      this.pollResults.splice(resultIndex, 1);
+    }
+  }
+
   public onPollIconClick() {
     this.isPollCreating = false;
     this.isShowPoll = !this.isShowPoll;
@@ -122,5 +144,28 @@ export class PollService {
   public onNewPollClick() {
     this.isShowPoll = false;
     this.isPollCreating = true;
+  }
+
+  public onDeletePollIconClick(poll: PollDto) {
+    const httpParams = new HttpParams()
+      .set('pollId', poll.id)
+      .set('meetingId', poll.meetingId);
+
+    this.httpService.deleteRequest(this.route, httpParams).subscribe(() => {
+      // spinner
+    });
+  }
+
+  public onDeletePollResultIconClick(
+    pollResult: PollResultDto,
+    meetingId: string
+  ) {
+    const httpParams = new HttpParams()
+      .set('pollId', pollResult.pollId)
+      .set('meetingId', meetingId);
+
+    this.httpService.deleteRequest(this.route, httpParams).subscribe(() => {
+      // spinner
+    });
   }
 }

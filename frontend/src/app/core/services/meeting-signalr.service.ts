@@ -52,6 +52,9 @@ export class MeetingSignalrService {
   private pollResultReceived = new Subject<PollResultDto>();
   public pollResultReceived$ = this.pollResultReceived.asObservable();
 
+  private pollDeleted = new Subject<string>();
+  public pollDeleted$ = this.pollDeleted.asObservable();
+
   constructor(private hubService: SignalRService) {
     from(hubService.registerHub(environment.meetingApiUrl, 'meeting'))
       .pipe(
@@ -117,6 +120,10 @@ export class MeetingSignalrService {
 
         this.signalHub.on('OnPollResults', (pollResultDto: PollResultDto) => {
           this.pollResultReceived.next(pollResultDto);
+        });
+
+        this.signalHub.on('OnPollDeleted', (pollId: string) => {
+          this.pollDeleted.next(pollId);
         });
       });
   }
