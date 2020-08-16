@@ -94,12 +94,12 @@ Enter+Shift for new line."
             data-tooltip="Toggle Microphone"
             data-position="top left"
           >
-            <i class="big microphone icon" (click)="toggleMicro()"></i>
+            <i class="big microphone icon" (click)="turnOffMicrophone()"></i>
           </span>
           <span *ngIf="!isScreenRecording" data-tooltip="Toggle Webcam">
             <i
               class="big video icon big-left-margin"
-              (click)="toggleCamera()"
+              (click)="turnOffCamera()"
             ></i>
           </span>
         </div>

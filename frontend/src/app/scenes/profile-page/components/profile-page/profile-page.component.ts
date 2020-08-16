@@ -9,6 +9,7 @@ import { AuthService } from '../../../../core/auth/auth.service';
 import { FormGroup, FormControl } from '@angular/forms';
 import { filter } from 'rxjs/operators';
 import Avatar from 'avatar-initials';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 
 @Component({
   selector: 'app-profile-page',
@@ -27,6 +28,9 @@ export class ProfilePageComponent implements OnInit {
 
   @ViewChild('avatar')
   public avatar: ElementRef;
+
+  @ViewChild('header')
+  private header: PageHeaderComponent;
 
   public isShowCamera = false;
   public isImageCropped = false;
@@ -202,7 +206,10 @@ export class ProfilePageComponent implements OnInit {
     this.loggedInUser.avatarUrl = avatar.element.src;
     this.httpService
       .putFullRequest<User, string>(`${this.routePrefix}`, this.loggedInUser)
-      .subscribe((response) => console.log(`image: ${response.body}`));
+      .subscribe((response) => {
+        console.log(`image: ${response.body}`);
+        this.header.getUser();
+      });
   }
 
   openModal(): void {
@@ -212,6 +219,7 @@ export class ProfilePageComponent implements OnInit {
   closeModal(): void {
     this.closeCamera();
     this.GetAvatar();
+    this.header.getUser();
     this.modal.nativeElement.style.display = 'none';
   }
 
@@ -222,6 +230,7 @@ export class ProfilePageComponent implements OnInit {
       .subscribe(
         (updUser: User) => {
           this.GetAvatar();
+          this.header.getUser();
         },
         (error) => this.toastr.error(error.Message)
       );

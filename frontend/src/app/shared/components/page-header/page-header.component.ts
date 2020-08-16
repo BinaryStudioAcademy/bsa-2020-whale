@@ -61,6 +61,10 @@ export class PageHeaderComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.getUser();
+  }
+
+  getUser(): void {
     this.auth.user$.pipe(filter((user) => Boolean(user))).subscribe((user) => {
       this.httpService
         .getRequest<User>(`${this.routePrefix}/email/${user.email}`)
