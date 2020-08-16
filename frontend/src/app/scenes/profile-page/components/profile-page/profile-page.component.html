@@ -1,4 +1,4 @@
-<app-page-header></app-page-header>
+<app-page-header #header></app-page-header>
 
 <div #cameraModal class="modal">
   <div class="modal-content">
@@ -102,41 +102,38 @@
         #nameForm="ngForm"
         (ngSubmit)="saveEditedUsername()"
       >
-        <div class="field">
-          <label>First Name</label>
-          <input
-            placeholder="First Name"
-            type="text"
-            id="frstName"
-            name="firstName"
-            [(ngModel)]="updatedUser.firstName"
-            required
-          />
-          <label>Second Name</label>
-          <input
-            placeholder="Second Name"
-            type="text"
-            id="scndName"
-            name="secondName"
-            [(ngModel)]="updatedUser.secondName"
-            required
-          />
-        </div>
-        <div class="edit-button">
-          <button
-            type="submit"
-            [disabled]="!nameForm.valid"
-            class="small ui button"
-          >
-            <a> <i class="check icon"></i> Save </a>
-          </button>
+        <div class="inline fields">
+          <div class="field form-field">
+            <label>First Name</label>
+            <input
+              placeholder="First Name"
+              type="text"
+              id="frstName"
+              name="firstName"
+              [(ngModel)]="updatedUser.firstName"
+              required
+            />
+            <label>Second Name</label>
+            <input
+              placeholder="Second Name"
+              type="text"
+              id="scndName"
+              name="secondName"
+              [(ngModel)]="updatedUser.secondName"
+              required
+            />
+          </div>
+          <div class="save-button">
+            <button
+              type="submit"
+              [disabled]="!nameForm.valid"
+              class="small ui button save"
+            >
+              <a> <i class="check icon"></i> Save </a>
+            </button>
+          </div>
         </div>
       </form>
-      <!-- <div *ngIf="editName" class="edit-button">
-        <button class="small ui button">
-          <a> <i class="check icon"></i> Save </a>
-        </button>
-      </div> -->
     </div>
     <div class="ui section divider"></div>
     <div class="personal-container">
@@ -144,11 +141,6 @@
         <h4>Email:</h4>
       </div>
       <span>{{ loggedInUser?.email }}</span>
-      <div class="edit-button">
-        <button class="small ui basic button">
-          <a> <i class="cog icon"></i> Edit </a>
-        </button>
-      </div>
     </div>
     <div class="ui section divider"></div>
     <div class="personal-container">
@@ -171,25 +163,27 @@
         #telephoneForm="ngForm"
         (ngSubmit)="saveEditedTelephone()"
       >
-        <div class="field">
-          <input
-            placeholder="Phone"
-            type="tel"
-            pattern="[0-9]{12}"
-            id="userTelephone"
-            name="phone"
-            [(ngModel)]="updatedUser.phone"
-            required
-          />
-        </div>
-        <div class="edit-button">
-          <button
-            type="submit"
-            [disabled]="!telephoneForm.valid"
-            class="small ui button"
-          >
-            <a> <i class="check icon"></i> Save </a>
-          </button>
+        <div class="inline fields">
+          <div class="field form-field">
+            <input
+              placeholder="Phone"
+              type="tel"
+              pattern="[0-9]{12}"
+              id="userTelephone"
+              name="phone"
+              [(ngModel)]="updatedUser.phone"
+              required
+            />
+          </div>
+          <div class="save-button">
+            <button
+              type="submit"
+              [disabled]="!telephoneForm.valid"
+              class="small ui button"
+            >
+              <a> <i class="check icon"></i> Save </a>
+            </button>
+          </div>
         </div>
       </form>
     </div>
