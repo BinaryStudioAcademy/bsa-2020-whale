@@ -2,11 +2,7 @@
 
 <div #cameraModal class="modal">
   <div class="modal-content">
-    <i
-      (click)="closeModal()"
-      #closeUploadModal
-      class="window close icon"
-    ></i>
+    <i (click)="closeModal()" #closeUploadModal class="window close icon"></i>
     <div class="ui buttons">
       <label (click)="closeCamera()" class="ui button" for="file">
         Upload from file
@@ -60,13 +56,11 @@
           format="jpeg"
           (imageCropped)="imageCroppedUpload($event)"
         ></image-cropper>
-        <img
-          [src]="croppedImage"
-        />
+        <img [src]="croppedImage" />
       </div>
-        <button (click)="SendImage()" class="ui button save">
-          Save
-        </button>
+      <button (click)="SendImage()" class="ui button save">
+        Save
+      </button>
     </div>
   </div>
 </div>

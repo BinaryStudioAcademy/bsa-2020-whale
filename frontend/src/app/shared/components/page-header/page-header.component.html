@@ -28,10 +28,7 @@
       notificationsList.length
     }}</a>
 
-    <div
-      *ngIf="isNotificationsVisible"
-      class="dropdown-menu notify"
-    >
+    <div *ngIf="isNotificationsVisible" class="dropdown-menu notify">
       <div
         *ngFor="let notification of notificationsList"
         class="dropdown-menu-item notification"
