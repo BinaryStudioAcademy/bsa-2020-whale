@@ -5,6 +5,8 @@ import { Notification } from 'app/shared/models/notification/notification';
 import { User } from '@shared/models/user';
 import { HttpService } from '../../../core/services/http.service';
 import { tap, filter } from 'rxjs/operators';
+import { BlobService } from '../../../core/services/blob.service';
+import { LinkTypeEnum } from '@shared/Enums/LinkTypeEnum';
 
 @Component({
   selector: 'app-page-header',
@@ -41,7 +43,8 @@ export class PageHeaderComponent implements OnInit {
   constructor(
     private router: Router,
     public auth: AuthService,
-    private httpService: HttpService
+    private httpService: HttpService,
+    private blobService: BlobService
   ) {}
 
   public showNotificationsMenu(): void {
@@ -70,7 +73,16 @@ export class PageHeaderComponent implements OnInit {
         .getRequest<User>(`${this.routePrefix}/email/${user.email}`)
         .pipe(tap(() => (this.isUserLoadig = false)))
         .subscribe((userFromDB: User) => {
-          this.loggedInUser = userFromDB;
+          if (userFromDB.linkType === LinkTypeEnum.Internal) {
+            this.blobService
+              .GetImageByName(userFromDB.avatarUrl)
+              .subscribe((fullLink: string) => {
+                userFromDB.avatarUrl = fullLink;
+                this.loggedInUser = userFromDB;
+              });
+          } else {
+            this.loggedInUser = userFromDB;
+          }
         });
     });
   }

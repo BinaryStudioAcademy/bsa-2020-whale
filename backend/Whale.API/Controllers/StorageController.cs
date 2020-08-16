@@ -19,6 +19,12 @@ namespace Whale.API.Controllers
             _storageProvider = storageProvider;
         }
 
+        [HttpGet("{name}")]
+        public async Task<ActionResult<string>> GetImageByName(string name)
+        {
+            return Ok(await _storageProvider.GetImageByNameAsync(name));
+        }
+
         [HttpPost]
         [Route("save")]
         public async Task<ActionResult<string>> Save()
