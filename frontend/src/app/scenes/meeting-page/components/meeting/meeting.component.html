@@ -72,9 +72,22 @@ Enter+Shift for new line."
       <i (click)="onStatisticsIconClick()" class="big chart bar icon"></i>
       <i (click)="showChat()" class="big wechat icon block"></i>
       <i (click)="closeFullscreen()" class="big desktop icon block"></i>
+      <span data-tooltip="Show Self View" data-position="top right">
+        <i
+          (click)="createParticipantCard(currentParticipant, true)"
+          (click)="isShowCurrentParticipantCard = true"
+          *ngIf="!isShowCurrentParticipantCard"
+          class="big user plus icon big-left-margin"
+        ></i>
+      </span>
     </div>
+
     <div class="users" *ngIf="mediaData.length > 1">
-      <app-participant-card *ngFor="let data of mediaData" [data]="data">
+      <app-participant-card
+        *ngFor="let data of mediaData"
+        (hideViewEvent)="hideViewEventHandler($event)"
+        [data]="data"
+      >
       </app-participant-card>
     </div>
 
@@ -153,6 +166,14 @@ Enter+Shift for new line."
             <i
               (click)="goFullscreen()"
               class="big desktop icon big-left-margin"
+            ></i>
+          </span>
+          <span data-tooltip="Show Self View" data-position="top right">
+            <i
+              *ngIf="!isShowCurrentParticipantCard"
+              (click)="createParticipantCard(currentParticipant, true)"
+              (click)="isShowCurrentParticipantCard = true"
+              class="big user plus icon big-left-margin"
             ></i>
           </span>
         </div>
