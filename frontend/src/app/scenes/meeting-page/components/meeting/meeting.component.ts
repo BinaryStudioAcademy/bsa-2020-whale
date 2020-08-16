@@ -17,7 +17,6 @@ import { ActivatedRoute, Router, Params } from '@angular/router';
 import { MeetingService } from 'app/core/services/meeting.service';
 import { takeUntil, filter } from 'rxjs/operators';
 import { Meeting } from '@shared/models/meeting/meeting';
-import { PollDto } from '@shared/models/poll/poll-dto';
 import {
   MeetingSignalrService,
   SignalMethods,
@@ -27,10 +26,9 @@ import { DOCUMENT } from '@angular/common';
 import { BlobService } from 'app/core/services/blob.service';
 import { MeetingConnectionData } from '@shared/models/meeting/meeting-connect';
 
-import { PollData } from '@shared/models/poll/poll-data';
 import { HttpService } from 'app/core/services/http.service';
+import { PollService } from 'app/core/services/poll.service';
 import { PollCreateDto } from 'app/shared/models/poll/poll-create-dto';
-import { PollResultDto } from '@shared/models/poll/poll-result-dto';
 import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
 import { MeetingMessageCreate } from '@shared/models/meeting/message/meeting-message-create';
 import { Participant } from '@shared/models/participant/participant';
@@ -40,8 +38,6 @@ import { AuthService } from 'app/core/auth/auth.service';
 import { UserMediaData } from '@shared/models/media/user-media-data';
 import { CopyClipboardComponent } from '@shared/components/copy-clipboard/copy-clipboard.component';
 import { SimpleModalService } from 'ngx-simple-modal';
-import { PollsAndResultsDto } from '@shared/models/poll/polls-and-results-dto';
-import { HttpParams } from '@angular/common/http';
 
 @Component({
   selector: 'app-meeting',
@@ -51,14 +47,9 @@ import { HttpParams } from '@angular/common/http';
 export class MeetingComponent
   implements OnInit, AfterContentInit, AfterViewInit, OnDestroy {
   public meeting: Meeting;
-  public polls: PollDto[] = [];
-  public pollResults: PollResultDto[] = [];
   public meetingStatistics: Statistics;
   public isShowChat = false;
   public isShowParticipants = false;
-  public isPollCreating = false;
-  public isShowPoll = false;
-  public isShowPollResults = false;
   public isShowStatistics = false;
   public isScreenRecording = false;
   public isCameraOn = true;
@@ -75,6 +66,7 @@ export class MeetingComponent
   public currentParticipant: Participant;
 
   private meetingSignalrService: MeetingSignalrService;
+  public pollService: PollService;
   private unsubscribe$ = new Subject<void>();
   private currentUserStream: MediaStream;
   private connectionData: MeetingConnectionData;
@@ -97,6 +89,12 @@ export class MeetingComponent
     private simpleModalService: SimpleModalService
   ) {
     this.meetingSignalrService = new MeetingSignalrService(signalRService);
+    this.pollService = new PollService(
+      this.meetingSignalrService,
+      this.httpService,
+      this.toastr,
+      this.unsubscribe$
+    );
   }
 
   public async ngOnInit() {
@@ -117,20 +115,13 @@ export class MeetingComponent
           console.log(this.meeting);
 
           if (connectData.peerId === this.peer.id) {
-            this.httpService
-              .getRequest<PollsAndResultsDto>(
-                environment.meetingApiUrl + '/api/polls',
-                new HttpParams()
-                  .set('meetingId', this.meeting.id)
-                  .set('userEmail', connectData.participant.user.email)
-              )
-              .subscribe((pollsAndResults: PollsAndResultsDto) => {
-                console.error(pollsAndResults);
-                this.polls = pollsAndResults.polls;
-                this.pollResults = pollsAndResults.results;
-              });
+            this.pollService.getPollsAndResults(
+              this.meeting.id,
+              connectData.participant.user.email
+            );
             return;
           }
+
           const index = this.meeting.participants.findIndex(
             (p) => p.id === connectData.participant.id
           );
@@ -260,19 +251,6 @@ export class MeetingComponent
         }
       );
 
-    this.meetingSignalrService.pollReceived$
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe((poll: PollDto) => {
-        this.polls.push(poll);
-        this.isShowPoll = true;
-      });
-
-    this.meetingSignalrService.pollResultReceived$
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe((pollResultDto: PollResultDto) => {
-        this.handlePollResults(pollResultDto);
-      });
-
     // when peer opened send my peer id everyone
     this.peer.on('open', (id) => this.onPeerOpen(id));
 
@@ -395,64 +373,11 @@ export class MeetingComponent
     );
   }
 
-  onPollIconClick() {
-    this.isPollCreating = false;
-    this.isShowPoll = !this.isShowPoll;
-  }
-
-  public onNewPollClick() {
-    this.isShowPoll = false;
-    this.isPollCreating = true;
-  }
-
-  public onPollCreated(pollCreateDto: PollCreateDto) {
-    this.httpService
-      .postRequest<PollCreateDto, PollDto>(
-        environment.meetingApiUrl + '/api/polls',
-        pollCreateDto
-      )
-      .subscribe(
-        (response: PollDto) => {
-          const pollData: PollData = {
-            userId: this.connectionData.userEmail,
-            groupId: this.connectionData.meetingId,
-            pollDto: response,
-          };
-
-          this.meetingSignalrService.invoke(
-            SignalMethods.OnPollCreated,
-            pollData
-          );
-
-          this.isPollCreating = false;
-          this.toastr.success('Poll was created!', 'Success');
-        },
-        (error) => {
-          this.toastr.error(error);
-        }
-      );
-  }
-
-  public onPollAnswered(poll: PollDto) {
-    const pollIndex = this.polls.findIndex((p) => p.id == poll.id);
-    this.polls.splice(pollIndex, 1);
-  }
-
-  public handlePollResults(pollResultDto: PollResultDto) {
-    const pollResultIndex = this.pollResults.findIndex(
-      (result) => result.pollId == pollResultDto.pollId
-    );
-    if (pollResultIndex != -1) {
-      this.pollResults[pollResultIndex] = pollResultDto;
-    } else {
-      this.pollResults.push(pollResultDto);
-    }
-  }
-
   public onStatisticsIconClick(): void {
-    this.isShowPoll = false;
-    this.isPollCreating = false;
-    this.isShowPollResults = false;
+    this.pollService.isShowPoll = false;
+    this.pollService.isPollCreating = false;
+    this.pollService.isShowPollResults = false;
+
     if (!this.meetingStatistics) {
       if (!this.meeting) {
         this.toastr.warning('Something went wrong. Try again later.');
