@@ -12,7 +12,5 @@ namespace Whale.DAL.Models
         public int AnonymousCount { get; set; }
         public bool IsScheduled { get; set; }
         public bool IsRecurrent { get; set; }
-
-        public ICollection<Participant> Participants { get; set; }
     }
 }

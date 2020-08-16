@@ -1,15 +1,24 @@
-<div class="ui segment">
-  <h4>{{ pollResults.title }}</h4>
+<div>
+  <h4>{{ pollResult.title }}</h4>
   <div class="ui four column grid padding-bottom-25px">
-    <div *ngFor="let answer of answers" class="row no-padding">
-      <!-- <p>{{ pollResults.results[answer] }} {{ answer }}</p> -->
-      <div class="two wide column">{{ pollResults.results[answer] }}%</div>
-      <div class="fourteen wide column">
-        {{ answer }}
+    <div
+      *ngFor="let optionResult of pollResult.optionResults; let i = index"
+      class="row no-padding"
+    >
+      <div class="three wide column">{{ calculatePercentage(i) }}%</div>
+      <div class="thirteen wide column">
+        {{ optionResult.option }}
+      </div>
+      <div class="sixteen wide column avatar-container">
+        <img
+          *ngFor="let user of optionResult.votedUsers"
+          src="{{ user.avatarUrl }}"
+          class="voted-user-avatar"
+        />
       </div>
     </div>
   </div>
   <div>
-    <p>{{ pollResults.totalVoted }} people voted so far</p>
+    <p>{{ pollResult.totalVoted }} people voted so far</p>
   </div>
 </div>

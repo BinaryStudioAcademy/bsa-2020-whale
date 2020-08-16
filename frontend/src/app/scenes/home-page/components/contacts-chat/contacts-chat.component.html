@@ -44,14 +44,10 @@
       </div>
     </div>
   </div>
-  <form
-    class="ui form vertically-aligned"
-    (ngSubmit)="sendMessage()"
-    #chatForm="ngForm"
-  >
+  <form class="ui form vertically-aligned" #chatForm="ngForm">
     <div class="field">
       <textarea
-        (keydown.enter)="chatForm.valid && sendMessage()"
+        (keydown.enter)="onEnterKeyPress($event, chatForm.valid)"
         rows="2"
         placeholder="Print your message there"
         type="text"
@@ -64,8 +60,9 @@
     <button
       class="ui button tiny send"
       type="submit"
-      id="sendMessage"
+      id="sendmessage"
       [disabled]="!chatForm.valid"
+      (click)="sendMessage()"
     >
       Send <i class="paper plane outline icon"></i>
     </button>

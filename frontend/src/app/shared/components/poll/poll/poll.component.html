@@ -1,9 +1,8 @@
-<div class="ui segment">
-  <h3>Poll</h3>
+<div class="poll-container">
   <h4>{{ poll.title }}</h4>
   <form class="ui form" [formGroup]="form" (ngSubmit)="onSubmit()">
     <div *ngIf="poll.isSingleChoice" class="answers-container">
-      <div class="field" *ngFor="let answer of poll.answers; let i = index">
+      <div class="field" *ngFor="let answer of poll.options; let i = index">
         <div class="ui radio checkbox">
           <input
             type="radio"
@@ -11,7 +10,7 @@
             id="{{ i }}"
             value="{{ i }}"
           />
-          <label class="default-cursor">{{ answer }}</label>
+          <label class="default-cursor">{{ answer }} </label>
         </div>
       </div>
     </div>
@@ -20,7 +19,7 @@
       formArrayName="answers"
       class="answers-container"
     >
-      <div class="field" *ngFor="let answer of poll.answers; let i = index">
+      <div class="field" *ngFor="let option of poll.options; let i = index">
         <div class="ui checkbox">
           <input
             type="checkbox"
@@ -28,12 +27,17 @@
             id="{{ i }}"
             value="{{ i }}"
           />
-          <label class="default-cursor">{{ answer }}</label>
+          <label class="default-cursor">{{ option }}</label>
         </div>
       </div>
     </div>
     <div class="flex-center">
-      <button class="ui button primary" type="submit" [disabled]="!form.valid">
+      <button
+        id="submitPollButton{{ poll.title }}"
+        class="ui button primary poll-button"
+        type="submit"
+        [disabled]="!form.valid"
+      >
         Submit answer
       </button>
     </div>

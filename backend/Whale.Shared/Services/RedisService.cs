@@ -64,6 +64,12 @@ namespace Whale.Shared.Services
             return JsonConvert.DeserializeObject<ICollection<T>>(json);
         }
 
+        public async Task DeleteSetMember<T>(string setKey, T setMember)
+        {
+            var db = _redis.GetDatabase();
+            await db.SetRemoveAsync(setKey, JsonConvert.SerializeObject(setMember));
+        }
+
         public async Task SetAsync<T>(string key, T value)
         {
             var db = _redis.GetDatabase();

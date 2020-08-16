@@ -1,5 +1,9 @@
+.bg-white
+    background-color: white
+
 .content
     height: 100%
+    //background-color: white
     overflow: hidden
     
 @media screen and (max-width: 600px) 
@@ -23,13 +27,32 @@
 
 //users 
 .users
+    padding: 5px
     background-color: #ffffff
-    height: 90%
     display: flex
     flex-wrap: wrap
     justify-content: center
     align-items: center
     overflow-y: scroll
+    height: 90vh
+    overflow: hidden
+    
+app-participant-card
+    width: 50%
+    max-width: 560px
+    max-height: 50%
+    padding: 5px
+
+.participant-fullscreen
+    width: 100vw
+    height: 100vh
+    object-fit: cover
+    position: fixed
+    top: 0
+    bottom: 0
+    left: 0
+    right: 0
+    z-index: -1
 
 .users__user 
     margin: 10px
@@ -39,51 +62,67 @@
 
 //options
 .options
-    background-color: #f1f1f1
-    width: 100% 
-    position: absolute
+    background-color: #ffffff
+    position: fixed
     bottom: 0
-    height: 10vh
-    text-align: center    
+    right: 0
+    left: 0
+    height: 60px
+    text-align: center   
+    z-index: 10
 
 div:fullscreen
     .options
         display: none
     .chat
         height: 100vh
+    .participants-container
+        height: 100%
 
 div:-webkit-full-screen
     .options
         display: none
+    .participants-container
+        height: 100%
 
 div:moz-full-screen
     .options
         display: none
+    .participants-container
+        height: 100%
 
 div:fullscreen
     .users
         height: 100%
+    .participants-container
+        height: 100%
 
 div:-webkit-full-screen
     .users
+        height: 100%
+    .participants-container
         height: 100%
 
 div:moz-full-screen
     .users
         height: 100%
+    .participants-container
+        height: 100%
 
 .options__buttons
-    margin-top: 24px
+    margin-top: 10px
     display: flex
     justify-content: space-between
+    padding: 0 20px
+    .inner-block
+        border: 1px solid lightgray
+        padding: 5px 10px
+        border-radius: 10px
+        background-color: gainsboro
     
-
 .options__leave-button
     margin-top: 24px
     float: right
-
-i.big.icon
-    opacity: 0.8
 
 i.big.icon:hover
     opacity: 1
@@ -95,8 +134,14 @@ i.big.icon.clipboard, i.big.icon.chart, i.big.copy.icon
 i.big.icon.wechat
     margin-left: 2px
 
-
-.big.share.square.icon:hover, .big.microphone.icon:hover, .big.video.icon:hover, .big.wechat.icon:hover, .big.users.icon:hover, .big.desktop.icon:hover, .big.clipboard.icon:hover, .big.chart.icon:hover
+.big.share.square.icon:hover,
+.big.microphone.icon:hover,
+.big.video.icon:hover,
+.big.wechat.icon:hover,
+.big.users.icon:hover,
+.big.desktop.icon:hover,
+.big.clipboard.icon:hover,
+.big.chart.icon:hover
     opacity: 1 !important
     cursor: pointer
 
@@ -115,23 +160,25 @@ i.big.icon.wechat
 
 .participants-button-container 
     display: inline-block
-    margin-left: 5%
 
 .relative-container
     position: relative
 
 .participants-container
-    height: 90%
-    min-width: 100px
+    height: 90vh
+    min-width: 150px
     max-width: 300px
     background-color: white
     overflow-y: scroll
     float: left
     text-align: left
+    background-color: white
     -webkit-box-shadow: 1px 1px 5px 0px #4e4e4ebf
     -moz-box-shadow: 1px 1px 5px 0px #4e4e4ebf
     box-shadow: 1px 1px 5px 0px #4e4e4ebf
     margin-right: 8px
+    padding-left: 5px
+    padding-bottom: 20px
 
 div.invite-icon-container
     padding: 15px 10px 0px 0px
@@ -158,17 +205,20 @@ div div.participant:hover
 .users-icon-fix
     display: inline
     background: none
-    opacity: 0.8
 
 .display-flex
     display: flex
-
 
 .poll-create-container
     position: absolute
     bottom: 11%
     left: calc(50% - 175px) 
+    max-height: 80%
     width: 350px
+    z-index: 10
+
+.overflow-scroll
+    overflow-y: scroll
 
 i.icon 
     opacity: 0.8
@@ -177,7 +227,6 @@ i.icon:hover
     opacity: 1
     cursor: pointer
 
-
 .block
     margin: 10px 10px 10px 0px
 
@@ -185,19 +234,22 @@ i.icon:hover
     padding-top: 15px
 
 .tools
-    width: auto
-    padding: 0px 10px
-    height: 50px
-    background-color: #f1f1f1
+    padding: 0 10px
+    min-height: 50px
     position: absolute
-    left: 40%
+    width: fit-content
+    background-color: #f1f1f1
+    margin-left: auto
+    margin-right: auto
+    left: 0
+    right: 0
     bottom: 15%
     display: none
     border-radius: 4px
     box-shadow: 0px 0px 3px grey
     opacity: 0.7
     text-align: center
-    z-index: 10
+    z-index: 1100
 
 .tools:active
     opacity: 1
@@ -216,17 +268,16 @@ div:moz-full-screen
         display: block
 
 .chat-inner
-    overflow-y: scroll
+    width: 100%
+    height: 100%
     padding-top: 2em
     padding-left: 2em
     padding-right: 2em
     margin-bottom: 0
-    width: 100%
-    height: 100%
-
+    overflow-y: auto
+  
 .ui.placeholder.segment.field
         max-width: 20rem
-
 
 .vertically-aligned
     display: flex
@@ -236,7 +287,6 @@ div:moz-full-screen
 .text-aligned
     text-align: center
 
-
 .ui.input
     width: 100%
     textarea
@@ -245,3 +295,29 @@ div:moz-full-screen
         max-height: 40vh
     .icon
         margin-right: 10px
+
+.poll-divider
+    height: 1px
+    background: #a7a7a7
+    border: 0px
+    margin-top: 12px
+
+[data-tooltip]:before
+    margin-bottom: 10px
+
+[data-tooltip]:after
+    margin-bottom: 15px
+
+.big-left-margin
+    margin-left: 10px
+
+.delete-poll-icon
+    float: right
+    width: 15px
+    text-align: right
+    font-weight: bold
+    cursor: pointer
+
+.delete-poll-icon:hover
+    font-size: 1.3em
+    

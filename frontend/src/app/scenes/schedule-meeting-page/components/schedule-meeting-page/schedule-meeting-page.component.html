@@ -1,26 +1,32 @@
 <app-page-header></app-page-header>
-<div class="ui container">
+<div class="ui container main-container">
   <div class="ui grid">
     <div class="ui twelve wide column segment margin-auto">
       <h1>Schedule meeting</h1>
       <form class="ui form" [formGroup]="form" (ngSubmit)="onSubmit()">
-        <div class="field">
-          <label>Topic</label>
-          <input type="text" formControlName="topic" />
+        <div class="ui segment">
+          <div class="field">
+            <label>Topic</label>
+            <input type="text" formControlName="topic" />
+          </div>
+          <div class="field">
+            <label>Description</label>
+            <textarea type="text" formControlName="description"></textarea>
+          </div>
         </div>
 
         <div class="ui segment">
           <div class="ten wide field">
             <label>Start</label>
             <div class="fields">
-              <div class="field">
+              <div class="field start-input">
                 <dp-date-picker
                   [config]="config"
                   theme="dp-material"
                   formControlName="date"
                 ></dp-date-picker>
               </div>
-              <div class="field">
+              <div class="field start-input">
                 <dp-date-picker
                   [config]="timeConfig"
                   mode="time"
@@ -33,19 +39,19 @@
 
           <div class="nine wide field">
             <label>Duration</label>
-            <div class="three fields">
-              <div class="seven wide field">
-                <div class="ui right labeled input">
+            <div class="fields">
+              <div class="field">
+                <div class="ui right labeled input duration-input">
                   <input type="number" formControlName="durationHours" />
-                  <div class="ui basic label">
+                  <div class="ui basic label flex-vertical-center">
                     <span class="text smaller default-cursor">hr</span>
                   </div>
                 </div>
               </div>
-              <div class="seven wide field">
-                <div class="ui right labeled input">
+              <div class="field">
+                <div class="ui right labeled input duration-input">
                   <input type="number" formControlName="durationMinutes" />
-                  <div class="ui basic label">
+                  <div class="ui basic label flex-vertical-center">
                     <span class="text smaller default-cursor">min</span>
                   </div>
                 </div>

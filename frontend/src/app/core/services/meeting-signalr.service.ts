@@ -8,7 +8,9 @@ import { MeetingConnectionData } from '@shared/models/meeting/meeting-connect';
 import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
 import { Participant } from '@shared/models/participant/participant';
 import { PollDto } from '@shared/models/poll/poll-dto';
-import { PollResultsDto } from '@shared/models/poll/poll-results-dto';
+import { PollResultDto } from '@shared/models/poll/poll-result-dto';
+import { VoteDto } from '@shared/models/poll/vote-dto';
+import { VoterDto } from '@shared/models/poll/voter-dto';
 
 @Injectable({
   providedIn: 'root',
@@ -20,10 +22,13 @@ export class MeetingSignalrService {
   private signalUserConected = new Subject<MeetingConnectionData>();
   public signalUserConected$ = this.signalUserConected.asObservable();
 
-  private signalUserDisconected = new Subject<MeetingConnectionData>();
-  public signalUserDisconected$ = this.signalUserDisconected.asObservable();
+  private signalParticipantLeft = new Subject<MeetingConnectionData>();
+  public signalParticipantLeft$ = this.signalParticipantLeft.asObservable();
 
-  private participantConected = new Subject<Participant>();
+  private signalParticipantDisconnected = new Subject<Participant>();
+  public signalParticipantDisconnected$ = this.signalParticipantDisconnected.asObservable();
+
+  private participantConected = new Subject<Participant[]>();
   public participantConected$ = this.participantConected.asObservable();
 
   private meetingEnded = new Subject<MeetingConnectionData>();
@@ -44,8 +49,11 @@ export class MeetingSignalrService {
   private pollReceived = new Subject<PollDto>();
   public pollReceived$ = this.pollReceived.asObservable();
 
-  private pollResultsReceived = new Subject<PollResultsDto>();
-  public pollResultsReceived$ = this.pollResultsReceived.asObservable();
+  private pollResultReceived = new Subject<PollResultDto>();
+  public pollResultReceived$ = this.pollResultReceived.asObservable();
+
+  private pollDeleted = new Subject<string>();
+  public pollDeleted$ = this.pollDeleted.asObservable();
 
   constructor(private hubService: SignalRService) {
     from(hubService.registerHub(environment.meetingApiUrl, 'meeting'))
@@ -72,15 +80,22 @@ export class MeetingSignalrService {
 
         this.signalHub.on(
           'OnParticipantConnect',
-          (participant: Participant) => {
-            this.participantConected.next(participant);
+          (participants: Participant[]) => {
+            this.participantConected.next(participants);
           }
         );
 
         this.signalHub.on(
-          'OnUserDisconnect',
+          'OnParticipantLeft',
           (connectionData: MeetingConnectionData) => {
-            this.signalUserDisconected.next(connectionData);
+            this.signalParticipantLeft.next(connectionData);
+          }
+        );
+
+        this.signalHub.on(
+          'OnParticipantDisconnected',
+          (disconnectedParticipant: Participant) => {
+            this.signalParticipantDisconnected.next(disconnectedParticipant);
           }
         );
 
@@ -103,8 +118,12 @@ export class MeetingSignalrService {
           this.pollReceived.next(poll);
         });
 
-        this.signalHub.on('OnPollResults', (pollResultsDto: PollResultsDto) => {
-          this.pollResultsReceived.next(pollResultsDto);
+        this.signalHub.on('OnPollResults', (pollResultDto: PollResultDto) => {
+          this.pollResultReceived.next(pollResultDto);
+        });
+
+        this.signalHub.on('OnPollDeleted', (pollId: string) => {
+          this.pollDeleted.next(pollId);
         });
       });
   }
@@ -121,7 +140,7 @@ export interface SignalData {
 
 export enum SignalMethods {
   OnUserConnect,
-  OnUserDisconnect,
+  OnParticipantLeft,
   OnConferenceStartRecording,
   OnConferenceStopRecording,
   OnSendMessage,

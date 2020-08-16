@@ -9,17 +9,17 @@ export interface CopyModal {
 @Component({
   selector: 'app-copy-clipboard',
   templateUrl: './copy-clipboard.component.html',
-  styleUrls: ['./copy-clipboard.component.sass']
+  styleUrls: ['./copy-clipboard.component.sass'],
 })
-export class CopyClipboardComponent extends SimpleModalComponent<CopyModal, Contact> implements CopyModal{
+export class CopyClipboardComponent
+  extends SimpleModalComponent<CopyModal, Contact>
+  implements CopyModal {
   message: string;
-  constructor(
-    private toastr: ToastrService,
-  ) {
+  constructor(private toastr: ToastrService) {
     super();
   }
 
-  onCopy(inputElement: HTMLInputElement): void{
+  onCopy(inputElement: HTMLInputElement): void {
     console.log(inputElement);
     inputElement.select();
     document.execCommand('copy');

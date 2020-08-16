@@ -28,11 +28,7 @@
       notificationsList.length
     }}</a>
 
-    <div
-      *ngIf="isNotificationsVisible"
-      style="width: 200px;"
-      class="dropdown-menu"
-    >
+    <div *ngIf="isNotificationsVisible" class="dropdown-menu notify">
       <div
         *ngFor="let notification of notificationsList"
         class="dropdown-menu-item notification"
@@ -46,7 +42,7 @@
     <spiner *ngIf="isUserLoadig" [size]="'small'"></spiner>
     <img class="ui tiny image user-pic" src="{{ loggedInUser?.avatarUrl }}" />
   </a>
-  <div *ngIf="settingsMenuVisible" style="right: 0;" class="dropdown-menu">
+  <div *ngIf="settingsMenuVisible" class="dropdown-menu settings">
     <div class="dropdown-menu-user" (click)="goToPage('profile-page')">
       {{ loggedInUser?.firstName }} {{ loggedInUser?.lastName }}
     </div>

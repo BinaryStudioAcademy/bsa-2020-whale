@@ -18,7 +18,7 @@ import flip from '@popperjs/core/lib/modifiers/flip.js';
 export class ParticipantCardComponent implements OnInit {
   @Input() data: UserMediaData;
   @Output() pinVideEvent = new EventEmitter<string>();
-  @Output() hideCurrentView = new EventEmitter<string>();
+  @Output() hideViewEvent = new EventEmitter<string>();
   @Output() stopVideoEvent = new EventEmitter<string>();
   @Output() startVideoEvent = new EventEmitter<string>();
   @Output() muteEvent = new EventEmitter<string>();
@@ -61,7 +61,7 @@ export class ParticipantCardComponent implements OnInit {
   }
 
   public hideCurrentCard(): void {
-    this.hideCurrentView.emit(this.data.id);
+    this.hideViewEvent.emit(this.data.id);
   }
 
   private initCardElements(): void {
@@ -78,7 +78,9 @@ export class ParticipantCardComponent implements OnInit {
       : this.elRef.nativeElement.querySelector('.other-participant-actions');
 
     this.video.srcObject = this.data.stream;
-    this.participantName.textContent = `${this.data.userFirstName} ${this.data.userLastName}`.trim();
+    this.participantName.textContent = `${this.data.userFirstName} ${
+      this.data.userLastName ? this.data.userLastName : ''
+    }`.trim();
 
     if (this.data.avatarUrl) {
       this.participantContainer.style.background = `url(${this.data.avatarUrl})`;
@@ -92,7 +94,7 @@ export class ParticipantCardComponent implements OnInit {
       participantInitials.textContent = `${this.data.userFirstName.slice(
         0,
         1
-      )} ${this.data.userLastName.slice(0, 1)}`;
+      )} ${this.data.userLastName?.slice(0, 1)}`;
     }
   }
 

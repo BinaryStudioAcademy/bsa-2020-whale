@@ -4,11 +4,12 @@ import {
   EventEmitter,
   Input,
   Output,
-  AfterViewInit,
+  OnDestroy,
   AfterContentInit,
   OnChanges,
   SimpleChanges,
 } from '@angular/core';
+import { ToastrService } from 'ngx-toastr';
 import { DirectMessage } from '@shared/models/message/message';
 import { User } from '@shared/models/user/user';
 import { Contact } from '@shared/models/contact/contact';
@@ -18,10 +19,11 @@ import { environment } from '@env';
 import { Injectable } from '@angular/core';
 import { HubConnection } from '@aspnet/signalr';
 import { Subject, from, Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { tap, takeUntil, take } from 'rxjs/operators';
 import { Message } from '@angular/compiler/src/i18n/i18n_ast';
 import { Console } from 'console';
 import { stringify } from 'querystring';
+import { HttpResponse } from '@angular/common/http';
 import { SimpleModalService } from 'ngx-simple-modal';
 import { CallModalComponent } from '../call-modal/call-modal.component';
 
@@ -30,9 +32,15 @@ import { CallModalComponent } from '../call-modal/call-modal.component';
   templateUrl: './contacts-chat.component.html',
   styleUrls: ['./contacts-chat.component.sass'],
 })
-export class ContactsChatComponent implements OnInit, OnChanges {
+export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
   private hubConnection: HubConnection;
-  currContactId: string;
+  counter = 0;
+
+  private receivedMsg = new Subject<DirectMessage>();
+  public receivedMsg$ = this.receivedMsg.asObservable();
+
+  private unsubscribe$ = new Subject<void>();
+
   @Input() contactSelected: Contact;
   @Output() chat: EventEmitter<boolean> = new EventEmitter<boolean>();
   directMessageRecieved = new EventEmitter<DirectMessage>();
@@ -47,17 +55,20 @@ export class ContactsChatComponent implements OnInit, OnChanges {
   constructor(
     private signalRService: SignalRService,
     private httpService: HttpService,
+    private toastr: ToastrService,
     private simpleModalService: SimpleModalService
   ) {}
 
-  ngOnChanges(changes: SimpleChanges) {
+  ngOnChanges(changes: SimpleChanges): void {
     this.httpService
       .getRequest<DirectMessage[]>(
         '/api/ContactChat/' + this.contactSelected.id
       )
+      .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (data: DirectMessage[]) => {
           this.messages = data;
+          console.log('messages new');
         },
         (error) => console.log(error)
       );
@@ -71,34 +82,62 @@ export class ContactsChatComponent implements OnInit, OnChanges {
         })
       )
       .subscribe(() => {
-        this.hubConnection.on('NewMessage', (message: DirectMessage) => {
-          this.messages.push(message);
-        });
+        this.hubConnection.on(
+          'NewMessageReceived',
+          (message: DirectMessage) => {
+            this.receivedMsg.next(message);
+          }
+        );
         this.hubConnection.invoke('JoinGroup', this.contactSelected.id);
       });
+    this.receivedMsg$.pipe(takeUntil(this.unsubscribe$)).subscribe(
+      (newMessage) => {
+        this.messages.push(newMessage);
+        console.log('received a messsage ' + newMessage.message);
+      },
+      (err) => {
+        console.log(err.message);
+        this.toastr.error(err.Message);
+      }
+    );
+  }
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
 
   sendMessage(): void {
+    console.log('Send is called');
     this.newMessage.contactId = this.contactSelected.id;
     this.newMessage.authorId = this.contactSelected.firstMemberId;
     this.newMessage.createdAt = new Date();
-    console.log('newMsg');
     console.log(this.newMessage);
     this.httpService
-      .postRequest<DirectMessage, void>('/api/ContactChat/', this.newMessage)
+      .postRequest<DirectMessage, HttpResponse<DirectMessage>>(
+        '/api/ContactChat/',
+        this.newMessage
+      )
+      .pipe(take(1))
       .subscribe(
-        () => {
-          this.newMessage.message = '';
-        },
-        (error) => console.log(error)
+        () => (this.newMessage.message = ''),
+        (error) => this.toastr.error(error.Message)
       );
   }
+
   close(): void {
     this.chat.emit(true);
+    this.hubConnection.invoke('Disconnect', this.contactSelected.id);
   }
 
   public call(): void {
     console.log(this.contactSelected);
     this.simpleModalService.addModal(CallModalComponent, this.contactSelected);
+  }
+
+  public onEnterKeyPress(event: KeyboardEvent, valid: boolean): void {
+    event.preventDefault();
+    if (valid) {
+      this.sendMessage();
+    }
   }
 }

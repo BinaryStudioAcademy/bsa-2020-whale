@@ -46,23 +46,24 @@
             New
           </button>
         </a>
-        <div
-          [hidden]="!contactsVisibility"
-          *ngFor="let contact of contacts"
-          class="user-list ui middle aligned selection list"
-        >
-          <div
-            [ngClass]="isContactActive(contact) ? 'active item' : 'item'"
-            (click)="onContactClick(contact)"
+        <div class="contacts-container" [hidden]="!contactsVisibility">
+          <div 
+            *ngFor="let contact of contacts"
+            class="user-list ui middle aligned selection list"
           >
-            <img
-              class="ui avatar image"
-              src="{{ contact?.secondMember.avatarUrl }}"
-            />
-            <div class="content">
-              <div class="description">
-                {{ contact?.secondMember.firstName }}
-                {{ contact?.secondMember.secondName }}
+            <div
+              [ngClass]="isContactActive(contact) ? 'active item' : 'item'"
+              (click)="onContactClick(contact)"
+            >
+              <img
+                class="ui avatar image"
+                src="{{ contact?.secondMember.avatarUrl }}"
+              />
+              <div class="content">
+                <div class="description">
+                  {{ contact?.secondMember.firstName }}
+                  {{ contact?.secondMember.secondName }}
+                </div>
               </div>
             </div>
           </div>
@@ -76,20 +77,21 @@
             New
           </button>
         </a>
-        <div
-          [hidden]="!groupsVisibility"
-          *ngFor="let contact of contacts"
-          class="user-list ui middle aligned selection list"
-        >
-          <div (click)="onGroupClick()" class="item">
-            <img
-              class="ui avatar image"
-              src="{{ contact.secondMember?.avatarUrl }}"
-            />
-            <div class="content">
-              <div class="description">
-                {{ contact.secondMember?.firstName }}
-                {{ contact.secondMember?.secondName }}
+        <div class="contacts-container" [hidden]="!groupsVisibility">
+          <div
+            *ngFor="let contact of contacts"
+            class="user-list ui middle aligned selection list"
+          >
+            <div (click)="onGroupClick()" class="item">
+              <img
+                class="ui avatar image"
+                src="{{ contact.secondMember?.avatarUrl }}"
+              />
+              <div class="content">
+                <div class="description">
+                  {{ contact.secondMember?.firstName }}
+                  {{ contact.secondMember?.secondName }}
+                </div>
               </div>
             </div>
           </div>

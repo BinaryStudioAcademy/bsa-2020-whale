@@ -47,7 +47,7 @@ export class BlobService {
       .post(`${this.baseUrl}/api/storage/save`, formData, {
         responseType: 'text',
       })
-      .subscribe((resp) => console.log(`video record: ${resp}`));
+      .subscribe((resp) => alert(resp));
   }
 
   public postBlobUploadImage(blob: Blob): Observable<string> {

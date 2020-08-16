@@ -1,4 +1,4 @@
-<div #mainArea>
+<div #mainArea class="bg-white">
   <div *ngIf="isShowChat" class="ui chat card">
     <div class="ui chat-inner feed">
       <div *ngFor="let message of messages" class="event">
@@ -22,7 +22,7 @@
       <div class="ui icon input">
         <div class="ui icon input">
           <textarea
-            (keyup.enter)="sendMessage()"
+            (keydown.enter)="onEnterKeyPress($event)"
             rows="1"
             placeholder="Enter to send.
 Enter+Shift for new line."
@@ -38,131 +38,220 @@ Enter+Shift for new line."
     </div>
   </div>
 
-  <div class="content">
-    <div *ngIf="isShowParticipants" class="ui participants-container">
-      <div class="invite-icon-container">
-        <i class="user plus icon"></i>
-      </div>
-      <div class="ui divided list">
-        <div
-          *ngFor="let participant of meeting.participants"
-          class="ui item participant"
+  <div *ngIf="isShowParticipants" class="ui participants-container">
+    <div class="invite-icon-container">
+      <i class="user plus icon"></i>
+    </div>
+    <div class="ui divided list">
+      <div
+        *ngFor="let participant of meeting.participants"
+        class="ui item participant"
+      >
+        <img src="{{ participant.user.avatarUrl }}" />
+        <span
+          >{{ participant.user.firstName }}
+          {{ participant.user.lastName ? participant.user.lastName : "" }}</span
         >
-          <img src="{{ participant.user.avatarUrl }}" />
-          <span>{{ participant.user.firstName }}</span>
-        </div>
       </div>
     </div>
-    <!-- <div class="users">
-            <div class="users__user" *ngFor="let user of users;">
-                <div class="ui card">
-                    <div class="image">
-                    <img src="https://icons.iconarchive.com/icons/paomedia/small-n-flat/512/user-male-icon.png">
-                    </div>
-                    <div class="content">
-                    <a class="header">{{user}}</a>
-                    </div>
-                </div>
-            </div>
-        </div> -->
+  </div>
 
+  <div class="content">
     <div class="tools" ngDraggable>
-      <i style="opacity: 0.8;" class="big microphone icon block"></i>
-      <i style="opacity: 0.8;" class="big video icon block"></i>
+      <i class="big microphone icon block"></i>
+      <i class="big video icon block"></i>
       <i
-        style="opacity: 0.8;"
         class="users icon big users-icon-fix block"
         (click)="isShowParticipants = !isShowParticipants"
       ></i>
-      <i style="opacity: 0.8;" class="big share square icon block"></i>
-      <i (click)="onPollIconClick()" class="big clipboard list icon"></i>
+      <i class="big share square icon block"></i>
+      <i
+        (click)="pollService.onPollIconClick()"
+        class="big clipboard list icon"
+      ></i>
       <i (click)="onStatisticsIconClick()" class="big chart bar icon"></i>
-      <i
-        (click)="showChat()"
-        style="opacity: 0.8;"
-        class="big wechat icon block"
-      ></i>
-      <i
-        (click)="closeFullscreen()"
-        style="opacity: 0.8;"
-        class="big desktop icon block"
-      ></i>
+      <i (click)="showChat()" class="big wechat icon block"></i>
+      <i (click)="closeFullscreen()" class="big desktop icon block"></i>
+      <span data-tooltip="Show Self View" data-position="top right">
+        <i
+          (click)="createParticipantCard(currentParticipant, true)"
+          (click)="isShowCurrentParticipantCard = true"
+          *ngIf="!isShowCurrentParticipantCard"
+          class="big user plus icon big-left-margin"
+        ></i>
+      </span>
     </div>
-    Me:
-    <video #currentVideo autoplay="autoplay" [muted]="'muted'"></video> Users:
-    <div id="participants"></div>
+
+    <div class="users" *ngIf="mediaData.length > 1">
+      <app-participant-card
+        *ngFor="let data of mediaData"
+        (hideViewEvent)="hideViewEventHandler($event)"
+        [data]="data"
+      >
+      </app-participant-card>
+    </div>
+
+    <video
+      #currentVideo
+      *ngIf="mediaData.length <= 1"
+      autoplay="autoplay"
+      class="participant-fullscreen"
+      [muted]="'muted'"
+    ></video>
 
     <div class="options">
-      <div class="ui container options__buttons">
-        <div>
-          <i style="opacity: 0.8;" class="big microphone icon"></i>
-          <i
-            style="margin-left: 10px; opacity: 0.8;"
-            class="big video icon"
-            (click)="turnOffCamera()"
-          ></i>
+      <div class="ui options__buttons">
+        <div class="inner-block">
+          <span
+            *ngIf="!isScreenRecording"
+            data-tooltip="Toggle Microphone"
+            data-position="top left"
+          >
+            <i class="big microphone icon" (click)="turnOffMicrophone()"></i>
+          </span>
+          <span *ngIf="!isScreenRecording" data-tooltip="Toggle Webcam">
+            <i
+              class="big video icon big-left-margin"
+              (click)="turnOffCamera()"
+            ></i>
+          </span>
         </div>
 
-        <div class="display-flex">
+        <div class="display-flex inner-block">
           <div class="participants-button-container">
-            <div class="relative-container">
+            <div
+              class="relative-container"
+              data-tooltip="Participants"
+              data-position="top left"
+            >
               <i
                 class="users icon big users-icon-fix"
                 (click)="isShowParticipants = !isShowParticipants"
               ></i>
             </div>
           </div>
-          <i
-            style="margin-left: 10px; opacity: 0.8;"
-            class="big share square icon"
-          ></i>
-          <i (click)="onPollIconClick()" class="big clipboard list icon"></i>
-          <i (click)="onStatisticsIconClick()" class="big chart bar icon"></i>
-          <i (click)="onCopyIconClick()" class="big copy icon"></i>
-          <i
-            (click)="showChat()"
-            style="margin-left: 10px; opacity: 0.8;"
-            class="big wechat icon"
-          ></i>
-          <i
-            (click)="goFullscreen()"
-            style="margin-left: 10px; opacity: 0.8;"
-            class="big desktop icon"
-          ></i>
+          <span
+            *ngIf="!isScreenRecording"
+            data-tooltip="Start Recording"
+            data-position="top left"
+          >
+            <i (click)="startRecording()" class="big circle icon"></i>
+          </span>
+          <span
+            *ngIf="isScreenRecording"
+            data-tooltip="Stop Recording"
+            data-position="top left"
+          >
+            <i (click)="stopRecording()" class="big stop circle icon"></i>
+          </span>
+          <span data-tooltip="Share Screen" data-position="top left">
+            <i class="big share square icon big-left-margin"></i>
+          </span>
+          <span data-tooltip="Polls">
+            <i
+              (click)="pollService.onPollIconClick()"
+              class="big clipboard list icon"
+            ></i
+          ></span>
+          <span data-tooltip="Statistics">
+            <i (click)="onStatisticsIconClick()" class="big chart bar icon"></i
+          ></span>
+          <span data-tooltip="Copy Link" data-position="top right">
+            <i (click)="onCopyIconClick()" class="big copy icon"></i>
+          </span>
+          <span data-tooltip="Chat" data-position="top right">
+            <i (click)="showChat()" class="big wechat icon big-left-margin"></i>
+          </span>
+          <span data-tooltip="Fullscreen" data-position="top right">
+            <i
+              (click)="goFullscreen()"
+              class="big desktop icon big-left-margin"
+            ></i>
+          </span>
+          <span data-tooltip="Show Self View" data-position="top right">
+            <i
+              *ngIf="!isShowCurrentParticipantCard"
+              (click)="createParticipantCard(currentParticipant, true)"
+              (click)="isShowCurrentParticipantCard = true"
+              class="big user plus icon big-left-margin"
+            ></i>
+          </span>
         </div>
         <div>
-          <button
-            style="margin-left: 200px;"
-            class="ui inverted red button"
-            (click)="leave()"
-          >
+          <button class="ui red button" (click)="leave()">
             Leave
           </button>
         </div>
       </div>
     </div>
   </div>
-  <div class="poll-create-container" *ngIf="isPollCreating">
-    <app-poll-create
-      [meetingId]="meeting.id"
-      (pollCreated)="onPollCreated($event)"
-    ></app-poll-create>
-  </div>
-
-  <div class="poll-create-container" *ngIf="isShowPoll">
-    <app-poll
-      [poll]="poll"
-      (pollAnswered)="isShowPoll = false; poll = null"
-    ></app-poll>
-  </div>
-
-  <div class="poll-create-container" *ngIf="isShowPollResults">
-    <app-poll-results [pollResults]="pollResults"></app-poll-results>
-  </div>
 
   <div class="poll-create-container" *ngIf="isShowStatistics">
     <app-meeting-statistics
       [statistic]="meetingStatistics"
     ></app-meeting-statistics>
+  </div>
+
+  <div
+    class="ui poll-create-container overflow-scroll segment"
+    *ngIf="pollService.isPollCreating"
+  >
+    <app-poll-create
+      [meetingId]="meeting.id"
+      (pollCreated)="
+        pollService.onPollCreated(
+          $event,
+          connectionData.meetingId,
+          connectionData.userEmail
+        )
+      "
+    ></app-poll-create>
+  </div>
+
+  <div
+    class="ui poll-create-container overflow-scroll segment"
+    *ngIf="pollService.isShowPoll"
+  >
+    <button
+      *ngIf="currentParticipant.role == 1"
+      (click)="pollService.onNewPollClick()"
+    >
+      New poll
+    </button>
+    <div class="ui segment">
+      <!--POLLS CONTAINER -->
+      <h3>Polls</h3>
+      <div *ngFor="let pollx of pollService.polls; let i = index">
+        <hr class="poll-divider" />
+        <span
+          *ngIf="currentParticipant.role == 1"
+          class="delete-poll-icon"
+          (click)="pollService.onDeletePollIconClick(pollx)"
+        >
+          &times;
+        </span>
+        <app-poll
+          [poll]="pollx"
+          [user]="currentParticipant.user"
+          (pollAnswered)="pollService.onPollAnswered($event)"
+        ></app-poll>
+      </div>
+    </div>
+    <div class="ui segment">
+      <h3>Results</h3>
+      <div *ngFor="let pollxResult of pollService.pollResults; let i = index">
+        <hr class="poll-divider" />
+        <span
+          *ngIf="currentParticipant.role == 1"
+          class="delete-poll-icon"
+          (click)="
+            pollService.onDeletePollResultIconClick(pollxResult, meeting.id)
+          "
+        >
+          &times;
+        </span>
+        <app-poll-results [pollResult]="pollxResult"></app-poll-results>
+      </div>
+    </div>
   </div>
 </div>
