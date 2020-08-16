@@ -206,8 +206,10 @@ export class ProfilePageComponent implements OnInit {
     this.loggedInUser.avatarUrl = avatar.element.src;
     this.httpService
       .putFullRequest<User, string>(`${this.routePrefix}`, this.loggedInUser)
-      .subscribe((response) => console.log(`image: ${response.body}`));
-    this.header.getUser();
+      .subscribe((response) => {
+        console.log(`image: ${response.body}`);
+        this.header.getUser();
+      });
   }
 
   openModal(): void {
