@@ -213,8 +213,12 @@ div div.participant:hover
     position: absolute
     bottom: 11%
     left: calc(50% - 175px) 
+    max-height: 80%
     width: 350px
-    z-index: 2
+    z-index: 10
+
+.overflow-scroll
+    overflow-y: scroll
 
 i.icon 
     opacity: 0.8
@@ -292,6 +296,12 @@ div:moz-full-screen
     .icon
         margin-right: 10px
 
+.poll-divider
+    height: 1px
+    background: #a7a7a7
+    border: 0px
+    margin-top: 12px
+
 [data-tooltip]:before
     margin-bottom: 10px
 
@@ -300,3 +310,14 @@ div:moz-full-screen
 
 .big-left-margin
     margin-left: 10px
+
+.delete-poll-icon
+    float: right
+    width: 15px
+    text-align: right
+    font-weight: bold
+    cursor: pointer
+
+.delete-poll-icon:hover
+    font-size: 1.3em
+    

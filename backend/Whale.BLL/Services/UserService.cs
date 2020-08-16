@@ -90,6 +90,7 @@ namespace Whale.BLL.Services
             entity.SecondName = userDTO.SecondName;
             entity.Email = userDTO.Email;
             entity.AvatarUrl = userDTO.AvatarUrl;
+            entity.LinkType = (LinkTypeEnum)userDTO.LinkType;
             entity.RegistrationDate = entity.RegistrationDate;
             entity.Phone = userDTO.Phone;
 

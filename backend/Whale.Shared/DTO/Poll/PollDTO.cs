@@ -12,6 +12,6 @@ namespace Whale.Shared.DTO.Poll
         public bool IsAnonymous { get; set; }
         public bool IsSingleChoice { get; set; }
 
-        public string[] Answers { get; set; }
+        public ICollection<string> Options { get; set; }
     }
 }

@@ -65,13 +65,29 @@ Enter+Shift for new line."
         (click)="isShowParticipants = !isShowParticipants"
       ></i>
       <i class="big share square icon block"></i>
-      <i (click)="onPollIconClick()" class="big clipboard list icon"></i>
+      <i
+        (click)="pollService.onPollIconClick()"
+        class="big clipboard list icon"
+      ></i>
       <i (click)="onStatisticsIconClick()" class="big chart bar icon"></i>
       <i (click)="showChat()" class="big wechat icon block"></i>
       <i (click)="closeFullscreen()" class="big desktop icon block"></i>
+      <span data-tooltip="Show Self View" data-position="top right">
+        <i
+          (click)="createParticipantCard(currentParticipant, true)"
+          (click)="isShowCurrentParticipantCard = true"
+          *ngIf="!isShowCurrentParticipantCard"
+          class="big user plus icon big-left-margin"
+        ></i>
+      </span>
     </div>
+
     <div class="users" *ngIf="mediaData.length > 1">
-      <app-participant-card *ngFor="let data of mediaData" [data]="data">
+      <app-participant-card
+        *ngFor="let data of mediaData"
+        (hideViewEvent)="hideViewEventHandler($event)"
+        [data]="data"
+      >
       </app-participant-card>
     </div>
 
@@ -131,8 +147,11 @@ Enter+Shift for new line."
           <span data-tooltip="Share Screen" data-position="top left">
             <i class="big share square icon big-left-margin"></i>
           </span>
-          <span data-tooltip="Poolls">
-            <i (click)="onPollIconClick()" class="big clipboard list icon"></i
+          <span data-tooltip="Polls">
+            <i
+              (click)="pollService.onPollIconClick()"
+              class="big clipboard list icon"
+            ></i
           ></span>
           <span data-tooltip="Statistics">
             <i (click)="onStatisticsIconClick()" class="big chart bar icon"></i
@@ -149,6 +168,14 @@ Enter+Shift for new line."
               class="big desktop icon big-left-margin"
             ></i>
           </span>
+          <span data-tooltip="Show Self View" data-position="top right">
+            <i
+              *ngIf="!isShowCurrentParticipantCard"
+              (click)="createParticipantCard(currentParticipant, true)"
+              (click)="isShowCurrentParticipantCard = true"
+              class="big user plus icon big-left-margin"
+            ></i>
+          </span>
         </div>
         <div>
           <button class="ui red button" (click)="leave()">
@@ -158,27 +185,73 @@ Enter+Shift for new line."
       </div>
     </div>
   </div>
-  <div class="poll-create-container" *ngIf="isPollCreating">
-    <app-poll-create
-      [meetingId]="meeting.id"
-      (pollCreated)="onPollCreated($event)"
-    ></app-poll-create>
-  </div>
-
-  <div class="poll-create-container" *ngIf="isShowPoll">
-    <app-poll
-      [poll]="poll"
-      (pollAnswered)="isShowPoll = false; poll = null"
-    ></app-poll>
-  </div>
-
-  <div class="poll-create-container" *ngIf="isShowPollResults">
-    <app-poll-results [pollResults]="pollResults"></app-poll-results>
-  </div>
 
   <div class="poll-create-container" *ngIf="isShowStatistics">
     <app-meeting-statistics
       [statistic]="meetingStatistics"
     ></app-meeting-statistics>
+  </div>
+
+  <div
+    class="ui poll-create-container overflow-scroll segment"
+    *ngIf="pollService.isPollCreating"
+  >
+    <app-poll-create
+      [meetingId]="meeting.id"
+      (pollCreated)="
+        pollService.onPollCreated(
+          $event,
+          connectionData.meetingId,
+          connectionData.userEmail
+        )
+      "
+    ></app-poll-create>
+  </div>
+
+  <div
+    class="ui poll-create-container overflow-scroll segment"
+    *ngIf="pollService.isShowPoll"
+  >
+    <button
+      *ngIf="currentParticipant.role == 1"
+      (click)="pollService.onNewPollClick()"
+    >
+      New poll
+    </button>
+    <div class="ui segment">
+      <!--POLLS CONTAINER -->
+      <h3>Polls</h3>
+      <div *ngFor="let pollx of pollService.polls; let i = index">
+        <hr class="poll-divider" />
+        <span
+          *ngIf="currentParticipant.role == 1"
+          class="delete-poll-icon"
+          (click)="pollService.onDeletePollIconClick(pollx)"
+        >
+          &times;
+        </span>
+        <app-poll
+          [poll]="pollx"
+          [user]="currentParticipant.user"
+          (pollAnswered)="pollService.onPollAnswered($event)"
+        ></app-poll>
+      </div>
+    </div>
+    <div class="ui segment">
+      <h3>Results</h3>
+      <div *ngFor="let pollxResult of pollService.pollResults; let i = index">
+        <hr class="poll-divider" />
+        <span
+          *ngIf="currentParticipant.role == 1"
+          class="delete-poll-icon"
+          (click)="
+            pollService.onDeletePollResultIconClick(pollxResult, meeting.id)
+          "
+        >
+          &times;
+        </span>
+        <app-poll-results [pollResult]="pollxResult"></app-poll-results>
+      </div>
+    </div>
   </div>
 </div>

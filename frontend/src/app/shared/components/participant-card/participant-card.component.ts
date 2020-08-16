@@ -18,7 +18,7 @@ import flip from '@popperjs/core/lib/modifiers/flip.js';
 export class ParticipantCardComponent implements OnInit {
   @Input() data: UserMediaData;
   @Output() pinVideEvent = new EventEmitter<string>();
-  @Output() hideCurrentView = new EventEmitter<string>();
+  @Output() hideViewEvent = new EventEmitter<string>();
   @Output() stopVideoEvent = new EventEmitter<string>();
   @Output() startVideoEvent = new EventEmitter<string>();
   @Output() muteEvent = new EventEmitter<string>();
@@ -61,7 +61,7 @@ export class ParticipantCardComponent implements OnInit {
   }
 
   public hideCurrentCard(): void {
-    this.hideCurrentView.emit(this.data.id);
+    this.hideViewEvent.emit(this.data.id);
   }
 
   private initCardElements(): void {
