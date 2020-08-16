@@ -1,4 +1,4 @@
-<div #mainArea>
+<div #mainArea class="bg-white">
   <div *ngIf="isShowChat" class="ui chat card">
     <div class="ui chat-inner feed">
       <div *ngFor="let message of messages" class="event">
@@ -48,39 +48,31 @@ Enter+Shift for new line."
         class="ui item participant"
       >
         <img src="{{ participant.user.avatarUrl }}" />
-        <span>{{ participant.user.firstName }}</span>
+        <span
+          >{{ participant.user.firstName }}
+          {{ participant.user.lastName ? participant.user.lastName : "" }}</span
+        >
       </div>
     </div>
   </div>
 
   <div class="content">
     <div class="tools" ngDraggable>
-      <i style="opacity: 0.8;" class="big microphone icon block"></i>
-      <i style="opacity: 0.8;" class="big video icon block"></i>
+      <i class="big microphone icon block"></i>
+      <i class="big video icon block"></i>
       <i
-        style="opacity: 0.8;"
         class="users icon big users-icon-fix block"
         (click)="isShowParticipants = !isShowParticipants"
       ></i>
-      <i style="opacity: 0.8;" class="big share square icon block"></i>
+      <i class="big share square icon block"></i>
       <i (click)="onPollIconClick()" class="big clipboard list icon"></i>
       <i (click)="onStatisticsIconClick()" class="big chart bar icon"></i>
-      <i
-        (click)="showChat()"
-        style="opacity: 0.8;"
-        class="big wechat icon block"
-      ></i>
-      <i
-        (click)="closeFullscreen()"
-        style="opacity: 0.8;"
-        class="big desktop icon block"
-      ></i>
+      <i (click)="showChat()" class="big wechat icon block"></i>
+      <i (click)="closeFullscreen()" class="big desktop icon block"></i>
     </div>
     <div class="users" *ngIf="mediaData.length > 1">
-      <app-participant-card
-        *ngFor="let data of mediaData"
-        [data]="data"
-      ></app-participant-card>
+      <app-participant-card *ngFor="let data of mediaData" [data]="data">
+      </app-participant-card>
     </div>
 
     <video
@@ -92,65 +84,74 @@ Enter+Shift for new line."
     ></video>
 
     <div class="options">
-      <div class="ui container options__buttons">
-        <div>
-          <i
-            style="opacity: 0.8;"
-            class="big microphone icon"
-            (click)="turnOffMicrophone()"
-          ></i>
-          <i
-            style="margin-left: 10px; opacity: 0.8;"
-            class="big video icon"
-            (click)="turnOffCamera()"
-          ></i>
+      <div class="ui options__buttons">
+        <div class="inner-block">
+          <span
+            *ngIf="!isScreenRecording"
+            data-tooltip="Toggle Microphone"
+            data-position="top left"
+          >
+            <i class="big microphone icon" (click)="turnOffMicrophone()"></i>
+          </span>
+          <span *ngIf="!isScreenRecording" data-tooltip="Toggle Webcam">
+            <i
+              class="big video icon big-left-margin"
+              (click)="turnOffCamera()"
+            ></i>
+          </span>
         </div>
 
-        <div class="display-flex">
+        <div class="display-flex inner-block">
           <div class="participants-button-container">
-            <div class="relative-container">
+            <div
+              class="relative-container"
+              data-tooltip="Participants"
+              data-position="top left"
+            >
               <i
                 class="users icon big users-icon-fix"
                 (click)="isShowParticipants = !isShowParticipants"
               ></i>
             </div>
           </div>
-
-          <i
+          <span
             *ngIf="!isScreenRecording"
-            (click)="startRecording()"
-            class="big circle icon"
-          ></i>
-          <i
+            data-tooltip="Start Recording"
+            data-position="top left"
+          >
+            <i (click)="startRecording()" class="big circle icon"></i>
+          </span>
+          <span
             *ngIf="isScreenRecording"
-            (click)="stopRecording()"
-            class="big stop circle icon"
-          ></i>
-
-          <i
-            style="margin-left: 10px; opacity: 0.8;"
-            class="big share square icon"
-          ></i>
-          <i (click)="onPollIconClick()" class="big clipboard list icon"></i>
-          <i (click)="onStatisticsIconClick()" class="big chart bar icon"></i>
-          <i (click)="onCopyIconClick()" class="big copy icon"></i>
-          <i
-            (click)="showChat()"
-            style="margin-left: 10px; opacity: 0.8;"
-            class="big wechat icon"
-          ></i>
-          <i
-            (click)="goFullscreen()"
-            style="margin-left: 10px; opacity: 0.8;"
-            class="big desktop icon"
-          ></i>
+            data-tooltip="Stop Recording"
+            data-position="top left"
+          >
+            <i (click)="stopRecording()" class="big stop circle icon"></i>
+          </span>
+          <span data-tooltip="Share Screen" data-position="top left">
+            <i class="big share square icon big-left-margin"></i>
+          </span>
+          <span data-tooltip="Poolls">
+            <i (click)="onPollIconClick()" class="big clipboard list icon"></i
+          ></span>
+          <span data-tooltip="Statistics">
+            <i (click)="onStatisticsIconClick()" class="big chart bar icon"></i
+          ></span>
+          <span data-tooltip="Copy Link" data-position="top right">
+            <i (click)="onCopyIconClick()" class="big copy icon"></i>
+          </span>
+          <span data-tooltip="Chat" data-position="top right">
+            <i (click)="showChat()" class="big wechat icon big-left-margin"></i>
+          </span>
+          <span data-tooltip="Fullscreen" data-position="top right">
+            <i
+              (click)="goFullscreen()"
+              class="big desktop icon big-left-margin"
+            ></i>
+          </span>
         </div>
         <div>
-          <button
-            style="margin-left: 200px;"
-            class="ui inverted red button"
-            (click)="leave()"
-          >
+          <button class="ui red button" (click)="leave()">
             Leave
           </button>
         </div>

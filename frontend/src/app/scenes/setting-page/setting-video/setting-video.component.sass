@@ -12,12 +12,33 @@ select
     width: 100%
     
 .custom-select select 
-    appearance: none  
+    appearance: none
     display: flex
-    justify-content: center
+    justify-content: space-between
     padding: 0px 24px
     font-size: 16px
+    box-shadow: 0 2px 3px rgba(#DDDDDF, 0.1) inset
+    border: none
+    border-radius: 10px
+    width: 100%
+    -webkit-appearance: none
+    -moz-appearance: none
+    appearance: none
 
+select:hover
+    cursor: pointer
+
+.custom-select:after
+    content: '<>'
+    visibility: visible
+    -webkit-transform: rotate(90deg)
+    -moz-transform: rotate(90deg)
+    position: relative
+    top: 12px
+    right: 15px
+    pointer-events: none
+    width: 0px
+   
 .action
     display: flex
     flex-direction: column
@@ -29,6 +50,8 @@ select
 
 .custom-select
     margin: 20px !important
+    margin-right: 0px
+
 
 
 

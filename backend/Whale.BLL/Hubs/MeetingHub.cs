@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Whale.Shared.DTO.Meeting;
 using Whale.Shared.DTO.Meeting.MeetingMessage;
@@ -9,7 +8,7 @@ using Whale.BLL.Interfaces;
 using Whale.Shared.DTO.Poll;
 using Whale.BLL.Services;
 using Whale.Shared.DTO.Participant;
-using Whale.Shared.DTO.Call;
+using System.Linq;
 
 namespace Whale.BLL.Hubs
 {
@@ -17,7 +16,8 @@ namespace Whale.BLL.Hubs
     {
         private readonly IMeetingService _meetingService;
         private readonly ParticipantService _participantService;
-        private readonly Dictionary<string, List<ParticipantDTO>> _participants = new Dictionary<string, List<ParticipantDTO>>();
+        private readonly static Dictionary<string, List<ParticipantDTO>> _groupsParticipants = 
+            new Dictionary<string, List<ParticipantDTO>>();
 
         public MeetingHub(IMeetingService meetingService, ParticipantService participantService)
         {
@@ -29,37 +29,56 @@ namespace Whale.BLL.Hubs
         public async Task Join(MeetingConnectDTO connectionData)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, connectionData.MeetingId);
-            var participant = await _participantService.GetMeetingParticipantByEmail(Guid.Parse(connectionData.MeetingId), connectionData.UserEmail);
+            var participant = await _participantService.GetMeetingParticipantByEmail(
+                Guid.Parse(connectionData.MeetingId), connectionData.UserEmail);
             participant.StreamId = connectionData.StreamId;
-            _participants.TryGetValue(connectionData.MeetingId, out var groupParticipants);
-            if (groupParticipants == null)
+            connectionData.Participant = participant;
+            connectionData.Participant.ActiveConnectionId = Context.ConnectionId;
+
+            if (_groupsParticipants.TryGetValue(connectionData.MeetingId, out var groupParticipants))
             {
-                _participants[connectionData.MeetingId] = new List<ParticipantDTO>()
-                {
-                    participant
-                };
+                groupParticipants.Add(participant);
             }
             else
             {
-                groupParticipants.Add(participant);
-                _participants[connectionData.MeetingId] = groupParticipants;
+                _groupsParticipants[connectionData.MeetingId] = new List<ParticipantDTO> { participant };
             }
          
-
-            connectionData.Participant = participant;
             await Clients.Group(connectionData.MeetingId).SendAsync("OnUserConnect", connectionData);
-            await Clients.Caller.SendAsync("OnParticipantConnect", _participants[connectionData.MeetingId]);
+            await Clients.Caller.SendAsync("OnParticipantConnect", _groupsParticipants[connectionData.MeetingId]);
         }
 
-        [HubMethodName("OnUserDisconnect")]
-        public async Task Disconnect(MeetingConnectDTO ConnectionData)
+        public async override Task OnDisconnectedAsync(Exception exception)
         {
+            var disconectedParticipantInGroups = _groupsParticipants
+                .Where(g => g.Value.Any(p => p.ActiveConnectionId == Context.ConnectionId))
+                .ToList();
+
+            foreach(var group in disconectedParticipantInGroups)
+            {
+                var disconnectedParticipant = group.Value.Find(p => p.ActiveConnectionId == Context.ConnectionId);
+
+                _groupsParticipants[group.Key].Remove(disconnectedParticipant);
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, group.Key);
+                await Clients.Group(group.Key).SendAsync("OnParticipantDisconnected", disconnectedParticipant);
+            }
+
+            await base.OnDisconnectedAsync(exception);
+        }
+
+        [HubMethodName("OnParticipantLeft")]
+        public async Task ParticipantLeft(MeetingConnectDTO ConnectionData)
+        {
+            var disconnectedParticipant = _groupsParticipants[ConnectionData.MeetingId].Find(p => p.Id == ConnectionData.Participant.Id);
+
+            ConnectionData.Participant = disconnectedParticipant;
+            _groupsParticipants[ConnectionData.MeetingId].Remove(disconnectedParticipant);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, ConnectionData.MeetingId);
-            await Clients.Group(ConnectionData.MeetingId).SendAsync("OnUserDisconnect", ConnectionData);
+            await Clients.Group(ConnectionData.MeetingId).SendAsync("OnParticipantLeft", ConnectionData);
 
             if (await _meetingService.ParticipantDisconnect(ConnectionData.MeetingId, ConnectionData.UserEmail))
             {
-                await Clients.Group(ConnectionData.MeetingId).SendAsync("OnMeetingEnded", ConnectionData);
+               await Clients.Group(ConnectionData.MeetingId).SendAsync("OnMeetingEnded", ConnectionData);
             }
         }
 

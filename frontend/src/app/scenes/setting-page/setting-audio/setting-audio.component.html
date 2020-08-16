@@ -1,14 +1,13 @@
 <div class="custom-select">
   <div class="select">
     Microphone:
-    <div class="ui compact menu">
-      <select [(ngModel)]="inputDevice" class="menu select">
+    <div class="custom-select ui compact menu">
+      <select [(ngModel)]="inputDeviceId" (ngModelChange)="changeState($event)">
         <option
-          class="label"
           *ngFor="let c of inputDevices"
-          [value]="c"
-          [selected]="c"
-          >{{ c.label }}</option
+          [value]="c.deviceId"
+          [selected]="c.deviceId == inputDeviceId"
+          ><span>{{ c.label }}</span></option
         >
       </select>
     </div>
@@ -37,14 +36,16 @@
 <div class="custom-select" id="outputDevice">
   <div class="select">
     Speaker:
-    <div class="ui compact menu">
-      <select [(ngModel)]="outputDevice">
+    <div class="custom-select ui compact menu">
+      <select
+        [(ngModel)]="outputDeviceId"
+        (ngModelChange)="changeState($event)"
+      >
         <option
-          class="item"
           *ngFor="let c of outputDevices"
-          [value]="c"
-          [selected]="c"
-          >{{ c.label }}</option
+          [value]="c.deviceId"
+          [selected]="c.deviceId == outputDeviceId"
+          ><span>{{ c.label }}</span></option
         >
       </select>
     </div>

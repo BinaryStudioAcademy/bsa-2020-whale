@@ -59,6 +59,8 @@ export class MeetingComponent
   public isShowPollResults = false;
   public isShowStatistics = false;
   public isScreenRecording = false;
+  public isCameraOn = true;
+  public isMicroOn = true;
 
   @ViewChild('currentVideo') currentVideo: ElementRef;
 
@@ -139,6 +141,7 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (participants) => {
+          this.meeting.participants.push(...participants);
           this.currentParticipant = participants.find(
             (p) => p.user.email === this.authService.currentUser.email
           );
@@ -158,15 +161,54 @@ export class MeetingComponent
         }
       );
 
-    // when someone disconnected from meeting
-    this.meetingSignalrService.signalUserDisconected$
+    // when someone left meeting
+    this.meetingSignalrService.signalParticipantLeft$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((connectionData) => {
         this.meeting.participants = this.meeting.participants.filter(
           (p) => p.id !== connectionData.participant.id
         );
+
         if (this.connectedPeers.has(connectionData.peerId)) {
           this.connectedPeers.delete(connectionData.peerId);
+        }
+
+        const disconectedMediaDataIndex = this.mediaData.findIndex(
+          (m) => m.stream.id == connectionData.participant.streamId
+        );
+        if (disconectedMediaDataIndex) {
+          this.mediaData.splice(disconectedMediaDataIndex, 1);
+          const secondName = ` ${
+            connectionData.participant.user.secondName ?? ''
+          }`;
+          this.toastr.show(
+            `${connectionData.participant.user.firstName}${secondName} left`
+          );
+        }
+      });
+
+    this.meetingSignalrService.signalParticipantDisconnected$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe((participant) => {
+        this.meeting.participants = this.meeting.participants.filter(
+          (p) => p.id !== participant.id
+        );
+
+        this.connectedPeers = new Map(
+          [...this.connectedPeers].filter(
+            ([_, v]) => v.id !== participant.streamId
+          )
+        );
+
+        const disconectedMediaDataIndex = this.mediaData.findIndex(
+          (m) => m.stream.id == participant.streamId
+        );
+        if (disconectedMediaDataIndex) {
+          this.mediaData.splice(disconectedMediaDataIndex, 1);
+          const secondName = ` ${participant.user.secondName ?? ''}`;
+          this.toastr.show(
+            `${participant.user.firstName}${secondName} disconnected`
+          );
         }
       });
 
@@ -228,12 +270,12 @@ export class MeetingComponent
       call.on('stream', (stream) => {
         debugger;
         if (!this.connectedStreams.includes(stream.id)) {
-          this.showMediaStream(stream);
           this.connectedStreams.push(stream.id);
-          call;
           console.log(call.peer, 'call peer');
 
-          const participant = this.meeting.participants[0]; //to-do this.meeting.participants.find(p => p.streamId == stream.id);
+          const participant = this.meeting.participants.find(
+            (p) => p.streamId == stream.id
+          );
 
           console.log(stream.id);
           console.log(this.meeting);
@@ -279,11 +321,13 @@ export class MeetingComponent
     if (this.currentParticipant?.role === ParticipantRole.Host) {
       canLeave = confirm('You will end current meeting!');
     }
+
     if (canLeave) {
-      this.currentUserStream.getTracks().forEach((track) => track.stop());
+      this.currentUserStream?.getTracks().forEach((track) => track.stop());
       this.destroyPeer();
+      this.connectionData.participant = this.currentParticipant;
       this.meetingSignalrService.invoke(
-        SignalMethods.OnUserDisconnect,
+        SignalMethods.OnParticipantLeft,
         this.connectionData
       );
       this.router.navigate(['/home']);
@@ -339,6 +383,7 @@ export class MeetingComponent
   }
 
   public onPollIconClick() {
+    this.isShowStatistics = false;
     if (this.poll) {
       this.isShowPoll = !this.isShowPoll;
     } else if (this.pollResults || this.isShowPoll) {
@@ -386,6 +431,9 @@ export class MeetingComponent
   }
 
   public onStatisticsIconClick(): void {
+    this.isShowPoll = false;
+    this.isPollCreating = false;
+    this.isShowPollResults = false;
     if (!this.meetingStatistics) {
       if (!this.meeting) {
         this.toastr.warning('Something went wrong. Try again later.');
@@ -454,7 +502,6 @@ export class MeetingComponent
 
     // get answer and show other user
     call.on('stream', (stream) => {
-      //this.showMediaStream(stream);
       this.connectedStreams.push(stream.id);
       const connectedPeer = this.connectedPeers.get(call.peer);
       if (!connectedPeer || connectedPeer.id !== stream.id) {
@@ -533,32 +580,6 @@ export class MeetingComponent
           };
           this.getMeeting(link);
         });
-    });
-  }
-
-  // show mediaStream
-  private showMediaStream(stream: MediaStream) {
-    debugger;
-    const participants = document.getElementById('participants');
-
-    if (!this.connectedStreams.includes(stream.id)) {
-      //debugger
-      //this.createParticipantCard(this.currentParticipant, this.currentUserStream)
-    }
-  }
-
-  // // create html element to show video
-  private createParticipantCard(
-    participant: Participant,
-    stream: MediaStream
-  ): void {
-    this.mediaData.push({
-      id: participant.id,
-      userFirstName: participant.user.firstName,
-      userLastName: participant.user.secondName,
-      isCurrentUser: stream.id == this.currentUserStream.id,
-      isUserHost: participant.role == ParticipantRole.Host,
-      stream: stream,
     });
   }
 }

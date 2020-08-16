@@ -37,7 +37,7 @@ export class SettingVideoComponent implements OnInit {
   async handleSuccess(stream) {
     const video = document.querySelector('video');
     const videoTracks = stream.getVideoTracks();
-    window.MSStream = stream; // make variable available to browser console
+    window.MSStream = stream;
     video.srcObject = stream;
   }
 
