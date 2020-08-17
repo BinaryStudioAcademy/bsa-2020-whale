@@ -17,6 +17,7 @@ import { SimpleModalModule } from 'ngx-simple-modal';
 import { AngularDraggableModule } from 'angular2-draggable';
 import { PagesModule } from './scenes/pages.module';
 import { SharedModule } from '@shared/shared.module';
+import { CanvasWhiteboardModule } from 'ng2-canvas-whiteboard';
 
 @NgModule({
   declarations: [AppComponent],
@@ -33,6 +34,7 @@ import { SharedModule } from '@shared/shared.module';
     BrowserAnimationsModule,
     PagesModule,
     SharedModule,
+    CanvasWhiteboardModule,
     ToastrModule.forRoot({
       timeOut: 5000,
       positionClass: 'toast-bottom-right',
