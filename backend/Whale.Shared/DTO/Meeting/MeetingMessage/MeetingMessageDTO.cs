@@ -10,6 +10,6 @@ namespace Whale.Shared.DTO.Meeting.MeetingMessage
         public string MeetingId { get; set; }
 
         public string Message { get; set; }
-        public DateTime SentDate { get; set; }
+        public DateTimeOffset SentDate { get; set; }
     }
 }

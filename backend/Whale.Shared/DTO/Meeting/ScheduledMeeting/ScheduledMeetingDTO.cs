@@ -6,7 +6,7 @@ namespace Whale.Shared.DTO.Meeting.ScheduledMeeting
     {
         public Guid Id { get; set; }
         public string Settings { get; set; }
-        public DateTime ScheduledTime { get; set; }
+        public DateTimeOffset ScheduledTime { get; set; }
         public int AnonymousCount { get; set; }
     }
 }

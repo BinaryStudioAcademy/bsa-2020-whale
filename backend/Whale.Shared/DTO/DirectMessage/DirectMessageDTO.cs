@@ -13,7 +13,7 @@ namespace Whale.Shared.DTO.DirectMessage
         public ContactDTO Contact { get; set; }
         public Guid AuthorId { get; set; }
         public UserDTO Author { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
         public string Message { get; set; }
         public bool Attachment { get; set; }
     }

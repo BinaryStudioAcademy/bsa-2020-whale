@@ -33,7 +33,7 @@ namespace Whale.API
 			return new ElasticsearchSinkOptions(new Uri(configuration["ElasticConfiguration:Uri"]))
 			{
 				AutoRegisterTemplate = true,
-				IndexFormat = $"{Assembly.GetExecutingAssembly().GetName().Name.ToLower().Replace(".", "-")}-{environment?.ToLower().Replace(".", "-")}-{DateTime.UtcNow:yyyy-MM}"
+				IndexFormat = $"{Assembly.GetExecutingAssembly().GetName().Name.ToLower().Replace(".", "-")}-{environment?.ToLower().Replace(".", "-")}-{DateTimeOffset.UtcNow:yyyy-MM}"
 			};
 		}
 	}
