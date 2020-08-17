@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Whale.Shared.Enums;
 
 namespace Whale.Shared.Models
 {
@@ -11,6 +12,7 @@ namespace Whale.Shared.Models
         [Required]
         public string DisplayName { get; set; }
         public string PhotoUrl { get; set; }
+        public LinkTypeEnum LinkType { get; set; }
         [Required]
         [EmailAddress]
         public string Email { get; set; }

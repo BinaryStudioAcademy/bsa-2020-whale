@@ -27,8 +27,8 @@ export class CheckAccessToMediaGuard implements CanActivate {
       });
       return stream.active;
     } catch {
-      window.location.reload();
       alert('Cannot access the camera and microphone');
+      window.location.reload();
       return this.router.createUrlTree(['/home']);
     }
   }

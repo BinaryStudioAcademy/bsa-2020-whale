@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ImageCroppedEvent } from 'ngx-image-cropper';
 import { ToastrService } from 'ngx-toastr';
@@ -6,10 +6,11 @@ import { BlobService } from '../../../../core/services/blob.service';
 import { User } from '@shared/models/user';
 import { HttpService } from '../../../../core/services/http.service';
 import { AuthService } from '../../../../core/auth/auth.service';
-import { FormGroup, FormControl } from '@angular/forms';
 import { filter } from 'rxjs/operators';
 import Avatar from 'avatar-initials';
+import { LinkTypeEnum } from '@shared/Enums/LinkTypeEnum';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+
 
 @Component({
   selector: 'app-profile-page',
@@ -42,6 +43,7 @@ export class ProfilePageComponent implements OnInit {
 
   isShowUploadFile: boolean;
   loggedInUser: User;
+  updatedUserDB: User;
   public routePrefix = '/api/user';
 
   imageChangedEvent: any = '';
@@ -100,10 +102,14 @@ export class ProfilePageComponent implements OnInit {
       this.avatarURL = resp;
       if (this.avatarURL !== '') {
         this.loggedInUser.avatarUrl = this.avatarURL;
+        const name = this.avatarURL.split('/').pop();
+        this.updatedUserDB = Object.assign({}, this.loggedInUser);
+        this.updatedUserDB.avatarUrl = name;
+        this.updatedUserDB.linkType = LinkTypeEnum.Internal;
         this.httpService
           .putFullRequest<User, string>(
             `${this.routePrefix}`,
-            this.loggedInUser
+            this.updatedUserDB
           )
           .subscribe((response) => console.log(`image: ${response.body}`));
       }
@@ -186,8 +192,17 @@ export class ProfilePageComponent implements OnInit {
           .getRequest<User>(`${this.routePrefix}/email/${user.email}`)
           .subscribe(
             (userFromDB: User) => {
-              this.loggedInUser = userFromDB;
-              this.updatedUser = this.loggedInUser;
+              if (userFromDB.linkType === LinkTypeEnum.Internal) {
+                this.blobService
+                  .GetImageByName(userFromDB.avatarUrl)
+                  .subscribe((fullLink: string) => {
+                    userFromDB.avatarUrl = fullLink;
+                    this.loggedInUser = userFromDB;
+                    this.updatedUser = this.loggedInUser;
+                  });
+              } else {
+                this.loggedInUser = userFromDB;
+              }
             },
             (error) => this.toastr.error(error.Message)
           );
@@ -204,6 +219,7 @@ export class ProfilePageComponent implements OnInit {
     });
 
     this.loggedInUser.avatarUrl = avatar.element.src;
+    this.loggedInUser.linkType = LinkTypeEnum.External;
     this.httpService
       .putFullRequest<User, string>(`${this.routePrefix}`, this.loggedInUser)
       .subscribe((response) => {

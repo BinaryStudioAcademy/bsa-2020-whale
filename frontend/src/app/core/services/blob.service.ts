@@ -59,4 +59,10 @@ export class BlobService {
       responseType: 'text',
     });
   }
+
+  public GetImageByName(name: string): Observable<string> {
+    return this.http.get(`${this.baseUrl}/api/storage/${name}`, {
+      responseType: 'text',
+    });
+  }
 }
