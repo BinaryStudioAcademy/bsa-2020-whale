@@ -14,7 +14,7 @@ namespace Whale.DAL.Models
         public Contact Contact { get; set; }
         public Guid AuthorId { get; set; }
         public User Author { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
         [Required]
         public string Message { get; set; }
         public bool Attachment { get; set; }

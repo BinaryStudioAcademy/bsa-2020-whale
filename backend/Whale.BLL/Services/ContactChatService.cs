@@ -35,7 +35,7 @@ namespace Whale.BLL.Services
         public async Task<DirectMessageDTO> CreateDirectMessage(DirectMessageCreateDTO directMessageDto)
         {
             var messageEntity = _mapper.Map<DirectMessage>(directMessageDto);
-            messageEntity.CreatedAt = DateTime.UtcNow;
+            messageEntity.CreatedAt = DateTimeOffset.UtcNow;
             _context.DirectMessages.Add(messageEntity);
             await _context.SaveChangesAsync();
 

@@ -67,7 +67,7 @@ namespace Whale.BLL.Services
             var meeting = _mapper.Map<Meeting>(meetingDTO);
             if (!meeting.IsScheduled)
             {
-                meeting.StartTime = DateTime.Now;
+                meeting.StartTime = DateTimeOffset.Now;
             }
             await _context.Meetings.AddAsync(meeting);
             await _context.SaveChangesAsync();
@@ -91,7 +91,7 @@ namespace Whale.BLL.Services
         public async Task<MeetingMessageDTO> SendMessage(MeetingMessageCreateDTO msgDTO)
         {
             var message = _mapper.Map<MeetingMessageDTO>(msgDTO);
-            message.SentDate = DateTime.Now;
+            message.SentDate = DateTimeOffset.Now;
             message.Id = Guid.NewGuid().ToString();
 
             var user = await _userService.GetUserByEmail(msgDTO.AuthorEmail);
