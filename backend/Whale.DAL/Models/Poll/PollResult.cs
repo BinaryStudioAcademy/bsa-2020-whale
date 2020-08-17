@@ -13,5 +13,7 @@ namespace Whale.DAL.Models.Poll
         public List<OptionResult> OptionResults { get; set; } = new List<OptionResult>();
         public int TotalVoted { get; set; }
         public int VoteCount { get; set; }
+
+        public Guid MeetingId { get; set; }
     }
 }
