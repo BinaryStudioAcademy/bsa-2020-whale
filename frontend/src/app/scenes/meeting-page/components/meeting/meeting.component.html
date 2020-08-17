@@ -59,22 +59,60 @@ Enter+Shift for new line."
 
   <div class="content">
     <div class="tools" ngDraggable>
-      <i class="big microphone icon block"></i>
-      <i class="big video icon block"></i>
-      <i
-        id="meeting-draggable-participants"
-        class="users icon big users-icon-fix block"
-        (click)="isShowParticipants = !isShowParticipants"
-      ></i>
-      <i class="big share square icon block"></i>
-      <i
-        id="meeting-draggable-poll"
-        (click)="pollService.onPollIconClick()"
-        class="big clipboard list icon"
-      ></i>
-      <i id="meeting-draggable-statistics" (click)="onStatisticsIconClick()" class="big chart bar icon"></i>
-      <i id="meeting-draggable-chat" (click)="showChat()" class="big wechat icon block"></i>
-      <i id="meeting-draggable-fullscreen" (click)="closeFullscreen()" class="big desktop icon block"></i>
+      <span data-tooltip="Toggle Microphone" data-position="top left">
+        <i
+          id="meeting-draggable-mute"
+          *ngIf="!isMicrophoneMuted"
+          class="big microphone icon"
+          (click)="turnOffMicrophone()"
+        ></i>
+        <i
+          id="meeting-draggable-mute"
+          *ngIf="isMicrophoneMuted"
+          class="big slash microphone icon"
+          (click)="turnOffMicrophone()"
+        ></i>
+      </span>
+      <span data-tooltip="Toggle Webcam" data-position="top left">
+        <i
+          id="meeting-draggable-camera"
+          *ngIf="!isCameraMuted"
+          class="big video icon big-left-margin"
+          (click)="turnOffCamera()"
+        ></i>
+        <i
+          id="meeting-draggable-camera"
+          *ngIf="isCameraMuted"
+          class="big eye slash icon big-left-margin"
+          (click)="turnOffCamera()"
+        ></i>
+      </span>
+      <span data-tooltip="Participants" data-position="top left">
+        <i
+          id="meeting-draggable-participants"
+          class="users icon big users-icon-fix block"
+          (click)="isShowParticipants = !isShowParticipants"
+        ></i>
+      </span>
+      <span data-tooltip="Share Screen">
+        <i class="big share square icon block"></i>
+      </span>
+      <span data-tooltip="Polls">
+        <i
+          id="meeting-draggable-poll"
+          (click)="pollService.onPollIconClick()"
+          class="big clipboard list icon"
+        ></i>
+      </span>
+      <span data-tooltip="Statistics" data-position="top right">
+        <i id="meeting-draggable-statistics" (click)="onStatisticsIconClick()" class="big chart bar icon"></i>
+      </span>
+      <span data-tooltip="Chat" data-position="top right">
+        <i id="meeting-draggable-chat" (click)="showChat()" class="big wechat icon block"></i>
+      </span>
+      <span data-tooltip="Quit fullscreen" data-position="top right">
+        <i id="meeting-draggable-fullscrean" (click)="closeFullscreen()" class="big compress icon block"></i>
+      </span>
       <span data-tooltip="Show Self View" data-position="top right">
         <i
           id="meeting-draggable-create" 
@@ -191,7 +229,7 @@ Enter+Shift for new line."
             <i
               id="meeting-options-fullscreen"
               (click)="goFullscreen()"
-              class="big desktop icon big-left-margin"
+              class="big expand icon big-left-margin"
             ></i>
           </span>
           <span data-tooltip="Show Self View" data-position="top right">

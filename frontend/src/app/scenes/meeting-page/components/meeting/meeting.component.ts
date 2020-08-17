@@ -75,8 +75,8 @@ export class MeetingComponent
   private currentStreamLoaded = new EventEmitter<void>();
   private contectedAt = new Date();
   private elem: any;
-  private isMicrophoneMuted = false;
-  private isCameraMuted = false;
+  public isMicrophoneMuted = false;
+  public isCameraMuted = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -393,9 +393,22 @@ export class MeetingComponent
   }
 
   public onCopyIconClick(): void {
-    this.simpleModalService.addModal(CopyClipboardComponent, {
-      message: this.document.location.href,
-    });
+    const copyBox = document.createElement('textarea');
+    copyBox.style.position = 'fixed';
+    copyBox.style.left = '0';
+    copyBox.style.top = '0';
+    copyBox.style.opacity = '0';
+    copyBox.value = this.document.location.href;
+    document.body.appendChild(copyBox);
+    copyBox.focus();
+    copyBox.select();
+    document.execCommand('copy');
+    document.body.removeChild(copyBox);
+    this.toastr.success('Copied');
+
+    // this.simpleModalService.addModal(CopyClipboardComponent, {
+    //   message: this.document.location.href,
+    // });
   }
 
   public sendMessage(): void {
