@@ -264,6 +264,8 @@ Enter+Shift for new line."
     <button
       *ngIf="currentParticipant && currentParticipant.role == 1"
       (click)="pollService.onNewPollClick()"
+      class="ui button"
+      id="new-poll-btn"
     >
       New poll
     </button>

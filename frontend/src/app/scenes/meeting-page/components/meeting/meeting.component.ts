@@ -57,6 +57,7 @@ export class MeetingComponent
   public isShowCurrentParticipantCard = true;
 
   @ViewChild('currentVideo') currentVideo: ElementRef;
+  @ViewChild('mainArea', { static: false }) mainArea: ElementRef<HTMLElement>;
 
   public peer: Peer;
   public connectedStreams: MediaStream[] = [];
@@ -76,8 +77,6 @@ export class MeetingComponent
   private elem: any;
   public isMicrophoneMuted = false;
   public isCameraMuted = false;
-
-  @ViewChild('mainArea', { static: false }) mainArea: ElementRef;
 
   constructor(
     private route: ActivatedRoute,
@@ -182,7 +181,7 @@ export class MeetingComponent
             connectionData.participant.user.secondName ?? ''
           }`;
           this.toastr.show(
-            `${connectionData.participant.user.firstName}${secondName} left`
+            `${connectionData.participant.user.firstName}${secondName} has left`
           );
         }
       });
@@ -271,6 +270,16 @@ export class MeetingComponent
       // send mediaStream to caller
       call.answer(this.currentUserStream);
     });
+
+    // disables ability to close browser tab if user didn't visit any element on the tab
+    this.mainArea.nativeElement.classList.add('visited');
+
+    window.onbeforeunload = function (ev: BeforeUnloadEvent) {
+      ev.preventDefault();
+      ev = ev || window.event;
+      ev.returnValue = '';
+      return '';
+    };
   }
 
   public ngAfterViewInit(): void {
