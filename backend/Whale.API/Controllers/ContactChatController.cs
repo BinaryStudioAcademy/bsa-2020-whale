@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Whale.BLL.Services;
-using Whale.Shared.DTO.DirectMessage;
-using Whale.Shared.DTO.Contact;
+using Whale.API.Services;
+using Whale.Shared.Models.DirectMessage;
 
 namespace Whale.API.Controllers
 {
