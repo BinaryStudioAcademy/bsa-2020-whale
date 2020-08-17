@@ -84,6 +84,16 @@
       ></i>
     </div>
 
+    <div class="canvas" [style.display]="!canvasIsDisplayed ? 'block' : 'none'">
+      <canvas-whiteboard
+        #canvasWhiteboard
+        [options]="canvasOptions"
+        (onBatchUpdate)="onCanvasDraw($event)"
+        (onClear)="onCanvasClear()"
+      >
+      </canvas-whiteboard>
+    </div>
+
     Me:
     <video #currentVideo autoplay="autoplay" [muted]="'muted'"></video> Users:
     <div id="participants"></div>
@@ -115,6 +125,11 @@
             (click)="showChat()"
             style="margin-left: 10px; opacity: 0.8;"
             class="big wechat icon"
+          ></i>
+          <i
+            (click)="showCanvas()"
+            style="margin-left: 10px; opacity: 0.8;"
+            class="big paint brush icon"
           ></i>
           <i
             (click)="goFullscreen()"

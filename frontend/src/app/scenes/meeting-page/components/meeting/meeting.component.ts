@@ -28,6 +28,11 @@ import { MeetingConnectionData } from '@shared/models/meeting/meeting-connect';
 import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
 import { MeetingMessageCreate } from '@shared/models/meeting/message/meeting-message-create';
 import { UserService } from 'app/core/services/user.service';
+import {
+  CanvasWhiteboardOptions,
+  CanvasWhiteboardService,
+  CanvasWhiteboardUpdate,
+} from 'ng2-canvas-whiteboard';
 
 @Component({
   selector: 'app-meeting',
@@ -46,6 +51,26 @@ export class MeetingComponent
   public meeting: Meeting;
   public isShowChat = false;
   public isShowParticipants = false;
+
+  public canvasIsDisplayed: boolean;
+  public canvasOptions: CanvasWhiteboardOptions = {
+    clearButtonEnabled: true,
+    clearButtonText: 'Erase',
+    undoButtonText: 'Undo',
+    undoButtonEnabled: false,
+    colorPickerEnabled: false,
+    saveDataButtonEnabled: true,
+    saveDataButtonText: 'Save',
+    lineWidth: 5,
+    strokeColor: 'rgb(0,0,0)',
+    shouldDownloadDrawing: true,
+    drawingEnabled: true,
+    showShapeSelector: false,
+    shapeSelectorEnabled: false,
+    showFillColorPicker: false,
+    batchUpdateTimeoutDuration: 250,
+    drawButtonEnabled: false,
+  };
 
   public messages: MeetingMessage[] = [];
   public msgText = '';
@@ -77,13 +102,15 @@ export class MeetingComponent
     private toastr: ToastrService,
     private blobService: BlobService,
     @Inject(DOCUMENT) private document: any,
-    private userService: UserService
+    private userService: UserService,
+    private canvasWhiteboardService: CanvasWhiteboardService
   ) {
     this.meetingSignalrService = new MeetingSignalrService(signalRService);
   }
 
   ngAfterViewInit(): void {
     this.elem = this.mainArea.nativeElement;
+    this.canvasIsDisplayed = true;
   }
 
   ngAfterContentInit() {
@@ -93,6 +120,7 @@ export class MeetingComponent
   }
 
   async ngOnInit() {
+    this.canvasIsDisplayed = false;
     this.currentUserStream = await navigator.mediaDevices.getUserMedia({
       video: true,
       audio: true,
@@ -168,6 +196,28 @@ export class MeetingComponent
       // send mediaStream to caller
       call.answer(this.currentUserStream);
     });
+
+    this.meetingSignalrService.canvasDraw$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (strokes) => {
+          this.canvasWhiteboardService.drawCanvas(strokes);
+        },
+        (err) => {
+          this.toastr.error('Error occured while trying to get drawings');
+        }
+      );
+
+    this.meetingSignalrService.canvasErase$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (erase) => {
+          if (erase) this.canvasWhiteboardService.clearCanvas();
+        },
+        (err) => {
+          this.toastr.error('Error occured while trying to erase drawings');
+        }
+      );
   }
 
   ngOnDestroy(): void {
@@ -321,5 +371,23 @@ export class MeetingComponent
     } else if (this.document.msExitFullscreen) {
       this.document.msExitFullscreen();
     }
+  }
+
+  onCanvasDraw(event) {
+    this.meetingSignalrService.invoke(SignalMethods.OnDrawing, {
+      meetingId: this.meeting.id,
+      canvasEvent: event,
+    });
+  }
+
+  onCanvasClear() {
+    this.meetingSignalrService.invoke(SignalMethods.OnErasing, {
+      meetingId: this.meeting.id,
+      erase: true,
+    });
+  }
+
+  showCanvas() {
+    this.canvasIsDisplayed = this.canvasIsDisplayed ? false : true;
   }
 }

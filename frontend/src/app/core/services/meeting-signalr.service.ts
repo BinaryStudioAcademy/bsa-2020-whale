@@ -6,6 +6,7 @@ import { Subject, from, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { MeetingConnectionData } from '@shared/models/meeting/meeting-connect';
 import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
+import { CanvasWhiteboardUpdate } from 'ng2-canvas-whiteboard';
 
 @Injectable({
   providedIn: 'root',
@@ -31,6 +32,12 @@ export class MeetingSignalrService {
 
   private getMessages = new Subject<MeetingMessage[]>();
   public getMessages$ = this.getMessages.asObservable();
+
+  private canvasDraw = new Subject<CanvasWhiteboardUpdate[]>();
+  public readonly canvasDraw$ = this.canvasDraw.asObservable();
+
+  private canvasErase = new Subject<boolean>();
+  public readonly canvasErase$ = this.canvasErase.asObservable();
 
   constructor(private hubService: SignalRService) {
     from(hubService.registerHub(environment.meetingApiUrl, 'meeting'))
@@ -69,6 +76,14 @@ export class MeetingSignalrService {
         this.signalHub.on('OnGetMessages', (messages: MeetingMessage[]) => {
           this.getMessages.next(messages);
         });
+
+        this.signalHub.on('OnDrawing', (drawing: CanvasWhiteboardUpdate[]) => {
+          this.canvasDraw.next(drawing);
+        });
+
+        this.signalHub.on('OnErasing', (erase: boolean) => {
+          this.canvasErase.next(erase);
+        });
       });
   }
 
@@ -89,4 +104,6 @@ export enum SignalMethods {
   OnConferenceStopRecording,
   OnSendMessage,
   OnGetMessages,
+  OnDrawing,
+  OnErasing,
 }

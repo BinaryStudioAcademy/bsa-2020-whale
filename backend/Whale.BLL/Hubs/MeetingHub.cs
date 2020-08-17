@@ -57,5 +57,17 @@ namespace Whale.BLL.Hubs
         {
             await Clients.All.SendAsync("OnConferenceStopRecording", message);
         }
+
+        [HubMethodName("OnDrawing")]
+        public async Task Draw(CreateDrawingDTO drawingDTO)
+        {
+            await Clients.GroupExcept(drawingDTO.MeetingId, new List<string> { Context.ConnectionId }).SendAsync("OnDrawing", drawingDTO.CanvasEvent);
+        }
+
+        [HubMethodName("OnErasing")]
+        public async Task Erase(EraseDrawingDTO drawingDTO)
+        {
+            await Clients.GroupExcept(drawingDTO.MeetingId, new List<string> { Context.ConnectionId }).SendAsync("OnErasing", drawingDTO.Erase);
+        }
     }
 }
