@@ -213,7 +213,7 @@ Enter+Shift for new line."
     *ngIf="pollService.isShowPoll"
   >
     <button
-      *ngIf="currentParticipant.role == 1"
+      *ngIf="currentParticipant && currentParticipant.role == 1"
       (click)="pollService.onNewPollClick()"
     >
       New poll

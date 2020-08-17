@@ -9,12 +9,21 @@
       <div class="thirteen wide column">
         {{ optionResult.option }}
       </div>
-      <div class="sixteen wide column avatar-container">
-        <img
+      <div class="ui grid container avatar-container">
+        <div
           *ngFor="let user of optionResult.votedUsers"
-          src="{{ user.avatarUrl }}"
-          class="voted-user-avatar"
-        />
+          class="one wide column voted-user-column padding-0"
+        >
+          <img
+            title="{{
+              user.secondName
+                ? user.firstName + ' ' + user.secondName
+                : user.firstName
+            }}"
+            src="{{ user.avatarUrl }}"
+            class="voted-user-avatar margin-0 padding-0"
+          />
+        </div>
       </div>
     </div>
   </div>
