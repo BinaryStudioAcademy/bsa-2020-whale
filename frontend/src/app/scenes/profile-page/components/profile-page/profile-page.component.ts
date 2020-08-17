@@ -110,7 +110,11 @@ export class ProfilePageComponent implements OnInit {
             `${this.routePrefix}`,
             this.updatedUserDB
           )
-          .subscribe((response) => console.log(`image: ${response.body}`));
+          .subscribe((response) => {
+            console.log(`image: ${response.body}`);
+
+            this.closeModal();
+          });
       }
     });
 
