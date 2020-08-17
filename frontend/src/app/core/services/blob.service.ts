@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { Observable } from 'rxjs';
+import { Observable, observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -14,23 +14,35 @@ export class BlobService {
   recorder: MediaRecorder;
   stream: MediaStream;
 
-  public async startRecording(): Promise<void> {
-    const mediaDevices = navigator.mediaDevices as any;
-    this.stream = await mediaDevices.getDisplayMedia({
-      video: { mediaSource: 'screen' },
-      audio: true,
+  public startRecording(): Observable<boolean> {
+    return new Observable<boolean>((subscriber) => {
+      const mediaDevices = navigator.mediaDevices as any;
+      mediaDevices
+        .getDisplayMedia({
+          video: { mediaSource: 'screen' },
+          audio: true,
+        })
+        .then((stream: MediaStream) => {
+          this.stream = stream;
+          this.recorder = new MediaRecorder(stream);
+          const chunks = [];
+          this.recorder.ondataavailable = (e: any) => chunks.push(e.data);
+          this.recorder.stream.getVideoTracks()[0].onended = function () {
+            subscriber.next(false);
+          };
+          this.recorder.onstop = (e: Event) => {
+            const completeBlob = new Blob(chunks, { type: chunks[0].type });
+
+            this.postBlob(completeBlob);
+          };
+          this.recorder.start();
+
+          subscriber.next(true);
+        })
+        .catch(() => {
+          subscriber.next(false);
+        });
     });
-
-    this.recorder = new MediaRecorder(this.stream);
-
-    const chunks = [];
-    this.recorder.ondataavailable = (e: any) => chunks.push(e.data);
-    this.recorder.onstop = (e: Event) => {
-      const completeBlob = new Blob(chunks, { type: chunks[0].type });
-
-      this.postBlob(completeBlob);
-    };
-    this.recorder.start();
   }
 
   public stopRecording(): void {

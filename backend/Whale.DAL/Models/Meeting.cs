@@ -8,7 +8,7 @@ namespace Whale.DAL.Models
     public class Meeting:BaseEntity
     {
         public string Settings { get; set; }
-        public DateTime StartTime { get; set; }
+        public DateTimeOffset StartTime { get; set; }
         public int AnonymousCount { get; set; }
         public bool IsScheduled { get; set; }
         public bool IsRecurrent { get; set; }

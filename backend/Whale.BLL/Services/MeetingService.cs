@@ -16,6 +16,7 @@ using Whale.BLL.Services.Interfaces;
 using Whale.Shared.DTO.Participant;
 using System.Linq;
 using Whale.Shared.Helper;
+using shortid;
 
 namespace Whale.BLL.Services
 {
@@ -67,7 +68,7 @@ namespace Whale.BLL.Services
             var meeting = _mapper.Map<Meeting>(meetingDTO);
             if (!meeting.IsScheduled)
             {
-                meeting.StartTime = DateTime.Now;
+                meeting.StartTime = DateTimeOffset.Now;
             }
             await _context.Meetings.AddAsync(meeting);
             await _context.SaveChangesAsync();
@@ -77,6 +78,11 @@ namespace Whale.BLL.Services
             var pwd = _encryptService.EncryptString(Guid.NewGuid().ToString());
             await _redisService.SetAsync(meeting.Id.ToString(), new MeetingMessagesAndPasswordDTO { Password = pwd });
 
+            string shortURL = ShortId.Generate();
+            string fullURL = $"?id={meeting.Id}&pwd={pwd}";
+            await _redisService.SetAsync(fullURL, shortURL);
+            await _redisService.SetAsync(shortURL, fullURL);
+
             await _participantService.CreateParticipantAsync(new ParticipantCreateDTO
             {
                 Role = Shared.DTO.Participant.ParticipantRole.Host,
@@ -84,14 +90,13 @@ namespace Whale.BLL.Services
                 MeetingId = meeting.Id
             });
 
-
             return new MeetingLinkDTO { Id = meeting.Id, Password = pwd };
         }
 
         public async Task<MeetingMessageDTO> SendMessage(MeetingMessageCreateDTO msgDTO)
         {
             var message = _mapper.Map<MeetingMessageDTO>(msgDTO);
-            message.SentDate = DateTime.Now;
+            message.SentDate = DateTimeOffset.Now;
             message.Id = Guid.NewGuid().ToString();
 
             var user = await _userService.GetUserByEmail(msgDTO.AuthorEmail);
@@ -125,6 +130,20 @@ namespace Whale.BLL.Services
                 await _redisService.RemoveAsync(groupname);
             }
             return isHost;
+        }
+
+        public async Task<string> GetShortInviteLink(string fullURL)
+        {
+            await _redisService.ConnectAsync();
+
+            return await _redisService.GetAsync<string>(fullURL);
+        }
+
+        public async Task<string> GetFullInviteLink(string shortURL)
+        {
+            await _redisService.ConnectAsync();
+
+            return await _redisService.GetAsync<string>(shortURL);
         }
     }
 }

@@ -35,6 +35,22 @@ namespace Whale.API.Controllers
             var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
             return Ok(await _meetingService.ConnectToMeeting(new MeetingLinkDTO { Id = id, Password = pwd}, ownerEmail));
         }
+
+        [HttpGet("shortInvite/{inviteLink}")]
+        public async Task<ActionResult<string>> GetFullMeetingLink(string inviteLink)
+        {
+            var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+
+            var meetingLink = await _meetingService.GetFullInviteLink(inviteLink);
+
+            return Ok(meetingLink);
+        }
+
+        [HttpGet("shortenLink/{longURL}")]
+        public async Task<ActionResult<string>> GetShortURL(string longURL)
+        {
+            return Ok(await _meetingService.GetShortInviteLink(longURL));
+        }
     }
 
 }

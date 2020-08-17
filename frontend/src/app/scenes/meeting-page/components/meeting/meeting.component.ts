@@ -12,7 +12,7 @@ import {
 import Peer from 'peerjs';
 import { SignalRService } from 'app/core/services/signal-r.service';
 import { environment } from '@env';
-import { Subject } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { MeetingService } from 'app/core/services/meeting.service';
 import { takeUntil, filter } from 'rxjs/operators';
@@ -28,7 +28,6 @@ import { MeetingConnectionData } from '@shared/models/meeting/meeting-connect';
 
 import { HttpService } from 'app/core/services/http.service';
 import { PollService } from 'app/core/services/poll.service';
-import { PollCreateDto } from 'app/shared/models/poll/poll-create-dto';
 import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
 import { MeetingMessageCreate } from '@shared/models/meeting/message/meeting-message-create';
 import { Participant } from '@shared/models/participant/participant';
@@ -43,6 +42,8 @@ import {
   CanvasWhiteboardService,
   CanvasWhiteboardUpdate,
 } from 'ng2-canvas-whiteboard';
+import { MediaSettingsService } from 'app/core/services/media-settings.service';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-meeting',
@@ -114,7 +115,9 @@ export class MeetingComponent
     @Inject(DOCUMENT) private document: any,
     private authService: AuthService,
     private simpleModalService: SimpleModalService,
-    private canvasWhiteboardService: CanvasWhiteboardService
+    private canvasWhiteboardService: CanvasWhiteboardService,
+    private mediaSettingsService: MediaSettingsService,
+    private http: HttpClient
   ) {
     this.meetingSignalrService = new MeetingSignalrService(signalRService);
     this.pollService = new PollService(
@@ -131,6 +134,10 @@ export class MeetingComponent
       video: true,
       audio: true,
     });
+    // ! await this.mediaSettingsService.checkIfAvailableDevices();  <- this is in guard, if guard will be deleted restore this string
+    this.currentUserStream = await navigator.mediaDevices.getUserMedia(
+      await this.mediaSettingsService.getMediaConstraints()
+    );
     this.currentStreamLoaded.emit();
     // create new peer
     this.peer = new Peer(environment.peerOptions);
@@ -323,6 +330,7 @@ export class MeetingComponent
     // disables ability to close browser tab if user didn't visit any element on the tab
     this.mainArea.nativeElement.classList.add('visited');
 
+    // show a warning dialog if close current tab or window
     window.onbeforeunload = function (ev: BeforeUnloadEvent) {
       ev.preventDefault();
       ev = ev || window.event;
@@ -337,9 +345,10 @@ export class MeetingComponent
   }
 
   public ngAfterContentInit() {
-    this.currentStreamLoaded.subscribe(
-      () => (this.currentVideo.nativeElement.srcObject = this.currentUserStream)
-    );
+    this.currentStreamLoaded.subscribe(() => {
+      this.currentVideo.nativeElement.srcObject = this.currentUserStream;
+      this.setOutputDevice();
+    });
   }
 
   public ngOnDestroy(): void {
@@ -374,17 +383,6 @@ export class MeetingComponent
     }
   }
 
-  public startRecording(): void {
-    this.blobService.startRecording();
-
-    this.meetingSignalrService.invoke(
-      SignalMethods.OnConferenceStartRecording,
-      'Conference start recording'
-    );
-
-    this.isScreenRecording = true;
-  }
-
   turnOffMicrophone(): void {
     if (!this.isMicrophoneMuted) {
       this.currentUserStream
@@ -409,6 +407,20 @@ export class MeetingComponent
         .forEach((track) => (track.enabled = true));
     }
     this.isCameraMuted = !this.isCameraMuted;
+  }
+
+  public startRecording(): void {
+    this.isScreenRecording = true;
+    this.blobService.startRecording().subscribe((permited) => {
+      if (permited) {
+        this.meetingSignalrService.invoke(
+          SignalMethods.OnConferenceStartRecording,
+          'Conference start recording'
+        );
+      } else {
+        this.isScreenRecording = false;
+      }
+    });
   }
 
   stopRecording(): void {
@@ -442,19 +454,39 @@ export class MeetingComponent
     this.isShowStatistics = !this.isShowStatistics;
   }
 
+  private getShortInviteLink(): Observable<string> {
+    const URL: string = this.document.location.href;
+    const chanks = URL.split('/');
+    const meetingLink = chanks[chanks.length - 1];
+
+    const baseUrl: string = environment.apiUrl;
+
+    return this.http.get(`${baseUrl}/api/meeting/shortenLink/${meetingLink}`, {
+      responseType: 'text',
+    });
+  }
+
   public onCopyIconClick(): void {
-    const copyBox = document.createElement('textarea');
-    copyBox.style.position = 'fixed';
-    copyBox.style.left = '0';
-    copyBox.style.top = '0';
-    copyBox.style.opacity = '0';
-    copyBox.value = this.document.location.href;
-    document.body.appendChild(copyBox);
-    copyBox.focus();
-    copyBox.select();
-    document.execCommand('copy');
-    document.body.removeChild(copyBox);
-    this.toastr.success('Copied');
+    const URL: string = this.document.location.href;
+    const chanks = URL.split('/');
+
+    this.getShortInviteLink().subscribe((short) => {
+      chanks[chanks.length - 1] = short;
+      chanks[chanks.length - 2] = 'redirection';
+
+      const copyBox = document.createElement('textarea');
+      copyBox.style.position = 'fixed';
+      copyBox.style.left = '0';
+      copyBox.style.top = '0';
+      copyBox.style.opacity = '0';
+      copyBox.value = chanks.join('/');
+      document.body.appendChild(copyBox);
+      copyBox.focus();
+      copyBox.select();
+      document.execCommand('copy');
+      document.body.removeChild(copyBox);
+      this.toastr.success('Copied');
+    });
 
     // this.simpleModalService.addModal(CopyClipboardComponent, {
     //   message: this.document.location.href,
@@ -529,6 +561,8 @@ export class MeetingComponent
     shouldPrepend
       ? this.mediaData.unshift(newMediaData)
       : this.mediaData.push(newMediaData);
+
+    this.setOutputDevice();
   }
 
   // call to peer
@@ -550,8 +584,8 @@ export class MeetingComponent
   }
 
   private destroyPeer() {
-    this.peer.disconnect();
-    this.peer.destroy();
+    this.peer?.disconnect();
+    this.peer?.destroy();
   }
 
   private getMeeting(link: string): void {
@@ -628,5 +662,15 @@ export class MeetingComponent
 
   showCanvas() {
     this.canvasIsDisplayed = this.canvasIsDisplayed ? false : true;
+  }
+
+  private setOutputDevice(): void {
+    const videoElements = document.querySelectorAll('video');
+    videoElements.forEach((elem) => {
+      this.mediaSettingsService.attachSinkId(
+        elem,
+        this.mediaSettingsService.settings.OutputDeviceId
+      );
+    });
   }
 }
