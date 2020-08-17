@@ -275,6 +275,7 @@ export class MeetingComponent
     // disables ability to close browser tab if user didn't visit any element on the tab
     this.mainArea.nativeElement.classList.add('visited');
 
+    // show a warning dialog if close current tab or window
     window.onbeforeunload = function (ev: BeforeUnloadEvent) {
       ev.preventDefault();
       ev = ev || window.event;
@@ -326,17 +327,6 @@ export class MeetingComponent
     }
   }
 
-  public startRecording(): void {
-    this.blobService.startRecording();
-
-    this.meetingSignalrService.invoke(
-      SignalMethods.OnConferenceStartRecording,
-      'Conference start recording'
-    );
-
-    this.isScreenRecording = true;
-  }
-
   turnOffMicrophone(): void {
     if (!this.isMicrophoneMuted) {
       this.currentUserStream
@@ -361,6 +351,20 @@ export class MeetingComponent
         .forEach((track) => (track.enabled = true));
     }
     this.isCameraMuted = !this.isCameraMuted;
+  }
+
+  public startRecording(): void {
+    this.isScreenRecording = true;
+    this.blobService.startRecording().subscribe((permited) => {
+      if (permited) {
+        this.meetingSignalrService.invoke(
+          SignalMethods.OnConferenceStartRecording,
+          'Conference start recording'
+        );
+      } else {
+        this.isScreenRecording = false;
+      }
+    });
   }
 
   stopRecording(): void {
