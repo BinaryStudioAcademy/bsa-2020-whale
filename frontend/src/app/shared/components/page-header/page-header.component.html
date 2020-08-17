@@ -1,6 +1,7 @@
 <div class="ui borderless fixed top tiny labeled icon main menu">
   <div class="logo-item item">
     <img
+      id="header-go-home"
       (click)="goToPage('home')"
       class="mini ui circular image"
       src="https://img.icons8.com/flat_round/64/000000/whale--v1.png"
@@ -22,7 +23,7 @@
         <i class="address book outline icon"></i>
         Contacts
     </a> -->
-  <a (click)="showNotificationsMenu()" class="notify-pic-item item">
+  <a id="header-show-notifications" (click)="showNotificationsMenu()" class="notify-pic-item item">
     <i class="bell outline icon"></i>
     <a *ngIf="notificationsList.length > 0" class="ui teal circular label">{{
       notificationsList.length
@@ -38,17 +39,17 @@
       </div>
     </div>
   </a>
-  <a (click)="showSettingsMenu()" class="user-pic-item item message shared">
+  <a id="header-show-settings" (click)="showSettingsMenu()" class="user-pic-item item message shared">
     <spiner *ngIf="isUserLoadig" [size]="'small'"></spiner>
     <img class="ui tiny image user-pic" src="{{ loggedInUser?.avatarUrl }}" />
   </a>
   <div *ngIf="settingsMenuVisible" class="dropdown-menu settings">
-    <div class="dropdown-menu-user" (click)="goToPage('profile-page')">
+    <div id="header-go-profile" class="dropdown-menu-user" (click)="goToPage('profile-page')">
       {{ loggedInUser?.firstName }} {{ loggedInUser?.lastName }}
     </div>
-    <div class="dropdown-menu-item" (click)="goToPage('setting-page')">
+    <div id="header-go-settings" class="dropdown-menu-item" (click)="goToPage('setting-page')">
       Settings
     </div>
-    <div class="dropdown-menu-item" (click)="logOut()">Log Out</div>
+    <div id="header-go-logout" class="dropdown-menu-item" (click)="logOut()">Log Out</div>
   </div>
 </div>
