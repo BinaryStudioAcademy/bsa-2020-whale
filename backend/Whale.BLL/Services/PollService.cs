@@ -167,6 +167,37 @@ namespace Whale.BLL.Services
 			// signal
 			await _meetingHub.Clients.Group(meetingId).SendAsync("OnPollDeleted", pollId);
 		}
+
+		public async Task SavePollResultsToDatabase(Guid meetingId)
+		{
+			_redisService.Connect();
+			var pollResults = await _redisService.GetSetMembers<PollResult>(meetingId + nameof(PollResult));
+			var polls = await _redisService.GetSetMembers<Poll>(meetingId + nameof(Poll));
+
+			foreach (var result in pollResults)
+			{
+				result.MeetingId = meetingId;
+			}
+			await _context.PollResults.AddRangeAsync(pollResults);
+			await _context.SaveChangesAsync();
+ 
+			await DeletePollsAndResultsFromRedis(meetingId, polls, pollResults);
+		}
+
+		public async Task DeletePollsAndResultsFromRedis(Guid meetingId, ICollection<Poll> polls, ICollection<PollResult> pollResults)
+		{
+			var pollList = polls.ToList();
+			var resultList = pollResults.ToList();
+
+			for (int i = 0; i < polls.Count; i++)
+			{
+				await _redisService.DeleteSetMember<Poll>(meetingId + nameof(Poll), pollList[i]);
+				await _redisService.DeleteSetMember<PollResult>(meetingId + nameof(PollResult), resultList[i]);
+			}
+
+			await _redisService.DeleteKey(meetingId + nameof(Poll));
+			await _redisService.DeleteKey(meetingId + nameof(PollResult));
+		}
 	}
 }
 

@@ -306,6 +306,9 @@ export class MeetingComponent
         SignalMethods.OnParticipantLeft,
         this.connectionData
       );
+      if (this.currentParticipant?.role === ParticipantRole.Host) {
+        this.pollService.savePollResults(this.meeting.id);
+      }
       this.router.navigate(['/home']);
     }
   }
