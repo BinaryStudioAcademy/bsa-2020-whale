@@ -102,21 +102,10 @@ export class MeetingComponent
   }
 
   public async ngOnInit() {
-    this.currentUserStream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        deviceId: this.mediaSettingsService.settings.VideoDeviceId
-          ? { exact: this.mediaSettingsService.settings.VideoDeviceId }
-          : undefined,
-        width: { max: 858 },
-        height: { max: 480 },
-        frameRate: { max: 24 },
-      },
-      audio: {
-        deviceId: this.mediaSettingsService.settings.InputDeviceId
-          ? { exact: this.mediaSettingsService.settings.InputDeviceId }
-          : undefined,
-      },
-    });
+    // ! await this.mediaSettingsService.checkIfAvailableDevices();  <- this is in guard, if guard will be deleted restore this string
+    this.currentUserStream = await navigator.mediaDevices.getUserMedia(
+      await this.mediaSettingsService.getMediaConstraints()
+    );
     this.currentStreamLoaded.emit();
     // create new peer
     this.peer = new Peer(environment.peerOptions);
@@ -290,9 +279,10 @@ export class MeetingComponent
   }
 
   public ngAfterContentInit() {
-    this.currentStreamLoaded.subscribe(
-      () => (this.currentVideo.nativeElement.srcObject = this.currentUserStream)
-    );
+    this.currentStreamLoaded.subscribe(() => {
+      this.currentVideo.nativeElement.srcObject = this.currentUserStream;
+      this.setOutputDevice();
+    });
   }
 
   public ngOnDestroy(): void {
@@ -468,6 +458,8 @@ export class MeetingComponent
     shouldPrepend
       ? this.mediaData.unshift(newMediaData)
       : this.mediaData.push(newMediaData);
+
+    this.setOutputDevice();
   }
 
   // call to peer
@@ -489,8 +481,8 @@ export class MeetingComponent
   }
 
   private destroyPeer() {
-    this.peer.disconnect();
-    this.peer.destroy();
+    this.peer?.disconnect();
+    this.peer?.destroy();
   }
 
   private getMeeting(link: string): void {
@@ -547,6 +539,16 @@ export class MeetingComponent
           };
           this.getMeeting(link);
         });
+    });
+  }
+
+  private setOutputDevice(): void {
+    const videoElements = document.querySelectorAll('video');
+    videoElements.forEach((elem) => {
+      this.mediaSettingsService.attachSinkId(
+        elem,
+        this.mediaSettingsService.settings.OutputDeviceId
+      );
     });
   }
 }

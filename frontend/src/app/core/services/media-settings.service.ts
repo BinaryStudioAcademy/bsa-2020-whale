@@ -45,17 +45,32 @@ export class MediaSettingsService {
   }
 
   public attachSinkId(element: any, sinkId: string): void {
-    element
-      .setSinkId(sinkId)
-      .then(() => {
-        console.log(`Success, audio output device attached: ${sinkId}`);
-      })
-      .catch((error) => {
-        let errorMessage = error;
-        if (error.name === 'SecurityError') {
-          errorMessage = `You need to use HTTPS for selecting audio output device: ${error}`;
-        }
-        console.error(errorMessage);
-      });
+    if (navigator.userAgent.search(/Firefox/) <= 0) {
+      element
+        .setSinkId(sinkId)
+        .then(() => {
+          console.log(`Success, audio output device attached: ${sinkId}`);
+        })
+        .catch((error) => {
+          let errorMessage = error;
+          if (error.name === 'SecurityError') {
+            errorMessage = `You need to use HTTPS for selecting audio output device: ${error}`;
+          }
+          console.error(errorMessage);
+        });
+    }
+  }
+
+  public async getMediaConstraints(): Promise<MediaStreamConstraints> {
+    return {
+      video: {
+        deviceId: this._settings.VideoDeviceId,
+        width: { max: 858 },
+        height: { max: 480 },
+      },
+      audio: {
+        deviceId: this._settings.InputDeviceId,
+      },
+    };
   }
 }
