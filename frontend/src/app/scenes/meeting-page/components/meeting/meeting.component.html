@@ -29,6 +29,7 @@ Enter+Shift for new line."
             [(ngModel)]="msgText"
           ></textarea>
           <i
+            id="meeting-sendmessage"
             aria-hidden="true"
             class="paper plane link icon blue"
             (click)="sendMessage()"
@@ -60,11 +61,13 @@ Enter+Shift for new line."
     <div class="tools" ngDraggable>
       <span data-tooltip="Toggle Microphone" data-position="top left">
         <i
+          id="meeting-draggable-mute"
           *ngIf="!isMicrophoneMuted"
           class="big microphone icon"
           (click)="turnOffMicrophone()"
         ></i>
         <i
+          id="meeting-draggable-mute"
           *ngIf="isMicrophoneMuted"
           class="big slash microphone icon"
           (click)="turnOffMicrophone()"
@@ -72,11 +75,13 @@ Enter+Shift for new line."
       </span>
       <span data-tooltip="Toggle Webcam" data-position="top left">
         <i
+          id="meeting-draggable-camera"
           *ngIf="!isCameraMuted"
           class="big video icon big-left-margin"
           (click)="turnOffCamera()"
         ></i>
         <i
+          id="meeting-draggable-camera"
           *ngIf="isCameraMuted"
           class="big eye slash icon big-left-margin"
           (click)="turnOffCamera()"
@@ -84,6 +89,7 @@ Enter+Shift for new line."
       </span>
       <span data-tooltip="Participants" data-position="top left">
         <i
+          id="meeting-draggable-participants"
           class="users icon big users-icon-fix block"
           (click)="isShowParticipants = !isShowParticipants"
         ></i>
@@ -93,21 +99,23 @@ Enter+Shift for new line."
       </span>
       <span data-tooltip="Polls">
         <i
+          id="meeting-draggable-poll"
           (click)="pollService.onPollIconClick()"
           class="big clipboard list icon"
         ></i>
       </span>
       <span data-tooltip="Statistics" data-position="top right">
-        <i (click)="onStatisticsIconClick()" class="big chart bar icon"></i>
+        <i id="meeting-draggable-statistics" (click)="onStatisticsIconClick()" class="big chart bar icon"></i>
       </span>
       <span data-tooltip="Chat" data-position="top right">
-        <i (click)="showChat()" class="big wechat icon block"></i>
+        <i id="meeting-draggable-chat" (click)="showChat()" class="big wechat icon block"></i>
       </span>
       <span data-tooltip="Quit fullscreen" data-position="top right">
-        <i (click)="closeFullscreen()" class="big compress icon block"></i>
+        <i id="meeting-draggable-fullscrean" (click)="closeFullscreen()" class="big compress icon block"></i>
       </span>
       <span data-tooltip="Show Self View" data-position="top right">
         <i
+          id="meeting-draggable-create" 
           (click)="createParticipantCard(currentParticipant, true)"
           (click)="isShowCurrentParticipantCard = true"
           *ngIf="!isShowCurrentParticipantCard"
@@ -142,11 +150,13 @@ Enter+Shift for new line."
             data-position="top left"
           >
             <i
+              id="meeting-options-microphone" 
               *ngIf="!isMicrophoneMuted"
               class="big microphone icon"
               (click)="turnOffMicrophone()"
             ></i>
             <i
+              id="meeting-options-microphone" 
               *ngIf="isMicrophoneMuted"
               class="big slash microphone icon"
               (click)="turnOffMicrophone()"
@@ -154,11 +164,13 @@ Enter+Shift for new line."
           </span>
           <span *ngIf="!isScreenRecording" data-tooltip="Toggle Webcam">
             <i
+              id="meeting-options-camera" 
               *ngIf="!isCameraMuted"
               class="big video icon big-left-margin"
               (click)="turnOffCamera()"
             ></i>
             <i
+              id="meeting-options-camera"
               *ngIf="isCameraMuted"
               class="big eye slash icon big-left-margin"
               (click)="turnOffCamera()"
@@ -174,6 +186,7 @@ Enter+Shift for new line."
               data-position="top left"
             >
               <i
+                id="meeting-options-participants"
                 class="users icon big users-icon-fix"
                 (click)="isShowParticipants = !isShowParticipants"
               ></i>
@@ -184,41 +197,44 @@ Enter+Shift for new line."
             data-tooltip="Start Recording"
             data-position="top left"
           >
-            <i (click)="startRecording()" class="big circle icon"></i>
+            <i id="meeting-options-recording" (click)="startRecording()" class="big circle icon"></i>
           </span>
           <span
             *ngIf="isScreenRecording"
             data-tooltip="Stop Recording"
             data-position="top left"
           >
-            <i (click)="stopRecording()" class="big stop circle icon"></i>
+            <i id="meeting-options-recording" (click)="stopRecording()" class="big stop circle icon"></i>
           </span>
           <span data-tooltip="Share Screen" data-position="top left">
-            <i class="big share square icon big-left-margin"></i>
+            <i id="meeting-options-share" class="big share square icon big-left-margin"></i>
           </span>
           <span data-tooltip="Polls">
             <i
+              id="meeting-options-poll"
               (click)="pollService.onPollIconClick()"
               class="big clipboard list icon"
             ></i
           ></span>
           <span data-tooltip="Statistics">
-            <i (click)="onStatisticsIconClick()" class="big chart bar icon"></i
+            <i id="meeting-options-statistics" (click)="onStatisticsIconClick()" class="big chart bar icon"></i
           ></span>
           <span data-tooltip="Copy Link" data-position="top right">
-            <i (click)="onCopyIconClick()" class="big copy icon"></i>
+            <i id="meeting-options-copy" (click)="onCopyIconClick()" class="big copy icon"></i>
           </span>
           <span data-tooltip="Chat" data-position="top right">
-            <i (click)="showChat()" class="big wechat icon big-left-margin"></i>
+            <i id="meeting-options-chat" (click)="showChat()" class="big wechat icon big-left-margin"></i>
           </span>
           <span data-tooltip="Fullscreen" data-position="top right">
             <i
+              id="meeting-options-fullscreen"
               (click)="goFullscreen()"
               class="big expand icon big-left-margin"
             ></i>
           </span>
           <span data-tooltip="Show Self View" data-position="top right">
             <i
+              id="meeting-options-create"
               *ngIf="!isShowCurrentParticipantCard"
               (click)="createParticipantCard(currentParticipant, true)"
               (click)="isShowCurrentParticipantCard = true"
@@ -227,7 +243,7 @@ Enter+Shift for new line."
           </span>
         </div>
         <div>
-          <button class="ui red button" (click)="leave()">
+          <button id="meeting-options-leave" class="ui red button" (click)="leave()">
             Leave
           </button>
         </div>
@@ -262,6 +278,7 @@ Enter+Shift for new line."
     *ngIf="pollService.isShowPoll"
   >
     <button
+      id="meeting-poll-new"
       *ngIf="currentParticipant && currentParticipant.role == 1"
       (click)="pollService.onNewPollClick()"
       class="ui button"
@@ -275,6 +292,7 @@ Enter+Shift for new line."
       <div *ngFor="let pollx of pollService.polls; let i = index">
         <hr class="poll-divider" />
         <span
+          id="meeting-poll-delete"
           *ngIf="currentParticipant.role == 1"
           class="delete-poll-icon"
           (click)="pollService.onDeletePollIconClick(pollx)"
@@ -293,6 +311,7 @@ Enter+Shift for new line."
       <div *ngFor="let pollxResult of pollService.pollResults; let i = index">
         <hr class="poll-divider" />
         <span
+          id="meeting-poll-result"
           *ngIf="currentParticipant.role == 1"
           class="delete-poll-icon"
           (click)="

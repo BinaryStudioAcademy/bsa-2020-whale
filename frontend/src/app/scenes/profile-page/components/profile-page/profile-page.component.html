@@ -2,9 +2,9 @@
 
 <div #cameraModal class="modal">
   <div class="modal-content">
-    <i (click)="closeModal()" #closeUploadModal class="window close icon"></i>
+    <i id="profile-upload-closemodal" (click)="closeModal()" #closeUploadModal class="window close icon"></i>
     <div class="ui buttons">
-      <label (click)="closeCamera()" class="ui button" for="file">
+      <label id="profile-upload-closecamera" (click)="closeCamera()" class="ui button" for="file">
         Upload from file
       </label>
       <input
@@ -15,7 +15,7 @@
         accept="image/*"
       />
       <div class="or"></div>
-      <button (click)="showCamera()" class="ui button">Make photo</button>
+      <button id="profile-upload-showcamera" (click)="showCamera()" class="ui button">Make photo</button>
     </div>
     <div *ngIf="isShowCamera" class="camera-canvas">
       <image-cropper
@@ -33,8 +33,8 @@
       <div>
         <video #video id="video" width="75%" height="auto" autoplay></video>
       </div>
-      <button (click)="capture()" class="ui button">Make photo</button>
-      <button *ngIf="isImageCropped" (click)="SendImage()" class="ui button">
+      <button id="profile-upload-capture" (click)="capture()" class="ui button">Make photo</button>
+      <button id="profile-upload-sendimage" *ngIf="isImageCropped" (click)="SendImage()" class="ui button">
         Save
       </button>
       <canvas #canvas id="canvas" width="640" height="480"></canvas>
@@ -58,7 +58,7 @@
         ></image-cropper>
         <img [src]="croppedImage" />
       </div>
-      <button (click)="SendImage()" class="ui button save">
+      <button id="profile-upload-sendimage" (click)="SendImage()" class="ui button save">
         Save
       </button>
     </div>
@@ -70,7 +70,7 @@
     <div class="personal-container">
       <div class="settings-item">
         <div class="card">
-          <i (click)="removeAvatar()" class="trash icon"></i>
+          <i id="profile-removeavatar" (click)="removeAvatar()" class="trash icon"></i>
           <img
             #avatar
             class="ui small image"
@@ -78,6 +78,7 @@
           />
           <div class="content">
             <div
+              id="profile-openmodal"
               (click)="openModal()"
               #showUploadModal
               class="ui mini bottom attached button"
@@ -91,7 +92,7 @@
       <h3 *ngIf="!editName" class="big name">
         {{ loggedInUser?.firstName }} {{ loggedInUser?.secondName }}
       </h3>
-      <div (click)="editName = !editName" *ngIf="!editName" class="edit-button">
+      <div id="profile-editname" (click)="editName = !editName" *ngIf="!editName" class="edit-button">
         <button class="small ui basic button">
           <a> <i class="cog icon"></i> Edit </a>
         </button>
@@ -125,6 +126,7 @@
           </div>
           <div class="save-button">
             <button
+              id="profile-submit-name"
               type="submit"
               [disabled]="!nameForm.valid"
               class="small ui button save"
@@ -149,6 +151,7 @@
       </div>
       <span *ngIf="!editTelephone">{{ loggedInUser?.phone }}</span>
       <div
+        id="profile-edittelephone"
         (click)="editTelephone = !editTelephone"
         *ngIf="!editTelephone"
         class="edit-button"
@@ -158,6 +161,7 @@
         </button>
       </div>
       <form
+        id="profile-editname"
         *ngIf="editTelephone"
         class="ui form"
         #telephoneForm="ngForm"
@@ -177,6 +181,7 @@
           </div>
           <div class="save-button">
             <button
+              id="profile-submit-telephone"
               type="submit"
               [disabled]="!telephoneForm.valid"
               class="small ui button"

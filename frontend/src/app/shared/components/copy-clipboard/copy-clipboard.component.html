@@ -1,10 +1,11 @@
-<div class="ui dimmer modals page visible active" (click)="close()">
+<div id="copy-close" class="ui dimmer modals page visible active" (click)="close()">
   <div class="ui mini modal visible active" (click)="$event.stopPropagation()">
     <h3 class="header">Copy to clipboard</h3>
     <div class="content">
       <div class="ui action input">
         <input type="text" [value]="message" #copyinput />
         <button
+          id="copy-copy"
           class="ui right labeled icon button"
           (click)="onCopy(copyinput)"
         >
