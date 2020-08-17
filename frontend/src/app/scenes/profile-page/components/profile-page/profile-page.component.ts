@@ -11,7 +11,6 @@ import Avatar from 'avatar-initials';
 import { LinkTypeEnum } from '@shared/Enums/LinkTypeEnum';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 
-
 @Component({
   selector: 'app-profile-page',
   templateUrl: './profile-page.component.html',
@@ -192,6 +191,7 @@ export class ProfilePageComponent implements OnInit {
           .getRequest<User>(`${this.routePrefix}/email/${user.email}`)
           .subscribe(
             (userFromDB: User) => {
+              this.loggedInUser = userFromDB;
               if (userFromDB.linkType === LinkTypeEnum.Internal) {
                 this.blobService
                   .GetImageByName(userFromDB.avatarUrl)

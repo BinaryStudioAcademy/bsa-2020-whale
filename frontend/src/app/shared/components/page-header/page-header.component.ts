@@ -73,6 +73,7 @@ export class PageHeaderComponent implements OnInit {
         .getRequest<User>(`${this.routePrefix}/email/${user.email}`)
         .pipe(tap(() => (this.isUserLoadig = false)))
         .subscribe((userFromDB: User) => {
+          this.loggedInUser = userFromDB;
           if (userFromDB.linkType === LinkTypeEnum.Internal) {
             this.blobService
               .GetImageByName(userFromDB.avatarUrl)
