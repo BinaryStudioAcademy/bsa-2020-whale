@@ -299,14 +299,18 @@ export class MeetingComponent
     }
 
     if (canLeave) {
-      this.currentUserStream?.getTracks().forEach((track) => track.stop());
       this.destroyPeer();
       this.connectionData.participant = this.currentParticipant;
       this.meetingSignalrService.invoke(
         SignalMethods.OnParticipantLeft,
         this.connectionData
       );
+      if (this.currentParticipant?.role === ParticipantRole.Host) {
+        this.pollService.savePollResults(this.meeting.id);
+      }
+
       this.router.navigate(['/home']);
+      this.currentUserStream?.getTracks().forEach((track) => track.stop());
     }
   }
 

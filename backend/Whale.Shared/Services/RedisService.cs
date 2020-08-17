@@ -70,6 +70,12 @@ namespace Whale.Shared.Services
             await db.SetRemoveAsync(setKey, JsonConvert.SerializeObject(setMember));
         }
 
+        public async Task DeleteKey(string key)
+        {
+            var db = _redis.GetDatabase();
+            await db.KeyDeleteAsync(key);
+        }
+
         public async Task SetAsync<T>(string key, T value)
         {
             var db = _redis.GetDatabase();

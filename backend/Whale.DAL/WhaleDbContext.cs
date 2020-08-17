@@ -20,6 +20,10 @@ namespace Whale.DAL
         public DbSet<Meeting> Meetings { get; set; }
         public DbSet<Participant> Participants { get; set; }
         // public DbSet<Poll> Polls { get; set; }
+        public DbSet<PollResult> PollResults { get; set; }
+        public DbSet<OptionResult> OptionResults { get; set; }
+        public DbSet<Voter> Voters { get; set; }
+
         public DbSet<Record> Records { get; set; }
         public DbSet<Setting> Settings { get; set; }
         public DbSet<ContactSetting> ContactSettings { get; set; }
@@ -30,8 +34,13 @@ namespace Whale.DAL
             modelBuilder.Entity<Contact>()
                 .HasOne(a => a.PinnedMessage)
                 .WithMany();
-                //.WithOne(a => a.Contact)
-                //.HasForeignKey<DirectMessage>(d => d.ContactId);
+            //.WithOne(a => a.Contact)
+            //.HasForeignKey<DirectMessage>(d => d.ContactId);
+
+            modelBuilder.Entity<Voter>()
+                .Ignore("FirstName")
+                .Ignore("SecondName")
+                .Ignore("AvatarUrl");
 
             base.OnModelCreating(modelBuilder);
         }

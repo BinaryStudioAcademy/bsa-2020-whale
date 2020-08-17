@@ -1,15 +1,18 @@
 .home-panel
-    margin-top: 6.5em
+    padding-top: 6.5em
+    padding-bottom: 2em
     margin-left: 2em
     margin-right: 2em
     display: flex
+    height: 100%
 
 .left-col
-    height: 100%
+    max-height: 100%
     background-color: #ffffff
     float: left
     width: 20%
     display: flex
+    height: fit-content
 
 .right-col
     width: 80%
@@ -22,8 +25,10 @@
     
 .ui.vertical.menu.bar
     width: 20rem 
-    max-height: 43em
+    max-height: 100%
+    overflow: hidden
     overflow-y: auto
+    display: flex
 
 .user-pic
     max-width: 45px
@@ -35,9 +40,9 @@
     margin-right: 10px
 
 .contacts-container
+    flex-grow: 1
     margin-top: 10px
     padding-bottom: 10px
-    max-height: 9.65rem
     overflow: hidden
     overflow-y: auto
 
@@ -45,7 +50,7 @@
     display: flex
 
 .chat
-    height: 43em
+    height: 100%
     margin-left: 2em
     margin-right: 2em
 
@@ -56,7 +61,7 @@
     height: 80%
   
 .ui.placeholder.segment.field
-        max-width: 20rem
+    max-width: 20rem
 
 
 .vertically-aligned

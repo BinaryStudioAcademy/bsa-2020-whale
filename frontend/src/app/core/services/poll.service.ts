@@ -136,6 +136,20 @@ export class PollService {
     }
   }
 
+  public savePollResults(meetindId: string) {
+    this.httpService
+      .getRequest(
+        this.route + '/saveResults',
+        new HttpParams().set('meetingId', meetindId)
+      )
+      .subscribe(() => {
+        this.toastr.info(
+          'You can check poll results in meeting history',
+          'Info'
+        );
+      });
+  }
+
   public onPollIconClick() {
     this.isPollCreating = false;
     this.isShowPoll = !this.isShowPoll;
@@ -153,6 +167,7 @@ export class PollService {
 
     this.httpService.deleteRequest(this.route, httpParams).subscribe(() => {
       // spinner
+      this.toastr.success('Poll deleted', 'Success');
     });
   }
 
@@ -166,6 +181,7 @@ export class PollService {
 
     this.httpService.deleteRequest(this.route, httpParams).subscribe(() => {
       // spinner
+      this.toastr.success('Poll deleted', 'Success');
     });
   }
 }
