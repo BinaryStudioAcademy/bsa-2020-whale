@@ -118,6 +118,7 @@ export class ProfilePageComponent implements OnInit {
       }
     });
 
+    this.isImageCropped = false;
     this.croppedImage = '';
     this.userPhotoFromCamera = '';
     this.isShowUploadFile = false;
