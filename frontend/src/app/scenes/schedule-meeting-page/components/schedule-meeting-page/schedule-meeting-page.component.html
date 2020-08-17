@@ -175,13 +175,19 @@
         </div>
         <!-- recurring meeting ? -->
         <button
+          id="schedule-submit"
           class="ui button primary"
           type="submit"
           [disabled]="!form.valid"
         >
           Schedule meeting
         </button>
-        <button class="ui button" type="button" (click)="cancelSchedule()">
+        <button
+          id="schedule-cancel"
+          class="ui button"
+          type="button"
+          (click)="cancelSchedule()"
+        >
           Cancel
         </button>
       </form>

@@ -1,21 +1,20 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { BrowserMediaDevice } from '../browser-media-device';
 import { MediaSettingsService } from 'app/core/services/media-settings.service';
-import { FormGroup, FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-setting-video',
   templateUrl: './setting-video.component.html',
   styleUrls: ['./setting-video.component.sass'],
 })
-export class SettingVideoComponent implements OnInit {
+export class SettingVideoComponent implements OnInit, OnDestroy {
   public browserMediaDevice = new BrowserMediaDevice();
   public videoDevices: MediaDeviceInfo[] = [null];
+  public videoStream: MediaStream;
   public deviceId: string = '';
   constructor(public mediaSettingsService: MediaSettingsService) {}
 
   ngOnInit(): void {
-    console.log(this.mediaSettingsService.settings);
     this.browserMediaDevice
       .getVideoInputList()
       .then((res) => {
@@ -31,14 +30,23 @@ export class SettingVideoComponent implements OnInit {
       .catch((error) => console.log(error));
   }
 
+  ngOnDestroy(): void {
+    this.videoStream?.getTracks().forEach((track) => track.stop());
+  }
+
+  // tslint:disable-next-line: typedef
   public async showVideo() {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        deviceId: this.mediaSettingsService.settings.VideoDeviceId,
-      },
-      audio: false,
-    });
-    this.handleSuccess(stream);
+    await navigator.mediaDevices
+      .getUserMedia({
+        video: {
+          deviceId: this.mediaSettingsService.settings.VideoDeviceId,
+        },
+        audio: false,
+      })
+      .then((stream) => {
+        this.videoStream = stream;
+        this.handleSuccess(this.videoStream);
+      });
   }
 
   async handleSuccess(stream) {
@@ -48,12 +56,13 @@ export class SettingVideoComponent implements OnInit {
 
   public async changeState(deviceId: string) {
     this.mediaSettingsService.changeVideoDevice(deviceId);
-    const stream = await navigator.mediaDevices.getUserMedia({
+    this.ngOnDestroy();
+    this.videoStream = await navigator.mediaDevices.getUserMedia({
       video: {
         deviceId: deviceId,
       },
       audio: false,
     });
-    this.handleSuccess(stream);
+    this.handleSuccess(this.videoStream);
   }
 }

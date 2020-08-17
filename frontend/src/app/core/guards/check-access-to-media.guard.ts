@@ -29,7 +29,11 @@ export class CheckAccessToMediaGuard implements CanActivate {
       const stream = await navigator.mediaDevices.getUserMedia(
         await this.mediaSettingsService.getMediaConstraints()
       );
-      return stream.active;
+
+      let isActive = stream.active;
+      stream?.getTracks().forEach((track) => track.stop());
+
+      return isActive;
     } catch {
       alert('Cannot access the camera and microphone');
       if (window.location.pathname == '/home') window.location.reload();

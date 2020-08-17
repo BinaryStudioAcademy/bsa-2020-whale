@@ -11,9 +11,12 @@
             {{ contactSelected.secondMember.secondName }}
             {{ contactSelected.secondMember.email }}
           </a>
-          <i class="phone icon" (click)="call()"></i>
+          <i id="chat-call" class="phone icon" (click)="call()"></i>
 
-          <a class="ui mini basic button edit-button" (click)="close()"
+          <a
+            id="chat-close"
+            class="ui mini basic button edit-button"
+            (click)="close()"
             >Close chat</a
           >
         </div>
@@ -58,6 +61,7 @@
       ></textarea>
     </div>
     <button
+      id="chat-submit"
       class="ui button tiny send"
       type="submit"
       id="sendmessage"

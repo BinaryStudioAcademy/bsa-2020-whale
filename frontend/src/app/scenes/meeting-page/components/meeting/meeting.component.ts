@@ -57,6 +57,7 @@ export class MeetingComponent
   public isShowCurrentParticipantCard = true;
 
   @ViewChild('currentVideo') currentVideo: ElementRef;
+  @ViewChild('mainArea', { static: false }) mainArea: ElementRef<HTMLElement>;
 
   public peer: Peer;
   public connectedStreams: MediaStream[] = [];
@@ -74,10 +75,8 @@ export class MeetingComponent
   private currentStreamLoaded = new EventEmitter<void>();
   private contectedAt = new Date();
   private elem: any;
-  private isMicrophoneMuted = false;
-  private isCameraMuted = false;
-
-  @ViewChild('mainArea', { static: false }) mainArea: ElementRef;
+  public isMicrophoneMuted = false;
+  public isCameraMuted = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -183,7 +182,7 @@ export class MeetingComponent
             connectionData.participant.user.secondName ?? ''
           }`;
           this.toastr.show(
-            `${connectionData.participant.user.firstName}${secondName} left`
+            `${connectionData.participant.user.firstName}${secondName} has left`
           );
         }
       });
@@ -272,6 +271,16 @@ export class MeetingComponent
       // send mediaStream to caller
       call.answer(this.currentUserStream);
     });
+
+    // disables ability to close browser tab if user didn't visit any element on the tab
+    this.mainArea.nativeElement.classList.add('visited');
+
+    window.onbeforeunload = function (ev: BeforeUnloadEvent) {
+      ev.preventDefault();
+      ev = ev || window.event;
+      ev.returnValue = '';
+      return '';
+    };
   }
 
   public ngAfterViewInit(): void {
@@ -286,6 +295,7 @@ export class MeetingComponent
   }
 
   public ngOnDestroy(): void {
+    this.currentUserStream?.getTracks().forEach((track) => track.stop());
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
   }
@@ -385,9 +395,22 @@ export class MeetingComponent
   }
 
   public onCopyIconClick(): void {
-    this.simpleModalService.addModal(CopyClipboardComponent, {
-      message: this.document.location.href,
-    });
+    const copyBox = document.createElement('textarea');
+    copyBox.style.position = 'fixed';
+    copyBox.style.left = '0';
+    copyBox.style.top = '0';
+    copyBox.style.opacity = '0';
+    copyBox.value = this.document.location.href;
+    document.body.appendChild(copyBox);
+    copyBox.focus();
+    copyBox.select();
+    document.execCommand('copy');
+    document.body.removeChild(copyBox);
+    this.toastr.success('Copied');
+
+    // this.simpleModalService.addModal(CopyClipboardComponent, {
+    //   message: this.document.location.href,
+    // });
   }
 
   public sendMessage(): void {

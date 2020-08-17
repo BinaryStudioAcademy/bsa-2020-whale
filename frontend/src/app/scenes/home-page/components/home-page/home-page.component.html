@@ -20,25 +20,31 @@
         </div>
       </a>
       <a class="item">
-        <a class="item" (click)="goToPage('history')">
+        <a id="home-go-history" class="item" (click)="goToPage('history')">
           <i class="clock outline icon"></i>
           Meetings history
         </a>
-        <a class="item" (click)="goToPage('schedule-meeting')">
+        <a
+          id="home-go-schedule"
+          class="item"
+          (click)="goToPage('schedule-meeting')"
+        >
           <i class="calendar alternate outline icon"></i>
           Schedule meeting
         </a>
-        <a class="item" (click)="createMeeting()">
+        <a id="home-go-create" class="item" (click)="createMeeting()">
           <i class="share icon"></i>
           Enter the meeting
         </a>
       </a>
       <spiner *ngIf="isContactsLoading" [size]="'medium'"></spiner>
       <a
+        id="home-toggle-contacts"
         (click)="contactsVisibility = !contactsVisibility"
         class="item header"
         >Contacts
         <button
+          id="home-add-contact"
           (click)="addNewContact(); $event.stopPropagation()"
           class="ui mini basic button edit-button"
         >
@@ -46,11 +52,12 @@
         </button>
       </a>
       <div class="contacts-container" [hidden]="!contactsVisibility">
-        <div 
+        <div
           *ngFor="let contact of contacts"
           class="user-list ui middle aligned selection list"
         >
           <div
+            id="home-contact"
             [ngClass]="isContactActive(contact) ? 'active item' : 'item'"
             (click)="onContactClick(contact)"
           >
@@ -67,9 +74,13 @@
           </div>
         </div>
       </div>
-      <a (click)="groupsVisibility = !groupsVisibility" class="item header"
+      <a
+        id="home-toggle-groups"
+        (click)="groupsVisibility = !groupsVisibility"
+        class="item header"
         >Groups
         <button
+          id="home-add-group"
           (click)="addNewGroup(); $event.stopPropagation()"
           class="ui mini basic button edit-button"
         >
@@ -81,7 +92,7 @@
           *ngFor="let contact of contacts"
           class="user-list ui middle aligned selection list"
         >
-          <div (click)="onGroupClick()" class="item">
+          <div id="home-group" (click)="onGroupClick()" class="item">
             <img
               class="ui avatar image"
               src="{{ contact.secondMember?.avatarUrl }}"
@@ -107,7 +118,11 @@
     </div>
     <div *ngIf="chatVisibility" class="actions">
       <div class="vertically-aligned chat ui segment">
-        <div class="text-aligned" (click)="goToPage('schedule-meeting')">
+        <div
+          id="home-chat-go-shedule"
+          class="text-aligned"
+          (click)="goToPage('schedule-meeting')"
+        >
           <img
             class="ui centered small image"
             src="https://img.icons8.com/bubbles/100/000000/planner.png"
@@ -121,7 +136,11 @@
           />
           <span class="text-aligned">Meetings history</span>
         </div>
-        <div class="text-aligned" (click)="createMeeting()">
+        <div
+          id="home-chat-go-create"
+          class="text-aligned"
+          (click)="createMeeting()"
+        >
           <img
             class="ui centered small image"
             src="https://img.icons8.com/bubbles/100/000000/forward.png"
