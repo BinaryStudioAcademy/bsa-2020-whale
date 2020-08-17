@@ -69,6 +69,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
           .pipe(tap(() => (this.isUserLoadig = false)))
           .subscribe(
             (userFromDB: User) => {
+              this.loggedInUser = userFromDB;
               if (userFromDB.linkType === LinkTypeEnum.Internal) {
                 this.blobService
                   .GetImageByName(userFromDB.avatarUrl)

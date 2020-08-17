@@ -107,11 +107,26 @@ Enter+Shift for new line."
             data-tooltip="Toggle Microphone"
             data-position="top left"
           >
-            <i class="big microphone icon" (click)="turnOffMicrophone()"></i>
+            <i
+              *ngIf="!isMicrophoneMuted"
+              class="big microphone icon"
+              (click)="turnOffMicrophone()"
+            ></i>
+            <i
+              *ngIf="isMicrophoneMuted"
+              class="big slash microphone icon"
+              (click)="turnOffMicrophone()"
+            ></i>
           </span>
           <span *ngIf="!isScreenRecording" data-tooltip="Toggle Webcam">
             <i
+              *ngIf="!isCameraMuted"
               class="big video icon big-left-margin"
+              (click)="turnOffCamera()"
+            ></i>
+            <i
+              *ngIf="isCameraMuted"
+              class="big eye slash icon big-left-margin"
               (click)="turnOffCamera()"
             ></i>
           </span>
@@ -213,7 +228,7 @@ Enter+Shift for new line."
     *ngIf="pollService.isShowPoll"
   >
     <button
-      *ngIf="currentParticipant.role == 1"
+      *ngIf="currentParticipant && currentParticipant.role == 1"
       (click)="pollService.onNewPollClick()"
     >
       New poll

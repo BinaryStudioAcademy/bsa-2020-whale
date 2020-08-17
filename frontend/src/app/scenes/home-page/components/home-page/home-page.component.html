@@ -33,65 +33,63 @@
           Enter the meeting
         </a>
       </a>
-      <div class="relative">
-        <spiner *ngIf="isContactsLoading" [size]="'medium'"></spiner>
-        <a
-          (click)="contactsVisibility = !contactsVisibility"
-          class="item header"
-          >Contacts
-          <button
-            (click)="addNewContact(); $event.stopPropagation()"
-            class="ui mini basic button edit-button"
+      <spiner *ngIf="isContactsLoading" [size]="'medium'"></spiner>
+      <a
+        (click)="contactsVisibility = !contactsVisibility"
+        class="item header"
+        >Contacts
+        <button
+          (click)="addNewContact(); $event.stopPropagation()"
+          class="ui mini basic button edit-button"
+        >
+          New
+        </button>
+      </a>
+      <div class="contacts-container" [hidden]="!contactsVisibility">
+        <div 
+          *ngFor="let contact of contacts"
+          class="user-list ui middle aligned selection list"
+        >
+          <div
+            [ngClass]="isContactActive(contact) ? 'active item' : 'item'"
+            (click)="onContactClick(contact)"
           >
-            New
-          </button>
-        </a>
-        <div class="contacts-container" [hidden]="!contactsVisibility">
-          <div 
-            *ngFor="let contact of contacts"
-            class="user-list ui middle aligned selection list"
-          >
-            <div
-              [ngClass]="isContactActive(contact) ? 'active item' : 'item'"
-              (click)="onContactClick(contact)"
-            >
-              <img
-                class="ui avatar image"
-                src="{{ contact?.secondMember.avatarUrl }}"
-              />
-              <div class="content">
-                <div class="description">
-                  {{ contact?.secondMember.firstName }}
-                  {{ contact?.secondMember.secondName }}
-                </div>
+            <img
+              class="ui avatar image"
+              src="{{ contact?.secondMember.avatarUrl }}"
+            />
+            <div class="content">
+              <div class="description">
+                {{ contact?.secondMember.firstName }}
+                {{ contact?.secondMember.secondName }}
               </div>
             </div>
           </div>
         </div>
-        <a (click)="groupsVisibility = !groupsVisibility" class="item header"
-          >Groups
-          <button
-            (click)="addNewGroup()"
-            class="ui mini basic button edit-button"
-          >
-            New
-          </button>
-        </a>
-        <div class="contacts-container" [hidden]="!groupsVisibility">
-          <div
-            *ngFor="let contact of contacts"
-            class="user-list ui middle aligned selection list"
-          >
-            <div (click)="onGroupClick()" class="item">
-              <img
-                class="ui avatar image"
-                src="{{ contact.secondMember?.avatarUrl }}"
-              />
-              <div class="content">
-                <div class="description">
-                  {{ contact.secondMember?.firstName }}
-                  {{ contact.secondMember?.secondName }}
-                </div>
+      </div>
+      <a (click)="groupsVisibility = !groupsVisibility" class="item header"
+        >Groups
+        <button
+          (click)="addNewGroup(); $event.stopPropagation()"
+          class="ui mini basic button edit-button"
+        >
+          New
+        </button>
+      </a>
+      <div class="contacts-container" [hidden]="!groupsVisibility">
+        <div
+          *ngFor="let contact of contacts"
+          class="user-list ui middle aligned selection list"
+        >
+          <div (click)="onGroupClick()" class="item">
+            <img
+              class="ui avatar image"
+              src="{{ contact.secondMember?.avatarUrl }}"
+            />
+            <div class="content">
+              <div class="description">
+                {{ contact.secondMember?.firstName }}
+                {{ contact.secondMember?.secondName }}
               </div>
             </div>
           </div>
