@@ -25,7 +25,11 @@ export class CheckAccessToMediaGuard implements CanActivate {
         audio: true,
         video: true,
       });
-      return stream.active;
+
+      let isActive = stream.active;
+      stream?.getTracks().forEach((track) => track.stop());
+
+      return isActive;
     } catch {
       alert('Cannot access the camera and microphone');
       window.location.reload();

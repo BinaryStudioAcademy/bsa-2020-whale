@@ -284,6 +284,7 @@ export class MeetingComponent
   }
 
   public ngOnDestroy(): void {
+    this.currentUserStream?.getTracks().forEach((track) => track.stop());
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
   }

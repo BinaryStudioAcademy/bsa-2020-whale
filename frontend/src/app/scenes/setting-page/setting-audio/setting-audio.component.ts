@@ -20,9 +20,13 @@ export class SettingAudioComponent implements OnInit, OnDestroy {
   public volume = 50;
   public recordedChunks: [];
   public recorder;
+
+  public audioStream: MediaStream;
+
   constructor() {}
   ngOnDestroy(): void {
     this.constraints.audio = false;
+    this.audioStream?.getTracks().forEach((track) => track.stop());
   }
 
   ngOnInit(): void {
@@ -62,6 +66,8 @@ export class SettingAudioComponent implements OnInit, OnDestroy {
         audio: true,
       })
       .then(async (stream) => {
+        this.audioStream = stream;
+
         this.recorder = RecordRTC(stream, {
           type: 'audio',
         });
