@@ -8,9 +8,9 @@
     >
       <option
         *ngFor="let c of videoDevices"
-        [value]="c.deviceId"
-        [selected]="c.deviceId == deviceId"
-        ><span>{{ c.label }}</span></option
+        [value]="c?.deviceId"
+        [selected]="c?.deviceId == deviceId"
+        ><span>{{ c?.label }}</span></option
       >
     </select>
   </div>

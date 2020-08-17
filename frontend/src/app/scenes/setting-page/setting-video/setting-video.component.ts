@@ -21,7 +21,7 @@ export class SettingVideoComponent implements OnInit {
       .then((res) => {
         this.videoDevices = res;
         if (!this.mediaSettingsService.settings.VideoDeviceId) {
-          this.mediaSettingsService.ChangeVideoDevice(
+          this.mediaSettingsService.changeVideoDevice(
             this.videoDevices[0]?.deviceId
           );
         }
@@ -47,8 +47,7 @@ export class SettingVideoComponent implements OnInit {
   }
 
   public async changeState(deviceId: string) {
-    this.mediaSettingsService.ChangeVideoDevice(deviceId);
-    this.deviceId = deviceId;
+    this.mediaSettingsService.changeVideoDevice(deviceId);
     const stream = await navigator.mediaDevices.getUserMedia({
       video: {
         deviceId: deviceId,

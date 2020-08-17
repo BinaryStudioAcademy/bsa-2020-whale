@@ -2,7 +2,10 @@
   <div class="select">
     Microphone:
     <div class="custom-select ui compact menu">
-      <select [(ngModel)]="inputDeviceId" (ngModelChange)="changeState($event)">
+      <select
+        [(ngModel)]="inputDeviceId"
+        (ngModelChange)="changeInputDevice($event)"
+      >
         <option
           *ngFor="let c of inputDevices"
           [value]="c.deviceId"
@@ -13,7 +16,7 @@
     </div>
   </div>
   <div class="wrapper">
-    <audio></audio>
+    <audio id="audio"></audio>
     <button class="ui button" (click)="testMicro()">
       <span>Check input level</span>
     </button>
@@ -39,7 +42,7 @@
     <div class="custom-select ui compact menu">
       <select
         [(ngModel)]="outputDeviceId"
-        (ngModelChange)="changeState($event)"
+        (ngModelChange)="changeOutputDevice($event)"
       >
         <option
           *ngFor="let c of outputDevices"

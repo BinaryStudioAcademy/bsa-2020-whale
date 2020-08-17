@@ -22,25 +22,40 @@ export class MediaSettingsService {
     }
   }
 
-  public ChangeVideoDevice(diviceId: string): void {
+  public changeVideoDevice(diviceId: string): void {
     this._settings.VideoDeviceId = diviceId;
-    this.SaveSettingsInLocalStorage();
+    this.saveSettingsInLocalStorage();
   }
 
-  public ChangeInputDevice(deviceId: string): void {
+  public changeInputDevice(deviceId: string): void {
     this._settings.InputDeviceId = deviceId;
-    this.SaveSettingsInLocalStorage();
+    this.saveSettingsInLocalStorage();
   }
 
-  public ChangeOutputDevice(deviceId: string): void {
+  public changeOutputDevice(deviceId: string): void {
     this._settings.OutputDeviceId = deviceId;
-    this.SaveSettingsInLocalStorage();
+    this.saveSettingsInLocalStorage();
   }
 
-  private SaveSettingsInLocalStorage(): void {
+  private saveSettingsInLocalStorage(): void {
     window.localStorage.setItem(
       'media-settings',
       JSON.stringify(this._settings)
     );
+  }
+
+  public attachSinkId(element: any, sinkId: string): void {
+    element
+      .setSinkId(sinkId)
+      .then(() => {
+        console.log(`Success, audio output device attached: ${sinkId}`);
+      })
+      .catch((error) => {
+        let errorMessage = error;
+        if (error.name === 'SecurityError') {
+          errorMessage = `You need to use HTTPS for selecting audio output device: ${error}`;
+        }
+        console.error(errorMessage);
+      });
   }
 }
