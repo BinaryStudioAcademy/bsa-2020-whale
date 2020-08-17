@@ -136,6 +136,16 @@ Enter+Shift for new line."
       </span>
     </div>
 
+    <div class="canvas" [style.display]="!canvasIsDisplayed ? 'block' : 'none'">
+      <canvas-whiteboard
+        #canvasWhiteboard
+        [options]="canvasOptions"
+        (onBatchUpdate)="onCanvasDraw($event)"
+        (onClear)="onCanvasClear()"
+      >
+      </canvas-whiteboard>
+    </div>
+
     <div class="users" *ngIf="mediaData.length > 1">
       <app-participant-card
         *ngFor="let data of mediaData"
@@ -259,6 +269,9 @@ Enter+Shift for new line."
               (click)="showChat()"
               class="big wechat icon big-left-margin"
             ></i>
+          </span>
+          <span data-tooltip="Canvas" data-position="top right">
+            <i (click)="showCanvas()" class="big paint brush icon"></i>
           </span>
           <span data-tooltip="Fullscreen" data-position="top right">
             <i

@@ -113,5 +113,19 @@ namespace Whale.BLL.Hubs
         {
             await Clients.Group(pollData.GroupId).SendAsync("OnPoll", pollData.PollDto);
         }
+
+        [HubMethodName("OnDrawing")]
+        public async Task OnDrawing(CreateDrawingDTO drawingDTO)
+        {
+            await Clients.GroupExcept(drawingDTO.MeetingId, new List<string> { Context.ConnectionId })
+                .SendAsync("OnDrawing", drawingDTO.CanvasEvent);
+        }
+
+        [HubMethodName("OnErasing")]
+        public async Task OnErasing(EraseDrawingDTO drawingDTO)
+        {
+            await Clients.GroupExcept(drawingDTO.MeetingId, new List<string> { Context.ConnectionId })
+                .SendAsync("OnErasing", drawingDTO.Erase);
+        }
     }
 }

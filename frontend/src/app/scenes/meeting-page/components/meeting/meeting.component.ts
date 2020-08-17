@@ -37,6 +37,11 @@ import { AuthService } from 'app/core/auth/auth.service';
 import { UserMediaData } from '@shared/models/media/user-media-data';
 import { CopyClipboardComponent } from '@shared/components/copy-clipboard/copy-clipboard.component';
 import { SimpleModalService } from 'ngx-simple-modal';
+import {
+  CanvasWhiteboardOptions,
+  CanvasWhiteboardService,
+  CanvasWhiteboardUpdate,
+} from 'ng2-canvas-whiteboard';
 import { MediaSettingsService } from 'app/core/services/media-settings.service';
 import { HttpClient } from '@angular/common/http';
 
@@ -64,6 +69,26 @@ export class MeetingComponent
   public connectedStreams: MediaStream[] = [];
   public mediaData: UserMediaData[] = [];
   public connectedPeers = new Map<string, MediaStream>();
+  public canvasIsDisplayed: boolean;
+  public canvasOptions: CanvasWhiteboardOptions = {
+    clearButtonEnabled: true,
+    clearButtonText: 'Erase',
+    undoButtonText: 'Undo',
+    undoButtonEnabled: false,
+    colorPickerEnabled: false,
+    saveDataButtonEnabled: true,
+    saveDataButtonText: 'Save',
+    lineWidth: 5,
+    strokeColor: 'rgb(0,0,0)',
+    shouldDownloadDrawing: true,
+    drawingEnabled: true,
+    showShapeSelector: false,
+    shapeSelectorEnabled: false,
+    showFillColorPicker: false,
+    batchUpdateTimeoutDuration: 250,
+    drawButtonEnabled: false,
+  };
+
   public messages: MeetingMessage[] = [];
   public msgText = '';
   public currentParticipant: Participant;
@@ -90,6 +115,7 @@ export class MeetingComponent
     @Inject(DOCUMENT) private document: any,
     private authService: AuthService,
     private simpleModalService: SimpleModalService,
+    private canvasWhiteboardService: CanvasWhiteboardService,
     private mediaSettingsService: MediaSettingsService,
     private http: HttpClient
   ) {
@@ -103,6 +129,11 @@ export class MeetingComponent
   }
 
   public async ngOnInit() {
+    this.canvasIsDisplayed = false;
+    this.currentUserStream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: true,
+    });
     // ! await this.mediaSettingsService.checkIfAvailableDevices();  <- this is in guard, if guard will be deleted restore this string
     this.currentUserStream = await navigator.mediaDevices.getUserMedia(
       await this.mediaSettingsService.getMediaConstraints()
@@ -248,6 +279,28 @@ export class MeetingComponent
         }
       );
 
+    this.meetingSignalrService.canvasDraw$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (strokes) => {
+          this.canvasWhiteboardService.drawCanvas(strokes);
+        },
+        (err) => {
+          this.toastr.error('Error occured while trying to get drawings');
+        }
+      );
+
+    this.meetingSignalrService.canvasErase$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (erase) => {
+          if (erase) this.canvasWhiteboardService.clearCanvas();
+        },
+        (err) => {
+          this.toastr.error('Error occured while trying to erase drawings');
+        }
+      );
+
     // when peer opened send my peer id everyone
     this.peer.on('open', (id) => this.onPeerOpen(id));
 
@@ -288,6 +341,7 @@ export class MeetingComponent
 
   public ngAfterViewInit(): void {
     this.elem = this.mainArea.nativeElement;
+    this.canvasIsDisplayed = true;
   }
 
   public ngAfterContentInit() {
@@ -589,6 +643,25 @@ export class MeetingComponent
           this.getMeeting(link);
         });
     });
+  }
+
+  onCanvasDraw(event) {
+    this.meetingSignalrService.invoke(SignalMethods.OnDrawing, {
+      // meetingId: this.meeting.id,
+      meetingId: '123',
+      canvasEvent: event,
+    });
+  }
+
+  onCanvasClear() {
+    this.meetingSignalrService.invoke(SignalMethods.OnErasing, {
+      meetingId: this.meeting.id,
+      erase: true,
+    });
+  }
+
+  showCanvas() {
+    this.canvasIsDisplayed = this.canvasIsDisplayed ? false : true;
   }
 
   private setOutputDevice(): void {
