@@ -16,6 +16,7 @@ using Whale.BLL.Services.Interfaces;
 using Whale.Shared.DTO.Participant;
 using System.Linq;
 using Whale.Shared.Helper;
+using shortid;
 
 namespace Whale.BLL.Services
 {
@@ -77,13 +78,17 @@ namespace Whale.BLL.Services
             var pwd = _encryptService.EncryptString(Guid.NewGuid().ToString());
             await _redisService.SetAsync(meeting.Id.ToString(), new MeetingMessagesAndPasswordDTO { Password = pwd });
 
+            string shortURL = ShortId.Generate();
+            string fullURL = $"?id={meeting.Id}&pwd={pwd}";
+            await _redisService.SetAsync(fullURL, shortURL);
+            await _redisService.SetAsync(shortURL, fullURL);
+
             await _participantService.CreateParticipantAsync(new ParticipantCreateDTO
             {
                 Role = Shared.DTO.Participant.ParticipantRole.Host,
                 UserEmail = userEmail,
                 MeetingId = meeting.Id
             });
-
 
             return new MeetingLinkDTO { Id = meeting.Id, Password = pwd };
         }
@@ -125,6 +130,20 @@ namespace Whale.BLL.Services
                 await _redisService.RemoveAsync(groupname);
             }
             return isHost;
+        }
+
+        public async Task<string> GetShortInviteLink(string fullURL)
+        {
+            await _redisService.ConnectAsync();
+
+            return await _redisService.GetAsync<string>(fullURL);
+        }
+
+        public async Task<string> GetFullInviteLink(string shortURL)
+        {
+            await _redisService.ConnectAsync();
+
+            return await _redisService.GetAsync<string>(shortURL);
         }
     }
 }
