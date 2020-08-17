@@ -12,7 +12,7 @@ import {
 import Peer from 'peerjs';
 import { SignalRService } from 'app/core/services/signal-r.service';
 import { environment } from '@env';
-import { Subject } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { MeetingService } from 'app/core/services/meeting.service';
 import { takeUntil, filter } from 'rxjs/operators';
@@ -38,6 +38,7 @@ import { UserMediaData } from '@shared/models/media/user-media-data';
 import { CopyClipboardComponent } from '@shared/components/copy-clipboard/copy-clipboard.component';
 import { SimpleModalService } from 'ngx-simple-modal';
 import { MediaSettingsService } from 'app/core/services/media-settings.service';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-meeting',
@@ -89,7 +90,8 @@ export class MeetingComponent
     @Inject(DOCUMENT) private document: any,
     private authService: AuthService,
     private simpleModalService: SimpleModalService,
-    private mediaSettingsService: MediaSettingsService
+    private mediaSettingsService: MediaSettingsService,
+    private http: HttpClient
   ) {
     this.meetingSignalrService = new MeetingSignalrService(signalRService);
     this.pollService = new PollService(
@@ -398,19 +400,39 @@ export class MeetingComponent
     this.isShowStatistics = !this.isShowStatistics;
   }
 
+  private getShortInviteLink(): Observable<string> {
+    const URL: string = this.document.location.href;
+    const chanks = URL.split('/');
+    const meetingLink = chanks[chanks.length - 1];
+
+    const baseUrl: string = environment.apiUrl;
+
+    return this.http.get(`${baseUrl}/api/meeting/shortenLink/${meetingLink}`, {
+      responseType: 'text',
+    });
+  }
+
   public onCopyIconClick(): void {
-    const copyBox = document.createElement('textarea');
-    copyBox.style.position = 'fixed';
-    copyBox.style.left = '0';
-    copyBox.style.top = '0';
-    copyBox.style.opacity = '0';
-    copyBox.value = this.document.location.href;
-    document.body.appendChild(copyBox);
-    copyBox.focus();
-    copyBox.select();
-    document.execCommand('copy');
-    document.body.removeChild(copyBox);
-    this.toastr.success('Copied');
+    const URL: string = this.document.location.href;
+    const chanks = URL.split('/');
+
+    this.getShortInviteLink().subscribe((short) => {
+      chanks[chanks.length - 1] = short;
+      chanks[chanks.length - 2] = 'redirection';
+
+      const copyBox = document.createElement('textarea');
+      copyBox.style.position = 'fixed';
+      copyBox.style.left = '0';
+      copyBox.style.top = '0';
+      copyBox.style.opacity = '0';
+      copyBox.value = chanks.join('/');
+      document.body.appendChild(copyBox);
+      copyBox.focus();
+      copyBox.select();
+      document.execCommand('copy');
+      document.body.removeChild(copyBox);
+      this.toastr.success('Copied');
+    });
 
     // this.simpleModalService.addModal(CopyClipboardComponent, {
     //   message: this.document.location.href,
