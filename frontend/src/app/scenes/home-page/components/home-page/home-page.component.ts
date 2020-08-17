@@ -1,25 +1,14 @@
-import {
-  Component,
-  OnInit,
-  EventEmitter,
-  ViewChild,
-  Output,
-  OnDestroy,
-} from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { User } from '@shared/models/user/user';
 import { Contact } from '@shared/models/contact/contact';
-import { SignalRService } from 'app/core/services/signal-r.service';
 import { HttpService } from 'app/core/services/http.service';
-import { HubConnection } from '@aspnet/signalr';
 import { SimpleModalService } from 'ngx-simple-modal';
 import { AddContactModalComponent } from '../add-contact-modal/add-contact-modal.component';
-import { ContactsChatComponent } from '../contacts-chat/contacts-chat.component';
 import { ToastrService } from 'ngx-toastr';
-import { UpstateService } from 'app/core/services/upstate.service';
 import { MeetingService } from 'app/core/services/meeting.service';
 import { Router } from '@angular/router';
 import { MeetingCreate } from '@shared/models/meeting/meeting-create';
-import { takeUntil, tap, filter } from 'rxjs/operators';
+import { filter, takeUntil, tap } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { AuthService } from 'app/core/auth/auth.service';
 import { LinkTypeEnum } from '@shared/Enums/LinkTypeEnum';
@@ -91,6 +80,15 @@ export class HomePageComponent implements OnInit, OnDestroy {
           .subscribe(
             (data: Contact[]) => {
               this.contacts = data;
+              data.forEach((contact) => {
+                if (contact.secondMember.linkType === LinkTypeEnum.Internal) {
+                  this.blobService
+                    .GetImageByName(contact.secondMember.avatarUrl)
+                    .subscribe((fullLink: string) => {
+                      contact.secondMember.avatarUrl = fullLink;
+                    });
+                }
+              });
             },
             (error) => this.toastr.error(error.Message)
           );
