@@ -108,23 +108,24 @@ namespace Whale.BLL.Hubs
             await Clients.All.SendAsync("OnConferenceStopRecording", message);
         }
 
-<<<<<<< HEAD
         [HubMethodName("OnPollCreated")]
         public async Task SendPollToGroup(PollDataDTO pollData)
         {
             await Clients.Group(pollData.GroupId).SendAsync("OnPoll", pollData.PollDto);
-=======
+        }
+
         [HubMethodName("OnDrawing")]
-        public async Task Draw(CreateDrawingDTO drawingDTO)
+        public async Task OnDrawing(CreateDrawingDTO drawingDTO)
         {
-            await Clients.GroupExcept(drawingDTO.MeetingId, new List<string> { Context.ConnectionId }).SendAsync("OnDrawing", drawingDTO.CanvasEvent);
+            await Clients.GroupExcept(drawingDTO.MeetingId, new List<string> { Context.ConnectionId })
+                .SendAsync("OnDrawing", drawingDTO.CanvasEvent);
         }
 
         [HubMethodName("OnErasing")]
-        public async Task Erase(EraseDrawingDTO drawingDTO)
+        public async Task OnErasing(EraseDrawingDTO drawingDTO)
         {
-            await Clients.GroupExcept(drawingDTO.MeetingId, new List<string> { Context.ConnectionId }).SendAsync("OnErasing", drawingDTO.Erase);
->>>>>>> feature/whiteboard
+            await Clients.GroupExcept(drawingDTO.MeetingId, new List<string> { Context.ConnectionId })
+                .SendAsync("OnErasing", drawingDTO.Erase);
         }
     }
 }

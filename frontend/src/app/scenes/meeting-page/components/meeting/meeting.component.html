@@ -136,6 +136,16 @@ Enter+Shift for new line."
       </span>
     </div>
 
+    <div class="canvas" [style.display]="!canvasIsDisplayed ? 'block' : 'none'">
+      <canvas-whiteboard
+        #canvasWhiteboard
+        [options]="canvasOptions"
+        (onBatchUpdate)="onCanvasDraw($event)"
+        (onClear)="onCanvasClear()"
+      >
+      </canvas-whiteboard>
+    </div>
+
     <div class="users" *ngIf="mediaData.length > 1">
       <app-participant-card
         *ngFor="let data of mediaData"
@@ -152,20 +162,6 @@ Enter+Shift for new line."
       class="participant-fullscreen"
       [muted]="'muted'"
     ></video>
-
-    <div class="canvas" [style.display]="!canvasIsDisplayed ? 'block' : 'none'">
-      <canvas-whiteboard
-        #canvasWhiteboard
-        [options]="canvasOptions"
-        (onBatchUpdate)="onCanvasDraw($event)"
-        (onClear)="onCanvasClear()"
-      >
-      </canvas-whiteboard>
-    </div>
-
-    Me:
-    <video #currentVideo autoplay="autoplay" [muted]="'muted'"></video> Users:
-    <div id="participants"></div>
 
     <div class="options">
       <div class="ui options__buttons">
@@ -218,30 +214,81 @@ Enter+Shift for new line."
               ></i>
             </div>
           </div>
-          <i
-            style="margin-left: 10px; opacity: 0.8;"
-            class="big share square icon"
-          ></i>
-          <i
-            (click)="showChat()"
-            style="margin-left: 10px; opacity: 0.8;"
-            class="big wechat icon"
-          ></i>
-          <i
-            (click)="showCanvas()"
-            style="margin-left: 10px; opacity: 0.8;"
-            class="big paint brush icon"
-          ></i>
-          <i
-            (click)="showCanvas()"
-            style="margin-left: 10px; opacity: 0.8;"
-            class="big paint brush icon"
-          ></i>
-          <i
-            (click)="goFullscreen()"
-            style="margin-left: 10px; opacity: 0.8;"
-            class="big desktop icon"
-          ></i>
+          <span
+            *ngIf="!isScreenRecording"
+            data-tooltip="Start Recording"
+            data-position="top left"
+          >
+            <i
+              id="meeting-options-recording"
+              (click)="startRecording()"
+              class="big circle icon"
+            ></i>
+          </span>
+          <span
+            *ngIf="isScreenRecording"
+            data-tooltip="Stop Recording"
+            data-position="top left"
+          >
+            <i
+              id="meeting-options-recording"
+              (click)="stopRecording()"
+              class="big stop circle icon"
+            ></i>
+          </span>
+          <span data-tooltip="Share Screen" data-position="top left">
+            <i
+              id="meeting-options-share"
+              class="big share square icon big-left-margin"
+            ></i>
+          </span>
+          <span data-tooltip="Polls">
+            <i
+              id="meeting-options-poll"
+              (click)="pollService.onPollIconClick()"
+              class="big clipboard list icon"
+            ></i
+          ></span>
+          <span data-tooltip="Statistics">
+            <i
+              id="meeting-options-statistics"
+              (click)="onStatisticsIconClick()"
+              class="big chart bar icon"
+            ></i
+          ></span>
+          <span data-tooltip="Copy Link" data-position="top right">
+            <i
+              id="meeting-options-copy"
+              (click)="onCopyIconClick()"
+              class="big copy icon"
+            ></i>
+          </span>
+          <span data-tooltip="Chat" data-position="top right">
+            <i
+              id="meeting-options-chat"
+              (click)="showChat()"
+              class="big wechat icon big-left-margin"
+            ></i>
+          </span>
+          <span data-tooltip="Canvas" data-position="top right">
+            <i (click)="showCanvas()" class="big paint brush icon"></i>
+          </span>
+          <span data-tooltip="Fullscreen" data-position="top right">
+            <i
+              id="meeting-options-fullscreen"
+              (click)="goFullscreen()"
+              class="big expand icon big-left-margin"
+            ></i>
+          </span>
+          <span data-tooltip="Show Self View" data-position="top right">
+            <i
+              id="meeting-options-create"
+              *ngIf="!isShowCurrentParticipantCard"
+              (click)="createParticipantCard(currentParticipant, true)"
+              (click)="isShowCurrentParticipantCard = true"
+              class="big user plus icon big-left-margin"
+            ></i>
+          </span>
         </div>
         <div>
           <button

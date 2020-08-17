@@ -613,7 +613,8 @@ export class MeetingComponent
 
   onCanvasDraw(event) {
     this.meetingSignalrService.invoke(SignalMethods.OnDrawing, {
-      meetingId: this.meeting.id,
+      // meetingId: this.meeting.id,
+      meetingId: '123',
       canvasEvent: event,
     });
   }
