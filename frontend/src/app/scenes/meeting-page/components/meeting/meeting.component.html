@@ -105,17 +105,29 @@ Enter+Shift for new line."
         ></i>
       </span>
       <span data-tooltip="Statistics" data-position="top right">
-        <i id="meeting-draggable-statistics" (click)="onStatisticsIconClick()" class="big chart bar icon"></i>
+        <i
+          id="meeting-draggable-statistics"
+          (click)="onStatisticsIconClick()"
+          class="big chart bar icon"
+        ></i>
       </span>
       <span data-tooltip="Chat" data-position="top right">
-        <i id="meeting-draggable-chat" (click)="showChat()" class="big wechat icon block"></i>
+        <i
+          id="meeting-draggable-chat"
+          (click)="showChat()"
+          class="big wechat icon block"
+        ></i>
       </span>
       <span data-tooltip="Quit fullscreen" data-position="top right">
-        <i id="meeting-draggable-fullscrean" (click)="closeFullscreen()" class="big compress icon block"></i>
+        <i
+          id="meeting-draggable-fullscrean"
+          (click)="closeFullscreen()"
+          class="big compress icon block"
+        ></i>
       </span>
       <span data-tooltip="Show Self View" data-position="top right">
         <i
-          id="meeting-draggable-create" 
+          id="meeting-draggable-create"
           (click)="createParticipantCard(currentParticipant, true)"
           (click)="isShowCurrentParticipantCard = true"
           *ngIf="!isShowCurrentParticipantCard"
@@ -150,13 +162,13 @@ Enter+Shift for new line."
             data-position="top left"
           >
             <i
-              id="meeting-options-microphone" 
+              id="meeting-options-microphone"
               *ngIf="!isMicrophoneMuted"
               class="big microphone icon"
               (click)="turnOffMicrophone()"
             ></i>
             <i
-              id="meeting-options-microphone" 
+              id="meeting-options-microphone"
               *ngIf="isMicrophoneMuted"
               class="big slash microphone icon"
               (click)="turnOffMicrophone()"
@@ -164,7 +176,7 @@ Enter+Shift for new line."
           </span>
           <span *ngIf="!isScreenRecording" data-tooltip="Toggle Webcam">
             <i
-              id="meeting-options-camera" 
+              id="meeting-options-camera"
               *ngIf="!isCameraMuted"
               class="big video icon big-left-margin"
               (click)="turnOffCamera()"
@@ -197,17 +209,28 @@ Enter+Shift for new line."
             data-tooltip="Start Recording"
             data-position="top left"
           >
-            <i id="meeting-options-recording" (click)="startRecording()" class="big circle icon"></i>
+            <i
+              id="meeting-options-recording"
+              (click)="startRecording()"
+              class="big circle icon"
+            ></i>
           </span>
           <span
             *ngIf="isScreenRecording"
             data-tooltip="Stop Recording"
             data-position="top left"
           >
-            <i id="meeting-options-recording" (click)="stopRecording()" class="big stop circle icon"></i>
+            <i
+              id="meeting-options-recording"
+              (click)="stopRecording()"
+              class="big stop circle icon"
+            ></i>
           </span>
           <span data-tooltip="Share Screen" data-position="top left">
-            <i id="meeting-options-share" class="big share square icon big-left-margin"></i>
+            <i
+              id="meeting-options-share"
+              class="big share square icon big-left-margin"
+            ></i>
           </span>
           <span data-tooltip="Polls">
             <i
@@ -217,13 +240,25 @@ Enter+Shift for new line."
             ></i
           ></span>
           <span data-tooltip="Statistics">
-            <i id="meeting-options-statistics" (click)="onStatisticsIconClick()" class="big chart bar icon"></i
+            <i
+              id="meeting-options-statistics"
+              (click)="onStatisticsIconClick()"
+              class="big chart bar icon"
+            ></i
           ></span>
           <span data-tooltip="Copy Link" data-position="top right">
-            <i id="meeting-options-copy" (click)="onCopyIconClick()" class="big copy icon"></i>
+            <i
+              id="meeting-options-copy"
+              (click)="onCopyIconClick()"
+              class="big copy icon"
+            ></i>
           </span>
           <span data-tooltip="Chat" data-position="top right">
-            <i id="meeting-options-chat" (click)="showChat()" class="big wechat icon big-left-margin"></i>
+            <i
+              id="meeting-options-chat"
+              (click)="showChat()"
+              class="big wechat icon big-left-margin"
+            ></i>
           </span>
           <span data-tooltip="Fullscreen" data-position="top right">
             <i
@@ -243,7 +278,11 @@ Enter+Shift for new line."
           </span>
         </div>
         <div>
-          <button id="meeting-options-leave" class="ui red button" (click)="leave()">
+          <button
+            id="meeting-options-leave"
+            class="ui red button"
+            (click)="leave()"
+          >
             Leave
           </button>
         </div>

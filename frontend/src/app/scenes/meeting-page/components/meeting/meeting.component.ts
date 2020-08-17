@@ -28,7 +28,6 @@ import { MeetingConnectionData } from '@shared/models/meeting/meeting-connect';
 
 import { HttpService } from 'app/core/services/http.service';
 import { PollService } from 'app/core/services/poll.service';
-import { PollCreateDto } from 'app/shared/models/poll/poll-create-dto';
 import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
 import { MeetingMessageCreate } from '@shared/models/meeting/message/meeting-message-create';
 import { Participant } from '@shared/models/participant/participant';
@@ -38,6 +37,7 @@ import { AuthService } from 'app/core/auth/auth.service';
 import { UserMediaData } from '@shared/models/media/user-media-data';
 import { CopyClipboardComponent } from '@shared/components/copy-clipboard/copy-clipboard.component';
 import { SimpleModalService } from 'ngx-simple-modal';
+import { MediaSettingsService } from 'app/core/services/media-settings.service';
 
 @Component({
   selector: 'app-meeting',
@@ -88,7 +88,8 @@ export class MeetingComponent
     private httpService: HttpService,
     @Inject(DOCUMENT) private document: any,
     private authService: AuthService,
-    private simpleModalService: SimpleModalService
+    private simpleModalService: SimpleModalService,
+    private mediaSettingsService: MediaSettingsService
   ) {
     this.meetingSignalrService = new MeetingSignalrService(signalRService);
     this.pollService = new PollService(
@@ -100,10 +101,10 @@ export class MeetingComponent
   }
 
   public async ngOnInit() {
-    this.currentUserStream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
-    });
+    // ! await this.mediaSettingsService.checkIfAvailableDevices();  <- this is in guard, if guard will be deleted restore this string
+    this.currentUserStream = await navigator.mediaDevices.getUserMedia(
+      await this.mediaSettingsService.getMediaConstraints()
+    );
     this.currentStreamLoaded.emit();
     // create new peer
     this.peer = new Peer(environment.peerOptions);
@@ -287,9 +288,10 @@ export class MeetingComponent
   }
 
   public ngAfterContentInit() {
-    this.currentStreamLoaded.subscribe(
-      () => (this.currentVideo.nativeElement.srcObject = this.currentUserStream)
-    );
+    this.currentStreamLoaded.subscribe(() => {
+      this.currentVideo.nativeElement.srcObject = this.currentUserStream;
+      this.setOutputDevice();
+    });
   }
 
   public ngOnDestroy(): void {
@@ -479,6 +481,8 @@ export class MeetingComponent
     shouldPrepend
       ? this.mediaData.unshift(newMediaData)
       : this.mediaData.push(newMediaData);
+
+    this.setOutputDevice();
   }
 
   // call to peer
@@ -500,8 +504,8 @@ export class MeetingComponent
   }
 
   private destroyPeer() {
-    this.peer.disconnect();
-    this.peer.destroy();
+    this.peer?.disconnect();
+    this.peer?.destroy();
   }
 
   private getMeeting(link: string): void {
@@ -558,6 +562,16 @@ export class MeetingComponent
           };
           this.getMeeting(link);
         });
+    });
+  }
+
+  private setOutputDevice(): void {
+    const videoElements = document.querySelectorAll('video');
+    videoElements.forEach((elem) => {
+      this.mediaSettingsService.attachSinkId(
+        elem,
+        this.mediaSettingsService.settings.OutputDeviceId
+      );
     });
   }
 }

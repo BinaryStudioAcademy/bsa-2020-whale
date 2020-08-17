@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { BrowserMediaDevice } from '../browser-media-device';
+import { MediaSettingsService } from 'app/core/services/media-settings.service';
 
 @Component({
   selector: 'app-setting-video',
@@ -8,59 +9,60 @@ import { BrowserMediaDevice } from '../browser-media-device';
 })
 export class SettingVideoComponent implements OnInit, OnDestroy {
   public browserMediaDevice = new BrowserMediaDevice();
-  public videoDevices: MediaDeviceInfo[];
+  public videoDevices: MediaDeviceInfo[] = [null];
   public videoStream: MediaStream;
-  public deviceId: string;
-  constructor() {}
+  public deviceId: string = '';
+  constructor(public mediaSettingsService: MediaSettingsService) {}
 
   ngOnInit(): void {
-    console.log('ngOnInitVideo');
     this.browserMediaDevice
       .getVideoInputList()
       .then((res) => {
         this.videoDevices = res;
-        this.deviceId = this.videoDevices[0].deviceId;
+        if (!this.mediaSettingsService.settings.VideoDeviceId) {
+          this.mediaSettingsService.changeVideoDevice(
+            this.videoDevices[0]?.deviceId
+          );
+        }
+        this.deviceId = this.mediaSettingsService.settings.VideoDeviceId;
         this.showVideo();
       })
       .catch((error) => console.log(error));
   }
 
   ngOnDestroy(): void {
-    console.log('ngOnDestroy');
     this.videoStream?.getTracks().forEach((track) => track.stop());
   }
 
   // tslint:disable-next-line: typedef
   public async showVideo() {
-    /*this.videoStream = */ await navigator.mediaDevices
+    await navigator.mediaDevices
       .getUserMedia({
         video: {
-          deviceId: this.videoDevices[0].deviceId,
+          deviceId: this.mediaSettingsService.settings.VideoDeviceId,
         },
         audio: false,
       })
       .then((stream) => {
         this.videoStream = stream;
-        console.log(this.videoStream);
         this.handleSuccess(this.videoStream);
       });
-    //this.handleSuccess(this.videoStream);
   }
-  // tslint:disable-next-line: typedef
+
   async handleSuccess(stream) {
     const video = document.querySelector('video');
-    const videoTracks = stream.getVideoTracks();
-    window.MSStream = stream;
     video.srcObject = stream;
   }
 
-  public async changeState(event: any) {
-    const stream = await navigator.mediaDevices.getUserMedia({
+  public async changeState(deviceId: string) {
+    this.mediaSettingsService.changeVideoDevice(deviceId);
+    this.ngOnDestroy();
+    this.videoStream = await navigator.mediaDevices.getUserMedia({
       video: {
-        deviceId: event,
+        deviceId: deviceId,
       },
       audio: false,
     });
-    this.handleSuccess(stream);
+    this.handleSuccess(this.videoStream);
   }
 }

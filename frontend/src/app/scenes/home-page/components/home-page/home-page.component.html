@@ -24,7 +24,11 @@
           <i class="clock outline icon"></i>
           Meetings history
         </a>
-        <a id="home-go-schedule" class="item" (click)="goToPage('schedule-meeting')">
+        <a
+          id="home-go-schedule"
+          class="item"
+          (click)="goToPage('schedule-meeting')"
+        >
           <i class="calendar alternate outline icon"></i>
           Schedule meeting
         </a>
@@ -48,7 +52,7 @@
         </button>
       </a>
       <div class="contacts-container" [hidden]="!contactsVisibility">
-        <div 
+        <div
           *ngFor="let contact of contacts"
           class="user-list ui middle aligned selection list"
         >
@@ -70,7 +74,10 @@
           </div>
         </div>
       </div>
-      <a id="home-toggle-groups" (click)="groupsVisibility = !groupsVisibility" class="item header"
+      <a
+        id="home-toggle-groups"
+        (click)="groupsVisibility = !groupsVisibility"
+        class="item header"
         >Groups
         <button
           id="home-add-group"
@@ -111,7 +118,11 @@
     </div>
     <div *ngIf="chatVisibility" class="actions">
       <div class="vertically-aligned chat ui segment">
-        <div id="home-chat-go-shedule" class="text-aligned" (click)="goToPage('schedule-meeting')">
+        <div
+          id="home-chat-go-shedule"
+          class="text-aligned"
+          (click)="goToPage('schedule-meeting')"
+        >
           <img
             class="ui centered small image"
             src="https://img.icons8.com/bubbles/100/000000/planner.png"
@@ -125,7 +136,11 @@
           />
           <span class="text-aligned">Meetings history</span>
         </div>
-        <div id="home-chat-go-create" class="text-aligned" (click)="createMeeting()">
+        <div
+          id="home-chat-go-create"
+          class="text-aligned"
+          (click)="createMeeting()"
+        >
           <img
             class="ui centered small image"
             src="https://img.icons8.com/bubbles/100/000000/forward.png"

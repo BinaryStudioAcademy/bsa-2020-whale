@@ -5,13 +5,20 @@
     </div>
     <div class="right menu">
       <div class="item" *ngIf="auth.isSignedIn">
-        <a id="landing-home" class="ui primary button" (click)="redirectToHome()">Profile</a>
+        <a
+          id="landing-home"
+          class="ui primary button"
+          (click)="redirectToHome()"
+          >Profile</a
+        >
       </div>
       <div class="item" *ngIf="auth.isSignedIn">
         <a id="landing-logout" class="ui button" (click)="logOut()">Log Out</a>
       </div>
       <div class="item" *ngIf="!auth.isSignedIn">
-        <a id="landing-login" class="ui primary button" (click)="logIn()">Log In</a>
+        <a id="landing-login" class="ui primary button" (click)="logIn()"
+          >Log In</a
+        >
       </div>
     </div>
   </div>

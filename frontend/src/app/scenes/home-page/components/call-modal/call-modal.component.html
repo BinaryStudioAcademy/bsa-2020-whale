@@ -1,4 +1,8 @@
-<div id="modal-div-close" class="ui dimmer modals page visible active" (click)="decline()">
+<div
+  id="modal-div-close"
+  class="ui dimmer modals page visible active"
+  (click)="decline()"
+>
   <div class="ui mini modal visible active" (click)="$event.stopPropagation()">
     <div class="header">
       {{ secondMember?.firstName }} {{ secondMember?.secondName }}
@@ -16,7 +20,11 @@
     </div>
 
     <div class="icon-wrapper">
-      <i id="call-decline" class="phone red circular large icon" (click)="decline()"></i>
+      <i
+        id="call-decline"
+        class="phone red circular large icon"
+        (click)="decline()"
+      ></i>
     </div>
   </div>
 </div>
