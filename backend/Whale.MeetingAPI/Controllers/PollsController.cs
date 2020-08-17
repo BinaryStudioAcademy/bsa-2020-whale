@@ -40,6 +40,13 @@ namespace Whale.MeetingAPI.Controllers
 			}
 		}
 
+		[HttpGet("saveResults")]
+		public async Task<IActionResult> SavePollResults(Guid meetingId)
+		{
+			await _pollService.SavePollResultsToDatabase(meetingId);
+			return Ok();
+		}
+
 		[HttpGet]
 		public async Task<IActionResult> GetPollsAndResults(string meetingId, string userEmail)
 		{
