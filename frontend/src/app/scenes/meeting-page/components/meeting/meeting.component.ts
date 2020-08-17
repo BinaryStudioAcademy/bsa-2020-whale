@@ -28,7 +28,6 @@ import { MeetingConnectionData } from '@shared/models/meeting/meeting-connect';
 
 import { HttpService } from 'app/core/services/http.service';
 import { PollService } from 'app/core/services/poll.service';
-import { PollCreateDto } from 'app/shared/models/poll/poll-create-dto';
 import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
 import { MeetingMessageCreate } from '@shared/models/meeting/message/meeting-message-create';
 import { Participant } from '@shared/models/participant/participant';
@@ -38,6 +37,7 @@ import { AuthService } from 'app/core/auth/auth.service';
 import { UserMediaData } from '@shared/models/media/user-media-data';
 import { CopyClipboardComponent } from '@shared/components/copy-clipboard/copy-clipboard.component';
 import { SimpleModalService } from 'ngx-simple-modal';
+import { MediaSettingsService } from 'app/core/services/media-settings.service';
 
 @Component({
   selector: 'app-meeting',
@@ -89,7 +89,8 @@ export class MeetingComponent
     private httpService: HttpService,
     @Inject(DOCUMENT) private document: any,
     private authService: AuthService,
-    private simpleModalService: SimpleModalService
+    private simpleModalService: SimpleModalService,
+    private mediaSettingsService: MediaSettingsService
   ) {
     this.meetingSignalrService = new MeetingSignalrService(signalRService);
     this.pollService = new PollService(
@@ -102,8 +103,19 @@ export class MeetingComponent
 
   public async ngOnInit() {
     this.currentUserStream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
+      video: {
+        deviceId: this.mediaSettingsService.settings.VideoDeviceId
+          ? { exact: this.mediaSettingsService.settings.VideoDeviceId }
+          : undefined,
+        width: { max: 858 },
+        height: { max: 480 },
+        frameRate: { max: 24 },
+      },
+      audio: {
+        deviceId: this.mediaSettingsService.settings.InputDeviceId
+          ? { exact: this.mediaSettingsService.settings.InputDeviceId }
+          : undefined,
+      },
     });
     this.currentStreamLoaded.emit();
     // create new peer
