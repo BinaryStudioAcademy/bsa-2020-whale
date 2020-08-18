@@ -102,7 +102,8 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   private elem: any;
   public isMicrophoneMuted = false;
   public isCameraMuted = false;
-
+  public isAudioSettings = false;
+  public isVideoSettings = false;
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -175,7 +176,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (participants) => {
-          //this.meeting.participants.push(...participants);
+          this.meeting.participants.push(...participants);
           this.currentParticipant = participants.find(
             (p) => p.user.email === this.authService.currentUser.email
           );
@@ -663,6 +664,56 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
         elem,
         this.mediaSettingsService.settings.OutputDeviceId
       );
+    });
+  }
+  public async changeStateVideo(event: any) {
+    this.mediaSettingsService.changeVideoDevice(event);
+    this.currentUserStream.getVideoTracks()?.forEach((track) => track.stop());
+    this.currentUserStream = await navigator.mediaDevices.getUserMedia({
+      video: { deviceId: event },
+      audio: false,
+    });
+    this.handleSuccessVideo(this.currentUserStream);
+  }
+  async handleSuccessVideo(stream: MediaStream): Promise<void> {
+    const video = document.querySelector('video');
+    video.srcObject = stream;
+    const keys = Object.keys(this.peer.connections);
+    const peerConnection = this.peer.connections[keys[0]];
+    const videoTrack = stream.getVideoTracks()[0];
+    peerConnection.forEach((pc) => {
+      const sender = pc.peerConnection.getSenders().find((s) => {
+        return s.track.kind === videoTrack.kind;
+      });
+      sender.replaceTrack(videoTrack);
+    });
+  }
+  public async changeInputDevice(deviceId: string) {
+    this.mediaSettingsService.changeInputDevice(deviceId);
+    this.currentUserStream = await navigator.mediaDevices.getUserMedia({
+      video: false,
+      audio: { deviceId: deviceId },
+    });
+    this.handleSuccess(this.currentUserStream);
+  }
+
+  public async changeOutputDevice(deviceId: string) {
+    const audio = document.querySelector('audio');
+    this.mediaSettingsService.changeOutputDevice(deviceId);
+    this.mediaSettingsService.attachSinkId(audio, deviceId);
+  }
+
+  async handleSuccess(stream): Promise<void> {
+    const audio = document.querySelector('audio');
+    audio.srcObject = stream;
+    const keys = Object.keys(this.peer.connections);
+    const peerConnection = this.peer.connections[keys[0]];
+    const audioTrack = stream.getAudioTracks()[0];
+    peerConnection.forEach((pc) => {
+      const sender = pc.peerConnection.getSenders().find((s) => {
+        return s.track.kind === audioTrack.kind;
+      });
+      sender.replaceTrack(audioTrack);
     });
   }
 }

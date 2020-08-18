@@ -5,7 +5,6 @@ import { SharedModule } from '@shared/shared.module';
 import { FormsModule } from '@angular/forms';
 import { AngularDraggableModule } from 'angular2-draggable';
 import { CanvasWhiteboardModule } from 'ng2-canvas-whiteboard';
-
 @NgModule({
   declarations: [MeetingComponent],
   imports: [
