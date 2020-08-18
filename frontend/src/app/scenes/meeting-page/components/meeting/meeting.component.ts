@@ -130,11 +130,6 @@ export class MeetingComponent
 
   public async ngOnInit() {
     this.canvasIsDisplayed = false;
-    this.currentUserStream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
-    });
-    // ! await this.mediaSettingsService.checkIfAvailableDevices();  <- this is in guard, if guard will be deleted restore this string
     this.currentUserStream = await navigator.mediaDevices.getUserMedia(
       await this.mediaSettingsService.getMediaConstraints()
     );
