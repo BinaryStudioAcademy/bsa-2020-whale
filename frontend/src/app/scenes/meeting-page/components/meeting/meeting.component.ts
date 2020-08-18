@@ -105,6 +105,8 @@ export class MeetingComponent
   public isCameraMuted = false;
   public isAudioSettings = false;
   public isVideoSettings = false;
+  public isWaitingForRecord = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -407,19 +409,25 @@ export class MeetingComponent
 
   public startRecording(): void {
     this.isScreenRecording = true;
-    this.blobService.startRecording().subscribe((permited) => {
-      if (permited) {
-        this.meetingSignalrService.invoke(
-          SignalMethods.OnConferenceStartRecording,
-          'Conference start recording'
-        );
-      } else {
-        this.isScreenRecording = false;
-      }
+
+    this.blobService.startRecording().subscribe({
+      complete: () => (this.isWaitingForRecord = false),
+      next: (permited) => {
+        if (permited) {
+          this.meetingSignalrService.invoke(
+            SignalMethods.OnConferenceStartRecording,
+            'Conference start recording'
+          );
+        } else {
+          this.isScreenRecording = false;
+        }
+      },
     });
   }
 
-  stopRecording(): void {
+  public stopRecording(): void {
+    this.isWaitingForRecord = true;
+
     this.isScreenRecording = false;
 
     this.blobService.stopRecording();

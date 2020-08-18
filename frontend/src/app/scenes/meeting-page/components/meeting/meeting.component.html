@@ -1,3 +1,7 @@
+<div *ngIf="isWaitingForRecord" class="waiting-for-record-modal">
+  <p>Waiting record...</p>
+</div>
+
 <div #mainArea class="bg-white">
   <div *ngIf="isShowChat" class="ui chat card">
     <div class="ui chat-inner feed">
