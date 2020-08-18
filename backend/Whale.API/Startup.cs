@@ -54,6 +54,7 @@ namespace Whale.API
                 mc.AddProfile<MeetingMessage>();
                 mc.AddProfile<ParticipantProfile>();
                 mc.AddProfile<GroupProfile>();
+                mc.AddProfile<GroupMessageProfile>();
             });
 
             services.AddSingleton(mappingConfig.CreateMapper());
@@ -64,6 +65,8 @@ namespace Whale.API
             services.AddTransient<ContactChatService>();
             services.AddTransient<IMeetingService, MeetingService>();
             services.AddTransient<ParticipantService>();
+            services.AddTransient<GroupService>();
+
 
             services.AddSignalR();
             services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>

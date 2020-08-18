@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Whale.BLL.Services;
+using Whale.Shared.DTO.Group;
 
 namespace Whale.API.Controllers
 {
@@ -46,6 +47,24 @@ namespace Whale.API.Controllers
             if (contact == null) return NotFound();
 
             return Ok(contact);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateNewGroup([FromBody] GroupCreateDTO newGroup)
+        {
+            var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+            var createdGroup = await _groupService.CreateGroupAsync(newGroup, ownerEmail);
+
+            return Created($"id/{createdGroup.Id}", createdGroup);
+        }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var deleted = await _groupService.DeleteGroupAsync(id);
+
+            if (deleted) return NoContent();
+
+            return NotFound();
         }
 
     }

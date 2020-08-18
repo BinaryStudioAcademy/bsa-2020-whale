@@ -26,6 +26,7 @@ import { AuthService } from 'app/core/auth/auth.service';
 import { LinkTypeEnum } from '@shared/Enums/LinkTypeEnum';
 import { BlobService } from '../../../../core/services/blob.service';
 import { Group } from '@shared/models/group/group';
+import { GroupService } from 'app/core/services/group.service';
 
 @Component({
   selector: 'app-home-page',
@@ -46,6 +47,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
   public isContactsLoading = true;
   public isUserLoadig = true;
   public isMeetingLoading = false;
+  public isGroupsLoading = true;
 
   private unsubscribe$ = new Subject<void>();
   constructor(
@@ -55,7 +57,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
     private meetingService: MeetingService,
     private router: Router,
     private authService: AuthService,
-    private blobService: BlobService
+    private blobService: BlobService,
+    private groupService: GroupService
   ) {}
 
   ngOnDestroy(): void {
@@ -97,6 +100,16 @@ export class HomePageComponent implements OnInit, OnDestroy {
             },
             (error) => this.toastr.error(error.Message)
           );
+        this.groupService
+          .getAllGroups()
+          .pipe(tap(() => (this.isGroupsLoading = false)))
+          .subscribe(
+            (data: Group[]) => {
+              this.groups = data;
+              console.log(this.groups);
+            },
+            (error) => this.toastr.error(error.Message)
+          );
       });
   }
 
@@ -109,6 +122,23 @@ export class HomePageComponent implements OnInit, OnDestroy {
         }
       });
   }
+
+  deleteGroup(group: Group): void {
+    if (
+      confirm('Are you sure want to delete the group ' + group.label + ' ?')
+    ) {
+      this.groupService.deleteGroup(group).subscribe(
+        (response) => {
+          if (response.status === 204) {
+            this.toastr.success('Deleted successfuly');
+            this.groups.splice(this.groups.indexOf(group), 1);
+          }
+        },
+        (error) => this.toastr.error(error.Message)
+      );
+    }
+  }
+
   addNewContact(): void {
     this.simpleModalService
       .addModal(AddContactModalComponent)
@@ -118,6 +148,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
         }
       });
   }
+
   visibilityChange(event): void {
     this.chatVisibility = event;
     this.contactSelected = undefined;
@@ -127,9 +158,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.contactSelected = contact;
   }
 
-  onGroupClick(): void {
-    this.chatVisibility = !this.chatVisibility;
-  }
+  onGroupClick(group: Group): void {}
+
   isContactActive(contact): boolean {
     return this.contactSelected === contact;
   }

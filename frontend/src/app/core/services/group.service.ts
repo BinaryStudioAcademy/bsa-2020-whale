@@ -12,13 +12,19 @@ export class GroupService {
 
   constructor(private httpService: HttpService) {}
 
-  public createGroup(
-    email: string,
-    group: Group
-  ): Observable<HttpResponse<Group>> {
+  public getAllGroups(): Observable<Group[]> {
+    return this.httpService.getRequest<Group[]>('/api/groups');
+  }
+
+  public createGroup(group: Group): Observable<HttpResponse<Group>> {
     return this.httpService.postFullRequest<Group, Group>(
       `${this.routePrefix}`,
       group
+    );
+  }
+  public deleteGroup(group: Group): Observable<HttpResponse<void>> {
+    return this.httpService.deleteFullRequest<void>(
+      `${this.routePrefix}/${group.id}`
     );
   }
 }

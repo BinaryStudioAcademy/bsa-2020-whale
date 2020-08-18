@@ -74,6 +74,7 @@
           </div>
         </div>
       </div>
+      <spiner *ngIf="isGroupsLoading" [size]="'medium'"></spiner>
       <a
         id="home-toggle-groups"
         (click)="groupsVisibility = !groupsVisibility"
@@ -87,21 +88,21 @@
           New
         </button>
       </a>
-      <div class="contacts-container" [hidden]="!groupsVisibility">
-        <div
-          *ngFor="let contact of contacts"
-          class="user-list ui middle aligned selection list"
-        >
-          <div id="home-group" (click)="onGroupClick()" class="item">
-            <img
-              class="ui avatar image"
-              src="{{ contact.secondMember?.avatarUrl }}"
-            />
-            <div class="content">
-              <div class="description">
-                {{ contact.secondMember?.firstName }}
-                {{ contact.secondMember?.secondName }}
-              </div>
+      <div class="contacts-container" [hidden]="groupsVisibility">
+        <div *ngFor="let group of groups" class="user-list ui selection list">
+          <div id="home-group" (click)="onGroupClick(group)" class="item">
+            <div class="group content">
+              {{ group.label }}
+              <button
+                id="home-remove-group"
+                (click)="deleteGroup(group); $event.stopPropagation()"
+                class="ui mini basic button edit-button"
+              >
+                <i
+                  class="trash alternate outline icon"
+                  (click)="deleteGroup(group); $event.stopPropagation()"
+                ></i>
+              </button>
             </div>
           </div>
         </div>
