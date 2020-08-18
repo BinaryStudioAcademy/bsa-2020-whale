@@ -87,7 +87,7 @@
       </div>
       <div class="ui divided list">
         <div
-          *ngFor="let participant of meeting.participants"
+          *ngFor="let participant of distinctParticipants"
           class="ui item participant"
         >
           <img src="{{ participant.user.avatarUrl }}" />
