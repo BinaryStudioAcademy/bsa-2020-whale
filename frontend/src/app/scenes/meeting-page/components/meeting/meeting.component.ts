@@ -178,7 +178,7 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (participants) => {
-          //this.meeting.participants.push(...participants);
+          this.meeting.participants.push(...participants);
           this.currentParticipant = participants.find(
             (p) => p.user.email === this.authService.currentUser.email
           );
