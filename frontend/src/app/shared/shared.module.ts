@@ -13,7 +13,9 @@ import { MeetingStatisticsComponent } from './components/meeting-statistics/meet
 import { CopyClipboardComponent } from './components/copy-clipboard/copy-clipboard.component';
 import { IncomingCallComponent } from './components/incoming-call/incoming-call.component';
 import { AngularDraggableModule } from 'angular2-draggable';
-
+import { AudioSettingsComponent } from '@shared/components/settings/audio-settings/audio-settings.component';
+import { VideoSettingsComponent } from '@shared/components/settings/video-settings/video-settings.component';
+import { OutputSettingsComponent } from './components/settings/output-settings/output-settings.component';
 @NgModule({
   declarations: [
     PageHeaderComponent,
@@ -26,6 +28,9 @@ import { AngularDraggableModule } from 'angular2-draggable';
     MeetingStatisticsComponent,
     CopyClipboardComponent,
     IncomingCallComponent,
+    AudioSettingsComponent,
+    VideoSettingsComponent,
+    OutputSettingsComponent,
   ],
   imports: [
     CommonModule,
@@ -44,6 +49,9 @@ import { AngularDraggableModule } from 'angular2-draggable';
     ParticipantCardComponent,
     MeetingStatisticsComponent,
     IncomingCallComponent,
+    AudioSettingsComponent,
+    VideoSettingsComponent,
+    OutputSettingsComponent,
   ],
 })
 export class SharedModule {}

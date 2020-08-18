@@ -1,0 +1,13 @@
+<div class="ui segment">
+  <div class="ui middle aligned selection list">
+    <h4 class="ui header">Choose speaker</h4>
+    <div
+      class="item content header"
+      (click)="onClick.emit(d.deviceId)"
+      *ngFor="let d of outputAudioDevices"
+      [ngClass]="isActive(d) ? 'active item' : 'item'"
+    >
+      {{ d.label }}
+    </div>
+  </div>
+</div>

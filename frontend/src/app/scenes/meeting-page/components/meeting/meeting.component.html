@@ -184,6 +184,13 @@ Enter+Shift for new line."
               (click)="turnOffMicrophone()"
             ></i>
           </span>
+          <span data-tooltip="Settings">
+            <i
+              class="angle up icon"
+              *ngIf="!isMicrophoneMuted"
+              (click)="isAudioSettings = !isAudioSettings"
+            ></i>
+          </span>
           <span *ngIf="!isScreenRecording" data-tooltip="Toggle Webcam">
             <i
               id="meeting-options-camera"
@@ -196,6 +203,13 @@ Enter+Shift for new line."
               *ngIf="isCameraMuted"
               class="big eye slash icon big-left-margin"
               (click)="turnOffCamera()"
+            ></i>
+          </span>
+          <span data-tooltip="Settings">
+            <i
+              class="angle up icon"
+              *ngIf="!isCameraMuted"
+              (click)="isVideoSettings = !isVideoSettings"
             ></i>
           </span>
         </div>
@@ -375,5 +389,19 @@ Enter+Shift for new line."
         <app-poll-results [pollResult]="pollxResult"></app-poll-results>
       </div>
     </div>
+  </div>
+  <div class="settings" *ngIf="isVideoSettings && !isCameraMuted">
+    <app-video-settings
+      (onClick)="changeStateVideo($event)"
+    ></app-video-settings>
+  </div>
+  <div class="settings" *ngIf="isAudioSettings && !isMicrophoneMuted">
+    <app-audio-settings
+      (onClick)="changeInputDevice($event)"
+    ></app-audio-settings>
+    <app-output-settings
+      (onClick)="changeOutputDevice($event)"
+    ></app-output-settings>
+    <audio></audio>
   </div>
 </div>

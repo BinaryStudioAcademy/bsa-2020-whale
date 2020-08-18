@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { BrowserMediaDevice } from '../browser-media-device';
+import { BrowserMediaDevice } from '@shared/browser-media-device';
 import * as DecibelMeter from 'decibel-meter';
 import * as RecordRTC from 'recordrtc';
 import { MediaSettingsService } from 'app/core/services/media-settings.service';

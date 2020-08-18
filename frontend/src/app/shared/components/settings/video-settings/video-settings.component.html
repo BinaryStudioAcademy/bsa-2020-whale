@@ -1,0 +1,15 @@
+<div class="ui segment">
+  <form class="ui form">
+    <div class="ui middle aligned selection list">
+      <h4 class="ui header">Choose camera</h4>
+      <div
+        class="item content header"
+        (click)="onClick.emit(d.deviceId)"
+        *ngFor="let d of videoDevices"
+        [ngClass]="isActive(d) ? 'active item' : 'item'"
+      >
+        {{ d.label }}
+      </div>
+    </div>
+  </form>
+</div>
