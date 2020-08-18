@@ -20,6 +20,7 @@ using Whale.API.Middleware;
 using Whale.BLL.Interfaces;
 using Microsoft.OpenApi.Models;
 using Whale.Shared.Helper;
+using Whale.API.Services;
 
 namespace Whale.API
 {
@@ -44,6 +45,7 @@ namespace Whale.API
             services.AddDbContext<WhaleDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("WhaleDatabase")));
             services.AddControllers()
                     .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+
             var mappingConfig = new MapperConfiguration(mc =>
             {
                 mc.AddProfile<ContactProfile>();
@@ -53,6 +55,7 @@ namespace Whale.API
                 mc.AddProfile<MeetingProfile>();
                 mc.AddProfile<MeetingMessage>();
                 mc.AddProfile<ParticipantProfile>();
+                mc.AddProfile<PollProfile>();
             });
 
             services.AddSingleton(mappingConfig.CreateMapper());
@@ -63,6 +66,7 @@ namespace Whale.API
             services.AddTransient<ContactChatService>();
             services.AddTransient<IMeetingService, MeetingService>();
             services.AddTransient<ParticipantService>();
+            services.AddTransient<MeetingHistoryService>();
 
             services.AddSignalR();
             services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>

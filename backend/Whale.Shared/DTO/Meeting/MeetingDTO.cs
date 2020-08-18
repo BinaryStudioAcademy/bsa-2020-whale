@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Whale.Shared.DTO.Participant;
+using Whale.Shared.DTO.Poll;
 
 namespace Whale.Shared.DTO.Meeting
 {
@@ -14,6 +15,7 @@ namespace Whale.Shared.DTO.Meeting
         public bool IsScheduled { get; set; }
         public bool IsRecurrent { get; set; }
 
-        public ICollection<ParticipantDTO> Participants { get; set; }
+        public IEnumerable<ParticipantDTO> Participants { get; set; }
+        public IEnumerable<PollResultDTO> PollResults { get; set; }
     }
 }

@@ -6,6 +6,8 @@ import { AddContactModalComponent } from './components/add-contact-modal/add-con
 import { FormsModule } from '@angular/forms';
 import { ContactsChatComponent } from './components/contacts-chat/contacts-chat.component';
 import { CallModalComponent } from './components/call-modal/call-modal.component';
+import { HistoryComponent } from './components/history/history.component';
+import { MeetingNoteComponent } from './components/history/meeting-note/meeting-note.component';
 
 @NgModule({
   declarations: [
@@ -13,6 +15,8 @@ import { CallModalComponent } from './components/call-modal/call-modal.component
     AddContactModalComponent,
     ContactsChatComponent,
     CallModalComponent,
+    HistoryComponent,
+    MeetingNoteComponent,
   ],
   imports: [CommonModule, SharedModule, FormsModule],
   entryComponents: [CallModalComponent],

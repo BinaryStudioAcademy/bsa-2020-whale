@@ -10,6 +10,7 @@ import { LandingPageModule } from './scenes/landing-page/landing-page.module';
 import { MeetingPageModule } from './scenes/meeting-page/meeting-page.module';
 import { ProfilePageModule } from './scenes/profile-page/profile-page.module';
 import { ScheduleMeetingPageModule } from './scenes/schedule-meeting-page/schedule-meeting-page.module';
+import { MeetingHistoryModule } from './scenes/meeting-history/meeting-history.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ngx-toastr';
 import { HomePageModule } from './scenes/home-page/home-page.module';
@@ -28,6 +29,7 @@ import { SharedModule } from '@shared/shared.module';
     MeetingPageModule,
     ProfilePageModule,
     ScheduleMeetingPageModule,
+    MeetingHistoryModule,
     HttpClientModule,
     AngularDraggableModule,
     BrowserAnimationsModule,

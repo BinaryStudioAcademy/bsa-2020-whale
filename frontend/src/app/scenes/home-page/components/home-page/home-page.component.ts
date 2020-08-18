@@ -34,8 +34,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
   contacts: Contact[];
   loggedInUser: User;
   contactsVisibility = true;
+  actionsVisibility = true;
   groupsVisibility = false;
-  chatVisibility = true;
+  chatVisibility = false;
+  historyVisibility = false;
+
   ownerEmail: string;
   public routePrefix = '/api/user/email';
   contactSelected: Contact;
@@ -100,6 +103,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
   addNewGroup(): void {
     console.log('group clicked!');
   }
+
   addNewContact(): void {
     this.simpleModalService
       .addModal(AddContactModalComponent)
@@ -109,21 +113,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
         }
       });
   }
-  visibilityChange(event): void {
-    this.chatVisibility = event;
-    this.contactSelected = undefined;
-  }
-  onContactClick(contact: Contact): void {
-    this.chatVisibility = false;
-    this.contactSelected = contact;
-  }
 
-  onGroupClick(): void {
-    this.chatVisibility = !this.chatVisibility;
-  }
-  isContactActive(contact): boolean {
-    return this.contactSelected === contact;
-  }
   createMeeting(): void {
     this.isMeetingLoading = true;
     this.meetingService
@@ -146,8 +136,52 @@ export class HomePageComponent implements OnInit, OnDestroy {
         (error) => console.log(error.message)
       );
   }
+
   goToPage(pageName: string): void {
     this.router.navigate([`${pageName}`]);
+  }
+
+  public falseAllBooleans() {
+    this.chatVisibility = false;
+    this.groupsVisibility = false;
+    this.contactsVisibility = false;
+    this.actionsVisibility = false;
+    this.historyVisibility = false;
+  }
+
+  visibilityChange(event): void {
+    console.log(event);
+    this.chatVisibility = event;
+    this.contactSelected = undefined;
+    this.actionsVisibility = true;
+  }
+
+  onContactClick(contact: Contact): void {
+    this.falseAllBooleans();
+    this.chatVisibility = true;
+    this.contactSelected = contact;
+  }
+
+  onGroupClick(): void {
+    this.falseAllBooleans();
+    this.chatVisibility = true;
+  }
+
+  isContactActive(contact): boolean {
+    return this.contactSelected === contact;
+  }
+
+  public onMeetingHistoryClick() {
+    this.chatVisibility = false;
+    this.groupsVisibility = false;
+    this.contactsVisibility = false;
+    this.actionsVisibility = false;
+
+    this.historyVisibility = !this.historyVisibility;
+
+    if (!this.historyVisibility) {
+      this.actionsVisibility = true;
+    }
   }
 }
 export interface UserModel {

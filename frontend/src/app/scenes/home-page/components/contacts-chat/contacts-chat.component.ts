@@ -125,7 +125,7 @@ export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   close(): void {
-    this.chat.emit(true);
+    this.chat.emit(false);
     this.hubConnection.invoke('Disconnect', this.contactSelected.id);
   }
 

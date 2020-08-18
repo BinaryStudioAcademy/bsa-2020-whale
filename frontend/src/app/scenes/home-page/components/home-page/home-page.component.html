@@ -20,7 +20,7 @@
         </div>
       </a>
       <a class="item">
-        <a class="item" (click)="goToPage('history')">
+        <a class="item" (click)="onMeetingHistoryClick()">
           <i class="clock outline icon"></i>
           Meetings history
         </a>
@@ -34,9 +34,7 @@
         </a>
       </a>
       <spiner *ngIf="isContactsLoading" [size]="'medium'"></spiner>
-      <a
-        (click)="contactsVisibility = !contactsVisibility"
-        class="item header"
+      <a (click)="contactsVisibility = !contactsVisibility" class="item header"
         >Contacts
         <button
           (click)="addNewContact(); $event.stopPropagation()"
@@ -46,7 +44,7 @@
         </button>
       </a>
       <div class="contacts-container" [hidden]="!contactsVisibility">
-        <div 
+        <div
           *ngFor="let contact of contacts"
           class="user-list ui middle aligned selection list"
         >
@@ -99,14 +97,17 @@
   </div>
 
   <div class="right-col">
-    <div *ngIf="!chatVisibility" class="actions">
+    <div *ngIf="chatVisibility" class="actions">
       <app-contacts-chat
         [contactSelected]="contactSelected"
         (chat)="visibilityChange($event)"
       ></app-contacts-chat>
     </div>
-    <div *ngIf="chatVisibility" class="actions">
-      <div class="vertically-aligned chat ui segment">
+    <div class="actions">
+      <div *ngIf="historyVisibility">
+        <app-history [user]="loggedInUser"></app-history>
+      </div>
+      <div *ngIf="actionsVisibility" class="vertically-aligned chat ui segment">
         <div class="text-aligned" (click)="goToPage('schedule-meeting')">
           <img
             class="ui centered small image"
@@ -114,7 +115,7 @@
           />
           <span class="text-aligned">Schedule meeting</span>
         </div>
-        <div class="text-aligned">
+        <div class="text-aligned" (click)="onMeetingHistoryClick()">
           <img
             class="ui centered small image"
             src="https://img.icons8.com/bubbles/100/000000/todo-list.png"
