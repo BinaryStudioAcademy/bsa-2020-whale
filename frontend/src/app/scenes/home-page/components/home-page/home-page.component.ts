@@ -13,6 +13,7 @@ import { HttpService } from 'app/core/services/http.service';
 import { HubConnection } from '@aspnet/signalr';
 import { SimpleModalService } from 'ngx-simple-modal';
 import { AddContactModalComponent } from '../add-contact-modal/add-contact-modal.component';
+import { AddGroupModalComponent } from '../add-group-modal/add-group-modal.component';
 import { ContactsChatComponent } from '../contacts-chat/contacts-chat.component';
 import { ToastrService } from 'ngx-toastr';
 import { UpstateService } from 'app/core/services/upstate.service';
@@ -24,6 +25,7 @@ import { Subject } from 'rxjs';
 import { AuthService } from 'app/core/auth/auth.service';
 import { LinkTypeEnum } from '@shared/Enums/LinkTypeEnum';
 import { BlobService } from '../../../../core/services/blob.service';
+import { Group } from '@shared/models/group/group';
 
 @Component({
   selector: 'app-home-page',
@@ -32,6 +34,7 @@ import { BlobService } from '../../../../core/services/blob.service';
 })
 export class HomePageComponent implements OnInit, OnDestroy {
   contacts: Contact[];
+  groups: Group[];
   loggedInUser: User;
   contactsVisibility = true;
   groupsVisibility = false;
@@ -98,7 +101,13 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   addNewGroup(): void {
-    console.log('group clicked!');
+    this.simpleModalService
+      .addModal(AddGroupModalComponent)
+      .subscribe((group) => {
+        if (group !== undefined) {
+          this.groups.push(group);
+        }
+      });
   }
   addNewContact(): void {
     this.simpleModalService

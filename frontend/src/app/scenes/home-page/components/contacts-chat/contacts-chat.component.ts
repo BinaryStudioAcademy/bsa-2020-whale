@@ -10,7 +10,7 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
-import { DirectMessage } from '@shared/models/message/message';
+import { DirectMessage } from '@shared/models/message/direct-message';
 import { User } from '@shared/models/user/user';
 import { Contact } from '@shared/models/contact/contact';
 import { SignalRService } from 'app/core/services/signal-r.service';

@@ -53,6 +53,7 @@ namespace Whale.API
                 mc.AddProfile<MeetingProfile>();
                 mc.AddProfile<MeetingMessage>();
                 mc.AddProfile<ParticipantProfile>();
+                mc.AddProfile<GroupProfile>();
             });
 
             services.AddSingleton(mappingConfig.CreateMapper());
