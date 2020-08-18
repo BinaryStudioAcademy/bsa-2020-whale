@@ -4,6 +4,12 @@
 .content
     height: 100vh
     width: 100vw
+
+.main-content
+    display: flex
+    flex-direction: column
+    width: 100%
+    height: 100%
     overflow: hidden
     
 @media screen and (max-width: 600px) 
@@ -16,6 +22,27 @@
     height: 100%
     background-color: #ffffff
     margin: 0
+
+.chat-inner
+    width: 100%
+    height: 100%
+    padding-top: 2em
+    padding-left: 2em
+    padding-right: 2em
+    margin-bottom: 0
+    overflow-y: auto
+
+    .event
+        margin-top: 10px
+
+.ui.input
+    width: 100%
+    textarea
+        padding-right: 50px
+        min-height: 50px
+        max-height: 40vh
+    .icon
+        margin-right: 10px
 
 //users 
 .users
@@ -44,6 +71,11 @@ app-participant-card
     bottom: 0
     left: 0
     right: 0
+
+
+.single-video
+    width: 100%
+    height: 100%
 
 .users__user 
     margin: 10px
@@ -187,6 +219,7 @@ i.icon:hover
 .users-icon-fix.block
     padding-top: 15px
 
+// fullscreen
 .tools
     padding: 0 10px
     min-height: 50px
@@ -229,15 +262,6 @@ div:moz-full-screen
         display: none
     .tools
         display: block
-
-.chat-inner
-    width: 100%
-    height: 100%
-    padding-top: 2em
-    padding-left: 2em
-    padding-right: 2em
-    margin-bottom: 0
-    overflow-y: auto
   
 .ui.placeholder.segment.field
         max-width: 20rem
@@ -247,21 +271,13 @@ div:moz-full-screen
     justify-content: center
     align-items: center
 
-.ui.input
-    width: 100%
-    textarea
-        padding-right: 50px
-        min-height: 50px
-        max-height: 40vh
-    .icon
-        margin-right: 10px
-
 .poll-divider
     height: 1px
     background: #a7a7a7
     border: 0px
     margin-top: 12px
 
+// tooltips
 [data-tooltip]:before
     margin-bottom: 10px
 
@@ -271,6 +287,7 @@ div:moz-full-screen
 .big-left-margin
     margin-left: 10px
 
+// polls
 .delete-poll-icon
     float: right
     width: 15px
@@ -280,7 +297,8 @@ div:moz-full-screen
 
 .delete-poll-icon:hover
     font-size: 1.3em
-    
+
+// canvas
 .canvas
     border: 1px solid
     position: absolute
@@ -292,19 +310,7 @@ div:moz-full-screen
     background-color: white
     z-index: 1
 
-.main-content
-    display: flex
-    flex-direction: column
-    width: 100%
-    height: 100%
-
-.chat-inner 
-    .event
-        margin-top: 10px
-
-.single-video
-    width: 100%
-    height: 100%
+// media settings
 .settings
     position: absolute
     bottom: 7%
