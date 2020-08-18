@@ -102,6 +102,12 @@ namespace Whale.BLL.Services
             var user = await _userService.GetUserByEmail(msgDTO.AuthorEmail);
             message.Author = user ?? throw new NotFoundException("User");
 
+            if (!string.IsNullOrEmpty(msgDTO.ReceiverEmail))
+            {
+                var receiver = await _userService.GetUserByEmail(msgDTO.ReceiverEmail);
+                message.Receiver = receiver ?? throw new NotFoundException("User");
+            }
+
             await _redisService.ConnectAsync();
             var redisDTO = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(msgDTO.MeetingId);
             redisDTO.Messages.Add(message);
@@ -110,11 +116,12 @@ namespace Whale.BLL.Services
             return message;
         }
 
-        public async Task<IEnumerable<MeetingMessageDTO>> GetMessagesAsync(string groupName)
+        public async Task<IEnumerable<MeetingMessageDTO>> GetMessagesAsync(string groupName, string userEmail)
         {
             await _redisService.ConnectAsync();
             var redisDTO = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(groupName);
-            return redisDTO.Messages;
+            return  redisDTO.Messages
+                .Where(m => m.Receiver == null || m.Author.Email == userEmail || m.Receiver.Email == userEmail);
         }
 
         public async Task<bool> ParticipantDisconnect(string groupname, string userEmail)

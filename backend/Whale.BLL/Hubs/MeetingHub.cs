@@ -86,13 +86,24 @@ namespace Whale.BLL.Hubs
         public async Task SendMessage(MeetingMessageCreateDTO msgDTO)
         {
             var msg = await _meetingService.SendMessage(msgDTO);
-            await Clients.Group(msgDTO.MeetingId).SendAsync("OnSendMessage", msg);
+            if(msg.Receiver != null)
+            {
+                var receiver = _groupsParticipants[msgDTO.MeetingId].Find(p => p.User.Id == msg.Receiver.Id);
+                if(receiver != null)
+                {
+                    await Clients.Caller.SendAsync("OnSendMessage", msg);
+                    await Clients.Client(receiver.ActiveConnectionId).SendAsync("OnSendMessage", msg);
+                }
+            } else
+            {
+                await Clients.Group(msgDTO.MeetingId).SendAsync("OnSendMessage", msg);
+            }
         }
 
         [HubMethodName("OnGetMessages")]
-        public async Task GetMessages(string groupName)
+        public async Task GetMessages(GetMessagesDTO getMessagesDTO)
         {
-            var messages = await _meetingService.GetMessagesAsync(groupName);
+            var messages = await _meetingService.GetMessagesAsync(getMessagesDTO.MeetingId, getMessagesDTO.Email);
             await Clients.Caller.SendAsync("OnGetMessages", messages);
         }
 

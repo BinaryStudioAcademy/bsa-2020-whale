@@ -290,6 +290,25 @@
                 {{ message?.author?.firstName }}
                 {{ message?.author?.secondName }}
               </a>
+              <div
+                *ngIf="
+                  message.receiver &&
+                  message.receiver.email !== currentParticipant.user.email
+                "
+                class="message_receiver"
+              >
+                To: {{ message?.receiver?.firstName }}
+                {{ message?.receiver?.secondName }}
+              </div>
+              <div
+                *ngIf="
+                  message.receiver &&
+                  message.receiver.email === currentParticipant.user.email
+                "
+                class="privately-received"
+              >
+                privately
+              </div>
               <div class="date">
                 {{ message?.sentDate | dateFormat }}
               </div>
@@ -299,22 +318,34 @@
         </div>
       </div>
       <div class="ui form vertically-aligned">
+        <div class="ui right labeled input">
+          <label for="receiver" class="ui label">Send To:</label>
+          <select
+            class="ui compact selection dropdown"
+            id="receiver"
+            [(ngModel)]="msgReceiverEmail"
+          >
+            <option value="">Everyone</option>
+            <option *ngFor="let p of otherParticipants" [value]="p.user.email"
+              >{{ p.user.firstName }} {{ p.user.secondName }}</option
+            >
+          </select>
+        </div>
+
         <div class="ui icon input">
-          <div class="ui icon input">
-            <textarea
-              (keydown.enter)="onEnterKeyPress($event)"
-              rows="1"
-              placeholder="Enter to send.
-Enter+Shift for new line."
-              [(ngModel)]="msgText"
-            ></textarea>
-            <i
-              id="meeting-sendmessage"
-              aria-hidden="true"
-              class="paper plane link icon blue"
-              (click)="sendMessage()"
-            ></i>
-          </div>
+          <textarea
+            (keydown.enter)="onEnterKeyPress($event)"
+            rows="1"
+            placeholder="Enter to send.
+  Enter+Shift for new line."
+            [(ngModel)]="msgText"
+          ></textarea>
+          <i
+            id="meeting-sendmessage"
+            aria-hidden="true"
+            class="paper plane link icon blue"
+            (click)="sendMessage()"
+          ></i>
         </div>
       </div>
     </div>
