@@ -427,6 +427,11 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
+  public onPollIconClick(): void {
+    this.isShowStatistics = false;
+    this.pollService.onPollIconClick();
+  }
+
   public onStatisticsIconClick(): void {
     this.pollService.isShowPoll = false;
     this.pollService.isPollCreating = false;
