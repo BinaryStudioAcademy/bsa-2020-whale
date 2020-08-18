@@ -102,34 +102,6 @@
     </div>
 
     <div class="main-content">
-      <div class="canvas" *ngIf="canvasIsDisplayed">
-        <canvas-whiteboard
-          #canvasWhiteboard
-          [options]="canvasOptions"
-          (onBatchUpdate)="onCanvasDraw($event)"
-          (onClear)="onCanvasClear()"
-        >
-        </canvas-whiteboard>
-      </div>
-
-      <div class="users" *ngIf="mediaData.length > 1">
-        <app-participant-card
-          *ngFor="let data of mediaData"
-          (hideViewEvent)="hideViewEventHandler($event)"
-          [data]="data"
-        >
-        </app-participant-card>
-      </div>
-
-      <div class="single-video" *ngIf="mediaData.length <= 1">
-        <video
-          #currentVideo
-          autoplay="autoplay"
-          class="participant-fullscreen"
-          [muted]="'muted'"
-        ></video>
-      </div>
-
       <div class="options">
         <div class="ui options__buttons">
           <div class="inner-block">
@@ -276,6 +248,32 @@
           </div>
         </div>
       </div>
+      <div class="canvas" *ngIf="canvasIsDisplayed">
+        <canvas-whiteboard
+          #canvasWhiteboard
+          [options]="canvasOptions"
+          (onBatchUpdate)="onCanvasDraw($event)"
+          (onClear)="onCanvasClear()"
+        >
+        </canvas-whiteboard>
+      </div>
+
+      <div class="users" *ngIf="mediaData.length > 1">
+        <app-participant-card
+          *ngFor="let data of mediaData"
+          (hideViewEvent)="hideViewEventHandler($event)"
+          [data]="data"
+        >
+        </app-participant-card>
+      </div>
+
+      <video
+        #currentVideo
+        autoplay="autoplay"
+        class="participant-fullscreen"
+        [hidden]="mediaData.length > 1"
+        [muted]="'muted'"
+      ></video>
     </div>
 
     <div *ngIf="isShowChat" class="ui chat card">
