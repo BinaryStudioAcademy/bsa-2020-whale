@@ -91,6 +91,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public messages: MeetingMessage[] = [];
   public msgText = '';
   public currentParticipant: Participant;
+  public distinctParticipants: Participant[] = [];
   public connectionData: MeetingConnectionData;
 
   private meetingSignalrService: MeetingSignalrService;
@@ -160,7 +161,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
           if (index >= 0) {
             this.meeting.participants[index] = connectData.participant;
           } else {
-            this.meeting.participants.push(connectData.participant);
+            this.addParticipantToMeeting(connectData.participant);
           }
 
           console.log('connected with peer: ' + connectData.peerId);
@@ -178,7 +179,14 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (participants) => {
-          this.meeting.participants.push(...participants);
+          participants.forEach((p) => {
+            if (
+              !this.meeting.participants.some(
+                (mp) => mp.streamId === p.streamId
+              )
+            )
+              this.addParticipantToMeeting(p);
+          });
           this.currentParticipant = participants.find(
             (p) => p.user.email === this.authService.currentUser.email
           );
@@ -194,9 +202,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.meetingSignalrService.signalParticipantLeft$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((connectionData) => {
-        this.meeting.participants = this.meeting.participants.filter(
-          (p) => p.id !== connectionData.participant.id
-        );
+        this.removeParticipantFromMeeting(connectionData.participant);
 
         if (this.connectedPeers.has(connectionData.peerId)) {
           this.connectedPeers.delete(connectionData.peerId);
@@ -219,9 +225,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.meetingSignalrService.signalParticipantDisconnected$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((participant) => {
-        this.meeting.participants = this.meeting.participants.filter(
-          (p) => p.id !== participant.id
-        );
+        this.removeParticipantFromMeeting(participant);
 
         this.connectedPeers = new Map(
           [...this.connectedPeers].filter(
@@ -376,6 +380,24 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       this.router.navigate(['/home']);
       this.currentUserStream?.getTracks().forEach((track) => track.stop());
     }
+  }
+
+  private addParticipantToMeeting(participant: Participant): void {
+    this.meeting.participants.push(participant);
+    this.meeting.participants.forEach((p) => {
+      if (!this.distinctParticipants.some((dp) => dp.id === p.id)) {
+        this.distinctParticipants.push(p);
+      }
+    });
+  }
+
+  private removeParticipantFromMeeting(participant: Participant): void {
+    this.meeting.participants = this.meeting.participants.filter(
+      (p) => p.id !== participant.id
+    );
+    this.distinctParticipants = this.distinctParticipants.filter(
+      (p) => p.id !== participant.id
+    );
   }
 
   turnOffMicrophone(): void {
