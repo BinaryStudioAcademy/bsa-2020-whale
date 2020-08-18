@@ -50,8 +50,7 @@ import { HttpClient } from '@angular/common/http';
   templateUrl: './meeting.component.html',
   styleUrls: ['./meeting.component.sass'],
 })
-export class MeetingComponent
-  implements OnInit, AfterContentInit, AfterViewInit, OnDestroy {
+export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public meeting: Meeting;
   public meetingStatistics: Statistics;
   public isShowChat = false;
@@ -69,7 +68,7 @@ export class MeetingComponent
   public connectedStreams: MediaStream[] = [];
   public mediaData: UserMediaData[] = [];
   public connectedPeers = new Map<string, MediaStream>();
-  public canvasIsDisplayed: boolean;
+  public canvasIsDisplayed: boolean = false;
   public canvasOptions: CanvasWhiteboardOptions = {
     clearButtonEnabled: true,
     clearButtonText: 'Erase',
@@ -129,7 +128,6 @@ export class MeetingComponent
   }
 
   public async ngOnInit() {
-    this.canvasIsDisplayed = false;
     this.currentUserStream = await navigator.mediaDevices.getUserMedia(
       await this.mediaSettingsService.getMediaConstraints()
     );
@@ -336,11 +334,10 @@ export class MeetingComponent
 
   public ngAfterViewInit(): void {
     this.elem = this.mainArea.nativeElement;
-    this.canvasIsDisplayed = true;
-  }
-
-  public ngAfterContentInit() {
+    console.log('elem', this.elem);
+    console.log('currentVideo first', this.currentVideo);
     this.currentStreamLoaded.subscribe(() => {
+      console.log('currentVideo', this.currentVideo);
       this.currentVideo.nativeElement.srcObject = this.currentUserStream;
       this.setOutputDevice();
     });
@@ -656,7 +653,7 @@ export class MeetingComponent
   }
 
   showCanvas() {
-    this.canvasIsDisplayed = this.canvasIsDisplayed ? false : true;
+    this.canvasIsDisplayed = !this.canvasIsDisplayed;
   }
 
   private setOutputDevice(): void {

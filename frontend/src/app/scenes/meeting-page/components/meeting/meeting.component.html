@@ -1,4 +1,5 @@
 <div #mainArea class="bg-white">
+  <!-- ! Chat -->
   <!-- <div *ngIf="isShowChat" class="ui chat card">
     <div class="ui chat-inner feed">
       <div *ngFor="let message of messages" class="event">
@@ -39,6 +40,7 @@ Enter+Shift for new line."
     </div>
   </div> -->
 
+  <!-- ! participants -->
   <!-- <div *ngIf="isShowParticipants" class="ui participants-container">
     <div class="invite-icon-container">
       <i class="user plus icon"></i>
@@ -57,7 +59,9 @@ Enter+Shift for new line."
     </div>
   </div> -->
 
-  <div class="content">
+  <div class="content display-flex">
+    <!-- * Full Sreen -->
+
     <div class="tools" ngDraggable>
       <span data-tooltip="Toggle Microphone" data-position="top left">
         <i
@@ -136,53 +140,57 @@ Enter+Shift for new line."
       </span>
     </div>
 
-    <div class="canvas" [style.display]="!canvasIsDisplayed ? 'block' : 'none'">
-      <canvas-whiteboard
-        #canvasWhiteboard
-        [options]="canvasOptions"
-        (onBatchUpdate)="onCanvasDraw($event)"
-        (onClear)="onCanvasClear()"
-      >
-      </canvas-whiteboard>
-    </div>
+    <!-- * full sreen -->
 
-    <div class="users" *ngIf="mediaData.length > 1">
-      <app-participant-card
-        *ngFor="let data of mediaData"
-        (hideViewEvent)="hideViewEventHandler($event)"
-        [data]="data"
-      >
-      </app-participant-card>
-    </div>
-
-    <video
-      #currentVideo
-      *ngIf="mediaData.length <= 1"
-      autoplay="autoplay"
-      class="participant-fullscreen"
-      [muted]="'muted'"
-    ></video>
-
-    <div class="options-all">
-      <div *ngIf="isShowParticipants" class="ui participants-container">
-        <div class="invite-icon-container">
-          <i class="user plus icon"></i>
-        </div>
-        <div class="ui divided list">
-          <div
-            *ngFor="let participant of meeting.participants"
-            class="ui item participant"
+    <div *ngIf="isShowParticipants" class="ui participants-container">
+      <div class="invite-icon-container">
+        <i class="user plus icon"></i>
+      </div>
+      <div class="ui divided list">
+        <div
+          *ngFor="let participant of meeting.participants"
+          class="ui item participant"
+        >
+          <img src="{{ participant.user.avatarUrl }}" />
+          <span
+            >{{ participant.user.firstName }}
+            {{
+              participant.user.lastName ? participant.user.lastName : ""
+            }}</span
           >
-            <img src="{{ participant.user.avatarUrl }}" />
-            <span
-              >{{ participant.user.firstName }}
-              {{
-                participant.user.lastName ? participant.user.lastName : ""
-              }}</span
-            >
-          </div>
         </div>
       </div>
+    </div>
+
+    <div class="main-content">
+      <div class="canvas" *ngIf="canvasIsDisplayed">
+        <canvas-whiteboard
+          #canvasWhiteboard
+          [options]="canvasOptions"
+          (onBatchUpdate)="onCanvasDraw($event)"
+          (onClear)="onCanvasClear()"
+        >
+        </canvas-whiteboard>
+      </div>
+
+      <div class="users" *ngIf="mediaData.length > 1">
+        <app-participant-card
+          *ngFor="let data of mediaData"
+          (hideViewEvent)="hideViewEventHandler($event)"
+          [data]="data"
+        >
+        </app-participant-card>
+      </div>
+
+      <div class="single-video" *ngIf="mediaData.length <= 1">
+        <video
+          #currentVideo
+          autoplay="autoplay"
+          class="participant-fullscreen"
+          [muted]="'muted'"
+        ></video>
+      </div>
+
       <div class="options">
         <div class="ui options__buttons">
           <div class="inner-block">
@@ -321,43 +329,44 @@ Enter+Shift for new line."
           </div>
         </div>
       </div>
-      <div *ngIf="isShowChat" class="ui chat card">
-        <div class="ui chat-inner feed">
-          <div *ngFor="let message of messages" class="event">
-            <div class="label">
-              <img src="{{ message?.author?.avatarUrl }}" />
-            </div>
-            <div class="content">
-              <div class="summary">
-                <a class="user">
-                  {{ message?.author?.firstName }}
-                  {{ message?.author?.secondName }}
-                </a>
-                <div class="date">
-                  {{ message?.sentDate | dateFormat }}
-                </div>
+    </div>
+
+    <div *ngIf="isShowChat" class="ui chat card">
+      <div class="ui chat-inner feed">
+        <div *ngFor="let message of messages" class="event">
+          <div class="label">
+            <img src="{{ message?.author?.avatarUrl }}" />
+          </div>
+          <div class="chat-content">
+            <div class="summary">
+              <a class="user">
+                {{ message?.author?.firstName }}
+                {{ message?.author?.secondName }}
+              </a>
+              <div class="date">
+                {{ message?.sentDate | dateFormat }}
               </div>
-              {{ message?.message }}
             </div>
+            {{ message?.message }}
           </div>
         </div>
-        <div class="ui form vertically-aligned">
+      </div>
+      <div class="ui form vertically-aligned">
+        <div class="ui icon input">
           <div class="ui icon input">
-            <div class="ui icon input">
-              <textarea
-                (keydown.enter)="onEnterKeyPress($event)"
-                rows="1"
-                placeholder="Enter to send.
-  Enter+Shift for new line."
-                [(ngModel)]="msgText"
-              ></textarea>
-              <i
-                id="meeting-sendmessage"
-                aria-hidden="true"
-                class="paper plane link icon blue"
-                (click)="sendMessage()"
-              ></i>
-            </div>
+            <textarea
+              (keydown.enter)="onEnterKeyPress($event)"
+              rows="1"
+              placeholder="Enter to send.
+Enter+Shift for new line."
+              [(ngModel)]="msgText"
+            ></textarea>
+            <i
+              id="meeting-sendmessage"
+              aria-hidden="true"
+              class="paper plane link icon blue"
+              (click)="sendMessage()"
+            ></i>
           </div>
         </div>
       </div>
@@ -416,7 +425,8 @@ Enter+Shift for new line."
           [poll]="pollx"
           [user]="currentParticipant.user"
           (pollAnswered)="pollService.onPollAnswered($event)"
-        ></app-poll>
+        >
+        </app-poll>
       </div>
     </div>
     <div class="ui segment">
