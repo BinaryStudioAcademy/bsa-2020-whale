@@ -49,7 +49,10 @@
     class="user-pic-item item message shared"
   >
     <spiner *ngIf="isUserLoadig" [size]="'small'"></spiner>
-    <img class="ui tiny image user-pic" src="{{ loggedInUser?.avatarUrl }}" />
+    <img
+      class="ui tiny avatar image user-pic"
+      src="{{ loggedInUser?.avatarUrl }}"
+    />
   </a>
   <div *ngIf="settingsMenuVisible" class="dropdown-menu settings">
     <div
@@ -57,7 +60,7 @@
       class="dropdown-menu-user"
       (click)="goToPage('profile-page')"
     >
-      {{ loggedInUser?.firstName }} {{ loggedInUser?.lastName }}
+      {{ loggedInUser?.firstName }} {{ loggedInUser?.secondName }}
     </div>
     <div
       id="header-go-settings"
