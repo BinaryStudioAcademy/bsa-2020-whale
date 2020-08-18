@@ -75,7 +75,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     clearButtonText: 'Erase',
     undoButtonText: 'Undo',
     undoButtonEnabled: false,
-    colorPickerEnabled: false,
+    colorPickerEnabled: true,
     saveDataButtonEnabled: true,
     saveDataButtonText: 'Save',
     lineWidth: 5,
@@ -83,7 +83,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     shouldDownloadDrawing: true,
     drawingEnabled: true,
     showShapeSelector: false,
-    shapeSelectorEnabled: false,
+    shapeSelectorEnabled: true,
     showFillColorPicker: false,
     batchUpdateTimeoutDuration: 250,
     drawButtonEnabled: false,
@@ -138,7 +138,9 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.currentUserStream = await navigator.mediaDevices.getUserMedia(
       await this.mediaSettingsService.getMediaConstraints()
     );
-    const enterModal = await this.simpleModalService.addModal(EnterModalComponent).toPromise();
+    const enterModal = await this.simpleModalService
+      .addModal(EnterModalComponent)
+      .toPromise();
     if (enterModal.leave) {
       this.leaveUnConnected();
       return;
@@ -702,16 +704,17 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onCanvasDraw(event) {
+    const points = event as CanvasWhiteboardUpdate[];
+    console.log(points);
     this.meetingSignalrService.invoke(SignalMethods.OnDrawing, {
-      // meetingId: this.meeting.id,
-      meetingId: '123',
-      canvasEvent: event,
+      meetingId: this.meeting.id.toString(),
+      canvasEvent: points,
     });
   }
 
   onCanvasClear() {
     this.meetingSignalrService.invoke(SignalMethods.OnErasing, {
-      meetingId: this.meeting.id,
+      meetingId: this.meeting.id.toString(),
       erase: true,
     });
   }

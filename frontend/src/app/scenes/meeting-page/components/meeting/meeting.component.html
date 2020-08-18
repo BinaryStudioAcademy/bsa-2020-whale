@@ -105,7 +105,11 @@
       <div class="options">
         <div class="ui options__buttons">
           <div class="inner-block">
-            <span *ngIf="!isScreenRecording" data-tooltip="Toggle Microphone" data-position="top left">
+            <span
+              *ngIf="!isScreenRecording"
+              data-tooltip="Toggle Microphone"
+              data-position="top left"
+            >
               <i
                 id="meeting-options-microphone"
                 *ngIf="!isMicrophoneMuted"

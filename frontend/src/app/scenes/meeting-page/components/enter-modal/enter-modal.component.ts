@@ -4,10 +4,12 @@ import { SimpleModalComponent } from 'ngx-simple-modal';
 @Component({
   selector: 'app-enter-modal',
   templateUrl: './enter-modal.component.html',
-  styleUrls: ['./enter-modal.component.sass']
+  styleUrls: ['./enter-modal.component.sass'],
 })
-export class EnterModalComponent extends SimpleModalComponent<void, {microOff: boolean, cameraOff: boolean, leave: boolean}>
-{
+export class EnterModalComponent extends SimpleModalComponent<
+  void,
+  { microOff: boolean; cameraOff: boolean; leave: boolean }
+> {
   message: string;
   public webcam = true;
   public microphone = true;
@@ -17,7 +19,11 @@ export class EnterModalComponent extends SimpleModalComponent<void, {microOff: b
   }
 
   public onProceed(): void {
-    this.result = { microOff: !this.microphone, cameraOff: !this.webcam, leave: this.leave};
+    this.result = {
+      microOff: !this.microphone,
+      cameraOff: !this.webcam,
+      leave: this.leave,
+    };
     this.close();
   }
 
