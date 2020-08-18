@@ -13,7 +13,7 @@
 //chat
 .chat
     width: 300px
-    height: 90vh
+    height: calc( 100vh - 60px )
     background-color: #ffffff
     float: right
 
@@ -286,8 +286,12 @@ div:moz-full-screen
 
 .vertically-aligned
     display: flex
+    flex-direction: column
     justify-content: center
     align-items: center
+    .ui.right.labeled.input
+        padding: 0 5px 5px 5px
+        font-size: 12px
 
 .text-aligned
     text-align: center
@@ -343,3 +347,11 @@ div:moz-full-screen
     max-height: 80%
     width: 350px
     z-index: 10
+
+.message_receiver
+    font-size: .85714286em
+    color: grey
+
+.privately-received
+    font-size: .85714286em
+    color: #db2828

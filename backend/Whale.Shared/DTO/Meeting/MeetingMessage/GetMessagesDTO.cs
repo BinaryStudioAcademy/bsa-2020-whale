@@ -4,11 +4,9 @@ using System.Text;
 
 namespace Whale.Shared.DTO.Meeting.MeetingMessage
 {
-    public class MeetingMessageCreateDTO
+    public class GetMessagesDTO
     {
-        public string AuthorEmail { get; set; }
         public string MeetingId { get; set; }
-        public string Message { get; set; }
-        public string ReceiverEmail { get; set; }
+        public string Email { get; set; }
     }
 }

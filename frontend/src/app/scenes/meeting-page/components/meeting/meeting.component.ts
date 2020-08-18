@@ -12,7 +12,7 @@ import {
 import Peer from 'peerjs';
 import { SignalRService } from 'app/core/services/signal-r.service';
 import { environment } from '@env';
-import { Subject, Observable } from 'rxjs';
+import { Subject, Observable, from } from 'rxjs';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { MeetingService } from 'app/core/services/meeting.service';
 import { takeUntil, filter } from 'rxjs/operators';
@@ -44,6 +44,7 @@ import {
 } from 'ng2-canvas-whiteboard';
 import { MediaSettingsService } from 'app/core/services/media-settings.service';
 import { HttpClient } from '@angular/common/http';
+import { GetMessages } from '@shared/models/meeting/message/get-messages';
 
 @Component({
   selector: 'app-meeting',
@@ -91,7 +92,9 @@ export class MeetingComponent
 
   public messages: MeetingMessage[] = [];
   public msgText = '';
+  public msgReceiverEmail: string = '';
   public currentParticipant: Participant;
+  public otherParticipants: Participant[];
   public connectionData: MeetingConnectionData;
 
   private meetingSignalrService: MeetingSignalrService;
@@ -162,6 +165,11 @@ export class MeetingComponent
           } else {
             this.meeting.participants.push(connectData.participant);
           }
+          if (this.currentParticipant != null) {
+            this.otherParticipants = this.meeting.participants.filter(
+              (p) => p.id !== this.currentParticipant.id
+            );
+          }
 
           console.log('connected with peer: ' + connectData.peerId);
           this.connect(connectData.peerId);
@@ -178,9 +186,13 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (participants) => {
-          //this.meeting.participants.push(...participants);
+          this.meeting.participants = participants;
           this.currentParticipant = participants.find(
             (p) => p.user.email === this.authService.currentUser.email
+          );
+
+          this.otherParticipants = participants.filter(
+            (p) => p.id !== this.currentParticipant.id
           );
 
           this.createParticipantCard(this.currentParticipant);
@@ -196,6 +208,10 @@ export class MeetingComponent
       .subscribe((connectionData) => {
         this.meeting.participants = this.meeting.participants.filter(
           (p) => p.id !== connectionData.participant.id
+        );
+
+        this.otherParticipants = this.meeting.participants.filter(
+          (p) => p.id !== this.currentParticipant.id
         );
 
         if (this.connectedPeers.has(connectionData.peerId)) {
@@ -221,6 +237,9 @@ export class MeetingComponent
       .subscribe((participant) => {
         this.meeting.participants = this.meeting.participants.filter(
           (p) => p.id !== participant.id
+        );
+        this.otherParticipants = this.meeting.participants.filter(
+          (p) => p.id !== this.currentParticipant.id
         );
 
         this.connectedPeers = new Map(
@@ -494,6 +513,7 @@ export class MeetingComponent
       authorEmail: this.authService.currentUser.email,
       meetingId: this.meeting.id,
       message: this.msgText,
+      receiverEmail: this.msgReceiverEmail,
     } as MeetingMessageCreate);
 
     this.msgText = '';
@@ -598,10 +618,10 @@ export class MeetingComponent
             SignalMethods.OnUserConnect,
             this.connectionData
           );
-          this.meetingSignalrService.invoke(
-            SignalMethods.OnGetMessages,
-            this.meeting.id
-          );
+          this.meetingSignalrService.invoke(SignalMethods.OnGetMessages, {
+            meetingId: this.meeting.id,
+            email: this.authService.currentUser.email,
+          } as GetMessages);
         },
         (error) => {
           console.log(error.message);
