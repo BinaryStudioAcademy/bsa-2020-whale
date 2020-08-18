@@ -7,6 +7,7 @@ import { HttpService } from '../../../core/services/http.service';
 import { tap, filter } from 'rxjs/operators';
 import { BlobService } from '../../../core/services/blob.service';
 import { LinkTypeEnum } from '@shared/Enums/LinkTypeEnum';
+import { UpstateService } from '../../../core/services/upstate.service';
 
 @Component({
   selector: 'app-page-header',
@@ -39,12 +40,14 @@ export class PageHeaderComponent implements OnInit {
     this.notification2,
     this.notification3,
   ];
+  isUserAvatarLoading: boolean;
 
   constructor(
     private router: Router,
     public auth: AuthService,
     private httpService: HttpService,
-    private blobService: BlobService
+    private blobService: BlobService,
+    private upstateService: UpstateService
   ) {}
 
   public showNotificationsMenu(): void {
@@ -68,24 +71,24 @@ export class PageHeaderComponent implements OnInit {
   }
 
   getUser(): void {
-    this.auth.user$.pipe(filter((user) => Boolean(user))).subscribe((user) => {
-      this.httpService
-        .getRequest<User>(`${this.routePrefix}/email/${user.email}`)
-        .pipe(tap(() => (this.isUserLoadig = false)))
-        .subscribe((userFromDB: User) => {
+    this.upstateService
+      .getLoggedInUser()
+      .pipe(tap(() => (this.isUserLoadig = false)))
+      .subscribe((userFromDB: User) => {
+        this.isUserAvatarLoading = false;
+        this.loggedInUser = userFromDB;
+        if (userFromDB.linkType === LinkTypeEnum.Internal) {
+          this.blobService
+            .GetImageByName(userFromDB.avatarUrl)
+            .subscribe((fullLink: string) => {
+              this.loggedInUser.avatarUrl = fullLink;
+              this.isUserAvatarLoading = true;
+            });
+        } else {
           this.loggedInUser = userFromDB;
-          if (userFromDB.linkType === LinkTypeEnum.Internal) {
-            this.blobService
-              .GetImageByName(userFromDB.avatarUrl)
-              .subscribe((fullLink: string) => {
-                userFromDB.avatarUrl = fullLink;
-                this.loggedInUser = userFromDB;
-              });
-          } else {
-            this.loggedInUser = userFromDB;
-          }
-        });
-    });
+          this.isUserAvatarLoading = true;
+        }
+      });
   }
   goToPage(pageName: string): void {
     this.router.navigate([`${pageName}`]);

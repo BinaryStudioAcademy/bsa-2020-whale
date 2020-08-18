@@ -13,6 +13,7 @@ import { Subject } from 'rxjs';
 import { AuthService } from 'app/core/auth/auth.service';
 import { LinkTypeEnum } from '@shared/Enums/LinkTypeEnum';
 import { BlobService } from '../../../../core/services/blob.service';
+import { UpstateService } from '../../../../core/services/upstate.service';
 
 @Component({
   selector: 'app-home-page',
@@ -32,8 +33,10 @@ export class HomePageComponent implements OnInit, OnDestroy {
   public isContactsLoading = true;
   public isUserLoadig = true;
   public isMeetingLoading = false;
+  public isUserAvatarLoading: boolean;
 
   private unsubscribe$ = new Subject<void>();
+
   constructor(
     private toastr: ToastrService,
     private httpService: HttpService,
@@ -41,7 +44,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
     private meetingService: MeetingService,
     private router: Router,
     private authService: AuthService,
-    private blobService: BlobService
+    private blobService: BlobService,
+    private upstateService: UpstateService
   ) {}
 
   ngOnDestroy(): void {
@@ -50,49 +54,46 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.authService.user$
-      .pipe(filter((user) => Boolean(user)))
-      .subscribe((user) => {
-        this.httpService
-          .getRequest<User>(`${this.routePrefix}/${user.email}`)
-          .pipe(tap(() => (this.isUserLoadig = false)))
-          .subscribe(
-            (userFromDB: User) => {
-              this.loggedInUser = userFromDB;
-              if (userFromDB.linkType === LinkTypeEnum.Internal) {
-                this.blobService
-                  .GetImageByName(userFromDB.avatarUrl)
-                  .subscribe((fullLink: string) => {
-                    userFromDB.avatarUrl = fullLink;
-                    this.loggedInUser = userFromDB;
-                  });
-              } else {
-                this.loggedInUser = userFromDB;
-              }
-              this.ownerEmail = this.loggedInUser?.email;
-            },
-            (error) => this.toastr.error(error.Message)
-          );
-
-        this.httpService
-          .getRequest<Contact[]>('/api/contacts')
-          .pipe(tap(() => (this.isContactsLoading = false)))
-          .subscribe(
-            (data: Contact[]) => {
-              this.contacts = data;
-              data.forEach((contact) => {
-                if (contact.secondMember.linkType === LinkTypeEnum.Internal) {
-                  this.blobService
-                    .GetImageByName(contact.secondMember.avatarUrl)
-                    .subscribe((fullLink: string) => {
-                      contact.secondMember.avatarUrl = fullLink;
-                    });
-                }
+    this.upstateService
+      .getLoggedInUser()
+      .pipe(tap(() => (this.isUserLoadig = false)))
+      .subscribe(
+        (userFromDB: User) => {
+          this.isUserAvatarLoading = false;
+          this.loggedInUser = userFromDB;
+          if (userFromDB.linkType === LinkTypeEnum.Internal) {
+            this.blobService
+              .GetImageByName(userFromDB.avatarUrl)
+              .subscribe((fullLink: string) => {
+                this.loggedInUser.avatarUrl = fullLink;
+                this.isUserAvatarLoading = true;
               });
-            },
-            (error) => this.toastr.error(error.Message)
-          );
-      });
+          } else {
+            this.isUserAvatarLoading = true;
+          }
+          this.ownerEmail = this.loggedInUser?.email;
+
+          this.httpService
+            .getRequest<Contact[]>('/api/contacts')
+            .pipe(tap(() => (this.isContactsLoading = false)))
+            .subscribe(
+              (data: Contact[]) => {
+                this.contacts = data;
+                data.forEach((contact) => {
+                  if (contact.secondMember.linkType === LinkTypeEnum.Internal) {
+                    this.blobService
+                      .GetImageByName(contact.secondMember.avatarUrl)
+                      .subscribe((fullLink: string) => {
+                        contact.secondMember.avatarUrl = fullLink;
+                      });
+                  }
+                });
+              },
+              (error) => this.toastr.error(error.Message)
+            );
+        },
+        (error) => this.toastr.error(error.Message)
+      );
   }
 
   addNewGroup(): void {

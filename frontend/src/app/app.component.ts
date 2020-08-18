@@ -40,9 +40,10 @@ export class AppComponent implements OnInit {
       )
       .subscribe(() => {
         this.hubConnection.on('OnStartCallOthers', (call: Call) => {
-          if (this.user.email !== call.callerEmail) {
-            this.call = call;
+          if (this.user.email === call.callerEmail) {
+            return;
           }
+          this.call = call;
         });
       });
 

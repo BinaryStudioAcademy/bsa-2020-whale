@@ -8,6 +8,7 @@
         <div class="ui very relaxed horizontal list">
           <div class="item">
             <img
+              *ngIf="isUserAvatarLoading"
               class="ui user-pic image"
               src="{{ loggedInUser?.avatarUrl }}"
             />
@@ -63,7 +64,12 @@
           >
             <img
               class="ui avatar image"
-              src="{{ contact?.secondMember.avatarUrl }}"
+              src="{{
+                contact?.secondMember.avatarUrl.startsWith('http') ||
+                contact?.secondMember.avatarUrl.startsWith('data')
+                  ? contact?.secondMember.avatarUrl
+                  : ''
+              }}"
             />
             <div class="content">
               <div class="description">
@@ -95,7 +101,12 @@
           <div id="home-group" (click)="onGroupClick()" class="item">
             <img
               class="ui avatar image"
-              src="{{ contact.secondMember?.avatarUrl }}"
+              src="{{
+                contact?.secondMember.avatarUrl.startsWith('http') ||
+                contact?.secondMember.avatarUrl.startsWith('data')
+                  ? contact?.secondMember.avatarUrl
+                  : ''
+              }}"
             />
             <div class="content">
               <div class="description">

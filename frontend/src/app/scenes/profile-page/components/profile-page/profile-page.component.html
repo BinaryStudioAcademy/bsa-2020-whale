@@ -105,7 +105,12 @@
           <img
             #avatar
             class="ui small image"
-            src="{{ loggedInUser?.avatarUrl }}"
+            src="{{
+              loggedInUser?.avatarUrl.startsWith('http') ||
+              loggedInUser?.avatarUrl.startsWith('data')
+                ? loggedInUser?.avatarUrl
+                : ''
+            }}"
           />
           <div class="content">
             <div
