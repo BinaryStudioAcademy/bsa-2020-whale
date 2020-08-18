@@ -15,7 +15,7 @@ namespace Whale.BLL.Interfaces
 
         Task<MeetingMessageDTO> SendMessage(MeetingMessageCreateDTO msgDTO);
 
-        Task<IEnumerable<MeetingMessageDTO>> GetMessagesAsync(string groupName);
+        Task<IEnumerable<MeetingMessageDTO>> GetMessagesAsync(string groupName, string userEmail);
 
         Task<bool> ParticipantDisconnect(string groupname, string userEmail);
 

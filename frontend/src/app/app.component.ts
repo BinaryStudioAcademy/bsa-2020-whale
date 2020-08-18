@@ -10,6 +10,7 @@ import { environment } from '@env';
 import { HubConnection } from '@aspnet/signalr';
 import { HttpService } from './core/services/http.service';
 import { User } from 'firebase';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-root',
@@ -17,7 +18,7 @@ import { User } from 'firebase';
   styleUrls: ['./app.component.sass'],
 })
 export class AppComponent implements OnInit {
-  title = 'frontend';
+  title = 'Whale';
   call: Call;
   user: User;
 
@@ -28,8 +29,11 @@ export class AppComponent implements OnInit {
     private http: HttpClient,
     private signalRService: SignalRService,
     private httpService: HttpService,
-    private authService: AuthService
-  ) {}
+    private authService: AuthService,
+    private titleService: Title
+  ) {
+    titleService.setTitle(this.title);
+  }
 
   ngOnInit(): void {
     from(this.signalRService.registerHub(environment.signalrUrl, 'chatHub'))

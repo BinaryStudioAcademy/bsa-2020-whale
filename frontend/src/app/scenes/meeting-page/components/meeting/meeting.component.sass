@@ -1,9 +1,29 @@
+.waiting-for-record-modal 
+    width: 213px
+    height: 42px
+    background-color: #8b8b8b
+    position: absolute
+    left: 7px
+    top: 7px
+    opacity: 0.7
+    border-radius: 5px
+    text-align: center
+    font-size: 18px
+    padding-top: 8px
+    color: white
+    
 .bg-white
     background-color: white
 
 .content
+    height: 100vh
+    width: 100vw
+
+.main-content
+    display: flex
+    flex-direction: column-reverse
+    width: 100%
     height: 100%
-    //background-color: white
     overflow: hidden
     
 @media screen and (max-width: 600px) 
@@ -13,19 +33,31 @@
 //chat
 .chat
     width: 300px
-    height: 90vh
+    height: 100%
     background-color: #ffffff
-    float: right
+    margin: 0
 
-.ui input 
-    width: 300px
-    height: 50px
-    background-color: #e6e6e6
+.chat-inner
+    width: 100%
+    height: 100%
+    padding-top: 2em
+    padding-left: 2em
+    padding-right: 2em
+    margin-bottom: 0
+    overflow-y: auto
 
-.comments
-    height: calc(100% - 50px)
+    .event
+        margin-top: 10px
 
-//users 
+.ui.input
+    width: 100%
+    textarea
+        padding-right: 50px
+        min-height: 50px
+        max-height: 40vh
+    .icon
+        margin-right: 10px
+
 .users
     padding: 5px
     background-color: #ffffff
@@ -34,13 +66,11 @@
     justify-content: center
     align-items: center
     overflow-y: scroll
-    height: 90vh
-    overflow: hidden
+    height: 100%
     
 app-participant-card
     width: 50%
     max-width: 560px
-    max-height: 50%
     padding: 5px
 
 .participant-fullscreen
@@ -52,7 +82,13 @@ app-participant-card
     bottom: 0
     left: 0
     right: 0
+
+.hidden
     z-index: -1
+
+.single-video
+    width: 100%
+    height: 100%
 
 .users__user 
     margin: 10px
@@ -62,52 +98,13 @@ app-participant-card
 
 //options
 .options
-    background-color: #ffffff
-    position: fixed
-    bottom: 0
-    right: 0
-    left: 0
+    background-color: #eee
+    position: relative
+    width: 100%
     height: 60px
-    text-align: center   
-    z-index: 10
-
-div:fullscreen
-    .options
-        display: none
-    .chat
-        height: 100vh
-    .participants-container
-        height: 100%
-
-div:-webkit-full-screen
-    .options
-        display: none
-    .participants-container
-        height: 100%
-
-div:moz-full-screen
-    .options
-        display: none
-    .participants-container
-        height: 100%
-
-div:fullscreen
-    .users
-        height: 100%
-    .participants-container
-        height: 100%
-
-div:-webkit-full-screen
-    .users
-        height: 100%
-    .participants-container
-        height: 100%
-
-div:moz-full-screen
-    .users
-        height: 100%
-    .participants-container
-        height: 100%
+    text-align: center
+    min-width: 650px
+    z-index: 1
 
 .options__buttons
     margin-top: 10px
@@ -141,7 +138,8 @@ i.big.icon.wechat
 .big.users.icon:hover,
 .big.desktop.icon:hover,
 .big.clipboard.icon:hover,
-.big.chart.icon:hover
+.big.chart.icon:hover,
+.angle.up.icon:hover
 .big.share.square.icon:hover, .big.microphone.icon:hover, .big.video.icon:hover, .big.wechat.icon:hover, .big.users.icon:hover, .big.desktop.icon:hover, .big.paint.brush.icon:hover
     opacity: 1 !important
     cursor: pointer
@@ -166,7 +164,7 @@ i.big.icon.wechat
     position: relative
 
 .participants-container
-    height: 90vh
+    height: 100%
     min-width: 150px
     max-width: 300px
     background-color: white
@@ -177,9 +175,10 @@ i.big.icon.wechat
     -webkit-box-shadow: 1px 1px 5px 0px #4e4e4ebf
     -moz-box-shadow: 1px 1px 5px 0px #4e4e4ebf
     box-shadow: 1px 1px 5px 0px #4e4e4ebf
-    margin-right: 8px
     padding-left: 5px
     padding-bottom: 20px
+    z-index: 1
+    position: relative
 
 div.invite-icon-container
     padding: 15px 10px 0px 0px
@@ -216,7 +215,7 @@ div div.participant:hover
     left: calc(50% - 175px) 
     max-height: 80%
     width: 350px
-    z-index: 10
+    z-index: 0
 
 .overflow-scroll
     overflow-y: scroll
@@ -234,6 +233,7 @@ i.icon:hover
 .users-icon-fix.block
     padding-top: 15px
 
+// fullscreen
 .tools
     padding: 0 10px
     min-height: 50px
@@ -244,13 +244,13 @@ i.icon:hover
     margin-right: auto
     left: 0
     right: 0
-    bottom: 15%
+    bottom: 10%
     display: none
     border-radius: 4px
     box-shadow: 0px 0px 3px grey
     opacity: 0.7
     text-align: center
-    z-index: 1100
+    z-index: 2
 
 .tools:active
     opacity: 1
@@ -260,45 +260,34 @@ i.icon:hover
     opacity: 0.9
 
 div:fullscreen
+    .options
+        display: none
     .tools
         display: block
 
 div:-webkit-full-screen
+    .options
+        display: none
     .tools
         display: block
 
 div:moz-full-screen
+    .options
+        display: none
     .tools
         display: block
-
-.chat-inner
-    width: 100%
-    height: 100%
-    padding-top: 2em
-    padding-left: 2em
-    padding-right: 2em
-    margin-bottom: 0
-    overflow-y: auto
   
 .ui.placeholder.segment.field
         max-width: 20rem
 
 .vertically-aligned
     display: flex
+    flex-direction: column
     justify-content: center
     align-items: center
-
-.text-aligned
-    text-align: center
-
-.ui.input
-    width: 100%
-    textarea
-        padding-right: 50px
-        min-height: 50px
-        max-height: 40vh
-    .icon
-        margin-right: 10px
+    .ui.right.labeled.input
+        padding: 0 5px 5px 5px
+        font-size: 12px
 
 .poll-divider
     height: 1px
@@ -306,6 +295,7 @@ div:moz-full-screen
     border: 0px
     margin-top: 12px
 
+// tooltips
 [data-tooltip]:before
     margin-bottom: 10px
 
@@ -315,6 +305,7 @@ div:moz-full-screen
 .big-left-margin
     margin-left: 10px
 
+// polls
 .delete-poll-icon
     float: right
     width: 15px
@@ -324,7 +315,8 @@ div:moz-full-screen
 
 .delete-poll-icon:hover
     font-size: 1.3em
-    
+
+// canvas
 .canvas
     border: 1px solid
     position: absolute
@@ -334,4 +326,21 @@ div:moz-full-screen
     bottom: 80px
     box-shadow: 0px 0px 5px grey
     background-color: white
+    z-index: 1
 
+// media settings
+.settings
+    position: absolute
+    bottom: 7%
+    left: 5%
+    max-height: 80%
+    width: 350px
+    z-index: 10
+
+.message_receiver
+    font-size: .85714286em
+    color: grey
+
+.privately-received
+    font-size: .85714286em
+    color: #db2828
