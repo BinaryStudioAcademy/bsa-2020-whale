@@ -35,7 +35,7 @@ import { ParticipantRole } from '@shared/models/participant/participant-role';
 import { Statistics } from '@shared/models/statistics/statistics';
 import { AuthService } from 'app/core/auth/auth.service';
 import { UserMediaData } from '@shared/models/media/user-media-data';
-import { CopyClipboardComponent } from '@shared/components/copy-clipboard/copy-clipboard.component';
+import { EnterModalComponent } from '../enter-modal/enter-modal.component';
 import { SimpleModalService } from 'ngx-simple-modal';
 import {
   CanvasWhiteboardOptions,
@@ -138,6 +138,17 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.currentUserStream = await navigator.mediaDevices.getUserMedia(
       await this.mediaSettingsService.getMediaConstraints()
     );
+    const enterModal = await this.simpleModalService.addModal(EnterModalComponent).toPromise();
+    if (enterModal.leave) {
+      this.leaveUnConnected();
+      return;
+    }
+    if (enterModal.cameraOff) {
+      this.turnOffCamera();
+    }
+    if (enterModal.microOff) {
+      this.turnOffMicrophone();
+    }
     this.currentStreamLoaded.emit();
     // create new peer
     this.peer = new Peer(environment.peerOptions);

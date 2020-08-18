@@ -1,0 +1,29 @@
+<div
+  id="enter-modal-close"
+  class="ui dimmer modals page visible active"
+  (click)="onProceed()"
+>
+    <div class="ui mini modal visible active" (click)="$event.stopPropagation()">
+        <h3 class="header">Meeting Settings</h3>
+        <div class="content">
+            <div class="ui form">
+                <div class="inline field">
+                    <div id="enter-modal-microphone" class="ui toggle checkbox" (click)="microphone = !microphone">
+                        <input type="checkbox" [checked]="microphone" tabindex="0" class="hidden">
+                        <label>Microphone</label>
+                    </div>
+                </div>            
+                <div class="inline field">
+                    <div id="enter-modal-webcam" class="ui toggle checkbox" (click)="webcam = !webcam">
+                        <input type="checkbox" [checked]="webcam" tabindex="0" class="hidden">
+                        <label>Webcam</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="actions">
+            <div id="enter-modal-leave" class="ui button" (click)="onLeave()">Leave</div>
+            <div id="enter-modal-proceed" class="ui primary button" (click)="onProceed()">Proceed</div>
+        </div>
+    </div>
+</div>
