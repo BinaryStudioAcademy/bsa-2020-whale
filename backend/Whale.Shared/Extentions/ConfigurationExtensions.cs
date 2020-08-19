@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 
-namespace Whale.API.Extensions
+namespace Whale.Shared.Exceptions
 {
     public static class ConfigurationExtensions
     {
