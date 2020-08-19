@@ -93,7 +93,7 @@ export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
     this.receivedMsg$.pipe(takeUntil(this.unsubscribe$)).subscribe(
       (newMessage) => {
         this.messages.push(newMessage);
-        console.log('received a messsage ' + newMessage.message);
+        console.log('received a messsage ', newMessage);
       },
       (err) => {
         console.log(err.message);

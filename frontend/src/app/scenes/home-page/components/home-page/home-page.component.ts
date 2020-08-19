@@ -64,16 +64,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
       .pipe(tap(() => (this.isUserLoadig = false)))
       .subscribe(
         (userFromDB: User) => {
-          this.loggedInUser = { ...userFromDB, avatarUrl: null };
-          if (userFromDB.linkType === LinkTypeEnum.Internal) {
-            this.blobService
-              .GetImageByName(userFromDB.avatarUrl)
-              .subscribe((fullLink: string) => {
-                this.loggedInUser.avatarUrl = fullLink;
-              });
-          } else {
-            this.loggedInUser.avatarUrl = userFromDB.avatarUrl;
-          }
+          this.loggedInUser = userFromDB;
           this.ownerEmail = this.loggedInUser?.email;
 
           this.httpService
@@ -82,16 +73,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
             .subscribe(
               (data: Contact[]) => {
                 this.contacts = data;
-                data.forEach((contact) => {
-                  if (contact.secondMember.linkType === LinkTypeEnum.Internal) {
-                    this.blobService
-                      .GetImageByName(contact.secondMember.avatarUrl)
-                      .subscribe((fullLink: string) => {
-                        contact.secondMember.avatarUrl = fullLink;
-                      });
-                  }
-                });
-                this.onContactsClick();
               },
               (error) => this.toastr.error(error.Message)
             );
