@@ -10,13 +10,13 @@
           id="meeting-draggable-mute"
           *ngIf="!isMicrophoneMuted"
           class="big microphone icon"
-          (click)="turnOffMicrophone()"
+          (click)="toggleMicrophone()"
         ></i>
         <i
           id="meeting-draggable-mute"
           *ngIf="isMicrophoneMuted"
           class="big slash microphone icon"
-          (click)="turnOffMicrophone()"
+          (click)="toggleMicrophone()"
         ></i>
       </span>
       <span data-tooltip="Toggle Webcam" data-position="top left">
@@ -109,13 +109,13 @@
               id="meeting-options-microphone"
               *ngIf="!isMicrophoneMuted"
               class="big microphone icon"
-              (click)="turnOffMicrophone()"
+              (click)="toggleMicrophone()"
             ></i>
             <i
               id="meeting-options-microphone"
               *ngIf="isMicrophoneMuted"
               class="big slash microphone icon"
-              (click)="turnOffMicrophone()"
+              (click)="toggleMicrophone()"
             ></i>
             <span data-tooltip="Settings">
               <i
@@ -129,13 +129,13 @@
                 id="meeting-options-camera"
                 *ngIf="!isCameraMuted"
                 class="big video icon big-left-margin"
-                (click)="turnOffCamera()"
+                (click)="toggleCamera()"
               ></i>
               <i
                 id="meeting-options-camera"
                 *ngIf="isCameraMuted"
                 class="big eye slash icon big-left-margin"
-                (click)="turnOffCamera()"
+                (click)="toggleCamera()"
               ></i>
             </span>
             <span data-tooltip="Settings">
@@ -262,6 +262,12 @@
         <app-participant-card
           *ngFor="let data of mediaData"
           (hideViewEvent)="hideViewEventHandler($event)"
+          (toggleMicrophoneEvent)="
+            currentParticipant.id === $event ? toggleMicrophone() : ''
+          "
+          (toggleCameraEvent)="
+            currentParticipant.id === $event ? toggleCamera() : ''
+          "
           [data]="data"
         >
         </app-participant-card>
