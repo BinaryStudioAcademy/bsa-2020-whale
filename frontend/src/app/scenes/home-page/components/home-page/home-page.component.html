@@ -63,7 +63,7 @@
           >
             <img
               class="ui avatar image"
-              src="{{ contact?.secondMember.avatarUrl }}"
+              src="{{ returnCorrectLink(contact) }}"
             />
             <div class="content">
               <div class="description">
@@ -95,7 +95,7 @@
           <div id="home-group" (click)="onGroupClick()" class="item">
             <img
               class="ui avatar image"
-              src="{{ contact.secondMember?.avatarUrl }}"
+              src="{{ returnCorrectLink(contact) }}"
             />
             <div class="content">
               <div class="description">
