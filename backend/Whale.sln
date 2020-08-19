@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Whale.Shared", "Whale.Shared\Whale.Shared.csproj", "{81F6C3B9-117E-4152-A0D7-EE327CA56D65}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Whale.API", "Whale.API\Whale.API.csproj", "{49A4C9A6-D443-4DE9-B8DD-E4E36908A71D}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Whale.BLL", "Whale.BLL\Whale.BLL.csproj", "{CD035326-7D35-4344-B62B-99475ED0CFEA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Whale.DAL", "Whale.DAL\Whale.DAL.csproj", "{AEE0FABE-4938-490C-9367-E68D08B06FAE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Whale.MeetingAPI", "Whale.MeetingAPI\Whale.MeetingAPI.csproj", "{5F445CF6-662E-4027-AF7F-6E0DF1DAB0F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Whale.MeetingAPI", "Whale.MeetingAPI\Whale.MeetingAPI.csproj", "{5F445CF6-662E-4027-AF7F-6E0DF1DAB0F1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Whale.SignalR", "Whale.SignalR\Whale.SignalR.csproj", "{0B340E13-9965-4567-ADDE-9F62B7A64AFB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Whale.Shared", "Whale.Shared\Whale.Shared.csproj", "{D0367625-78D5-4A8E-8065-B4B1B3FD8696}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,18 +19,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{81F6C3B9-117E-4152-A0D7-EE327CA56D65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{81F6C3B9-117E-4152-A0D7-EE327CA56D65}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{81F6C3B9-117E-4152-A0D7-EE327CA56D65}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{81F6C3B9-117E-4152-A0D7-EE327CA56D65}.Release|Any CPU.Build.0 = Release|Any CPU
 		{49A4C9A6-D443-4DE9-B8DD-E4E36908A71D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{49A4C9A6-D443-4DE9-B8DD-E4E36908A71D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{49A4C9A6-D443-4DE9-B8DD-E4E36908A71D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{49A4C9A6-D443-4DE9-B8DD-E4E36908A71D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CD035326-7D35-4344-B62B-99475ED0CFEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CD035326-7D35-4344-B62B-99475ED0CFEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CD035326-7D35-4344-B62B-99475ED0CFEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CD035326-7D35-4344-B62B-99475ED0CFEA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AEE0FABE-4938-490C-9367-E68D08B06FAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AEE0FABE-4938-490C-9367-E68D08B06FAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AEE0FABE-4938-490C-9367-E68D08B06FAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -39,6 +31,14 @@ Global
 		{5F445CF6-662E-4027-AF7F-6E0DF1DAB0F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5F445CF6-662E-4027-AF7F-6E0DF1DAB0F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5F445CF6-662E-4027-AF7F-6E0DF1DAB0F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B340E13-9965-4567-ADDE-9F62B7A64AFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B340E13-9965-4567-ADDE-9F62B7A64AFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B340E13-9965-4567-ADDE-9F62B7A64AFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B340E13-9965-4567-ADDE-9F62B7A64AFB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0367625-78D5-4A8E-8065-B4B1B3FD8696}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0367625-78D5-4A8E-8065-B4B1B3FD8696}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0367625-78D5-4A8E-8065-B4B1B3FD8696}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0367625-78D5-4A8E-8065-B4B1B3FD8696}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

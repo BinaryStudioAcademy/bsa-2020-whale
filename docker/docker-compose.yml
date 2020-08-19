@@ -14,7 +14,8 @@ services:
     environment:
       ConnectionStrings:WhaleDatabase: ${WhaleDBConnectionString}
       BlobStorageSettings:ConnectionString: ${WhaleBlobStorageConnectionString}
-      MeetingApiUrl: "http://meetingapi:6000/"
+      MeetingAPI: "http://meetingapi:4202"
+      SignalR: "http://hubs:4203"
       ElasticConfiguration:Uri: "http://elasticsearch:9200"
       ConnectionStrings:RedisOptions: "redis:6379"
       ASPNETCORE_URLS: http://+:4201
@@ -27,9 +28,20 @@ services:
     environment:
       ConnectionStrings:WhaleDatabase: ${WhaleDBConnectionString}
       BlobStorageSettings:ConnectionString: ${WhaleBlobStorageConnectionString}
+      SignalR: "http://hubs:4203"
       ElasticConfiguration:Uri: "http://elasticsearch:9200"
       ConnectionStrings:RedisOptions: "redis:6379"
       ASPNETCORE_URLS: http://+:4202
+
+  hubs:
+    image: krasnovnikita/bsa2020-whale:hubs
+    container_name: 'hubs'
+    ports:
+      - "4203:4203"
+    environment:
+      ConnectionStrings:WhaleDatabase: ${WhaleDBConnectionString}
+      ConnectionStrings:RedisOptions: "redis:6379"
+      ASPNETCORE_URLS: http://+:4203
 
   elasticsearch:
     container_name: elasticsearch

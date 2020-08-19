@@ -23,6 +23,7 @@ export class AppComponent implements OnInit {
   user: User;
 
   private hubConnection: HubConnection;
+  private getUserUrl: string = environment.apiUrl + '/api/user/email';
 
   constructor(
     public fireAuth: AuthService,
@@ -36,7 +37,7 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    from(this.signalRService.registerHub(environment.apiUrl, 'chatHub'))
+    from(this.signalRService.registerHub(environment.signalrUrl, 'chatHub'))
       .pipe(
         tap((hub) => {
           this.hubConnection = hub;
@@ -53,15 +54,20 @@ export class AppComponent implements OnInit {
     this.authService.user$
       .pipe(filter((user) => Boolean(user)))
       .subscribe((user) => {
-        this.user = user;
-
-        this.httpService
-          .getRequest<Contact[]>('/api/contacts')
-          .pipe()
-          .subscribe((data: Contact[]) => {
-            data.forEach((contact) => {
-              this.hubConnection.invoke('JoinGroup', contact.id);
-            });
+        this.user = Object.assign({}, user);
+        this.http
+          .get<User>(this.getUserUrl + `/${user.email}`, {
+            observe: 'response',
+          })
+          .subscribe((user) => {
+            this.httpService
+              .getRequest<Contact[]>('/api/contacts')
+              .pipe()
+              .subscribe((data: Contact[]) => {
+                data.forEach((contact) => {
+                  this.hubConnection.invoke('JoinGroup', contact.id);
+                });
+              });
           });
       });
   }

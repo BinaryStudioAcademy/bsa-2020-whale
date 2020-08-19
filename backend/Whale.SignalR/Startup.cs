@@ -1,0 +1,93 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
+using AutoMapper;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Whale.DAL;
+using Whale.Shared.Helpers;
+using Whale.Shared.MappingProfiles;
+using Whale.Shared.Services;
+using Whale.SignalR.Hubs;
+
+namespace Whale.SignalR
+{
+    public class Startup
+    {
+        public Startup(IConfiguration configuration, IWebHostEnvironment hostingEnvironment)
+        {
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(hostingEnvironment.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{hostingEnvironment.EnvironmentName}.json", reloadOnChange: true, optional: true)
+                .AddEnvironmentVariables();
+
+            Configuration = builder.Build();
+        }
+
+        public IConfiguration Configuration { get; }
+
+
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddDbContext<WhaleDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("WhaleDatabase")));
+
+            services.AddTransient<ContactsService>();
+            services.AddTransient<MeetingService>();
+            services.AddTransient<ParticipantService>();
+            services.AddTransient<UserService>();
+
+            services.AddScoped(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
+            services.AddScoped(x => new EncryptHelper(Configuration.GetValue<string>("EncryptSettings:key")));
+
+            services.AddSignalR();
+            services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
+            {
+                builder
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials()
+                .WithOrigins("http://localhost:4200", "http://bsa2020-whale.westeurope.cloudapp.azure.com");
+            }));
+
+            services.AddAutoMapper(cfg =>
+            {
+                cfg.AddProfile<MeetingProfile>();
+                cfg.AddProfile<PollProfile>();
+                cfg.AddProfile<MeetingMessage>();
+                cfg.AddProfile<UserProfile>();
+                cfg.AddProfile<ParticipantProfile>();
+                cfg.AddProfile<ContactProfile>();
+                cfg.AddProfile<DirectMessageProfile>();
+            },
+            Assembly.GetExecutingAssembly());
+        }
+
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+
+            app.UseCors("CorsPolicy");
+
+            app.UseHttpsRedirection();
+
+            app.UseRouting();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapHub<ChatHub>("/chatHub");
+                endpoints.MapHub<MeetingHub>("/meeting");
+            });
+        }
+    }
+}

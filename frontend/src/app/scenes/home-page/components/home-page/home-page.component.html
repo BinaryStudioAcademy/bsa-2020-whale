@@ -40,7 +40,7 @@
       <spiner *ngIf="isContactsLoading" [size]="'medium'"></spiner>
       <a
         id="home-toggle-contacts"
-        (click)="contactsVisibility = !contactsVisibility"
+        (click)="onContactsClick()"
         class="item header"
         >Contacts
         <button
@@ -63,7 +63,7 @@
           >
             <img
               class="ui avatar image"
-              src="{{ contact?.secondMember.avatarUrl }}"
+              src="{{ returnCorrectLink(contact) }}"
             />
             <div class="content">
               <div class="description">
@@ -95,7 +95,7 @@
           <div id="home-group" (click)="onGroupClick()" class="item">
             <img
               class="ui avatar image"
-              src="{{ contact.secondMember?.avatarUrl }}"
+              src="{{ returnCorrectLink(contact) }}"
             />
             <div class="content">
               <div class="description">

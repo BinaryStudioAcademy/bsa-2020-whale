@@ -7,6 +7,7 @@ import { HttpService } from '../../../core/services/http.service';
 import { tap, filter } from 'rxjs/operators';
 import { BlobService } from '../../../core/services/blob.service';
 import { LinkTypeEnum } from '@shared/Enums/LinkTypeEnum';
+import { UpstateService } from '../../../core/services/upstate.service';
 
 @Component({
   selector: 'app-page-header',
@@ -19,7 +20,6 @@ export class PageHeaderComponent implements OnInit {
   settingsMenuVisible = false;
   isNotificationsVisible = false;
   loggedInUser: User;
-  public routePrefix = '/api/user';
 
   notification1: Notification = {
     text: 'Missed call from USER',
@@ -44,7 +44,8 @@ export class PageHeaderComponent implements OnInit {
     private router: Router,
     public auth: AuthService,
     private httpService: HttpService,
-    private blobService: BlobService
+    private blobService: BlobService,
+    private upstateService: UpstateService
   ) {}
 
   public showNotificationsMenu(): void {
@@ -68,24 +69,21 @@ export class PageHeaderComponent implements OnInit {
   }
 
   getUser(): void {
-    this.auth.user$.pipe(filter((user) => Boolean(user))).subscribe((user) => {
-      this.httpService
-        .getRequest<User>(`${this.routePrefix}/email/${user.email}`)
-        .pipe(tap(() => (this.isUserLoadig = false)))
-        .subscribe((userFromDB: User) => {
-          this.loggedInUser = userFromDB;
-          if (userFromDB.linkType === LinkTypeEnum.Internal) {
-            this.blobService
-              .GetImageByName(userFromDB.avatarUrl)
-              .subscribe((fullLink: string) => {
-                userFromDB.avatarUrl = fullLink;
-                this.loggedInUser = userFromDB;
-              });
-          } else {
-            this.loggedInUser = userFromDB;
-          }
-        });
-    });
+    this.upstateService
+      .getLoggedInUser()
+      .pipe(tap(() => (this.isUserLoadig = false)))
+      .subscribe((userFromDB: User) => {
+        this.loggedInUser = { ...userFromDB, avatarUrl: null };
+        if (userFromDB.linkType === LinkTypeEnum.Internal) {
+          this.blobService
+            .GetImageByName(userFromDB.avatarUrl)
+            .subscribe((fullLink: string) => {
+              this.loggedInUser.avatarUrl = fullLink;
+            });
+          return;
+        }
+        this.loggedInUser.avatarUrl = userFromDB.avatarUrl;
+      });
   }
   goToPage(pageName: string): void {
     this.router.navigate([`${pageName}`]);
