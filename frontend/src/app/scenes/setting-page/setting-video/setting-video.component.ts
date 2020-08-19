@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
-import { BrowserMediaDevice } from '../browser-media-device';
+import { BrowserMediaDevice } from '../../../shared/browser-media-device';
 import { MediaSettingsService } from 'app/core/services/media-settings.service';
 
 @Component({

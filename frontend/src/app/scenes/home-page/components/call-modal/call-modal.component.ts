@@ -37,7 +37,7 @@ export class CallModalComponent extends SimpleModalComponent<Contact, null>
     super();
   }
   ngOnInit(): void {
-    from(this.signalRService.registerHub(environment.apiUrl, 'chatHub'))
+    from(this.signalRService.registerHub(environment.signalrUrl, 'chatHub'))
       .pipe(
         tap((hub) => {
           this.hubConnection = hub;
@@ -68,8 +68,8 @@ export class CallModalComponent extends SimpleModalComponent<Contact, null>
             anonymousCount: 0,
             isScheduled: false,
             isRecurrent: false,
+            creatorEmail: this.firstMember.email,
           } as MeetingCreate,
-          email: this.firstMember.email,
         } as CallStart);
       });
   }

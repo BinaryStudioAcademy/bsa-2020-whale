@@ -10,6 +10,7 @@ import { environment } from '@env';
 import { HubConnection } from '@aspnet/signalr';
 import { HttpService } from './core/services/http.service';
 import { User } from 'firebase';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-root',
@@ -17,22 +18,26 @@ import { User } from 'firebase';
   styleUrls: ['./app.component.sass'],
 })
 export class AppComponent implements OnInit {
-  title = 'frontend';
+  title = 'Whale';
   call: Call;
   user: User;
 
   private hubConnection: HubConnection;
+  private getUserUrl: string = environment.apiUrl + '/api/user/email';
 
   constructor(
     public fireAuth: AuthService,
     private http: HttpClient,
     private signalRService: SignalRService,
     private httpService: HttpService,
-    private authService: AuthService
-  ) {}
+    private authService: AuthService,
+    private titleService: Title
+  ) {
+    titleService.setTitle(this.title);
+  }
 
   ngOnInit(): void {
-    from(this.signalRService.registerHub(environment.apiUrl, 'chatHub'))
+    from(this.signalRService.registerHub(environment.signalrUrl, 'chatHub'))
       .pipe(
         tap((hub) => {
           this.hubConnection = hub;
@@ -49,15 +54,20 @@ export class AppComponent implements OnInit {
     this.authService.user$
       .pipe(filter((user) => Boolean(user)))
       .subscribe((user) => {
-        this.user = user;
-
-        this.httpService
-          .getRequest<Contact[]>('/api/contacts')
-          .pipe()
-          .subscribe((data: Contact[]) => {
-            data.forEach((contact) => {
-              this.hubConnection.invoke('JoinGroup', contact.id);
-            });
+        this.user = Object.assign({}, user);
+        this.http
+          .get<User>(this.getUserUrl + `/${user.email}`, {
+            observe: 'response',
+          })
+          .subscribe((user) => {
+            this.httpService
+              .getRequest<Contact[]>('/api/contacts')
+              .pipe()
+              .subscribe((data: Contact[]) => {
+                data.forEach((contact) => {
+                  this.hubConnection.invoke('JoinGroup', contact.id);
+                });
+              });
           });
       });
   }

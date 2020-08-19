@@ -1,32 +1,23 @@
-import {
-  Component,
-  OnInit,
-  EventEmitter,
-  ViewChild,
-  Output,
-  OnDestroy,
-} from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { User } from '@shared/models/user/user';
 import { Contact } from '@shared/models/contact/contact';
-import { SignalRService } from 'app/core/services/signal-r.service';
 import { HttpService } from 'app/core/services/http.service';
-import { HubConnection } from '@aspnet/signalr';
 import { SimpleModalService } from 'ngx-simple-modal';
 import { AddContactModalComponent } from '../add-contact-modal/add-contact-modal.component';
 import { AddGroupModalComponent } from '../add-group-modal/add-group-modal.component';
 import { ContactsChatComponent } from '../contacts-chat/contacts-chat.component';
 import { ToastrService } from 'ngx-toastr';
-import { UpstateService } from 'app/core/services/upstate.service';
 import { MeetingService } from 'app/core/services/meeting.service';
 import { Router } from '@angular/router';
 import { MeetingCreate } from '@shared/models/meeting/meeting-create';
-import { takeUntil, tap, filter } from 'rxjs/operators';
+import { filter, takeUntil, tap } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { AuthService } from 'app/core/auth/auth.service';
 import { LinkTypeEnum } from '@shared/Enums/LinkTypeEnum';
 import { BlobService } from '../../../../core/services/blob.service';
 import { Group } from '@shared/models/group/group';
 import { GroupService } from 'app/core/services/group.service';
+import { UpstateService } from '../../../../core/services/upstate.service';
 
 @Component({
   selector: 'app-home-page',
@@ -37,11 +28,10 @@ export class HomePageComponent implements OnInit, OnDestroy {
   contacts: Contact[];
   groups: Group[];
   loggedInUser: User;
-  contactsVisibility = true;
+  contactsVisibility = false;
   groupsVisibility = false;
   chatVisibility = true;
   ownerEmail: string;
-  public routePrefix = '/api/user/email';
   contactSelected: Contact;
 
   public isContactsLoading = true;
@@ -50,6 +40,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
   public isGroupsLoading = true;
 
   private unsubscribe$ = new Subject<void>();
+
   constructor(
     private toastr: ToastrService,
     private httpService: HttpService,
@@ -57,8 +48,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
     private meetingService: MeetingService,
     private router: Router,
     private authService: AuthService,
+    private groupService: GroupService,
     private blobService: BlobService,
-    private groupService: GroupService
+    private upstateService: UpstateService
   ) {}
 
   ngOnDestroy(): void {
@@ -67,50 +59,55 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.authService.user$
-      .pipe(filter((user) => Boolean(user)))
-      .subscribe((user) => {
-        this.httpService
-          .getRequest<User>(`${this.routePrefix}/${user.email}`)
-          .pipe(tap(() => (this.isUserLoadig = false)))
-          .subscribe(
-            (userFromDB: User) => {
-              this.loggedInUser = userFromDB;
-              if (userFromDB.linkType === LinkTypeEnum.Internal) {
-                this.blobService
-                  .GetImageByName(userFromDB.avatarUrl)
-                  .subscribe((fullLink: string) => {
-                    userFromDB.avatarUrl = fullLink;
-                    this.loggedInUser = userFromDB;
-                  });
-              } else {
-                this.loggedInUser = userFromDB;
-              }
-              this.ownerEmail = this.loggedInUser?.email;
-            },
-            (error) => this.toastr.error(error.Message)
-          );
+    this.upstateService
+      .getLoggedInUser()
+      .pipe(tap(() => (this.isUserLoadig = false)))
+      .subscribe(
+        (userFromDB: User) => {
+          this.loggedInUser = { ...userFromDB, avatarUrl: null };
+          if (userFromDB.linkType === LinkTypeEnum.Internal) {
+            this.blobService
+              .GetImageByName(userFromDB.avatarUrl)
+              .subscribe((fullLink: string) => {
+                this.loggedInUser.avatarUrl = fullLink;
+              });
+          } else {
+            this.loggedInUser.avatarUrl = userFromDB.avatarUrl;
+          }
+          this.ownerEmail = this.loggedInUser?.email;
 
-        this.httpService
-          .getRequest<Contact[]>('/api/contacts')
-          .pipe(tap(() => (this.isContactsLoading = false)))
-          .subscribe(
-            (data: Contact[]) => {
-              this.contacts = data;
-            },
-            (error) => this.toastr.error(error.Message)
-          );
-        this.groupService
-          .getAllGroups()
-          .pipe(tap(() => (this.isGroupsLoading = false)))
-          .subscribe(
-            (data: Group[]) => {
-              this.groups = data;
-              console.log(this.groups);
-            },
-            (error) => this.toastr.error(error.Message)
-          );
-      });
+          this.httpService
+            .getRequest<Contact[]>('/api/contacts')
+            .pipe(tap(() => (this.isContactsLoading = false)))
+            .subscribe(
+              (data: Contact[]) => {
+                this.contacts = data;
+                data.forEach((contact) => {
+                  if (contact.secondMember.linkType === LinkTypeEnum.Internal) {
+                    this.blobService
+                      .GetImageByName(contact.secondMember.avatarUrl)
+                      .subscribe((fullLink: string) => {
+                        contact.secondMember.avatarUrl = fullLink;
+                      });
+                  }
+                });
+                this.onContactsClick();
+              },
+              (error) => this.toastr.error(error.Message)
+            );
+        },
+        (error) => this.toastr.error(error.Message)
+      );
+    this.groupService
+      .getAllGroups()
+      .pipe(tap(() => (this.isGroupsLoading = false)))
+      .subscribe(
+        (data: Group[]) => {
+          this.groups = data;
+          console.log(this.groups);
+        },
+        (error) => this.toastr.error(error.Message)
+      );
   }
 
   addNewGroup(): void {
@@ -172,6 +169,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
         anonymousCount: 0,
         isScheduled: false,
         isRecurrent: false,
+        creatorEmail: this.ownerEmail,
       } as MeetingCreate)
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
@@ -187,6 +185,18 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
   goToPage(pageName: string): void {
     this.router.navigate([`${pageName}`]);
+  }
+  returnCorrectLink(contact: Contact): string {
+    return contact?.secondMember.avatarUrl.startsWith('http') ||
+      contact?.secondMember.avatarUrl.startsWith('data')
+      ? contact?.secondMember.avatarUrl
+      : '';
+  }
+
+  public onContactsClick(): void {
+    if (this.contacts.length) {
+      this.contactsVisibility = !this.contactsVisibility;
+    }
   }
 }
 export interface UserModel {

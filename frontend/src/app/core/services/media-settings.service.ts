@@ -65,8 +65,6 @@ export class MediaSettingsService {
     return {
       video: {
         deviceId: this._settings.VideoDeviceId,
-        width: { max: 858 },
-        height: { max: 480 },
       },
       audio: {
         deviceId: this._settings.InputDeviceId,

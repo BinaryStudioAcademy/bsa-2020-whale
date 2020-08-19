@@ -8,10 +8,10 @@
         <div class="ui very relaxed horizontal list">
           <div class="item">
             <img
-              class="ui user-pic image"
+              class="ui circular image avatar-pic"
               src="{{ loggedInUser?.avatarUrl }}"
             />
-            <div class="content">
+            <div class="content user-label">
               <a class="header"
                 >{{ loggedInUser?.firstName }} {{ loggedInUser?.secondName }}</a
               >
@@ -40,7 +40,7 @@
       <spiner *ngIf="isContactsLoading" [size]="'medium'"></spiner>
       <a
         id="home-toggle-contacts"
-        (click)="contactsVisibility = !contactsVisibility"
+        (click)="onContactsClick()"
         class="item header"
         >Contacts
         <button
@@ -63,7 +63,7 @@
           >
             <img
               class="ui avatar image"
-              src="{{ contact?.secondMember.avatarUrl }}"
+              src="{{ returnCorrectLink(contact) }}"
             />
             <div class="content">
               <div class="description">

@@ -12,7 +12,7 @@ import {
 import Peer from 'peerjs';
 import { SignalRService } from 'app/core/services/signal-r.service';
 import { environment } from '@env';
-import { Subject, Observable } from 'rxjs';
+import { Subject, Observable, from } from 'rxjs';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { MeetingService } from 'app/core/services/meeting.service';
 import { takeUntil, filter } from 'rxjs/operators';
@@ -35,7 +35,7 @@ import { ParticipantRole } from '@shared/models/participant/participant-role';
 import { Statistics } from '@shared/models/statistics/statistics';
 import { AuthService } from 'app/core/auth/auth.service';
 import { UserMediaData } from '@shared/models/media/user-media-data';
-import { CopyClipboardComponent } from '@shared/components/copy-clipboard/copy-clipboard.component';
+import { EnterModalComponent } from '../enter-modal/enter-modal.component';
 import { SimpleModalService } from 'ngx-simple-modal';
 import {
   CanvasWhiteboardOptions,
@@ -44,14 +44,14 @@ import {
 } from 'ng2-canvas-whiteboard';
 import { MediaSettingsService } from 'app/core/services/media-settings.service';
 import { HttpClient } from '@angular/common/http';
+import { GetMessages } from '@shared/models/meeting/message/get-messages';
 
 @Component({
   selector: 'app-meeting',
   templateUrl: './meeting.component.html',
   styleUrls: ['./meeting.component.sass'],
 })
-export class MeetingComponent
-  implements OnInit, AfterContentInit, AfterViewInit, OnDestroy {
+export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public meeting: Meeting;
   public meetingStatistics: Statistics;
   public isShowChat = false;
@@ -69,13 +69,13 @@ export class MeetingComponent
   public connectedStreams: MediaStream[] = [];
   public mediaData: UserMediaData[] = [];
   public connectedPeers = new Map<string, MediaStream>();
-  public canvasIsDisplayed: boolean;
+  public canvasIsDisplayed: boolean = false;
   public canvasOptions: CanvasWhiteboardOptions = {
     clearButtonEnabled: true,
     clearButtonText: 'Erase',
     undoButtonText: 'Undo',
     undoButtonEnabled: false,
-    colorPickerEnabled: false,
+    colorPickerEnabled: true,
     saveDataButtonEnabled: true,
     saveDataButtonText: 'Save',
     lineWidth: 5,
@@ -83,7 +83,7 @@ export class MeetingComponent
     shouldDownloadDrawing: true,
     drawingEnabled: true,
     showShapeSelector: false,
-    shapeSelectorEnabled: false,
+    shapeSelectorEnabled: true,
     showFillColorPicker: false,
     batchUpdateTimeoutDuration: 250,
     drawButtonEnabled: false,
@@ -91,7 +91,10 @@ export class MeetingComponent
 
   public messages: MeetingMessage[] = [];
   public msgText = '';
+  public msgReceiverEmail: string = '';
   public currentParticipant: Participant;
+  public distinctParticipants: Participant[] = [];
+  public otherParticipants: Participant[];
   public connectionData: MeetingConnectionData;
 
   private meetingSignalrService: MeetingSignalrService;
@@ -103,7 +106,9 @@ export class MeetingComponent
   private elem: any;
   public isMicrophoneMuted = false;
   public isCameraMuted = false;
-  public currentLocation: string;
+  public isAudioSettings = false;
+  public isVideoSettings = false;
+  public isWaitingForRecord = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -130,15 +135,22 @@ export class MeetingComponent
   }
 
   public async ngOnInit() {
-    this.canvasIsDisplayed = false;
-    this.currentUserStream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
-    });
-    // ! await this.mediaSettingsService.checkIfAvailableDevices();  <- this is in guard, if guard will be deleted restore this string
     this.currentUserStream = await navigator.mediaDevices.getUserMedia(
       await this.mediaSettingsService.getMediaConstraints()
     );
+    const enterModal = await this.simpleModalService
+      .addModal(EnterModalComponent)
+      .toPromise();
+    if (enterModal.leave) {
+      this.leaveUnConnected();
+      return;
+    }
+    if (enterModal.cameraOff) {
+      this.turnOffCamera();
+    }
+    if (enterModal.microOff) {
+      this.turnOffMicrophone();
+    }
     this.currentStreamLoaded.emit();
     // create new peer
     this.peer = new Peer(environment.peerOptions);
@@ -165,7 +177,12 @@ export class MeetingComponent
           if (index >= 0) {
             this.meeting.participants[index] = connectData.participant;
           } else {
-            this.meeting.participants.push(connectData.participant);
+            this.addParticipantToMeeting(connectData.participant);
+          }
+          if (this.currentParticipant != null) {
+            this.otherParticipants = this.meeting.participants.filter(
+              (p) => p.id !== this.currentParticipant.id
+            );
           }
 
           console.log('connected with peer: ' + connectData.peerId);
@@ -183,9 +200,19 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (participants) => {
-          this.meeting.participants.push(...participants);
+          participants.forEach((p) => {
+            if (
+              !this.meeting.participants.some(
+                (mp) => mp.streamId === p.streamId
+              )
+            )
+              this.addParticipantToMeeting(p);
+          });
           this.currentParticipant = participants.find(
             (p) => p.user.email === this.authService.currentUser.email
+          );
+          this.otherParticipants = participants.filter(
+            (p) => p.id !== this.currentParticipant.id
           );
 
           this.createParticipantCard(this.currentParticipant);
@@ -199,10 +226,10 @@ export class MeetingComponent
     this.meetingSignalrService.signalParticipantLeft$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((connectionData) => {
-        this.meeting.participants = this.meeting.participants.filter(
-          (p) => p.id !== connectionData.participant.id
+        this.removeParticipantFromMeeting(connectionData.participant);
+        this.otherParticipants = this.meeting.participants.filter(
+          (p) => p.id !== this.currentParticipant.id
         );
-
         if (this.connectedPeers.has(connectionData.peerId)) {
           this.connectedPeers.delete(connectionData.peerId);
         }
@@ -224,8 +251,9 @@ export class MeetingComponent
     this.meetingSignalrService.signalParticipantDisconnected$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((participant) => {
-        this.meeting.participants = this.meeting.participants.filter(
-          (p) => p.id !== participant.id
+        this.removeParticipantFromMeeting(participant);
+        this.otherParticipants = this.meeting.participants.filter(
+          (p) => p.id !== this.currentParticipant.id
         );
 
         this.connectedPeers = new Map(
@@ -343,11 +371,10 @@ export class MeetingComponent
 
   public ngAfterViewInit(): void {
     this.elem = this.mainArea.nativeElement;
-    this.canvasIsDisplayed = true;
-  }
-
-  public ngAfterContentInit() {
+    console.log('elem', this.elem);
+    console.log('currentVideo first', this.currentVideo);
     this.currentStreamLoaded.subscribe(() => {
+      console.log('currentVideo', this.currentVideo);
       this.currentVideo.nativeElement.srcObject = this.currentUserStream;
       this.setOutputDevice();
     });
@@ -386,6 +413,24 @@ export class MeetingComponent
     }
   }
 
+  private addParticipantToMeeting(participant: Participant): void {
+    this.meeting.participants.push(participant);
+    this.meeting.participants.forEach((p) => {
+      if (!this.distinctParticipants.some((dp) => dp.id === p.id)) {
+        this.distinctParticipants.push(p);
+      }
+    });
+  }
+
+  private removeParticipantFromMeeting(participant: Participant): void {
+    this.meeting.participants = this.meeting.participants.filter(
+      (p) => p.id !== participant.id
+    );
+    this.distinctParticipants = this.distinctParticipants.filter(
+      (p) => p.id !== participant.id
+    );
+  }
+
   turnOffMicrophone(): void {
     if (!this.isMicrophoneMuted) {
       this.currentUserStream
@@ -414,19 +459,25 @@ export class MeetingComponent
 
   public startRecording(): void {
     this.isScreenRecording = true;
-    this.blobService.startRecording().subscribe((permited) => {
-      if (permited) {
-        this.meetingSignalrService.invoke(
-          SignalMethods.OnConferenceStartRecording,
-          'Conference start recording'
-        );
-      } else {
-        this.isScreenRecording = false;
-      }
+
+    this.blobService.startRecording().subscribe({
+      complete: () => (this.isWaitingForRecord = false),
+      next: (permited) => {
+        if (permited) {
+          this.meetingSignalrService.invoke(
+            SignalMethods.OnConferenceStartRecording,
+            'Conference start recording'
+          );
+        } else {
+          this.isScreenRecording = false;
+        }
+      },
     });
   }
 
-  stopRecording(): void {
+  public stopRecording(): void {
+    this.isWaitingForRecord = true;
+
     this.isScreenRecording = false;
 
     this.blobService.stopRecording();
@@ -435,6 +486,11 @@ export class MeetingComponent
       SignalMethods.OnConferenceStopRecording,
       'Conference stop recording'
     );
+  }
+
+  public onPollIconClick(): void {
+    this.isShowStatistics = false;
+    this.pollService.onPollIconClick();
   }
 
   public onStatisticsIconClick(): void {
@@ -501,6 +557,7 @@ export class MeetingComponent
       authorEmail: this.authService.currentUser.email,
       meetingId: this.meeting.id,
       message: this.msgText,
+      receiverEmail: this.msgReceiverEmail,
     } as MeetingMessageCreate);
 
     this.msgText = '';
@@ -605,10 +662,10 @@ export class MeetingComponent
             SignalMethods.OnUserConnect,
             this.connectionData
           );
-          this.meetingSignalrService.invoke(
-            SignalMethods.OnGetMessages,
-            this.meeting.id
-          );
+          this.meetingSignalrService.invoke(SignalMethods.OnGetMessages, {
+            meetingId: this.meeting.id,
+            email: this.authService.currentUser.email,
+          } as GetMessages);
         },
         (error) => {
           console.log(error.message);
@@ -649,22 +706,23 @@ export class MeetingComponent
   }
 
   onCanvasDraw(event) {
+    const points = event as CanvasWhiteboardUpdate[];
+    console.log(points);
     this.meetingSignalrService.invoke(SignalMethods.OnDrawing, {
-      // meetingId: this.meeting.id,
-      meetingId: '123',
-      canvasEvent: event,
+      meetingId: this.meeting.id.toString(),
+      canvasEvent: points,
     });
   }
 
   onCanvasClear() {
     this.meetingSignalrService.invoke(SignalMethods.OnErasing, {
-      meetingId: this.meeting.id,
+      meetingId: this.meeting.id.toString(),
       erase: true,
     });
   }
 
   showCanvas() {
-    this.canvasIsDisplayed = this.canvasIsDisplayed ? false : true;
+    this.canvasIsDisplayed = !this.canvasIsDisplayed;
   }
 
   private setOutputDevice(): void {
@@ -674,6 +732,56 @@ export class MeetingComponent
         elem,
         this.mediaSettingsService.settings.OutputDeviceId
       );
+    });
+  }
+  public async changeStateVideo(event: any) {
+    this.mediaSettingsService.changeVideoDevice(event);
+    this.currentUserStream.getVideoTracks()?.forEach((track) => track.stop());
+    this.currentUserStream = await navigator.mediaDevices.getUserMedia({
+      video: { deviceId: event },
+      audio: false,
+    });
+    this.handleSuccessVideo(this.currentUserStream);
+  }
+  async handleSuccessVideo(stream: MediaStream): Promise<void> {
+    const video = document.querySelector('video');
+    video.srcObject = stream;
+    const keys = Object.keys(this.peer.connections);
+    const peerConnection = this.peer.connections[keys[0]];
+    const videoTrack = stream.getVideoTracks()[0];
+    peerConnection.forEach((pc) => {
+      const sender = pc.peerConnection.getSenders().find((s) => {
+        return s.track.kind === videoTrack.kind;
+      });
+      sender.replaceTrack(videoTrack);
+    });
+  }
+  public async changeInputDevice(deviceId: string) {
+    this.mediaSettingsService.changeInputDevice(deviceId);
+    this.currentUserStream = await navigator.mediaDevices.getUserMedia({
+      video: false,
+      audio: { deviceId: deviceId },
+    });
+    this.handleSuccess(this.currentUserStream);
+  }
+
+  public async changeOutputDevice(deviceId: string) {
+    const audio = document.querySelector('audio');
+    this.mediaSettingsService.changeOutputDevice(deviceId);
+    this.mediaSettingsService.attachSinkId(audio, deviceId);
+  }
+
+  async handleSuccess(stream): Promise<void> {
+    const audio = document.querySelector('audio');
+    audio.srcObject = stream;
+    const keys = Object.keys(this.peer.connections);
+    const peerConnection = this.peer.connections[keys[0]];
+    const audioTrack = stream.getAudioTracks()[0];
+    peerConnection.forEach((pc) => {
+      const sender = pc.peerConnection.getSenders().find((s) => {
+        return s.track.kind === audioTrack.kind;
+      });
+      sender.replaceTrack(audioTrack);
     });
   }
 }

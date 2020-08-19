@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Whale.BLL.Services.Interfaces;
-using Whale.Shared.DTO.Meeting.ScheduledMeeting;
+using Whale.API.Models.ScheduledMeeting;
+using Whale.API.Services;
 
 namespace Whale.API.Controllers
 {
@@ -10,9 +10,9 @@ namespace Whale.API.Controllers
     [ApiController]
     public class ScheduledMeetingController : ControllerBase
     {
-        private readonly IScheduledMeetingsService _scheduledMeetingService;
+        private readonly ScheduledMeetingsService _scheduledMeetingService;
 
-        public ScheduledMeetingController(IScheduledMeetingsService scheduledMeetingService)
+        public ScheduledMeetingController(ScheduledMeetingsService scheduledMeetingService)
         {
             _scheduledMeetingService = scheduledMeetingService;
         }

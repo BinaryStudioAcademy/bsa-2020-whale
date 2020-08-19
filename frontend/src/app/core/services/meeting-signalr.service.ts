@@ -63,7 +63,7 @@ export class MeetingSignalrService {
   public readonly canvasErase$ = this.canvasErase.asObservable();
 
   constructor(private hubService: SignalRService) {
-    from(hubService.registerHub(environment.meetingApiUrl, 'meeting'))
+    from(hubService.registerHub(environment.signalrUrl, 'meeting'))
       .pipe(
         tap((hub) => {
           this.signalHub = hub;
