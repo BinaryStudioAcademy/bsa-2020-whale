@@ -103,6 +103,7 @@ export class MeetingComponent
   private elem: any;
   public isMicrophoneMuted = false;
   public isCameraMuted = false;
+  public currentLocation: string;
 
   constructor(
     private route: ActivatedRoute,
@@ -329,6 +330,7 @@ export class MeetingComponent
 
     // disables ability to close browser tab if user didn't visit any element on the tab
     this.mainArea.nativeElement.classList.add('visited');
+    this.currentLocation = this.document.location.href;
 
     // show a warning dialog if close current tab or window
     window.onbeforeunload = function (ev: BeforeUnloadEvent) {
@@ -365,6 +367,7 @@ export class MeetingComponent
     let canLeave = true;
     if (this.currentParticipant?.role === ParticipantRole.Host) {
       canLeave = confirm('You will end current meeting!');
+      window.onbeforeunload = function (ev: BeforeUnloadEvent) {};
     }
 
     if (canLeave) {

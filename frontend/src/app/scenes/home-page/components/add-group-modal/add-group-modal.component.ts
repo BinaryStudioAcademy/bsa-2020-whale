@@ -27,7 +27,7 @@ export class AddGroupModalComponent extends SimpleModalComponent<null, Group> {
   }
 
   public submit(): void {
-    this.groupService.createGroup(this.ownerEmail, this.newGroup).subscribe(
+    this.groupService.createGroup(this.newGroup).subscribe(
       (resp) => {
         this.result = resp.body;
         this.close();
