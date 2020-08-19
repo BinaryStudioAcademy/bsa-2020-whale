@@ -5,18 +5,24 @@
         <img src="{{ contactSelected.secondMember.avatarUrl }}" />
       </div>
       <div class="content">
-        <div class="summary">
-          <a class="user user-chat-label">
-            {{ contactSelected.secondMember.firstName }}
-            {{ contactSelected.secondMember.secondName }}
-            {{ contactSelected.secondMember.email }}
-          </a>
-          <i class="phone icon" (click)="call()"></i>
-
-          <a class="ui mini basic button edit-button" (click)="close()"
-            >Close chat</a
-          >
+        <div class="user-info">
+          <div>
+            <span class="user user-chat-label ui header">
+              {{ contactSelected.secondMember.firstName }}
+              {{ contactSelected.secondMember.secondName }}
+              <span class="grey sub header">
+                {{ contactSelected.secondMember.email }}
+              </span>
+            </span>
+          </div>
+          <div data-tooltip="Call" data-position="right center">
+            <i id="chat-call" class="large phone icon" (click)="call()"></i>
+          </div>
         </div>
+
+        <span data-tooltip="Close chat" data-position="left center">
+          <i id="chat-close" class="large close icon" (click)="close()"></i>
+        </span>
       </div>
     </div>
 
@@ -58,6 +64,7 @@
       ></textarea>
     </div>
     <button
+      id="chat-submit"
       class="ui button tiny send"
       type="submit"
       id="sendmessage"

@@ -4,10 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Whale.BLL.Interfaces;
-using Whale.Shared.DTO.Meeting;
-using Whale.Shared.Services;
-using Whale.Shared.DTO.Meeting.MeetingMessage;
+using Whale.API.Services;
+using Whale.Shared.Models.Meeting;
 
 namespace Whale.API.Controllers
 {
@@ -15,33 +13,45 @@ namespace Whale.API.Controllers
     [ApiController]
     public class MeetingController : ControllerBase
     {
-        private readonly IMeetingService _meetingService;
+        private readonly HttpService _httpService;
 
-        public MeetingController(IMeetingService meetingService)
+        public MeetingController(HttpService httpService)
         {
-            _meetingService = meetingService;
+            _httpService = httpService;
         }
 
         [HttpPost]
         public async Task<ActionResult<MeetingLinkDTO>> CreateMeeting(MeetingCreateDTO meetingDto)
         {
             var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
-            return Ok(await _meetingService.CreateMeeting(meetingDto, ownerEmail));
+            meetingDto.CreatorEmail = ownerEmail;
+            return Ok(await _httpService.PostAsync<MeetingCreateDTO, MeetingLinkDTO>("api/meeting", meetingDto));
         }
 
         [HttpGet]
-        public async Task<ActionResult<MeetingDTO>> ConnectToMeeting(Guid id, string pwd)
+        public async Task<ActionResult<MeetingDTO>> ConnectMeeting(Guid id, string pwd)
         {
             var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
-            return Ok(await _meetingService.ConnectToMeeting(new MeetingLinkDTO { Id = id, Password = pwd}, ownerEmail));
+            return Ok(await _httpService.GetAsync<MeetingDTO>($"api/meeting?id={id}&pwd={pwd}&email={ownerEmail}"));
+        }
+
+        [HttpGet("shortInvite/{inviteLink}")]
+        public async Task<ActionResult<string>> GetFullMeetingLink(string inviteLink)
+        {
+            return Ok(await _httpService.GetAsync<string>($"api/meeting/shortInvite/{inviteLink}"));
         }
 
         [HttpPut("end")]
         public async Task<NoContentResult> SaveMeetingEndTime(MeetingDTO meetingDto)
         {
-            await _meetingService.SaveMeetingEndTime(meetingDto);
+            await _httpService.PutAsync<MeetingDTO>("api/meeting/end", meetingDto);
             return NoContent();
         }
-    }
 
+        [HttpGet("shortenLink/{longURL}")]
+        public async Task<ActionResult<string>> GetShortURL(string longURL)
+        {
+            return Ok(await _httpService.GetAsync<string>($"api/meeting/shortenLink/{longURL}"));
+        }
+    }
 }

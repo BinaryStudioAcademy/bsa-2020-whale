@@ -14,6 +14,9 @@ import { CopyClipboardComponent } from './components/copy-clipboard/copy-clipboa
 import { IncomingCallComponent } from './components/incoming-call/incoming-call.component';
 import { AngularDraggableModule } from 'angular2-draggable';
 import { ProgressBarDirective } from './directives/progress-bar.directive';
+import { AudioSettingsComponent } from '@shared/components/settings/audio-settings/audio-settings.component';
+import { VideoSettingsComponent } from '@shared/components/settings/video-settings/video-settings.component';
+import { OutputSettingsComponent } from './components/settings/output-settings/output-settings.component';
 
 @NgModule({
   declarations: [
@@ -28,6 +31,9 @@ import { ProgressBarDirective } from './directives/progress-bar.directive';
     CopyClipboardComponent,
     IncomingCallComponent,
     ProgressBarDirective,
+    AudioSettingsComponent,
+    VideoSettingsComponent,
+    OutputSettingsComponent,
   ],
   imports: [
     CommonModule,
@@ -46,6 +52,9 @@ import { ProgressBarDirective } from './directives/progress-bar.directive';
     ParticipantCardComponent,
     MeetingStatisticsComponent,
     IncomingCallComponent,
+    AudioSettingsComponent,
+    VideoSettingsComponent,
+    OutputSettingsComponent,
   ],
 })
 export class SharedModule {}

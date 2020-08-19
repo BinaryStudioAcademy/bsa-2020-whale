@@ -11,6 +11,7 @@ import { PollDto } from '@shared/models/poll/poll-dto';
 import { PollResultDto } from '@shared/models/poll/poll-result-dto';
 import { VoteDto } from '@shared/models/poll/vote-dto';
 import { VoterDto } from '@shared/models/poll/voter-dto';
+import { CanvasWhiteboardUpdate } from 'ng2-canvas-whiteboard';
 
 @Injectable({
   providedIn: 'root',
@@ -55,8 +56,14 @@ export class MeetingSignalrService {
   private pollDeleted = new Subject<string>();
   public pollDeleted$ = this.pollDeleted.asObservable();
 
+  private canvasDraw = new Subject<CanvasWhiteboardUpdate[]>();
+  public readonly canvasDraw$ = this.canvasDraw.asObservable();
+
+  private canvasErase = new Subject<boolean>();
+  public readonly canvasErase$ = this.canvasErase.asObservable();
+
   constructor(private hubService: SignalRService) {
-    from(hubService.registerHub(environment.meetingApiUrl, 'meeting'))
+    from(hubService.registerHub(environment.signalrUrl, 'meeting'))
       .pipe(
         tap((hub) => {
           this.signalHub = hub;
@@ -125,6 +132,14 @@ export class MeetingSignalrService {
         this.signalHub.on('OnPollDeleted', (pollId: string) => {
           this.pollDeleted.next(pollId);
         });
+
+        this.signalHub.on('OnDrawing', (drawing: CanvasWhiteboardUpdate[]) => {
+          this.canvasDraw.next(drawing);
+        });
+
+        this.signalHub.on('OnErasing', (erase: boolean) => {
+          this.canvasErase.next(erase);
+        });
       });
   }
 
@@ -147,4 +162,6 @@ export enum SignalMethods {
   OnGetMessages,
   OnPoll,
   OnPollCreated,
+  OnDrawing,
+  OnErasing,
 }

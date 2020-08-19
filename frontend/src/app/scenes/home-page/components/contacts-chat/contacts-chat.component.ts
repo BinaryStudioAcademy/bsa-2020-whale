@@ -75,7 +75,7 @@ export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
     this.hubConnection?.invoke('JoinGroup', this.contactSelected.id);
   }
   ngOnInit(): void {
-    from(this.signalRService.registerHub(environment.apiUrl, 'chatHub'))
+    from(this.signalRService.registerHub(environment.signalrUrl, 'chatHub'))
       .pipe(
         tap((hub) => {
           this.hubConnection = hub;

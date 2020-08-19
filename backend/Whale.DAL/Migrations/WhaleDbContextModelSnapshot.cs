@@ -109,8 +109,8 @@ namespace Whale.DAL.Migrations
                     b.Property<Guid>("ContactId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Message")
                         .IsRequired()
@@ -209,8 +209,8 @@ namespace Whale.DAL.Migrations
                     b.Property<string>("Settings")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("StartTime")
+                        .HasColumnType("datetimeoffset");
 
                     b.HasKey("Id");
 
@@ -335,8 +335,8 @@ namespace Whale.DAL.Migrations
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("RegistrationDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("RegistrationDate")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("SecondName")
                         .HasColumnType("nvarchar(max)");

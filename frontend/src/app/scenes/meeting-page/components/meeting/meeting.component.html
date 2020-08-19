@@ -1,79 +1,79 @@
+<div *ngIf="isWaitingForRecord" class="waiting-for-record-modal">
+  <p>Waiting record...</p>
+</div>
+
 <div #mainArea class="bg-white">
-  <div *ngIf="isShowChat" class="ui chat card">
-    <div class="ui chat-inner feed">
-      <div *ngFor="let message of messages" class="event">
-        <div class="label">
-          <img src="{{ message?.author?.avatarUrl }}" />
-        </div>
-        <div class="content">
-          <div class="summary">
-            <a class="user">
-              {{ message?.author?.firstName }} {{ message?.author?.secondName }}
-            </a>
-            <div class="date">
-              {{ message?.sentDate | dateFormat }}
-            </div>
-          </div>
-          {{ message?.message }}
-        </div>
-      </div>
-    </div>
-    <div class="ui form vertically-aligned">
-      <div class="ui icon input">
-        <div class="ui icon input">
-          <textarea
-            (keydown.enter)="onEnterKeyPress($event)"
-            rows="1"
-            placeholder="Enter to send.
-Enter+Shift for new line."
-            [(ngModel)]="msgText"
-          ></textarea>
-          <i
-            aria-hidden="true"
-            class="paper plane link icon blue"
-            (click)="sendMessage()"
-          ></i>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div *ngIf="isShowParticipants" class="ui participants-container">
-    <div class="invite-icon-container">
-      <i class="user plus icon"></i>
-    </div>
-    <div class="ui divided list">
-      <div
-        *ngFor="let participant of meeting.participants"
-        class="ui item participant"
-      >
-        <img src="{{ participant.user.avatarUrl }}" />
-        <span
-          >{{ participant.user.firstName }}
-          {{ participant.user.lastName ? participant.user.lastName : "" }}</span
-        >
-      </div>
-    </div>
-  </div>
-
-  <div class="content">
+  <div class="content display-flex">
     <div class="tools" ngDraggable>
-      <i class="big microphone icon block"></i>
-      <i class="big video icon block"></i>
-      <i
-        class="users icon big users-icon-fix block"
-        (click)="isShowParticipants = !isShowParticipants"
-      ></i>
-      <i class="big share square icon block"></i>
-      <i
-        (click)="pollService.onPollIconClick()"
-        class="big clipboard list icon"
-      ></i>
-      <i (click)="onStatisticsIconClick()" class="big chart bar icon"></i>
-      <i (click)="showChat()" class="big wechat icon block"></i>
-      <i (click)="closeFullscreen()" class="big desktop icon block"></i>
+      <span data-tooltip="Toggle Microphone" data-position="top left">
+        <i
+          id="meeting-draggable-mute"
+          *ngIf="!isMicrophoneMuted"
+          class="big microphone icon"
+          (click)="turnOffMicrophone()"
+        ></i>
+        <i
+          id="meeting-draggable-mute"
+          *ngIf="isMicrophoneMuted"
+          class="big slash microphone icon"
+          (click)="turnOffMicrophone()"
+        ></i>
+      </span>
+      <span data-tooltip="Toggle Webcam" data-position="top left">
+        <i
+          id="meeting-draggable-camera"
+          *ngIf="!isCameraMuted"
+          class="big video icon big-left-margin"
+          (click)="turnOffCamera()"
+        ></i>
+        <i
+          id="meeting-draggable-camera"
+          *ngIf="isCameraMuted"
+          class="big eye slash icon big-left-margin"
+          (click)="turnOffCamera()"
+        ></i>
+      </span>
+      <span data-tooltip="Participants" data-position="top left">
+        <i
+          id="meeting-draggable-participants"
+          class="users icon big users-icon-fix block"
+          (click)="isShowParticipants = !isShowParticipants"
+        ></i>
+      </span>
+      <span data-tooltip="Share Screen">
+        <i class="big share square icon block"></i>
+      </span>
+      <span data-tooltip="Polls">
+        <i
+          id="meeting-draggable-poll"
+          (click)="pollService.onPollIconClick()"
+          class="big clipboard list icon"
+        ></i>
+      </span>
+      <span data-tooltip="Statistics" data-position="top right">
+        <i
+          id="meeting-draggable-statistics"
+          (click)="onStatisticsIconClick()"
+          class="big chart bar icon"
+        ></i>
+      </span>
+      <span data-tooltip="Chat" data-position="top right">
+        <i
+          id="meeting-draggable-chat"
+          (click)="showChat()"
+          class="big wechat icon block"
+        ></i>
+      </span>
+      <span data-tooltip="Quit fullscreen" data-position="top right">
+        <i
+          id="meeting-draggable-fullscrean"
+          (click)="closeFullscreen()"
+          class="big compress icon block"
+        ></i>
+      </span>
       <span data-tooltip="Show Self View" data-position="top right">
         <i
+          id="meeting-draggable-create"
           (click)="createParticipantCard(currentParticipant, true)"
           (click)="isShowCurrentParticipantCard = true"
           *ngIf="!isShowCurrentParticipantCard"
@@ -81,121 +81,275 @@ Enter+Shift for new line."
         ></i>
       </span>
     </div>
-
-    <div class="users" *ngIf="mediaData.length > 1">
-      <app-participant-card
-        *ngFor="let data of mediaData"
-        (hideViewEvent)="hideViewEventHandler($event)"
-        [data]="data"
-      >
-      </app-participant-card>
+    <div *ngIf="isShowParticipants" class="ui participants-container">
+      <div class="invite-icon-container">
+        <i class="user plus icon"></i>
+      </div>
+      <div class="ui divided list">
+        <div
+          *ngFor="let participant of distinctParticipants"
+          class="ui item participant"
+        >
+          <img src="{{ participant.user.avatarUrl }}" />
+          <span
+            >{{ participant.user.firstName }}
+            {{
+              participant.user.secondName ? participant.user.secondName : ""
+            }}</span
+          >
+        </div>
+      </div>
     </div>
 
-    <video
-      #currentVideo
-      *ngIf="mediaData.length <= 1"
-      autoplay="autoplay"
-      class="participant-fullscreen"
-      [muted]="'muted'"
-    ></video>
-
-    <div class="options">
-      <div class="ui options__buttons">
-        <div class="inner-block">
-          <span
-            *ngIf="!isScreenRecording"
-            data-tooltip="Toggle Microphone"
-            data-position="top left"
-          >
-            <i
-              *ngIf="!isMicrophoneMuted"
-              class="big microphone icon"
-              (click)="turnOffMicrophone()"
-            ></i>
-            <i
-              *ngIf="isMicrophoneMuted"
-              class="big slash microphone icon"
-              (click)="turnOffMicrophone()"
-            ></i>
-          </span>
-          <span *ngIf="!isScreenRecording" data-tooltip="Toggle Webcam">
-            <i
-              *ngIf="!isCameraMuted"
-              class="big video icon big-left-margin"
-              (click)="turnOffCamera()"
-            ></i>
-            <i
-              *ngIf="isCameraMuted"
-              class="big eye slash icon big-left-margin"
-              (click)="turnOffCamera()"
-            ></i>
-          </span>
-        </div>
-
-        <div class="display-flex inner-block">
-          <div class="participants-button-container">
-            <div
-              class="relative-container"
-              data-tooltip="Participants"
+    <div class="main-content">
+      <div class="options">
+        <div class="ui options__buttons">
+          <div class="inner-block">
+            <span
+              *ngIf="!isScreenRecording"
+              data-tooltip="Toggle Microphone"
               data-position="top left"
             >
               <i
-                class="users icon big users-icon-fix"
-                (click)="isShowParticipants = !isShowParticipants"
+                id="meeting-options-microphone"
+                *ngIf="!isMicrophoneMuted"
+                class="big microphone icon"
+                (click)="turnOffMicrophone()"
               ></i>
-            </div>
+              <i
+                id="meeting-options-microphone"
+                *ngIf="isMicrophoneMuted"
+                class="big slash microphone icon"
+                (click)="turnOffMicrophone()"
+              ></i>
+            </span>
+            <span data-tooltip="Settings">
+              <i
+                class="angle up icon"
+                *ngIf="!isMicrophoneMuted"
+                (click)="isAudioSettings = !isAudioSettings"
+              ></i>
+            </span>
+            <span *ngIf="!isScreenRecording" data-tooltip="Toggle Webcam">
+              <i
+                id="meeting-options-camera"
+                *ngIf="!isCameraMuted"
+                class="big video icon big-left-margin"
+                (click)="turnOffCamera()"
+              ></i>
+              <i
+                id="meeting-options-camera"
+                *ngIf="isCameraMuted"
+                class="big eye slash icon big-left-margin"
+                (click)="turnOffCamera()"
+              ></i>
+            </span>
+            <span data-tooltip="Settings">
+              <i
+                class="angle up icon"
+                *ngIf="!isCameraMuted"
+                (click)="isVideoSettings = !isVideoSettings"
+              ></i>
+            </span>
           </div>
-          <span
-            *ngIf="!isScreenRecording"
-            data-tooltip="Start Recording"
-            data-position="top left"
-          >
-            <i (click)="startRecording()" class="big circle icon"></i>
-          </span>
-          <span
-            *ngIf="isScreenRecording"
-            data-tooltip="Stop Recording"
-            data-position="top left"
-          >
-            <i (click)="stopRecording()" class="big stop circle icon"></i>
-          </span>
-          <span data-tooltip="Share Screen" data-position="top left">
-            <i class="big share square icon big-left-margin"></i>
-          </span>
-          <span data-tooltip="Polls">
-            <i
-              (click)="pollService.onPollIconClick()"
-              class="big clipboard list icon"
-            ></i
-          ></span>
-          <span data-tooltip="Statistics">
-            <i (click)="onStatisticsIconClick()" class="big chart bar icon"></i
-          ></span>
-          <span data-tooltip="Copy Link" data-position="top right">
-            <i (click)="onCopyIconClick()" class="big copy icon"></i>
-          </span>
-          <span data-tooltip="Chat" data-position="top right">
-            <i (click)="showChat()" class="big wechat icon big-left-margin"></i>
-          </span>
-          <span data-tooltip="Fullscreen" data-position="top right">
-            <i
-              (click)="goFullscreen()"
-              class="big desktop icon big-left-margin"
-            ></i>
-          </span>
-          <span data-tooltip="Show Self View" data-position="top right">
-            <i
-              *ngIf="!isShowCurrentParticipantCard"
-              (click)="createParticipantCard(currentParticipant, true)"
-              (click)="isShowCurrentParticipantCard = true"
-              class="big user plus icon big-left-margin"
-            ></i>
-          </span>
+
+          <div class="display-flex inner-block">
+            <div class="participants-button-container">
+              <div
+                class="relative-container"
+                data-tooltip="Participants"
+                data-position="top left"
+              >
+                <i
+                  id="meeting-options-participants"
+                  class="users icon big users-icon-fix"
+                  (click)="isShowParticipants = !isShowParticipants"
+                ></i>
+              </div>
+            </div>
+            <span
+              *ngIf="!isScreenRecording"
+              data-tooltip="Start Recording"
+              data-position="top left"
+            >
+              <i
+                id="meeting-options-recording"
+                (click)="startRecording()"
+                class="big circle icon"
+              ></i>
+            </span>
+            <span
+              *ngIf="isScreenRecording"
+              data-tooltip="Stop Recording"
+              data-position="top left"
+            >
+              <i
+                id="meeting-options-recording"
+                (click)="stopRecording()"
+                class="big stop circle icon"
+              ></i>
+            </span>
+            <span data-tooltip="Share Screen" data-position="top left">
+              <i
+                id="meeting-options-share"
+                class="big share square icon big-left-margin"
+              ></i>
+            </span>
+            <span data-tooltip="Polls">
+              <i
+                id="meeting-options-poll"
+                (click)="onPollIconClick()"
+                class="big clipboard list icon"
+              ></i
+            ></span>
+            <span data-tooltip="Statistics">
+              <i
+                id="meeting-options-statistics"
+                (click)="onStatisticsIconClick()"
+                class="big chart bar icon"
+              ></i
+            ></span>
+            <span data-tooltip="Copy Link" data-position="top right">
+              <i
+                id="meeting-options-copy"
+                (click)="onCopyIconClick()"
+                class="big copy icon"
+              ></i>
+            </span>
+            <span data-tooltip="Chat" data-position="top right">
+              <i
+                id="meeting-options-chat"
+                (click)="showChat()"
+                class="big wechat icon big-left-margin"
+              ></i>
+            </span>
+            <span data-tooltip="Canvas" data-position="top right">
+              <i (click)="showCanvas()" class="big paint brush icon"></i>
+            </span>
+            <span data-tooltip="Fullscreen" data-position="top right">
+              <i
+                id="meeting-options-fullscreen"
+                (click)="goFullscreen()"
+                class="big expand icon big-left-margin"
+              ></i>
+            </span>
+            <span data-tooltip="Show Self View" data-position="top right">
+              <i
+                id="meeting-options-create"
+                *ngIf="!isShowCurrentParticipantCard"
+                (click)="createParticipantCard(currentParticipant, true)"
+                (click)="isShowCurrentParticipantCard = true"
+                class="big user plus icon big-left-margin"
+              ></i>
+            </span>
+          </div>
+          <div>
+            <button
+              id="meeting-options-leave"
+              class="ui red button"
+              (click)="leave()"
+            >
+              Leave
+            </button>
+          </div>
         </div>
-        <div>
-          <button class="ui red button" (click)="leave()">
-            Leave
-          </button>
+      </div>
+      <div class="canvas" *ngIf="canvasIsDisplayed">
+        <canvas-whiteboard
+          #canvasWhiteboard
+          [options]="canvasOptions"
+          (onBatchUpdate)="onCanvasDraw($event)"
+          (onClear)="onCanvasClear()"
+        >
+        </canvas-whiteboard>
+      </div>
+
+      <div class="users" *ngIf="mediaData.length > 1">
+        <app-participant-card
+          *ngFor="let data of mediaData"
+          (hideViewEvent)="hideViewEventHandler($event)"
+          [data]="data"
+        >
+        </app-participant-card>
+      </div>
+
+      <video
+        #currentVideo
+        autoplay="autoplay"
+        class="participant-fullscreen"
+        [hidden]="mediaData.length > 1"
+        [muted]="'muted'"
+      ></video>
+    </div>
+
+    <div *ngIf="isShowChat" class="ui chat card">
+      <div class="ui chat-inner feed">
+        <div *ngFor="let message of messages" class="event">
+          <div class="label">
+            <img src="{{ message?.author?.avatarUrl }}" />
+          </div>
+          <div class="chat-content">
+            <div class="summary">
+              <a class="user">
+                {{ message?.author?.firstName }}
+                {{ message?.author?.secondName }}
+              </a>
+              <div
+                *ngIf="
+                  message.receiver &&
+                  message.receiver.email !== currentParticipant.user.email
+                "
+                class="message_receiver"
+              >
+                To: {{ message?.receiver?.firstName }}
+                {{ message?.receiver?.secondName }}
+              </div>
+              <div
+                *ngIf="
+                  message.receiver &&
+                  message.receiver.email === currentParticipant.user.email
+                "
+                class="privately-received"
+              >
+                privately
+              </div>
+              <div class="date">
+                {{ message?.sentDate | dateFormat }}
+              </div>
+            </div>
+            {{ message?.message }}
+          </div>
+        </div>
+      </div>
+      <div class="ui form vertically-aligned">
+        <div class="ui right labeled input">
+          <label for="receiver" class="ui label">Send To:</label>
+          <select
+            class="ui compact selection dropdown"
+            id="receiver"
+            [(ngModel)]="msgReceiverEmail"
+          >
+            <option value="">Everyone</option>
+            <option *ngFor="let p of otherParticipants" [value]="p.user.email"
+              >{{ p.user.firstName }} {{ p.user.secondName }}</option
+            >
+          </select>
+        </div>
+
+        <div class="ui icon input">
+          <textarea
+            (keydown.enter)="onEnterKeyPress($event)"
+            rows="1"
+            placeholder="Enter to send.
+  Enter+Shift for new line."
+            [(ngModel)]="msgText"
+          ></textarea>
+          <i
+            id="meeting-sendmessage"
+            aria-hidden="true"
+            class="paper plane link icon blue"
+            (click)="sendMessage()"
+          ></i>
         </div>
       </div>
     </div>
@@ -228,6 +382,7 @@ Enter+Shift for new line."
     *ngIf="pollService.isShowPoll"
   >
     <button
+      id="meeting-poll-new"
       *ngIf="currentParticipant && currentParticipant.role == 1"
       (click)="pollService.onNewPollClick()"
       class="ui button"
@@ -241,6 +396,7 @@ Enter+Shift for new line."
       <div *ngFor="let pollx of pollService.polls; let i = index">
         <hr class="poll-divider" />
         <span
+          id="meeting-poll-delete"
           *ngIf="currentParticipant.role == 1"
           class="delete-poll-icon"
           (click)="pollService.onDeletePollIconClick(pollx)"
@@ -251,7 +407,8 @@ Enter+Shift for new line."
           [poll]="pollx"
           [user]="currentParticipant.user"
           (pollAnswered)="pollService.onPollAnswered($event)"
-        ></app-poll>
+        >
+        </app-poll>
       </div>
     </div>
     <div class="ui segment">
@@ -259,6 +416,7 @@ Enter+Shift for new line."
       <div *ngFor="let pollxResult of pollService.pollResults; let i = index">
         <hr class="poll-divider" />
         <span
+          id="meeting-poll-result"
           *ngIf="currentParticipant.role == 1"
           class="delete-poll-icon"
           (click)="
@@ -270,5 +428,19 @@ Enter+Shift for new line."
         <app-poll-results [pollResult]="pollxResult"></app-poll-results>
       </div>
     </div>
+  </div>
+  <div class="settings" *ngIf="isVideoSettings && !isCameraMuted">
+    <app-video-settings
+      (onClick)="changeStateVideo($event)"
+    ></app-video-settings>
+  </div>
+  <div class="settings" *ngIf="isAudioSettings && !isMicrophoneMuted">
+    <app-audio-settings
+      (onClick)="changeInputDevice($event)"
+    ></app-audio-settings>
+    <app-output-settings
+      (onClick)="changeOutputDevice($event)"
+    ></app-output-settings>
+    <audio></audio>
   </div>
 </div>

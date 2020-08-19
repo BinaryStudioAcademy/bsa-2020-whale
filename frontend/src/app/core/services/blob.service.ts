@@ -9,28 +9,42 @@ import { Observable } from 'rxjs';
 export class BlobService {
   constructor(private http: HttpClient) {}
 
-  public baseUrl: string = environment.apiUrl;
-
+  baseUrl: string = environment.apiUrl;
   recorder: MediaRecorder;
   stream: MediaStream;
 
-  public async startRecording(): Promise<void> {
-    const mediaDevices = navigator.mediaDevices as any;
-    this.stream = await mediaDevices.getDisplayMedia({
-      video: { mediaSource: 'screen' },
-      audio: true,
+  public startRecording(): Observable<boolean> {
+    return new Observable<boolean>((subscriber) => {
+      const mediaDevices = navigator.mediaDevices as any;
+      mediaDevices
+        .getDisplayMedia({
+          video: { mediaSource: 'screen' },
+          audio: true,
+        })
+        .then((stream: MediaStream) => {
+          this.stream = stream;
+          this.recorder = new MediaRecorder(stream);
+          const chunks = [];
+          this.recorder.ondataavailable = (e: any) => chunks.push(e.data);
+          this.recorder.stream.getVideoTracks()[0].onended = () => {
+            subscriber.next(false);
+          };
+          this.recorder.onstop = (e: Event) => {
+            const blob = new Blob(chunks, { type: chunks[0].type });
+
+            this.postBlob(blob).subscribe((resp) => {
+              subscriber.complete();
+              alert(resp);
+            });
+          };
+          this.recorder.start();
+
+          subscriber.next(true);
+        })
+        .catch(() => {
+          subscriber.next(false);
+        });
     });
-
-    this.recorder = new MediaRecorder(this.stream);
-
-    const chunks = [];
-    this.recorder.ondataavailable = (e: any) => chunks.push(e.data);
-    this.recorder.onstop = (e: Event) => {
-      const completeBlob = new Blob(chunks, { type: chunks[0].type });
-
-      this.postBlob(completeBlob);
-    };
-    this.recorder.start();
   }
 
   public stopRecording(): void {
@@ -38,16 +52,14 @@ export class BlobService {
     this.stream.getVideoTracks()[0].stop();
   }
 
-  private postBlob(blob: Blob): void {
+  public postBlob(blob: Blob): Observable<string> {
     const formData = new FormData();
 
     formData.append('meeting-record', blob, 'record');
 
-    this.http
-      .post(`${this.baseUrl}/api/storage/save`, formData, {
-        responseType: 'text',
-      })
-      .subscribe((resp) => alert(resp));
+    return this.http.post(`${this.baseUrl}/api/storage/save`, formData, {
+      responseType: 'text',
+    });
   }
 
   public postBlobUploadImage(blob: Blob): Observable<string> {

@@ -1,10 +1,15 @@
-<div class="ui dimmer modals page visible active" (click)="cancel()">
+<div
+  id="login-cancel"
+  class="ui dimmer modals page visible active"
+  (click)="cancel()"
+>
   <div class="ui mini modal visible active" (click)="$event.stopPropagation()">
     <div class="header">
       Sign In
     </div>
     <div class="actions">
       <button
+        id="login-google"
         class="ui labeled icon google plus button login"
         (click)="googleLogin()"
       >
@@ -12,6 +17,7 @@
         Sign in with Google
       </button>
       <button
+        id="login-facebook"
         class="ui labeled icon facebook button login"
         (click)="facebookLogin()"
       >

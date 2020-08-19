@@ -1,4 +1,5 @@
 <div
+  id="modal-div-close"
   class="ui dimmer modals page visible active"
   (click)="cancel(contactForm.dirty)"
 >
@@ -10,7 +11,7 @@
       <div class="content">
         <div class="ui segment">
           <div class="field">
-            <label>Contactner Email</label>
+            <label>Contacter Email</label>
             <input
               type="text"
               name="email"
@@ -18,7 +19,7 @@
               #email="ngModel"
               placeholder="Email"
               required
-              email
+              pattern="[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"
             />
             <div
               class="ui error message"
@@ -31,6 +32,7 @@
             </div>
           </div>
           <button
+            id="submit-contact"
             class="ui button primary"
             type="submit"
             [disabled]="contactForm.invalid || ownerEmail === email.value"
@@ -38,6 +40,7 @@
             Add
           </button>
           <button
+            id="modal-close"
             class="ui button"
             type="button"
             (click)="cancel(contactForm.dirty)"

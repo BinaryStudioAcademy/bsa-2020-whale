@@ -5,13 +5,20 @@
     </div>
     <div class="right menu">
       <div class="item" *ngIf="auth.isSignedIn">
-        <a class="ui primary button" (click)="redirectToHome()">Profile</a>
+        <a
+          id="landing-home"
+          class="ui primary button"
+          (click)="redirectToHome()"
+          >Profile</a
+        >
       </div>
       <div class="item" *ngIf="auth.isSignedIn">
-        <a class="ui button" (click)="logOut()">Log Out</a>
+        <a id="landing-logout" class="ui button" (click)="logOut()">Log Out</a>
       </div>
       <div class="item" *ngIf="!auth.isSignedIn">
-        <a class="ui primary button" (click)="logIn()">Log In</a>
+        <a id="landing-login" class="ui primary button" (click)="logIn()"
+          >Log In</a
+        >
       </div>
     </div>
   </div>
@@ -30,6 +37,7 @@
         </div>
         <div class="ui text container">
           <button
+            id="landing-main-login"
             class="ui big primary button"
             (click)="logIn()"
             *ngIf="!auth.isSignedIn"
@@ -37,6 +45,7 @@
             <span>Sign up for free</span>
           </button>
           <button
+            id="landing-main-home"
             class="ui big primary button"
             (click)="redirectToHome()"
             *ngIf="auth.isSignedIn"

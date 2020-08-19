@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { BrowserMediaDevice } from '../browser-media-device';
+import { BrowserMediaDevice } from '@shared/browser-media-device';
 import * as DecibelMeter from 'decibel-meter';
 import * as RecordRTC from 'recordrtc';
+import { MediaSettingsService } from 'app/core/services/media-settings.service';
 @Component({
   selector: 'app-setting-audio',
   templateUrl: './setting-audio.component.html',
@@ -14,16 +15,16 @@ export class SettingAudioComponent implements OnInit, OnDestroy {
   public outputDevices: MediaDeviceInfo[];
   public inputDeviceId: string;
   public outputDeviceId: string;
-  public audio;
+  public audio: HTMLMediaElement;
   public meter = new DecibelMeter('meter');
   public db: number;
   public volume = 50;
   public recordedChunks: [];
   public recorder;
-
   public audioStream: MediaStream;
 
-  constructor() {}
+  constructor(private mediaSettingsService: MediaSettingsService) {}
+
   ngOnDestroy(): void {
     this.constraints.audio = false;
     this.audioStream?.getTracks().forEach((track) => track.stop());
@@ -34,17 +35,27 @@ export class SettingAudioComponent implements OnInit, OnDestroy {
       .getAudioInputList()
       .then((res) => {
         this.inputDevices = res;
-        this.inputDeviceId = this.inputDevices[0].deviceId;
+        if (!this.mediaSettingsService.settings.InputDeviceId) {
+          this.mediaSettingsService.changeInputDevice(
+            this.inputDevices[0]?.deviceId
+          );
+        }
+        this.inputDeviceId = this.mediaSettingsService.settings.InputDeviceId;
       })
       .catch((error) => console.log(error));
     this.browserMediaDevice
       .getAudioOutputList()
       .then((res) => {
         this.outputDevices = res;
-        this.outputDeviceId = this.outputDevices[0].deviceId;
+        if (!this.mediaSettingsService.settings.OutputDeviceId) {
+          this.mediaSettingsService.changeOutputDevice(
+            this.outputDevices[0]?.deviceId
+          );
+        }
+        this.outputDeviceId = this.mediaSettingsService.settings.OutputDeviceId;
       })
       .catch((error) => console.log(error));
-    this.audio = document.getElementsByTagName('audio');
+    this.audio = document.getElementById('audio') as HTMLMediaElement;
 
     if (navigator.userAgent.search(/Firefox/) > 0) {
       document.getElementById('outputDevice').style.display = 'none';
@@ -54,8 +65,8 @@ export class SettingAudioComponent implements OnInit, OnDestroy {
   changeVolume(vol: number) {
     this.volume = vol;
   }
+
   async testMicro() {
-    console.log(this.inputDeviceId);
     this.meter
       .connect(this.inputDevices.find((x) => x.deviceId === this.inputDeviceId))
       .catch((err) => alert('Connection Error'));
@@ -63,7 +74,10 @@ export class SettingAudioComponent implements OnInit, OnDestroy {
     this.meter.listen();
     navigator.mediaDevices
       .getUserMedia({
-        audio: true,
+        video: false,
+        audio: {
+          deviceId: this.inputDeviceId,
+        },
       })
       .then(async (stream) => {
         this.audioStream = stream;
@@ -94,16 +108,22 @@ export class SettingAudioComponent implements OnInit, OnDestroy {
     this.audio.volume = this.volume / 100;
     this.audio.play();
   }
-  public async changeState(event: any) {
+  public async changeInputDevice(deviceId: string) {
+    this.mediaSettingsService.changeInputDevice(deviceId);
     const stream = await navigator.mediaDevices.getUserMedia({
       video: false,
-      audio: { deviceId: event.label },
+      audio: { deviceId: deviceId },
     });
     this.handleSuccess(stream);
   }
+
+  public async changeOutputDevice(deviceId: string) {
+    this.mediaSettingsService.changeOutputDevice(deviceId);
+    this.mediaSettingsService.attachSinkId(this.audio, deviceId);
+  }
+
   async handleSuccess(stream): Promise<void> {
     const audio = document.querySelector('audio');
-    window.MSStream = stream;
     audio.srcObject = stream;
   }
 }

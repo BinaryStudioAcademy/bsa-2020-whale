@@ -19,7 +19,7 @@ import { Subject } from 'rxjs';
   providedIn: 'root',
 })
 export class PollService {
-  private route = environment.meetingApiUrl + '/api/polls';
+  private route = environment.apiUrl + '/api/polls';
 
   public polls: PollDto[] = [];
   public pollResults: PollResultDto[] = [];
