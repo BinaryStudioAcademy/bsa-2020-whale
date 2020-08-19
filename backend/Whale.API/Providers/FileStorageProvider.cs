@@ -3,13 +3,11 @@ using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using MimeTypes;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Whale.DAL.Settings;
 
-namespace Whale.Shared.Providers
+
+namespace Whale.API.Providers
 {
     public class FileStorageProvider
     {
@@ -50,27 +48,6 @@ namespace Whale.Shared.Providers
 
             return blockBlob.Uri.AbsoluteUri;
         }
-
-        //public async Task<string> GetImageByNameAsync(string fileName)
-        //{
-        //    var container = _blobClient.GetContainerReference(_settings.ImageContainerName);
-        //    //await SetPublicContainerPermissionsAsync(container);
-
-        //    BlobContinuationToken blobContinuationToken = null;
-        //    var imageURL = string.Empty;
-
-        //    if (!string.IsNullOrEmpty(fileName))
-        //    {
-        //        var response = await container.ListBlobsSegmentedAsync(blobContinuationToken);
-        //        var blob = response.Results.FirstOrDefault(x => x.Uri.Segments.Contains(fileName));
-        //        if (blob != null)
-        //        {
-        //            imageURL = blob.Uri.AbsoluteUri;
-        //        }
-        //    }
-
-        //    return imageURL;
-        //}
 
         private async Task SetPublicContainerPermissionsAsync(CloudBlobContainer container)
         {

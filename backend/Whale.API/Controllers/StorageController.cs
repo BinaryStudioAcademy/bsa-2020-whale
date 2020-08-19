@@ -1,6 +1,6 @@
-﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Whale.Shared.Providers;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
+using Whale.API.Providers;
 
 namespace Whale.API.Controllers
 {

@@ -11,12 +11,11 @@ using Whale.Shared.Exceptions;
 using Whale.Shared.Extentions;
 using Whale.Shared.Models;
 using Whale.Shared.Models.User;
-using Whale.Shared.Providers;
 using Whale.Shared.Services.Abstract;
 
 namespace Whale.Shared.Services
 {
-    public class UserService: BaseService
+    public class UserService : BaseService
     {
         private readonly BlobStorageSettings _blobStorageSettings;
 

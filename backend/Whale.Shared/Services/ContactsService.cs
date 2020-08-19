@@ -13,7 +13,6 @@ using Whale.Shared.Models.Contact;
 using Whale.Shared.Models.Contact.Setting;
 using Whale.Shared.Models.DirectMessage;
 using Whale.Shared.Models.User;
-using Whale.Shared.Providers;
 using Whale.Shared.Services.Abstract;
 
 namespace Whale.Shared.Services

@@ -15,7 +15,6 @@ using Microsoft.OpenApi.Models;
 using Whale.MeetingAPI.Services;
 using Whale.Shared.MappingProfiles;
 using Whale.Shared.Helpers;
-using Whale.Shared.Providers;
 using Whale.DAL.Settings;
 using Whale.Shared.Exceptions;
 using System;

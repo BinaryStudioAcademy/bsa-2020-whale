@@ -1,18 +1,17 @@
-﻿using System;
-using AutoMapper;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Whale.DAL;
 using Whale.DAL.Models;
-using Whale.Shared.Services.Abstract;
-using Whale.Shared.Models.DirectMessage;
-using Whale.Shared.Services;
-using Microsoft.AspNetCore.SignalR.Client;
-using Whale.Shared.Providers;
 using Whale.DAL.Settings;
 using Whale.Shared.Extentions;
+using Whale.Shared.Models.DirectMessage;
+using Whale.Shared.Services;
+using Whale.Shared.Services.Abstract;
 
 namespace Whale.API.Services
 {
@@ -21,7 +20,8 @@ namespace Whale.API.Services
         private readonly SignalrService _signalrService;
         private readonly BlobStorageSettings _blobStorageSettings;
 
-        public ContactChatService(WhaleDbContext context, IMapper mapper, SignalrService signalrService, BlobStorageSettings blobStorageSettings) : base(context, mapper) {
+        public ContactChatService(WhaleDbContext context, IMapper mapper, SignalrService signalrService, BlobStorageSettings blobStorageSettings) : base(context, mapper)
+        {
             _signalrService = signalrService;
             _blobStorageSettings = blobStorageSettings;
         }

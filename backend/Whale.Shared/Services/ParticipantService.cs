@@ -10,7 +10,6 @@ using Whale.DAL.Settings;
 using Whale.Shared.Exceptions;
 using Whale.Shared.Extentions;
 using Whale.Shared.Models.Participant;
-using Whale.Shared.Providers;
 using Whale.Shared.Services.Abstract;
 
 namespace Whale.Shared.Services
@@ -19,7 +18,7 @@ namespace Whale.Shared.Services
     {
         private readonly BlobStorageSettings _blobStorageSettings;
 
-        public ParticipantService(WhaleDbContext context, IMapper mapper, BlobStorageSettings blobStorageSettings) : base(context, mapper) 
+        public ParticipantService(WhaleDbContext context, IMapper mapper, BlobStorageSettings blobStorageSettings) : base(context, mapper)
         {
             _blobStorageSettings = blobStorageSettings;
         }
