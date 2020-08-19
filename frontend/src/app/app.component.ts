@@ -55,7 +55,7 @@ export class AppComponent implements OnInit {
       .pipe(filter((user) => Boolean(user)))
       .subscribe((user) => {
         this.user = Object.assign({}, user);
-        /*this.http
+        this.http
           .get<User>(this.getUserUrl + `/${user.email}`, {
             observe: 'response',
           })
@@ -68,7 +68,7 @@ export class AppComponent implements OnInit {
                   this.hubConnection.invoke('JoinGroup', contact.id);
                 });
               });
-          });*/
+          });
       });
   }
 
