@@ -58,6 +58,8 @@ namespace Whale.SignalR
                 cfg.AddProfile<MeetingMessage>();
                 cfg.AddProfile<UserProfile>();
                 cfg.AddProfile<ParticipantProfile>();
+                cfg.AddProfile<ContactProfile>();
+                cfg.AddProfile<DirectMessageProfile>();
             },
             Assembly.GetExecutingAssembly());
         }
