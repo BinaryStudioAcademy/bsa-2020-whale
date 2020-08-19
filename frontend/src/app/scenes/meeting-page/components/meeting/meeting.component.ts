@@ -146,10 +146,10 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     if (enterModal.cameraOff) {
-      this.turnOffCamera();
+      this.toggleCamera();
     }
     if (enterModal.microOff) {
-      this.turnOffMicrophone();
+      this.toggleMicrophone();
     }
     this.currentStreamLoaded.emit();
     // create new peer
