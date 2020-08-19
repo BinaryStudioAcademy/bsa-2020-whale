@@ -58,8 +58,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public isShowParticipants = false;
   public isShowStatistics = false;
   public isScreenRecording = false;
-  public isCameraOn = true;
-  public isMicroOn = true;
   public isShowCurrentParticipantCard = true;
 
   @ViewChild('currentVideo') currentVideo: ElementRef;
@@ -145,10 +143,10 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     if (enterModal.cameraOff) {
-      this.turnOffCamera();
+      this.toggleCamera();
     }
     if (enterModal.microOff) {
-      this.turnOffMicrophone();
+      this.toggleMicrophone();
     }
     this.currentStreamLoaded.emit();
     // create new peer
@@ -366,7 +364,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     console.log('elem', this.elem);
     console.log('currentVideo first', this.currentVideo);
     this.currentStreamLoaded.subscribe(() => {
-      console.log('currentVideo', this.currentVideo);
       this.currentVideo.nativeElement.srcObject = this.currentUserStream;
       this.setOutputDevice();
     });
@@ -416,28 +413,32 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
-  turnOffMicrophone(): void {
+  toggleMicrophone(): void {
     if (!this.isMicrophoneMuted) {
-      this.currentUserStream
-        .getAudioTracks()
-        .forEach((track) => (track.enabled = false));
+      this.currentUserStream.getAudioTracks().forEach((track) => {
+        track.enabled = false;
+        track.dispatchEvent(new Event('disabled'));
+      });
     } else {
-      this.currentUserStream
-        .getAudioTracks()
-        .forEach((track) => (track.enabled = true));
+      this.currentUserStream.getAudioTracks().forEach((track) => {
+        track.enabled = true;
+        track.dispatchEvent(new Event('enabled'));
+      });
     }
     this.isMicrophoneMuted = !this.isMicrophoneMuted;
   }
 
-  turnOffCamera(): void {
+  toggleCamera(): void {
     if (!this.isCameraMuted) {
-      this.currentUserStream
-        .getVideoTracks()
-        .forEach((track) => (track.enabled = false));
+      this.currentUserStream.getVideoTracks().forEach((track) => {
+        track.enabled = false;
+        track.dispatchEvent(new Event('disabled'));
+      });
     } else {
-      this.currentUserStream
-        .getVideoTracks()
-        .forEach((track) => (track.enabled = true));
+      this.currentUserStream.getVideoTracks().forEach((track) => {
+        track.enabled = true;
+        track.dispatchEvent(new Event('enabled'));
+      });
     }
     this.isCameraMuted = !this.isCameraMuted;
   }
@@ -718,6 +719,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       );
     });
   }
+
   public async changeStateVideo(event: any) {
     this.mediaSettingsService.changeVideoDevice(event);
     this.currentUserStream.getVideoTracks()?.forEach((track) => track.stop());
@@ -727,6 +729,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     });
     this.handleSuccessVideo(this.currentUserStream);
   }
+
   async handleSuccessVideo(stream: MediaStream): Promise<void> {
     const video = document.querySelector('video');
     video.srcObject = stream;
@@ -740,6 +743,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       sender.replaceTrack(videoTrack);
     });
   }
+
   public async changeInputDevice(deviceId: string) {
     this.mediaSettingsService.changeInputDevice(deviceId);
     this.currentUserStream = await navigator.mediaDevices.getUserMedia({

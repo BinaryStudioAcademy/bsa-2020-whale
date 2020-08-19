@@ -20,9 +20,8 @@ export class ParticipantCardComponent implements OnInit {
   @Output() pinVideEvent = new EventEmitter<string>();
   @Output() hideViewEvent = new EventEmitter<string>();
   @Output() stopVideoEvent = new EventEmitter<string>();
-  @Output() startVideoEvent = new EventEmitter<string>();
-  @Output() muteEvent = new EventEmitter<string>();
-  @Output() unmuteEvent = new EventEmitter<string>();
+  @Output() toggleCameraEvent = new EventEmitter<string>();
+  @Output() toggleMicrophoneEvent = new EventEmitter<string>();
 
   public actionsIcon: HTMLElement;
   public actionsPopupContent: HTMLElement;
@@ -44,16 +43,12 @@ export class ParticipantCardComponent implements OnInit {
     this.handleStreamChanges();
   }
 
-  public switchMute(): void {
-    this.isParticipantMuted
-      ? this.unmuteEvent.emit(this.data.id)
-      : this.muteEvent.emit(this.data.id);
+  public toggleMicrophone(): void {
+    this.toggleMicrophoneEvent.emit(this.data.id);
   }
 
-  public switchVideo(): void {
-    this.hasParticipantVideo
-      ? this.stopVideoEvent.emit(this.data.id)
-      : this.startVideoEvent.emit(this.data.id);
+  public toggleCamera(): void {
+    this.toggleCameraEvent.emit(this.data.id);
   }
 
   public pinVideo(): void {
@@ -62,6 +57,23 @@ export class ParticipantCardComponent implements OnInit {
 
   public hideCurrentCard(): void {
     this.hideViewEvent.emit(this.data.id);
+  }
+
+  public addAvatar() {
+    if (this.data.avatarUrl) {
+      this.participantContainer.style.background = `url(${this.data.avatarUrl})`;
+      this.participantContainer.style.backgroundSize = 'contain';
+      this.participantContainer.style.backgroundRepeat = 'no-repeat';
+      this.participantContainer.style.backgroundPosition = 'center';
+    } else {
+      var participantInitials = this.elRef.nativeElement.querySelector(
+        '.participant-initials'
+      );
+      participantInitials.textContent = `${this.data.userFirstName.slice(
+        0,
+        1
+      )} ${this.data.userLastName?.slice(0, 1)}`;
+    }
   }
 
   private initCardElements(): void {
@@ -82,33 +94,19 @@ export class ParticipantCardComponent implements OnInit {
       this.data.userLastName ? this.data.userLastName : ''
     }`.trim();
 
-    if (this.data.avatarUrl) {
-      this.participantContainer.style.background = `url(${this.data.avatarUrl})`;
-      this.participantContainer.style.backgroundSize = 'contain';
-      this.participantContainer.style.backgroundRepeat = 'no-repeat';
-      this.participantContainer.style.backgroundPosition = 'center';
-    } else {
-      var participantInitials = this.elRef.nativeElement.querySelector(
-        '.participant-initials'
-      );
-      participantInitials.textContent = `${this.data.userFirstName.slice(
-        0,
-        1
-      )} ${this.data.userLastName?.slice(0, 1)}`;
-    }
+    this.addAvatar();
   }
 
   private updateMediData() {
     if (this.data.isUserHost) {
       this.participantName.classList.add('inverted-text');
     }
-
-    this.isParticipantMuted = this.data.stream
-      ? this.data.stream.getAudioTracks().length == 0
-      : false;
+    this.isParticipantMuted = !this.data.stream
+      .getAudioTracks()
+      .some((at) => at.enabled);
     this.hasParticipantVideo = this.data.stream
-      ? this.data.stream.getVideoTracks().length == 0
-      : false;
+      .getVideoTracks()
+      .some((at) => at.enabled);
   }
 
   private handleActionsPopup() {
@@ -138,16 +136,22 @@ export class ParticipantCardComponent implements OnInit {
 
   private handleStreamChanges() {
     if (this.data.stream) {
-      this.data.stream.onaddtrack = (ev: MediaStreamTrackEvent) => {
-        ev.track.kind == 'audio'
-          ? (this.isParticipantMuted = false)
-          : (this.hasParticipantVideo = true);
-      };
-      this.data.stream.onremovetrack = (ev: MediaStreamTrackEvent) => {
-        ev.track.kind == 'audio'
-          ? (this.isParticipantMuted = true)
-          : (this.hasParticipantVideo = false);
-      };
+      this.data.stream.getAudioTracks().forEach((at) => {
+        at.addEventListener('enabled', () => {
+          this.isParticipantMuted = false;
+        });
+        at.addEventListener('disabled', () => {
+          this.isParticipantMuted = true;
+        });
+      });
+      this.data.stream.getVideoTracks().forEach((at) => {
+        at.addEventListener('enabled', () => {
+          this.hasParticipantVideo = true;
+        });
+        at.addEventListener('disabled', () => {
+          this.hasParticipantVideo = false;
+        });
+      });
     }
   }
 
