@@ -13,6 +13,7 @@ import { MeetingStatisticsComponent } from './components/meeting-statistics/meet
 import { CopyClipboardComponent } from './components/copy-clipboard/copy-clipboard.component';
 import { IncomingCallComponent } from './components/incoming-call/incoming-call.component';
 import { AngularDraggableModule } from 'angular2-draggable';
+import { ProgressBarDirective } from './directives/progress-bar.directive';
 
 @NgModule({
   declarations: [
@@ -26,6 +27,7 @@ import { AngularDraggableModule } from 'angular2-draggable';
     MeetingStatisticsComponent,
     CopyClipboardComponent,
     IncomingCallComponent,
+    ProgressBarDirective,
   ],
   imports: [
     CommonModule,

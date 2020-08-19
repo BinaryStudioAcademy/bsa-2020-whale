@@ -137,17 +137,12 @@ export class PollService {
   }
 
   public savePollResults(meetindId: string) {
-    this.httpService
-      .getRequest(
-        this.route + '/saveResults',
-        new HttpParams().set('meetingId', meetindId)
-      )
-      .subscribe(() => {
-        this.toastr.info(
-          'You can check poll results in meeting history',
-          'Info'
-        );
-      });
+    this.httpService.getRequest(
+      this.route + '/saveResults',
+      new HttpParams().set('meetingId', meetindId)
+    );
+    // .subscribe(() => {
+    // });
   }
 
   public onPollIconClick() {
