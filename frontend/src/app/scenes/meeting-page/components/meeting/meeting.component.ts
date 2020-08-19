@@ -307,6 +307,11 @@ export class MeetingComponent
         this.connectionData
       );
       if (this.currentParticipant?.role === ParticipantRole.Host) {
+        this.meeting.endTime = new Date();
+        this.httpService.putRequest<Meeting, null>(
+          environment.apiUrl + '/api/meeting/end',
+          this.meeting
+        );
         this.pollService.savePollResults(this.meeting.id);
       }
 

@@ -12,6 +12,8 @@ namespace Whale.DAL.Models
     {
         public string Settings { get; set; }
         public DateTime StartTime { get; set; }
+        [NotMapped]
+        public DateTimeOffset EndTime { get; set; }
         public int AnonymousCount { get; set; }
         public bool IsScheduled { get; set; }
         public bool IsRecurrent { get; set; }

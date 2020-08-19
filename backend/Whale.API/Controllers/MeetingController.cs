@@ -35,6 +35,13 @@ namespace Whale.API.Controllers
             var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
             return Ok(await _meetingService.ConnectToMeeting(new MeetingLinkDTO { Id = id, Password = pwd}, ownerEmail));
         }
+
+        [HttpPut("end")]
+        public async Task<NoContentResult> SaveMeetingEndTime(MeetingDTO meetingDto)
+        {
+            await _meetingService.SaveMeetingEndTime(meetingDto);
+            return NoContent();
+        }
     }
 
 }

@@ -15,4 +15,11 @@ export class MeetingNoteComponent implements OnInit {
   constructor() {}
 
   ngOnInit(): void {}
+
+  public calculateDuration(): number {
+    const start: number = new Date(this.meeting.startTime).getTime();
+    const end: number = new Date(this.meeting.endTime).getTime();
+    const diff: number = (end - start) / 60000;
+    return diff;
+  }
 }

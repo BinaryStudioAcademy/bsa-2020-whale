@@ -126,5 +126,20 @@ namespace Whale.BLL.Services
             }
             return isHost;
         }
+
+        public async Task SaveMeetingEndTime(MeetingDTO meetingDto)
+        {
+            var meeting = await _context.Meetings.FirstOrDefaultAsync(m => m.Id == meetingDto.Id);
+
+            if(meeting == null)
+            {
+                throw new NotFoundException(nameof(Meeting));
+            }
+
+            meeting.EndTime = meetingDto.EndTime;
+
+            _context.Update(meeting);
+            await _context.SaveChangesAsync();
+        }
     }
 }
