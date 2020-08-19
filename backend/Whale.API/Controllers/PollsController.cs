@@ -46,5 +46,12 @@ namespace Whale.API.Controllers
             await _httpService.DeleteAsync($"api/polls?meetingId={meetingId}&pollId={pollId}");
             return NoContent();
         }
+
+        [HttpGet("saveResults")]
+        public async Task<IActionResult> SavePollResults(Guid meetingId)
+        {
+            await _httpService.GetAsync<object>($"api/polls/saveResults?meetingId={meetingId}");
+            return Ok();
+        }
     }
 }

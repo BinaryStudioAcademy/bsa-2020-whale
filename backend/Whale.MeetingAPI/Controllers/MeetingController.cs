@@ -45,6 +45,13 @@ namespace Whale.API.Controllers
         {
             return Ok(await _meetingService.GetShortInviteLink(longURL));
         }
+
+        [HttpPut("end")]
+        public async Task<OkResult> SaveMeetingEndTime(MeetingDTO meetingDto)
+        {
+            await _meetingService.SaveMeetingEndTime(meetingDto);
+            return Ok();
+        }
     }
 
 }

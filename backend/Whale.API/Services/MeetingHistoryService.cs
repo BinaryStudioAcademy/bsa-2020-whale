@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Whale.API.Services.Abstract;
 using Whale.DAL;
 using Whale.DAL.Models;
-using Whale.Shared.DTO.Meeting;
+using Whale.Shared.Models.Meeting;
 
 namespace Whale.API.Services
 {

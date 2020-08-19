@@ -137,12 +137,15 @@ export class PollService {
   }
 
   public savePollResults(meetindId: string) {
-    this.httpService.getRequest(
-      this.route + '/saveResults',
-      new HttpParams().set('meetingId', meetindId)
-    );
-    // .subscribe(() => {
-    // });
+    this.httpService
+      .getRequest(
+        this.route + '/saveResults',
+        new HttpParams().set('meetingId', meetindId)
+      )
+      .subscribe(
+        () => {},
+        (error) => console.error(error)
+      );
   }
 
   public onPollIconClick() {

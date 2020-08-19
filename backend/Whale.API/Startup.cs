@@ -51,13 +51,9 @@ namespace Whale.API
                 mc.AddProfile<UserProfile>();
                 mc.AddProfile<ScheduledMeetingProfile>();
                 mc.AddProfile<DirectMessageProfile>();
-//<<<<<<< HEAD
-//                mc.AddProfile<MeetingProfile>();
-//                mc.AddProfile<MeetingMessage>();
-//                mc.AddProfile<ParticipantProfile>();
-//                mc.AddProfile<PollProfile>();
-//=======
-//>>>>>>> develop
+                mc.AddProfile<MeetingProfile>();
+                mc.AddProfile<ParticipantProfile>();
+                mc.AddProfile<PollProfile>();
             });
 
             services.AddSingleton(mappingConfig.CreateMapper());
@@ -66,15 +62,10 @@ namespace Whale.API
             services.AddTransient<UserService>();
             services.AddTransient<ScheduledMeetingsService>();
             services.AddTransient<ContactChatService>();
-//<<<<<<< HEAD
-//            services.AddTransient<IMeetingService, MeetingService>();
-//            services.AddTransient<ParticipantService>();
-//            services.AddTransient<MeetingHistoryService>();
-//=======
+            services.AddTransient<MeetingHistoryService>();
             services.AddScoped<HttpClient>();
             services.AddTransient(p =>  new HttpService(p.GetRequiredService<HttpClient>(), Configuration.GetValue<string>("MeetingAPI")));
             services.AddTransient(p => new SignalrService(Configuration.GetValue<string>("SignalR")));
-//>>>>>>> develop
 
             services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
             {
