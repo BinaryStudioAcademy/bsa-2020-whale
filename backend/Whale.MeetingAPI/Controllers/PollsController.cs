@@ -43,7 +43,7 @@ namespace Whale.MeetingAPI.Controllers
 		[HttpGet("saveResults")]
 		public async Task<IActionResult> SavePollResults(Guid meetingId)
 		{
-			await _pollService.SavePollResultsToDatabase(meetingId);
+			await _pollService.SavePollResultsToDatabaseAndDeleteFromRedis(meetingId);
 			return Ok();
 		}
 

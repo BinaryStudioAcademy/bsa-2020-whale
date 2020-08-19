@@ -168,7 +168,7 @@ namespace Whale.BLL.Services
 			await _meetingHub.Clients.Group(meetingId).SendAsync("OnPollDeleted", pollId);
 		}
 
-		public async Task SavePollResultsToDatabase(Guid meetingId)
+		public async Task SavePollResultsToDatabaseAndDeleteFromRedis(Guid meetingId)
 		{
 			_redisService.Connect();
 			var pollResults = await _redisService.GetSetMembers<PollResult>(meetingId + nameof(PollResult));
@@ -200,32 +200,3 @@ namespace Whale.BLL.Services
 		}
 	}
 }
-
-//var pollsAndResults = polls.Join(
-//	pollResults,
-//	poll => poll.Id,
-//	pollResult => pollResult.PollId,
-//	(poll, pollResult) => new
-//	{
-//		Poll = poll,
-//		Result = pollResult
-//	}
-//);
-
-//var pollsToSend = new List<Poll>();
-//var resultsToSend = new List<PollResult>();
-//int voteCount = 0;
-
-//foreach (var pollAndResult in pollsAndResults)
-//{
-//	voteCount += pollAndResult.Result.OptionResults.Sum(optRes => optRes.VotedUsers.Count);
-
-//	if(pollAndResult.Result.OptionResults.Any(optRes => optRes.VotedUsers.Any(user => user.Email == userEmail)))
-//	{
-//		resultsToSend.Add(pollAndResult.Result);
-//	}
-//	else
-//	{
-//		pollsToSend.Add(pollAndResult.Poll);
-//	}
-//}
