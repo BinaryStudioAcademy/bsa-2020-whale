@@ -1,0 +1,104 @@
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Whale.API.Models.Notification;
+using Whale.DAL;
+using Whale.DAL.Models;
+using Whale.Shared.Exceptions;
+using Whale.Shared.Models.Contact;
+using Whale.Shared.Models.Contact.Setting;
+using Whale.Shared.Models.DirectMessage;
+using Whale.Shared.Models.Notification;
+using Whale.Shared.Models.User;
+using Whale.Shared.Services.Abstract;
+
+namespace Whale.Shared.Services
+{
+    public class NotificationsService : BaseService
+    {
+
+        private readonly JsonSerializerSettings camelSettings = new JsonSerializerSettings
+        {
+            ContractResolver = new CamelCasePropertyNamesContractResolver(),
+            Formatting = Formatting.Indented
+        };
+
+        public NotificationsService(WhaleDbContext context, IMapper mapper) : base(context, mapper)
+        { }
+
+        public async Task<IEnumerable<NotificationDTO>> GetAllNotificationsAsync(string userEmail)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+            if (user is null)
+                throw new NotFoundException("User", userEmail);
+
+            var notifications = _context.Notifications
+                 .Where(n => n.UserId == user.Id);
+
+            return _mapper.Map<IEnumerable<NotificationDTO>>(notifications);
+        }
+
+        private async Task<NotificationDTO> AddNotification(string userEmail, string options, NotificationTypeEnum type)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+            if (user is null)
+                throw new NotFoundException("User", userEmail);
+
+            var notification = new Notification()
+            {
+                UserId = user.Id,
+                User = user,
+                CreatedAt = DateTimeOffset.Now,
+                NotificationType = type,
+                Options = options
+            };
+
+            _context.Notifications.Add(notification);
+            await _context.SaveChangesAsync();
+
+            return _mapper.Map<NotificationDTO>(notification);
+        }
+
+        public Task<NotificationDTO> AddTextNotification(string userEmail, string message)
+        {
+            var options = new OptionsText()
+            {
+                Message = message
+            };
+
+            return AddNotification(userEmail, JsonConvert.SerializeObject(options, camelSettings), NotificationTypeEnum.TextNotification);
+        }
+
+        public Task<NotificationDTO> AddContactNotification(string userEmail, Contact contact)
+        {
+            var options = new OptionsAddContact
+            {
+                ContactId = contact.Id,
+                ContactUserId = contact.FirstMemberId
+            };
+
+            return AddNotification(userEmail, JsonConvert.SerializeObject(options, camelSettings), NotificationTypeEnum.AddContactNotification);
+        }
+
+        public async Task DeleteNotificationAsync(string userEmail, Guid notificationId)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+            if (user is null)
+                throw new NotFoundException("User", userEmail);
+
+            var notification = _context.Notifications.FirstOrDefault(n => n.Id == notificationId && n.UserId == user.Id);
+
+            if (notification is null)
+                throw new NotFoundException("Notification", notificationId.ToString());
+
+            _context.Notifications.Remove(notification);
+            await _context.SaveChangesAsync();
+            return;
+        }
+    }
+}
