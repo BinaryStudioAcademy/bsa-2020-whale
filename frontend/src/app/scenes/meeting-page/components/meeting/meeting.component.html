@@ -24,13 +24,13 @@
           id="meeting-draggable-camera"
           *ngIf="!isCameraMuted"
           class="big video icon big-left-margin"
-          (click)="turnOffCamera()"
+          (click)="toggleCamera()"
         ></i>
         <i
           id="meeting-draggable-camera"
           *ngIf="isCameraMuted"
           class="big eye slash icon big-left-margin"
-          (click)="turnOffCamera()"
+          (click)="toggleCamera()"
         ></i>
       </span>
       <span data-tooltip="Participants" data-position="top left">
@@ -110,18 +110,18 @@
               data-tooltip="Toggle Microphone"
               data-position="top left"
             >
-            <i
-              id="meeting-options-microphone"
-              *ngIf="!isMicrophoneMuted"
-              class="big microphone icon"
-              (click)="toggleMicrophone()"
-            ></i>
-            <i
-              id="meeting-options-microphone"
-              *ngIf="isMicrophoneMuted"
-              class="big slash microphone icon"
-              (click)="toggleMicrophone()"
-            ></i>
+              <i
+                id="meeting-options-microphone"
+                *ngIf="!isMicrophoneMuted"
+                class="big microphone icon"
+                (click)="toggleMicrophone()"
+              ></i>
+              <i
+                id="meeting-options-microphone"
+                *ngIf="isMicrophoneMuted"
+                class="big slash microphone icon"
+                (click)="toggleMicrophone()"
+              ></i>
             </span>
             <span data-tooltip="Settings">
               <i
@@ -279,11 +279,17 @@
         </app-participant-card>
       </div>
 
+      <img
+        [src]="currentParticipant?.user?.avatarUrl"
+        [hidden]="!isCameraMuted || (isCameraMuted && mediaData.length > 1)"
+        class="big-avatar"
+      />
+
       <video
         #currentVideo
         autoplay="autoplay"
         class="participant-fullscreen"
-        [hidden]="mediaData.length > 1"
+        [hidden]="mediaData.length > 1 || isCameraMuted"
         [muted]="'muted'"
       ></video>
     </div>

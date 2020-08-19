@@ -1,11 +1,18 @@
 <div class="ui card">
-  <div class="image">
+  <div
+    class="image"
+    [ngClass]="hasParticipantVideo ? 'without-background' : addAvatar()"
+  >
     <video
       class="video"
       autoplay
+      [ngClass]="hasParticipantVideo ? 'visible' : 'hidden'"
       [muted]="data.isCurrentUser ? 'muted' : ''"
     ></video>
-    <p class="participant-initials"></p>
+    <p
+      class="participant-initials"
+      [ngClass]="hasParticipantVideo ? 'hidden' : 'visible'"
+    ></p>
   </div>
   <div class="content">
     <div class="participant-name-wrapper">

@@ -9,7 +9,6 @@ import {
 import { UserMediaData } from '@shared/models/media/user-media-data';
 import { createPopper } from '@popperjs/core';
 import flip from '@popperjs/core/lib/modifiers/flip.js';
-import { SourceMapGenerator } from '@angular/compiler/src/output/source_map';
 
 @Component({
   selector: 'app-participant-card',
@@ -60,6 +59,23 @@ export class ParticipantCardComponent implements OnInit {
     this.hideViewEvent.emit(this.data.id);
   }
 
+  public addAvatar() {
+    if (this.data.avatarUrl) {
+      this.participantContainer.style.background = `url(${this.data.avatarUrl})`;
+      this.participantContainer.style.backgroundSize = 'contain';
+      this.participantContainer.style.backgroundRepeat = 'no-repeat';
+      this.participantContainer.style.backgroundPosition = 'center';
+    } else {
+      var participantInitials = this.elRef.nativeElement.querySelector(
+        '.participant-initials'
+      );
+      participantInitials.textContent = `${this.data.userFirstName.slice(
+        0,
+        1
+      )} ${this.data.userLastName?.slice(0, 1)}`;
+    }
+  }
+
   private initCardElements(): void {
     this.video = this.elRef.nativeElement.querySelector('video');
     this.participantContainer = this.elRef.nativeElement.querySelector(
@@ -78,36 +94,19 @@ export class ParticipantCardComponent implements OnInit {
       this.data.userLastName ? this.data.userLastName : ''
     }`.trim();
 
-    if (this.data.avatarUrl) {
-      this.participantContainer.style.background = `url(${this.data.avatarUrl})`;
-      this.participantContainer.style.backgroundSize = 'contain';
-      this.participantContainer.style.backgroundRepeat = 'no-repeat';
-      this.participantContainer.style.backgroundPosition = 'center';
-    } else {
-      var participantInitials = this.elRef.nativeElement.querySelector(
-        '.participant-initials'
-      );
-      participantInitials.textContent = `${this.data.userFirstName.slice(
-        0,
-        1
-      )} ${this.data.userLastName?.slice(0, 1)}`;
-    }
+    this.addAvatar();
   }
 
   private updateMediData() {
     if (this.data.isUserHost) {
       this.participantName.classList.add('inverted-text');
     }
-    this.data.stream.getAudioTracks().forEach((t) => (t.enabled = false));
     this.isParticipantMuted = !this.data.stream
       .getAudioTracks()
       .some((at) => at.enabled);
-    this.hasParticipantVideo = !this.data.stream
+    this.hasParticipantVideo = this.data.stream
       .getVideoTracks()
       .some((at) => at.enabled);
-    this.hasParticipantVideo = this.data.stream
-      ? this.data.stream.getVideoTracks().length == 0
-      : false;
   }
 
   private handleActionsPopup() {
@@ -147,22 +146,12 @@ export class ParticipantCardComponent implements OnInit {
       });
       this.data.stream.getVideoTracks().forEach((at) => {
         at.addEventListener('enabled', () => {
-          this.hasParticipantVideo = false;
-        });
-        at.addEventListener('disabled', () => {
           this.hasParticipantVideo = true;
         });
+        at.addEventListener('disabled', () => {
+          this.hasParticipantVideo = false;
+        });
       });
-      this.data.stream.onaddtrack = (ev: MediaStreamTrackEvent) => {
-        ev.track.kind == 'audio'
-          ? (this.isParticipantMuted = false)
-          : (this.hasParticipantVideo = true);
-      };
-      this.data.stream.onremovetrack = (ev: MediaStreamTrackEvent) => {
-        ev.track.kind == 'audio'
-          ? (this.isParticipantMuted = true)
-          : (this.hasParticipantVideo = false);
-      };
     }
   }
 
