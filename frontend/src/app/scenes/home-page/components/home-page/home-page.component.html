@@ -40,7 +40,7 @@
       <spiner *ngIf="isContactsLoading" [size]="'medium'"></spiner>
       <a
         id="home-toggle-contacts"
-        (click)="contactsVisibility = !contactsVisibility"
+        (click)="onContactsClick()"
         class="item header"
         >Contacts
         <button

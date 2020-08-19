@@ -5,13 +5,13 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
 WORKDIR /src
-COPY backend/Whale.MeetingAPI/ Whale.MeetingAPI/
+COPY backend/Whale.SignalR/ Whale.SignalR/
 COPY backend/Whale.DAL/ Whale.DAL/
 COPY backend/Whale.Shared/ Whale.Shared/
-WORKDIR Whale.MeetingAPI
+WORKDIR Whale.SignalR
 RUN dotnet publish -c Release -o output
 
 FROM base AS final
-COPY --from=build /src/Whale.MeetingAPI/output .
-ENV ASPNETCORE_URLS=http://+:4202
-ENTRYPOINT ["dotnet", "Whale.MeetingAPI.dll"]
+COPY --from=build /src/Whale.SignalR/output .
+ENV ASPNETCORE_URLS=http://+:4203
+ENTRYPOINT ["dotnet", "Whale.SignalR.dll"]

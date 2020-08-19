@@ -23,7 +23,7 @@ import { UpstateService } from '../../../../core/services/upstate.service';
 export class HomePageComponent implements OnInit, OnDestroy {
   contacts: Contact[];
   loggedInUser: User;
-  contactsVisibility = true;
+  contactsVisibility = false;
   groupsVisibility = false;
   chatVisibility = true;
   ownerEmail: string;
@@ -110,6 +110,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
         anonymousCount: 0,
         isScheduled: false,
         isRecurrent: false,
+        creatorEmail: this.ownerEmail,
       } as MeetingCreate)
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
@@ -131,6 +132,12 @@ export class HomePageComponent implements OnInit, OnDestroy {
       contact?.secondMember.avatarUrl.startsWith('data')
       ? contact?.secondMember.avatarUrl
       : '';
+  }
+
+  public onContactsClick(): void {
+    if (this.contacts.length) {
+      this.contactsVisibility = !this.contactsVisibility;
+    }
   }
 }
 export interface UserModel {
