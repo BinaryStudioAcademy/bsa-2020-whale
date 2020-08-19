@@ -358,7 +358,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // disables ability to close browser tab if user didn't visit any element on the tab
     this.mainArea.nativeElement.classList.add('visited');
-    this.currentLocation = this.document.location.href;
 
     // show a warning dialog if close current tab or window
     window.onbeforeunload = function (ev: BeforeUnloadEvent) {

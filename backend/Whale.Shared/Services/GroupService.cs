@@ -5,19 +5,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Whale.BLL.Exceptions;
-using Whale.BLL.Services.Abstract;
-using Whale.BLL.Services.Interfaces;
+using Whale.Shared.Exceptions;
+using Whale.Shared.Services.Abstract;
+using Whale.Shared.Services;
 using Whale.DAL;
 using Whale.DAL.Models;
 using Whale.Shared.DTO.Group;
 
-namespace Whale.BLL.Services
+namespace Whale.Shared.Services
 {
     public class GroupService: BaseService
     {
-        private IUserService _userService;
-        public GroupService(WhaleDbContext context, IMapper mapper, IUserService userService ) : base(context, mapper)
+        private UserService _userService;
+        public GroupService(WhaleDbContext context, IMapper mapper, UserService userService ) : base(context, mapper)
         {
             this._userService = userService;
         }

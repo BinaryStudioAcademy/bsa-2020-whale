@@ -5,7 +5,7 @@ using System.Text;
 using Whale.DAL.Models;
 using Whale.Shared.DTO.Group; 
 
-namespace Whale.BLL.MappingProfiles
+namespace Whale.Shared.MappingProfiles
 {
     public class GroupProfile: Profile
     {

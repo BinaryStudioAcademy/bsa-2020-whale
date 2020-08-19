@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Whale.BLL.Services;
+using Whale.Shared.Services;
 using Whale.Shared.DTO.Group;
 
 namespace Whale.API.Controllers

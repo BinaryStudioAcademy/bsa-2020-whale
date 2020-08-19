@@ -62,7 +62,7 @@ namespace Whale.API
             services.AddTransient<UserService>();
             services.AddTransient<ScheduledMeetingsService>();
             services.AddTransient<ContactChatService>();
-            services.AddTransient<IMeetingService, MeetingService>();
+            services.AddTransient<MeetingService>();
             services.AddTransient<ParticipantService>();
             services.AddTransient<GroupService>();
 
