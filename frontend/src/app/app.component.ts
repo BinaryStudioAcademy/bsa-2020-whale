@@ -41,10 +41,9 @@ export class AppComponent implements OnInit {
       )
       .subscribe(() => {
         this.hubConnection.on('OnStartCallOthers', (call: Call) => {
-          if (this.user.email === call.callerEmail) {
-            return;
+          if (this.user.email !== call.callerEmail) {
+            this.call = call;
           }
-          this.call = call;
         });
       });
 
@@ -52,7 +51,7 @@ export class AppComponent implements OnInit {
       .pipe(filter((user) => Boolean(user)))
       .subscribe((user) => {
         this.user = Object.assign({}, user);
-        this.http
+        /*this.http
           .get<User>(this.getUserUrl + `/${user.email}`, {
             observe: 'response',
           })
@@ -65,7 +64,7 @@ export class AppComponent implements OnInit {
                   this.hubConnection.invoke('JoinGroup', contact.id);
                 });
               });
-          });
+          });*/
       });
   }
 
