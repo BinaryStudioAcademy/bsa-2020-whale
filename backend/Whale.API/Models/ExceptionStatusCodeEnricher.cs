@@ -3,7 +3,7 @@ using Serilog.Configuration;
 using Serilog.Core;
 using Serilog.Events;
 using System;
-using Whale.BLL.Exceptions;
+using Whale.Shared.Exceptions;
 
 namespace Whale.API.Models
 {

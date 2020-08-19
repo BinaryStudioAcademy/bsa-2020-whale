@@ -2,12 +2,12 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Whale.BLL.Exceptions;
-using Whale.BLL.Services.Interfaces;
 using System.Text.RegularExpressions;
-using Whale.Shared.DTO.User;
 using Whale.Shared.Models;
 using System.Linq;
+using Whale.Shared.Services;
+using Whale.Shared.Exceptions;
+using Whale.Shared.Models.User;
 
 namespace Whale.API.Controllers
 {
@@ -16,9 +16,9 @@ namespace Whale.API.Controllers
     [Authorize]
     public class UserController : ControllerBase
     {
-        private readonly IUserService _userService;
+        private readonly UserService _userService;
 
-        public UserController(IUserService userService)
+        public UserController(UserService userService)
         {
             _userService = userService;
         }

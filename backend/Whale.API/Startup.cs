@@ -4,22 +4,21 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Whale.BLL.Hubs;
 using Whale.DAL;
 using Microsoft.EntityFrameworkCore;
-using Whale.BLL.Services;
 using AutoMapper;
-using Whale.BLL.MappingProfiles;
-using Whale.BLL.Providers;
 using Microsoft.IdentityModel.Tokens;
 using Whale.Shared.Services;
-using Whale.BLL.Services.Interfaces;
 using Whale.DAL.Settings;
 using Whale.API.Extensions;
 using Whale.API.Middleware;
-using Whale.BLL.Interfaces;
 using Microsoft.OpenApi.Models;
-using Whale.Shared.Helper;
+using Whale.API.Services;
+using Whale.API.MappingProfiles;
+using Whale.API.Providers;
+using Whale.Shared.Helpers;
+using Whale.Shared.MappingProfiles;
+using System.Net.Http;
 
 namespace Whale.API
 {
@@ -50,21 +49,18 @@ namespace Whale.API
                 mc.AddProfile<UserProfile>();
                 mc.AddProfile<ScheduledMeetingProfile>();
                 mc.AddProfile<DirectMessageProfile>();
-                mc.AddProfile<MeetingProfile>();
-                mc.AddProfile<MeetingMessage>();
-                mc.AddProfile<ParticipantProfile>();
             });
 
             services.AddSingleton(mappingConfig.CreateMapper());
 
-            services.AddTransient<IContactsService, ContactsService>();
-            services.AddTransient<IUserService, UserService>();
-            services.AddTransient<IScheduledMeetingsService, ScheduledMeetingsService>();
+            services.AddTransient<ContactsService>();
+            services.AddTransient<UserService>();
+            services.AddTransient<ScheduledMeetingsService>();
             services.AddTransient<ContactChatService>();
-            services.AddTransient<IMeetingService, MeetingService>();
-            services.AddTransient<ParticipantService>();
+            services.AddScoped<HttpClient>();
+            services.AddTransient(p =>  new HttpService(p.GetRequiredService<HttpClient>(), Configuration.GetValue<string>("MeetingAPI")));
+            services.AddTransient(p => new SignalrService(Configuration.GetValue<string>("SignalR")));
 
-            services.AddSignalR();
             services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
             {
                 builder
@@ -74,7 +70,7 @@ namespace Whale.API
                 .WithOrigins("http://localhost:4200", "http://bsa2020-whale.westeurope.cloudapp.azure.com");
         }));
 
-            services.AddTransient<FileStorageProvider>(x => new FileStorageProvider(Configuration.Bind<BlobStorageSettings>("BlobStorageSettings")));
+            services.AddTransient(x => new FileStorageProvider(Configuration.Bind<BlobStorageSettings>("BlobStorageSettings")));
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(opt =>
@@ -89,13 +85,12 @@ namespace Whale.API
                         ValidateLifetime = true
                     };
                 });
-            services.AddScoped<RedisService>(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
 
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Whale API", Version = "v1" });
             });
-            services.AddScoped(x => new EncryptService(Configuration.GetValue<string>("EncryptSettings:key")));
+            services.AddScoped(x => new EncryptHelper(Configuration.GetValue<string>("EncryptSettings:key")));
 
         }
 
@@ -127,7 +122,6 @@ namespace Whale.API
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<ChatHub>("/chatHub");
             });
         }
     }

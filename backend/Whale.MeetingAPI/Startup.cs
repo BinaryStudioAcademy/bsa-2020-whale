@@ -1,36 +1,20 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Mime;
-using System.Text;
-using System.Threading.Tasks;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Whale.BLL.Hubs;
-using Whale.BLL.Interfaces;
-using Whale.BLL.Services;
 using Whale.DAL;
 using Whale.Shared.Services;
 using AutoMapper;
-using Whale.BLL.MappingProfiles;
 using System.Reflection;
-using Whale.BLL.Services.Interfaces;
 using Microsoft.OpenApi.Models;
-using Whale.Shared.Helper;
+using Whale.MeetingAPI.Services;
+using Whale.Shared.MappingProfiles;
+using Whale.Shared.Helpers;
 
 namespace Whale.MeetingAPI
 {
@@ -47,12 +31,11 @@ namespace Whale.MeetingAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<WhaleDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("WhaleDatabase")));
-            services.AddTransient<IMeetingService, MeetingService>();
-
+            services.AddTransient<MeetingService>();
             services.AddTransient<PollService>();
-            services.AddTransient<IUserService, UserService>();
-
+            services.AddTransient<UserService>();
             services.AddTransient<ParticipantService>();
+            services.AddTransient(p => new SignalrService(Configuration.GetValue<string>("SignalR")));
 
             services.AddControllers()
                     .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
@@ -86,7 +69,7 @@ namespace Whale.MeetingAPI
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Meeting API", Version = "v1" });
             });
-            services.AddScoped(x => new EncryptService(Configuration.GetValue<string>("EncryptSettings:key")));
+            services.AddScoped(x => new EncryptHelper(Configuration.GetValue<string>("EncryptSettings:key")));
 
         }
 
@@ -122,8 +105,6 @@ namespace Whale.MeetingAPI
                     Predicate = _ => true,
                     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
                 });
-
-                endpoints.MapHub<MeetingHub>("/meeting");
             });
         }
     }
