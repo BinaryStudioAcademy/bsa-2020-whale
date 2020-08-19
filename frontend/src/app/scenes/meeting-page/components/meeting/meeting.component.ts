@@ -374,6 +374,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     console.log('currentVideo first', this.currentVideo);
     this.currentStreamLoaded.subscribe(() => {
       console.log('currentVideo', this.currentVideo);
+      // this.currentUserStream.getAudioTracks[0].enabled = false
       this.currentVideo.nativeElement.srcObject = this.currentUserStream;
       this.setOutputDevice();
     });
@@ -429,20 +430,22 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
-  turnOffMicrophone(): void {
+  toggleMicrophone(): void {
     if (!this.isMicrophoneMuted) {
-      this.currentUserStream
-        .getAudioTracks()
-        .forEach((track) => (track.enabled = false));
+      this.currentUserStream.getAudioTracks().forEach((track) => {
+        track.enabled = false;
+        track.dispatchEvent(new Event('disabled'));
+      });
     } else {
-      this.currentUserStream
-        .getAudioTracks()
-        .forEach((track) => (track.enabled = true));
+      this.currentUserStream.getAudioTracks().forEach((track) => {
+        track.enabled = true;
+        track.dispatchEvent(new Event('enabled'));
+      });
     }
     this.isMicrophoneMuted = !this.isMicrophoneMuted;
   }
 
-  turnOffCamera(): void {
+  toggleCamera(): void {
     if (!this.isCameraMuted) {
       this.currentUserStream
         .getVideoTracks()
@@ -629,6 +632,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // get answer and show other user
     call.on('stream', (stream) => {
+      stream.getAudioTracks[0].enabled = false;
       this.connectedStreams.push(stream);
       const connectedPeer = this.connectedPeers.get(call.peer);
       if (!connectedPeer || connectedPeer.id !== stream.id) {
@@ -732,6 +736,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       );
     });
   }
+
   public async changeStateVideo(event: any) {
     this.mediaSettingsService.changeVideoDevice(event);
     this.currentUserStream.getVideoTracks()?.forEach((track) => track.stop());
@@ -741,6 +746,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     });
     this.handleSuccessVideo(this.currentUserStream);
   }
+
   async handleSuccessVideo(stream: MediaStream): Promise<void> {
     const video = document.querySelector('video');
     video.srcObject = stream;
@@ -754,6 +760,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       sender.replaceTrack(videoTrack);
     });
   }
+
   public async changeInputDevice(deviceId: string) {
     this.mediaSettingsService.changeInputDevice(deviceId);
     this.currentUserStream = await navigator.mediaDevices.getUserMedia({

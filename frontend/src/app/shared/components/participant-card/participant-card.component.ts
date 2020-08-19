@@ -9,6 +9,7 @@ import {
 import { UserMediaData } from '@shared/models/media/user-media-data';
 import { createPopper } from '@popperjs/core';
 import flip from '@popperjs/core/lib/modifiers/flip.js';
+import { SourceMapGenerator } from '@angular/compiler/src/output/source_map';
 
 @Component({
   selector: 'app-participant-card',
@@ -20,9 +21,8 @@ export class ParticipantCardComponent implements OnInit {
   @Output() pinVideEvent = new EventEmitter<string>();
   @Output() hideViewEvent = new EventEmitter<string>();
   @Output() stopVideoEvent = new EventEmitter<string>();
-  @Output() startVideoEvent = new EventEmitter<string>();
-  @Output() muteEvent = new EventEmitter<string>();
-  @Output() unmuteEvent = new EventEmitter<string>();
+  @Output() toggleCameraEvent = new EventEmitter<string>();
+  @Output() toggleMicrophoneEvent = new EventEmitter<string>();
 
   public actionsIcon: HTMLElement;
   public actionsPopupContent: HTMLElement;
@@ -44,16 +44,12 @@ export class ParticipantCardComponent implements OnInit {
     this.handleStreamChanges();
   }
 
-  public switchMute(): void {
-    this.isParticipantMuted
-      ? this.unmuteEvent.emit(this.data.id)
-      : this.muteEvent.emit(this.data.id);
+  public toggleMicrophone(): void {
+    this.toggleMicrophoneEvent.emit(this.data.id);
   }
 
-  public switchVideo(): void {
-    this.hasParticipantVideo
-      ? this.stopVideoEvent.emit(this.data.id)
-      : this.startVideoEvent.emit(this.data.id);
+  public toggleCamera(): void {
+    this.toggleCameraEvent.emit(this.data.id);
   }
 
   public pinVideo(): void {
@@ -102,10 +98,13 @@ export class ParticipantCardComponent implements OnInit {
     if (this.data.isUserHost) {
       this.participantName.classList.add('inverted-text');
     }
-
-    this.isParticipantMuted = this.data.stream
-      ? this.data.stream.getAudioTracks().length == 0
-      : false;
+    this.data.stream.getAudioTracks().forEach((t) => (t.enabled = false));
+    this.isParticipantMuted = !this.data.stream
+      .getAudioTracks()
+      .some((at) => at.enabled);
+    this.hasParticipantVideo = !this.data.stream
+      .getVideoTracks()
+      .some((at) => at.enabled);
     this.hasParticipantVideo = this.data.stream
       ? this.data.stream.getVideoTracks().length == 0
       : false;
@@ -138,6 +137,22 @@ export class ParticipantCardComponent implements OnInit {
 
   private handleStreamChanges() {
     if (this.data.stream) {
+      this.data.stream.getAudioTracks().forEach((at) => {
+        at.addEventListener('enabled', () => {
+          this.isParticipantMuted = false;
+        });
+        at.addEventListener('disabled', () => {
+          this.isParticipantMuted = true;
+        });
+      });
+      this.data.stream.getVideoTracks().forEach((at) => {
+        at.addEventListener('enabled', () => {
+          this.hasParticipantVideo = false;
+        });
+        at.addEventListener('disabled', () => {
+          this.hasParticipantVideo = true;
+        });
+      });
       this.data.stream.onaddtrack = (ev: MediaStreamTrackEvent) => {
         ev.track.kind == 'audio'
           ? (this.isParticipantMuted = false)
