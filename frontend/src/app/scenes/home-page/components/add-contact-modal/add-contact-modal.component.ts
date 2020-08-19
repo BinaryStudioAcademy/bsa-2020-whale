@@ -26,13 +26,15 @@ export class AddContactModalComponent extends SimpleModalComponent<
   }
 
   public submit(): void {
-    this.contactCervice.createContactByEmail(this.contactnerEmail).subscribe(
-      (resp) => {
-        this.result = resp.body;
-        this.close();
-      },
-      (error) => this.toastr.error(error.Message)
-    );
+    this.contactCervice
+      .createContactByEmail(this.contactnerEmail.toLowerCase())
+      .subscribe(
+        (resp) => {
+          this.result = resp.body;
+          this.close();
+        },
+        (error) => this.toastr.error(error.Message)
+      );
   }
 
   public cancel(dirty: boolean): void {
