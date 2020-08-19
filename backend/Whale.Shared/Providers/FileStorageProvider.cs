@@ -3,11 +3,13 @@ using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using MimeTypes;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Whale.DAL.Settings;
 
-namespace Whale.API.Providers
+namespace Whale.Shared.Providers
 {
     public class FileStorageProvider
     {

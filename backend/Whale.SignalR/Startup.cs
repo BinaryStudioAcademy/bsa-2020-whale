@@ -12,8 +12,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Whale.DAL;
+using Whale.DAL.Settings;
+using Whale.Shared.Exceptions;
 using Whale.Shared.Helpers;
 using Whale.Shared.MappingProfiles;
+using Whale.Shared.Providers;
 using Whale.Shared.Services;
 using Whale.SignalR.Hubs;
 
@@ -50,6 +53,8 @@ namespace Whale.SignalR
                 .AllowCredentials()
                 .WithOrigins("http://localhost:4200", "http://bsa2020-whale.westeurope.cloudapp.azure.com");
             }));
+
+            services.AddTransient(x => new FileStorageProvider(Configuration.Bind<BlobStorageSettings>("BlobStorageSettings")));
 
             services.AddAutoMapper(cfg =>
             {

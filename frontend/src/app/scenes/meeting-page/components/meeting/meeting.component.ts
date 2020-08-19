@@ -93,7 +93,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public msgText = '';
   public msgReceiverEmail: string = '';
   public currentParticipant: Participant;
-  public distinctParticipants: Participant[] = [];
   public otherParticipants: Participant[];
   public connectionData: MeetingConnectionData;
 
@@ -174,16 +173,17 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
           const index = this.meeting.participants.findIndex(
             (p) => p.id === connectData.participant.id
           );
+          console.log('i', index);
           if (index >= 0) {
             this.meeting.participants[index] = connectData.participant;
           } else {
             this.addParticipantToMeeting(connectData.participant);
           }
-          if (this.currentParticipant != null) {
-            this.otherParticipants = this.meeting.participants.filter(
-              (p) => p.id !== this.currentParticipant.id
-            );
-          }
+          // if (this.currentParticipant != null) {
+          //   this.otherParticipants = this.meeting.participants.filter(
+          //     (p) => p.id !== this.currentParticipant.id
+          //   );
+          // }
 
           console.log('connected with peer: ' + connectData.peerId);
           this.connect(connectData.peerId);
@@ -200,14 +200,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (participants) => {
-          participants.forEach((p) => {
-            if (
-              !this.meeting.participants.some(
-                (mp) => mp.streamId === p.streamId
-              )
-            )
-              this.addParticipantToMeeting(p);
-          });
+          this.meeting.participants = participants;
           this.currentParticipant = participants.find(
             (p) => p.user.email === this.authService.currentUser.email
           );
@@ -338,11 +331,11 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       console.log('get call');
       // show caller
       call.on('stream', (stream) => {
-        debugger;
         if (!this.connectedStreams.includes(stream)) {
           this.connectedStreams.push(stream);
           console.log(call.peer, 'call peer');
 
+          console.log(this.meeting);
           const participant = this.meeting.participants.find(
             (p) => p.streamId == stream.id
           );
@@ -412,19 +405,13 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private addParticipantToMeeting(participant: Participant): void {
-    this.meeting.participants.push(participant);
-    this.meeting.participants.forEach((p) => {
-      if (!this.distinctParticipants.some((dp) => dp.id === p.id)) {
-        this.distinctParticipants.push(p);
-      }
-    });
+    if (!this.meeting.participants.some((p) => p.id === participant.id)) {
+      this.meeting.participants.push(participant);
+    }
   }
 
   private removeParticipantFromMeeting(participant: Participant): void {
     this.meeting.participants = this.meeting.participants.filter(
-      (p) => p.id !== participant.id
-    );
-    this.distinctParticipants = this.distinctParticipants.filter(
       (p) => p.id !== participant.id
     );
   }
@@ -594,7 +581,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // card actions
   public hideViewEventHandler(mediaDataId): void {
-    debugger;
     this.mediaData = this.mediaData.filter((d) => d.id != mediaDataId);
     this.isShowCurrentParticipantCard = false;
   }

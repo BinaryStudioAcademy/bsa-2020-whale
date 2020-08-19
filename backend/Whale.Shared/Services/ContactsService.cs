@@ -11,14 +11,19 @@ using Whale.Shared.Models.Contact;
 using Whale.Shared.Models.Contact.Setting;
 using Whale.Shared.Models.DirectMessage;
 using Whale.Shared.Models.User;
+using Whale.Shared.Providers;
 using Whale.Shared.Services.Abstract;
 
 namespace Whale.Shared.Services
 {
     public class ContactsService: BaseService
     {
-        public ContactsService(WhaleDbContext context, IMapper mapper) : base(context, mapper)
-        { }
+        private readonly FileStorageProvider _fileStorageProvider;
+
+        public ContactsService(WhaleDbContext context, IMapper mapper, FileStorageProvider fileStorageProvider) : base(context, mapper)
+        {
+            _fileStorageProvider = fileStorageProvider;
+        }
 
         public async Task<IEnumerable<ContactDTO>> GetAllContactsAsync(string userEmail)
         {
@@ -33,6 +38,13 @@ namespace Whale.Shared.Services
                  .Include(c => c.FirstMemberSettings)
                  .Include(c => c.SecondMemberSettings)
                  .Where(c => c.FirstMemberId == user.Id || c.SecondMemberId == user.Id)
+                 .AsParallel()
+                 .Select(c =>
+                 {
+                     c.FirstMember.AvatarUrl = c.FirstMember.LinkType == LinkTypeEnum.Internal ? _fileStorageProvider.GetImageByNameAsync(c.FirstMember.AvatarUrl).Result : c.FirstMember.AvatarUrl;
+                     c.SecondMember.AvatarUrl = c.SecondMember.LinkType == LinkTypeEnum.Internal ? _fileStorageProvider.GetImageByNameAsync(c.SecondMember.AvatarUrl).Result : c.SecondMember.AvatarUrl;
+                     return c;
+                 })
                  .Select(c => new ContactDTO()
                  {
                      Id = c.Id,
@@ -73,6 +85,9 @@ namespace Whale.Shared.Services
                 Settings = _mapper.Map<ContactSettingDTO>((contact.FirstMemberId == user.Id) ? contact.FirstMemberSettings : contact.SecondMemberSettings),
                 ContactnerSettings = _mapper.Map<ContactSettingDTO>((contact.SecondMemberId == user.Id) ? contact.FirstMemberSettings : contact.SecondMemberSettings),
             };
+
+            dtoContact.FirstMember.AvatarUrl = dtoContact.FirstMember.LinkType == LinkTypeEnum.Internal ? await _fileStorageProvider.GetImageByNameAsync(dtoContact.FirstMember.AvatarUrl) : dtoContact.FirstMember.AvatarUrl;
+            dtoContact.SecondMember.AvatarUrl = dtoContact.SecondMember.LinkType == LinkTypeEnum.Internal ? await _fileStorageProvider.GetImageByNameAsync(dtoContact.SecondMember.AvatarUrl) : dtoContact.SecondMember.AvatarUrl;
 
             return dtoContact;
         }

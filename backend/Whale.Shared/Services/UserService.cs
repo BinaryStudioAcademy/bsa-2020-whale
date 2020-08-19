@@ -9,19 +9,29 @@ using Whale.DAL.Models;
 using Whale.Shared.Exceptions;
 using Whale.Shared.Models;
 using Whale.Shared.Models.User;
+using Whale.Shared.Providers;
 using Whale.Shared.Services.Abstract;
 
 namespace Whale.Shared.Services
 {
     public class UserService: BaseService
     {
-        public UserService(WhaleDbContext context, IMapper mapper) : base(context, mapper)
+        private readonly FileStorageProvider _fileStorageProvider;
+
+        public UserService(WhaleDbContext context, IMapper mapper, FileStorageProvider fileStorageProvider) : base(context, mapper)
         {
+            _fileStorageProvider = fileStorageProvider;
         }
 
         public async Task<IEnumerable<UserDTO>> GetAllUsers()
         {
-            return _mapper.Map<IEnumerable<UserDTO>>(await _context.Users.ToListAsync());
+            var users = await _context.Users.ToListAsync();
+            users = users.AsParallel().Select((u) =>
+            {
+                u.AvatarUrl = u.LinkType == LinkTypeEnum.Internal ? _fileStorageProvider.GetImageByNameAsync(u.AvatarUrl).Result : u.AvatarUrl;
+                return u;
+            }).ToList();
+            return _mapper.Map<IEnumerable<UserDTO>>(users);
         }
 
         public async Task<UserDTO> GetUserAsync(Guid userId)
@@ -31,6 +41,8 @@ namespace Whale.Shared.Services
 
             if (user == null) throw new NotFoundException("User", userId.ToString());
 
+            user.AvatarUrl = user.LinkType == LinkTypeEnum.Internal ? await _fileStorageProvider.GetImageByNameAsync(user.AvatarUrl) : user.AvatarUrl;
+
             return _mapper.Map<UserDTO>(user);
         }
 
@@ -38,6 +50,8 @@ namespace Whale.Shared.Services
         {
             var user = await _context.Users.FirstOrDefaultAsync(e => e.Email == email);
             if (user == null) throw new NotFoundException("User", email);
+
+            user.AvatarUrl = user.LinkType == LinkTypeEnum.Internal ? await _fileStorageProvider.GetImageByNameAsync(user.AvatarUrl) : user.AvatarUrl;
 
             return _mapper.Map<UserDTO>(user);
         }

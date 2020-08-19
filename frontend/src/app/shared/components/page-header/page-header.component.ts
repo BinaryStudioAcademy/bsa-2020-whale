@@ -73,16 +73,7 @@ export class PageHeaderComponent implements OnInit {
       .getLoggedInUser()
       .pipe(tap(() => (this.isUserLoadig = false)))
       .subscribe((userFromDB: User) => {
-        this.loggedInUser = { ...userFromDB, avatarUrl: null };
-        if (userFromDB.linkType === LinkTypeEnum.Internal) {
-          this.blobService
-            .GetImageByName(userFromDB.avatarUrl)
-            .subscribe((fullLink: string) => {
-              this.loggedInUser.avatarUrl = fullLink;
-            });
-          return;
-        }
-        this.loggedInUser.avatarUrl = userFromDB.avatarUrl;
+        this.loggedInUser = userFromDB;
       });
   }
   goToPage(pageName: string): void {

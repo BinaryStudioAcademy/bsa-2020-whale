@@ -10,15 +10,15 @@ using AutoMapper;
 using Microsoft.IdentityModel.Tokens;
 using Whale.Shared.Services;
 using Whale.DAL.Settings;
-using Whale.API.Extensions;
 using Whale.API.Middleware;
 using Microsoft.OpenApi.Models;
 using Whale.API.Services;
 using Whale.API.MappingProfiles;
-using Whale.API.Providers;
 using Whale.Shared.Helpers;
 using Whale.Shared.MappingProfiles;
 using System.Net.Http;
+using Whale.Shared.Providers;
+using Whale.Shared.Exceptions;
 
 namespace Whale.API
 {

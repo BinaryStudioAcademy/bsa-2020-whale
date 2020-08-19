@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Whale.API.Providers;
+using Whale.Shared.Providers;
 
 namespace Whale.API.Controllers
 {
@@ -13,12 +13,6 @@ namespace Whale.API.Controllers
         public StorageController(FileStorageProvider storageProvider)
         {
             _storageProvider = storageProvider;
-        }
-
-        [HttpGet("{name}")]
-        public async Task<ActionResult<string>> GetImageByName(string name)
-        {
-            return Ok(await _storageProvider.GetImageByNameAsync(name));
         }
 
         [HttpPost]

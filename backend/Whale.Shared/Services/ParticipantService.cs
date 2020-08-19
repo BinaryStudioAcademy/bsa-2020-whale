@@ -8,13 +8,19 @@ using Whale.DAL;
 using Whale.DAL.Models;
 using Whale.Shared.Exceptions;
 using Whale.Shared.Models.Participant;
+using Whale.Shared.Providers;
 using Whale.Shared.Services.Abstract;
 
 namespace Whale.Shared.Services
 {
     public class ParticipantService : BaseService
     {
-        public ParticipantService(WhaleDbContext context, IMapper mapper) : base(context, mapper) { }
+        private readonly FileStorageProvider _fileStorageProvider;
+
+        public ParticipantService(WhaleDbContext context, IMapper mapper, FileStorageProvider fileStorageProvider) : base(context, mapper) 
+        {
+            _fileStorageProvider = fileStorageProvider;
+        }
 
         public async Task<ParticipantDTO> CreateParticipantAsync(ParticipantCreateDTO participantDto)
         {
@@ -36,6 +42,8 @@ namespace Whale.Shared.Services
                 .Include(p => p.User)
                 .Include(p => p.Meeting)
                 .FirstOrDefaultAsync(p => p.Id == entity.Id);
+
+            createdParticipant.User.AvatarUrl = createdParticipant.User.LinkType == LinkTypeEnum.Internal ? await _fileStorageProvider.GetImageByNameAsync(createdParticipant.User.AvatarUrl) : createdParticipant.User.AvatarUrl;
 
             return _mapper.Map<ParticipantDTO>(createdParticipant);
         }
@@ -83,6 +91,8 @@ namespace Whale.Shared.Services
             if (participant == null)
                 throw new NotFoundException("Participant");
 
+            participant.User.AvatarUrl = participant.User.LinkType == LinkTypeEnum.Internal ? await _fileStorageProvider.GetImageByNameAsync(participant.User.AvatarUrl) : participant.User.AvatarUrl;
+
             return _mapper.Map<ParticipantDTO>(participant);
         }
 
@@ -96,7 +106,11 @@ namespace Whale.Shared.Services
                 .Include(p => p.User)
                 .Include(p => p.Meeting)
                 .Where(p => p.MeetingId == meetingId)
-                .Select(p => _mapper.Map<ParticipantDTO>(p));
+                .AsParallel()
+                .Select(p => {
+                    p.User.AvatarUrl = p.User.LinkType == LinkTypeEnum.Internal ? _fileStorageProvider.GetImageByNameAsync(p.User.AvatarUrl).Result : p.User.AvatarUrl;
+                    return _mapper.Map<ParticipantDTO>(p);
+                    });
         }
 
         public async Task<ParticipantDTO> GetMeetingParticipantByEmail(Guid meetingId, string email)
