@@ -27,13 +27,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
   groupsVisibility = false;
   chatVisibility = true;
   ownerEmail: string;
-  public routePrefix = '/api/user/email';
   contactSelected: Contact;
 
   public isContactsLoading = true;
   public isUserLoadig = true;
   public isMeetingLoading = false;
-  public isUserAvatarLoading: boolean;
 
   private unsubscribe$ = new Subject<void>();
 
@@ -59,17 +57,15 @@ export class HomePageComponent implements OnInit, OnDestroy {
       .pipe(tap(() => (this.isUserLoadig = false)))
       .subscribe(
         (userFromDB: User) => {
-          this.isUserAvatarLoading = false;
-          this.loggedInUser = userFromDB;
+          this.loggedInUser = { ...userFromDB, avatarUrl: null };
           if (userFromDB.linkType === LinkTypeEnum.Internal) {
             this.blobService
               .GetImageByName(userFromDB.avatarUrl)
               .subscribe((fullLink: string) => {
                 this.loggedInUser.avatarUrl = fullLink;
-                this.isUserAvatarLoading = true;
               });
           } else {
-            this.isUserAvatarLoading = true;
+            this.loggedInUser.avatarUrl = userFromDB.avatarUrl;
           }
           this.ownerEmail = this.loggedInUser?.email;
 
@@ -147,6 +143,12 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
   goToPage(pageName: string): void {
     this.router.navigate([`${pageName}`]);
+  }
+  returnCorrectLink(contact: Contact): string {
+    return contact?.secondMember.avatarUrl.startsWith('http') ||
+      contact?.secondMember.avatarUrl.startsWith('data')
+      ? contact?.secondMember.avatarUrl
+      : '';
   }
 }
 export interface UserModel {

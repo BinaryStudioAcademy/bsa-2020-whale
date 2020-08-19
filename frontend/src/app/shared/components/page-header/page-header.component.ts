@@ -20,7 +20,6 @@ export class PageHeaderComponent implements OnInit {
   settingsMenuVisible = false;
   isNotificationsVisible = false;
   loggedInUser: User;
-  public routePrefix = '/api/user';
 
   notification1: Notification = {
     text: 'Missed call from USER',
@@ -40,7 +39,6 @@ export class PageHeaderComponent implements OnInit {
     this.notification2,
     this.notification3,
   ];
-  isUserAvatarLoading: boolean;
 
   constructor(
     private router: Router,
@@ -75,19 +73,16 @@ export class PageHeaderComponent implements OnInit {
       .getLoggedInUser()
       .pipe(tap(() => (this.isUserLoadig = false)))
       .subscribe((userFromDB: User) => {
-        this.isUserAvatarLoading = false;
-        this.loggedInUser = userFromDB;
+        this.loggedInUser = { ...userFromDB, avatarUrl: null };
         if (userFromDB.linkType === LinkTypeEnum.Internal) {
           this.blobService
             .GetImageByName(userFromDB.avatarUrl)
             .subscribe((fullLink: string) => {
               this.loggedInUser.avatarUrl = fullLink;
-              this.isUserAvatarLoading = true;
             });
-        } else {
-          this.loggedInUser = userFromDB;
-          this.isUserAvatarLoading = true;
+          return;
         }
+        this.loggedInUser.avatarUrl = userFromDB.avatarUrl;
       });
   }
   goToPage(pageName: string): void {

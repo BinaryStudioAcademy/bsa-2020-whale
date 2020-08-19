@@ -193,18 +193,17 @@ export class ProfilePageComponent implements OnInit {
   private GetAvatar(): void {
     this.upstateService.getLoggedInUser().subscribe(
       (userFromDB: User) => {
-        this.loggedInUser = userFromDB;
+        this.loggedInUser = { ...userFromDB, avatarUrl: null };
         if (userFromDB.linkType === LinkTypeEnum.Internal) {
           this.blobService
             .GetImageByName(userFromDB.avatarUrl)
             .subscribe((fullLink: string) => {
-              userFromDB.avatarUrl = fullLink;
-              this.loggedInUser = userFromDB;
+              this.loggedInUser.avatarUrl = fullLink;
               this.updatedUser = this.loggedInUser;
             });
           return;
         }
-        this.loggedInUser = userFromDB;
+        this.loggedInUser.avatarUrl = userFromDB.avatarUrl;
       },
       (error) => this.toastr.error(error.Message)
     );

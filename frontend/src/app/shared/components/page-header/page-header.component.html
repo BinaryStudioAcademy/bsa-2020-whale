@@ -49,11 +49,7 @@
     class="user-pic-item item message shared"
   >
     <spiner *ngIf="isUserLoadig" [size]="'small'"></spiner>
-    <img
-      *ngIf="isUserAvatarLoading"
-      class="ui tiny image user-pic"
-      src="{{ loggedInUser?.avatarUrl }}"
-    />
+    <img class="ui tiny image user-pic" src="{{ loggedInUser?.avatarUrl }}" />
   </a>
   <div *ngIf="settingsMenuVisible" class="dropdown-menu settings">
     <div

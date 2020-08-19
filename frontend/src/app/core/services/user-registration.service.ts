@@ -35,7 +35,9 @@ export class UserRegistrationService {
       .subscribe(
         (user) => {
           console.log(`User ${user.body.email} exists`);
-          this.router.navigate(['/home']);
+          if (this.router.url === '/') {
+            this.router.navigate(['/home']);
+          }
         },
         (error) => {
           if (error.status === 404) {
