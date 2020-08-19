@@ -11,33 +11,29 @@ using Whale.Shared.Models.DirectMessage;
 using Whale.Shared.Services;
 using Microsoft.AspNetCore.SignalR.Client;
 using Whale.Shared.Providers;
+using Whale.DAL.Settings;
+using Whale.Shared.Extentions;
 
 namespace Whale.API.Services
 {
     public class ContactChatService : BaseService
     {
         private readonly SignalrService _signalrService;
-        private readonly FileStorageProvider _fileStorageProvider;
+        private readonly BlobStorageSettings _blobStorageSettings;
 
-        public ContactChatService(WhaleDbContext context, IMapper mapper, SignalrService signalrService, FileStorageProvider fileStorageProvider) : base(context, mapper) {
+        public ContactChatService(WhaleDbContext context, IMapper mapper, SignalrService signalrService, BlobStorageSettings blobStorageSettings) : base(context, mapper) {
             _signalrService = signalrService;
-            _fileStorageProvider = fileStorageProvider;
+            _blobStorageSettings = blobStorageSettings;
         }
         public async Task<ICollection<DirectMessage>> GetAllContactsMessagesAsync(Guid contactId)
         {
-            var messages = _context.DirectMessages
-                .Include(msg=>msg.Author)
-                .OrderBy(msg=>msg.CreatedAt)
+            var messages = await _context.DirectMessages
+                .Include(msg => msg.Author)
+                .OrderBy(msg => msg.CreatedAt)
                 .Where(p => p.ContactId == contactId) // Filter here
-                .AsParallel()
-                .Select(msg =>
-                {
-                    msg.Author.AvatarUrl = msg.Author.LinkType == LinkTypeEnum.Internal ?  _fileStorageProvider.GetImageByNameAsync(msg.Author.AvatarUrl).Result : msg.Author.AvatarUrl;
-                    return msg;
-                })
-                .ToList();
+                .ToListAsync();
             if (messages == null) throw new Exception("No messages");
-            return _mapper.Map<ICollection<DirectMessage>>(messages);
+            return _mapper.Map<ICollection<DirectMessage>>(messages.LoadAvatars(_blobStorageSettings, msg => msg.Author));
         }
         public async Task<DirectMessage> CreateDirectMessage(DirectMessageCreateDTO directMessageDto)
         {
@@ -49,14 +45,13 @@ namespace Whale.API.Services
             var createdMessage = await _context.DirectMessages
                 .Include(msg => msg.Author)
                 .FirstAsync(msg => msg.Id == messageEntity.Id);
-            var createdMessageDTO = _mapper.Map<DirectMessage>(createdMessage);
 
-            createdMessageDTO.Author.AvatarUrl = createdMessageDTO.Author.LinkType == LinkTypeEnum.Internal ? await _fileStorageProvider.GetImageByNameAsync(createdMessageDTO.Author.AvatarUrl) : createdMessageDTO.Author.AvatarUrl;
+            await createdMessage.Author.LoadAvatarAsync(_blobStorageSettings);
+
+            var createdMessageDTO = _mapper.Map<DirectMessage>(createdMessage);
 
             var connection = await _signalrService.ConnectHubAsync("chatHub");
             await connection.InvokeAsync("NewMessageReceived", createdMessageDTO);
-
-            createdMessageDTO.Author.AvatarUrl = createdMessageDTO.Author.LinkType == LinkTypeEnum.Internal ? await _fileStorageProvider.GetImageByNameAsync(createdMessageDTO.Author.AvatarUrl) : createdMessageDTO.Author.AvatarUrl;
 
             return createdMessageDTO;
         }

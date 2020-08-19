@@ -6,7 +6,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Whale.DAL;
 using Whale.DAL.Models;
+using Whale.DAL.Settings;
 using Whale.Shared.Exceptions;
+using Whale.Shared.Extentions;
 using Whale.Shared.Models.Participant;
 using Whale.Shared.Providers;
 using Whale.Shared.Services.Abstract;
@@ -15,11 +17,11 @@ namespace Whale.Shared.Services
 {
     public class ParticipantService : BaseService
     {
-        private readonly FileStorageProvider _fileStorageProvider;
+        private readonly BlobStorageSettings _blobStorageSettings;
 
-        public ParticipantService(WhaleDbContext context, IMapper mapper, FileStorageProvider fileStorageProvider) : base(context, mapper) 
+        public ParticipantService(WhaleDbContext context, IMapper mapper, BlobStorageSettings blobStorageSettings) : base(context, mapper) 
         {
-            _fileStorageProvider = fileStorageProvider;
+            _blobStorageSettings = blobStorageSettings;
         }
 
         public async Task<ParticipantDTO> CreateParticipantAsync(ParticipantCreateDTO participantDto)
@@ -43,7 +45,7 @@ namespace Whale.Shared.Services
                 .Include(p => p.Meeting)
                 .FirstOrDefaultAsync(p => p.Id == entity.Id);
 
-            createdParticipant.User.AvatarUrl = createdParticipant.User.LinkType == LinkTypeEnum.Internal ? await _fileStorageProvider.GetImageByNameAsync(createdParticipant.User.AvatarUrl) : createdParticipant.User.AvatarUrl;
+            await createdParticipant.User.LoadAvatarAsync(_blobStorageSettings);
 
             return _mapper.Map<ParticipantDTO>(createdParticipant);
         }
@@ -91,7 +93,7 @@ namespace Whale.Shared.Services
             if (participant == null)
                 throw new NotFoundException("Participant");
 
-            participant.User.AvatarUrl = participant.User.LinkType == LinkTypeEnum.Internal ? await _fileStorageProvider.GetImageByNameAsync(participant.User.AvatarUrl) : participant.User.AvatarUrl;
+            await participant.User.LoadAvatarAsync(_blobStorageSettings);
 
             return _mapper.Map<ParticipantDTO>(participant);
         }
@@ -106,11 +108,8 @@ namespace Whale.Shared.Services
                 .Include(p => p.User)
                 .Include(p => p.Meeting)
                 .Where(p => p.MeetingId == meetingId)
-                .AsParallel()
-                .Select(p => {
-                    p.User.AvatarUrl = p.User.LinkType == LinkTypeEnum.Internal ? _fileStorageProvider.GetImageByNameAsync(p.User.AvatarUrl).Result : p.User.AvatarUrl;
-                    return _mapper.Map<ParticipantDTO>(p);
-                    });
+                .LoadAvatars(_blobStorageSettings, p => p.User)
+                .Select(p => _mapper.Map<ParticipantDTO>(p));
         }
 
         public async Task<ParticipantDTO> GetMeetingParticipantByEmail(Guid meetingId, string email)

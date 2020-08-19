@@ -51,26 +51,26 @@ namespace Whale.Shared.Providers
             return blockBlob.Uri.AbsoluteUri;
         }
 
-        public async Task<string> GetImageByNameAsync(string fileName)
-        {
-            var container = _blobClient.GetContainerReference(_settings.ImageContainerName);
-            await SetPublicContainerPermissionsAsync(container);
+        //public async Task<string> GetImageByNameAsync(string fileName)
+        //{
+        //    var container = _blobClient.GetContainerReference(_settings.ImageContainerName);
+        //    //await SetPublicContainerPermissionsAsync(container);
 
-            BlobContinuationToken blobContinuationToken = null;
-            var imageURL = string.Empty;
+        //    BlobContinuationToken blobContinuationToken = null;
+        //    var imageURL = string.Empty;
 
-            if (!string.IsNullOrEmpty(fileName))
-            {
-                var response = await container.ListBlobsSegmentedAsync(blobContinuationToken);
-                var blob = response.Results.FirstOrDefault(x => x.Uri.Segments.Contains(fileName));
-                if (blob != null)
-                {
-                    imageURL = blob.Uri.AbsoluteUri;
-                }
-            }
+        //    if (!string.IsNullOrEmpty(fileName))
+        //    {
+        //        var response = await container.ListBlobsSegmentedAsync(blobContinuationToken);
+        //        var blob = response.Results.FirstOrDefault(x => x.Uri.Segments.Contains(fileName));
+        //        if (blob != null)
+        //        {
+        //            imageURL = blob.Uri.AbsoluteUri;
+        //        }
+        //    }
 
-            return imageURL;
-        }
+        //    return imageURL;
+        //}
 
         private async Task SetPublicContainerPermissionsAsync(CloudBlobContainer container)
         {

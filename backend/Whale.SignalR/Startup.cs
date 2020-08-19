@@ -60,7 +60,7 @@ namespace Whale.SignalR
                 .WithOrigins("http://localhost:4200", "http://bsa2020-whale.westeurope.cloudapp.azure.com");
             }));
 
-            services.AddTransient(x => new FileStorageProvider(Configuration.Bind<BlobStorageSettings>("BlobStorageSettings")));
+            services.AddScoped<BlobStorageSettings>(options => Configuration.Bind<BlobStorageSettings>("BlobStorageSettings"));
 
             services.AddAutoMapper(cfg =>
             {

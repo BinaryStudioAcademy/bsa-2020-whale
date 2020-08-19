@@ -6,7 +6,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Whale.DAL;
 using Whale.DAL.Models;
+using Whale.DAL.Settings;
 using Whale.Shared.Exceptions;
+using Whale.Shared.Extentions;
 using Whale.Shared.Models;
 using Whale.Shared.Models.User;
 using Whale.Shared.Providers;
@@ -16,21 +18,23 @@ namespace Whale.Shared.Services
 {
     public class UserService: BaseService
     {
-        private readonly FileStorageProvider _fileStorageProvider;
+        private readonly BlobStorageSettings _blobStorageSettings;
 
-        public UserService(WhaleDbContext context, IMapper mapper, FileStorageProvider fileStorageProvider) : base(context, mapper)
+        public UserService(WhaleDbContext context, IMapper mapper, BlobStorageSettings blobStorageSettings) : base(context, mapper)
         {
-            _fileStorageProvider = fileStorageProvider;
+            _blobStorageSettings = blobStorageSettings;
         }
 
         public async Task<IEnumerable<UserDTO>> GetAllUsers()
         {
-            var users = await _context.Users.ToListAsync();
-            users = users.AsParallel().Select((u) =>
-            {
-                u.AvatarUrl = u.LinkType == LinkTypeEnum.Internal ? _fileStorageProvider.GetImageByNameAsync(u.AvatarUrl).Result : u.AvatarUrl;
-                return u;
-            }).ToList();
+            var users = await _context.Users.LoadAvatars(_blobStorageSettings).ToArrayAsync();
+            //var usersTasks = users.Select(async (u) =>
+            //{
+            //    u.AvatarUrl = u.LinkType == LinkTypeEnum.Internal ? await _fileStorageProvider.GetImageByNameAsync(u.AvatarUrl) : u.AvatarUrl;
+            //    return u;
+            //});
+            //users = await Task.WhenAll(usersTasks);
+
             return _mapper.Map<IEnumerable<UserDTO>>(users);
         }
 
@@ -41,7 +45,7 @@ namespace Whale.Shared.Services
 
             if (user == null) throw new NotFoundException("User", userId.ToString());
 
-            user.AvatarUrl = user.LinkType == LinkTypeEnum.Internal ? await _fileStorageProvider.GetImageByNameAsync(user.AvatarUrl) : user.AvatarUrl;
+            await user.LoadAvatarAsync(_blobStorageSettings);
 
             return _mapper.Map<UserDTO>(user);
         }
@@ -51,7 +55,7 @@ namespace Whale.Shared.Services
             var user = await _context.Users.FirstOrDefaultAsync(e => e.Email == email);
             if (user == null) throw new NotFoundException("User", email);
 
-            user.AvatarUrl = user.LinkType == LinkTypeEnum.Internal ? await _fileStorageProvider.GetImageByNameAsync(user.AvatarUrl) : user.AvatarUrl;
+            await user.LoadAvatarAsync(_blobStorageSettings);
 
             return _mapper.Map<UserDTO>(user);
         }
