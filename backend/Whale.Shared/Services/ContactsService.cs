@@ -17,8 +17,11 @@ namespace Whale.Shared.Services
 {
     public class ContactsService: BaseService
     {
-        public ContactsService(WhaleDbContext context, IMapper mapper) : base(context, mapper)
-        { }
+        private readonly NotificationsService _notifications;
+        public ContactsService(WhaleDbContext context, IMapper mapper, NotificationsService notifications) : base(context, mapper)
+        {
+            _notifications = notifications;
+        }
 
         public async Task<IEnumerable<ContactDTO>> GetAllContactsAsync(string userEmail)
         {
@@ -32,7 +35,7 @@ namespace Whale.Shared.Services
                  .Include(c => c.PinnedMessage)
                  .Include(c => c.FirstMemberSettings)
                  .Include(c => c.SecondMemberSettings)
-                 .Where(c => c.FirstMemberId == user.Id || c.SecondMemberId == user.Id)
+                 .Where(c => (c.FirstMemberId == user.Id || c.SecondMemberId == user.Id) && c.isAccepted)
                  .Select(c => new ContactDTO()
                  {
                      Id = c.Id,
@@ -112,8 +115,18 @@ namespace Whale.Shared.Services
                 .FirstOrDefaultAsync(c =>
                 (c.FirstMemberId == contactner.Id && c.SecondMemberId == owner.Id) ||
                 (c.SecondMemberId == contactner.Id && c.FirstMemberId == owner.Id));
+
             if (contact is object)
+            {
+                if (!contact.isAccepted && contact.SecondMemberId == owner.Id)
+                {
+                    contact.isAccepted = true;
+                    _context.Contacts.Update(contact);
+                    await _context.SaveChangesAsync();
+                    return await GetContactAsync(contact.Id, ownerEmail);
+                }
                 throw new AlreadyExistsException("Contact");
+            }
 
             var ownerSettings = new ContactSetting()
             {
@@ -137,10 +150,12 @@ namespace Whale.Shared.Services
                 SecondMemberId = contactner.Id,
                 FirstMemberSettings = ownerSettings,
                 SecondMemberSettings = contactnerSettings,
+                isAccepted = false,
             };
             _context.Contacts.Add(contact);
             await _context.SaveChangesAsync();
-            return await GetContactAsync(contact.Id, ownerEmail);
+            await _notifications.AddContactNotification(ownerEmail, contactnerEmail);
+            return null;
         }
     }
 }

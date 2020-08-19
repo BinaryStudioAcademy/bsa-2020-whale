@@ -74,15 +74,14 @@ namespace Whale.Shared.Services
             return AddNotification(userEmail, JsonConvert.SerializeObject(options, camelSettings), NotificationTypeEnum.TextNotification);
         }
 
-        public Task<NotificationDTO> AddContactNotification(string userEmail, Contact contact)
+        public Task<NotificationDTO> AddContactNotification(string owner, string contacter)
         {
             var options = new OptionsAddContact
             {
-                ContactId = contact.Id,
-                ContactUserId = contact.FirstMemberId
+                ContactEmail = owner,
             };
 
-            return AddNotification(userEmail, JsonConvert.SerializeObject(options, camelSettings), NotificationTypeEnum.AddContactNotification);
+            return AddNotification(contacter, JsonConvert.SerializeObject(options, camelSettings), NotificationTypeEnum.AddContactNotification);
         }
 
         public async Task DeleteNotificationAsync(string userEmail, Guid notificationId)
