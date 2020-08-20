@@ -45,7 +45,6 @@ import {
 import { MediaSettingsService } from 'app/core/services/media-settings.service';
 import { HttpClient } from '@angular/common/http';
 import { GetMessages } from '@shared/models/meeting/message/get-messages';
-import { LinkTypeEnum } from '@shared/Enums/LinkTypeEnum';
 
 @Component({
   selector: 'app-meeting',
@@ -292,13 +291,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe(
         (messages) => {
           this.messages = messages;
-          this.messages.map((m) => {
-            if (m.author.linkType === LinkTypeEnum.Internal) {
-              this.blobService
-                .GetImageByName(m.author.avatarUrl)
-                .subscribe((avatarUrl) => (m.author.avatarUrl = avatarUrl));
-            }
-          });
         },
         (err) => {
           this.toastr.error('Error occured when getting messages');
@@ -309,13 +301,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (message) => {
-          if (message.author.linkType === LinkTypeEnum.Internal) {
-            this.blobService
-              .GetImageByName(message.author.avatarUrl)
-              .subscribe(
-                (avaatarUrl) => (message.author.avatarUrl = avaatarUrl)
-              );
-          }
           this.messages.push(message);
         },
         (err) => {
@@ -430,11 +415,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.meeting.participants.push(participant);
     this.meeting.participants.forEach((p) => {
       if (!this.distinctParticipants.some((dp) => dp.id === p.id)) {
-        if (p.user.linkType === LinkTypeEnum.Internal) {
-          this.blobService
-            .GetImageByName(p.user.avatarUrl)
-            .subscribe((avatarUrl) => (p.user.avatarUrl = avatarUrl));
-        }
         this.distinctParticipants.push(p);
       }
     });
