@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -21,10 +22,12 @@ namespace Whale.Shared.Services
     {
         private readonly NotificationsService _notifications;
         private readonly BlobStorageSettings _blobStorageSettings;
-        public ContactsService(WhaleDbContext context, IMapper mapper, NotificationsService notifications, BlobStorageSettings blobStorageSettings) : base(context, mapper)
+        private readonly SignalrService _signalrService;
+        public ContactsService(WhaleDbContext context, IMapper mapper, NotificationsService notifications, BlobStorageSettings blobStorageSettings, SignalrService signalrService) : base(context, mapper)
         {
             _notifications = notifications;
             _blobStorageSettings = blobStorageSettings;
+            _signalrService = signalrService;
         }
 
         public async Task<IEnumerable<ContactDTO>> GetAllContactsAsync(string userEmail)
@@ -139,7 +142,10 @@ namespace Whale.Shared.Services
                     contact.isAccepted = true;
                     _context.Contacts.Update(contact);
                     await _context.SaveChangesAsync();
-                    return await GetContactAsync(contact.Id, ownerEmail);
+                    var contactDTO = await GetContactAsync(contact.Id, ownerEmail);
+                    var connection = await _signalrService.ConnectHubAsync("contactsHub");
+                    await connection.InvokeAsync("onNewContact", contactDTO);
+                    return contactDTO;
                 }
                 throw new AlreadyExistsException("Contact");
             }
