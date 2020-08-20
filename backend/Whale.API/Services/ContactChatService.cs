@@ -33,7 +33,7 @@ namespace Whale.API.Services
                 .Where(p => p.ContactId == contactId) // Filter here
                 .ToListAsync();
             if (messages == null) throw new Exception("No messages");
-            return _mapper.Map<ICollection<DirectMessage>>(await messages.LoadAvatars(_blobStorageSettings, msg => msg.Author));
+            return _mapper.Map<ICollection<DirectMessage>>(await messages.LoadAvatarsAsync(_blobStorageSettings, msg => msg.Author));
         }
         public async Task<DirectMessage> CreateDirectMessage(DirectMessageCreateDTO directMessageDto)
         {

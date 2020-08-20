@@ -107,7 +107,7 @@ namespace Whale.Shared.Services
                 .Include(p => p.User)
                 .Include(p => p.Meeting)
                 .Where(p => p.MeetingId == meetingId)
-                .LoadAvatars(_blobStorageSettings, p => p.User);
+                .LoadAvatarsAsync(_blobStorageSettings, p => p.User);
 
             return _mapper.Map<IEnumerable<ParticipantDTO>>(participants);
         }
