@@ -60,7 +60,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
     private groupService: GroupService,
     private blobService: BlobService,
     private upstateService: UpstateService,
-    private signalRService: SignalRService,
+    private signalRService: SignalRService
   ) {}
 
   ngOnDestroy(): void {
@@ -131,9 +131,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   addNewContact(): void {
-    this.simpleModalService
-      .addModal(AddContactModalComponent)
-      .subscribe();
+    this.simpleModalService.addModal(AddContactModalComponent).subscribe();
   }
 
   // visibilityChange(event): void {
@@ -196,6 +194,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
   onContactClick(contact: Contact): void {
     this.falseAllBooleans();
+    this.contactsVisibility = true;
     this.chatVisibility = true;
     this.contactSelected = contact;
   }
@@ -237,12 +236,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe(() => {
-        this.hubConnection.on(
-          'onNewContact',
-          (contact: Contact) => {
-            this.receivedContact.next(contact);
-          }
-        );
+        this.hubConnection.on('onNewContact', (contact: Contact) => {
+          this.receivedContact.next(contact);
+        });
         this.hubConnection.invoke('onConect', this.loggedInUser.email);
       });
     this.receivedContact$.pipe(takeUntil(this.unsubscribe$)).subscribe(
@@ -257,6 +253,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   public onContactsClick(): void {
+    console.log('open/close');
     if (this.contacts.length) {
       this.contactsVisibility = !this.contactsVisibility;
     }
