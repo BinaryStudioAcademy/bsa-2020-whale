@@ -12,10 +12,7 @@ namespace Whale.DAL.Models
     {
         public string Settings { get; set; }
         public DateTimeOffset StartTime { get; set; }
-
-        [NotMapped]
-        public DateTimeOffset EndTime { get; set; }
-
+        public DateTimeOffset? EndTime { get; set; }
         public int AnonymousCount { get; set; }
         public bool IsScheduled { get; set; }
         public bool IsRecurrent { get; set; }
@@ -32,6 +29,7 @@ namespace Whale.DAL.Models
             Id = meeting.Id;
             Settings = meeting.Settings;
             StartTime = meeting.StartTime;
+            EndTime = meeting.EndTime;
             AnonymousCount = meeting.AnonymousCount;
             IsScheduled = meeting.IsScheduled;
             IsRecurrent = meeting.IsRecurrent;

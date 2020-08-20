@@ -43,7 +43,7 @@ import {
   CanvasWhiteboardUpdate,
 } from 'ng2-canvas-whiteboard';
 import { MediaSettingsService } from 'app/core/services/media-settings.service';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { GetMessages } from '@shared/models/meeting/message/get-messages';
 
 @Component({
@@ -403,11 +403,15 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
         this.connectionData
       );
       if (this.currentParticipant?.role === ParticipantRole.Host) {
-        this.meeting.endTime = new Date();
-        this.httpService.putRequest<Meeting, null>(
-          environment.apiUrl + '/api/meeting/end',
-          this.meeting
-        );
+        this.httpService
+          .getRequest(
+            environment.apiUrl + '/api/meeting/end',
+            new HttpParams().set('meetingId', this.meeting.id)
+          )
+          .subscribe(
+            () => {},
+            (error) => console.error(error.Message)
+          );
         this.pollService.savePollResults(this.meeting.id);
       }
 

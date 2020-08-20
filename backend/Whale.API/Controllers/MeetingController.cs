@@ -41,11 +41,11 @@ namespace Whale.API.Controllers
             return Ok(await _httpService.GetAsync<string>($"api/meeting/shortInvite/{inviteLink}"));
         }
 
-        [HttpPut("end")]
-        public async Task<NoContentResult> SaveMeetingEndTime(MeetingDTO meetingDto)
+        [HttpGet("end")]
+        public async Task<OkResult> SaveMeetingEndTime(Guid meetingId)
         {
-            await _httpService.PutAsync<MeetingDTO>("api/meeting/end", meetingDto);
-            return NoContent();
+            await _httpService.GetAsync<object>($"api/meeting/end?meetingId={meetingId}");
+            return Ok();
         }
 
         [HttpGet("shortenLink/{longURL}")]

@@ -16,10 +16,20 @@ export class MeetingNoteComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  public calculateDuration(): number {
+  public calculateDuration(): Date {
     const start: number = new Date(this.meeting.startTime).getTime();
     const end: number = new Date(this.meeting.endTime).getTime();
-    const diff: number = (end - start) / 60000;
-    return diff;
+
+    return new Date(end - start);
+  }
+
+  public stringifyDuration(duration: Date): string {
+    const hours = duration.getUTCHours();
+    const minutes = duration.getUTCMinutes();
+
+    const hourString = hours == 0 ? '' : `${hours} hours `;
+    const minuteString = minutes == 0 ? '' : `${minutes} minutes`;
+
+    return hourString + minuteString;
   }
 }
