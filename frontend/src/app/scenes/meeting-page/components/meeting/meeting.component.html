@@ -287,6 +287,7 @@
             currentParticipant.id === $event ? toggleCamera() : ''
           "
           [data]="data"
+          [meetingHolder]="currentParticipant"
         >
         </app-participant-card>
       </div>
@@ -301,7 +302,12 @@
         #currentVideo
         autoplay="autoplay"
         class="participant-fullscreen"
-        [hidden]="mediaData.length > 1 || isCameraMuted"
+        [hidden]="
+          mediaData.length > 1 ||
+          (mediaData.length === 1 &&
+            mediaData[0].id !== currentParticipant.id) ||
+          isCameraMuted
+        "
         [muted]="'muted'"
       ></video>
 

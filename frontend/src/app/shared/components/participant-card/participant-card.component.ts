@@ -9,6 +9,7 @@ import {
 import { UserMediaData } from '@shared/models/media/user-media-data';
 import { createPopper } from '@popperjs/core';
 import flip from '@popperjs/core/lib/modifiers/flip.js';
+import { Participant } from '@shared/models/participant/participant';
 
 @Component({
   selector: 'app-participant-card',
@@ -17,6 +18,7 @@ import flip from '@popperjs/core/lib/modifiers/flip.js';
 })
 export class ParticipantCardComponent implements OnInit {
   @Input() data: UserMediaData;
+  @Input() meetingHolder: Participant;
   @Output() pinVideEvent = new EventEmitter<string>();
   @Output() hideViewEvent = new EventEmitter<string>();
   @Output() stopVideoEvent = new EventEmitter<string>();

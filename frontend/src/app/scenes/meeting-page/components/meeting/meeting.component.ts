@@ -267,7 +267,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (mediaData) => {
-          console.log(mediaData);
           const changedStream = this.connectedStreams.find(
             (s) => s.id === mediaData.streamId
           );
