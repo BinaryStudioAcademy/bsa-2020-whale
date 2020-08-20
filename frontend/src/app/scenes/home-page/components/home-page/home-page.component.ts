@@ -66,6 +66,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
             .subscribe(
               (data: Contact[]) => {
                 this.contacts = data;
+                this.onContactsClick();
               },
               (error) => this.toastr.error(error.Message)
             );

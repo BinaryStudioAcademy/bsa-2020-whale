@@ -35,12 +35,13 @@ namespace Whale.SignalR
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<WhaleDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("WhaleDatabase")));
-            services.AddTransient<NotificationsService>();
             services.AddTransient<ContactsService>();
+            services.AddTransient<NotificationsService>();
             services.AddTransient<MeetingService>();
             services.AddTransient<ParticipantService>();
             services.AddTransient<UserService>();
 
+            services.AddTransient(p => new SignalrService(Configuration.GetValue<string>("SignalR")));
             services.AddScoped(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
             services.AddScoped(x => new EncryptHelper(Configuration.GetValue<string>("EncryptSettings:key")));
 
@@ -87,6 +88,7 @@ namespace Whale.SignalR
             {
                 endpoints.MapHub<ChatHub>("/chatHub");
                 endpoints.MapHub<MeetingHub>("/meeting");
+                endpoints.MapHub<NotificationHub>("/notificationHub");
             });
         }
     }
