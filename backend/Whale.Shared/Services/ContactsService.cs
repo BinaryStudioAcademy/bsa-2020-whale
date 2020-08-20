@@ -42,8 +42,8 @@ namespace Whale.Shared.Services
                  .Where(c => (c.FirstMemberId == user.Id || c.SecondMemberId == user.Id) && c.isAccepted)
                  .ToListAsync();
 
-            contacts = (await contacts.LoadAvatars(_blobStorageSettings, c => c.FirstMember)).ToList();
-            contacts = (await contacts.LoadAvatars(_blobStorageSettings, c => c.SecondMember)).ToList();
+            contacts = (await contacts.LoadAvatarsAsync(_blobStorageSettings, c => c.FirstMember)).ToList();
+            contacts = (await contacts.LoadAvatarsAsync(_blobStorageSettings, c => c.SecondMember)).ToList();
 
             var contactsDto = contacts
                 .Select(c =>
