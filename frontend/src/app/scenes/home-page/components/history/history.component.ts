@@ -11,18 +11,32 @@ import { HttpParams } from '@angular/common/http';
   styleUrls: ['./history.component.sass'],
 })
 export class HistoryComponent implements OnInit {
+  public route = environment.apiUrl + '/api/meetingHistory';
+
   @Input() user: User;
-  public meetings: Meeting[];
+  public meetings: Meeting[] = [];
+
+  public take: number = 10;
 
   constructor(private httpService: HttpService) {}
 
   ngOnInit(): void {
-    console.log(this.user);
-    const apiUrl = environment.apiUrl + '/api/meetingHistory';
-    const params = new HttpParams().set('userId', this.user.id);
-    this.httpService.getRequest<Meeting[]>(apiUrl, params).subscribe(
+    this.getSomeMeetings();
+  }
+
+  public onScroll() {
+    this.getSomeMeetings();
+  }
+
+  public getSomeMeetings(): void {
+    const params = new HttpParams()
+      .set('userId', this.user.id)
+      .set('skip', `${this.meetings.length}`)
+      .set('take', `${this.take}`);
+
+    this.httpService.getRequest<Meeting[]>(this.route, params).subscribe(
       (response) => {
-        this.meetings = response;
+        this.meetings = this.meetings.concat(response);
         console.log(this.meetings);
       },
       (error) => console.error(error)

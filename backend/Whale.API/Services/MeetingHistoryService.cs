@@ -17,10 +17,12 @@ namespace Whale.API.Services
 			: base(context, mapper)
 		{ }
 
-		public async Task<IEnumerable<MeetingDTO>> GetMeetingsWithParticipantsAndPollResults(Guid userId)
+		public async Task<IEnumerable<MeetingDTO>> GetMeetingsWithParticipantsAndPollResults(Guid userId, int skip, int take)
 		{
 			var participants2 = await _context.Participants
 				.Where(p => p.UserId == userId)
+				.Skip(skip)
+				.Take(take)
 				.ToListAsync();
 
 			var userMeetingsIds = participants2.Select(p => p.MeetingId);
