@@ -1,17 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Reflection;
 using Whale.DAL;
+using Whale.DAL.Settings;
+using Whale.Shared.Exceptions;
 using Whale.Shared.Helpers;
 using Whale.Shared.MappingProfiles;
 using Whale.Shared.Services;
@@ -21,9 +18,15 @@ namespace Whale.SignalR
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment hostingEnvironment)
         {
-            Configuration = configuration;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(hostingEnvironment.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{hostingEnvironment.EnvironmentName}.json", reloadOnChange: true, optional: true)
+                .AddEnvironmentVariables();
+
+            Configuration = builder.Build();
         }
 
         public IConfiguration Configuration { get; }
@@ -51,6 +54,8 @@ namespace Whale.SignalR
                 .WithOrigins("http://localhost:4200", "http://bsa2020-whale.westeurope.cloudapp.azure.com");
             }));
 
+            services.AddScoped<BlobStorageSettings>(options => Configuration.Bind<BlobStorageSettings>("BlobStorageSettings"));
+
             services.AddAutoMapper(cfg =>
             {
                 cfg.AddProfile<MeetingProfile>();
@@ -58,6 +63,8 @@ namespace Whale.SignalR
                 cfg.AddProfile<MeetingMessage>();
                 cfg.AddProfile<UserProfile>();
                 cfg.AddProfile<ParticipantProfile>();
+                cfg.AddProfile<ContactProfile>();
+                cfg.AddProfile<DirectMessageProfile>();
             },
             Assembly.GetExecutingAssembly());
         }

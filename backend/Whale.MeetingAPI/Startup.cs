@@ -15,14 +15,23 @@ using Microsoft.OpenApi.Models;
 using Whale.MeetingAPI.Services;
 using Whale.Shared.MappingProfiles;
 using Whale.Shared.Helpers;
+using Whale.DAL.Settings;
+using Whale.Shared.Exceptions;
+using System;
 
 namespace Whale.MeetingAPI
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment hostingEnvironment)
         {
-            Configuration = configuration;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(hostingEnvironment.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{hostingEnvironment.EnvironmentName}.json", reloadOnChange: true, optional: true)
+                .AddEnvironmentVariables();
+
+            Configuration = builder.Build();
         }
 
         public IConfiguration Configuration { get; }
@@ -62,6 +71,8 @@ namespace Whale.MeetingAPI
                 cfg.AddProfile<ParticipantProfile>();
             },
             Assembly.GetExecutingAssembly());
+
+            services.AddScoped<BlobStorageSettings>(options => Configuration.Bind<BlobStorageSettings>("BlobStorageSettings"));
 
             services.AddScoped(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
 

@@ -23,7 +23,7 @@ import { UpstateService } from '../../../../core/services/upstate.service';
 export class HomePageComponent implements OnInit, OnDestroy {
   contacts: Contact[];
   loggedInUser: User;
-  contactsVisibility = true;
+  contactsVisibility = false;
   groupsVisibility = false;
   chatVisibility = true;
   ownerEmail: string;
@@ -57,16 +57,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
       .pipe(tap(() => (this.isUserLoadig = false)))
       .subscribe(
         (userFromDB: User) => {
-          this.loggedInUser = { ...userFromDB, avatarUrl: null };
-          if (userFromDB.linkType === LinkTypeEnum.Internal) {
-            this.blobService
-              .GetImageByName(userFromDB.avatarUrl)
-              .subscribe((fullLink: string) => {
-                this.loggedInUser.avatarUrl = fullLink;
-              });
-          } else {
-            this.loggedInUser.avatarUrl = userFromDB.avatarUrl;
-          }
+          this.loggedInUser = userFromDB;
           this.ownerEmail = this.loggedInUser?.email;
 
           this.httpService
@@ -75,15 +66,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
             .subscribe(
               (data: Contact[]) => {
                 this.contacts = data;
-                data.forEach((contact) => {
-                  if (contact.secondMember.linkType === LinkTypeEnum.Internal) {
-                    this.blobService
-                      .GetImageByName(contact.secondMember.avatarUrl)
-                      .subscribe((fullLink: string) => {
-                        contact.secondMember.avatarUrl = fullLink;
-                      });
-                  }
-                });
               },
               (error) => this.toastr.error(error.Message)
             );
@@ -128,6 +110,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
         anonymousCount: 0,
         isScheduled: false,
         isRecurrent: false,
+        creatorEmail: this.ownerEmail,
       } as MeetingCreate)
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
@@ -149,6 +132,12 @@ export class HomePageComponent implements OnInit, OnDestroy {
       contact?.secondMember.avatarUrl.startsWith('data')
       ? contact?.secondMember.avatarUrl
       : '';
+  }
+
+  public onContactsClick(): void {
+    if (this.contacts.length) {
+      this.contactsVisibility = !this.contactsVisibility;
+    }
   }
 }
 export interface UserModel {

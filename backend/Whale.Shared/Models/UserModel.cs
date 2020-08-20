@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Whale.Shared.Enums;
+using Whale.DAL.Models;
 
 namespace Whale.Shared.Models
 {
