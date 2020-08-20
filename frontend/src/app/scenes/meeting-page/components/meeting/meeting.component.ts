@@ -42,7 +42,7 @@ import {
   CanvasWhiteboardUpdate,
 } from 'ng2-canvas-whiteboard';
 import { MediaSettingsService } from 'app/core/services/media-settings.service';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { GetMessages } from '@shared/models/meeting/message/get-messages';
 
 @Component({
@@ -58,6 +58,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public isShowStatistics = false;
   public isScreenRecording = false;
   public isShowCurrentParticipantCard = true;
+  public canLeave = true;
 
   @ViewChild('currentVideo') currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) mainArea: ElementRef<HTMLElement>;
@@ -66,6 +67,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public connectedStreams: MediaStream[] = [];
   public mediaData: UserMediaData[] = [];
   public connectedPeers = new Map<string, MediaStream>();
+  public receiveingDrawings: boolean = false;
   public canvasIsDisplayed: boolean = false;
   public canvasOptions: CanvasWhiteboardOptions = {
     clearButtonEnabled: true,
@@ -85,6 +87,9 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     batchUpdateTimeoutDuration: 250,
     drawButtonEnabled: false,
   };
+  private savedStrokes: CanvasWhiteboardUpdate[][] = new Array<
+    CanvasWhiteboardUpdate[]
+  >();
 
   public messages: MeetingMessage[] = [];
   public msgText = '';
@@ -339,6 +344,8 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe(
         (strokes) => {
           this.canvasWhiteboardService.drawCanvas(strokes);
+          this.receiveingDrawings = true;
+          this.savedStrokes.push(strokes);
         },
         () => {
           this.toastr.error('Error occured while trying to get drawings');
@@ -401,7 +408,35 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public ngOnDestroy(): void {
+    this.destroyPeer();
     this.currentUserStream?.getTracks().forEach((track) => track.stop());
+
+    this.connectionData.participant = this.currentParticipant;
+    this.meetingSignalrService.invoke(
+      SignalMethods.OnParticipantLeft,
+      this.connectionData
+    );
+
+    const ended: boolean =
+      this.currentParticipant.role == ParticipantRole.Host ||
+      this.meeting.participants.findIndex(
+        (p) => p.id != this.currentParticipant.id
+      ) == -1;
+
+    if (ended) {
+      this.httpService
+        .getRequest(
+          environment.apiUrl + '/api/meeting/end',
+          new HttpParams().set('meetingId', this.meeting.id)
+        )
+        .subscribe(
+          () => {},
+          (error) => console.error(error.Message)
+        );
+
+      this.pollService.savePollResults(this.meeting.id);
+    }
+
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
   }
@@ -411,25 +446,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public leave(): void {
-    let canLeave = true;
-    if (this.currentParticipant?.role === ParticipantRole.Host) {
-      canLeave = confirm('You will end current meeting!');
-    }
-
-    if (canLeave) {
-      this.destroyPeer();
-      this.connectionData.participant = this.currentParticipant;
-      this.meetingSignalrService.invoke(
-        SignalMethods.OnParticipantLeft,
-        this.connectionData
-      );
-      if (this.currentParticipant?.role === ParticipantRole.Host) {
-        this.pollService.savePollResults(this.meeting.id);
-      }
-
-      this.router.navigate(['/home']);
-      this.currentUserStream?.getTracks().forEach((track) => track.stop());
-    }
+    this.router.navigate(['/home']);
   }
 
   private addParticipantToMeeting(participant: Participant): void {
@@ -744,11 +761,11 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onCanvasDraw(event) {
-    const points = event as CanvasWhiteboardUpdate[];
-    console.log(points);
+    const strokes = event as CanvasWhiteboardUpdate[];
+    this.savedStrokes.push(strokes);
     this.meetingSignalrService.invoke(SignalMethods.OnDrawing, {
       meetingId: this.meeting.id.toString(),
-      canvasEvent: points,
+      canvasEvent: strokes,
     });
   }
 
@@ -757,10 +774,27 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       meetingId: this.meeting.id.toString(),
       erase: true,
     });
+    this.savedStrokes = new Array<CanvasWhiteboardUpdate[]>();
   }
 
-  showCanvas() {
+  async showCanvas() {
     this.canvasIsDisplayed = !this.canvasIsDisplayed;
+    this.receiveingDrawings = false;
+
+    if (this.canvasIsDisplayed) {
+      await this.delay(200);
+      this.savedStrokes.forEach((strokes) =>
+        this.canvasWhiteboardService.drawCanvas(strokes)
+      );
+    }
+  }
+
+  delay(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  checkDrawing() {
+    return !this.canvasIsDisplayed && this.receiveingDrawings;
   }
 
   private setOutputDevice(): void {
@@ -781,6 +815,8 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       audio: false,
     });
     this.handleSuccessVideo(this.currentUserStream);
+    this.isAudioSettings = false;
+    this.isVideoSettings = false;
   }
 
   async handleSuccessVideo(stream: MediaStream): Promise<void> {
@@ -804,12 +840,16 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       audio: { deviceId: deviceId },
     });
     this.handleSuccess(this.currentUserStream);
+    this.isAudioSettings = false;
+    this.isVideoSettings = false;
   }
 
   public async changeOutputDevice(deviceId: string) {
     const audio = document.querySelector('audio');
     this.mediaSettingsService.changeOutputDevice(deviceId);
     this.mediaSettingsService.attachSinkId(audio, deviceId);
+    this.isAudioSettings = false;
+    this.isVideoSettings = false;
   }
 
   async handleSuccess(stream): Promise<void> {
@@ -824,5 +864,15 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       });
       sender.replaceTrack(audioTrack);
     });
+  }
+
+  public showAudioSettings(): void {
+    this.isVideoSettings = false;
+    this.isAudioSettings = !this.isAudioSettings;
+  }
+
+  public showVideoSettings(): void {
+    this.isAudioSettings = false;
+    this.isVideoSettings = !this.isVideoSettings;
   }
 }

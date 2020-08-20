@@ -20,6 +20,7 @@
     width: 100vw
 
 .main-content
+    position: relative
     display: flex
     flex-direction: column-reverse
     width: 100%
@@ -53,8 +54,8 @@
     width: 100%
     textarea
         padding-right: 50px
-        min-height: 50px
-        max-height: 40vh
+        height: 60px
+        resize: none
     .icon
         margin-right: 10px
 
@@ -95,6 +96,11 @@ app-participant-card
 
 .users__user:hover .users__user__info 
     opacity: 0.9
+
+.message
+    word-break: break-word
+    overflow-wrap: break-word
+    
 
 //options
 .options
@@ -165,8 +171,9 @@ i.big.icon.wechat
 
 .participants-container
     height: 100%
-    min-width: 150px
-    max-width: 300px
+    min-width: 180px
+    max-width: 400px
+    width: 15%
     background-color: white
     overflow-y: scroll
     float: left
@@ -194,8 +201,7 @@ div div.item.participant
     display: flex
     align-items: center
     img
-        width: 20px
-        margin-right: 7px
+        margin-right: 10%
     span
         margin-top: 1px
 
@@ -323,7 +329,7 @@ div:moz-full-screen
     height: 500px
     width: 500px
     right: 30px
-    bottom: 80px
+    bottom: 85px
     box-shadow: 0px 0px 5px grey
     background-color: white
     z-index: 9999
@@ -334,11 +340,43 @@ div:moz-full-screen
         height: 300px
         width: 300px
 
+.board
+    height: 468px
+    width: 100%
+    @media screen and (max-width: 1000px)
+        height: 368px
+        width: 100%
+    @media screen and (max-width: 600px)
+        height: 268px
+        width: 100%
+
+.whiteboard-header
+    background-color: #f1f1f1
+    height: 30px
+
+.whiteboard-title
+    float: left
+    padding-top: 6px
+    padding-left: 10px
+
+.whiteboard-close
+    margin-left: 93%
+    padding-top: 4px
+
+.pulse
+    animation: pulse 2s infinite
+
+@keyframes pulse
+    0%
+        color: #da0909
+    100%
+        -color: #4e4b4b
+
 // media settings
 .settings
     position: absolute
-    bottom: 7%
-    left: 5%
+    bottom: 10%
+    left: 30px
     max-height: 80%
     width: 350px
     z-index: 10
@@ -368,4 +406,8 @@ div:moz-full-screen
             font-size: .85714286em
             color: rgba(0,0,0,.4)
             display: inline-block
-
+.message 
+    outline: none
+    resize: none
+    border: none
+    background-color: white

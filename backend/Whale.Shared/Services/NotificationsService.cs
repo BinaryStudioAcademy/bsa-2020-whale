@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -21,6 +22,7 @@ namespace Whale.Shared.Services
 {
     public class NotificationsService : BaseService
     {
+        private readonly SignalrService _signalrService;
 
         private readonly JsonSerializerSettings camelSettings = new JsonSerializerSettings
         {
@@ -28,8 +30,10 @@ namespace Whale.Shared.Services
             Formatting = Formatting.Indented
         };
 
-        public NotificationsService(WhaleDbContext context, IMapper mapper) : base(context, mapper)
-        { }
+        public NotificationsService(WhaleDbContext context, IMapper mapper, SignalrService signalrService) : base(context, mapper)
+        {
+            _signalrService = signalrService;
+        }
 
         public async Task<IEnumerable<NotificationDTO>> GetAllNotificationsAsync(string userEmail)
         {
@@ -60,8 +64,12 @@ namespace Whale.Shared.Services
 
             _context.Notifications.Add(notification);
             await _context.SaveChangesAsync();
+            var createdNotificationDTO = _mapper.Map<NotificationDTO>(notification);
 
-            return _mapper.Map<NotificationDTO>(notification);
+            var connection = await _signalrService.ConnectHubAsync("notificationHub");
+            await connection.InvokeAsync("onNewNotification", userEmail, createdNotificationDTO);
+
+            return createdNotificationDTO;
         }
 
         public Task<NotificationDTO> AddTextNotification(string userEmail, string message)

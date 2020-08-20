@@ -1,4 +1,4 @@
 export enum NotificationTypeEnum {
-    TextNotification,
-    AddContactNotification,
+  TextNotification,
+  AddContactNotification,
 }

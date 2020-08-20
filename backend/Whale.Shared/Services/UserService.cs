@@ -18,10 +18,13 @@ namespace Whale.Shared.Services
     public class UserService : BaseService
     {
         private readonly BlobStorageSettings _blobStorageSettings;
+        private readonly RedisService _redisService;
+        private const string onlineUsersKey = "online";
 
-        public UserService(WhaleDbContext context, IMapper mapper, BlobStorageSettings blobStorageSettings) : base(context, mapper)
+        public UserService(WhaleDbContext context, IMapper mapper, BlobStorageSettings blobStorageSettings, RedisService redisService) : base(context, mapper)
         {
             _blobStorageSettings = blobStorageSettings;
+            _redisService = redisService;
         }
 
         public async Task<IEnumerable<UserDTO>> GetAllUsers()
@@ -29,7 +32,12 @@ namespace Whale.Shared.Services
             var users = await _context.Users.ToListAsync();
             await users.LoadAvatarsAsync(_blobStorageSettings);
 
-            return _mapper.Map<IEnumerable<UserDTO>>(users);
+            return users.Select(u =>
+            {
+                var user = _mapper.Map<UserDTO>(u);
+                user.ConnectionId = GetConnectionId(u.Id);
+                return user;
+            });
         }
 
         public async Task<UserDTO> GetUserAsync(Guid userId)
@@ -41,7 +49,9 @@ namespace Whale.Shared.Services
 
             await user.LoadAvatarAsync(_blobStorageSettings);
 
-            return _mapper.Map<UserDTO>(user);
+            var userDto = _mapper.Map<UserDTO>(user);
+            userDto.ConnectionId = GetConnectionId(user.Id);
+            return userDto;
         }
 
         public async Task<UserDTO> GetUserByEmail(string email)
@@ -51,7 +61,9 @@ namespace Whale.Shared.Services
 
             await user.LoadAvatarAsync(_blobStorageSettings);
 
-            return _mapper.Map<UserDTO>(user);
+            var userDto = _mapper.Map<UserDTO>(user);
+            userDto.ConnectionId = GetConnectionId(user.Id);
+            return userDto;
         }
 
         public async Task<UserDTO> CreateUserAsync(UserCreateDTO userDTO)
@@ -119,6 +131,21 @@ namespace Whale.Shared.Services
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        private string GetConnectionId(Guid userId)
+        {
+            _redisService.Connect();
+            try
+            {
+                var onlineUsers = _redisService.Get<ICollection<UserOnlineDTO>>(onlineUsersKey);
+                var userOnline = onlineUsers.FirstOrDefault(u => u.Id == userId);
+                return userOnline?.ConnectionId;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
     }
 }

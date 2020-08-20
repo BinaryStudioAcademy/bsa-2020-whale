@@ -19,11 +19,7 @@ namespace Whale.DAL
         public DbSet<GroupUser> GroupUsers { get; set; }
         public DbSet<Meeting> Meetings { get; set; }
         public DbSet<Participant> Participants { get; set; }
-        // public DbSet<Poll> Polls { get; set; }
         public DbSet<PollResult> PollResults { get; set; }
-        public DbSet<OptionResult> OptionResults { get; set; }
-        public DbSet<Voter> Voters { get; set; }
-
         public DbSet<Record> Records { get; set; }
         public DbSet<Setting> Settings { get; set; }
         public DbSet<ContactSetting> ContactSettings { get; set; }
@@ -35,13 +31,18 @@ namespace Whale.DAL
             modelBuilder.Entity<Contact>()
                 .HasOne(a => a.PinnedMessage)
                 .WithMany();
-            //.WithOne(a => a.Contact)
-            //.HasForeignKey<DirectMessage>(d => d.ContactId);
 
-            modelBuilder.Entity<Voter>()
-                .Ignore("FirstName")
-                .Ignore("SecondName")
-                .Ignore("AvatarUrl");
+            modelBuilder.Entity<Group>()
+                .HasOne(a => a.PinnedMessage)
+                .WithMany();
+           
+
+            modelBuilder.Entity<PollResult>()
+                .Property(pollResult => pollResult.OptionResults)
+                .HasConversion(
+                    v => Newtonsoft.Json.JsonConvert.SerializeObject(v),
+                    v => Newtonsoft.Json.JsonConvert.DeserializeObject<List<OptionResult>>(v)
+                );
 
             base.OnModelCreating(modelBuilder);
         }

@@ -15,6 +15,8 @@ export class NotificationService {
     return this.httpService.getRequest<Notification[]>(this.routePrefix);
   }
   public DeleteNotification(id: string): void {
-    this.httpService.deleteRequest<void>(`${this.routePrefix}/${id}`).subscribe();
+    this.httpService
+      .deleteRequest<void>(`${this.routePrefix}/${id}`)
+      .subscribe();
   }
 }

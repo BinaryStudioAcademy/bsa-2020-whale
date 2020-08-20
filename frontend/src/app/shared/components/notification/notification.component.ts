@@ -9,7 +9,7 @@ import { ToastrService } from 'ngx-toastr';
 @Component({
   selector: 'app-notification',
   templateUrl: './notification.component.html',
-  styleUrls: ['./notification.component.sass']
+  styleUrls: ['./notification.component.sass'],
 })
 export class NotificationComponent implements OnInit {
   @Input() notification: Notification;
@@ -17,18 +17,31 @@ export class NotificationComponent implements OnInit {
   public message = '';
   public contactEmail = '';
   public isPendingContact = false;
+  public isText = false;
   public show = true;
   constructor(
     private contactCervice: ContactService,
-    private toastr: ToastrService) { }
+    private toastr: ToastrService
+  ) {}
 
   ngOnInit(): void {
-    if (this.notification.notificationType === NotificationTypeEnum.TextNotification) {
-      this.message = (JSON.parse(this.notification.options) as OptionsText).message;
+    if (
+      this.notification.notificationType ===
+      NotificationTypeEnum.TextNotification
+    ) {
+      this.message = (JSON.parse(
+        this.notification.options
+      ) as OptionsText).message;
+      this.isText = true;
       return;
     }
-    if (this.notification.notificationType === NotificationTypeEnum.AddContactNotification) {
-      this.contactEmail = (JSON.parse(this.notification.options) as OptionsAddContact).contactEmail;
+    if (
+      this.notification.notificationType ===
+      NotificationTypeEnum.AddContactNotification
+    ) {
+      this.contactEmail = (JSON.parse(
+        this.notification.options
+      ) as OptionsAddContact).contactEmail;
       this.message = `${this.contactEmail} wants add you to contacts.`;
       this.isPendingContact = true;
       return;
@@ -42,7 +55,7 @@ export class NotificationComponent implements OnInit {
   onAddContact(): void {
     this.contactCervice.createContactByEmail(this.contactEmail).subscribe(
       (resp) => {
-          this.toastr.success('Contact Add');
+        this.toastr.success('Contact Add');
       },
       (error) => this.toastr.error(error.Message)
     );

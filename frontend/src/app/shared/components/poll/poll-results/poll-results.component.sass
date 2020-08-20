@@ -1,20 +1,32 @@
 h4
     text-align: center
 
-.no-padding
-    padding: 0 !important
+.option-result
+    display: flex
 
-.padding-bottom-25px
-    padding-bottom: 25px !important
+.option-percentage
+    min-width: 50px
+    padding-top: 4px
+    text-align: center
+    padding-right: 5px
+
+.option-container
+    min-width: calc(100% - 50px)
+    div.ui.tiny.progress
+        padding: 0
+        margin: 0
 
 div.avatar-container
     display: flex
     justify-content: flex-end
-    margin: 0px 16px 0px 0px !important
+    flex-wrap: wrap
+    width: calc(100% - 5px)
+    margin-top: 5px
+    padding-right: 5px
     padding: 0
     
 .voted-user-avatar
-    width: 100%
+    width: 20px
     height: auto
     border-radius: 50%
 
