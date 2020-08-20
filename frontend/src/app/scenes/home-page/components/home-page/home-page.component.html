@@ -85,36 +85,30 @@
           New
         </button>
       </a>
-      <div class="contacts-container" [hidden]="!groupsVisibility">
-        <div *ngFor="let group of groups" class="user-list ui selection list">
-          <div id="home-group" (click)="onGroupClick(group)" class="item">
-            <div class="group content">
-              {{ group.label }}
-              <button
-                id="home-remove-group"
-                (click)="deleteGroup(group); $event.stopPropagation()"
-                class="ui mini basic button edit-button"
-              >
-                <i
-                  class="trash alternate outline icon"
-                  (click)="deleteGroup(group); $event.stopPropagation()"
-                ></i>
-              </button>
-            </div>
-          </div>
+      <div
+        class="contacts-container user-list ui selection list"
+        [hidden]="!groupsVisibility"
+      >
+        <div *ngFor="let group of groups">
+          <a id="home-group" class="item" (click)="onGroupClick(group)">
+            <i
+              class="trash alternate outline icon"
+              (click)="deleteGroup(group); $event.stopPropagation()"
+            ></i>
+            {{ group.label }}
+          </a>
         </div>
       </div>
     </div>
   </div>
 
   <div class="right-col">
-    <div *ngIf="chatVisibility" class="actions">
+    <div class="actions">
       <app-contacts-chat
+        *ngIf="chatVisibility"
         [contactSelected]="contactSelected"
         (chat)="visibilityChange($event)"
       ></app-contacts-chat>
-    </div>
-    <div class="actions">
       <div *ngIf="historyVisibility">
         <app-history [user]="loggedInUser"></app-history>
       </div>

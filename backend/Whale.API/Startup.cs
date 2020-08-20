@@ -62,6 +62,7 @@ namespace Whale.API
 
             services.AddSingleton(mappingConfig.CreateMapper());
 
+            services.AddTransient<NotificationsService>();
             services.AddTransient<ContactsService>();
             services.AddTransient<UserService>();
             services.AddTransient<ScheduledMeetingsService>();
@@ -70,10 +71,7 @@ namespace Whale.API
             services.AddTransient<MeetingService>();
             services.AddTransient<ParticipantService>();
             services.AddTransient<GroupService>();
-            services.AddTransient<NotificationsService>();
-
             services.AddScoped(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
-            
             services.AddScoped<HttpClient>();
             services.AddTransient(p => new HttpService(p.GetRequiredService<HttpClient>(), Configuration.GetValue<string>("MeetingAPI")));
             services.AddTransient(p => new SignalrService(Configuration.GetValue<string>("SignalR")));
