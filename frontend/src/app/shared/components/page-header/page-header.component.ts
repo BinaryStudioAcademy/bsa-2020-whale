@@ -79,9 +79,10 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
       });
   }
   getNotifications(): void {
-    this.notificationService.GetNotifications()
+    this.notificationService
+      .GetNotifications()
       .pipe(tap(() => (this.isNotificationsLoading = false)))
-      .subscribe( notifications => {
+      .subscribe((notifications) => {
         this.notificationsList = notifications;
       });
   }
@@ -121,7 +122,7 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
   }
 
   onNotificationDelete(id: string): void {
-    this.notificationsList = this.notificationsList.filter(n => n.id !== id );
+    this.notificationsList = this.notificationsList.filter((n) => n.id !== id);
     this.notificationService.DeleteNotification(id);
   }
 }

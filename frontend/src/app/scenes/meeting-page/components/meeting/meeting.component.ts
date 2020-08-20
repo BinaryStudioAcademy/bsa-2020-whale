@@ -398,6 +398,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.router.navigate(['/home']);
       this.currentUserStream?.getTracks().forEach((track) => track.stop());
+      window.onbeforeunload = function (ev: BeforeUnloadEvent) {};
     }
   }
 

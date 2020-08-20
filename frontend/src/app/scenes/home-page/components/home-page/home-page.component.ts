@@ -4,6 +4,8 @@ import { Contact } from '@shared/models/contact/contact';
 import { HttpService } from 'app/core/services/http.service';
 import { SimpleModalService } from 'ngx-simple-modal';
 import { AddContactModalComponent } from '../add-contact-modal/add-contact-modal.component';
+import { AddGroupModalComponent } from '../add-group-modal/add-group-modal.component';
+import { ContactsChatComponent } from '../contacts-chat/contacts-chat.component';
 import { ToastrService } from 'ngx-toastr';
 import { MeetingService } from 'app/core/services/meeting.service';
 import { Router } from '@angular/router';
@@ -13,6 +15,8 @@ import { Subject, from } from 'rxjs';
 import { AuthService } from 'app/core/auth/auth.service';
 import { LinkTypeEnum } from '@shared/Enums/LinkTypeEnum';
 import { BlobService } from '../../../../core/services/blob.service';
+import { Group } from '@shared/models/group/group';
+import { GroupService } from 'app/core/services/group.service';
 import { UpstateService } from '../../../../core/services/upstate.service';
 import { environment } from '@env';
 import { SignalRService } from 'app/core/services/signal-r.service';
@@ -25,6 +29,7 @@ import { HubConnection } from '@aspnet/signalr';
 })
 export class HomePageComponent implements OnInit, OnDestroy {
   contacts: Contact[];
+  groups: Group[];
   loggedInUser: User;
   contactsVisibility = false;
   groupsVisibility = false;
@@ -38,6 +43,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
   public isContactsLoading = true;
   public isUserLoadig = true;
   public isMeetingLoading = false;
+  public isGroupsLoading = true;
 
   private unsubscribe$ = new Subject<void>();
 
@@ -48,6 +54,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
     private meetingService: MeetingService,
     private router: Router,
     private authService: AuthService,
+    private groupService: GroupService,
     private blobService: BlobService,
     private upstateService: UpstateService,
     private signalRService: SignalRService,
@@ -82,16 +89,49 @@ export class HomePageComponent implements OnInit, OnDestroy {
         },
         (error) => this.toastr.error(error.Message)
       );
+    this.groupService
+      .getAllGroups()
+      .pipe(tap(() => (this.isGroupsLoading = false)))
+      .subscribe(
+        (data: Group[]) => {
+          this.groups = data;
+        },
+        (error) => this.toastr.error(error.Message)
+      );
   }
 
   addNewGroup(): void {
-    console.log('group clicked!');
+    this.simpleModalService
+      .addModal(AddGroupModalComponent)
+      .subscribe((group) => {
+        if (group !== undefined) {
+          this.groups.push(group);
+        }
+      });
   }
+
+  deleteGroup(group: Group): void {
+    if (
+      confirm('Are you sure want to delete the group ' + group.label + ' ?')
+    ) {
+      this.groupService.deleteGroup(group).subscribe(
+        (response) => {
+          if (response.status === 204) {
+            this.toastr.success('Deleted successfuly');
+            this.groups.splice(this.groups.indexOf(group), 1);
+          }
+        },
+        (error) => this.toastr.error(error.Message)
+      );
+    }
+  }
+
   addNewContact(): void {
     this.simpleModalService
       .addModal(AddContactModalComponent)
       .subscribe();
   }
+
   visibilityChange(event): void {
     this.chatVisibility = event;
     this.contactSelected = undefined;
@@ -101,9 +141,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.contactSelected = contact;
   }
 
-  onGroupClick(): void {
-    this.chatVisibility = !this.chatVisibility;
-  }
+  onGroupClick(group: Group): void {}
+
   isContactActive(contact): boolean {
     return this.contactSelected === contact;
   }
@@ -171,6 +210,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
   public onContactsClick(): void {
     if (this.contacts.length) {
       this.contactsVisibility = !this.contactsVisibility;
+    }
+  }
+  public onGroupsClick(): void {
+    if (this.groups.length) {
+      this.groupsVisibility = !this.groupsVisibility;
     }
   }
 }

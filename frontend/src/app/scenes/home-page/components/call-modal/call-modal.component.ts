@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { SimpleModalComponent } from 'ngx-simple-modal';
 import { Contact } from '@shared/models/contact/contact';
 import { User } from '@shared/models/user/user';
-import { DirectMessage } from '@shared/models/message/message';
+import { DirectMessage } from '@shared/models/message/direct-message';
 import { SignalRService } from '../../../../core/services/signal-r.service';
 import { from } from 'rxjs';
 import { MeetingLink } from '@shared/models/meeting/meeting-link';
