@@ -135,6 +135,21 @@ namespace Whale.Shared.Services
             return isHost;
         }
 
+        public async Task SaveMeetingEndTime(Guid meetingId)
+        {
+            var meeting = await _context.Meetings.FirstOrDefaultAsync(m => m.Id == meetingId);
+
+            if (meeting == null)
+            {
+                throw new NotFoundException(nameof(Meeting));
+            }
+
+            meeting.EndTime = DateTimeOffset.Now;
+
+            _context.Update(meeting);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<string> GetShortInviteLink(string fullURL)
         {
             await _redisService.ConnectAsync();

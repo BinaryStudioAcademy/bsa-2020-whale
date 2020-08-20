@@ -1,18 +1,19 @@
-<div>
+<div class="poll-result">
   <h4>{{ pollResult.title }}</h4>
-  <div class="ui four column grid padding-bottom-25px">
-    <div
-      *ngFor="let optionResult of pollResult.optionResults; let i = index"
-      class="row no-padding"
-    >
-      <div class="three wide column">{{ calculatePercentage(i) }}%</div>
-      <div class="thirteen wide column">
-        {{ optionResult.option }}
+  <div
+    *ngFor="let optionResult of pollResult.optionResults; let i = index"
+    class="option-result"
+  >
+    <div class="option-percentage">{{ calculatePercentage(i) }}%</div>
+    <div class="option-container">
+      <div>{{ optionResult.option }}</div>
+      <div class="ui tiny progress">
+        <div class="bar" [appProgressBar]="calculatePercentage(i)"></div>
       </div>
-      <div class="ui grid container avatar-container">
+      <div class="avatar-container">
         <div
           *ngFor="let user of optionResult.votedUsers"
-          class="one wide column voted-user-column padding-0"
+          class="voted-user-column padding-0"
         >
           <img
             title="{{

@@ -1,0 +1,91 @@
+<div class="ui card width-100">
+  <div class="content">
+    <div class="header" style="margin-left: 50px;">
+      Meeting {{ meeting.id }}
+    </div>
+  </div>
+  <div class="content">
+    <div class="ui internally celled grid">
+      <div class="row">
+        <div class="column" style="color: #a0a0a0; min-width: 120px;">
+          Started
+        </div>
+        <div class="ten wide column">
+          {{ meeting.startTime | date: "dd/MM/yyyy" }}
+          at
+          {{ meeting.startTime | date: "HH:mm" }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="column" style="color: #a0a0a0; min-width: 120px;">
+          Duration
+        </div>
+        <div class="ten wide column">
+          {{ stringifyDuration(calculateDuration()) }}
+        </div>
+      </div>
+      <div class="row">
+        <div
+          class="column"
+          style="color: #a0a0a0; min-width: 120px; padding-top: 22px;"
+        >
+          Participants
+        </div>
+        <div class="ten wide column">
+          <button
+            class="ui basic button"
+            (click)="areParticipantsVisible = !areParticipantsVisible"
+          >
+            {{
+              areParticipantsVisible ? "Hide participants" : "Show participants"
+            }}
+          </button>
+          <div class="ui list" *ngIf="areParticipantsVisible">
+            <div class="item" *ngFor="let participant of meeting.participants">
+              <img
+                class="ui mini circular image"
+                src="{{ participant.user.avatarUrl }}"
+              />
+              <div class="content">
+                <div class="ui sub header">
+                  {{
+                    participant.user.secondName
+                      ? participant.user.firstName +
+                        " " +
+                        participant.user.secondName
+                      : participant.user.firstName
+                  }}
+                </div>
+                {{ participant.user.email }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div
+          class="column"
+          style="color: #a0a0a0; min-width: 120px; padding-top: 22px;"
+        >
+          Poll results
+        </div>
+        <div class="six wide column">
+          <button
+            class="ui basic button"
+            (click)="areResultsVisible = !areResultsVisible"
+          >
+            {{ areResultsVisible ? "Hide poll results" : "Show poll results" }}
+          </button>
+          <div class="ui relaxed divided list" *ngIf="areResultsVisible">
+            <div *ngIf="meeting.pollResults.length == 0">
+              No polls were made during this meeting.
+            </div>
+            <div class="item" *ngFor="let pollResult of meeting.pollResults">
+              <app-poll-results [pollResult]="pollResult"></app-poll-results>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

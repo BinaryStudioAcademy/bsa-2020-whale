@@ -1,0 +1,6 @@
+<div class="ui container segment">
+  <h2 class="center aligned header">Meeting history</h2>
+  <div *ngFor="let meeting of meetings" class="meeting-container">
+    <app-meeting-note [meeting]="meeting"></app-meeting-note>
+  </div>
+</div>
