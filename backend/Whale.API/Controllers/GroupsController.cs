@@ -39,16 +39,16 @@ namespace Whale.API.Controllers
         }
 
         [HttpGet("id/{groupId}")]
-        public async Task<IActionResult> Get(Guid groupId)
+        public async Task<ActionResult<GroupDTO>> Get(Guid groupId)
         {
             string email = HttpContext?.User.Claims
                 .FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
 
-            var contact = await _groupService.GetGroupAsync(groupId, email);
+            var group = await _groupService.GetGroupAsync(groupId, email);
 
-            if (contact == null) return NotFound();
+            if (group == null) return NotFound();
 
-            return Ok(contact);
+            return Ok(group);
         }
 
         [HttpPost]

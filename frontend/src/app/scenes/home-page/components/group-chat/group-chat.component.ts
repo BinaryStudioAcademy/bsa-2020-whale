@@ -10,9 +10,8 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
-import { DirectMessage } from '@shared/models/message/direct-message';
+import { GroupMessage } from '@shared/models/message/group-message';
 import { User } from '@shared/models/user/user';
-import { Contact } from '@shared/models/contact/contact';
 import { SignalRService } from 'app/core/services/signal-r.service';
 import { HttpService } from 'app/core/services/http.service';
 import { environment } from '@env';
@@ -30,6 +29,8 @@ import { Group } from '@shared/models/group/group';
 import { GroupService } from 'app/core/services/group.service';
 import { GroupUser } from '@shared/models/group/groupuser';
 import { AddUserToGroupModalComponent } from '../add-user-to-group-modal/add-user-to-group-modal.component';
+import { UpstateService } from 'app/core/services/upstate.service';
+import { AuthService } from 'app/core/auth/auth.service';
 
 @Component({
   selector: 'app-group-chat',
@@ -39,7 +40,7 @@ import { AddUserToGroupModalComponent } from '../add-user-to-group-modal/add-use
 export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
   private hubConnection: HubConnection;
   counter = 0;
-  private receivedMsg = new Subject<DirectMessage>();
+  private receivedMsg = new Subject<GroupMessage>();
   public receivedMsg$ = this.receivedMsg.asObservable();
 
   private unsubscribe$ = new Subject<void>();
@@ -50,38 +51,44 @@ export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
     groupId: this.groupSelected?.id,
   };
   groupMembers: User[] = [];
+  currentUser: User;
   isMembersVisible = false;
-  // groupMessageRecieved = new EventEmitter<GroupMessage>();
-  // messages: GroupMessage[] = [];
-  // newMessage: GroupMessage = {
-  //   groupId: '',
-  //   message: '',
-  //   authorId: '',
-  //   createdAt: new Date(),
-  //   attachment: false,
-  // };
+  groupMessageRecieved = new EventEmitter<GroupMessage>();
+  messages: GroupMessage[] = [];
+  newMessage: GroupMessage = {
+    groupId: '',
+    message: '',
+    authorId: '',
+    createdAt: new Date(),
+    attachment: false,
+  };
   constructor(
     private signalRService: SignalRService,
     private httpService: HttpService,
     private toastr: ToastrService,
     private simpleModalService: SimpleModalService,
-    private groupService: GroupService
+    private groupService: GroupService,
+    private upstateSevice: UpstateService
   ) {}
   ngOnChanges(changes: SimpleChanges): void {
     console.log(this.groupSelected);
-    // this.httpService
-    //   .getRequest<DirectMessage[]>(
-    //     '/api/ContactChat/' + this.groupSelected.id
-    //   )
-    //   .pipe(takeUntil(this.unsubscribe$))
-    //   .subscribe(
-    //     (data: DirectMessage[]) => {
-    //       this.messages = data;
-    //       console.log('messages new');
-    //     },
-    //     (error) => console.log(error)
-    //   );
-    // this.hubConnection?.invoke('JoinGroup', this.groupSelected.id);
+    this.upstateSevice
+      .getLoggedInUser()
+      .pipe(tap())
+      .subscribe((userFromDB: User) => {
+        this.currentUser = userFromDB;
+      });
+    this.httpService
+      .getRequest<GroupMessage[]>('/api/GroupChat/' + this.groupSelected.id)
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (data: GroupMessage[]) => {
+          this.messages = data;
+          console.log('messages new');
+        },
+        (error) => console.log(error)
+      );
+    this.hubConnection?.invoke('JoinGroup', this.groupSelected.id);
     this.groupService
       .getAllGroupUsers(this.groupSelected.id)
       .pipe(takeUntil(this.unsubscribe$))
@@ -97,53 +104,58 @@ export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
       );
   }
   ngOnInit(): void {
-    // from(this.signalRService.registerHub(environment.signalrUrl, 'chatHub'))
-    //   .pipe(
-    //     tap((hub) => {
-    //       this.hubConnection = hub;
-    //     })
-    //   )
-    //   .subscribe(() => {
-    //     this.hubConnection.on(
-    //       'NewMessageReceived',
-    //       (message: DirectMessage) => {
-    //         this.receivedMsg.next(message);
-    //       }
-    //     );
-    //     this.hubConnection.invoke('JoinGroup', this.groupSelected.id);
-    //   });
-    // this.receivedMsg$.pipe(takeUntil(this.unsubscribe$)).subscribe(
-    //   (newMessage) => {
-    //     this.messages.push(newMessage);
-    //     console.log('received a messsage ', newMessage);
-    //   },
-    //   (err) => {
-    //     console.log(err.message);
-    //     this.toastr.error(err.Message);
-    //   }
-    // );
+    from(this.signalRService.registerHub(environment.signalrUrl, 'chatHub'))
+      .pipe(
+        tap((hub) => {
+          this.hubConnection = hub;
+        })
+      )
+      .subscribe(() => {
+        this.hubConnection.on(
+          'NewGroupMessageReceived',
+          (message: GroupMessage) => {
+            console.log('GOT IT!');
+            console.log(message);
+            this.receivedMsg.next(message);
+          }
+        );
+        this.hubConnection.invoke('JoinGroup', this.groupSelected.id);
+      });
+    this.receivedMsg$.pipe(takeUntil(this.unsubscribe$)).subscribe(
+      (newMessage) => {
+        this.messages.push(newMessage);
+        console.log('received a messsage ', newMessage);
+      },
+      (err) => {
+        console.log(err.message);
+        this.toastr.error(err.Message);
+      }
+    );
   }
   ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
   }
-  // sendMessage(): void {
-  //   console.log('Send is called');
-  //   this.newMessage.contactId = this.contactSelected.id;
-  //   this.newMessage.authorId = this.contactSelected.firstMemberId;
-  //   this.newMessage.createdAt = new Date();
-  //   console.log(this.newMessage);
-  //   this.httpService
-  //     .postRequest<DirectMessage, HttpResponse<DirectMessage>>(
-  //       '/api/ContactChat/',
-  //       this.newMessage
-  //     )
-  //     .pipe(take(1))
-  //     .subscribe(
-  //       () => (this.newMessage.message = ''),
-  //       (error) => this.toastr.error(error.Message)
-  //     );
-  // }
+  sendMessage(): void {
+    console.log('Send is called');
+    this.newMessage.groupId = this.groupSelected.id;
+    this.newMessage.authorId = this.currentUser.id;
+    this.newMessage.createdAt = new Date();
+    console.log(this.newMessage);
+    this.httpService
+      .postRequest<GroupMessage, HttpResponse<GroupMessage>>(
+        '/api/GroupChat/',
+        this.newMessage
+      )
+      .pipe(take(1))
+      .subscribe(
+        (response) => {
+          console.log(response.body);
+          this.newMessage.message = '';
+        },
+        (error) => this.toastr.error(error.Message)
+      );
+  }
   close(): void {
     this.chat.emit(false);
     this.hubConnection.invoke('Disconnect', this.groupSelected.id);
@@ -157,7 +169,7 @@ export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
   public onEnterKeyPress(event: KeyboardEvent, valid: boolean): void {
     event.preventDefault();
     if (valid) {
-      // this.sendMessage();
+      this.sendMessage();
     }
   }
   addNewMember(): void {

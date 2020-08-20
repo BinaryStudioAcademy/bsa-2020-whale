@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using System.Threading.Tasks;
+using Whale.Shared.DTO.GroupMessage;
 using Whale.Shared.Models.DirectMessage;
 using Whale.Shared.Services;
 using Whale.SignalR.Models.Call;
@@ -28,6 +29,12 @@ namespace Whale.SignalR.Hubs
         public async Task SendMessage(DirectMessageDTO directMessageDTO)
         {
             await Clients.Group(directMessageDTO.ContactId.ToString()).SendAsync("NewMessageReceived", directMessageDTO);
+        }
+
+        [HubMethodName("NewGroupMessageReceived")]
+        public async Task SendGroupMessage(GroupMessageDTO groupMessageDTO)
+        {
+            await Clients.Group(groupMessageDTO.GroupId.ToString()).SendAsync("NewGroupMessageReceived", groupMessageDTO);
         }
 
 
