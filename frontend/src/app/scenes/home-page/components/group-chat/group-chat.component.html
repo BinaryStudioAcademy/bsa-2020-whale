@@ -1,0 +1,115 @@
+<div class="chat ui secondary segment">
+  <div class="ui chat-inner feed">
+    <div class="event chat-label">
+      <!-- <div class="label">
+          <img src="{{ groupSelected.label }}" />
+        </div> -->
+      <div class="content">
+        <div class="user-info">
+          <div>
+            <span class="user user-chat-label ui header">
+              {{ groupSelected.label }}
+              <span class="grey sub header">
+                {{ groupSelected.description }}
+              </span>
+            </span>
+          </div>
+          <div data-tooltip="Call" data-position="bottom center">
+            <i id="chat-call" class="large phone icon" (click)="call()"></i>
+          </div>
+        </div>
+        <div class="ui simple active dropdown">
+          <span data-tooltip="Group members list" data-position="bottom center">
+            <i
+              id="chat-close"
+              class="large address book outline icon"
+              (click)="isMembersVisible = !isMembersVisible"
+            ></i>
+          </span>
+          <div *ngIf="isMembersVisible" class="menu">
+            <div
+              *ngFor="let user of groupMembers"
+              class="contacts-container user-list ui middle aligned selection list"
+            >
+              <!-- <img
+                        class="ui avatar image"
+                        src="{{returnCorrectLink(user) }}"
+                      /> -->
+              <div class="content">
+                <div class="description">
+                  {{ user?.firstName }}
+                  {{ user?.secondName }}
+                  {{ user?.email }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <span data-tooltip="Add new member" data-position="bottom center">
+          <i
+            id="chat-close"
+            class="large user plus icon"
+            (click)="addNewMember()"
+          ></i>
+        </span>
+        <span data-tooltip="Close chat" data-position="bottom right">
+          <i id="chat-close" class="large close icon" (click)="close()"></i>
+        </span>
+      </div>
+    </div>
+
+    <!-- <div
+        *ngIf="messages.length == 0"
+        class="ui large message vertically-aligned"
+      > -->
+    <!-- There is still no messages yet! -->
+  </div>
+  <!-- <div *ngFor="let message of messages" class="event message-event">
+        <div class="label">
+          <img src="{{ message.author?.avatarUrl }}" />
+        </div>
+        <div class="content">
+          <div class="summary">
+            <a class="user">
+              {{ message.author?.firstName }}
+              {{ message.author?.secondName }}
+            </a>
+            <div class="date">
+              {{ message.createdAt | date: "short" }}
+            </div>
+          </div>
+          <div class="message">{{ message.message }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="forma">
+      <form class="ui form vertically-aligned" #chatForm="ngForm">
+        <div class="field">
+          <textarea
+            (keydown.enter)="onEnterKeyPress($event, chatForm.valid)"
+            rows="2"
+            placeholder="Print your message there"
+            type="text"
+            id="message"
+            name="newMessage"
+            [(ngModel)]="newMessage.message"
+            required
+          ></textarea>
+        </div>
+        <button
+          id="chat-submit"
+          class="ui button tiny send"
+          type="submit"
+          id="sendmessage"
+          [disabled]="!chatForm.valid"
+          (click)="sendMessage()"
+        >
+          Send <i class="paper plane outline icon"></i>
+        </button>
+      </form>
+      <div class="subheader">
+        Enter to send. Enter+Shift for new line.
+      </div>
+    </div> -->
+</div>

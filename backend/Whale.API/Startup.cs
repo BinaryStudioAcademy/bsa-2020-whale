@@ -57,6 +57,7 @@ namespace Whale.API
                 mc.AddProfile<MeetingMessage>();
                 mc.AddProfile<GroupProfile>();
                 mc.AddProfile<GroupMessageProfile>();
+                mc.AddProfile<GroupUserProfile>();
                 mc.AddProfile<NotificationProfile>();
             });
 

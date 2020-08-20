@@ -34,11 +34,13 @@ export class HomePageComponent implements OnInit, OnDestroy {
   actionsVisibility = true;
   contactsVisibility = false;
   groupsVisibility = false;
-  chatVisibility = false;
+  contactChatVisibility = false;
   historyVisibility = false;
+  groupChatVisibility = false;
 
   ownerEmail: string;
   contactSelected: Contact;
+  groupSelected: Group;
   private hubConnection: HubConnection;
   private receivedContact = new Subject<Contact>();
   public receivedContact$ = this.receivedContact.asObservable();
@@ -60,7 +62,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
     private groupService: GroupService,
     private blobService: BlobService,
     private upstateService: UpstateService,
-    private signalRService: SignalRService,
+    private signalRService: SignalRService
   ) {}
 
   ngOnDestroy(): void {
@@ -131,21 +133,17 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   addNewContact(): void {
-    this.simpleModalService
-      .addModal(AddContactModalComponent)
-      .subscribe();
+    this.simpleModalService.addModal(AddContactModalComponent).subscribe();
   }
 
   // visibilityChange(event): void {
-  //   this.chatVisibility = event;
+  //   this.contactChatVisibility = event;
   //   this.contactSelected = undefined;
   // }
   // onContactClick(contact: Contact): void {
-  //   this.chatVisibility = false;
+  //   this.contactChatVisibility = false;
   //   this.contactSelected = contact;
   // }
-
-  onGroupClick(group: Group): void {}
 
   isContactActive(contact): boolean {
     return this.contactSelected === contact;
@@ -180,29 +178,40 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   public falseAllBooleans() {
-    this.chatVisibility = false;
+    this.contactChatVisibility = false;
+    this.groupChatVisibility = false;
     this.groupsVisibility = false;
     this.contactsVisibility = false;
     this.actionsVisibility = false;
     this.historyVisibility = false;
   }
 
-  visibilityChange(event): void {
-    console.log(event);
-    this.chatVisibility = event;
+  contactVisibilityChange(event): void {
+    this.contactChatVisibility = event;
     this.contactSelected = undefined;
+    this.actionsVisibility = true;
+  }
+  groupVisibilityChange(event): void {
+    this.groupChatVisibility = event;
+    this.groupSelected = undefined;
     this.actionsVisibility = true;
   }
 
   onContactClick(contact: Contact): void {
     this.falseAllBooleans();
-    this.chatVisibility = true;
+    this.contactChatVisibility = true;
     this.contactSelected = contact;
+  }
+
+  onGroupClick(group: Group): void {
+    this.falseAllBooleans();
+    this.groupChatVisibility = true;
+    this.groupSelected = group;
   }
 
   // onGroupClick(): void {
   //   this.falseAllBooleans();
-  //   this.chatVisibility = true;
+  //   this.contactChatVisibility = true;
   // }
 
   // isContactActive(contact): boolean {
@@ -210,7 +219,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
   // }
 
   public onMeetingHistoryClick() {
-    this.chatVisibility = false;
+    this.contactChatVisibility = false;
     this.groupsVisibility = false;
     this.contactsVisibility = false;
     this.actionsVisibility = false;
@@ -237,12 +246,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe(() => {
-        this.hubConnection.on(
-          'onNewContact',
-          (contact: Contact) => {
-            this.receivedContact.next(contact);
-          }
-        );
+        this.hubConnection.on('onNewContact', (contact: Contact) => {
+          this.receivedContact.next(contact);
+        });
         this.hubConnection.invoke('onConect', this.loggedInUser.email);
       });
     this.receivedContact$.pipe(takeUntil(this.unsubscribe$)).subscribe(
