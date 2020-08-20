@@ -68,6 +68,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public connectedStreams: MediaStream[] = [];
   public mediaData: UserMediaData[] = [];
   public connectedPeers = new Map<string, MediaStream>();
+  public receiveingDrawings: boolean = false;
   public canvasIsDisplayed: boolean = false;
   public canvasOptions: CanvasWhiteboardOptions = {
     clearButtonEnabled: true,
@@ -87,6 +88,9 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     batchUpdateTimeoutDuration: 250,
     drawButtonEnabled: false,
   };
+  private savedStrokes: CanvasWhiteboardUpdate[][] = new Array<
+    CanvasWhiteboardUpdate[]
+  >();
 
   public messages: MeetingMessage[] = [];
   public msgText = '';
@@ -305,6 +309,8 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe(
         (strokes) => {
           this.canvasWhiteboardService.drawCanvas(strokes);
+          this.receiveingDrawings = true;
+          this.savedStrokes.push(strokes);
         },
         (err) => {
           this.toastr.error('Error occured while trying to get drawings');
@@ -702,11 +708,11 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onCanvasDraw(event) {
-    const points = event as CanvasWhiteboardUpdate[];
-    console.log(points);
+    const strokes = event as CanvasWhiteboardUpdate[];
+    this.savedStrokes.push(strokes);
     this.meetingSignalrService.invoke(SignalMethods.OnDrawing, {
       meetingId: this.meeting.id.toString(),
-      canvasEvent: points,
+      canvasEvent: strokes,
     });
   }
 
@@ -715,10 +721,27 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       meetingId: this.meeting.id.toString(),
       erase: true,
     });
+    this.savedStrokes = new Array<CanvasWhiteboardUpdate[]>();
   }
 
-  showCanvas() {
+  async showCanvas() {
     this.canvasIsDisplayed = !this.canvasIsDisplayed;
+    this.receiveingDrawings = false;
+
+    if (this.canvasIsDisplayed) {
+      await this.delay(200);
+      this.savedStrokes.forEach((strokes) =>
+        this.canvasWhiteboardService.drawCanvas(strokes)
+      );
+    }
+  }
+
+  delay(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  checkDrawing() {
+    return !this.canvasIsDisplayed && this.receiveingDrawings;
   }
 
   private setOutputDevice(): void {
