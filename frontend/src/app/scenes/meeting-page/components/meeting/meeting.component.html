@@ -276,7 +276,13 @@
         </div>
       </div>
 
-      <div class="users" *ngIf="mediaData.length > 1">
+      <div
+        class="users"
+        *ngIf="
+          mediaData.length > 1 ||
+          (mediaData.length === 1 && mediaData[0].id !== currentParticipant.id)
+        "
+      >
         <app-participant-card
           *ngFor="let data of mediaData"
           (hideViewEvent)="hideViewEventHandler($event)"
