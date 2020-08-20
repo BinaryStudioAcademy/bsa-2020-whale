@@ -40,6 +40,7 @@ namespace Whale.SignalR
             services.AddTransient<MeetingService>();
             services.AddTransient<ParticipantService>();
             services.AddTransient<UserService>();
+            services.AddTransient<WhaleService>();
 
             services.AddScoped(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
             services.AddScoped(x => new EncryptHelper(Configuration.GetValue<string>("EncryptSettings:key")));
