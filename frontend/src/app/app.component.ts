@@ -11,6 +11,9 @@ import { HubConnection } from '@aspnet/signalr';
 import { HttpService } from './core/services/http.service';
 import { User } from 'firebase';
 import { Title } from '@angular/platform-browser';
+import { IFireBaseUser } from '@shared/models/user';
+import { LinkTypeEnum } from '@shared/Enums/LinkTypeEnum';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -24,6 +27,7 @@ export class AppComponent implements OnInit {
 
   private hubConnection: HubConnection;
   private getUserUrl: string = environment.apiUrl + '/api/user/email';
+  private addUserUrl: string = environment.apiUrl + '/api/user';
 
   constructor(
     public fireAuth: AuthService,
@@ -31,7 +35,8 @@ export class AppComponent implements OnInit {
     private signalRService: SignalRService,
     private httpService: HttpService,
     private authService: AuthService,
-    private titleService: Title
+    private titleService: Title,
+    private router: Router
   ) {
     titleService.setTitle(this.title);
   }
@@ -55,24 +60,56 @@ export class AppComponent implements OnInit {
       .pipe(filter((user) => Boolean(user)))
       .subscribe((user) => {
         this.user = Object.assign({}, user);
+        const UpdateNser: IFireBaseUser = {
+          uid: user.uid,
+          displayName: user.displayName,
+          email: user.email,
+          phoneNumber: user.phoneNumber,
+          photoUrl: user.photoURL,
+          linkType: LinkTypeEnum.External,
+        };
+
         this.http
-          .get<User>(this.getUserUrl + `/${user.email}`, {
+          .get<User>(this.getUserUrl + `/${UpdateNser.email}`, {
             observe: 'response',
           })
-          .subscribe((user) => {
-            this.httpService
-              .getRequest<Contact[]>('/api/contacts')
-              .pipe()
-              .subscribe((data: Contact[]) => {
-                data.forEach((contact) => {
-                  this.hubConnection.invoke('JoinGroup', contact.id);
-                });
-              });
-          });
+          .subscribe(
+            (user) => {
+              console.log(`User ${user.body.email} exists`);
+              this.requestContact();
+              if (this.router.url === '/') {
+                this.router.navigate(['/home']);
+              }
+            },
+            (error) => {
+              if (error.status === 404) {
+                this.httpService
+                  .postClearRequest<IFireBaseUser, User>(
+                    this.addUserUrl,
+                    UpdateNser
+                  )
+                  .subscribe(() => {
+                    this.requestContact();
+                    this.router.navigate(['/home']);
+                  });
+              }
+            }
+          );
       });
   }
 
   closeIncomingCall(): void {
     this.call = null;
+  }
+
+  requestContact(): void {
+    this.httpService
+      .getRequest<Contact[]>('/api/contacts')
+      .pipe()
+      .subscribe((data: Contact[]) => {
+        data.forEach((contact) => {
+          this.hubConnection.invoke('JoinGroup', contact.id);
+        });
+      });
   }
 }

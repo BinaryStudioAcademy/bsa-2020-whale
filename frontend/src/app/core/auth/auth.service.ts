@@ -25,7 +25,7 @@ export class AuthService {
       if (user) {
         this.isSignedIn = true;
         this.currentUser = user;
-        this.registrationService.registerUser(user);
+        /*this.registrationService.registerUser(user);*/
       } else {
         this.isSignedIn = false;
         this.currentUser = null;
