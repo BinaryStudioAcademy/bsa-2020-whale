@@ -382,13 +382,20 @@
             placeholder="Enter to send.
   Enter+Shift for new line."
             [(ngModel)]="msgText"
-          ></textarea>
-          <i
-            id="meeting-sendmessage"
-            aria-hidden="true"
-            class="paper plane link icon blue"
+            required
+          >
+          </textarea>
+          <button
+            class="sendMessage"
             (click)="sendMessage()"
-          ></i>
+            [disabled]="msgText === ''"
+          >
+            <i
+              id="meeting-sendmessage"
+              aria-hidden="true"
+              class="paper plane link icon blue"
+            ></i>
+          </button>
         </div>
       </div>
     </div>
