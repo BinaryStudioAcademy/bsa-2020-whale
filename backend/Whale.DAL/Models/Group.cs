@@ -10,7 +10,7 @@ namespace Whale.DAL.Models
     {
         public string Label { get; set; }
         public string Description { get; set; }
-        public Guid PinnedMessageId { get; set; }
+        public Guid? PinnedMessageId { get; set; }
         public GroupMessage PinnedMessage { get; set; }
     }
 }

@@ -140,7 +140,7 @@ namespace Whale.DAL.Migrations
                     b.Property<string>("Label")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("PinnedMessageId")
+                    b.Property<Guid?>("PinnedMessageId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
@@ -159,7 +159,13 @@ namespace Whale.DAL.Migrations
                     b.Property<bool>("Attachment")
                         .HasColumnType("bit");
 
-                    b.Property<Guid>("ContactId")
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("GroupId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Message")
@@ -168,7 +174,9 @@ namespace Whale.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ContactId");
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("GroupId");
 
                     b.ToTable("GroupMessages");
                 });
@@ -202,6 +210,9 @@ namespace Whale.DAL.Migrations
 
                     b.Property<int>("AnonymousCount")
                         .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("EndTime")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<bool>("IsRecurrent")
                         .HasColumnType("bit");
@@ -269,28 +280,6 @@ namespace Whale.DAL.Migrations
                     b.ToTable("Participants");
                 });
 
-            modelBuilder.Entity("Whale.DAL.Models.Poll.OptionResult", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Option")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("PollResultId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("VoteCount")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PollResultId");
-
-                    b.ToTable("OptionResults");
-                });
-
             modelBuilder.Entity("Whale.DAL.Models.Poll.PollResult", b =>
                 {
                     b.Property<Guid>("Id")
@@ -302,6 +291,9 @@ namespace Whale.DAL.Migrations
 
                     b.Property<Guid>("MeetingId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("OptionResults")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("PollId")
                         .HasColumnType("uniqueidentifier");
@@ -318,25 +310,6 @@ namespace Whale.DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("PollResults");
-                });
-
-            modelBuilder.Entity("Whale.DAL.Models.Poll.Voter", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("OptionResultId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OptionResultId");
-
-                    b.ToTable("Voters");
                 });
 
             modelBuilder.Entity("Whale.DAL.Models.Record", b =>
@@ -491,16 +464,20 @@ namespace Whale.DAL.Migrations
                 {
                     b.HasOne("Whale.DAL.Models.GroupMessage", "PinnedMessage")
                         .WithMany()
-                        .HasForeignKey("PinnedMessageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PinnedMessageId");
                 });
 
             modelBuilder.Entity("Whale.DAL.Models.GroupMessage", b =>
                 {
-                    b.HasOne("Whale.DAL.Models.Contact", "Contact")
+                    b.HasOne("Whale.DAL.Models.User", "Author")
                         .WithMany()
-                        .HasForeignKey("ContactId")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Whale.DAL.Models.Group", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -540,24 +517,6 @@ namespace Whale.DAL.Migrations
                     b.HasOne("Whale.DAL.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Whale.DAL.Models.Poll.OptionResult", b =>
-                {
-                    b.HasOne("Whale.DAL.Models.Poll.PollResult", null)
-                        .WithMany("OptionResults")
-                        .HasForeignKey("PollResultId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Whale.DAL.Models.Poll.Voter", b =>
-                {
-                    b.HasOne("Whale.DAL.Models.Poll.OptionResult", null)
-                        .WithMany("VotedUsers")
-                        .HasForeignKey("OptionResultId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

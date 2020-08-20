@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Whale.API.Services;
 using System.Net.Http;
 using Whale.API.MappingProfiles;
 using Whale.API.Middleware;
@@ -43,22 +44,34 @@ namespace Whale.API
             services.AddDbContext<WhaleDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("WhaleDatabase")));
             services.AddControllers()
                     .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+
             var mappingConfig = new MapperConfiguration(mc =>
             {
                 mc.AddProfile<ContactProfile>();
                 mc.AddProfile<UserProfile>();
                 mc.AddProfile<ScheduledMeetingProfile>();
                 mc.AddProfile<DirectMessageProfile>();
+                mc.AddProfile<MeetingProfile>();
+                mc.AddProfile<ParticipantProfile>();
+                mc.AddProfile<PollProfile>();
+                mc.AddProfile<MeetingMessage>();
+                mc.AddProfile<GroupProfile>();
+                mc.AddProfile<GroupMessageProfile>();
                 mc.AddProfile<NotificationProfile>();
             });
 
             services.AddSingleton(mappingConfig.CreateMapper());
 
+            services.AddTransient<NotificationsService>();
             services.AddTransient<ContactsService>();
             services.AddTransient<UserService>();
             services.AddTransient<ScheduledMeetingsService>();
             services.AddTransient<ContactChatService>();
-            services.AddTransient<NotificationsService>();
+            services.AddTransient<MeetingHistoryService>();
+            services.AddTransient<MeetingService>();
+            services.AddTransient<ParticipantService>();
+            services.AddTransient<GroupService>();
+            services.AddScoped(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
             services.AddScoped<HttpClient>();
             services.AddTransient(p => new HttpService(p.GetRequiredService<HttpClient>(), Configuration.GetValue<string>("MeetingAPI")));
             services.AddTransient(p => new SignalrService(Configuration.GetValue<string>("SignalR")));
