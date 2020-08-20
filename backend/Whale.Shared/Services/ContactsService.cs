@@ -17,7 +17,7 @@ using Whale.Shared.Services.Abstract;
 
 namespace Whale.Shared.Services
 {
-    public class ContactsService: BaseService
+    public class ContactsService : BaseService
     {
         private readonly BlobStorageSettings _blobStorageSettings;
 
@@ -41,9 +41,10 @@ namespace Whale.Shared.Services
                  .Where(c => c.FirstMemberId == user.Id || c.SecondMemberId == user.Id)
                  .ToListAsync();
 
+            contacts = (await contacts.LoadAvatars(_blobStorageSettings, c => c.FirstMember)).ToList();
+            contacts = (await contacts.LoadAvatars(_blobStorageSettings, c => c.SecondMember)).ToList();
+
             var contactsDto = contacts
-                .LoadAvatars(_blobStorageSettings, c => c.FirstMember)
-                .LoadAvatars(_blobStorageSettings, c => c.SecondMember)
                 .Select(c =>
             {
                 return new ContactDTO()
@@ -116,7 +117,7 @@ namespace Whale.Shared.Services
 
         public async Task<ContactDTO> CreateContactFromEmailAsync(string ownerEmail, string contactnerEmail)
         {
-            if(ownerEmail == contactnerEmail)
+            if (ownerEmail == contactnerEmail)
                 throw new BaseCustomException("You cannot add yourself to contacts");
             var owner = await _context.Users.FirstOrDefaultAsync(u => u.Email == ownerEmail);
             var contactner = await _context.Users.FirstOrDefaultAsync(u => u.Email == contactnerEmail);
