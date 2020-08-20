@@ -739,6 +739,8 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       audio: false,
     });
     this.handleSuccessVideo(this.currentUserStream);
+    this.isAudioSettings = false;
+    this.isVideoSettings = false;
   }
 
   async handleSuccessVideo(stream: MediaStream): Promise<void> {
@@ -762,12 +764,16 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       audio: { deviceId: deviceId },
     });
     this.handleSuccess(this.currentUserStream);
+    this.isAudioSettings = false;
+    this.isVideoSettings = false;
   }
 
   public async changeOutputDevice(deviceId: string) {
     const audio = document.querySelector('audio');
     this.mediaSettingsService.changeOutputDevice(deviceId);
     this.mediaSettingsService.attachSinkId(audio, deviceId);
+    this.isAudioSettings = false;
+    this.isVideoSettings = false;
   }
 
   async handleSuccess(stream): Promise<void> {
@@ -782,5 +788,15 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       });
       sender.replaceTrack(audioTrack);
     });
+  }
+
+  public showAudioSettings(): void {
+    this.isVideoSettings = false;
+    this.isAudioSettings = !this.isAudioSettings;
+  }
+
+  public showVideoSettings(): void {
+    this.isAudioSettings = false;
+    this.isVideoSettings = !this.isVideoSettings;
   }
 }

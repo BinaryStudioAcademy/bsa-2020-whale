@@ -90,7 +90,7 @@
           *ngFor="let participant of meeting?.participants"
           class="ui item participant"
         >
-          <img src="{{ participant.user.avatarUrl }}" />
+          <img class="ui avatar image" src="{{ participant.user.avatarUrl }}" />
           <span
             >{{ participant.user.firstName }}
             {{
@@ -127,7 +127,7 @@
               <i
                 class="angle up icon"
                 *ngIf="!isMicrophoneMuted"
-                (click)="isAudioSettings = !isAudioSettings"
+                (click)="showAudioSettings()"
               ></i>
             </span>
             <span *ngIf="!isScreenRecording" data-tooltip="Toggle Webcam">
@@ -148,7 +148,7 @@
               <i
                 class="angle up icon"
                 *ngIf="!isCameraMuted"
-                (click)="isVideoSettings = !isVideoSettings"
+                (click)="showVideoSettings()"
               ></i>
             </span>
           </div>
