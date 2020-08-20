@@ -434,6 +434,9 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public leave(): void {
+    //this is made to remove eventListener for other routes
+    window.onbeforeunload = function () {};
+
     this.router.navigate(['/home']);
   }
 
