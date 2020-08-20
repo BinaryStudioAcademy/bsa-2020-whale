@@ -29,13 +29,13 @@ const routes: Routes = [
   {
     path: 'setting-page',
     component: SettingPageComponent,
-    canActivate: [CheckAccessToMediaGuard, AngularFireAuthGuard],
+    canActivate: [AngularFireAuthGuard],
     data: { authGuardPipe: redirectUnauthorizedToLogin },
   },
   {
     path: 'meeting-page/:link',
     component: MeetingComponent,
-    canActivate: [CheckAccessToMediaGuard, AngularFireAuthGuard],
+    canActivate: [AngularFireAuthGuard],
     canDeactivate: [LastParticipantGuard],
     data: { authGuardPipe: redirectUnauthorizedToLogin },
   },

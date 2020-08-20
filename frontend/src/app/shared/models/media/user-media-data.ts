@@ -3,7 +3,9 @@ export interface UserMediaData {
   userFirstName: string;
   userLastName: string;
   avatarUrl?: string;
-  stream: MediaStream;
   isUserHost?: boolean;
   isCurrentUser?: boolean;
+  stream: MediaStream;
+  isVideoEnabled: boolean;
+  isAudioEnabled: boolean;
 }

@@ -28,8 +28,6 @@ export class ParticipantCardComponent implements OnInit {
   public actionsPopup: any;
   public shouldShowActions = false;
   public isMicrophoneHovered = false;
-  public isParticipantMuted: boolean;
-  public hasParticipantVideo: boolean;
   private video: HTMLVideoElement;
   private participantContainer: HTMLElement;
   private participantName: HTMLElement;
@@ -101,12 +99,6 @@ export class ParticipantCardComponent implements OnInit {
     if (this.data.isUserHost) {
       this.participantName.classList.add('inverted-text');
     }
-    this.isParticipantMuted = !this.data.stream
-      .getAudioTracks()
-      .some((at) => at.enabled);
-    this.hasParticipantVideo = this.data.stream
-      .getVideoTracks()
-      .some((at) => at.enabled);
   }
 
   private handleActionsPopup() {
@@ -135,24 +127,26 @@ export class ParticipantCardComponent implements OnInit {
   }
 
   private handleStreamChanges() {
-    if (this.data.stream) {
-      this.data.stream.getAudioTracks().forEach((at) => {
-        at.addEventListener('enabled', () => {
-          this.isParticipantMuted = false;
-        });
-        at.addEventListener('disabled', () => {
-          this.isParticipantMuted = true;
-        });
-      });
-      this.data.stream.getVideoTracks().forEach((at) => {
-        at.addEventListener('enabled', () => {
-          this.hasParticipantVideo = true;
-        });
-        at.addEventListener('disabled', () => {
-          this.hasParticipantVideo = false;
-        });
-      });
+    if (!this.data.stream) {
+      return;
     }
+
+    this.data.stream.getAudioTracks().forEach((at) => {
+      at.addEventListener('enabled', () => {
+        this.data.isAudioEnabled = true;
+      });
+      at.addEventListener('disabled', () => {
+        this.data.isAudioEnabled = false;
+      });
+    });
+    this.data.stream.getVideoTracks().forEach((at) => {
+      at.addEventListener('enabled', () => {
+        this.data.isVideoEnabled = true;
+      });
+      at.addEventListener('disabled', () => {
+        this.data.isVideoEnabled = false;
+      });
+    });
   }
 
   private onOutsideActionsClick(ev: Event): void {
