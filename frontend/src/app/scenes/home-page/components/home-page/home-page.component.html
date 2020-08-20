@@ -71,13 +71,16 @@
                 {{ contact?.secondMember.secondName }}
               </div>
             </div>
-            <i
-              [ngClass]="
-                contact?.secondMember.connectionId
-                  ? 'circle online small icon'
-                  : 'circle outline small icon'
-              "
-            ></i>
+            <div
+              data-tooltip="Online"
+              data-position="right center"
+              class="icon-wrapper"
+            >
+              <i
+                *ngIf="contact?.secondMember.connectionId"
+                class="circle small icon"
+              ></i>
+            </div>
           </div>
         </div>
       </div>
