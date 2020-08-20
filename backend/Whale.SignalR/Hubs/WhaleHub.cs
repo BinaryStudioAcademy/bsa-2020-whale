@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Whale.Shared.Models.Contact;
+using Whale.Shared.Models.Meeting;
 using Whale.Shared.Services;
 using Whale.SignalR.Models.Call;
 
@@ -61,7 +63,7 @@ namespace Whale.SignalR.Hubs
         public async Task DeclineCall(DeclineCallDTO declineCallDTO)
         {
             await _meetingService.ParticipantDisconnect(declineCallDTO.MeetingId, declineCallDTO.Email);
-            var connections = await _whaleService.GetConnections(declineCallDTO.CallerId);
+            var connections = await _whaleService.GetConnections(declineCallDTO.UserId);
             foreach (var connection in connections)
             {
                 await Clients.Client(connection).SendAsync("OnDeclineCall");

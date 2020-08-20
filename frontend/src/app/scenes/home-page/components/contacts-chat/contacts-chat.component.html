@@ -15,13 +15,18 @@
               </span>
             </span>
           </div>
-          <div data-tooltip="Online" data-position="right center">
-            <i
-              *ngIf="contactSelected?.secondMember.connectionId"
-              class="circle small icon"
-            ></i>
+          <div
+            *ngIf="contactSelected?.secondMember.connectionId"
+            data-tooltip="Online"
+            data-position="right center"
+          >
+            <i class="circle small icon"></i>
           </div>
-          <div data-tooltip="Call" data-position="right center">
+          <div
+            *ngIf="contactSelected?.secondMember.connectionId"
+            data-tooltip="Call"
+            data-position="right center"
+          >
             <i id="chat-call" class="large phone icon" (click)="call()"></i>
           </div>
         </div>

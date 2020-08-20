@@ -5,6 +5,8 @@ import { from, Observable, Subject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { UserOnline } from '../../shared/models/user/user-online';
+import { Call } from '@shared/models/call/call';
+import { MeetingLink } from '@shared/models/meeting/meeting-link';
 
 @Injectable({
   providedIn: 'root',
@@ -17,6 +19,18 @@ export class WhaleSignalService {
 
   private signalUserDisconected = new Subject<string>();
   public signalUserDisconected$ = this.signalUserDisconected.asObservable();
+
+  private startCallOthers = new Subject<Call>();
+  public startCallOthers$ = this.startCallOthers.asObservable();
+
+  private startCallCaller = new Subject<MeetingLink>();
+  public startCallCaller$ = this.startCallCaller.asObservable();
+
+  private takeCall = new Subject<void>();
+  public takeCall$ = this.takeCall.asObservable();
+
+  private declineCall = new Subject<void>();
+  public declineCall$ = this.declineCall.asObservable();
 
   constructor(private hubService: SignalRService) {
     from(hubService.registerHub(environment.signalrUrl, 'whale'))
@@ -33,6 +47,22 @@ export class WhaleSignalService {
         this.signalHub.on('OnUserDisconnect', (userEmail: string) => {
           this.signalUserDisconected.next(userEmail);
         });
+
+        this.signalHub.on('OnStartCallOthers', (call: Call) => {
+          this.startCallOthers.next(call);
+        });
+
+        this.signalHub.on('OnStartCallCaller', (link: MeetingLink) => {
+          this.startCallCaller.next(link);
+        });
+
+        this.signalHub.on('OnTakeCall', () => {
+          this.takeCall.next();
+        });
+
+        this.signalHub.on('OnDeclineCall', () => {
+          this.declineCall.next();
+        });
       });
   }
 
@@ -44,4 +74,7 @@ export class WhaleSignalService {
 export enum SignalMethods {
   OnUserConnect,
   OnUserDisconnect,
+  OnStartCall,
+  OnTakeCall,
+  OnDeclineCall,
 }
