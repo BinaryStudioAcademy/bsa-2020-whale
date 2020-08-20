@@ -6,7 +6,6 @@ import { BlobService } from '../../../../core/services/blob.service';
 import { User } from '@shared/models/user';
 import { HttpService } from '../../../../core/services/http.service';
 import { AuthService } from '../../../../core/auth/auth.service';
-import { filter } from 'rxjs/operators';
 import Avatar from 'avatar-initials';
 import { LinkTypeEnum } from '@shared/Enums/LinkTypeEnum';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
@@ -193,17 +192,15 @@ export class ProfilePageComponent implements OnInit {
   private GetAvatar(): void {
     this.upstateService.getLoggedInUser().subscribe(
       (userFromDB: User) => {
-        this.loggedInUser = { ...userFromDB, avatarUrl: null };
+        this.loggedInUser = userFromDB;
         if (userFromDB.linkType === LinkTypeEnum.Internal) {
-          this.blobService
-            .GetImageByName(userFromDB.avatarUrl)
-            .subscribe((fullLink: string) => {
-              this.loggedInUser.avatarUrl = fullLink;
-              this.updatedUser = this.loggedInUser;
-            });
+          this.updatedUser = {
+            ...this.loggedInUser,
+            avatarUrl: userFromDB.avatarUrl.split('/').pop(),
+          };
           return;
         }
-        this.loggedInUser.avatarUrl = userFromDB.avatarUrl;
+        this.updatedUser = this.loggedInUser;
       },
       (error) => this.toastr.error(error.Message)
     );

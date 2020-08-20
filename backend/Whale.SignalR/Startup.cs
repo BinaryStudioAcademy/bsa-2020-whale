@@ -1,17 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Reflection;
 using Whale.DAL;
+using Whale.DAL.Settings;
+using Whale.Shared.Exceptions;
 using Whale.Shared.Helpers;
 using Whale.Shared.MappingProfiles;
 using Whale.Shared.Services;
@@ -38,7 +35,7 @@ namespace Whale.SignalR
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<WhaleDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("WhaleDatabase")));
-
+            services.AddTransient<NotificationsService>();
             services.AddTransient<ContactsService>();
             services.AddTransient<MeetingService>();
             services.AddTransient<ParticipantService>();
@@ -57,6 +54,8 @@ namespace Whale.SignalR
                 .WithOrigins("http://localhost:4200", "http://bsa2020-whale.westeurope.cloudapp.azure.com");
             }));
 
+            services.AddScoped<BlobStorageSettings>(options => Configuration.Bind<BlobStorageSettings>("BlobStorageSettings"));
+
             services.AddAutoMapper(cfg =>
             {
                 cfg.AddProfile<MeetingProfile>();
@@ -66,6 +65,7 @@ namespace Whale.SignalR
                 cfg.AddProfile<ParticipantProfile>();
                 cfg.AddProfile<ContactProfile>();
                 cfg.AddProfile<DirectMessageProfile>();
+                cfg.AddProfile<NotificationProfile>();
             },
             Assembly.GetExecutingAssembly());
         }

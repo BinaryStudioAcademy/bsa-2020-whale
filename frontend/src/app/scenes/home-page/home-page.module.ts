@@ -8,6 +8,7 @@ import { ContactsChatComponent } from './components/contacts-chat/contacts-chat.
 import { CallModalComponent } from './components/call-modal/call-modal.component';
 import { HistoryComponent } from './components/history/history.component';
 import { MeetingNoteComponent } from './components/history/meeting-note/meeting-note.component';
+import { AddGroupModalComponent } from './components/add-group-modal/add-group-modal.component';
 
 @NgModule({
   declarations: [
@@ -17,6 +18,7 @@ import { MeetingNoteComponent } from './components/history/meeting-note/meeting-
     CallModalComponent,
     HistoryComponent,
     MeetingNoteComponent,
+    AddGroupModalComponent,
   ],
   imports: [CommonModule, SharedModule, FormsModule],
   entryComponents: [CallModalComponent],

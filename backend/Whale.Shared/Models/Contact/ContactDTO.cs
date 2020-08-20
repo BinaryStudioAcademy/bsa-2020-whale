@@ -16,5 +16,6 @@ namespace Whale.Shared.Models.Contact
         public DirectMessageDTO PinnedMessage { get; set; }
         public ContactSettingDTO Settings { get; set; }
         public ContactSettingDTO ContactnerSettings { get; set; }
+        public bool isAccepted { get; set; }
     }
 }

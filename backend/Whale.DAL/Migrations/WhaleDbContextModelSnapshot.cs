@@ -57,6 +57,9 @@ namespace Whale.DAL.Migrations
                     b.Property<Guid?>("SecondMemberSettingsId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("isAccepted")
+                        .HasColumnType("bit");
+
                     b.HasKey("Id");
 
                     b.HasIndex("FirstMemberId");
@@ -137,7 +140,7 @@ namespace Whale.DAL.Migrations
                     b.Property<string>("Label")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("PinnedMessageId")
+                    b.Property<Guid?>("PinnedMessageId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
@@ -156,7 +159,13 @@ namespace Whale.DAL.Migrations
                     b.Property<bool>("Attachment")
                         .HasColumnType("bit");
 
-                    b.Property<Guid>("ContactId")
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("GroupId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Message")
@@ -165,7 +174,9 @@ namespace Whale.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ContactId");
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("GroupId");
 
                     b.ToTable("GroupMessages");
                 });
@@ -218,6 +229,31 @@ namespace Whale.DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Meetings");
+                });
+
+            modelBuilder.Entity("Whale.DAL.Models.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("NotificationType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Options")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("Whale.DAL.Models.Participant", b =>
@@ -428,16 +464,20 @@ namespace Whale.DAL.Migrations
                 {
                     b.HasOne("Whale.DAL.Models.GroupMessage", "PinnedMessage")
                         .WithMany()
-                        .HasForeignKey("PinnedMessageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PinnedMessageId");
                 });
 
             modelBuilder.Entity("Whale.DAL.Models.GroupMessage", b =>
                 {
-                    b.HasOne("Whale.DAL.Models.Contact", "Contact")
+                    b.HasOne("Whale.DAL.Models.User", "Author")
                         .WithMany()
-                        .HasForeignKey("ContactId")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Whale.DAL.Models.Group", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -450,6 +490,15 @@ namespace Whale.DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Whale.DAL.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Whale.DAL.Models.Notification", b =>
+                {
                     b.HasOne("Whale.DAL.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")

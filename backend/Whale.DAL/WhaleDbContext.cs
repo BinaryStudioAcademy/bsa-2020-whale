@@ -24,14 +24,18 @@ namespace Whale.DAL
         public DbSet<Setting> Settings { get; set; }
         public DbSet<ContactSetting> ContactSettings { get; set; }
         public DbSet<UserAchivement> UserAchivements { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Contact>()
                 .HasOne(a => a.PinnedMessage)
                 .WithMany();
-            //.WithOne(a => a.Contact)
-            //.HasForeignKey<DirectMessage>(d => d.ContactId);
+
+            modelBuilder.Entity<Group>()
+                .HasOne(a => a.PinnedMessage)
+                .WithMany();
+           
 
             modelBuilder.Entity<PollResult>()
                 .Property(pollResult => pollResult.OptionResults)

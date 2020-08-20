@@ -6,22 +6,30 @@ using System.Linq;
 using System.Threading.Tasks;
 using Whale.DAL;
 using Whale.DAL.Models;
+using Whale.DAL.Settings;
 using Whale.Shared.Exceptions;
+using Whale.Shared.Extentions;
 using Whale.Shared.Models;
 using Whale.Shared.Models.User;
 using Whale.Shared.Services.Abstract;
 
 namespace Whale.Shared.Services
 {
-    public class UserService: BaseService
+    public class UserService : BaseService
     {
-        public UserService(WhaleDbContext context, IMapper mapper) : base(context, mapper)
+        private readonly BlobStorageSettings _blobStorageSettings;
+
+        public UserService(WhaleDbContext context, IMapper mapper, BlobStorageSettings blobStorageSettings) : base(context, mapper)
         {
+            _blobStorageSettings = blobStorageSettings;
         }
 
         public async Task<IEnumerable<UserDTO>> GetAllUsers()
         {
-            return _mapper.Map<IEnumerable<UserDTO>>(await _context.Users.ToListAsync());
+            var users = await _context.Users.ToListAsync();
+            await users.LoadAvatarsAsync(_blobStorageSettings);
+
+            return _mapper.Map<IEnumerable<UserDTO>>(users);
         }
 
         public async Task<UserDTO> GetUserAsync(Guid userId)
@@ -31,6 +39,8 @@ namespace Whale.Shared.Services
 
             if (user == null) throw new NotFoundException("User", userId.ToString());
 
+            await user.LoadAvatarAsync(_blobStorageSettings);
+
             return _mapper.Map<UserDTO>(user);
         }
 
@@ -38,6 +48,8 @@ namespace Whale.Shared.Services
         {
             var user = await _context.Users.FirstOrDefaultAsync(e => e.Email == email);
             if (user == null) throw new NotFoundException("User", email);
+
+            await user.LoadAvatarAsync(_blobStorageSettings);
 
             return _mapper.Map<UserDTO>(user);
         }

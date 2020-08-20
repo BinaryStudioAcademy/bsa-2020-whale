@@ -58,8 +58,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public isShowParticipants = false;
   public isShowStatistics = false;
   public isScreenRecording = false;
-  public isCameraOn = true;
-  public isMicroOn = true;
   public isShowCurrentParticipantCard = true;
   public canLeave = true;
 
@@ -94,7 +92,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public msgText = '';
   public msgReceiverEmail: string = '';
   public currentParticipant: Participant;
-  public distinctParticipants: Participant[] = [];
   public otherParticipants: Participant[];
   public connectionData: MeetingConnectionData;
 
@@ -147,10 +144,10 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     if (enterModal.cameraOff) {
-      this.turnOffCamera();
+      this.toggleCamera();
     }
     if (enterModal.microOff) {
-      this.turnOffMicrophone();
+      this.toggleMicrophone();
     }
     this.currentStreamLoaded.emit();
     // create new peer
@@ -175,16 +172,17 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
           const index = this.meeting.participants.findIndex(
             (p) => p.id === connectData.participant.id
           );
+          console.log('i', index);
           if (index >= 0) {
             this.meeting.participants[index] = connectData.participant;
           } else {
             this.addParticipantToMeeting(connectData.participant);
           }
-          if (this.currentParticipant != null) {
-            this.otherParticipants = this.meeting.participants.filter(
-              (p) => p.id !== this.currentParticipant.id
-            );
-          }
+          // if (this.currentParticipant != null) {
+          //   this.otherParticipants = this.meeting.participants.filter(
+          //     (p) => p.id !== this.currentParticipant.id
+          //   );
+          // }
 
           console.log('connected with peer: ' + connectData.peerId);
           this.connect(connectData.peerId);
@@ -201,14 +199,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (participants) => {
-          participants.forEach((p) => {
-            if (
-              !this.meeting.participants.some(
-                (mp) => mp.streamId === p.streamId
-              )
-            )
-              this.addParticipantToMeeting(p);
-          });
+          this.meeting.participants = participants;
           this.currentParticipant = participants.find(
             (p) => p.user.email === this.authService.currentUser.email
           );
@@ -339,11 +330,11 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       console.log('get call');
       // show caller
       call.on('stream', (stream) => {
-        debugger;
         if (!this.connectedStreams.includes(stream)) {
           this.connectedStreams.push(stream);
           console.log(call.peer, 'call peer');
 
+          console.log(this.meeting);
           const participant = this.meeting.participants.find(
             (p) => p.streamId == stream.id
           );
@@ -374,7 +365,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     console.log('elem', this.elem);
     console.log('currentVideo first', this.currentVideo);
     this.currentStreamLoaded.subscribe(() => {
-      console.log('currentVideo', this.currentVideo);
       this.currentVideo.nativeElement.srcObject = this.currentUserStream;
       this.setOutputDevice();
     });
@@ -423,45 +413,43 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private addParticipantToMeeting(participant: Participant): void {
-    this.meeting.participants.push(participant);
-    this.meeting.participants.forEach((p) => {
-      if (!this.distinctParticipants.some((dp) => dp.id === p.id)) {
-        this.distinctParticipants.push(p);
-      }
-    });
+    if (!this.meeting.participants.some((p) => p.id === participant.id)) {
+      this.meeting.participants.push(participant);
+    }
   }
 
   private removeParticipantFromMeeting(participant: Participant): void {
     this.meeting.participants = this.meeting.participants.filter(
       (p) => p.id !== participant.id
     );
-    this.distinctParticipants = this.distinctParticipants.filter(
-      (p) => p.id !== participant.id
-    );
   }
 
-  turnOffMicrophone(): void {
+  toggleMicrophone(): void {
     if (!this.isMicrophoneMuted) {
-      this.currentUserStream
-        .getAudioTracks()
-        .forEach((track) => (track.enabled = false));
+      this.currentUserStream.getAudioTracks().forEach((track) => {
+        track.enabled = false;
+        track.dispatchEvent(new Event('disabled'));
+      });
     } else {
-      this.currentUserStream
-        .getAudioTracks()
-        .forEach((track) => (track.enabled = true));
+      this.currentUserStream.getAudioTracks().forEach((track) => {
+        track.enabled = true;
+        track.dispatchEvent(new Event('enabled'));
+      });
     }
     this.isMicrophoneMuted = !this.isMicrophoneMuted;
   }
 
-  turnOffCamera(): void {
+  toggleCamera(): void {
     if (!this.isCameraMuted) {
-      this.currentUserStream
-        .getVideoTracks()
-        .forEach((track) => (track.enabled = false));
+      this.currentUserStream.getVideoTracks().forEach((track) => {
+        track.enabled = false;
+        track.dispatchEvent(new Event('disabled'));
+      });
     } else {
-      this.currentUserStream
-        .getVideoTracks()
-        .forEach((track) => (track.enabled = true));
+      this.currentUserStream.getVideoTracks().forEach((track) => {
+        track.enabled = true;
+        track.dispatchEvent(new Event('enabled'));
+      });
     }
     this.isCameraMuted = !this.isCameraMuted;
   }
@@ -605,7 +593,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // card actions
   public hideViewEventHandler(mediaDataId): void {
-    debugger;
     this.mediaData = this.mediaData.filter((d) => d.id != mediaDataId);
     this.isShowCurrentParticipantCard = false;
   }
@@ -743,6 +730,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       );
     });
   }
+
   public async changeStateVideo(event: any) {
     this.mediaSettingsService.changeVideoDevice(event);
     this.currentUserStream.getVideoTracks()?.forEach((track) => track.stop());
@@ -752,6 +740,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     });
     this.handleSuccessVideo(this.currentUserStream);
   }
+
   async handleSuccessVideo(stream: MediaStream): Promise<void> {
     const video = document.querySelector('video');
     video.srcObject = stream;
@@ -765,6 +754,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       sender.replaceTrack(videoTrack);
     });
   }
+
   public async changeInputDevice(deviceId: string) {
     this.mediaSettingsService.changeInputDevice(deviceId);
     this.currentUserStream = await navigator.mediaDevices.getUserMedia({

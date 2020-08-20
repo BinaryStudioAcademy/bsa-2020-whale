@@ -6,7 +6,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Whale.DAL;
 using Whale.DAL.Models;
+using Whale.DAL.Settings;
 using Whale.Shared.Exceptions;
+using Whale.Shared.Extentions;
 using Whale.Shared.Models.Participant;
 using Whale.Shared.Services.Abstract;
 
@@ -14,7 +16,12 @@ namespace Whale.Shared.Services
 {
     public class ParticipantService : BaseService
     {
-        public ParticipantService(WhaleDbContext context, IMapper mapper) : base(context, mapper) { }
+        private readonly BlobStorageSettings _blobStorageSettings;
+
+        public ParticipantService(WhaleDbContext context, IMapper mapper, BlobStorageSettings blobStorageSettings) : base(context, mapper)
+        {
+            _blobStorageSettings = blobStorageSettings;
+        }
 
         public async Task<ParticipantDTO> CreateParticipantAsync(ParticipantCreateDTO participantDto)
         {
@@ -36,6 +43,8 @@ namespace Whale.Shared.Services
                 .Include(p => p.User)
                 .Include(p => p.Meeting)
                 .FirstOrDefaultAsync(p => p.Id == entity.Id);
+
+            await createdParticipant.User.LoadAvatarAsync(_blobStorageSettings);
 
             return _mapper.Map<ParticipantDTO>(createdParticipant);
         }
@@ -83,6 +92,8 @@ namespace Whale.Shared.Services
             if (participant == null)
                 throw new NotFoundException("Participant");
 
+            await participant.User.LoadAvatarAsync(_blobStorageSettings);
+
             return _mapper.Map<ParticipantDTO>(participant);
         }
 
@@ -92,11 +103,13 @@ namespace Whale.Shared.Services
             if (meeting == null)
                 throw new NotFoundException("Meeting");
 
-            return _context.Participants
+            var participants = await _context.Participants
                 .Include(p => p.User)
                 .Include(p => p.Meeting)
                 .Where(p => p.MeetingId == meetingId)
-                .Select(p => _mapper.Map<ParticipantDTO>(p));
+                .LoadAvatarsAsync(_blobStorageSettings, p => p.User);
+
+            return _mapper.Map<IEnumerable<ParticipantDTO>>(participants);
         }
 
         public async Task<ParticipantDTO> GetMeetingParticipantByEmail(Guid meetingId, string email)
