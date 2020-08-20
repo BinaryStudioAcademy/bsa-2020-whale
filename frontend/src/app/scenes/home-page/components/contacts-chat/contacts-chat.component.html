@@ -50,31 +50,33 @@
       </div>
     </div>
   </div>
-  <form class="ui form vertically-aligned" #chatForm="ngForm">
-    <div class="field">
-      <textarea
-        (keydown.enter)="onEnterKeyPress($event, chatForm.valid)"
-        rows="2"
-        placeholder="Print your message there"
-        type="text"
-        id="message"
-        name="newMessage"
-        [(ngModel)]="newMessage.message"
-        required
-      ></textarea>
+  <div class="forma">
+    <form class="ui form vertically-aligned" #chatForm="ngForm">
+      <div class="field">
+        <textarea
+          (keydown.enter)="onEnterKeyPress($event, chatForm.valid)"
+          rows="2"
+          placeholder="Print your message there"
+          type="text"
+          id="message"
+          name="newMessage"
+          [(ngModel)]="newMessage.message"
+          required
+        ></textarea>
+      </div>
+      <button
+        id="chat-submit"
+        class="ui button tiny send"
+        type="submit"
+        id="sendmessage"
+        [disabled]="!chatForm.valid"
+        (click)="sendMessage()"
+      >
+        Send <i class="paper plane outline icon"></i>
+      </button>
+    </form>
+    <div class="subheader">
+      Enter to send. Enter+Shift for new line.
     </div>
-    <button
-      id="chat-submit"
-      class="ui button tiny send"
-      type="submit"
-      id="sendmessage"
-      [disabled]="!chatForm.valid"
-      (click)="sendMessage()"
-    >
-      Send <i class="paper plane outline icon"></i>
-    </button>
-  </form>
-  <div class="subheader">
-    Enter to send. Enter+Shift for new line.
   </div>
 </div>
