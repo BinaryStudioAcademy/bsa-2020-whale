@@ -183,7 +183,7 @@
     <div class="ui section divider"></div>
     <div class="personal-container">
       <div class="settings-item">
-        <h4>Telephone:</h4>
+        <h4>Phone number:</h4>
       </div>
       <span *ngIf="!editTelephone">{{ loggedInUser?.phone }}</span>
       <div
@@ -212,9 +212,11 @@
               id="userTelephone"
               name="phone"
               [(ngModel)]="updatedUser.phone"
-              required
             />
           </div>
+          <a class="remove-telephone-button" (click)="updatedUser.phone = ''"
+            ><i class="remove icon"></i
+          ></a>
           <div class="save-button">
             <button
               id="profile-submit-telephone"

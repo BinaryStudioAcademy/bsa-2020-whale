@@ -40,6 +40,7 @@ namespace Whale.SignalR
             services.AddTransient<MeetingService>();
             services.AddTransient<ParticipantService>();
             services.AddTransient<UserService>();
+            services.AddTransient<WhaleService>();
 
             services.AddTransient(p => new SignalrService(Configuration.GetValue<string>("SignalR")));
             services.AddScoped(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
@@ -90,6 +91,7 @@ namespace Whale.SignalR
                 endpoints.MapHub<MeetingHub>("/meeting");
                 endpoints.MapHub<NotificationHub>("/notificationHub");
                 endpoints.MapHub<ContactsHub>("/contactsHub");
+                endpoints.MapHub<WhaleHub>("/whale");
             });
         }
     }
