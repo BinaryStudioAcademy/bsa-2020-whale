@@ -491,6 +491,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
             SignalMethods.OnConferenceStartRecording,
             'Conference start recording'
           );
+          this.toastr.info('Start recording a conference');
         } else {
           this.isScreenRecording = false;
         }
@@ -509,6 +510,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       SignalMethods.OnConferenceStopRecording,
       'Conference stop recording'
     );
+    this.toastr.info('Stop recording a conference');
   }
 
   public onPollIconClick(): void {
