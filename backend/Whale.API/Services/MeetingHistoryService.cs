@@ -7,15 +7,21 @@ using System.Threading.Tasks;
 using Whale.API.Services.Abstract;
 using Whale.DAL;
 using Whale.DAL.Models;
+using Whale.DAL.Settings;
+using Whale.Shared.Extentions;
 using Whale.Shared.Models.Meeting;
 
 namespace Whale.API.Services
 {
 	public class MeetingHistoryService : BaseService
 	{
-		public MeetingHistoryService(WhaleDbContext context, IMapper mapper)
+        private readonly BlobStorageSettings _blobStorageSettings;
+
+        public MeetingHistoryService(WhaleDbContext context, IMapper mapper, BlobStorageSettings blobStorageSettings)
 			: base(context, mapper)
-		{ }
+		{
+			_blobStorageSettings = blobStorageSettings;
+		}
 
 		public async Task<IEnumerable<MeetingDTO>> GetMeetingsWithParticipantsAndPollResults(Guid userId)
 		{
@@ -29,7 +35,7 @@ namespace Whale.API.Services
 				.Where(m => userMeetingsIds.Contains(m.Id))
 				.ToListAsync();
 
-			meetings = meetings
+			var meetingsTasks = meetings
 				.GroupJoin(
 					_context.PollResults,
 					m => m.Id,
@@ -42,7 +48,13 @@ namespace Whale.API.Services
 					p => p.MeetingId,
 					(m, pGroup) => new Meeting(m, pGroup)
 				)
-				.ToList();
+				.Select(async m =>
+				{
+					m.Participants = await m.Participants.LoadAvatarsAsync(_blobStorageSettings, p => p.User);
+					return m;
+				});
+
+			meetings = (await Task.WhenAll(meetingsTasks)).ToList();
 
 			return _mapper.Map<IEnumerable<MeetingDTO>>(meetings);
 		}
