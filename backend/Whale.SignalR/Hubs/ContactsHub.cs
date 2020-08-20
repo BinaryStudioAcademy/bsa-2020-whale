@@ -21,7 +21,6 @@ namespace Whale.SignalR.Hubs
         public async Task SendContacts(ContactDTO contactDTO)
         {
             await Clients.Group(contactDTO.FirstMember.Email).SendAsync("onNewContact", contactDTO);
-            await Clients.Group(contactDTO.SecondMember.Email).SendAsync("onNewContact", contactDTO);
         }
 
         public async Task Disconnect(string email)

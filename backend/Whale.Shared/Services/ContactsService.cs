@@ -142,10 +142,12 @@ namespace Whale.Shared.Services
                     contact.isAccepted = true;
                     _context.Contacts.Update(contact);
                     await _context.SaveChangesAsync();
-                    var contactDTO = await GetContactAsync(contact.Id, ownerEmail);
+                    var contactOwnerDTO = await GetContactAsync(contact.Id, ownerEmail);
+                    var contactContactnerEmailDTO = await GetContactAsync(contact.Id, contactnerEmail);
                     var connection = await _signalrService.ConnectHubAsync("contactsHub");
-                    await connection.InvokeAsync("onNewContact", contactDTO);
-                    return contactDTO;
+                    await connection.InvokeAsync("onNewContact", contactOwnerDTO);
+                    await connection.InvokeAsync("onNewContact", contactContactnerEmailDTO);
+                    return contactOwnerDTO;
                 }
                 throw new AlreadyExistsException("Contact");
             }

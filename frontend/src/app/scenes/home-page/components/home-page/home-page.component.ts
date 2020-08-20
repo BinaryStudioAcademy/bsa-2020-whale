@@ -193,13 +193,12 @@ export class HomePageComponent implements OnInit, OnDestroy {
             this.receivedContact.next(contact);
           }
         );
-        console.log(this.loggedInUser.email);
         this.hubConnection.invoke('onConect', this.loggedInUser.email);
       });
     this.receivedContact$.pipe(takeUntil(this.unsubscribe$)).subscribe(
       (contact) => {
         this.contacts.push(contact);
-        console.log('received a contact ', contact);
+        this.contactsVisibility = true;
       },
       (err) => {
         console.log(err.message);

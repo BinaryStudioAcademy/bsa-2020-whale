@@ -22,7 +22,6 @@ import { environment } from '@env';
 export class PageHeaderComponent implements OnInit, OnDestroy {
   private hubConnection: HubConnection;
   public isUserLoadig = true;
-  public isNotificationsLoading = true;
   private receivedNotify = new Subject<Notification>();
   public receivedNotify$ = this.receivedNotify.asObservable();
   private unsubscribe$ = new Subject<void>();
@@ -44,11 +43,13 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
   ) {}
 
   public showNotificationsMenu(): void {
-    if (this.settingsMenuVisible) {
-      this.settingsMenuVisible = false;
-    }
+    if (this.notificationsList.length) {
+      if (this.settingsMenuVisible) {
+        this.settingsMenuVisible = false;
+      }
 
-    this.isNotificationsVisible = !this.isNotificationsVisible;
+      this.isNotificationsVisible = !this.isNotificationsVisible;
+    }
   }
 
   public showSettingsMenu(): void {
@@ -81,7 +82,6 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
   getNotifications(): void {
     this.notificationService
       .GetNotifications()
-      .pipe(tap(() => (this.isNotificationsLoading = false)))
       .subscribe((notifications) => {
         this.notificationsList = notifications;
       });
@@ -101,13 +101,11 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
             this.receivedNotify.next(notification);
           }
         );
-        console.log(this.loggedInUser.email);
         this.hubConnection.invoke('onConect', this.loggedInUser.email);
       });
     this.receivedNotify$.pipe(takeUntil(this.unsubscribe$)).subscribe(
       (newNotification) => {
         this.notificationsList.push(newNotification);
-        console.log('received a messsage ', newNotification);
       },
       (err) => {
         console.log(err.message);

@@ -17,6 +17,7 @@ export class NotificationComponent implements OnInit {
   public message = '';
   public contactEmail = '';
   public isPendingContact = false;
+  public isText = false;
   public show = true;
   constructor(
     private contactCervice: ContactService,
@@ -31,6 +32,7 @@ export class NotificationComponent implements OnInit {
       this.message = (JSON.parse(
         this.notification.options
       ) as OptionsText).message;
+      this.isText = true;
       return;
     }
     if (
