@@ -17,10 +17,12 @@ import { LinkTypeEnum } from '@shared/Enums/LinkTypeEnum';
 import { BlobService } from '../../../../core/services/blob.service';
 import { Group } from '@shared/models/group/group';
 import { GroupService } from 'app/core/services/group.service';
-import { UpstateService } from '../../../../core/services/upstate.service';
 import { environment } from '@env';
 import { SignalRService } from 'app/core/services/signal-r.service';
 import { HubConnection } from '@aspnet/signalr';
+import { WhaleSignalService } from 'app/core/services/whale-signal.service';
+import { UserOnline } from '@shared/models/user/user-online';
+import { UpstateService } from 'app/core/services/upstate.service';
 
 @Component({
   selector: 'app-home-page',
@@ -61,6 +63,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
     private blobService: BlobService,
     private upstateService: UpstateService,
     private signalRService: SignalRService,
+    private whaleSignalrService: WhaleSignalService
   ) {}
 
   ngOnDestroy(): void {
@@ -84,6 +87,29 @@ export class HomePageComponent implements OnInit, OnDestroy {
               (data: Contact[]) => {
                 this.contacts = data;
                 this.onContactsClick();
+
+                this.whaleSignalrService.signalUserConected$
+                  .pipe(takeUntil(this.unsubscribe$))
+                  .subscribe(
+                    (onlineUser) => {
+                      console.log('whalesignalr user connected:', onlineUser);
+                      this.userConnected(onlineUser);
+                    },
+                    (err) => {
+                      this.toastr.error(err.Message);
+                    }
+                  );
+
+                this.whaleSignalrService.signalUserDisconected$
+                  .pipe(takeUntil(this.unsubscribe$))
+                  .subscribe(
+                    (userEmail) => {
+                      this.userDisconnected(userEmail);
+                    },
+                    (err) => {
+                      this.toastr.error(err.Message);
+                    }
+                  );
               },
               (error) => this.toastr.error(error.Message)
             );
@@ -101,6 +127,23 @@ export class HomePageComponent implements OnInit, OnDestroy {
         },
         (error) => this.toastr.error(error.Message)
       );
+  }
+  userConnected(onlineUser: UserOnline): void {
+    const index = this.contacts.findIndex(
+      (c) => c.secondMember?.id === onlineUser.id
+    );
+    if (index >= 0) {
+      this.contacts[index].secondMember.connectionId = onlineUser.connectionId;
+    }
+  }
+
+  userDisconnected(userEmail: string): void {
+    const index = this.contacts.findIndex(
+      (c) => c.secondMember?.email === userEmail
+    );
+    if (index >= 0) {
+      this.contacts[index].secondMember.connectionId = null;
+    }
   }
 
   addNewGroup(): void {
@@ -131,9 +174,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   addNewContact(): void {
-    this.simpleModalService
-      .addModal(AddContactModalComponent)
-      .subscribe();
+    this.simpleModalService.addModal(AddContactModalComponent).subscribe();
   }
 
   // visibilityChange(event): void {
@@ -237,12 +278,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe(() => {
-        this.hubConnection.on(
-          'onNewContact',
-          (contact: Contact) => {
-            this.receivedContact.next(contact);
-          }
-        );
+        this.hubConnection.on('onNewContact', (contact: Contact) => {
+          this.receivedContact.next(contact);
+        });
         this.hubConnection.invoke('onConect', this.loggedInUser.email);
       });
     this.receivedContact$.pipe(takeUntil(this.unsubscribe$)).subscribe(

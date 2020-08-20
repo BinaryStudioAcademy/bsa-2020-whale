@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
 import { AuthService } from './core/auth/auth.service';
 import { HttpClient } from '@angular/common/http';
 import { Contact } from '@shared/models/contact/contact';
@@ -11,6 +11,10 @@ import { HubConnection } from '@aspnet/signalr';
 import { HttpService } from './core/services/http.service';
 import { User } from 'firebase';
 import { Title } from '@angular/platform-browser';
+import {
+  WhaleSignalService,
+  SignalMethods,
+} from './core/services/whale-signal.service';
 
 @Component({
   selector: 'app-root',
@@ -31,9 +35,17 @@ export class AppComponent implements OnInit {
     private signalRService: SignalRService,
     private httpService: HttpService,
     private authService: AuthService,
-    private titleService: Title
+    private titleService: Title,
+    private whaleSignalrService: WhaleSignalService
   ) {
     titleService.setTitle(this.title);
+  }
+  @HostListener('window:beforeunload')
+  beforeunload(): void {
+    this.whaleSignalrService.invoke(
+      SignalMethods.OnUserDisconnect,
+      this.authService.currentUser.email
+    );
   }
 
   ngOnInit(): void {
@@ -60,6 +72,15 @@ export class AppComponent implements OnInit {
             observe: 'response',
           })
           .subscribe((user) => {
+            console.log(
+              'whalesignalr email:',
+              this.authService.currentUser.email
+            );
+            this.whaleSignalrService.invoke(
+              SignalMethods.OnUserConnect,
+              this.authService.currentUser.email
+            );
+
             this.httpService
               .getRequest<Contact[]>('/api/contacts')
               .pipe()
