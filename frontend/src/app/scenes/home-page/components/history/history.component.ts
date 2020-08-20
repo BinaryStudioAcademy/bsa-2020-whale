@@ -28,6 +28,10 @@ export class HistoryComponent implements OnInit {
     this.getSomeMeetings();
   }
 
+  public scrollToTop(): void {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   public getSomeMeetings(): void {
     const params = new HttpParams()
       .set('userId', this.user.id)
