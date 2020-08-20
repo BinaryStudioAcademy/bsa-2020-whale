@@ -2,7 +2,7 @@
   <div class="ui chat-inner feed">
     <div class="event chat-label">
       <div class="label">
-        <img src="{{ contactSelected.secondMember.avatarUrl }}" />
+        <img src="{{ contactSelected.secondMember?.avatarUrl }}" />
       </div>
       <div class="content">
         <div class="user-info">
@@ -46,7 +46,7 @@
             {{ message.createdAt | date: "short" }}
           </div>
         </div>
-        {{ message.message }}
+        <div class="message">{{ message.message }}</div>
       </div>
     </div>
   </div>

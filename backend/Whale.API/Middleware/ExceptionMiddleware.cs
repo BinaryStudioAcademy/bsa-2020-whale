@@ -3,7 +3,7 @@ using Serilog;
 using System;
 using System.Threading.Tasks;
 using Whale.API.Models;
-using Whale.BLL.Exceptions;
+using Whale.Shared.Exceptions;
 
 namespace Whale.API.Middleware
 {

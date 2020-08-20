@@ -19,7 +19,7 @@ import { Subject } from 'rxjs';
   providedIn: 'root',
 })
 export class PollService {
-  private route = environment.meetingApiUrl + '/api/polls';
+  private route = environment.apiUrl + '/api/polls';
 
   public polls: PollDto[] = [];
   public pollResults: PollResultDto[] = [];
@@ -142,12 +142,10 @@ export class PollService {
         this.route + '/saveResults',
         new HttpParams().set('meetingId', meetindId)
       )
-      .subscribe(() => {
-        this.toastr.info(
-          'You can check poll results in meeting history',
-          'Info'
-        );
-      });
+      .subscribe(
+        () => {},
+        (error) => console.error(error)
+      );
   }
 
   public onPollIconClick() {

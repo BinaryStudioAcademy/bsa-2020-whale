@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { SimpleModalComponent } from 'ngx-simple-modal';
 import { Contact } from '@shared/models/contact/contact';
 import { User } from '@shared/models/user/user';
-import { DirectMessage } from '@shared/models/message/message';
+import { DirectMessage } from '@shared/models/message/direct-message';
 import { SignalRService } from '../../../../core/services/signal-r.service';
 import { from } from 'rxjs';
 import { MeetingLink } from '@shared/models/meeting/meeting-link';
@@ -37,7 +37,7 @@ export class CallModalComponent extends SimpleModalComponent<Contact, null>
     super();
   }
   ngOnInit(): void {
-    from(this.signalRService.registerHub(environment.apiUrl, 'chatHub'))
+    from(this.signalRService.registerHub(environment.signalrUrl, 'chatHub'))
       .pipe(
         tap((hub) => {
           this.hubConnection = hub;
@@ -68,8 +68,8 @@ export class CallModalComponent extends SimpleModalComponent<Contact, null>
             anonymousCount: 0,
             isScheduled: false,
             isRecurrent: false,
+            creatorEmail: this.firstMember.email,
           } as MeetingCreate,
-          email: this.firstMember.email,
         } as CallStart);
       });
   }

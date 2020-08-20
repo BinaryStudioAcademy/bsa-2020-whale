@@ -10,7 +10,7 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
-import { DirectMessage } from '@shared/models/message/message';
+import { DirectMessage } from '@shared/models/message/direct-message';
 import { User } from '@shared/models/user/user';
 import { Contact } from '@shared/models/contact/contact';
 import { SignalRService } from 'app/core/services/signal-r.service';
@@ -75,7 +75,7 @@ export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
     this.hubConnection?.invoke('JoinGroup', this.contactSelected.id);
   }
   ngOnInit(): void {
-    from(this.signalRService.registerHub(environment.apiUrl, 'chatHub'))
+    from(this.signalRService.registerHub(environment.signalrUrl, 'chatHub'))
       .pipe(
         tap((hub) => {
           this.hubConnection = hub;
@@ -93,7 +93,7 @@ export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
     this.receivedMsg$.pipe(takeUntil(this.unsubscribe$)).subscribe(
       (newMessage) => {
         this.messages.push(newMessage);
-        console.log('received a messsage ' + newMessage.message);
+        console.log('received a messsage ', newMessage);
       },
       (err) => {
         console.log(err.message);
@@ -125,7 +125,7 @@ export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   close(): void {
-    this.chat.emit(true);
+    this.chat.emit(false);
     this.hubConnection.invoke('Disconnect', this.contactSelected.id);
   }
 

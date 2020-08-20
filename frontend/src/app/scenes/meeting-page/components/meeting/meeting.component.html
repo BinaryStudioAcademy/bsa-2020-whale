@@ -10,13 +10,13 @@
           id="meeting-draggable-mute"
           *ngIf="!isMicrophoneMuted"
           class="big microphone icon"
-          (click)="turnOffMicrophone()"
+          (click)="toggleMicrophone()"
         ></i>
         <i
           id="meeting-draggable-mute"
           *ngIf="isMicrophoneMuted"
           class="big slash microphone icon"
-          (click)="turnOffMicrophone()"
+          (click)="toggleMicrophone()"
         ></i>
       </span>
       <span data-tooltip="Toggle Webcam" data-position="top left">
@@ -24,13 +24,13 @@
           id="meeting-draggable-camera"
           *ngIf="!isCameraMuted"
           class="big video icon big-left-margin"
-          (click)="turnOffCamera()"
+          (click)="toggleCamera()"
         ></i>
         <i
           id="meeting-draggable-camera"
           *ngIf="isCameraMuted"
           class="big eye slash icon big-left-margin"
-          (click)="turnOffCamera()"
+          (click)="toggleCamera()"
         ></i>
       </span>
       <span data-tooltip="Participants" data-position="top left">
@@ -87,7 +87,7 @@
       </div>
       <div class="ui divided list">
         <div
-          *ngFor="let participant of distinctParticipants"
+          *ngFor="let participant of meeting?.participants"
           class="ui item participant"
         >
           <img src="{{ participant.user.avatarUrl }}" />
@@ -114,13 +114,13 @@
                 id="meeting-options-microphone"
                 *ngIf="!isMicrophoneMuted"
                 class="big microphone icon"
-                (click)="turnOffMicrophone()"
+                (click)="toggleMicrophone()"
               ></i>
               <i
                 id="meeting-options-microphone"
                 *ngIf="isMicrophoneMuted"
                 class="big slash microphone icon"
-                (click)="turnOffMicrophone()"
+                (click)="toggleMicrophone()"
               ></i>
             </span>
             <span data-tooltip="Settings">
@@ -135,13 +135,13 @@
                 id="meeting-options-camera"
                 *ngIf="!isCameraMuted"
                 class="big video icon big-left-margin"
-                (click)="turnOffCamera()"
+                (click)="toggleCamera()"
               ></i>
               <i
                 id="meeting-options-camera"
                 *ngIf="isCameraMuted"
                 class="big eye slash icon big-left-margin"
-                (click)="turnOffCamera()"
+                (click)="toggleCamera()"
               ></i>
             </span>
             <span data-tooltip="Settings">
@@ -280,23 +280,35 @@
         <app-participant-card
           *ngFor="let data of mediaData"
           (hideViewEvent)="hideViewEventHandler($event)"
+          (toggleMicrophoneEvent)="
+            currentParticipant.id === $event ? toggleMicrophone() : ''
+          "
+          (toggleCameraEvent)="
+            currentParticipant.id === $event ? toggleCamera() : ''
+          "
           [data]="data"
         >
         </app-participant-card>
       </div>
 
+      <img
+        [src]="currentParticipant?.user?.avatarUrl"
+        [hidden]="!isCameraMuted || (isCameraMuted && mediaData.length > 1)"
+        class="big-avatar"
+      />
+
       <video
         #currentVideo
         autoplay="autoplay"
         class="participant-fullscreen"
-        [hidden]="mediaData.length > 1"
+        [hidden]="mediaData.length > 1 || isCameraMuted"
         [muted]="'muted'"
       ></video>
     </div>
 
     <div *ngIf="isShowChat" class="ui chat card">
       <div class="ui chat-inner feed">
-        <div *ngFor="let message of messages" class="event">
+        <div *ngFor="let message of messages" class="event message-event">
           <div class="label">
             <img src="{{ message?.author?.avatarUrl }}" />
           </div>
@@ -326,10 +338,10 @@
                 privately
               </div>
               <div class="date">
-                {{ message?.sentDate | dateFormat }}
+                {{ message?.sentDate | date: "short" }}
               </div>
             </div>
-            {{ message?.message }}
+            <div class="message">{{ message?.message }}</div>
           </div>
         </div>
       </div>

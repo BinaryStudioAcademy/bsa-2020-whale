@@ -7,6 +7,7 @@ export const environment = {
   production: false,
   apiUrl: 'http://localhost:4201',
   meetingApiUrl: 'http://localhost:4202',
+  signalrUrl: 'http://localhost:4203',
   firebase: {
     apiKey: 'AIzaSyCdb8h9YMeJBdcIM5wK_w6Mcw7ZI1CVJAk',
     authDomain: 'bsa-whale.firebaseapp.com',

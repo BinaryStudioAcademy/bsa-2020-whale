@@ -6,10 +6,10 @@ import { BlobService } from '../../../../core/services/blob.service';
 import { User } from '@shared/models/user';
 import { HttpService } from '../../../../core/services/http.service';
 import { AuthService } from '../../../../core/auth/auth.service';
-import { filter } from 'rxjs/operators';
 import Avatar from 'avatar-initials';
 import { LinkTypeEnum } from '@shared/Enums/LinkTypeEnum';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { UpstateService } from '../../../../core/services/upstate.service';
 
 @Component({
   selector: 'app-profile-page',
@@ -60,7 +60,8 @@ export class ProfilePageComponent implements OnInit {
     private toastr: ToastrService,
     private blobService: BlobService,
     private httpService: HttpService,
-    private authService: AuthService
+    private authService: AuthService,
+    private upstateService: UpstateService
   ) {}
 
   fileChangeEvent(event: any): void {}
@@ -189,29 +190,20 @@ export class ProfilePageComponent implements OnInit {
   }
 
   private GetAvatar(): void {
-    this.authService.user$
-      .pipe(filter((user) => Boolean(user)))
-      .subscribe((user) => {
-        this.httpService
-          .getRequest<User>(`${this.routePrefix}/email/${user.email}`)
-          .subscribe(
-            (userFromDB: User) => {
-              this.loggedInUser = userFromDB;
-              if (userFromDB.linkType === LinkTypeEnum.Internal) {
-                this.blobService
-                  .GetImageByName(userFromDB.avatarUrl)
-                  .subscribe((fullLink: string) => {
-                    userFromDB.avatarUrl = fullLink;
-                    this.loggedInUser = userFromDB;
-                    this.updatedUser = this.loggedInUser;
-                  });
-              } else {
-                this.loggedInUser = userFromDB;
-              }
-            },
-            (error) => this.toastr.error(error.Message)
-          );
-      });
+    this.upstateService.getLoggedInUser().subscribe(
+      (userFromDB: User) => {
+        this.loggedInUser = userFromDB;
+        if (userFromDB.linkType === LinkTypeEnum.Internal) {
+          this.updatedUser = {
+            ...this.loggedInUser,
+            avatarUrl: userFromDB.avatarUrl.split('/').pop(),
+          };
+          return;
+        }
+        this.updatedUser = this.loggedInUser;
+      },
+      (error) => this.toastr.error(error.Message)
+    );
   }
 
   public removeAvatar(): void {

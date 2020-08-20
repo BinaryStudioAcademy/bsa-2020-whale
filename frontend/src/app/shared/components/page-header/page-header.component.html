@@ -29,18 +29,17 @@
     class="notify-pic-item item"
   >
     <i class="bell outline icon"></i>
-    <a *ngIf="notificationsList.length > 0" class="ui teal circular label">{{
+    <a *ngIf="notificationsList?.length > 0" class="ui teal circular label">{{
       notificationsList.length
     }}</a>
 
     <div *ngIf="isNotificationsVisible" class="dropdown-menu notify">
-      <div
+      <app-notification
         *ngFor="let notification of notificationsList"
-        class="dropdown-menu-item notification"
+        [notification]="notification"
+        (delete)="onNotificationDelete($event)"
       >
-        <span>{{ notification.time | date: "short" }}</span>
-        <p>{{ notification.text }}</p>
-      </div>
+      </app-notification>
     </div>
   </a>
   <a

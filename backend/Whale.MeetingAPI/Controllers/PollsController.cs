@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Whale.BLL.Services;
-using Whale.Shared.DTO.Poll;
+using Whale.MeetingAPI.Services;
+using Whale.Shared.Models.Poll;
 
 namespace Whale.MeetingAPI.Controllers
 {
@@ -20,7 +18,7 @@ namespace Whale.MeetingAPI.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> PostPoll([FromBody] PollCreateDTO pollCreateDto)
+		public async Task<ActionResult<PollDTO>> PostPoll([FromBody] PollCreateDTO pollCreateDto)
 		{
 			var pollDto = await _pollService.CreatePoll(pollCreateDto);
 			return CreatedAtAction("PostPoll", pollDto);
@@ -43,12 +41,12 @@ namespace Whale.MeetingAPI.Controllers
 		[HttpGet("saveResults")]
 		public async Task<IActionResult> SavePollResults(Guid meetingId)
 		{
-			await _pollService.SavePollResultsToDatabase(meetingId);
+			await _pollService.SavePollResultsToDatabaseAndDeleteFromRedis(meetingId);
 			return Ok();
 		}
 
 		[HttpGet]
-		public async Task<IActionResult> GetPollsAndResults(string meetingId, string userEmail)
+		public async Task<ActionResult<PollsAndResultsDTO>> GetPollsAndResults(string meetingId, string userEmail)
 		{
 			try
 			{

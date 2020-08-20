@@ -1,5 +1,5 @@
 import { User } from '../user/user';
-import { DirectMessage } from '../message/message';
+import { DirectMessage } from '../message/direct-message';
 
 export interface Contact {
   id: string;

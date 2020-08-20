@@ -5,19 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Migrations\20200804115721_Initial.cs" />
-    <Compile Remove="Migrations\20200804115721_Initial.Designer.cs" />
-    <Compile Remove="Migrations\20200804122248_Initial.cs" />
-    <Compile Remove="Migrations\20200804122248_Initial.Designer.cs" />
-    <Compile Remove="Migrations\20200804122426_Initial.cs" />
-    <Compile Remove="Migrations\20200804122426_Initial.Designer.cs" />
-    <Compile Remove="Migrations\20200804122734_Initial.cs" />
-    <Compile Remove="Migrations\20200804122734_Initial.Designer.cs" />
-    <Compile Remove="Migrations\20200812205204_DirectMsgModelFixes.cs" />
-    <Compile Remove="Migrations\20200812205204_DirectMsgModelFixes.Designer.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.6">
       <PrivateAssets>all</PrivateAssets>
@@ -29,6 +16,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
 </Project>

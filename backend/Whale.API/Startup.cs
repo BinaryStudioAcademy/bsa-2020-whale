@@ -1,25 +1,25 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Whale.BLL.Hubs;
-using Whale.DAL;
-using Microsoft.EntityFrameworkCore;
-using Whale.BLL.Services;
-using AutoMapper;
-using Whale.BLL.MappingProfiles;
-using Whale.BLL.Providers;
 using Microsoft.IdentityModel.Tokens;
-using Whale.Shared.Services;
-using Whale.BLL.Services.Interfaces;
-using Whale.DAL.Settings;
-using Whale.API.Extensions;
-using Whale.API.Middleware;
-using Whale.BLL.Interfaces;
 using Microsoft.OpenApi.Models;
-using Whale.Shared.Helper;
+using Whale.API.Services;
+using System.Net.Http;
+using Whale.API.MappingProfiles;
+using Whale.API.Middleware;
+using Whale.API.Providers;
+using Whale.API.Services;
+using Whale.DAL;
+using Whale.DAL.Settings;
+using Whale.Shared.Exceptions;
+using Whale.Shared.Helpers;
+using Whale.Shared.MappingProfiles;
+using Whale.Shared.Services;
 
 namespace Whale.API
 {
@@ -44,6 +44,7 @@ namespace Whale.API
             services.AddDbContext<WhaleDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("WhaleDatabase")));
             services.AddControllers()
                     .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+
             var mappingConfig = new MapperConfiguration(mc =>
             {
                 mc.AddProfile<ContactProfile>();
@@ -51,20 +52,30 @@ namespace Whale.API
                 mc.AddProfile<ScheduledMeetingProfile>();
                 mc.AddProfile<DirectMessageProfile>();
                 mc.AddProfile<MeetingProfile>();
-                mc.AddProfile<MeetingMessage>();
                 mc.AddProfile<ParticipantProfile>();
+                mc.AddProfile<PollProfile>();
+                mc.AddProfile<MeetingMessage>();
+                mc.AddProfile<GroupProfile>();
+                mc.AddProfile<GroupMessageProfile>();
+                mc.AddProfile<NotificationProfile>();
             });
 
             services.AddSingleton(mappingConfig.CreateMapper());
 
-            services.AddTransient<IContactsService, ContactsService>();
-            services.AddTransient<IUserService, UserService>();
-            services.AddTransient<IScheduledMeetingsService, ScheduledMeetingsService>();
+            services.AddTransient<NotificationsService>();
+            services.AddTransient<ContactsService>();
+            services.AddTransient<UserService>();
+            services.AddTransient<ScheduledMeetingsService>();
             services.AddTransient<ContactChatService>();
-            services.AddTransient<IMeetingService, MeetingService>();
+            services.AddTransient<MeetingHistoryService>();
+            services.AddTransient<MeetingService>();
             services.AddTransient<ParticipantService>();
+            services.AddTransient<GroupService>();
+            services.AddScoped(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
+            services.AddScoped<HttpClient>();
+            services.AddTransient(p => new HttpService(p.GetRequiredService<HttpClient>(), Configuration.GetValue<string>("MeetingAPI")));
+            services.AddTransient(p => new SignalrService(Configuration.GetValue<string>("SignalR")));
 
-            services.AddSignalR();
             services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
             {
                 builder
@@ -72,9 +83,10 @@ namespace Whale.API
                 .AllowAnyHeader()
                 .AllowCredentials()
                 .WithOrigins("http://localhost:4200", "http://bsa2020-whale.westeurope.cloudapp.azure.com");
-        }));
+            }));
 
-            services.AddTransient<FileStorageProvider>(x => new FileStorageProvider(Configuration.Bind<BlobStorageSettings>("BlobStorageSettings")));
+            services.AddScoped<BlobStorageSettings>(options => Configuration.Bind<BlobStorageSettings>("BlobStorageSettings"));
+            services.AddScoped<FileStorageProvider>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(opt =>
@@ -89,13 +101,12 @@ namespace Whale.API
                         ValidateLifetime = true
                     };
                 });
-            services.AddScoped<RedisService>(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
 
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Whale API", Version = "v1" });
             });
-            services.AddScoped(x => new EncryptService(Configuration.GetValue<string>("EncryptSettings:key")));
+            services.AddScoped(x => new EncryptHelper(Configuration.GetValue<string>("EncryptSettings:key")));
 
         }
 
@@ -127,7 +138,6 @@ namespace Whale.API
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<ChatHub>("/chatHub");
             });
         }
     }

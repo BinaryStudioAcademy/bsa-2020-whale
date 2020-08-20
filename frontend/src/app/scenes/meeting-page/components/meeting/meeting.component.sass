@@ -96,6 +96,11 @@ app-participant-card
 .users__user:hover .users__user__info 
     opacity: 0.9
 
+.message
+    word-break: break-word
+    overflow-wrap: break-word
+    
+
 //options
 .options
     background-color: #eee
@@ -187,7 +192,7 @@ div.invite-icon-container
         font-size: 1.4em
 
 div div.item.participant
-    padding: 7px 12px 7px 12px
+    margin: 7px 12px 7px 12px
     min-width: 110px
     white-space: nowrap
     cursor: default
@@ -378,7 +383,26 @@ div:moz-full-screen
 .message_receiver
     font-size: .85714286em
     color: grey
+    display: inline-block
+    margin-right: 5px
 
 .privately-received
     font-size: .85714286em
     color: #db2828
+    display: inline-block
+    margin-right: 5px
+
+.big-avatar
+    width: auto
+    object-fit: contain
+    height: calc(100% - 60px)
+    padding: 10%
+    
+.message-event
+    .chat-content
+        margin-left: 10px
+        .date
+            font-size: .85714286em
+            color: rgba(0,0,0,.4)
+            display: inline-block
+

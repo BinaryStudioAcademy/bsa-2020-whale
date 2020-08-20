@@ -20,7 +20,7 @@
         </div>
       </a>
       <a class="item">
-        <a id="home-go-history" class="item" (click)="goToPage('history')">
+        <a id="home-go-history" class="item" (click)="onMeetingHistoryClick()">
           <i class="clock outline icon"></i>
           Meetings history
         </a>
@@ -40,7 +40,7 @@
       <spiner *ngIf="isContactsLoading" [size]="'medium'"></spiner>
       <a
         id="home-toggle-contacts"
-        (click)="contactsVisibility = !contactsVisibility"
+        (click)="onContactsClick()"
         class="item header"
         >Contacts
         <button
@@ -63,7 +63,7 @@
           >
             <img
               class="ui avatar image"
-              src="{{ contact?.secondMember.avatarUrl }}"
+              src="{{ returnCorrectLink(contact) }}"
             />
             <div class="content">
               <div class="description">
@@ -74,10 +74,8 @@
           </div>
         </div>
       </div>
-      <a
-        id="home-toggle-groups"
-        (click)="groupsVisibility = !groupsVisibility"
-        class="item header"
+      <spiner *ngIf="isGroupsLoading" [size]="'medium'"></spiner>
+      <a id="home-toggle-groups" (click)="onGroupsClick()" class="item header"
         >Groups
         <button
           id="home-add-group"
@@ -88,20 +86,20 @@
         </button>
       </a>
       <div class="contacts-container" [hidden]="!groupsVisibility">
-        <div
-          *ngFor="let contact of contacts"
-          class="user-list ui middle aligned selection list"
-        >
-          <div id="home-group" (click)="onGroupClick()" class="item">
-            <img
-              class="ui avatar image"
-              src="{{ contact.secondMember?.avatarUrl }}"
-            />
-            <div class="content">
-              <div class="description">
-                {{ contact.secondMember?.firstName }}
-                {{ contact.secondMember?.secondName }}
-              </div>
+        <div *ngFor="let group of groups" class="user-list ui selection list">
+          <div id="home-group" (click)="onGroupClick(group)" class="item">
+            <div class="group content">
+              {{ group.label }}
+              <button
+                id="home-remove-group"
+                (click)="deleteGroup(group); $event.stopPropagation()"
+                class="ui mini basic button edit-button"
+              >
+                <i
+                  class="trash alternate outline icon"
+                  (click)="deleteGroup(group); $event.stopPropagation()"
+                ></i>
+              </button>
             </div>
           </div>
         </div>
@@ -110,14 +108,17 @@
   </div>
 
   <div class="right-col">
-    <div *ngIf="!chatVisibility" class="actions">
+    <div *ngIf="chatVisibility" class="actions">
       <app-contacts-chat
         [contactSelected]="contactSelected"
         (chat)="visibilityChange($event)"
       ></app-contacts-chat>
     </div>
-    <div *ngIf="chatVisibility" class="actions">
-      <div class="vertically-aligned chat ui segment">
+    <div class="actions">
+      <div *ngIf="historyVisibility">
+        <app-history [user]="loggedInUser"></app-history>
+      </div>
+      <div *ngIf="actionsVisibility" class="vertically-aligned chat ui segment">
         <div
           id="home-chat-go-shedule"
           class="text-aligned"
@@ -129,7 +130,7 @@
           />
           <span class="text-aligned">Schedule meeting</span>
         </div>
-        <div class="text-aligned">
+        <div class="text-aligned" (click)="onMeetingHistoryClick()">
           <img
             class="ui centered small image"
             src="https://img.icons8.com/bubbles/100/000000/todo-list.png"

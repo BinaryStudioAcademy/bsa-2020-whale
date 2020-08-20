@@ -6,7 +6,6 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
 WORKDIR /src
 COPY backend/Whale.MeetingAPI/ Whale.MeetingAPI/
-COPY backend/Whale.BLL/ Whale.BLL/
 COPY backend/Whale.DAL/ Whale.DAL/
 COPY backend/Whale.Shared/ Whale.Shared/
 WORKDIR Whale.MeetingAPI

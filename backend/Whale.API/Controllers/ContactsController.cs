@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Whale.BLL.Services.Interfaces;
-using Whale.Shared.DTO.Contact;
+using Whale.Shared.Models.Contact;
+using Whale.Shared.Services;
 
 namespace Whale.API.Controllers
 {
@@ -13,9 +14,9 @@ namespace Whale.API.Controllers
     [Authorize]
     public class ContactsController : ControllerBase
     {
-        private readonly IContactsService _contactsService;
+        private readonly ContactsService _contactsService;
 
-        public ContactsController(IContactsService contactsService)
+        public ContactsController(ContactsService contactsService)
         {
             _contactsService = contactsService;
             
@@ -25,7 +26,7 @@ namespace Whale.API.Controllers
         public async Task<IActionResult> GetAll()
         {
             string email = HttpContext?.User.Claims
-                .FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+                .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
             Console.WriteLine("email");
             Console.WriteLine(email);
             var contacts = await _contactsService.GetAllContactsAsync(email);
@@ -38,7 +39,7 @@ namespace Whale.API.Controllers
         public async Task<IActionResult> Get(Guid contactId)
         {
             string email = HttpContext?.User.Claims
-                .FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+                .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 
             var contact = await _contactsService.GetContactAsync(contactId, email);
 
@@ -50,10 +51,11 @@ namespace Whale.API.Controllers
         [HttpPost("create")]
         public async Task<IActionResult> CreateFromEmail([FromQuery(Name = "email")] string contactnerEmail)
         {
-            var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+            var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
             var createdContact = await _contactsService.CreateContactFromEmailAsync(ownerEmail, contactnerEmail);
-
-            return Created($"id/{createdContact.Id}", createdContact);
+            if(createdContact is object)
+                return Created($"id/{createdContact.Id}", createdContact);
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
@@ -70,7 +72,7 @@ namespace Whale.API.Controllers
         public async Task<IActionResult> Update([FromBody] ContactEditDTO contactDTO)
         {
             string email = HttpContext?.User.Claims
-                .FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+                .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 
             await _contactsService.UpdateContactAsync(contactDTO, email);
 
