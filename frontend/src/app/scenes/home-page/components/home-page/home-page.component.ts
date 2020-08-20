@@ -100,6 +100,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
       .subscribe((group) => {
         if (group !== undefined) {
           this.groups.push(group);
+          this.toastr.success('Group created successfuly');
         }
       });
   }
