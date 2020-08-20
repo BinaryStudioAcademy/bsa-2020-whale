@@ -53,8 +53,9 @@ namespace Whale.API.Controllers
         {
             var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
             var createdContact = await _contactsService.CreateContactFromEmailAsync(ownerEmail, contactnerEmail);
-
-            return Created($"id/{createdContact.Id}", createdContact);
+            if(createdContact is object)
+                return Created($"id/{createdContact.Id}", createdContact);
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
