@@ -107,9 +107,9 @@ namespace Whale.Shared.Services
                 .Include(p => p.User)
                 .Include(p => p.Meeting)
                 .Where(p => p.MeetingId == meetingId)
-                .ToListAsync();
+                .LoadAvatarsAsync(_blobStorageSettings, p => p.User);
 
-            return _mapper.Map<IEnumerable<ParticipantDTO>>(await participants.LoadAvatarsAsync(_blobStorageSettings, p => p.User));
+            return _mapper.Map<IEnumerable<ParticipantDTO>>(participants);
         }
 
         public async Task<ParticipantDTO> GetMeetingParticipantByEmail(Guid meetingId, string email)
