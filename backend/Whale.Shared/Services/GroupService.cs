@@ -53,8 +53,6 @@ namespace Whale.Shared.Services
                    .ThenInclude(g => g.PinnedMessage)
                .FirstOrDefaultAsync(c => c.GroupId == groupId && c.UserId == user.Id);
 
-            //var gruppa = await _context.Groups
-            //    .Include(g => g.PinnedMessage).FirstOrDefaultAsync(c => c.Id == groupId);
             if (userGroup == null)
                 throw new NotFoundException("Group", groupId.ToString());
 
@@ -72,23 +70,15 @@ namespace Whale.Shared.Services
                 .Include(g => g.Group)
                 .FirstOrDefaultAsync(g => g.UserId == user.Id && g.Group.Label == newGroup.Label);
 
-            var fakeMsg = await _context.GroupMessages
-                .FirstOrDefaultAsync();
-
             if (group is object)
                 throw new AlreadyExistsException("Group");
 
-            var aLilRes = new Group
-            {
-                Label = newGroup.Label,
-                Description = newGroup.Description,
-                PinnedMessageId = fakeMsg.Id
-            };
-            _context.Groups.Add(aLilRes);
-            _context.GroupUsers.Add(new GroupUser { GroupId = aLilRes.Id, UserId = user.Id });
+            var newCreatedGroup = _mapper.Map<Group>(newGroup);
+            _context.Groups.Add(newCreatedGroup);
+            _context.GroupUsers.Add(new GroupUser { GroupId = newCreatedGroup.Id, UserId = user.Id });
             await _context.SaveChangesAsync();
 
-            return await GetGroupAsync(aLilRes.Id, userEmail);
+            return await GetGroupAsync(newCreatedGroup.Id, userEmail);
         }
         public async Task<bool> DeleteGroupAsync(Guid id)
         {
@@ -102,8 +92,13 @@ namespace Whale.Shared.Services
                 .Where(g => g.GroupId == id)
                 .ToListAsync();
 
+            var groupMessages = await _context.GroupMessages
+                .Where(g => g.GroupId == id)
+                .ToListAsync();
+
             _context.Groups.Remove(group);
             _context.GroupUsers.RemoveRange(userGroups);
+            _context.GroupMessages.RemoveRange(groupMessages);
             await _context.SaveChangesAsync();
 
             return true;

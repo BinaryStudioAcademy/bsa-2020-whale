@@ -65,6 +65,8 @@ namespace Whale.API
             services.AddTransient<MeetingService>();
             services.AddTransient<ParticipantService>();
             services.AddTransient<GroupService>();
+            services.AddScoped(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
+
 
             services.AddScoped<HttpClient>();
             services.AddTransient(p => new HttpService(p.GetRequiredService<HttpClient>(), Configuration.GetValue<string>("MeetingAPI")));

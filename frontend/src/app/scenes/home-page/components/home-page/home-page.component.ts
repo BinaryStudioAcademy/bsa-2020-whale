@@ -85,7 +85,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
       .subscribe(
         (data: Group[]) => {
           this.groups = data;
-          console.log(this.groups);
         },
         (error) => this.toastr.error(error.Message)
       );

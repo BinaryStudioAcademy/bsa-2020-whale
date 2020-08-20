@@ -34,8 +34,11 @@ namespace Whale.DAL
             modelBuilder.Entity<Contact>()
                 .HasOne(a => a.PinnedMessage)
                 .WithMany();
-            //.WithOne(a => a.Contact)
-            //.HasForeignKey<DirectMessage>(d => d.ContactId);
+
+            modelBuilder.Entity<Group>()
+                .HasOne(a => a.PinnedMessage)
+                .WithMany();
+           
 
             modelBuilder.Entity<Voter>()
                 .Ignore("FirstName")

@@ -88,7 +88,7 @@
           New
         </button>
       </a>
-      <div class="contacts-container" [hidden]="groupsVisibility">
+      <div class="contacts-container" [hidden]="!groupsVisibility">
         <div *ngFor="let group of groups" class="user-list ui selection list">
           <div id="home-group" (click)="onGroupClick(group)" class="item">
             <div class="group content">

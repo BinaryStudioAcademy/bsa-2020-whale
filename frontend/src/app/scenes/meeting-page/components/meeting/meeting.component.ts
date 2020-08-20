@@ -383,7 +383,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     let canLeave = true;
     if (this.currentParticipant?.role === ParticipantRole.Host) {
       canLeave = confirm('You will end current meeting!');
-      window.onbeforeunload = function (ev: BeforeUnloadEvent) {};
     }
 
     if (canLeave) {
@@ -399,6 +398,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.router.navigate(['/home']);
       this.currentUserStream?.getTracks().forEach((track) => track.stop());
+      window.onbeforeunload = function (ev: BeforeUnloadEvent) {};
     }
   }
 
