@@ -16,6 +16,7 @@ import { AngularDraggableModule } from 'angular2-draggable';
 import { AudioSettingsComponent } from '@shared/components/settings/audio-settings/audio-settings.component';
 import { VideoSettingsComponent } from '@shared/components/settings/video-settings/video-settings.component';
 import { OutputSettingsComponent } from './components/settings/output-settings/output-settings.component';
+import { NotificationComponent } from './components/notification/notification.component';
 @NgModule({
   declarations: [
     PageHeaderComponent,
@@ -31,6 +32,7 @@ import { OutputSettingsComponent } from './components/settings/output-settings/o
     AudioSettingsComponent,
     VideoSettingsComponent,
     OutputSettingsComponent,
+    NotificationComponent,
   ],
   imports: [
     CommonModule,

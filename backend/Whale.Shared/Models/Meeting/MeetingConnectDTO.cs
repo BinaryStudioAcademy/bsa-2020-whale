@@ -1,5 +1,4 @@
-﻿
-using Whale.Shared.Models.Participant;
+﻿using Whale.Shared.Models.Participant;
 
 namespace Whale.Shared.Models.Meeting
 {

@@ -49,6 +49,7 @@ namespace Whale.API
                 mc.AddProfile<UserProfile>();
                 mc.AddProfile<ScheduledMeetingProfile>();
                 mc.AddProfile<DirectMessageProfile>();
+                mc.AddProfile<NotificationProfile>();
             });
 
             services.AddSingleton(mappingConfig.CreateMapper());
@@ -57,6 +58,7 @@ namespace Whale.API
             services.AddTransient<UserService>();
             services.AddTransient<ScheduledMeetingsService>();
             services.AddTransient<ContactChatService>();
+            services.AddTransient<NotificationsService>();
             services.AddScoped<HttpClient>();
             services.AddTransient(p => new HttpService(p.GetRequiredService<HttpClient>(), Configuration.GetValue<string>("MeetingAPI")));
             services.AddTransient(p => new SignalrService(Configuration.GetValue<string>("SignalR")));
