@@ -103,12 +103,16 @@ namespace Whale.Shared.Services
             if (meeting == null)
                 throw new NotFoundException("Meeting");
 
-            return _context.Participants
+            var participants = await _context.Participants
                 .Include(p => p.User)
                 .Include(p => p.Meeting)
                 .Where(p => p.MeetingId == meetingId)
-                .LoadAvatars(_blobStorageSettings, p => p.User)
-                .Select(p => _mapper.Map<ParticipantDTO>(p));
+                .AsNoTracking()
+                .ToListAsync();
+
+            participants = (await participants.LoadAvatarsAsync(_blobStorageSettings, p => p.User)).ToList();
+
+            return _mapper.Map<IEnumerable<ParticipantDTO>>(participants);
         }
 
         public async Task<ParticipantDTO> GetMeetingParticipantByEmail(Guid meetingId, string email)

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -17,13 +18,19 @@ using Whale.Shared.Services.Abstract;
 
 namespace Whale.Shared.Services
 {
-    public class ContactsService: BaseService
+    public class ContactsService : BaseService
     {
+        private readonly NotificationsService _notifications;
         private readonly BlobStorageSettings _blobStorageSettings;
-
-        public ContactsService(WhaleDbContext context, IMapper mapper, BlobStorageSettings blobStorageSettings) : base(context, mapper)
+        private readonly SignalrService _signalrService;
+        private readonly RedisService _redisService;
+        private const string onlineUsersKey = "online";
+        public ContactsService(WhaleDbContext context, IMapper mapper, NotificationsService notifications, BlobStorageSettings blobStorageSettings, SignalrService signalrService, RedisService redisService) : base(context, mapper)
         {
+            _notifications = notifications;
             _blobStorageSettings = blobStorageSettings;
+            _signalrService = signalrService;
+            _redisService = redisService;
         }
 
         public async Task<IEnumerable<ContactDTO>> GetAllContactsAsync(string userEmail)
@@ -38,15 +45,16 @@ namespace Whale.Shared.Services
                  .Include(c => c.PinnedMessage)
                  .Include(c => c.FirstMemberSettings)
                  .Include(c => c.SecondMemberSettings)
-                 .Where(c => c.FirstMemberId == user.Id || c.SecondMemberId == user.Id)
+                 .Where(c => (c.FirstMemberId == user.Id || c.SecondMemberId == user.Id) && c.isAccepted)
                  .ToListAsync();
 
+            contacts = (await contacts.LoadAvatarsAsync(_blobStorageSettings, c => c.FirstMember)).ToList();
+            contacts = (await contacts.LoadAvatarsAsync(_blobStorageSettings, c => c.SecondMember)).ToList();
+
             var contactsDto = contacts
-                .LoadAvatars(_blobStorageSettings, c => c.FirstMember)
-                .LoadAvatars(_blobStorageSettings, c => c.SecondMember)
                 .Select(c =>
             {
-                return new ContactDTO()
+                var contact = new ContactDTO()
                 {
                     Id = c.Id,
                     FirstMemberId = (c.FirstMemberId == user.Id) ? c.FirstMemberId : c.SecondMemberId,
@@ -57,6 +65,9 @@ namespace Whale.Shared.Services
                     Settings = _mapper.Map<ContactSettingDTO>((c.FirstMemberId == user.Id) ? c.FirstMemberSettings : c.SecondMemberSettings),
                     ContactnerSettings = _mapper.Map<ContactSettingDTO>((c.SecondMemberId == user.Id) ? c.FirstMemberSettings : c.SecondMemberSettings),
                 };
+                contact.FirstMember.ConnectionId = GetConnectionId(contact.FirstMember.Id);
+                contact.SecondMember.ConnectionId = GetConnectionId(contact.SecondMember.Id);
+                return contact;
             });
 
             return contactsDto;
@@ -90,6 +101,8 @@ namespace Whale.Shared.Services
                 Settings = _mapper.Map<ContactSettingDTO>((contact.FirstMemberId == user.Id) ? contact.FirstMemberSettings : contact.SecondMemberSettings),
                 ContactnerSettings = _mapper.Map<ContactSettingDTO>((contact.SecondMemberId == user.Id) ? contact.FirstMemberSettings : contact.SecondMemberSettings),
             };
+            dtoContact.FirstMember.ConnectionId = GetConnectionId(contact.FirstMember.Id);
+            dtoContact.SecondMember.ConnectionId = GetConnectionId(contact.SecondMember.Id);
 
             return dtoContact;
         }
@@ -116,7 +129,7 @@ namespace Whale.Shared.Services
 
         public async Task<ContactDTO> CreateContactFromEmailAsync(string ownerEmail, string contactnerEmail)
         {
-            if(ownerEmail == contactnerEmail)
+            if (ownerEmail == contactnerEmail)
                 throw new BaseCustomException("You cannot add yourself to contacts");
             var owner = await _context.Users.FirstOrDefaultAsync(u => u.Email == ownerEmail);
             var contactner = await _context.Users.FirstOrDefaultAsync(u => u.Email == contactnerEmail);
@@ -129,8 +142,23 @@ namespace Whale.Shared.Services
                 .FirstOrDefaultAsync(c =>
                 (c.FirstMemberId == contactner.Id && c.SecondMemberId == owner.Id) ||
                 (c.SecondMemberId == contactner.Id && c.FirstMemberId == owner.Id));
+
             if (contact is object)
+            {
+                if (!contact.isAccepted && contact.SecondMemberId == owner.Id)
+                {
+                    contact.isAccepted = true;
+                    _context.Contacts.Update(contact);
+                    await _context.SaveChangesAsync();
+                    var contactOwnerDTO = await GetContactAsync(contact.Id, ownerEmail);
+                    var contactContactnerEmailDTO = await GetContactAsync(contact.Id, contactnerEmail);
+                    var connection = await _signalrService.ConnectHubAsync("contactsHub");
+                    await connection.InvokeAsync("onNewContact", contactOwnerDTO);
+                    await connection.InvokeAsync("onNewContact", contactContactnerEmailDTO);
+                    return contactOwnerDTO;
+                }
                 throw new AlreadyExistsException("Contact");
+            }
 
             var ownerSettings = new ContactSetting()
             {
@@ -154,10 +182,27 @@ namespace Whale.Shared.Services
                 SecondMemberId = contactner.Id,
                 FirstMemberSettings = ownerSettings,
                 SecondMemberSettings = contactnerSettings,
+                isAccepted = false,
             };
             _context.Contacts.Add(contact);
             await _context.SaveChangesAsync();
-            return await GetContactAsync(contact.Id, ownerEmail);
+            await _notifications.AddContactNotification(ownerEmail, contactnerEmail);
+            return null;
+        }
+
+        private string GetConnectionId(Guid userId)
+        {
+            _redisService.Connect();
+            try
+            {
+                var onlineUsers = _redisService.Get<ICollection<UserOnlineDTO>>(onlineUsersKey);
+                var userOnline = onlineUsers.FirstOrDefault(u => u.Id == userId);
+                return userOnline?.ConnectionId;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
     }
 }

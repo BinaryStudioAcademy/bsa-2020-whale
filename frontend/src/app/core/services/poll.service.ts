@@ -142,12 +142,10 @@ export class PollService {
         this.route + '/saveResults',
         new HttpParams().set('meetingId', meetindId)
       )
-      .subscribe(() => {
-        this.toastr.info(
-          'You can check poll results in meeting history',
-          'Info'
-        );
-      });
+      .subscribe(
+        () => {},
+        (error) => console.error(error)
+      );
   }
 
   public onPollIconClick() {

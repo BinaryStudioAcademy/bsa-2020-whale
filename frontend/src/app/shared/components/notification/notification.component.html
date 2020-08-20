@@ -1,0 +1,22 @@
+<div *ngIf="show" class="ui small message">
+  <span>{{ notification.createdAt | date: "short" }}</span>
+  <p>{{ message }}</p>
+  <div *ngIf="isPendingContact" class="mini ui buttons">
+    <button
+      *ngIf="isPendingContact"
+      class="ui teal button"
+      (click)="onAddContact(); $event.stopPropagation()"
+    >
+        Accept
+    </button>
+    <div class="or"></div>
+    <button class="ui button" (click)="onClose(); $event.stopPropagation()">
+        Reject
+    </button>
+  </div>
+  <div *ngIf="isText" class="mini ui buttons">
+    <button class="ui button" (click)="onClose(); $event.stopPropagation()">
+      Close
+    </button>
+  </div>
+</div>

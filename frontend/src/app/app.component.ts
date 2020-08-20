@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
 import { AuthService } from './core/auth/auth.service';
 import { HttpClient } from '@angular/common/http';
 import { Contact } from '@shared/models/contact/contact';
@@ -14,6 +14,10 @@ import { Title } from '@angular/platform-browser';
 import { IFireBaseUser } from '@shared/models/user';
 import { LinkTypeEnum } from '@shared/Enums/LinkTypeEnum';
 import { Router } from '@angular/router';
+import {
+  WhaleSignalService,
+  SignalMethods,
+} from './core/services/whale-signal.service';
 
 @Component({
   selector: 'app-root',
@@ -37,8 +41,16 @@ export class AppComponent implements OnInit {
     private authService: AuthService,
     private titleService: Title,
     private router: Router
+    private whaleSignalrService: WhaleSignalService
   ) {
     titleService.setTitle(this.title);
+  }
+  @HostListener('window:beforeunload')
+  beforeunload(): void {
+    this.whaleSignalrService.invoke(
+      SignalMethods.OnUserDisconnect,
+      this.authService.currentUser.email
+    );
   }
 
   ngOnInit(): void {
@@ -76,6 +88,14 @@ export class AppComponent implements OnInit {
           .subscribe(
             (user) => {
               console.log(`User ${user.body.email} exists`);
+              console.log(
+              'whalesignalr email:',
+              this.authService.currentUser.email
+            );
+            this.whaleSignalrService.invoke(
+              SignalMethods.OnUserConnect,
+              this.authService.currentUser.email
+            );
               this.requestContact();
               if (this.router.url === '/') {
                 this.router.navigate(['/home']);

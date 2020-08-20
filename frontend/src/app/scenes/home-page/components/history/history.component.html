@@ -1,0 +1,18 @@
+<div
+  class="ui container segment"
+  infiniteScroll
+  [infiniteScrollDistance]="2"
+  [infiniteScrollThrottle]="500"
+  (scrolled)="onScroll()"
+>
+  <h2 class="center aligned header">Meeting history</h2>
+  <div *ngFor="let meeting of meetings" class="meeting-container">
+    <app-meeting-note [meeting]="meeting"></app-meeting-note>
+  </div>
+</div>
+
+<div class="scroll-to-top-button">
+  <button (click)="scrollToTop()" class="circular ui icon button">
+    <i class="big angle double up icon"></i>
+  </button>
+</div>

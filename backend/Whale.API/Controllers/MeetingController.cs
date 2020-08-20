@@ -38,13 +38,21 @@ namespace Whale.API.Controllers
         [HttpGet("shortInvite/{inviteLink}")]
         public async Task<ActionResult<string>> GetFullMeetingLink(string inviteLink)
         {
-            return Ok(await _httpService.GetAsync<string>($"api/meeting/shortInvite/{inviteLink}"));
+            return Ok(await _httpService.GetStringAsync($"api/meeting/shortInvite/{inviteLink}"));
+        }
+
+        [HttpGet("end")]
+        public async Task<OkResult> SaveMeetingEndTime(Guid meetingId)
+        {
+            await _httpService.GetAsync<object>($"api/meeting/end?meetingId={meetingId}");
+            return Ok();
         }
 
         [HttpGet("shortenLink/{longURL}")]
         public async Task<ActionResult<string>> GetShortURL(string longURL)
         {
-            return Ok(await _httpService.GetAsync<string>($"api/meeting/shortenLink/{longURL}"));
+            string shortLink = await _httpService.GetStringAsync($"api/meeting/shortenLink/{longURL}");
+            return Ok(shortLink);
         }
     }
 }

@@ -49,14 +49,9 @@ namespace Whale.MeetingAPI.Services
 			};
 
 			// fill emptyPollResult's OptionResults
-			foreach (var option in pollEntity.Options)
-			{
-				var optionResult = new OptionResult
-				{
-					Option = option
-				};
-				emptyPollResult.OptionResults.Add(optionResult);
-			}
+			emptyPollResult.OptionResults = pollEntity.Options
+				.Select(option => new OptionResult { Option = option })
+				.ToList();
 
 			await _redisService.AddToSet<PollResult>(pollEntity.MeetingId.ToString() + nameof(PollResult), emptyPollResult);
 
@@ -90,13 +85,15 @@ namespace Whale.MeetingAPI.Services
 
 
 			await _redisService.AddToSet<PollResult>(resultSetKey, pollResult);
-
+			
 			if (pollResult.IsAnonymous)
 			{
-				foreach (var optionResult in pollResult.OptionResults)
+				pollResult.OptionResults = pollResult.OptionResults.Select(optionResult => new OptionResult
 				{
-					optionResult.VotedUsers = new List<Voter>();
-				}
+					Option = optionResult.Option,
+					VoteCount = optionResult.VoteCount,
+					VotedUsers = Enumerable.Empty<Voter>().ToList()
+				}).ToList();
 			}
 
 			// signal
@@ -117,16 +114,17 @@ namespace Whale.MeetingAPI.Services
 				.Any(optRes => optRes.VotedUsers
 				.Any(user => user.Email == userEmail))).ToList();
 
-			foreach(var result in resultsToSend)
+			//var anonResults = resultsToSend.Where(result => !result.IsAnonymous);
+			//var nonAnonResults = resultsToSend.Except(anonResults);
+			resultsToSend.ForEach(result =>
 			{
-				if(result.IsAnonymous)
+				if (result.IsAnonymous)
 				{
-					foreach(var optionResult in result.OptionResults)
-					{
-						optionResult.VotedUsers = new List<Voter>();
-					}
+					result.OptionResults.ForEach(oR => oR.VotedUsers = new List<Voter>());
 				}
-			}
+			});
+
+			//resultsToSend = anonResults.Concat(resultsToSend.Except(anonResults)).ToList();
 
 			var pollsToSend = new List<Poll>();
 
@@ -168,7 +166,7 @@ namespace Whale.MeetingAPI.Services
 			await connection.InvokeAsync("OnPollDeleted", meetingId, pollId);
 		}
 
-		public async Task SavePollResultsToDatabase(Guid meetingId)
+		public async Task SavePollResultsToDatabaseAndDeleteFromRedis(Guid meetingId)
 		{
 			_redisService.Connect();
 			var pollResults = await _redisService.GetSetMembers<PollResult>(meetingId + nameof(PollResult));
@@ -189,10 +187,10 @@ namespace Whale.MeetingAPI.Services
 			var pollList = polls.ToList();
 			var resultList = pollResults.ToList();
 
-			for (int i = 0; i < polls.Count; i++)
+			foreach (int index in Enumerable.Range(0, polls.Count))
 			{
-				await _redisService.DeleteSetMember<Poll>(meetingId + nameof(Poll), pollList[i]);
-				await _redisService.DeleteSetMember<PollResult>(meetingId + nameof(PollResult), resultList[i]);
+				await _redisService.DeleteSetMember<Poll>(meetingId + nameof(Poll), pollList[index]);
+				await _redisService.DeleteSetMember<PollResult>(meetingId + nameof(PollResult), resultList[index]);
 			}
 
 			await _redisService.DeleteKey(meetingId + nameof(Poll));
@@ -200,32 +198,3 @@ namespace Whale.MeetingAPI.Services
 		}
 	}
 }
-
-//var pollsAndResults = polls.Join(
-//	pollResults,
-//	poll => poll.Id,
-//	pollResult => pollResult.PollId,
-//	(poll, pollResult) => new
-//	{
-//		Poll = poll,
-//		Result = pollResult
-//	}
-//);
-
-//var pollsToSend = new List<Poll>();
-//var resultsToSend = new List<PollResult>();
-//int voteCount = 0;
-
-//foreach (var pollAndResult in pollsAndResults)
-//{
-//	voteCount += pollAndResult.Result.OptionResults.Sum(optRes => optRes.VotedUsers.Count);
-
-//	if(pollAndResult.Result.OptionResults.Any(optRes => optRes.VotedUsers.Any(user => user.Email == userEmail)))
-//	{
-//		resultsToSend.Add(pollAndResult.Result);
-//	}
-//	else
-//	{
-//		pollsToSend.Add(pollAndResult.Poll);
-//	}
-//}

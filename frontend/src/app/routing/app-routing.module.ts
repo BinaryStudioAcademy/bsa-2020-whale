@@ -8,6 +8,7 @@ import { ScheduleMeetingPageComponent } from 'app/scenes/schedule-meeting-page/c
 import { CheckAccessToMediaGuard } from 'app/core/guards/check-access-to-media.guard';
 import { SettingPageComponent } from '../scenes/setting-page/setting-page/setting-page.component';
 import { RedirectionComponent } from '../scenes/redirection-page/redirection/redirection.component';
+import { LastParticipantGuard } from '../core/guards/last-participant.guard';
 
 import {
   canActivate,
@@ -28,13 +29,14 @@ const routes: Routes = [
   {
     path: 'setting-page',
     component: SettingPageComponent,
-    canActivate: [CheckAccessToMediaGuard, AngularFireAuthGuard],
+    canActivate: [AngularFireAuthGuard],
     data: { authGuardPipe: redirectUnauthorizedToLogin },
   },
   {
     path: 'meeting-page/:link',
     component: MeetingComponent,
-    canActivate: [CheckAccessToMediaGuard, AngularFireAuthGuard],
+    canActivate: [AngularFireAuthGuard],
+    canDeactivate: [LastParticipantGuard],
     data: { authGuardPipe: redirectUnauthorizedToLogin },
   },
   {

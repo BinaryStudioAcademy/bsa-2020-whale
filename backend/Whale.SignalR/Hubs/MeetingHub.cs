@@ -9,6 +9,7 @@ using Whale.Shared.Models.Meeting;
 using Whale.Shared.Models.Meeting.MeetingMessage;
 using Whale.Shared.Models.Poll;
 using Whale.SignalR.Models.Drawing;
+using Whale.SignalR.Models.Media;
 
 namespace Whale.SignalR.Hubs
 {
@@ -80,6 +81,34 @@ namespace Whale.SignalR.Hubs
             {
                await Clients.Group(ConnectionData.MeetingId).SendAsync("OnMeetingEnded", ConnectionData);
             }
+        }
+
+
+        [HubMethodName("OnMediaStateChanged")]
+        public async Task ParticipantMediaStateChanged(MediaStateDTO mediaState)
+        {
+            if (string.IsNullOrEmpty(mediaState.ReceiverConnectionId))
+            {
+                var participantInGroup = _groupsParticipants
+               .FirstOrDefault(g => g.Value.Any(p => p.ActiveConnectionId == Context.ConnectionId));
+
+                await Clients.Group(participantInGroup.Key).SendAsync("OnMediaStateChanged", mediaState);
+            }
+            else
+            {
+                await Clients.Client(mediaState.ReceiverConnectionId).SendAsync("OnMediaStateChanged", mediaState);
+            }
+        }
+
+        [HubMethodName("OnMediaStateRequested")]
+        public async Task ParticipantMediaStateRequested(string streamId)
+        {
+            var requestReceiver = _groupsParticipants
+            .FirstOrDefault(g => g.Value.Any(p => p.StreamId == streamId))
+            .Value
+            .FirstOrDefault(p => p.StreamId == streamId);
+
+            await Clients.Client(requestReceiver.ActiveConnectionId).SendAsync("OnMediaStateRequested", Context.ConnectionId);
         }
 
         [HubMethodName("OnPollResults")]

@@ -90,7 +90,7 @@
           *ngFor="let participant of meeting?.participants"
           class="ui item participant"
         >
-          <img src="{{ participant.user.avatarUrl }}" />
+          <img class="ui avatar image" src="{{ participant.user.avatarUrl }}" />
           <span
             >{{ participant.user.firstName }}
             {{
@@ -127,7 +127,7 @@
               <i
                 class="angle up icon"
                 *ngIf="!isMicrophoneMuted"
-                (click)="isAudioSettings = !isAudioSettings"
+                (click)="showAudioSettings()"
               ></i>
             </span>
             <span *ngIf="!isScreenRecording" data-tooltip="Toggle Webcam">
@@ -148,7 +148,7 @@
               <i
                 class="angle up icon"
                 *ngIf="!isCameraMuted"
-                (click)="isVideoSettings = !isVideoSettings"
+                (click)="showVideoSettings()"
               ></i>
             </span>
           </div>
@@ -223,7 +223,11 @@
                 class="big wechat icon big-left-margin"
               ></i>
             </span>
-            <span data-tooltip="Canvas" data-position="top right">
+            <span
+              data-tooltip="Whiteboard"
+              data-position="top right"
+              [ngClass]="{ pulse: checkDrawing() }"
+            >
               <i (click)="showCanvas()" class="big paint brush icon"></i>
             </span>
             <span data-tooltip="Fullscreen" data-position="top right">
@@ -255,13 +259,21 @@
         </div>
       </div>
       <div class="canvas" *ngIf="canvasIsDisplayed">
-        <canvas-whiteboard
-          #canvasWhiteboard
-          [options]="canvasOptions"
-          (onBatchUpdate)="onCanvasDraw($event)"
-          (onClear)="onCanvasClear()"
-        >
-        </canvas-whiteboard>
+        <div class="whiteboard-header">
+          <div class="whiteboard-title">Whiteboard</div>
+          <div class="whiteboard-close">
+            <i (click)="showCanvas()" class="large times icon"></i>
+          </div>
+        </div>
+        <div class="board">
+          <canvas-whiteboard
+            #canvasWhiteboard
+            [options]="canvasOptions"
+            (onBatchUpdate)="onCanvasDraw($event)"
+            (onClear)="onCanvasClear()"
+          >
+          </canvas-whiteboard>
+        </div>
       </div>
 
       <div class="users" *ngIf="mediaData.length > 1">
@@ -292,6 +304,21 @@
         [hidden]="mediaData.length > 1 || isCameraMuted"
         [muted]="'muted'"
       ></video>
+
+      <div class="settings" *ngIf="isVideoSettings && !isCameraMuted">
+        <app-video-settings
+          (onClick)="changeStateVideo($event)"
+        ></app-video-settings>
+      </div>
+      <div class="settings" *ngIf="isAudioSettings && !isMicrophoneMuted">
+        <app-audio-settings
+          (onClick)="changeInputDevice($event)"
+        ></app-audio-settings>
+        <app-output-settings
+          (onClick)="changeOutputDevice($event)"
+        ></app-output-settings>
+        <audio></audio>
+      </div>
     </div>
 
     <div *ngIf="isShowChat" class="ui chat card">
@@ -329,7 +356,7 @@
                 {{ message?.sentDate | date: "short" }}
               </div>
             </div>
-            {{ message?.message }}
+            <div disabled class="message">{{ message?.message }}</div>
           </div>
         </div>
       </div>
@@ -440,19 +467,5 @@
         <app-poll-results [pollResult]="pollxResult"></app-poll-results>
       </div>
     </div>
-  </div>
-  <div class="settings" *ngIf="isVideoSettings && !isCameraMuted">
-    <app-video-settings
-      (onClick)="changeStateVideo($event)"
-    ></app-video-settings>
-  </div>
-  <div class="settings" *ngIf="isAudioSettings && !isMicrophoneMuted">
-    <app-audio-settings
-      (onClick)="changeInputDevice($event)"
-    ></app-audio-settings>
-    <app-output-settings
-      (onClick)="changeOutputDevice($event)"
-    ></app-output-settings>
-    <audio></audio>
   </div>
 </div>

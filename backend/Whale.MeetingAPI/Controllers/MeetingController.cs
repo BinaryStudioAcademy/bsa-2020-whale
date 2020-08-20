@@ -40,11 +40,18 @@ namespace Whale.API.Controllers
             return Ok(meetingLink);
         }
 
-        [HttpGet("shortenLink/{longURL}")]
-        public async Task<ActionResult<string>> GetShortURL(string longURL)
+        [HttpGet("shortenLink")]
+        public async Task<ActionResult<string>> GetShortURL(string id, string pwd)
         {
-            return Ok(await _meetingService.GetShortInviteLink(longURL));
+            string shortLink = await _meetingService.GetShortInviteLink(id, pwd);
+            return Ok(shortLink);
+        }
+
+        [HttpGet("end")]
+        public async Task<OkResult> SaveMeetingEndTime(Guid meetingId)
+        {
+            await _meetingService.SaveMeetingEndTime(meetingId);
+            return Ok();
         }
     }
-
 }

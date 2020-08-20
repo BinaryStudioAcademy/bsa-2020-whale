@@ -9,6 +9,7 @@ import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
 import { Participant } from '@shared/models/participant/participant';
 import { PollDto } from '@shared/models/poll/poll-dto';
 import { PollResultDto } from '@shared/models/poll/poll-result-dto';
+import { MediaState } from '@shared/models/media/media-state';
 import { VoteDto } from '@shared/models/poll/vote-dto';
 import { VoterDto } from '@shared/models/poll/voter-dto';
 import { CanvasWhiteboardUpdate } from 'ng2-canvas-whiteboard';
@@ -31,6 +32,12 @@ export class MeetingSignalrService {
 
   private participantConected = new Subject<Participant[]>();
   public participantConected$ = this.participantConected.asObservable();
+
+  private participantMediaStateChanged = new Subject<MediaState>();
+  public participantMediaStateChanged$ = this.participantMediaStateChanged.asObservable();
+
+  private mediaStateRequested = new Subject<string>();
+  public mediaStateRequested$ = this.mediaStateRequested.asObservable();
 
   private meetingEnded = new Subject<MeetingConnectionData>();
   public meetingEnded$ = this.meetingEnded.asObservable();
@@ -113,6 +120,17 @@ export class MeetingSignalrService {
           }
         );
 
+        this.signalHub.on('OnMediaStateChanged', (mediaState: MediaState) => {
+          this.participantMediaStateChanged.next(mediaState);
+        });
+
+        this.signalHub.on(
+          'OnMediaStateRequested',
+          (senderConnectionId: string) => {
+            this.mediaStateRequested.next(senderConnectionId);
+          }
+        );
+
         this.signalHub.on('OnSendMessage', (message: MeetingMessage) => {
           this.sendMessage.next(message);
         });
@@ -156,6 +174,8 @@ export interface SignalData {
 export enum SignalMethods {
   OnUserConnect,
   OnParticipantLeft,
+  OnMediaStateChanged,
+  OnMediaStateRequested,
   OnConferenceStartRecording,
   OnConferenceStopRecording,
   OnSendMessage,
