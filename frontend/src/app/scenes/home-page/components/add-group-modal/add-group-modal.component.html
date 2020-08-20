@@ -1,0 +1,67 @@
+<div
+  id="modal-div-close"
+  class="ui dimmer modals page visible active"
+  (click)="cancel(groupForm.dirty)"
+>
+  <div class="ui mini modal visible active" (click)="$event.stopPropagation()">
+    <div class="header">
+      Add new group
+    </div>
+    <form class="ui form" #groupForm="ngForm" (ngSubmit)="submit()">
+      <div class="content">
+        <div class="ui segment">
+          <div class="field">
+            <label>Name</label>
+            <input
+              type="text"
+              [(ngModel)]="newGroup.label"
+              #groupName="ngModel"
+              name="groupName"
+              placeholder="Group name"
+              required
+            />
+            <div
+              class="ui error message"
+              *ngIf="groupName.invalid && groupName.touched"
+            >
+              Please enter the group name
+            </div>
+          </div>
+          <div class="field">
+            <label>Short description</label>
+            <input
+              type="text"
+              [(ngModel)]="newGroup.description"
+              #groupDescription="ngModel"
+              name="groupDescription"
+              placeholder="Group description"
+              required
+            />
+            <div
+              class="ui error message"
+              *ngIf="groupDescription.invalid && groupDescription.touched"
+            >
+              Please enter the group description
+            </div>
+          </div>
+          <button
+            id="submit-contact"
+            class="ui button primary"
+            type="submit"
+            [disabled]="groupForm.invalid"
+          >
+            Add
+          </button>
+          <button
+            id="modal-close"
+            class="ui button"
+            type="button"
+            (click)="cancel(groupForm.dirty)"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

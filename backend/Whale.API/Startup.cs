@@ -49,6 +49,11 @@ namespace Whale.API
                 mc.AddProfile<UserProfile>();
                 mc.AddProfile<ScheduledMeetingProfile>();
                 mc.AddProfile<DirectMessageProfile>();
+                mc.AddProfile<MeetingProfile>();
+                mc.AddProfile<MeetingMessage>();
+                mc.AddProfile<ParticipantProfile>();
+                mc.AddProfile<GroupProfile>();
+                mc.AddProfile<GroupMessageProfile>();
                 mc.AddProfile<NotificationProfile>();
             });
 
@@ -58,6 +63,12 @@ namespace Whale.API
             services.AddTransient<UserService>();
             services.AddTransient<ScheduledMeetingsService>();
             services.AddTransient<ContactChatService>();
+            services.AddTransient<MeetingService>();
+            services.AddTransient<ParticipantService>();
+            services.AddTransient<GroupService>();
+            services.AddScoped(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
+
+
             services.AddTransient<NotificationsService>();
             services.AddScoped<HttpClient>();
             services.AddTransient(p => new HttpService(p.GetRequiredService<HttpClient>(), Configuration.GetValue<string>("MeetingAPI")));

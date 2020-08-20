@@ -26,19 +26,20 @@ export class AddContactModalComponent extends SimpleModalComponent<
   }
 
   public submit(): void {
-    this.contactCervice.createContactByEmail(this.contactnerEmail.toLowerCase()).subscribe(
-      (resp) => {
-        if (resp.status === 204){
-          this.toastr.success('Request has been sent');
-          this.close();
-        }
-        else {
-        this.result = resp.body;
-        this.close();
-        }
-      },
-      (error) => this.toastr.error(error.Message)
-    );
+    this.contactCervice
+      .createContactByEmail(this.contactnerEmail.toLowerCase())
+      .subscribe(
+        (resp) => {
+          if (resp.status === 204) {
+            this.toastr.success('Request has been sent');
+            this.close();
+          } else {
+            this.result = resp.body;
+            this.close();
+          }
+        },
+        (error) => this.toastr.error(error.Message)
+      );
   }
 
   public cancel(dirty: boolean): void {
