@@ -292,6 +292,21 @@
         [hidden]="mediaData.length > 1 || isCameraMuted"
         [muted]="'muted'"
       ></video>
+
+      <div class="settings" *ngIf="isVideoSettings && !isCameraMuted">
+        <app-video-settings
+          (onClick)="changeStateVideo($event)"
+        ></app-video-settings>
+      </div>
+      <div class="settings" *ngIf="isAudioSettings && !isMicrophoneMuted">
+        <app-audio-settings
+          (onClick)="changeInputDevice($event)"
+        ></app-audio-settings>
+        <app-output-settings
+          (onClick)="changeOutputDevice($event)"
+        ></app-output-settings>
+        <audio></audio>
+      </div>
     </div>
 
     <div *ngIf="isShowChat" class="ui chat card">
@@ -440,19 +455,5 @@
         <app-poll-results [pollResult]="pollxResult"></app-poll-results>
       </div>
     </div>
-  </div>
-  <div class="settings" *ngIf="isVideoSettings && !isCameraMuted">
-    <app-video-settings
-      (onClick)="changeStateVideo($event)"
-    ></app-video-settings>
-  </div>
-  <div class="settings" *ngIf="isAudioSettings && !isMicrophoneMuted">
-    <app-audio-settings
-      (onClick)="changeInputDevice($event)"
-    ></app-audio-settings>
-    <app-output-settings
-      (onClick)="changeOutputDevice($event)"
-    ></app-output-settings>
-    <audio></audio>
   </div>
 </div>
