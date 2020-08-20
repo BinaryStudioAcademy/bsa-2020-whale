@@ -1,0 +1,3924 @@
+[33mcommit 0bca66b766d3a9f4d9cc66c065781dfed9a71e7f[m[33m ([m[1;36mHEAD -> [m[1;32mdevelop[m[33m, [m[1;31morigin/feature/whiteboard-fixes[m[33m)[m
+Merge: 29e8f68 07cda12
+Author: Ivan Grynenko <grynenko.ivan@gmail.com>
+Date:   Tue Aug 18 23:46:40 2020 +0300
+
+    Merging
+
+[33mcommit 29e8f682b2ab5163e97903e3a09e2d16c36b0351[m
+Author: Ivan Grynenko <grynenko.ivan@gmail.com>
+Date:   Tue Aug 18 23:43:57 2020 +0300
+
+    Fix for the concurrent use of canvas
+
+[33mcommit 07cda1202df02d0971fe4fc7840855d6f27a0c66[m[33m ([m[1;31morigin/develop[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Merge: 6448a25 7bdedde
+Author: Anton Komisarov <32576664+apofis96@users.noreply.github.com>
+Date:   Tue Aug 18 22:31:01 2020 +0300
+
+    Merge pull request #121 from BinaryStudioAcademy/feature/meeting-enter-modal
+    
+    Feature/meeting enter modal
+
+[33mcommit 7bdeddebab8bcb06740a0e56e3c7defa66fddc98[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Tue Aug 18 22:29:43 2020 +0300
+
+    Fix microphone tooltip
+
+[33mcommit a001f935d53179052b18584b78962668fd52f9a0[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Tue Aug 18 22:21:42 2020 +0300
+
+    Add meeting onEntry modal
+
+[33mcommit 6448a258684721b4091bcc5b5417a8d013853b86[m
+Merge: 00467e3 bab2252
+Author: Vasyl <46243737+VasylSVR@users.noreply.github.com>
+Date:   Tue Aug 18 20:54:02 2020 +0300
+
+    Merge pull request #120 from BinaryStudioAcademy/fix/empty-screen-when-the-user-leaves-a-meeting
+    
+    Fix/empty screen when the user leaves a meeting
+
+[33mcommit bab2252cb047c105c3aeac5c76aa00a0faf6fed7[m[33m ([m[1;31morigin/fix/empty-screen-when-the-user-leaves-a-meeting[m[33m)[m
+Merge: 77249e1 00467e3
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Tue Aug 18 20:46:13 2020 +0300
+
+    Merge branch 'develop' into fix/empty-screen-when-the-user-leaves-a-meeting
+
+[33mcommit 77249e11833c6bf0a64679f58eca5603ddf37b93[m
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Tue Aug 18 20:41:36 2020 +0300
+
+    Fixed the bug with an empty screen when the user leaves a meeting
+
+[33mcommit 00467e3f914accb37a1500c9b2d9e8f5d0d27c3b[m
+Merge: 3ab1f4f 836403b
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Tue Aug 18 19:53:43 2020 +0300
+
+    Merging meeting-dm into develop
+
+[33mcommit 3ab1f4f68f73984ca5b6f722c1967bea6fc56812[m
+Merge: 4414afb 064274c
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Tue Aug 18 19:23:01 2020 +0300
+
+    Merge branch 'develop' of https://github.com/BinaryStudioAcademy/bsa-2020-whale into develop
+
+[33mcommit 4414afb87f8d1eda942766acacb227dc8c79741d[m
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Tue Aug 18 19:22:19 2020 +0300
+
+    fix video cards overlapping
+
+[33mcommit 836403b6af8a5cc129ad6cfe443908f58cadd765[m[33m ([m[1;31morigin/feature/meeting-dm[m[33m)[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Tue Aug 18 19:21:39 2020 +0300
+
+    Direct meeting messages added
+
+[33mcommit 064274cbe1e4a23b4620491b2f1e50e489ebb8ff[m
+Merge: 76f340a 45d7432
+Author: Vasyl <46243737+VasylSVR@users.noreply.github.com>
+Date:   Tue Aug 18 19:20:59 2020 +0300
+
+    Merge pull request #119 from BinaryStudioAcademy/fix/delete-dublicat-participants-in-list
+    
+    Deleted dublicate participants in participants list
+
+[33mcommit 45d7432ee794e2b08b9650644ba8a0cbaee18604[m[33m ([m[1;31morigin/fix/delete-dublicat-participants-in-list[m[33m)[m
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Tue Aug 18 19:16:17 2020 +0300
+
+    Deleted dublicate participants in participants list
+
+[33mcommit 76f340adfeee43bce7e921233c05a9af61aa26a9[m
+Merge: e9f9a5f 2d83684
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Tue Aug 18 18:40:36 2020 +0300
+
+    Merge pull request #118 from BinaryStudioAcademy/hotfix/waiting-for-record-notification
+    
+    Show notification while user is waiting for link to download record
+
+[33mcommit 2d83684cfb6ff1f98e3f9bf1a655a6585bece398[m
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Tue Aug 18 18:39:06 2020 +0300
+
+    Show notification while user is waiting for link to download recorded video
+
+[33mcommit e9f9a5f429882bb2f6246c0dc19051f3ffa962f0[m
+Merge: c1c28f9 4acdabc
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Tue Aug 18 18:00:41 2020 +0300
+
+    Merge pull request #116 from BinaryStudioAcademy/horfix/meeting-page-markdown
+    
+    Horfix/meeting page markdown
+
+[33mcommit 4acdabc7889d4eafc1fbdb7fb9402310bbec6135[m
+Merge: d1db4d9 c1c28f9
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Tue Aug 18 17:58:48 2020 +0300
+
+    Merge branch 'develop' into horfix/meeting-page-markdown
+
+[33mcommit d1db4d92d96a2fc3a6a725bd2f3124bdb3a4cd3f[m
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Tue Aug 18 17:57:28 2020 +0300
+
+    Fix bug with showing statistics and polls
+
+[33mcommit 90205f891a329b7edfdaca9297fb1aa61b4a350b[m
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Tue Aug 18 17:50:05 2020 +0300
+
+    Fix bug with micro and camera settings
+
+[33mcommit c1c28f96a2d1e777d799d7e7995f82388766397c[m
+Merge: f4068eb 45d01f8
+Author: Anton Komisarov <32576664+apofis96@users.noreply.github.com>
+Date:   Tue Aug 18 17:44:39 2020 +0300
+
+    Merge pull request #117 from BinaryStudioAcademy/feature/great-tab
+    
+    Update tab title and icon
+
+[33mcommit 45d01f8afa21ab9392ac73d931d59311c989c213[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Tue Aug 18 17:35:36 2020 +0300
+
+    Update tab title and icon
+
+[33mcommit a7de242815d61bbb51dbd87a3e5e0c54e2a575c4[m
+Merge: df30c4a f4068eb
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Tue Aug 18 17:23:46 2020 +0300
+
+    Merge branch 'develop' into horfix/meeting-page-markdown
+
+[33mcommit f4068ebc3b5871d7a79dc81bb5436d63f1fce11b[m
+Merge: d3d57dc cebc74d
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Tue Aug 18 17:09:50 2020 +0300
+
+    Merge branch 'develop' of https://github.com/BinaryStudioAcademy/bsa-2020-whale into develop
+
+[33mcommit df30c4a1c3fc1abab456aeffbf5b157f37a24860[m[33m ([m[1;31morigin/horfix/meeting-page-markdown[m[33m)[m
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Tue Aug 18 17:07:19 2020 +0300
+
+    Rearranged meeting-page
+
+[33mcommit d3d57dc0e1f61ae1db88622b06ead2e40bdcc85d[m
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Tue Aug 18 17:02:57 2020 +0300
+
+    Hotfix first participant absent on second participant screen
+
+[33mcommit cebc74de3b524575a14a4686d68d8ed244b56e23[m
+Merge: c156ead a23103a
+Author: Anton Komisarov <32576664+apofis96@users.noreply.github.com>
+Date:   Tue Aug 18 17:02:23 2020 +0300
+
+    Merge pull request #115 from BinaryStudioAcademy/hotfix/add-contact
+    
+    Hotfix/add contact
+
+[33mcommit a23103a8f680f742a0ebd53e8bc1543fbc597a51[m[33m ([m[1;31morigin/hotfix/add-contact[m[33m)[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Tue Aug 18 17:01:35 2020 +0300
+
+    Typo contacter fix
+
+[33mcommit 05907d720bb8eb44736e920546168c4e7233e793[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Tue Aug 18 16:59:28 2020 +0300
+
+    Update email validation rule
+
+[33mcommit 20b4bc0ee89189d757db2a021b1a0c8f32cf95b3[m
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Tue Aug 18 14:42:13 2020 +0300
+
+    Show participants and chat in left and right side
+
+[33mcommit c156eadf3c628dcd0fff54f63d4dde96aa3179e4[m
+Merge: 2942dec 3d90a08
+Author: Olya <50491792+0lyaMelnyk@users.noreply.github.com>
+Date:   Tue Aug 18 14:01:25 2020 +0300
+
+    Merge pull request #114 from BinaryStudioAcademy/feature/settings-on-meeting-page
+    
+    Ability change devices on meeting
+
+[33mcommit 3d90a084cd2861e24dbb9892de64a9a5c1cfc68c[m[33m ([m[1;31morigin/feature/settings-on-meeting-page[m[33m)[m
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Tue Aug 18 13:16:52 2020 +0300
+
+    Ability change devices on meeting
+
+[33mcommit 2942deccb56d0cdc1d79f9d0f8724fb28e8624a9[m
+Merge: d6daef9 dca278c
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Tue Aug 18 12:29:12 2020 +0300
+
+    Merge branch 'hotfix/participants-clones' into develop
+
+[33mcommit dca278cab4c4a67fd0b737ed8b186afd5da57288[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Tue Aug 18 12:28:22 2020 +0300
+
+    Duplicate participants fixed
+
+[33mcommit d6daef95e271a3b1902b025218e1d7522d34c554[m
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Tue Aug 18 12:11:55 2020 +0300
+
+    fix aspect ration
+
+[33mcommit 95bd247130fcda31f7f9b53ce29ab43f14e4b396[m
+Merge: 9a2122f f5f78a7
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Tue Aug 18 11:48:50 2020 +0300
+
+    Merge pull request #113 from BinaryStudioAcademy/hotfix/minor-ui-fix
+    
+    Hotfix/minor ui fix
+
+[33mcommit f5f78a73d247eaad08f35637ed6573fb8e2e0b7c[m[33m ([m[1;31morigin/hotfix/minor-ui-fix[m[33m)[m
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Tue Aug 18 11:47:25 2020 +0300
+
+    Add tooltips and split name and email
+
+[33mcommit 327b6c85ade7419c49dd6ae2e61d2183716943a5[m
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Tue Aug 18 10:19:59 2020 +0300
+
+    Make all photos look like a circle
+
+[33mcommit b817599b85f27ca022f66e15a59da8a178b26c0b[m
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Tue Aug 18 10:01:00 2020 +0300
+
+    Add last name in header
+
+[33mcommit 9a2122fcfdfba66d337e6d827987bccce613659a[m
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Tue Aug 18 09:31:26 2020 +0300
+
+    Delete duplicated getUserMedia
+
+[33mcommit b23a0b02b7fcf1b1452cfea6e634b0bc8957de34[m
+Author: Alexander Belokon <sascha.belokon@gmail.com>
+Date:   Mon Aug 17 23:32:02 2020 +0300
+
+    hotfix contact avatar
+
+[33mcommit a74145b5d8a1706482fdb7ac8ad50f9b833d1074[m
+Merge: 7e4ee8c e1d01c9
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Mon Aug 17 21:26:04 2020 +0300
+
+    Merge branch 'develop' of https://github.com/BinaryStudioAcademy/bsa-2020-whale into develop
+
+[33mcommit e1d01c9c8a8dc49c38132ed945230bafa75ae0f5[m
+Merge: 6276bb6 fa91948
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Mon Aug 17 21:25:29 2020 +0300
+
+    Merge pull request #112 from BinaryStudioAcademy/hotfix/save-photo-button
+    
+    Hide save button
+
+[33mcommit 7e4ee8ce693128eff0285392096dc56b037517d9[m
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Mon Aug 17 21:25:19 2020 +0300
+
+    Hotfix removed z-index from a participant cart
+
+[33mcommit fa91948f7099964e8d52dc3fa7c629e4c1485a3e[m
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Mon Aug 17 21:24:48 2020 +0300
+
+    Hide save button
+
+[33mcommit 6276bb6acdb60dd32902497a9dc5e54fbc93b5b9[m
+Merge: 862de0b 793c6e4
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Mon Aug 17 21:17:34 2020 +0300
+
+    Merge pull request #111 from BinaryStudioAcademy/hotfix/upload-image-modal
+    
+    Close upload modal
+
+[33mcommit 793c6e4edb3979bb3c13e1a5dde1296e2fe4820a[m
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Mon Aug 17 21:14:52 2020 +0300
+
+    Close upload modal
+
+[33mcommit 862de0b3c465438d24d6bec3e291106f789551b3[m
+Merge: fe6dbb6 1c2e434
+Author: Ivan Grynenko <36521919+IGrynenko@users.noreply.github.com>
+Date:   Mon Aug 17 20:34:41 2020 +0300
+
+    Merge pull request #110 from BinaryStudioAcademy/feature/whiteboard
+    
+    Feature/whiteboard
+
+[33mcommit 1c2e434edc0117b9872058915e304517716a914f[m[33m ([m[1;31morigin/feature/whiteboard[m[33m)[m
+Merge: e490d44 fe6dbb6
+Author: Ivan Grynenko <grynenko.ivan@gmail.com>
+Date:   Mon Aug 17 20:32:33 2020 +0300
+
+    Merging
+
+[33mcommit e490d44f66b0b0f5183cf92098cb09dcffc533e3[m
+Author: Ivan Grynenko <grynenko.ivan@gmail.com>
+Date:   Mon Aug 17 20:24:54 2020 +0300
+
+    Adding whiteboard
+
+[33mcommit fe6dbb66b09eb6b49ddb62b77769c2d9db7257b9[m
+Merge: 8e31d9b 7d42f5b
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Mon Aug 17 20:23:49 2020 +0300
+
+    Merge pull request #109 from BinaryStudioAcademy/feature/shorten-invite-link
+    
+    Shorten invite link
+
+[33mcommit 7d42f5b0c2bc7bb8f0abbee4dd82f08e0083cf0d[m[33m ([m[1;31morigin/feature/shorten-invite-link[m[33m)[m
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Mon Aug 17 20:22:28 2020 +0300
+
+    Shorten invite link
+
+[33mcommit 8e31d9b5ef37a5085761b0a0019a478022931a89[m
+Merge: 67765a6 d9c3b7d
+Author: Vasyl <46243737+VasylSVR@users.noreply.github.com>
+Date:   Mon Aug 17 20:21:29 2020 +0300
+
+    Merge pull request #108 from BinaryStudioAcademy/fix/record-icon-not-changed-if-cancel
+    
+    Fixed 'Record icon isn't changed if cancel'
+
+[33mcommit d9c3b7d0af95c4a7caba33000100e493e49f41b4[m[33m ([m[1;31morigin/fix/record-icon-not-changed-if-cancel[m[33m)[m
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Mon Aug 17 20:19:45 2020 +0300
+
+    Fixed 'Record icon isn't changed if cancel'
+
+[33mcommit 913ed8ee4ac7f6057c9c51c332ae483ed03a33ac[m
+Merge: e6f57fb 9a240be
+Author: Ivan Grynenko <grynenko.ivan@gmail.com>
+Date:   Mon Aug 17 19:57:35 2020 +0300
+
+    Merging3
+
+[33mcommit 67765a615332a3f33a5cb7599213cb2a2c321a6f[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Mon Aug 17 19:26:46 2020 +0300
+
+    Hotfix homepage markup
+
+[33mcommit 025fc117add29c7fccd00c231cf039e7999211ba[m
+Merge: 6e145db 5f4d54b
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Mon Aug 17 18:37:16 2020 +0300
+
+    Merge pull request #102 from BinaryStudioAcademy/feature/save-settings
+    
+    Feature/save settings
+
+[33mcommit 5f4d54b5890ea1e2b26b3e0edfacbd8658ba0b21[m[33m ([m[1;31morigin/feature/save-settings[m[33m)[m
+Merge: 085d8cb e6f57fb
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Mon Aug 17 18:36:03 2020 +0300
+
+    Merge branch 'develop' into feature/save-settings
+
+[33mcommit 6e145dbf743833adfe161ca60f497daac6a6431d[m
+Merge: e6f57fb c01d0da
+Author: Anton Komisarov <32576664+apofis96@users.noreply.github.com>
+Date:   Mon Aug 17 18:32:42 2020 +0300
+
+    Merge pull request #107 from BinaryStudioAcademy/hotfix/dataoffset
+    
+    Replace DateTime by DateTimeOffset
+
+[33mcommit c01d0da6947178d770b59b171aaaeec74ff4dabd[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Mon Aug 17 18:31:27 2020 +0300
+
+    Replace DateTime by DateTimeOffset
+
+[33mcommit 085d8cb9dcf0cb5e33a141b122a887d163d8cafd[m
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Mon Aug 17 18:18:47 2020 +0300
+
+    Set output device in every video element
+
+[33mcommit 9a240be104aa3fbab1252589edc39dfeb98bd2bd[m[33m ([m[1;32mfeature/whiteboard[m[33m)[m
+Author: Ivan Grynenko <grynenko.ivan@gmail.com>
+Date:   Mon Aug 17 18:15:43 2020 +0300
+
+    Adding drawing feature
+
+[33mcommit e6f57fbf639d90d595baecee624c158b3a06384b[m
+Merge: a2f99d6 d5d72d9
+Author: Anton Komisarov <32576664+apofis96@users.noreply.github.com>
+Date:   Mon Aug 17 17:10:11 2020 +0300
+
+    Merge pull request #106 from BinaryStudioAcademy/feature/controls-id
+    
+    Add controls id
+
+[33mcommit d5d72d94026bce2e91c5a1f9e78b0fe1e8c06b08[m[33m ([m[1;31morigin/feature/controls-id[m[33m)[m
+Merge: 3a04cd6 a2f99d6
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Mon Aug 17 17:09:05 2020 +0300
+
+    Merge branch 'develop' into feature/controls-id
+
+[33mcommit 3a04cd6dec8409eb53af71fea7706259df079732[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Mon Aug 17 17:04:28 2020 +0300
+
+    Add ids to action elements
+
+[33mcommit 48356cdd679bc236cc7eb53f907e65db615701e1[m
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Mon Aug 17 16:56:05 2020 +0300
+
+    fix infinity reloading
+
+[33mcommit a2f99d65b54c4639e8f42544d0a9974a3af140d1[m
+Merge: e5824f5 472ed47
+Author: irynakopyl <52530587+irynakopyl@users.noreply.github.com>
+Date:   Mon Aug 17 16:43:07 2020 +0300
+
+    Merge pull request #105 from BinaryStudioAcademy/fix/toolbar-improvements
+    
+    Delete modal window for 'Copy Link', fix full screen toolbar styles
+
+[33mcommit 472ed47a73a21522d40c9d9df2d4c1013eaebab8[m[33m ([m[1;31morigin/fix/toolbar-improvements[m[33m)[m
+Merge: 6fa8217 e5824f5
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Mon Aug 17 16:41:18 2020 +0300
+
+    Merge branch 'develop' into fix/toolbar-improvements
+
+[33mcommit 6fa8217336f4777b88741264b6790de366b8f394[m
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Mon Aug 17 16:38:23 2020 +0300
+
+    tool bar improvements
+
+[33mcommit e5824f58df51768cf6e1825703f5b101f92ca412[m
+Merge: 9435d7d f937061
+Author: Vasyl <46243737+VasylSVR@users.noreply.github.com>
+Date:   Mon Aug 17 16:01:38 2020 +0300
+
+    Merge pull request #104 from BinaryStudioAcademy/feature/warning-on-meeting-tab-close
+    
+    Feature/warning on meeting tab close
+
+[33mcommit f9370610599e80eb716414d072ca8434ce56ffb3[m[33m ([m[1;31morigin/feature/warning-on-meeting-tab-close[m[33m)[m
+Merge: 05bcaf3 9435d7d
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Mon Aug 17 15:46:27 2020 +0300
+
+    Merge branch 'develop' into feature/warning-on-meeting-tab-close
+
+[33mcommit 9435d7db8fecc851f0f4053e0a3093a72443149f[m
+Author: denbell <denbell@ukr.net>
+Date:   Mon Aug 17 15:29:56 2020 +0300
+
+    Make new poll button semantic
+
+[33mcommit 05bcaf3798c33e343659562c134e74d98d4eb9fd[m
+Merge: 157dbc3 39cf41c
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Mon Aug 17 15:23:40 2020 +0300
+
+    Merge branch 'develop' into feature/warning-on-meeting-tab-close
+
+[33mcommit 157dbc3cf112ef5e3afabb27cd1d59567a1570fd[m
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Mon Aug 17 15:22:11 2020 +0300
+
+    Addув a warning message if a user tries to close a browser tab with an active conference
+
+[33mcommit 39cf41cc9789c1365608b6e7d40e5cf5d0631551[m
+Merge: 70ad0ea feb2711
+Author: denys-belik <53171742+denbell5@users.noreply.github.com>
+Date:   Mon Aug 17 15:20:16 2020 +0300
+
+    Merge pull request #103 from BinaryStudioAcademy/hotfix/camera-turn-off-settings-page
+    
+    Hotfix/camera turn off when return to the home page
+
+[33mcommit feb271118d87d43d72a5208485135823e473277c[m[33m ([m[1;31morigin/hotfix/camera-turn-off-settings-page[m[33m)[m
+Author: denbell <denbell@ukr.net>
+Date:   Mon Aug 17 15:18:46 2020 +0300
+
+    Fix camera turn off when leaving Meeting Page
+
+[33mcommit 2cd7d4f2eebf33dae5c8b99d8d28a9a2400ca1ac[m
+Author: denbell <denbell@ukr.net>
+Date:   Mon Aug 17 15:16:23 2020 +0300
+
+    Fix camera turn off when leaving Settings Page
+
+[33mcommit 743997b22f6c47b0f1507c2a8489ab705b7ef084[m
+Merge: bfa6c8a 70ad0ea
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Mon Aug 17 15:04:07 2020 +0300
+
+    Merge branch 'develop' into feature/save-settings
+
+[33mcommit bfa6c8ac35631637fc924f3a9576f9a4a9190857[m
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Mon Aug 17 15:02:00 2020 +0300
+
+    Use media settings on meeting page
+
+[33mcommit 70ad0ea5d0cace85ea04535ffeb405352537a77a[m
+Merge: 5069624 43462f5
+Author: irynakopyl <52530587+irynakopyl@users.noreply.github.com>
+Date:   Mon Aug 17 14:52:58 2020 +0300
+
+    Merge pull request #101 from BinaryStudioAcademy/fix/more-productive-mute
+    
+    Fix/more productive mute
+
+[33mcommit 710830d2197805b6c7e09d155ab227aa2471c53f[m
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Mon Aug 17 14:47:59 2020 +0300
+
+    Save output and input devices in localStorage
+
+[33mcommit 43462f5d5dbb6f68a1f88851126b084031a877d0[m[33m ([m[1;31morigin/fix/more-productive-mute[m[33m)[m
+Merge: 6d2c337 5069624
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Mon Aug 17 14:34:39 2020 +0300
+
+    Merge branch 'develop' into fix/more-productive-mute
+
+[33mcommit 6d2c337e1ff901ff79ba3d382ddb52f76a3065a0[m
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Mon Aug 17 14:30:28 2020 +0300
+
+    disable buttons added
+
+[33mcommit 5069624ba7a04786e6ad89a55a1173f637fc9b55[m
+Merge: 4afe8df 7b1c952
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Mon Aug 17 14:16:05 2020 +0300
+
+    Merge branch 'develop' of https://github.com/BinaryStudioAcademy/bsa-2020-whale into develop
+
+[33mcommit 4afe8df271c449158dac16dcfcabd1917fe6c725[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Mon Aug 17 14:15:08 2020 +0300
+
+    hotfix homepage style
+
+[33mcommit 7b1c9524defa6b10c62b68bf5c75d96f25043b60[m
+Author: denbell <denbell@ukr.net>
+Date:   Mon Aug 17 13:57:16 2020 +0300
+
+    Fix camera turn off when meeting is ended
+
+[33mcommit e98e11e0f437992a1559f3f71cab01d03cffb92e[m
+Merge: 527969c bb9c04b
+Author: denys-belik <53171742+denbell5@users.noreply.github.com>
+Date:   Mon Aug 17 13:10:56 2020 +0300
+
+    Merge pull request #100 from BinaryStudioAcademy/feature/polls/merge
+    
+    Save poll results when meeting ended
+
+[33mcommit bb9c04b2950817a779b39a6d03e27ab9b6c3e94a[m[33m ([m[1;31morigin/feature/polls/merge[m[33m)[m
+Author: denbell <denbell@ukr.net>
+Date:   Mon Aug 17 12:46:27 2020 +0300
+
+    Save poll results when meeting ended
+
+[33mcommit 527969c5826eeaaeb413b2e6dc8315a129a3de31[m
+Author: Alexander Belokon <sascha.belokon@gmail.com>
+Date:   Mon Aug 17 12:18:25 2020 +0300
+
+    hotfix avatar on other pages
+
+[33mcommit b7fdcfca146b8f522c5cd0a76bfd198a0f840a3f[m
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Mon Aug 17 11:12:55 2020 +0300
+
+    Save videoDeviceId in locallStorage
+
+[33mcommit 7d4b4536d19aca80128100ca82b198ff0f2c20f6[m
+Author: Alexander Belokon <sascha.belokon@gmail.com>
+Date:   Mon Aug 17 11:12:19 2020 +0300
+
+    hotfix avatar
+
+[33mcommit 6063ba5de1ff5c60db5dee1236c084bed5fbe88c[m
+Merge: a17b363 c286ace
+Author: denys-belik <53171742+denbell5@users.noreply.github.com>
+Date:   Mon Aug 17 10:44:45 2020 +0300
+
+    Merge pull request #99 from BinaryStudioAcademy/feature/polls/merge
+    
+    Feature/polls/merge
+
+[33mcommit c286acef8e06abbbb3df3ff20ac1ac84b6a202b1[m
+Merge: 84676f7 a17b363
+Author: denbell <denbell@ukr.net>
+Date:   Mon Aug 17 10:44:08 2020 +0300
+
+    Merge branch 'develop' into feature/polls/merge
+
+[33mcommit 84676f74f1070975708d5413fb46619b3da9a4cc[m
+Author: denbell <denbell@ukr.net>
+Date:   Mon Aug 17 10:41:21 2020 +0300
+
+    Fix voted users avatars and prevent error when participant hasn't been loaded
+
+[33mcommit a17b363c3f210947d9e7e233eff6abbdbb448b0f[m
+Author: Alexander Belokon <sascha.belokon@gmail.com>
+Date:   Mon Aug 17 01:21:06 2020 +0300
+
+    some fixes
+
+[33mcommit 03fddff158aefdead1781465e4c1bec5efaa3cd6[m
+Merge: 2c2b74a 3cd9d3a
+Author: irynakopyl <52530587+irynakopyl@users.noreply.github.com>
+Date:   Mon Aug 17 00:44:54 2020 +0300
+
+    Merge pull request #98 from BinaryStudioAcademy/hotfix/settings-selected-tab
+    
+    Hotfix/settings selected tab
+
+[33mcommit 3cd9d3af62a007c037c81086510d99389fe29442[m[33m ([m[1;31morigin/hotfix/settings-selected-tab[m[33m)[m
+Merge: c94cbef 2c2b74a
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Mon Aug 17 00:38:12 2020 +0300
+
+    Merge branch 'develop' into hotfix/settings-selected-tab
+
+[33mcommit c94cbefe0b175dbc98c94218f428157f75a68509[m
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Mon Aug 17 00:34:23 2020 +0300
+
+    tab selected on the first time
+
+[33mcommit 2c2b74ae4a91ec78e9f1522b366f8bb2c0bb077f[m
+Merge: a70ace9 5c4edd7
+Author: alex-bilokon <62422024+alex-bilokon@users.noreply.github.com>
+Date:   Sun Aug 16 22:00:19 2020 +0200
+
+    Merge pull request #97 from BinaryStudioAcademy/feature/get_image_by_id_from_blob
+    
+    Feature/get image by id from blob
+
+[33mcommit 5c4edd78d345adeb29105a8300781f39bad1d9e0[m[33m ([m[1;31morigin/feature/get_image_by_id_from_blob[m[33m)[m
+Merge: 0ba5808 a70ace9
+Author: alex-bilokon <62422024+alex-bilokon@users.noreply.github.com>
+Date:   Sun Aug 16 22:00:08 2020 +0200
+
+    Merge branch 'develop' into feature/get_image_by_id_from_blob
+
+[33mcommit 0ba580877612090f85ba9d2ca96e014ae55e3afc[m
+Author: Alexander Belokon <sascha.belokon@gmail.com>
+Date:   Sun Aug 16 22:48:48 2020 +0300
+
+    hotfix
+
+[33mcommit b09dc9d879830db58dc78fcbb04ebfb55f241576[m
+Author: Alexander Belokon <sascha.belokon@gmail.com>
+Date:   Sun Aug 16 21:50:41 2020 +0300
+
+    added LinkTypeEnum2
+
+[33mcommit 563e692b47302e0ad54430ca5e4747af36917169[m
+Author: Alexander Belokon <sascha.belokon@gmail.com>
+Date:   Sun Aug 16 21:49:17 2020 +0300
+
+    added LinkTypeEnum
+
+[33mcommit a70ace9d4e8eea8eab2a9e68bbb18d41beef1c37[m
+Merge: 703bbe7 1a4941f
+Author: Vasyl <46243737+VasylSVR@users.noreply.github.com>
+Date:   Sun Aug 16 20:05:02 2020 +0300
+
+    Merge pull request #96 from BinaryStudioAcademy/feature/abbility-to-hide-and-show-self-video-card
+    
+    Added an ability to hide and to show a self card
+
+[33mcommit 1a4941fe412ce176a6b0abce88dbd1e31a21bd5b[m[33m ([m[1;31morigin/feature/abbility-to-hide-and-show-self-video-card[m[33m)[m
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Sun Aug 16 20:02:36 2020 +0300
+
+    Added an ability to hide and to show a self card
+
+[33mcommit 703bbe7d5e409cdebaf5f37e3447f8a65d99a373[m
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Sun Aug 16 19:41:06 2020 +0300
+
+    fix bug with reloading before alert in CheckAccessToMediaGuard
+
+[33mcommit cf44d578684531736f486f34da0e71aa720dc2a5[m
+Merge: fc6c3e1 45e5fab
+Author: Anton Komisarov <32576664+apofis96@users.noreply.github.com>
+Date:   Sun Aug 16 19:15:58 2020 +0300
+
+    Merge pull request #95 from BinaryStudioAcademy/feature/contacts-scrollbar
+    
+    Added overflow behavior to contacts and groups lists
+
+[33mcommit 45e5fab855e343f236f5bd9c686dd84d10f941f9[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Sun Aug 16 19:12:22 2020 +0300
+
+    Added overflow behavior to contacts and groups lists
+
+[33mcommit fc6c3e14074fa5423841f33cc6468428caf3c35b[m
+Merge: c22dc2d 63a7607
+Author: denys-belik <53171742+denbell5@users.noreply.github.com>
+Date:   Sun Aug 16 18:08:19 2020 +0300
+
+    Merge pull request #94 from BinaryStudioAcademy/feature/polls/merge
+    
+    Feature/polls/merge
+
+[33mcommit 63a7607d7b837e89faf00e1a2328be51c83c2a68[m
+Merge: 5469716 c22dc2d
+Author: denbell <denbell@ukr.net>
+Date:   Sun Aug 16 18:06:04 2020 +0300
+
+    Merge branch 'develop' into feature/polls/merge
+
+[33mcommit 5469716850a73928d25d141429549e56227b7835[m
+Author: denbell <denbell@ukr.net>
+Date:   Sun Aug 16 18:02:15 2020 +0300
+
+    Add ability to delete poll
+
+[33mcommit 3a16a0c0c6c0260f5b758458c5a197be74189c7b[m
+Author: denbell <denbell@ukr.net>
+Date:   Sun Aug 16 15:15:00 2020 +0300
+
+    Create poll service
+
+[33mcommit c22dc2d5d3629dae83c9fe4a964551ad67f8637c[m
+Merge: 7ea7672 9ad557a
+Author: irynakopyl <52530587+irynakopyl@users.noreply.github.com>
+Date:   Sun Aug 16 15:05:05 2020 +0300
+
+    Merge pull request #93 from BinaryStudioAcademy/hotfix/profile-page-design
+    
+    header refresh
+
+[33mcommit 9ad557a967a98d456670e67c104279aa9aff25a7[m[33m ([m[1;31morigin/hotfix/profile-page-design[m[33m)[m
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Sun Aug 16 15:03:59 2020 +0300
+
+    header refresh
+
+[33mcommit 7ea767283fb0f6226cd55e02d5cf90bab70bce70[m
+Merge: 42e0d40 9370d3c
+Author: irynakopyl <52530587+irynakopyl@users.noreply.github.com>
+Date:   Sun Aug 16 14:33:14 2020 +0300
+
+    Merge pull request #92 from BinaryStudioAcademy/hotfix/profile-page-design
+    
+    Hotfix/profile page design
+
+[33mcommit 9370d3c6395cbe2621d2258feda75f39b14b5c94[m
+Merge: 2863af0 42e0d40
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Sun Aug 16 14:32:34 2020 +0300
+
+    Merge branch 'develop' into hotfix/profile-page-design
+
+[33mcommit 2863af00e5726e5c81d8b36a18847632c4b47236[m
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Sun Aug 16 14:30:55 2020 +0300
+
+    header-info refreshing and save-btn aligned
+
+[33mcommit 42e0d4048667dafc872319a224e7643894f38111[m
+Merge: 0b32756 b16b39d
+Author: irynakopyl <52530587+irynakopyl@users.noreply.github.com>
+Date:   Sun Aug 16 11:37:56 2020 +0300
+
+    Merge pull request #91 from BinaryStudioAcademy/feature/mute-microphone
+    
+    Feature/mute microphone
+
+[33mcommit b16b39dd4fa7b1b729b2ac1cd6b925ed916d5366[m[33m ([m[1;31morigin/feature/mute-microphone[m[33m)[m
+Merge: 5a3195a 0b32756
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Sun Aug 16 11:35:53 2020 +0300
+
+    merge dev into mute-micro
+
+[33mcommit 9b877e287ea95f1cac43ef611e54c375ebaec277[m
+Author: denbell <denbell@ukr.net>
+Date:   Sat Aug 15 17:27:04 2020 +0300
+
+    Fix poll bugs
+
+[33mcommit 50ccad017b6ab0f5253eede363972825117b2f07[m
+Merge: 48a7c3b 0b32756
+Author: denbell <denbell@ukr.net>
+Date:   Sat Aug 15 15:49:05 2020 +0300
+
+    Merge branch 'develop' into polls/merge
+
+[33mcommit 48a7c3b41b95c09f2513afe0cea0b573b7fcc55c[m
+Author: denbell <denbell@ukr.net>
+Date:   Sat Aug 15 15:42:48 2020 +0300
+
+    Create meeting-persistent, multiple, anonymous/public polls
+
+[33mcommit 0b32756d44970d9b4e95d6c7c3055c7b78c857c8[m
+Merge: 92229e8 b47d50c
+Author: Anton Komisarov <32576664+apofis96@users.noreply.github.com>
+Date:   Sat Aug 15 14:37:07 2020 +0300
+
+    Merge pull request #90 from BinaryStudioAcademy/fix/frontend-inline-styles
+    
+    Fix/frontend inline styles
+
+[33mcommit b47d50c2c88d92d7eb44866920071acec55a47e3[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Sat Aug 15 14:34:24 2020 +0300
+
+    Fix z-index collision
+    
+    Polls modal was above tooltips
+
+[33mcommit 306e12f565f6c78c5a1c1db3f01727b7922582c7[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Sat Aug 15 14:20:57 2020 +0300
+
+    Removed inline syles
+
+[33mcommit 92229e8705fa63c040c5d05f1c3d63d385972f2c[m
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Sat Aug 15 13:41:01 2020 +0300
+
+    Hotfix changed wrong SignalRMethod
+
+[33mcommit 3387cc09315bd932b04e0b36b46ed185917c1986[m
+Merge: eaded30 d6f97c4
+Author: Vasyl <46243737+VasylSVR@users.noreply.github.com>
+Date:   Sat Aug 15 12:58:31 2020 +0300
+
+    Merge pull request #89 from BinaryStudioAcademy/partisipant-card-work
+    
+    Added ability inform participants if someone left or disconnected
+
+[33mcommit d6f97c4a9b7e41e96e8ec2276ee3600a803ebd15[m
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Sat Aug 15 12:51:58 2020 +0300
+
+    Added ability inform participants if someone left or disconnected
+
+[33mcommit eaded30d396024493226eb2061e6fb9a90078311[m
+Merge: 3176a89 6ff02d4
+Author: Vasyl <46243737+VasylSVR@users.noreply.github.com>
+Date:   Sat Aug 15 09:16:17 2020 +0300
+
+    Merge pull request #88 from BinaryStudioAcademy/partisipant-card-work
+    
+    Fixed the bug with wrong participant name on a card.
+
+[33mcommit 6ff02d4c73e926c94f8f0daaac42422ab4147339[m
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Sat Aug 15 08:49:43 2020 +0300
+
+    Fixed the bug with wrong participant name on a card.
+
+[33mcommit 3176a8997983cac32b3fe6ca5e2c0fcdebd89562[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Fri Aug 14 22:49:48 2020 +0300
+
+    Update tooltip content
+
+[33mcommit e41c15c054905cde93a41fb4602bfa9d12dab7b5[m
+Merge: fdb0e9d 1571fb9
+Author: Anton Komisarov <32576664+apofis96@users.noreply.github.com>
+Date:   Fri Aug 14 22:08:24 2020 +0300
+
+    Merge pull request #87 from BinaryStudioAcademy/feature/meeting-tooltips
+    
+    Add meeting tooltips
+
+[33mcommit 1571fb9dc420a4011e736c51d4dce9a3fd320d04[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Fri Aug 14 21:56:07 2020 +0300
+
+    Add tooltips
+
+[33mcommit fdb0e9dff047282be8b9aa76e255e62366e4cb5e[m
+Merge: c261d2b b835f25
+Author: Olya <50491792+0lyaMelnyk@users.noreply.github.com>
+Date:   Fri Aug 14 20:06:00 2020 +0300
+
+    Merge pull request #86 from BinaryStudioAcademy/bugfix/select-design
+    
+    Add more obvious select
+
+[33mcommit b835f25fa5154a57766595d7de1392e6d1a0811c[m[33m ([m[1;31morigin/bugfix/select-design[m[33m)[m
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Fri Aug 14 20:04:24 2020 +0300
+
+    Add more obvious select
+
+[33mcommit c261d2ba392b717fbda1d4503acdff5ed4e3a6c7[m
+Merge: da9d304 efd0879
+Author: Nikita Krasnov <nikita.krasnov@binary-studio.com>
+Date:   Fri Aug 14 18:53:06 2020 +0300
+
+    Merge branch 'develop' of https://github.com/BinaryStudioAcademy/bsa-2020-whale into develop
+
+[33mcommit da9d30447ba76b841ceb18ef912f5d20834adce2[m
+Author: Nikita Krasnov <nikita.krasnov@binary-studio.com>
+Date:   Fri Aug 14 18:52:44 2020 +0300
+
+    Fixed toolbar markdown
+
+[33mcommit efd0879e6949f7a77c63f295705ab7bf79bcd409[m
+Merge: 70d9f32 2f4024b
+Author: Anton Komisarov <32576664+apofis96@users.noreply.github.com>
+Date:   Fri Aug 14 18:44:56 2020 +0300
+
+    Merge pull request #85 from BinaryStudioAcademy/hotfix/fullscreen-toolbar
+    
+    Fix dropout element and z-index
+
+[33mcommit 2f4024badd4b271d7821389ec0e17f38c8122e8f[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Fri Aug 14 18:43:43 2020 +0300
+
+    Fix dropout element and z-index
+    
+    Now full screen tools is auto size and auto position
+
+[33mcommit 70d9f32d79747b67c989741e4851dcd7588d1508[m
+Merge: 251f215 b2a8eec
+Author: Anton Komisarov <32576664+apofis96@users.noreply.github.com>
+Date:   Fri Aug 14 17:21:13 2020 +0300
+
+    Merge pull request #84 from BinaryStudioAcademy/hotfix/meeting-pop-ups
+    
+    Update meeting.component.ts
+
+[33mcommit b2a8eecd8bacf369daa25a96db6492d48127c3ab[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Fri Aug 14 17:17:20 2020 +0300
+
+    Update meeting.component.ts
+
+[33mcommit 251f215652e79cd5085f52d141b40429bcdf50cf[m
+Merge: d0e4fef 477cadf
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Fri Aug 14 17:10:45 2020 +0300
+
+    Merge pull request #83 from BinaryStudioAcademy/hotfix/fix-ability-to-turnOn/Of-camera
+    
+    Hotfix/fix ability to turn on/off camera and micro
+
+[33mcommit 477cadf5efb15e0eda5c8585aec1b709798ea109[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Fri Aug 14 17:07:37 2020 +0300
+
+    Add ability to mute/unmute micro
+
+[33mcommit 714d9ffb3b63989f415b48b8d3c8cad64a66046c[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Fri Aug 14 17:02:58 2020 +0300
+
+    add ability to enable/diable camera
+
+[33mcommit ff816f56df55426059f2a4d80e4e4e3f72100f24[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Fri Aug 14 16:56:44 2020 +0300
+
+    deleted everything that is not used
+
+[33mcommit d0e4fef7d90d59c39ad934be2d6c7d3af1ae4848[m
+Merge: cdbcaeb 0054478
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Fri Aug 14 16:49:17 2020 +0300
+
+    Merge branch 'develop' of https://github.com/BinaryStudioAcademy/bsa-2020-whale into develop
+
+[33mcommit 0054478a2f52a7f352853fbda33c42d795bfb7b0[m
+Author: denbell <denbell@ukr.net>
+Date:   Fri Aug 14 16:41:12 2020 +0300
+
+    Fix inputs and participant list and fullscreen video
+
+[33mcommit cdbcaeba4194559923855ce55233696d1dc78223[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Fri Aug 14 16:38:58 2020 +0300
+
+    Fix ablility to leave meeting page when camera turned off
+
+[33mcommit 5a3195a9a9155886294af171231f97f7ccfccb30[m
+Merge: df4a0bc fe4e91a
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Fri Aug 14 14:56:29 2020 +0300
+
+    Merge branch 'develop' into feature/mute-microphone
+
+[33mcommit 581a3050ce21041d2a8eaf66d41336038f596b0d[m
+Author: Alexander Belokon <sascha.belokon@gmail.com>
+Date:   Fri Aug 14 13:29:28 2020 +0300
+
+    added get image by id(blob storage)
+
+[33mcommit fe4e91a4049a3bb1a25864e1c8b36852ca88e79e[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Fri Aug 14 12:56:55 2020 +0300
+
+    Fix settings-page video settings
+
+[33mcommit 86797f6a907bf08732e57f67e2949e78013a5e79[m
+Merge: 0381c9f 61681ef
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Fri Aug 14 12:49:37 2020 +0300
+
+    Merge pull request #82 from BinaryStudioAcademy/hotfix/screen-recording
+    
+    Add record button
+
+[33mcommit 61681ef9da5d0f91f7af0a9799c7b6b9aef568f0[m
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Fri Aug 14 12:48:01 2020 +0300
+
+    Add record button
+
+[33mcommit 0381c9f16e372b1bfcf42357ce6ad673fc141611[m
+Merge: 6ad5b01 2e946f8
+Author: denbell <denbell@ukr.net>
+Date:   Fri Aug 14 12:43:02 2020 +0300
+
+    Merge branch 'develop' of https://github.com/BinaryStudioAcademy/bsa-2020-whale into develop
+
+[33mcommit 6ad5b01f5f4f93f414b5cce347e3ad23cce27eb6[m
+Author: denbell <denbell@ukr.net>
+Date:   Fri Aug 14 12:38:25 2020 +0300
+
+    Add description to schedule meeting form
+
+[33mcommit 2e946f8e14d2536ef165cad92e721cb1350c5de9[m
+Merge: 24faa95 7cea151
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Fri Aug 14 12:22:32 2020 +0300
+
+    Merge branch 'develop' of https://github.com/BinaryStudioAcademy/bsa-2020-whale into develop
+
+[33mcommit 24faa955879b9ecfddbae2e9b6073559fc00b4f9[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Fri Aug 14 12:22:18 2020 +0300
+
+    Toastr prod opacity fix
+
+[33mcommit 7cea151d3a274edfa8fb5eb489a8cf4ef0065ca2[m
+Merge: 5b2909b 895b86b
+Author: Vasyl <46243737+VasylSVR@users.noreply.github.com>
+Date:   Fri Aug 14 12:21:28 2020 +0300
+
+    Merge pull request #81 from BinaryStudioAcademy/feature/meeting-page-cards-layout
+    
+    Rewritten a current user participant card mute
+
+[33mcommit 5b2909b50cd0b910995242c51bee0228ecdafb0e[m
+Merge: cc5c990 f8c04c3
+Author: irynakopyl <52530587+irynakopyl@users.noreply.github.com>
+Date:   Fri Aug 14 12:20:17 2020 +0300
+
+    Merge pull request #80 from BinaryStudioAcademy/feature/profile-settings
+    
+    doubling last sent messages in chat contacts fixed
+
+[33mcommit 895b86b0fa7e00ef269597f5980c8a2553c5d42e[m
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Fri Aug 14 12:18:34 2020 +0300
+
+    Rewritten current user participant card mute
+
+[33mcommit f8c04c32b8d17f86615fc4c8b800cc2a7b2b17a5[m[33m ([m[1;31morigin/feature/profile-settings[m[33m)[m
+Merge: 4eebe64 cc5c990
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Fri Aug 14 12:16:27 2020 +0300
+
+    Merge branch 'develop' into feature/profile-settings
+
+[33mcommit df4a0bc506191f6394fdc4b711b5d4881d52ed3d[m
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Fri Aug 14 12:05:53 2020 +0300
+
+    micro and video mute added
+
+[33mcommit cc5c9904385c58aa03e991b7d22c8e11b3e08bee[m
+Merge: bfd9d91 45fb64d
+Author: Vasyl <46243737+VasylSVR@users.noreply.github.com>
+Date:   Fri Aug 14 12:03:48 2020 +0300
+
+    Merge pull request #79 from BinaryStudioAcademy/feature/meeting-page-cards-layout
+    
+    Feature/meeting page cards layout
+
+[33mcommit 45fb64d03e0889c9a1622f5b5c445c7d127e4a28[m
+Merge: cf86f52 bfd9d91
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Fri Aug 14 12:01:56 2020 +0300
+
+    Merge branch 'develop' into feature/meeting-page-cards-layout
+
+[33mcommit cf86f5231604d4d8bf161176c9f9510c8eaba77f[m
+Merge: d96bff0 1f8eb2f
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Fri Aug 14 11:59:39 2020 +0300
+
+    Merge branch 'develop' into feature/meeting-page-cards-layout
+
+[33mcommit d96bff0b0ba0fbedb5b4eb1231d5de6ce14f2275[m
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Fri Aug 14 11:59:17 2020 +0300
+
+    Fixed cards overlaping
+
+[33mcommit bfd9d91ed1efec21d8327f15470e1cf5265e7340[m
+Merge: 1f8eb2f 2028022
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Fri Aug 14 11:59:16 2020 +0300
+
+    Merge branch 'hotfix/duplicate-participants' into develop
+
+[33mcommit 2028022f96fc7ac8eb2cc98f1c1f6269c8068eed[m[33m ([m[1;31morigin/hotfix/duplicate-participants[m[33m)[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Fri Aug 14 11:58:45 2020 +0300
+
+    Dupliate participants fixed
+
+[33mcommit 1f8eb2f859e31fc725f072bcd388dce6a3428fa0[m
+Author: denbell <denbell@ukr.net>
+Date:   Fri Aug 14 11:34:29 2020 +0300
+
+    Fix second name in paticipant card when google account doesn't have second name
+
+[33mcommit a4c97990610fc73a0d09de4022599504821f3912[m
+Merge: 6ae3343 62db57c
+Author: Olya <50491792+0lyaMelnyk@users.noreply.github.com>
+Date:   Fri Aug 14 11:30:24 2020 +0300
+
+    Merge pull request #78 from BinaryStudioAcademy/fix/change-volume
+    
+    Fix changing volume
+
+[33mcommit 62db57cfc6e31b7e3628990b62fb268ecdc6f8bd[m
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Fri Aug 14 11:29:24 2020 +0300
+
+    Fix Change volume
+
+[33mcommit 6ae3343f2baa0472b9337a368f0fd0557063fc1f[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Fri Aug 14 11:21:15 2020 +0300
+
+    Caller is host
+
+[33mcommit cd5f0386379fecf82591e72db129f30aa6257537[m
+Merge: e38c0b4 565a5cd
+Author: Vasyl <46243737+VasylSVR@users.noreply.github.com>
+Date:   Fri Aug 14 11:11:17 2020 +0300
+
+    Merge pull request #77 from BinaryStudioAcademy/feature/meeting-page-cards-layout
+    
+    Feature/meeting page cards layout
+
+[33mcommit e38c0b491f4202d6cc42cf4b52cf08cc89fd0107[m
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Fri Aug 14 11:11:01 2020 +0300
+
+    Update z-index for modal window
+
+[33mcommit 565a5cd6ef8cb381ed29cbea47b56a2ccc917b29[m
+Merge: bd4bc93 1ba0433
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Fri Aug 14 11:08:29 2020 +0300
+
+    Merge remote-tracking branch 'origin/develop' into feature/meeting-page-cards-layout
+
+[33mcommit bd4bc930693db7395ebc9906720174e133993c0c[m
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Fri Aug 14 11:06:54 2020 +0300
+
+    Removed current user audio-track from current participant card.
+
+[33mcommit 4eebe643e8bf9ef4a0e630dc802314cbdf089fde[m
+Merge: 51ddcfc 1ba0433
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Fri Aug 14 10:50:33 2020 +0300
+
+    Merge branch 'develop' into feature/profile-settings
+
+[33mcommit 1ba04332de928f56d8b32a2339e2779ca6ea3d5b[m
+Merge: c06c9c7 8b12c68
+Author: denbell <denbell@ukr.net>
+Date:   Fri Aug 14 10:48:30 2020 +0300
+
+    Merge branch 'develop' of https://github.com/BinaryStudioAcademy/bsa-2020-whale into develop
+
+[33mcommit c06c9c7457c7faab94c995f581ce9d3918eb1c92[m
+Author: denbell <denbell@ukr.net>
+Date:   Fri Aug 14 10:47:42 2020 +0300
+
+    Fix one participant participants list width
+
+[33mcommit 8b12c6824bb8b35cd8c20d9e322f53f850286275[m
+Merge: 0f38fad 5a94667
+Author: Anton Komisarov <32576664+apofis96@users.noreply.github.com>
+Date:   Fri Aug 14 10:32:02 2020 +0300
+
+    Merge pull request #76 from BinaryStudioAcademy/hotfix/new-line-on-enter
+    
+    No newLines on enterPress anymore
+
+[33mcommit 5a9466782d006e91be5a5a18b4c2e05f14f3b168[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Fri Aug 14 10:30:38 2020 +0300
+
+    No newLines on enterPress anymore
+
+[33mcommit 51ddcfcf99eaef0857928b6fb6dc22dc68b2b1b0[m
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Fri Aug 14 10:23:14 2020 +0300
+
+    doubling last messages in chat contacts fixed
+
+[33mcommit 0f38fad7d420ce96a0667c54966b0318887d0a87[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Fri Aug 14 10:02:15 2020 +0300
+
+    z-index fixed
+
+[33mcommit f48689c1e662e7115b0de93a3a7ee8d7239a550c[m
+Merge: 89d8bcc 9626209
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Fri Aug 14 09:48:54 2020 +0300
+
+    Chat fixes
+
+[33mcommit 8a87ade332e173251c2bf7ec666d6f00dd9fffc8[m
+Merge: 9626209 cf59fb3
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Fri Aug 14 09:46:13 2020 +0300
+
+    Merge pull request #75 from BinaryStudioAcademy/hotfix/save-participant-from-db
+    
+    Fix bug with participants on meeting-page
+
+[33mcommit cf59fb3c7671317c5aa64818e8d54bff22654bb6[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Fri Aug 14 09:38:32 2020 +0300
+
+    Fix bug with participants
+
+[33mcommit 9626209939460e265c67f44f619a8737f9d35fc9[m
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Fri Aug 14 09:12:16 2020 +0300
+
+    Update profile-page.component.ts
+
+[33mcommit a0446fd7428909260188c38a62bf534f703fb0f7[m
+Merge: 9fff2f0 81d4dd5
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Fri Aug 14 08:38:32 2020 +0300
+
+    Merge pull request #74 from BinaryStudioAcademy/hotfix/save-participant-from-db
+    
+    Don't delete participant after disconnecting
+
+[33mcommit 81d4dd57c45325a6fe58f7ba287eadcc2d1c1715[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Fri Aug 14 08:16:22 2020 +0300
+
+    Don't delete participant after disconnecting
+
+[33mcommit 9fff2f046b5d46d4424346a8f2d9f8227d2a1c06[m
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Fri Aug 14 00:08:33 2020 +0300
+
+    Added missed curly brecket. Changed users list block background to white (it was black in a full-screen mode).
+
+[33mcommit 1858f176a30756e8cd7784c9a72c20df45e615a7[m
+Merge: f79e467 40308c1
+Author: Vasyl <46243737+VasylSVR@users.noreply.github.com>
+Date:   Thu Aug 13 23:49:21 2020 +0300
+
+    Merge pull request #73 from BinaryStudioAcademy/feature/meeting-page-cards-layout
+    
+    Feature/meeting page cards layout
+
+[33mcommit 40308c123f7fd162a12413a806f271fe7fad1a39[m
+Merge: 1a0042e f79e467
+Author: Vasyl <46243737+VasylSVR@users.noreply.github.com>
+Date:   Thu Aug 13 23:49:04 2020 +0300
+
+    Merge branch 'develop' into feature/meeting-page-cards-layout
+
+[33mcommit 1a0042e8c46eb69c272a4c91f6ea31271af1d4e3[m
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Thu Aug 13 23:39:33 2020 +0300
+
+    Enhenced cards size. Code clean up.
+
+[33mcommit aebfa8f5b8c2cf35b9dcba0f953dfd90eec43848[m
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Thu Aug 13 23:37:37 2020 +0300
+
+    Revert commit 8f15af7 13 Aug 18:30
+
+[33mcommit 89d8bcc967defc73f7a19ee55dbc9776786ec467[m
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Thu Aug 13 21:39:11 2020 +0300
+
+    chat repeated messages fixed
+
+[33mcommit f79e4670017e41a3847226f5342415a27fc6674b[m
+Merge: 17bc502 d63bf49
+Author: Anton Komisarov <32576664+apofis96@users.noreply.github.com>
+Date:   Thu Aug 13 21:35:57 2020 +0300
+
+    Merge pull request #72 from BinaryStudioAcademy/feature/auth-guard
+    
+    Add authGuard to routing
+
+[33mcommit d63bf496fcb8abc93fd926db66d37277c2498b9f[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Thu Aug 13 21:31:09 2020 +0300
+
+    Add authGuard to routing
+
+[33mcommit 17bc50224be0cc687f9cda8ba6aec00a9c2d306e[m
+Merge: 0755ad9 af6b919
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Thu Aug 13 21:17:16 2020 +0300
+
+    merging direct-call into develop
+
+[33mcommit af6b9199184a6d2d8f94aca83cf61ff2263369e5[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Thu Aug 13 21:03:10 2020 +0300
+
+    Direct call fixed
+
+[33mcommit 0755ad93a585c3e092b71010f630ba16c10516af[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Thu Aug 13 19:38:36 2020 +0300
+
+    Delete empty migration
+
+[33mcommit 6b0b9cbef7c3a118c57c04bf0ad46f2732e45783[m
+Merge: 345ab19 09a937e
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Thu Aug 13 19:10:41 2020 +0300
+
+    Merge branch 'develop' into feature/meeting-page-cards-layout
+
+[33mcommit 345ab19c9849f01c26f2853d75094f0327400018[m
+Merge: 0b7a7b1 0866012
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Thu Aug 13 19:09:22 2020 +0300
+
+    Merge branch 'develop' into feature/meeting-page-cards-layout
+    
+    # Conflicts:
+    #       frontend/src/app/scenes/meeting-page/components/meeting/meeting.component.sass
+    #       frontend/src/app/scenes/meeting-page/components/meeting/meeting.component.ts
+
+[33mcommit 09a937ea868c3ac611f423f52140a0e59708a827[m
+Merge: 646382b f2a4806
+Author: Anton Komisarov <32576664+apofis96@users.noreply.github.com>
+Date:   Thu Aug 13 19:01:26 2020 +0300
+
+    Merge pull request #71 from BinaryStudioAcademy/feature/sent-by-enter
+    
+    Add sending on Enter
+
+[33mcommit f2a480641438618a925d9f58226ae4f818f43ed0[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Thu Aug 13 19:00:46 2020 +0300
+
+    Add sending on Enter
+
+[33mcommit 646382bb1fc1a9e38b38c43c01c70c60c9424a90[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Thu Aug 13 18:59:14 2020 +0300
+
+    fix bug with self-referencing
+
+[33mcommit 0b7a7b1c9de3b19bc882ac7c20a1b986d6d63c9b[m
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Thu Aug 13 18:46:30 2020 +0300
+
+    Added cards layout for max for cards on the Meeting page
+
+[33mcommit e32fa054614686d57d40e2b63faaadce35a073a1[m
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Thu Aug 13 18:45:17 2020 +0300
+
+    On participant connected returns Participant[] instead Participant
+
+[33mcommit ee94a37995b7eb3ea58154ce0f44c0c2469760e1[m
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Thu Aug 13 18:42:16 2020 +0300
+
+    Added 'streamId' field to Meating and Participant models
+
+[33mcommit 85d7b43e57e155bd726c2d1ea46a4f605f5ce86b[m
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Thu Aug 13 18:40:09 2020 +0300
+
+    Added collection to Meeting hubs for partisipians saving by meeting
+
+[33mcommit 0866012f96f56ba00a0563e317d360fc7fd97790[m
+Merge: 554a7a4 8f15af7
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Thu Aug 13 18:31:19 2020 +0300
+
+    Merge pull request #70 from BinaryStudioAcademy/feature/save-participants
+    
+    Add participants into Meeting model
+
+[33mcommit 8f15af78348df92b2615321317f7cd7bd4286788[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Thu Aug 13 18:30:16 2020 +0300
+
+    Add participants into Meeting model
+
+[33mcommit 554a7a42b982fee4a1b762f9a099bb1486c7458f[m
+Merge: cc6f750 7f2594b
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Thu Aug 13 18:15:45 2020 +0300
+
+    Merge pull request #69 from BinaryStudioAcademy/feature/delete-avatar
+    
+    Add ability to remove profile photo
+
+[33mcommit 7f2594bbbc4cb997f33b697476efd36278b781a4[m
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Thu Aug 13 18:14:49 2020 +0300
+
+    Add ability to remove profile photo
+
+[33mcommit cc6f750a13ce950a0084b1ae2e7c5438355cc2f1[m
+Merge: f04b670 b9dbd50
+Author: denys-belik <53171742+denbell5@users.noreply.github.com>
+Date:   Thu Aug 13 17:35:02 2020 +0300
+
+    Merge pull request #68 from BinaryStudioAcademy/hotfix/minor-fixes
+    
+    Hotfix/minor fixes
+
+[33mcommit f04b670e64b0a11b586bc76905a94eeb543467db[m
+Merge: 531584e 7db1e8f
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Thu Aug 13 17:32:04 2020 +0300
+
+    Merge pull request #67 from BinaryStudioAcademy/hotfix/blob-storage-service
+    
+    Fix blob storage service post url
+
+[33mcommit b9dbd50f6e03d3397e38984f2829b7097ea7c430[m
+Author: denbell <denbell@ukr.net>
+Date:   Thu Aug 13 17:29:25 2020 +0300
+
+    Add minor fixes (2)
+
+[33mcommit 7db1e8fd697cc07c93b97a5e386ab8ff69ad96ac[m
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Thu Aug 13 17:28:43 2020 +0300
+
+    Fix blob storage service post url
+
+[33mcommit a84ee958317fa28e9b10e5a9441abd4700007201[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Thu Aug 13 17:16:24 2020 +0300
+
+    Add ability to call contact directly
+
+[33mcommit 531584e99c9877090b3863ec173a5f22e451fe7b[m
+Author: Nikita Krasnov <nikita.krasnov@binary-studio.com>
+Date:   Thu Aug 13 17:03:24 2020 +0300
+
+    Fixed slash
+
+[33mcommit 9d38d3b26ba82d79a15e4cb8bbdcab0acee2a4f5[m
+Author: Nikita Krasnov <nikita.krasnov@binary-studio.com>
+Date:   Thu Aug 13 16:44:44 2020 +0300
+
+    Added staging to cors
+
+[33mcommit 8043cdad0a42a79e24b386d0ad0ab873eb8ce224[m
+Merge: 22fce8f da38fe8
+Author: Anton Komisarov <32576664+apofis96@users.noreply.github.com>
+Date:   Thu Aug 13 16:25:06 2020 +0300
+
+    Merge pull request #66 from BinaryStudioAcademy/feature/meeting-link-clipboard
+    
+    Feature/meeting link clipboard
+
+[33mcommit da38fe8f52ade9ff0b667b04a326245a3c47d3fa[m
+Merge: 57f560e 22fce8f
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Thu Aug 13 16:21:56 2020 +0300
+
+    Merge branch 'develop' into feature/meeting-link-clipboard
+
+[33mcommit 57f560e0286dd0350d17d8d01f132cd4c43e1a03[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Thu Aug 13 16:21:15 2020 +0300
+
+    Add CopyToClipboard component
+
+[33mcommit 22fce8fc2ea51f234ac390a9efdf317f0876b3e3[m
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Thu Aug 13 16:10:40 2020 +0300
+
+    Update profile-page.component.html
+
+[33mcommit 6aa4939475de8d4bda0bdfd14318f859215c6a8a[m
+Merge: 541813f 80c2bb9
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Thu Aug 13 15:51:32 2020 +0300
+
+    Merge pull request #64 from BinaryStudioAcademy/avatar-binding
+    
+    Bind avatar with user
+
+[33mcommit 80c2bb9c39c330c0f654fd44c70b1596a8aa4cd5[m
+Merge: cc68331 541813f
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Thu Aug 13 15:51:22 2020 +0300
+
+    Merge branch 'develop' into avatar-binding
+
+[33mcommit 541813fd4303235adb1a25321556c1b91c0df798[m
+Merge: 31f86b9 4895e1e
+Author: irynakopyl <52530587+irynakopyl@users.noreply.github.com>
+Date:   Thu Aug 13 15:45:09 2020 +0300
+
+    Merge pull request #65 from BinaryStudioAcademy/feature/profile-settings
+    
+    contacts list fix
+
+[33mcommit 4895e1eb4d13210e9e0def51d16fce738ee9b400[m
+Merge: 53e964d 31f86b9
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Thu Aug 13 15:43:06 2020 +0300
+
+    Merge branch 'develop' into feature/profile-settings
+
+[33mcommit 53e964db3a6cca680452507fcb78e2495b3f0df9[m
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Thu Aug 13 15:42:15 2020 +0300
+
+    contacts list fix
+
+[33mcommit 31f86b9848a8a1a3189a675685fa647568f69a00[m
+Merge: fd72362 49d19b8
+Author: Nikita Krasnov <nikita.krasnov@binary-studio.com>
+Date:   Thu Aug 13 15:37:19 2020 +0300
+
+    Merge branch 'develop' of https://github.com/BinaryStudioAcademy/bsa-2020-whale into develop
+
+[33mcommit 649224017743c7d2745813fadfa1c835a010565d[m
+Author: denbell <denbell@ukr.net>
+Date:   Thu Aug 13 15:37:06 2020 +0300
+
+    Add minor fixes
+
+[33mcommit fd723626bf25003e3a070d80d137fff2095cb514[m
+Author: Nikita Krasnov <nikita.krasnov@binary-studio.com>
+Date:   Thu Aug 13 15:36:58 2020 +0300
+
+    Enabled prod mode for docker
+
+[33mcommit cc68331e94b9da3789b46a6d62fa193ba0cdb3b8[m
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Thu Aug 13 15:32:11 2020 +0300
+
+    Bind avatar with user
+
+[33mcommit 49d19b8fe9beb0ac504c6e3845cc01b82c3d8ce0[m
+Merge: dad40d6 e343d0d
+Author: denbell <denbell@ukr.net>
+Date:   Thu Aug 13 15:13:47 2020 +0300
+
+    Merge branch 'develop' of https://github.com/BinaryStudioAcademy/bsa-2020-whale into develop
+
+[33mcommit dad40d67a7a8f7b09b9181cc7fc5ee2d1514a31a[m
+Author: denbell <denbell@ukr.net>
+Date:   Thu Aug 13 15:13:05 2020 +0300
+
+    Fix double participants
+
+[33mcommit e343d0d397292c449b6740df907ea88c38298f7b[m
+Author: Nikita Krasnov <nikita.krasnov@binary-studio.com>
+Date:   Thu Aug 13 15:05:54 2020 +0300
+
+    Added production urls
+
+[33mcommit 3cce97a78bb54e4dd67ce95e9e5a3222634c1d17[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Thu Aug 13 14:54:48 2020 +0300
+
+    Call methods added to chat hub
+
+[33mcommit e1558d5c262a0c778684384e1e5570fb7c9d6172[m
+Merge: a421d80 78cc790
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Thu Aug 13 14:23:28 2020 +0300
+
+    Merge pull request #63 from BinaryStudioAcademy/hotfix/fix-null-when-loggingOut
+    
+    Hotfix/fix null when logging out
+
+[33mcommit 78cc79016d6ed352484ac02f82f58723863c3db5[m
+Merge: bdb9fed a421d80
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Thu Aug 13 14:22:39 2020 +0300
+
+    Merge branch 'develop' into hotfix/fix-null-when-loggingOut
+
+[33mcommit bdb9fed1f3649bc1799bfb30235aec004dbfd61a[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Thu Aug 13 14:15:13 2020 +0300
+
+    fix null bug when loggingOut
+
+[33mcommit a421d80140356585c1713d0216c503531a30be12[m
+Merge: c201c07 79aedd3
+Author: Nikita Krasnov <nikita.krasnov@binary-studio.com>
+Date:   Thu Aug 13 14:11:23 2020 +0300
+
+    Merge branch 'develop' of https://github.com/BinaryStudioAcademy/bsa-2020-whale into develop
+
+[33mcommit c201c07163d01456ef4f7fd7d06ad61ee759656d[m
+Author: Nikita Krasnov <nikita.krasnov@binary-studio.com>
+Date:   Thu Aug 13 14:11:07 2020 +0300
+
+    Added deploy script
+
+[33mcommit 79aedd3e0c65ebc85d7280539d6ddbb28103276e[m
+Merge: 7394ec1 41f7ca4
+Author: irynakopyl <52530587+irynakopyl@users.noreply.github.com>
+Date:   Thu Aug 13 13:55:38 2020 +0300
+
+    Merge pull request #62 from BinaryStudioAcademy/feature/profile-settings
+    
+    Feature/profile settings ability to change added
+
+[33mcommit 41f7ca438148a10c95a4d06aa2c87126a8ca43a5[m
+Merge: 6d8a412 7394ec1
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Thu Aug 13 13:54:04 2020 +0300
+
+    Merge branch 'develop' into feature/profile-settings
+
+[33mcommit 6d8a4129da20bcf2034b3f77c0d4da40b859a7ee[m
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Thu Aug 13 13:46:29 2020 +0300
+
+    profile settings works
+
+[33mcommit 7394ec1c92edba41239738dc555e495c38dc9e79[m
+Author: Nikita Krasnov <nikita.krasnov@binary-studio.com>
+Date:   Thu Aug 13 13:38:11 2020 +0300
+
+    Fixed docker-compose
+
+[33mcommit b7bfafe29742bb1344c344d2d0fa4c6df83a8159[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Thu Aug 13 13:33:12 2020 +0300
+
+    Added incoming call notification
+
+[33mcommit 15122532f263796acd23b0fe4fa74efc02efe70d[m
+Merge: d61a1bc 0688153
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Thu Aug 13 13:18:29 2020 +0300
+
+    Merge pull request #61 from BinaryStudioAcademy/feature/add-spiner
+    
+    Feature/add spiner
+
+[33mcommit 0688153e8f18bd6262d37d142f858607bb2606b1[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Thu Aug 13 13:16:28 2020 +0300
+
+    Fix header spiner
+
+[33mcommit de54771946de58b46a1d5aee1ab32c7cb73e409e[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Thu Aug 13 13:13:26 2020 +0300
+
+    Add redirect on buttons in shedule-meeting page
+
+[33mcommit d35d1e3b04ebf9febc69ee6ed3ff4504f1bbb30b[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Thu Aug 13 13:12:36 2020 +0300
+
+    Update check access to media guard
+
+[33mcommit d32d081711793d7ea20ff9d7d72773cd1202c22a[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Thu Aug 13 13:11:37 2020 +0300
+
+    Add spiners to loading elements
+
+[33mcommit ac9ac8ca67831f8a5916fe5dac9d95212b29a726[m
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Thu Aug 13 12:28:13 2020 +0300
+
+    Changed current user layout to fit screen width
+
+[33mcommit d61a1bcfe3aa715c0e6b538df6d0476ca49bbdff[m
+Merge: f1dca54 d724877
+Author: denbell <denbell@ukr.net>
+Date:   Thu Aug 13 12:21:52 2020 +0300
+
+    Merge branch 'develop' of https://github.com/BinaryStudioAcademy/bsa-2020-whale into develop
+
+[33mcommit d724877c603b232d6f57db2124c7fc26083c93d9[m
+Merge: ce4f43c 97e5265
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Thu Aug 13 12:20:22 2020 +0300
+
+    Merge into develop
+
+[33mcommit 97e52652b40261c15fc4e2c2963d7dd384ea76e7[m
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Thu Aug 13 12:16:50 2020 +0300
+
+    Implement ability test micro with record
+
+[33mcommit f1dca54a8272275d0d949ccaf5424ad34ca10fd5[m
+Author: denbell <denbell@ukr.net>
+Date:   Thu Aug 13 12:16:28 2020 +0300
+
+    Fix connect before user received and connection data participant
+
+[33mcommit ce4f43c0b353821172a75e61a3aa6a4a528f87d4[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Thu Aug 13 11:53:21 2020 +0300
+
+    Save google client id into environment
+
+[33mcommit f984ba4137b5f4e7f9b1811ba51868a5ec65387a[m
+Author: Nikita Krasnov <nikita.krasnov@binary-studio.com>
+Date:   Thu Aug 13 11:27:35 2020 +0300
+
+    Fixed merge issue
+
+[33mcommit 4500eaae50f171299d3214ccb7534fa05f104184[m
+Merge: 355186f c341301
+Author: Nikita Krasnov <nikita.krasnov@binary-studio.com>
+Date:   Thu Aug 13 11:24:51 2020 +0300
+
+    merge with develop
+
+[33mcommit 355186f32de086574621800258994d7aff296de1[m
+Author: Nikita Krasnov <nikita.krasnov@binary-studio.com>
+Date:   Thu Aug 13 11:22:35 2020 +0300
+
+    Added docker support
+
+[33mcommit c341301d1e0b9c3097e76ee74948f08a3e98c75d[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Thu Aug 13 11:17:11 2020 +0300
+
+    Fix one more bug with authorization
+
+[33mcommit 83ea4b8c4f1692b6e32b8525eeb54983d9ad5a1c[m
+Merge: 8b9c638 9c568d0
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Thu Aug 13 10:52:04 2020 +0300
+
+    Merge pull request #59 from BinaryStudioAcademy/hotfix/unauthorized
+    
+    Hotfix/unauthorized
+
+[33mcommit 9c568d0ea56645e9db97f86740159d269b6a987c[m[33m ([m[1;31morigin/hotfix/unauthorized[m[33m)[m
+Merge: 708a1c7 8b9c638
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Thu Aug 13 10:51:08 2020 +0300
+
+    Merge branch 'develop' into hotfix/unauthorized
+
+[33mcommit 708a1c73303e6293f016448887a4c8681b5a1d76[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Thu Aug 13 10:49:58 2020 +0300
+
+    Fix bug with unauthorized (exactly)
+
+[33mcommit 8b9c638fd34692b383fbb64f858fd5abbee30c33[m
+Merge: 009355d d846186
+Author: Anton Komisarov <32576664+apofis96@users.noreply.github.com>
+Date:   Thu Aug 13 10:41:44 2020 +0300
+
+    Merge pull request #58 from BinaryStudioAcademy/featrue/meeting-statistics-time
+    
+    Featrue/meeting statistics time
+
+[33mcommit d846186ff8eb90efbe001c444ad0f5253fd060fe[m
+Merge: 6a6820d 009355d
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Thu Aug 13 10:37:33 2020 +0300
+
+    Merge branch 'develop' into featrue/meeting-statistics-time
+
+[33mcommit 6a6820dced48762e85c45c697c9ea8c4cd68c21c[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Thu Aug 13 10:36:14 2020 +0300
+
+    Add meeting  time statistics
+
+[33mcommit 134103fd4e7ca79097ded28d16a327a773109def[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Thu Aug 13 10:36:09 2020 +0300
+
+    Fix unauthorized error
+
+[33mcommit 009355d94f553c0b6c42856a891ec79df26629f1[m
+Author: Alexander Belokon <sascha.belokon@gmail.com>
+Date:   Thu Aug 13 09:58:33 2020 +0300
+
+    hotfix
+
+[33mcommit 084e4e4eadf889e730fe53acf235b9e60f9a67f9[m
+Merge: 79dbfcc 126fe52
+Author: alex-bilokon <62422024+alex-bilokon@users.noreply.github.com>
+Date:   Thu Aug 13 08:26:29 2020 +0200
+
+    Merge pull request #57 from BinaryStudioAcademy/feature/avatarURL
+    
+    Added uploading avatar.
+
+[33mcommit 126fe52b07cf73c42550c13f5b34dfb470a92d9a[m[33m ([m[1;31morigin/feature/avatarURL[m[33m)[m
+Author: Alexander Belokon <sascha.belokon@gmail.com>
+Date:   Thu Aug 13 05:08:53 2020 +0300
+
+    Added uploading avatar.
+
+[33mcommit 79dbfccd73f6c8b1f5d63b379650e1a85d43f7cc[m[33m ([m[1;31morigin/feature/contacts-chat[m[33m)[m
+Merge: 2839641 acc82dd
+Author: irynakopyl <52530587+irynakopyl@users.noreply.github.com>
+Date:   Thu Aug 13 02:22:17 2020 +0300
+
+    Merge pull request #56 from BinaryStudioAcademy/feature/contacts-chat
+    
+    Feature/contacts chat FINALLY done
+
+[33mcommit acc82dd83e11fd14812d50698afe316f0f65df4f[m
+Merge: fd42748 2839641
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Thu Aug 13 02:21:06 2020 +0300
+
+    Merge branch 'develop' into feature/contacts-chat
+
+[33mcommit fd42748247b6ccc4f6cda4fe77ce5cb6d33df9d8[m
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Thu Aug 13 02:20:13 2020 +0300
+
+    chat between contacts is done
+
+[33mcommit 28396417e7ced17c1bd713881f351f105a73e799[m
+Author: Alexander Belokon <sascha.belokon@gmail.com>
+Date:   Thu Aug 13 01:57:58 2020 +0300
+
+    Hotfix for the site to work.
+
+[33mcommit 853bb555a695d5e287e02c8ff2716968efab5c9e[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Thu Aug 13 00:51:56 2020 +0300
+
+    added call dialog modal
+
+[33mcommit f025efe7a38140ec7b6590dfec88358a9367e384[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Wed Aug 12 20:24:22 2020 +0300
+
+    Update ContactsService.cs
+
+[33mcommit 35a6f312ea1b3c526600f989681a9d2d15f39308[m
+Merge: 1d77d8b 740303b
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Wed Aug 12 18:23:08 2020 +0300
+
+    Merge pull request #55 from BinaryStudioAcademy/feature/google-calendar
+    
+    Feature/google calendar
+
+[33mcommit 740303be5bbfab7b7f778977bd48623829fdcf04[m[33m ([m[1;31morigin/feature/google-calendar[m[33m)[m
+Merge: 6ac1758 1d77d8b
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Wed Aug 12 18:22:09 2020 +0300
+
+    Merge branch 'develop' into feature/google-calendar
+
+[33mcommit 6ac17589dee49435268f32a319aa2e4c76c8098b[m
+Merge: 7f19459 97cc0fe
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Wed Aug 12 18:21:13 2020 +0300
+
+    Merge branch 'develop' into feature/google-calendar
+
+[33mcommit 7f194599c48c6b52ff24d07c6752d044b5d294d7[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Wed Aug 12 18:19:52 2020 +0300
+
+    Delete userService
+
+[33mcommit ba9d62ec4715e28d60aeaa2195d94f99b680fac1[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Wed Aug 12 18:13:06 2020 +0300
+
+    Add ability to save event into google accaunt from shedule meeting
+
+[33mcommit 1d77d8bb6e78e6da4f372bc1473dae9af71bee0b[m
+Merge: 97cc0fe 1e116d0
+Author: Anton Komisarov <32576664+apofis96@users.noreply.github.com>
+Date:   Wed Aug 12 17:54:39 2020 +0300
+
+    Merge pull request #54 from BinaryStudioAcademy/hotfix/meaningful-error-messages
+    
+    Fix logging custom errors
+
+[33mcommit 1e116d03e42187736182a545b903887262324efc[m[33m ([m[1;31morigin/hotfix/meaningful-error-messages[m[33m)[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Wed Aug 12 17:53:42 2020 +0300
+
+    Fix logging custom errors
+
+[33mcommit 6b08dcbada9ff9fc1b9583dc4441a72e373518e3[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Wed Aug 12 17:30:38 2020 +0300
+
+    Alter Contact and Settings structure
+
+[33mcommit 69a42900be8e8361d1ebc34e7c38e11f34da4235[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Wed Aug 12 16:43:31 2020 +0300
+
+    fix date format, add google-calendar service
+
+[33mcommit 7cd2149f59ff34be65d0bd103b1c6d2552f85abe[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Wed Aug 12 15:56:29 2020 +0300
+
+    GroupJoin removed
+
+[33mcommit 9992e9e60a1eb378906b66da3a89fe016320a63d[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Wed Aug 12 15:32:48 2020 +0300
+
+    add working sign in and log out
+
+[33mcommit 97cc0fef38715b7e7335826be3185bf43b8834ef[m
+Merge: c72b943 6ac6e8c
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Wed Aug 12 14:40:43 2020 +0300
+
+    Merge pull request #53 from BinaryStudioAcademy/feature/webcamera-avatar
+    
+    Feature/webcamera avatar
+
+[33mcommit 6ac6e8cdf9421e50227abce5069073eb3214a356[m[33m ([m[1;31morigin/feature/webcamera-avatar[m[33m)[m
+Merge: 072a832 c72b943
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Wed Aug 12 14:39:47 2020 +0300
+
+    Merge branch 'develop' of https://github.com/BinaryStudioAcademy/bsa-2020-whale into feature/webcamera-avatar
+
+[33mcommit 072a8327abdc8fe2f10cc86edf738f9904e6a0bc[m
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Wed Aug 12 14:39:05 2020 +0300
+
+    switch off camera when unused
+
+[33mcommit f2466f15efb373b61f637753ba130ae00773b4b6[m
+Merge: 749cbc5 122df8c
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Wed Aug 12 14:14:32 2020 +0300
+
+    Merge branch 'feature/contacts-chat' of https://github.com/BinaryStudioAcademy/bsa-2020-whale into feature/contacts-chat
+
+[33mcommit c72b94341bcb1af9b3f2197e37a6276457976385[m
+Merge: 4891a96 01bbb40
+Author: Olya <50491792+0lyaMelnyk@users.noreply.github.com>
+Date:   Wed Aug 12 14:12:28 2020 +0300
+
+    Merge pull request #52 from BinaryStudioAcademy/bugfix/settings-page
+    
+    Fix bug with ui on settings page and input devices
+
+[33mcommit 01bbb400cb5d987592427e1b48aaa47d5c43d76b[m[33m ([m[1;31morigin/bugfix/settings-page[m[33m)[m
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Wed Aug 12 14:10:34 2020 +0300
+
+    Fix bug with ui and input devices
+
+[33mcommit 749cbc5b7673995b55497a6be5cb7029a4910938[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Wed Aug 12 14:09:38 2020 +0300
+
+    Set target user to FirstMember
+
+[33mcommit 4891a966b3585f641d45c84b63d8cd2b7f7988b0[m
+Merge: 737890f 122df8c
+Author: irynakopyl <52530587+irynakopyl@users.noreply.github.com>
+Date:   Wed Aug 12 14:00:00 2020 +0300
+
+    Merge pull request #51 from BinaryStudioAcademy/feature/contacts-chat
+    
+    Feature/contacts chat is made
+
+[33mcommit b8c4369ba47be8dd41287ff4f3627927cd24e24b[m
+Merge: 668619f 737890f
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Wed Aug 12 13:57:40 2020 +0300
+
+    Merge branch 'develop' of https://github.com/BinaryStudioAcademy/bsa-2020-whale into feature/webcamera-avatar
+
+[33mcommit 122df8c1446c4627f9d0aeb0892d3dcbd57d3c09[m
+Merge: 92b2290 737890f
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Wed Aug 12 13:40:27 2020 +0300
+
+    Merge branch 'develop' into feature/contacts-chat
+
+[33mcommit 737890f42e1aface23df81e93b0921ef07bc9501[m
+Merge: b0526b7 a577e77
+Author: denys-belik <53171742+denbell5@users.noreply.github.com>
+Date:   Wed Aug 12 13:27:32 2020 +0300
+
+    Merge pull request #50 from BinaryStudioAcademy/hotfix/poll-fullscreen
+    
+    Add polls to fullscreen
+
+[33mcommit a577e77ebd666d9f94f3cf14e49ffab6e4ab72c3[m[33m ([m[1;31morigin/hotfix/poll-fullscreen[m[33m)[m
+Author: denbell <denbell@ukr.net>
+Date:   Wed Aug 12 13:24:02 2020 +0300
+
+    Add polls to fullscreen
+
+[33mcommit b0526b70edd793cbb6d14671467b26c64d81502b[m
+Merge: 5ec9463 ec89dbd
+Author: denys-belik <53171742+denbell5@users.noreply.github.com>
+Date:   Wed Aug 12 13:11:44 2020 +0300
+
+    Merge pull request #49 from BinaryStudioAcademy/meeting-poll-results/merge-branch
+    
+    Meeting poll results/merge branch
+
+[33mcommit ec89dbde656c103173bf8128d82acd746515cd0e[m[33m ([m[1;31morigin/meeting-poll-results/merge-branch[m[33m)[m
+Author: denbell <denbell@ukr.net>
+Date:   Wed Aug 12 13:09:21 2020 +0300
+
+    Minor poll fixes
+
+[33mcommit 5ec946309b380598038936c9e2f47df5f33bbde9[m
+Merge: 6f7718f e94a5f2
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Wed Aug 12 13:04:03 2020 +0300
+
+    Merge pull request #48 from BinaryStudioAcademy/feature/notification-feed
+    
+    Add general notification feed
+
+[33mcommit 92b2290d13611762a79a333f920262b71c9606af[m
+Merge: 9cef3a6 6f7718f
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Wed Aug 12 13:03:13 2020 +0300
+
+    Merge branch 'develop' into feature/contacts-chat
+
+[33mcommit e94a5f2ce48b034abff1f2510851fe72622a1e07[m[33m ([m[1;31morigin/feature/notification-feed[m[33m)[m
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Wed Aug 12 13:02:53 2020 +0300
+
+    Add general notification feed
+
+[33mcommit 92ef952cccf9c01afbcfc71972af6a0a37472820[m
+Merge: 356f1a2 6f7718f
+Author: denbell <denbell@ukr.net>
+Date:   Wed Aug 12 12:25:54 2020 +0300
+
+    Merge branch 'develop' into meeting-poll-results/merge-branch
+
+[33mcommit 356f1a25297692e9bd3554fcdd68415e158fc29d[m
+Author: denbell <denbell@ukr.net>
+Date:   Wed Aug 12 12:24:44 2020 +0300
+
+    Make set methods async
+
+[33mcommit 6f7718f0a9f829d6a181a95e5e8eed847b5eba0e[m
+Merge: de14bda 7447a15
+Author: denbell <denbell@ukr.net>
+Date:   Wed Aug 12 12:10:28 2020 +0300
+
+    Merge branch 'develop' of https://github.com/BinaryStudioAcademy/bsa-2020-whale into develop
+
+[33mcommit de14bda4df4c99921bec238619c449400d4f0544[m
+Author: denbell <denbell@ukr.net>
+Date:   Wed Aug 12 12:09:13 2020 +0300
+
+    Fix name length check
+
+[33mcommit 7447a15d5b36e35151f4d34138287f799266a664[m[33m ([m[1;31morigin/other/encrypt-password[m[33m)[m
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Wed Aug 12 11:58:11 2020 +0300
+
+    Add encrypt password
+
+[33mcommit b79a51618bee01306af2b4d06aab1ba02100a4b8[m
+Merge: f17e3d8 953305a
+Author: denbell <denbell@ukr.net>
+Date:   Wed Aug 12 11:38:13 2020 +0300
+
+    Merge branch 'develop' into meeting-poll-results/merge-branch
+
+[33mcommit 9cef3a690d524a92763ff70f6ccf71231a771f12[m
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Wed Aug 12 10:57:16 2020 +0300
+
+    chat changes
+
+[33mcommit f17e3d88d6c42d69bcd4320a008a16e0d7281340[m[33m ([m[1;31morigin/other/meeting-polls/poll-answers-array[m[33m)[m
+Author: denbell <denbell@ukr.net>
+Date:   Wed Aug 12 10:44:31 2020 +0300
+
+    Add poll results frontend
+
+[33mcommit 69f5476989e11a658607f2ac2bab4d98abb818f1[m
+Author: denbell <denbell@ukr.net>
+Date:   Wed Aug 12 10:42:04 2020 +0300
+
+    Add poll results backend
+
+[33mcommit 953305abf9f7fac436feb6e5cf2da177e86a62d6[m[33m ([m[1;31morigin/feature/swagger[m[33m)[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Wed Aug 12 10:36:24 2020 +0300
+
+    Swagger added
+
+[33mcommit 5c84c7dbd73142f369ec2704dee4b7cbfaf56ec6[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Wed Aug 12 09:53:11 2020 +0300
+
+    Added z-index for tools
+
+[33mcommit 4bf8eda014c6c22a241455b776f38b7630eb5197[m
+Merge: 15a0a14 4a56092
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Wed Aug 12 08:19:08 2020 +0300
+
+    Merge branch 'develop' into feature/google-calendar
+
+[33mcommit 15a0a1440f09332d3e9ad7313f7fbcd88a7d5657[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Wed Aug 12 08:15:13 2020 +0300
+
+    configure gapi
+
+[33mcommit 4a560925d52a0aa7ca19fd6e212162ac4571d8e7[m
+Merge: 06d599b 34aad8c
+Author: alex-bilokon <62422024+alex-bilokon@users.noreply.github.com>
+Date:   Wed Aug 12 02:41:04 2020 +0200
+
+    Merge pull request #47 from BinaryStudioAcademy/feature/upload-avatar
+    
+    hotfix and refactoring code
+
+[33mcommit 34aad8c1989c8cebd41aaf85dab1f9e80d0ad192[m[33m ([m[1;31morigin/feature/upload-avatar[m[33m)[m
+Author: Alexander Belokon <sascha.belokon@gmail.com>
+Date:   Wed Aug 12 03:37:16 2020 +0300
+
+    hotfix and refactoring code
+
+[33mcommit a8268ff33f1a9ef1cb7ea7fd473d256d84325d20[m
+Merge: 99b8768 06d599b
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Wed Aug 12 02:09:42 2020 +0300
+
+    chat components works
+
+[33mcommit 99b876856d9b899e4dfe65ae2d5068fa637cdd6e[m
+Merge: e10604e b3b26b7
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Wed Aug 12 01:55:53 2020 +0300
+
+    contacts controller
+
+[33mcommit e10604ec68f5e23dae2aa8d286dda0ddbe8a66c1[m
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Wed Aug 12 01:52:27 2020 +0300
+
+    chat components works
+
+[33mcommit 06d599bda118cc073fb4137a7aebd897a3e40590[m
+Merge: 42c955a b9c391c
+Author: alex-bilokon <62422024+alex-bilokon@users.noreply.github.com>
+Date:   Wed Aug 12 00:03:19 2020 +0200
+
+    Merge pull request #46 from BinaryStudioAcademy/feature/upload-avatar
+    
+    added uploading file for user avatar
+
+[33mcommit b9c391c29da6c08de1b931f13238033483f6a4a8[m
+Author: Alexander Belokon <sascha.belokon@gmail.com>
+Date:   Wed Aug 12 00:57:00 2020 +0300
+
+    added uploading file for user avatar
+
+[33mcommit 42c955ac4dc6a54c2e790b113c4b5fd7e387f130[m
+Merge: 3f6051b f95b679
+Author: Anton Komisarov <32576664+apofis96@users.noreply.github.com>
+Date:   Tue Aug 11 23:23:39 2020 +0300
+
+    Merge pull request #45 from BinaryStudioAcademy/feature/meaningful-error-messages
+    
+    Feature/meaningful error messages
+
+[33mcommit f95b679a02b7b45bd8e91c00d26f865f13e06fba[m[33m ([m[1;31morigin/feature/meaningful-error-messages[m[33m)[m
+Merge: b4a809a 3f6051b
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Tue Aug 11 23:21:47 2020 +0300
+
+    Merge branch 'develop' into feature/meaningful-error-messages
+
+[33mcommit b4a809a2f4f55e2aaae5567d95b266bcf5cac1bd[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Tue Aug 11 23:15:32 2020 +0300
+
+    Implement meaningful error messages
+    
+    HttpService now rethrow error e.g.: {statusCode: 404, Message: "Entity e1 was not found."}. At backend you mast not use try-catch at Controllers. For 4xx Exceptions use custom excClasses from bll.Exceptions or implement another one, that inherit from BaseCustomException
+
+[33mcommit 3f6051beb7418983967a0eb7a32d7d0c1727bea4[m
+Merge: c8e633f a8d7ab1
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Tue Aug 11 19:40:43 2020 +0300
+
+    Merge branch 'feature/end-meeting' into develop
+
+[33mcommit a8d7ab16908d6509ce66e0b35d2083a192f39445[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Tue Aug 11 19:39:57 2020 +0300
+
+    fix meeting page leaving
+
+[33mcommit 724615de63993cdb5ea8a3356fbc8ee878d1f2e0[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Tue Aug 11 19:21:16 2020 +0300
+
+    Added ability to end meeting
+
+[33mcommit 2641657592ebda87911233076543bc52db6ee058[m
+Author: denbell <denbell@ukr.net>
+Date:   Tue Aug 11 18:18:14 2020 +0300
+
+    Add poll results
+
+[33mcommit b3b26b7afa913bfe832fbdf66d6584f5fb686153[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Tue Aug 11 17:54:15 2020 +0300
+
+    Fix contactController
+
+[33mcommit c8e633fe457c198bba35c5ebaa85835da2d8f0e2[m[33m ([m[1;31morigin/feature/meeting-page[m[33m)[m
+Merge: a350fb5 d1ffed8
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Tue Aug 11 17:29:07 2020 +0300
+
+    Merge branch 'feature/add-participant-video-card' into develop
+
+[33mcommit d1ffed8283c6270ba337731d591d45bffea8cbd4[m[33m ([m[1;31morigin/feature/add-participant-video-card[m[33m)[m
+Author: Smyrechynskyi <41690469+Smyrechynskyi@users.noreply.github.com>
+Date:   Tue Aug 11 17:26:58 2020 +0300
+
+    Added a video card component as a conference participant view. Added model 'UserMediaData' with a data for the card.
+
+[33mcommit f4dbf14a66c3747226115780b58309b974474dda[m
+Merge: be17fa2 a350fb5
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Tue Aug 11 16:54:08 2020 +0300
+
+    Merge branch 'develop' into feature/contacts-chat
+
+[33mcommit be17fa21138d0da9be4ec1f91d187e308206814c[m
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Tue Aug 11 16:48:30 2020 +0300
+
+    some more chat fixes
+
+[33mcommit a350fb5334fc026c5a8150e26bfb6f5c33f04e73[m
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Tue Aug 11 16:43:05 2020 +0300
+
+    Update profile-page.component.ts
+
+[33mcommit 668619fb33a1d5d883dc2baf5a1b8ce83c024e9f[m
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Tue Aug 11 16:28:36 2020 +0300
+
+    Fix camera duplicate
+
+[33mcommit 3726ace6f88392ac9bf193bd3b7d48f3dad8d719[m
+Merge: d4c1241 662905b
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Tue Aug 11 15:46:46 2020 +0300
+
+    Merge pull request #44 from BinaryStudioAcademy/feature/webcamera-avatar
+    
+    Implement the ability to upload user avatar from WebCamera
+
+[33mcommit 662905be5336cc41745b8cc87450728be9f0dee5[m
+Merge: e352922 d4c1241
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Tue Aug 11 15:45:48 2020 +0300
+
+    Merge branch 'develop' into feature/webcamera-avatar
+
+[33mcommit e3529221cf53efe1ac5568a5187f6eee3ea22a0b[m
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Tue Aug 11 15:42:44 2020 +0300
+
+    Implement the ability to upload user avatar from WebCamera
+
+[33mcommit b66e2e6903d4aa5939a05fd30fe144ef56693fda[m
+Merge: a235036 d4c1241
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Tue Aug 11 14:44:58 2020 +0300
+
+    chat conficts
+
+[33mcommit a2350365ae16fc0da7b8be1c73122c08f6375a61[m
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Tue Aug 11 13:33:29 2020 +0300
+
+    chat fixxes
+
+[33mcommit d4c1241fe9fda11c21ade6bf54905f7ee5fce2e8[m
+Merge: bbf68db 2937baa
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Tue Aug 11 11:36:30 2020 +0300
+
+    Merge branch 'feature/participants' into develop
+
+[33mcommit 2937baa132a0ac5d0ade3eb9bfc74d07624e89c7[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Tue Aug 11 11:35:28 2020 +0300
+
+    participants crud added
+
+[33mcommit bbf68db040116086266904e812fa8773e457a47e[m
+Merge: 33d462b 04414cc
+Author: Ivan Grynenko <36521919+IGrynenko@users.noreply.github.com>
+Date:   Tue Aug 11 11:05:00 2020 +0300
+
+    Merge pull request #43 from BinaryStudioAcademy/feature/fullscreen
+    
+    Adding fullscreen mode for the meeting page
+
+[33mcommit e88c82d3a8afcd33d4d3f7f7a02d2328a6dd1ff5[m[33m ([m[1;31morigin/other/meeting-polls/merge[m[33m)[m
+Author: denbell <denbell@ukr.net>
+Date:   Tue Aug 11 11:04:40 2020 +0300
+
+    Add poll models
+
+[33mcommit 04414ccccf43b7cd48d1bc49e117c82ab3ffebfb[m[33m ([m[1;31morigin/feature/fullscreen[m[33m, [m[1;32mfeature/fullscreen[m[33m)[m
+Merge: 9268fba 33d462b
+Author: Ivan Grynenko <grynenko.ivan@gmail.com>
+Date:   Tue Aug 11 11:02:33 2020 +0300
+
+    Merging
+
+[33mcommit 9268fbaa51ac72d5af766f75b1e81782779b967f[m
+Author: Ivan Grynenko <grynenko.ivan@gmail.com>
+Date:   Tue Aug 11 10:21:36 2020 +0300
+
+    Adding fullscreen mode
+
+[33mcommit 33d462b931eaab85931116e5821cfa36f9be34c7[m
+Merge: 49f2c71 d50fff0
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Tue Aug 11 09:59:17 2020 +0300
+
+    Merge branch 'other/connect-all-pages' into develop
+
+[33mcommit d50fff01bea5990cb21d92edc3e865191fe17ceb[m[33m ([m[1;31morigin/other/connect-all-pages[m[33m)[m
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Tue Aug 11 09:58:59 2020 +0300
+
+    fix log out in header
+
+[33mcommit 49f2c718a3ac6631cdb06a6286c3e788a0c4e63a[m
+Merge: 029d314 2a3556a
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Tue Aug 11 09:08:53 2020 +0300
+
+    Merge pull request #42 from BinaryStudioAcademy/hotfix/fix-bug-with-meetingId
+    
+    Hotfix/fix bug with meeting
+
+[33mcommit 2a3556aa45f0ed3f826523ed125e7619308e6d8e[m[33m ([m[1;31morigin/hotfix/fix-bug-with-meetingId[m[33m)[m
+Merge: 9319468 029d314
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Tue Aug 11 09:08:21 2020 +0300
+
+    Merge branch 'develop' into hotfix/fix-bug-with-meetingId
+
+[33mcommit 93194681638d62d53faad755fcb82f9478b31374[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Tue Aug 11 09:06:39 2020 +0300
+
+    Fix bug with meetingId and password
+
+[33mcommit dd5705f5b39a37d61925787b8be28750e0c222be[m
+Author: denbell <denbell@ukr.net>
+Date:   Tue Aug 11 08:52:04 2020 +0300
+
+    Change PollHub logic to MeetingHub
+
+[33mcommit 029d314e0837d6df97c87c6ebebc1e302544b25c[m
+Merge: 318be23 f59a9b6
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Tue Aug 11 08:47:13 2020 +0300
+
+    Merge branch 'feature/meeting-simplechat' into develop
+
+[33mcommit f59a9b6c8890f6c2e80aeeb1209f8a73b653a728[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Tue Aug 11 08:33:03 2020 +0300
+
+    get message author
+
+[33mcommit 318be23d1148a6d8f8c056a370d4e97c8c056416[m
+Merge: 390f2a5 16e7e6e
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Tue Aug 11 00:11:37 2020 +0300
+
+    resolving merge conflict when merging meeting-simplechat
+
+[33mcommit 16e7e6e79d526029e08097c7f75779b9a1b2b6d5[m[33m ([m[1;31morigin/feature/meeting-simplechat[m[33m)[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Mon Aug 10 23:20:18 2020 +0300
+
+    added messages loading from redis
+
+[33mcommit 390f2a51a4d42cac91708267858cf065ba48fd36[m
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Mon Aug 10 23:05:29 2020 +0300
+
+    connect all pages via buttons and links
+
+[33mcommit c6eb7a88774297f9fc823736f476f07ec35c3634[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Mon Aug 10 21:44:34 2020 +0300
+
+    Update WhaleDbContextModelSnapshot.cs
+
+[33mcommit 51d13595831a1a5cb53748232461d826bd8150ad[m
+Merge: f5468c1 6d1f1d9
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Mon Aug 10 21:33:25 2020 +0300
+
+    Merge branch 'feature/contacts-chat-backend' into feature/contacts-chat
+
+[33mcommit 6d1f1d993e911048dbb6d792c797132405a595d9[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Mon Aug 10 21:26:16 2020 +0300
+
+    Update ConfigurationService.cs
+
+[33mcommit 0678fca1fb08f4a12101f5838b761ba371678f0b[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Mon Aug 10 21:23:35 2020 +0300
+
+    Revert "Revert "Alter contacts at backend""
+    
+    This reverts commit 6691720bd6ee8cef3cc64140de3c1243dd296eba.
+
+[33mcommit 6691720bd6ee8cef3cc64140de3c1243dd296eba[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Mon Aug 10 21:22:14 2020 +0300
+
+    Revert "Alter contacts at backend"
+    
+    This reverts commit 5f0ff2ef5c6ab80af262df68fc99afcc552f6ad1.
+
+[33mcommit 5f0ff2ef5c6ab80af262df68fc99afcc552f6ad1[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Mon Aug 10 21:19:56 2020 +0300
+
+    Alter contacts at backend
+
+[33mcommit f5468c13fe3cd87ceb54afba5ac1de08d305d695[m
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Mon Aug 10 21:15:29 2020 +0300
+
+    chat for contacts added
+
+[33mcommit 08065afebe33e990a26d92ceb3abaf608952014c[m
+Merge: 1d55470 adf28cf
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Mon Aug 10 20:11:06 2020 +0300
+
+    Merge branch 'feature/setting-page' into develop
+
+[33mcommit adf28cffca6d7df1f4d1e676f3b2ffb5f60fca56[m
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Mon Aug 10 20:10:43 2020 +0300
+
+    create and design setting page
+
+[33mcommit 54d373ad295113899fa980509ed9d7312fa896cb[m
+Merge: 04be305 1d55470
+Author: denbell <denbell@ukr.net>
+Date:   Mon Aug 10 19:43:44 2020 +0300
+
+    Merge branch 'develop' into other/meeting-polls/merge
+
+[33mcommit 04be30513fb471a08b6bff7ec4885f89814926aa[m[33m ([m[1;31morigin/feature/meeting-polls[m[33m)[m
+Author: denbell <denbell@ukr.net>
+Date:   Mon Aug 10 18:59:40 2020 +0300
+
+    Update shared.module.ts
+
+[33mcommit a2bd92f7e832e0b1de902c546b18290ac54afb0f[m
+Author: denbell <denbell@ukr.net>
+Date:   Mon Aug 10 18:59:36 2020 +0300
+
+    Add polls to meeting component
+
+[33mcommit 9d7e340022eb88ba68b20a1b0a519c8bf2fbcd9d[m
+Author: denbell <denbell@ukr.net>
+Date:   Mon Aug 10 18:59:21 2020 +0300
+
+    Create poll component
+
+[33mcommit 7863c81bc93b275e3cfedd9fc2c12436d2e3af75[m
+Author: denbell <denbell@ukr.net>
+Date:   Mon Aug 10 18:58:47 2020 +0300
+
+    Create poll-create component
+
+[33mcommit 0d1009f58ed2a389709f1d97b687f221b4cdd218[m
+Author: denbell <denbell@ukr.net>
+Date:   Mon Aug 10 18:58:23 2020 +0300
+
+    Create poll models
+
+[33mcommit c62d1e8bebb0dcc37e642a8ba3b37b0db30fa87c[m
+Author: denbell <denbell@ukr.net>
+Date:   Mon Aug 10 18:54:58 2020 +0300
+
+    Poll backend initial
+
+[33mcommit 1d554708635cb3eb991041148fe2d8d72d051035[m
+Merge: 3ea25d9 b515913
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Mon Aug 10 16:53:37 2020 +0300
+
+    Merge pull request #41 from BinaryStudioAcademy/feature/homepage-after-login
+    
+    Redirect user to homepage after logining
+
+[33mcommit b515913dc6022e54743262aa0042feece927ba6a[m[33m ([m[1;31morigin/feature/homepage-after-login[m[33m)[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Mon Aug 10 16:53:17 2020 +0300
+
+    beautify html
+
+[33mcommit 164a6b2b593e7d1026e7f0541ff3d382c33d050d[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Mon Aug 10 16:52:14 2020 +0300
+
+    Redirect user to homepage after logining
+
+[33mcommit 3ea25d93cb02df53fb2a3a9a8f7d8acedf070925[m
+Merge: 1e0c590 11d4deb
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Mon Aug 10 16:03:29 2020 +0300
+
+    Merge pull request #40 from BinaryStudioAcademy/feature/spiner
+    
+    Feature/spiner
+
+[33mcommit 11d4deb5c98ad364e225deffbec363d327a80c9f[m[33m ([m[1;31morigin/feature/spiner[m[33m)[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Mon Aug 10 16:02:31 2020 +0300
+
+    beautify html in home-page, add class .relative, update spiner
+
+[33mcommit 99619d495686462a0a9600a1b33b9de320e1afcd[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Mon Aug 10 15:20:27 2020 +0300
+
+    Add spiner
+
+[33mcommit 1e0c590e39b2425b27064b6ca29e25ae37c74c62[m[33m ([m[1;31morigin/feature/exception-middleware[m[33m)[m
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Mon Aug 10 14:45:37 2020 +0300
+
+    implement exception middleware
+
+[33mcommit 6e8746739ef27667b026ec0da496c37011c1d7d7[m
+Merge: c4ba71c 45c8c14
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Mon Aug 10 14:27:46 2020 +0300
+
+    Merge pull request #39 from BinaryStudioAcademy/tools/prettier
+    
+    Tools/prettier
+
+[33mcommit 45c8c14673c8659b8cc2514aa610d7d27d8653a8[m[33m ([m[1;31morigin/tools/prettier[m[33m)[m
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Mon Aug 10 14:26:36 2020 +0300
+
+    Remove test files
+
+[33mcommit d29fd5ba007296113fcfc2e2eeb78499114aa0ce[m
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Mon Aug 10 14:22:45 2020 +0300
+
+    Change port to previous value
+
+[33mcommit c4ba71ca017eab351c681286a9665b471050b7fd[m
+Merge: b30df31 9dc0ad9
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Mon Aug 10 13:48:40 2020 +0300
+
+    Merge pull request #38 from BinaryStudioAcademy/feature/signalr-meeting
+    
+    Feature/signalr meeting
+
+[33mcommit 9dc0ad9682f141a335792edaae6ef2f32f650f77[m[33m ([m[1;31morigin/feature/signalr-meeting[m[33m)[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Mon Aug 10 13:47:56 2020 +0300
+
+    delete commecnts
+
+[33mcommit 8d3198c6d61b7c9f2743333e1466756517a92067[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Mon Aug 10 13:41:58 2020 +0300
+
+    Fix connectionData bug
+
+[33mcommit 35408d1cb3a4574e5a5002f7f4287d8f8549c895[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Mon Aug 10 13:39:57 2020 +0300
+
+    fix connection bug
+
+[33mcommit 161ece005cf33ea00c92d06577e807980f892da2[m
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Mon Aug 10 13:39:08 2020 +0300
+
+    hook test
+
+[33mcommit f696b16fbdabe2aa673b04d209c6f6256840b043[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Mon Aug 10 13:37:32 2020 +0300
+
+    Create one meetingHub, delete all other
+
+[33mcommit b30df31ef38fa0b1d79029f9a954d6cfc3136773[m
+Merge: 5a4203d 6bb129f
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Mon Aug 10 13:33:51 2020 +0300
+
+    Merge pull request #37 from BinaryStudioAcademy/tools/prettier
+    
+    Tools/prettier add pre-commit hook
+
+[33mcommit 07df97db65a46905ad34d02f5f1885a9e59f436e[m
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Mon Aug 10 13:30:51 2020 +0300
+
+    hook test
+
+[33mcommit 6bb129f1cfe40bdcdea4eb03a91d2e1c81daefb0[m
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Mon Aug 10 13:24:01 2020 +0300
+
+    Setup prettier for frontend
+
+[33mcommit a76ebb702ae4d9468b2f25a008add398b43544f4[m
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Mon Aug 10 13:17:24 2020 +0300
+
+    pre-commit hook test
+
+[33mcommit 5a4203d14223cd802d5ab3a90525f827c5aefd7c[m
+Merge: a87dab0 12a860b
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Mon Aug 10 12:58:21 2020 +0300
+
+    Merge branch 'feature/meeting-chat' into develop
+
+[33mcommit 12a860bdc235b8ca6ee7a2a151869c09b29fa271[m[33m ([m[1;31morigin/feature/meeting-chat[m[33m)[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Mon Aug 10 12:57:30 2020 +0300
+
+    meeting chat front added
+
+[33mcommit a87dab0b1c7b08afe030f2334b7d2ddc69126d59[m
+Merge: 47dcd5e 73c3031
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Mon Aug 10 11:15:20 2020 +0300
+
+    Merge pull request #36 from BinaryStudioAcademy/feature/local-peerjs-server
+    
+    add freeice, add settings for connection with local server
+
+[33mcommit 73c3031179a95fa0e2cef7e9b4c64776743c3445[m[33m ([m[1;31morigin/feature/local-peerjs-server[m[33m)[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Mon Aug 10 11:09:46 2020 +0300
+
+    add freeice, add settings for connecting local server
+
+[33mcommit 47dcd5e674a65cb41736681e9efb8b9f459b978a[m
+Merge: d113615 fdc659a
+Author: Anton Komisarov <32576664+apofis96@users.noreply.github.com>
+Date:   Mon Aug 10 10:48:33 2020 +0300
+
+    Merge pull request #35 from BinaryStudioAcademy/hotfix/new-contact-self
+    
+    Creating contact with himself not allowed anymore
+
+[33mcommit fdc659a72dbeb3ccf4796da3f60c315e99f8bd63[m[33m ([m[1;31morigin/hotfix/new-contact-self[m[33m)[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Mon Aug 10 10:47:59 2020 +0300
+
+    Creating contact with himself not allowed anymore
+
+[33mcommit d113615d8fecf257e5cf33430e0a72fa3174655b[m
+Merge: 4ce9fdf 7290fce
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Mon Aug 10 08:31:11 2020 +0300
+
+    Merge pull request #34 from BinaryStudioAcademy/hotfix/delete-duplicated-guard
+    
+    Delete check-access-to-media.guard.ts
+
+[33mcommit 7290fcefbcf2c185cdd0864c0ca8cf83114df09b[m[33m ([m[1;31morigin/hotfix/delete-duplicated-guard[m[33m)[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Mon Aug 10 08:25:25 2020 +0300
+
+    Delete check-access-to-media.guard.ts
+
+[33mcommit 4ce9fdf5e49ba6cbf653e267207deae70868b696[m
+Merge: 2b77a2a 93e05ab
+Author: Anton Komisarov <32576664+apofis96@users.noreply.github.com>
+Date:   Sun Aug 9 23:14:43 2020 +0300
+
+    Merge pull request #33 from BinaryStudioAcademy/feature/create-contact
+    
+    Feature/create contact
+
+[33mcommit 93e05abad5e2e74996d519e87385764baf8fd936[m[33m ([m[1;31morigin/feature/create-contact[m[33m)[m
+Merge: 39d0706 2b77a2a
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Sun Aug 9 23:12:53 2020 +0300
+
+    Merge branch 'develop' into feature/create-contact
+
+[33mcommit 39d070622a81a6602e900a540ffe4a140a12024d[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Sun Aug 9 23:11:47 2020 +0300
+
+    Add modal for adding new contact
+
+[33mcommit 2b77a2afc7dfff6c5c57848390e7ded92e7ecbc9[m
+Merge: b813bee b8991bf
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Sun Aug 9 22:11:57 2020 +0300
+
+    Merge pull request #32 from BinaryStudioAcademy/feature/screen-recording
+    
+    Notify participants about conference recording
+
+[33mcommit b8991bf92e617dd48b86148dc2305b2a64e3b27e[m[33m ([m[1;31morigin/feature/screen-recording[m[33m)[m
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Sun Aug 9 22:11:00 2020 +0300
+
+    Notify participants about conference recording
+
+[33mcommit b813bee8b38a47786175c2843f23093f6eb0da30[m
+Merge: 6f23f64 ba63e25
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Sun Aug 9 21:11:17 2020 +0300
+
+    Merge pull request #31 from BinaryStudioAcademy/feature/check-access-to-media-guard
+    
+    Add guard to redirect user when media is not allowed
+
+[33mcommit ba63e25741e989919904dc542b2313c88baafc28[m[33m ([m[1;31morigin/feature/check-access-to-media-guard[m[33m)[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Sun Aug 9 21:05:54 2020 +0300
+
+    Add guard to redirect user when media is not allowed
+
+[33mcommit 93693b6a7148abcb195790f97a0114b32f8fba10[m
+Merge: 96b1f96 6f23f64
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Sun Aug 9 19:12:44 2020 +0300
+
+    Merge branch 'develop' into feature/create-contact
+
+[33mcommit 6f23f643c11d32ce095bb60b3c8d509ccb58c301[m
+Merge: f077215 2463f38
+Author: denys-belik <53171742+denbell5@users.noreply.github.com>
+Date:   Sun Aug 9 15:27:42 2020 +0300
+
+    Merge pull request #30 from BinaryStudioAcademy/hotfix/participant-list-invite-button
+    
+    Add invite button to participant list
+
+[33mcommit 2463f383d520b23e4dbe6b8cd4b8af67ecf3ab27[m[33m ([m[1;31morigin/hotfix/participant-list-invite-button[m[33m)[m
+Author: denbell <denbell@ukr.net>
+Date:   Sun Aug 9 15:27:04 2020 +0300
+
+    Add invite button to participant list
+
+[33mcommit f07721514eba9a3b87d1a30fda2cdd59be736d69[m
+Merge: d083851 76a63b9
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Sun Aug 9 13:25:36 2020 +0300
+
+    Merge pull request #26 from BinaryStudioAcademy/feature/peerjs-angular-meeting
+    
+    Feature/peerjs angular meeting
+
+[33mcommit 76a63b9b9d8853c02edaf838458647d754978f43[m[33m ([m[1;31morigin/feature/peerjs-angular-meeting[m[33m)[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Sun Aug 9 13:24:56 2020 +0300
+
+    Update package-lock.json
+
+[33mcommit 64dad7385391651fa35ebf1505d4daffb56a70d6[m
+Merge: 08e70bb d083851
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Sun Aug 9 13:23:22 2020 +0300
+
+    Merge branch 'develop' into feature/peerjs-angular-meeting
+
+[33mcommit 08e70bb2fd8a2bc95913e79060c3a1c31f74470a[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Sun Aug 9 12:24:13 2020 +0300
+
+    Set all signalR invokes into service, fix bug with showing current user
+
+[33mcommit d0838511d4201f7deb8dca5dff1574a3c8b59448[m
+Merge: d50383b 9e3708b
+Author: denys-belik <53171742+denbell5@users.noreply.github.com>
+Date:   Sun Aug 9 12:10:27 2020 +0300
+
+    Merge pull request #29 from BinaryStudioAcademy/feature/get-list-of-participants
+    
+    Feature/get list of participants
+
+[33mcommit d50383b9dcfcfd0f6ef8e7bd64daf59a95912fdb[m
+Merge: 1bead3b baa583f
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Sun Aug 9 11:15:50 2020 +0300
+
+    Merge pull request #28 from BinaryStudioAcademy/feature/screen-recording
+    
+    Add package for MediaRecorder
+
+[33mcommit baa583f978a26617c01186c7ba74ed10b217fead[m
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Sun Aug 9 11:14:58 2020 +0300
+
+    Add package for MediaRecorder
+
+[33mcommit 9e3708b73fd477e0c899254405b0239f12fa0727[m[33m ([m[1;31morigin/feature/get-list-of-participants[m[33m)[m
+Author: denbell <denbell@ukr.net>
+Date:   Sun Aug 9 10:51:07 2020 +0300
+
+    Minor style changes
+
+[33mcommit 1f97288fe58662e1481363382c89edcecae624e9[m
+Author: denbell <denbell@ukr.net>
+Date:   Sun Aug 9 10:50:47 2020 +0300
+
+    Show avatars in participant list
+
+[33mcommit 1bead3b26e88cb2b8ffca17c708714a90881b223[m
+Merge: 7d85418 2f452e4
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Sat Aug 8 22:59:09 2020 +0300
+
+    Merge pull request #27 from BinaryStudioAcademy/feature/screen-recording
+    
+    screen recording
+
+[33mcommit 2f452e4c671e0e15dd7d7182d5d40d63153e003b[m
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Sat Aug 8 22:58:12 2020 +0300
+
+    screen recording
+
+[33mcommit 268373dc2617a15865077caad0e095866ed102bf[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Sat Aug 8 21:45:55 2020 +0300
+
+    fix bugs
+
+[33mcommit b709a849c61d458e4c282a730928cd3bb94dbaa3[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Sat Aug 8 16:03:18 2020 +0300
+
+    Move peer signals into service
+
+[33mcommit ca864deaf635bdcacc70f1e66c6d0b76dfe3efea[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Sat Aug 8 12:38:47 2020 +0300
+
+    Add ablity to leave meeting and signal all participant when user leave meeting
+
+[33mcommit b00688035b263ed1bdfd9a1f92b8dc5830c53a2b[m
+Author: denbell <denbell@ukr.net>
+Date:   Sat Aug 8 10:42:59 2020 +0300
+
+    Make participants list block
+
+[33mcommit 4444e69e8cd6d2ecd4ddd2cf543eff34f541d0f8[m
+Merge: 89cc101 7d85418
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Sat Aug 8 08:06:53 2020 +0300
+
+    Merge branch 'develop' into feature/peerjs-angular-meeting
+
+[33mcommit 7d8541820cac8f813ef656fab6886f11fa6595f9[m
+Merge: a2d8dc6 a7426a4
+Author: alex-bilokon <62422024+alex-bilokon@users.noreply.github.com>
+Date:   Sat Aug 8 01:46:35 2020 +0300
+
+    Merge pull request #25 from BinaryStudioAcademy/feature/user
+    
+    Feature/user resolved conflicts
+
+[33mcommit a7426a42ffa5033b9f7d18030af3164ae0e5c532[m[33m ([m[1;31morigin/feature/user[m[33m)[m
+Merge: eb42b81 a2d8dc6
+Author: alex-bilokon <62422024+alex-bilokon@users.noreply.github.com>
+Date:   Sat Aug 8 01:45:46 2020 +0300
+
+    Merge branch 'develop' into feature/user
+
+[33mcommit 3c129b5c3066f1799f334e6b88198e62a3ed7a1b[m
+Author: denbell <denbell@ukr.net>
+Date:   Fri Aug 7 22:10:32 2020 +0300
+
+    Change toolbar icons layout
+
+[33mcommit 96b1f963b823ae5e694b5bc4e9b6258c997c09ef[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Fri Aug 7 21:57:12 2020 +0300
+
+    Add Backend for newContactFromEmail
+
+[33mcommit b19624d0bbf095a824deca066f60d22812ee5dbb[m
+Author: denbell <denbell@ukr.net>
+Date:   Fri Aug 7 21:52:39 2020 +0300
+
+    Add ability to get list of participants
+
+[33mcommit eb42b810c59721e616e45b5619703ae1c7b1ecc9[m
+Author: Alexander Belokon <sascha.belokon@gmail.com>
+Date:   Fri Aug 7 21:40:09 2020 +0300
+
+    hotfix
+
+[33mcommit a2d8dc6679b4c2e4d1ff55d30799d8c19d0c7afa[m
+Merge: 0d35f32 21006d4
+Author: Anton Komisarov <32576664+apofis96@users.noreply.github.com>
+Date:   Fri Aug 7 20:35:19 2020 +0300
+
+    Merge pull request #24 from BinaryStudioAcademy/hotfix/signIn-page
+    
+    Hotfix/sign in page
+
+[33mcommit 21006d493567e494f5ac1aa06d2f73c06971d793[m[33m ([m[1;31morigin/hotfix/signIn-page[m[33m)[m
+Merge: 2120ea3 0d35f32
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Fri Aug 7 20:34:28 2020 +0300
+
+    Merge branch 'develop' into hotfix/signIn-page
+
+[33mcommit 89cc101d2c3c2b5ee847aa60dd2b6f885cca1d53[m
+Merge: b69c6dd 0d35f32
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Fri Aug 7 20:25:13 2020 +0300
+
+    Merge branch 'develop' into feature/peerjs-angular-meeting
+
+[33mcommit 2120ea3f3aa8e8ef7a6a62f00c5f5950d9df949a[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Fri Aug 7 20:16:19 2020 +0300
+
+    Hotfix SignIn to fit AC
+
+[33mcommit b69c6dd24327d67747bf1df59664c4aef8eabd35[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Fri Aug 7 20:15:59 2020 +0300
+
+    Improved code readability
+
+[33mcommit 0d35f324fb86bcfc5d37e21aaa30698fbc1bda7e[m
+Merge: d77b533 3b93133
+Author: denys-belik <53171742+denbell5@users.noreply.github.com>
+Date:   Fri Aug 7 19:00:11 2020 +0300
+
+    Merge pull request #23 from BinaryStudioAcademy/feature/schedule-meeting-page
+    
+    Create schedule meeting page component
+
+[33mcommit 6a816b9c0f87dfebd974af39bc285a271615c174[m
+Author: Alexander Belokon <sascha.belokon@gmail.com>
+Date:   Fri Aug 7 18:21:43 2020 +0300
+
+    hotfix
+
+[33mcommit 3b93133511e4e2ec3a7eca5052f11a3b9579b499[m[33m ([m[1;31morigin/feature/schedule-meeting-page[m[33m)[m
+Merge: 8b1b395 d77b533
+Author: denys-belik <53171742+denbell5@users.noreply.github.com>
+Date:   Fri Aug 7 18:21:04 2020 +0300
+
+    Merge branch 'develop' into feature/schedule-meeting-page
+
+[33mcommit d77b533627f915b32ce548cbbaff33cfef5e6c99[m
+Merge: 9042721 ef7b653
+Author: denys-belik <53171742+denbell5@users.noreply.github.com>
+Date:   Fri Aug 7 16:59:12 2020 +0300
+
+    Merge pull request #22 from BinaryStudioAcademy/hotfix/make-toastr-semantic
+    
+    Hotfix/make toastr semantic
+
+[33mcommit ef7b6536c852f3c43156b86c019d0152f906f92d[m[33m ([m[1;31morigin/hotfix/make-toastr-semantic[m[33m)[m
+Author: denbell <denbell@ukr.net>
+Date:   Fri Aug 7 16:57:40 2020 +0300
+
+    Make toast opacity 90%
+
+[33mcommit 8bc71ce5d1ac50026a3ea2e8d9cbc55f5b00efb3[m
+Author: denbell <denbell@ukr.net>
+Date:   Fri Aug 7 16:57:16 2020 +0300
+
+    Change toast duration to 5 sec
+
+[33mcommit 8b1b3958b4dd5ec20b04d94de420b998cd1d248e[m
+Author: denbell <denbell@ukr.net>
+Date:   Fri Aug 7 16:45:26 2020 +0300
+
+    Create schedule meeting page component
+
+[33mcommit a3a3c2e674666b8594d0e440036cdcb5d7528381[m
+Author: Alexander Belokon <sascha.belokon@gmail.com>
+Date:   Fri Aug 7 16:30:09 2020 +0300
+
+    after merge
+
+[33mcommit 9042721c0544d53577ee59f246db539e07fe8b3f[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Fri Aug 7 14:21:53 2020 +0300
+
+    hotfix merge
+
+[33mcommit 47e3e33a2dfdc8cbb841f3a00c2b6a0a7a3d3a06[m
+Merge: 4e693b3 ced9bad
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Fri Aug 7 14:12:50 2020 +0300
+
+    Merge branch 'feature/meeting' into develop
+
+[33mcommit ced9bad8830c6db0fa8686d55cf7c37a5da0bee1[m[33m ([m[1;31morigin/feature/meeting[m[33m)[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Fri Aug 7 14:10:10 2020 +0300
+
+    merge conflict fix
+
+[33mcommit 4e693b3c4c2df891ecf18bb26de6c2b91ee47204[m
+Merge: 3babc50 fdf1a97
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Fri Aug 7 13:57:26 2020 +0300
+
+    Merge branch 'feature/meeting' into develop
+
+[33mcommit fdf1a9777bc6a6f5082f26ba5c3bc628e1bc2339[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Fri Aug 7 13:56:49 2020 +0300
+
+    hotfix notFoundException in meeting service
+
+[33mcommit 3babc50cd0a2393518322ada3344f1f2bcf10dd0[m
+Merge: 1ec0232 37742fa
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Fri Aug 7 13:55:36 2020 +0300
+
+    Merge branch 'feature/meeting' into develop
+
+[33mcommit 0aac738ad63f20a53729bf53825cf0ede2a45264[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Fri Aug 7 13:33:25 2020 +0300
+
+    Add ability to call multiple participants
+
+[33mcommit 37742faa2643a126227a02663fa36ce7b5ff84d4[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Fri Aug 7 13:31:42 2020 +0300
+
+    Join signalR group
+
+[33mcommit 1ec02323d73aa5a48e72e3beb76376dc8651abdd[m
+Merge: 3f2a5f3 8de3bc8
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Fri Aug 7 12:45:18 2020 +0300
+
+    Merge branch 'path/logging-filter' into develop
+
+[33mcommit 3f2a5f37b74e1c1ad9947f482ba8302fb54a4939[m
+Merge: 14cfaca 3d1c931
+Author: irynakopyl <52530587+irynakopyl@users.noreply.github.com>
+Date:   Fri Aug 7 12:37:08 2020 +0300
+
+    Merge pull request #21 from BinaryStudioAcademy/feature/home
+    
+    home page added
+
+[33mcommit 3d1c9313e39d2e85a79d4141815c0edf389f2f1a[m[33m ([m[1;31morigin/feature/home[m[33m)[m
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Fri Aug 7 12:36:20 2020 +0300
+
+    home page added
+
+[33mcommit 28b55967c98aa142df9db0371a5d925db6bb0b69[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Fri Aug 7 12:08:22 2020 +0300
+
+    show second participant
+
+[33mcommit f6da7d35921ace0ea78dcff3e44e3f9ce28f7f28[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Fri Aug 7 11:58:19 2020 +0300
+
+    Add simple videochat
+
+[33mcommit 8de3bc8748cbfa6383f458cc775e4f582ca3c10a[m[33m ([m[1;31morigin/path/logging-filter[m[33m)[m
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Fri Aug 7 11:15:27 2020 +0300
+
+    implement logging filter
+
+[33mcommit 5aa05676b974433ff942b447b8b993dd1afd6f73[m
+Author: Alexander Belokon <sascha.belokon@gmail.com>
+Date:   Fri Aug 7 09:56:15 2020 +0300
+
+    added user CRUD
+
+[33mcommit 14cfacad666c5623f6ba0a38eed50723c5ef23de[m
+Merge: 43982cc ece8434
+Author: Anton Komisarov <32576664+apofis96@users.noreply.github.com>
+Date:   Thu Aug 6 22:06:03 2020 +0300
+
+    Merge pull request #20 from BinaryStudioAcademy/feature/scheduled-meeting-crud
+    
+    Add ScheduledMeeting CRUD
+
+[33mcommit ece8434bf3ae31334b77c08a76704fe4228df15e[m[33m ([m[1;31morigin/feature/scheduled-meeting-crud[m[33m)[m
+Merge: 0ff104d 43982cc
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Thu Aug 6 22:01:59 2020 +0300
+
+    Merge branch 'develop' into feature/scheduled-meeting-crud
+
+[33mcommit 0ff104d496e132729258a75131daa5a1e797c071[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Thu Aug 6 22:01:34 2020 +0300
+
+    Add ScheduledMeeting CRUD
+
+[33mcommit fccf661c8a79b2fc9edd97010af7b2c9212994ae[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Thu Aug 6 20:44:08 2020 +0300
+
+    Added ability for user to create meeting
+
+[33mcommit a043a2b76dfe9ba6c1522ba4b9ad22f9810dee40[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Thu Aug 6 19:29:51 2020 +0300
+
+    Meeting service added
+
+[33mcommit 43982cc7e803809cbd9b4f0dd0d13589e8692618[m
+Merge: 92cee86 74fe567
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Thu Aug 6 18:54:34 2020 +0300
+
+    Merge pull request #19 from BinaryStudioAcademy/feature/contacts
+    
+    Fix contact create respose url
+
+[33mcommit 74fe5674d40527a053ba074d5bee7a91ebb703f4[m[33m ([m[1;31morigin/feature/contacts[m[33m)[m
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Thu Aug 6 18:52:52 2020 +0300
+
+    Fix contact create respose url
+
+[33mcommit 92cee86c70632cbb05a74921ebb40af398f8aa98[m
+Merge: 99ccef9 dfa057c
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Thu Aug 6 17:35:10 2020 +0300
+
+    Merge pull request #18 from BinaryStudioAcademy/feature/contacts
+    
+    Fix issues with contacts CRUD flow
+
+[33mcommit dfa057c2e42388c76ce4ffeae6a8869165768545[m
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Thu Aug 6 17:34:14 2020 +0300
+
+    Fix issues with contacts CRUD flow
+
+[33mcommit 99ccef983cee98d64f39c5c2e0e06e75b468c22c[m
+Author: Nikita Krasnov <krasnov.n.u@gmail.com>
+Date:   Thu Aug 6 16:30:40 2020 +0300
+
+    Update README.md
+
+[33mcommit b2282db16a6250fc9cd93e4b1737dd62725a0a6d[m
+Merge: 698a6a8 53ac0b9
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Thu Aug 6 14:54:49 2020 +0300
+
+    Merge branch 'develop' of https://github.com/BinaryStudioAcademy/bsa-2020-whale into develop
+
+[33mcommit 698a6a8f10fb1e804881f79fcc129bcfafc9d38a[m
+Merge: 89558a8 e64245c
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Thu Aug 6 14:54:26 2020 +0300
+
+    Merge branch 'path/logging-in-Elasticsearch' into develop
+
+[33mcommit e64245cb4a23287fef8c04897b8cf60d3ece72f6[m
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Thu Aug 6 14:54:05 2020 +0300
+
+    add logging exceptions to whale api
+
+[33mcommit 53ac0b9a52a51d4c02792b0ee9f3a29a270ef22a[m
+Merge: 1a631be 0c59614
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Thu Aug 6 14:37:28 2020 +0300
+
+    Merge pull request #17 from BinaryStudioAcademy/feature/contacts
+    
+    implemented CRUD for Contacts
+
+[33mcommit 0c59614addb0156d38cedce6d1bdb8668dbb2047[m
+Merge: 33df1b4 1a631be
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Thu Aug 6 14:37:16 2020 +0300
+
+    Merge branch 'develop' into feature/contacts
+
+[33mcommit 1a631beb8df26b4159f8afa952582db3572eee2c[m
+Merge: 89558a8 9c4a0a2
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Thu Aug 6 14:33:42 2020 +0300
+
+    Merge branch 'feature/simpleChat' into develop
+
+[33mcommit 9c4a0a28b773479f37d6fd74fb89a6d0c719c28e[m[33m ([m[1;31morigin/feature/simpleChat[m[33m)[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Thu Aug 6 14:32:44 2020 +0300
+
+    chat component added
+
+[33mcommit 33df1b44c86232fd386c4e2ed065f531eb4af7c8[m
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Thu Aug 6 14:31:11 2020 +0300
+
+    implemented CRUD for Contacts
+
+[33mcommit db705ce318c1ffc409c14242590d8da8c1de1257[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Thu Aug 6 14:27:27 2020 +0300
+
+    chatHub updated
+
+[33mcommit 89558a86f623ca6247a6857d0535d7dd4ecd7d7c[m
+Merge: b5361af 39747a3
+Author: denys-belik <53171742+denbell5@users.noreply.github.com>
+Date:   Thu Aug 6 14:16:59 2020 +0300
+
+    Merge pull request #16 from BinaryStudioAcademy/hotfix/make-toastr-semantic
+    
+    Make toasts semantic
+
+[33mcommit 39747a3289fa862ae1beb1e9c821600f6f2578cb[m
+Author: denbell <denbell@ukr.net>
+Date:   Thu Aug 6 13:59:14 2020 +0300
+
+    Make toasts semantic
+
+[33mcommit b5361afb94d0b8207a4006aefadd3ecd7fe76aca[m
+Merge: 9cb4763 61b3cb1
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Thu Aug 6 13:56:42 2020 +0300
+
+    Merge pull request #15 from BinaryStudioAcademy/feature/azure_blob
+    
+    Feature/azure blob
+
+[33mcommit 61b3cb19e7cb00e0aa19513279443a52242d0468[m[33m ([m[1;31morigin/feature/azure_blob[m[33m)[m
+Merge: 0e62c97 9cb4763
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Thu Aug 6 13:55:44 2020 +0300
+
+    Merge branch 'develop' into feature/azure_blob
+
+[33mcommit 0e62c9773bd457cd695b9851f7d1d4d7a2e3cfec[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Thu Aug 6 13:30:05 2020 +0300
+
+    Delete BlobService add FileStorage provider and add controller to save file
+
+[33mcommit 9cb4763ec295cb4ce820ae842b40ac72f8d0136e[m
+Merge: 0be3ce6 2c9b62a
+Author: irynakopyl <52530587+irynakopyl@users.noreply.github.com>
+Date:   Thu Aug 6 13:03:21 2020 +0300
+
+    Merge pull request #14 from BinaryStudioAcademy/redis
+    
+    Update Whale.Shared.csproj
+
+[33mcommit 2c9b62ac5bfe333d9e6233784d63928785030cdc[m[33m ([m[1;31morigin/redis[m[33m)[m
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Thu Aug 6 13:02:51 2020 +0300
+
+    Update Whale.Shared.csproj
+
+[33mcommit 0be3ce603e46adc6eabcf370d4fda6437dac6ca2[m
+Merge: e2dbf7b ed0b476
+Author: irynakopyl <52530587+irynakopyl@users.noreply.github.com>
+Date:   Thu Aug 6 13:00:45 2020 +0300
+
+    Merge pull request #13 from BinaryStudioAcademy/redis
+    
+    redis sercice added
+
+[33mcommit ed0b4765c4171b18cc76d7f9977e78c1e80b7d02[m
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Thu Aug 6 13:00:12 2020 +0300
+
+    redis sercice added
+
+[33mcommit e2dbf7b1a0770a40bf5500e877281e1792202013[m
+Merge: 14a7074 74e7cec
+Author: Anton Komisarov <32576664+apofis96@users.noreply.github.com>
+Date:   Thu Aug 6 12:39:00 2020 +0300
+
+    Merge pull request #12 from BinaryStudioAcademy/firebase-auth
+    
+    Firebase auth and SignIn dialog
+
+[33mcommit 74e7cec56cd72b95183d9fe81deee92ad99efe62[m[33m ([m[1;31morigin/firebase-auth[m[33m)[m
+Merge: 17c3ade 14a7074
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Thu Aug 6 12:22:15 2020 +0300
+
+    Merge branch 'develop' into firebase-auth
+
+[33mcommit 17c3aded259ee302c7d9db4014483c68fb212a33[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Thu Aug 6 12:20:41 2020 +0300
+
+    Basic FirebaseAuth completed
+    
+    Rollback to pure JWT validator
+
+[33mcommit 94abd5de647629f2b7dba5c19a0c862120c7c07d[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Thu Aug 6 11:48:03 2020 +0300
+
+    Write file as stream and save it with ContentType
+
+[33mcommit 5874063514a0d74a2d8c1854b195512f43667a64[m
+Merge: cfb4561 23e5fb5
+Author: Ivan Grynenko <grynenko.ivan@gmail.com>
+Date:   Thu Aug 6 10:58:43 2020 +0300
+
+    Some changes
+
+[33mcommit 14a7074c8757c58c86c9c824f7f45472186d8649[m
+Merge: 88712dd 2971103
+Author: denys-belik <53171742+denbell5@users.noreply.github.com>
+Date:   Thu Aug 6 10:34:23 2020 +0300
+
+    Merge pull request #11 from BinaryStudioAcademy/feature/toastr-notifications
+    
+    Add Toastr
+
+[33mcommit 2971103f73a26f8f340e82ee8bdba42a1f4b9597[m[33m ([m[1;31morigin/feature/toastr-notifications[m[33m)[m
+Author: denbell <denbell@ukr.net>
+Date:   Thu Aug 6 10:28:49 2020 +0300
+
+    Add Toastr
+
+[33mcommit cfb4561549d85c01c0581e33302fe8333a7f030e[m
+Author: Ivan Grynenko <grynenko.ivan@gmail.com>
+Date:   Thu Aug 6 10:27:15 2020 +0300
+
+    Package changes
+
+[33mcommit 88712dd9f27a4def535f115c00a96435352f2a63[m
+Merge: 69febe8 ca9144b
+Author: denys-belik <53171742+denbell5@users.noreply.github.com>
+Date:   Thu Aug 6 09:46:14 2020 +0300
+
+    Merge pull request #10 from BinaryStudioAcademy/feature/webrtc-signaling
+    
+    Feature/webrtc signaling
+
+[33mcommit ca9144b58d5627d172f76c11ef3ba83f68025094[m
+Author: denbell <denbell@ukr.net>
+Date:   Thu Aug 6 09:45:12 2020 +0300
+
+    Clear app.component.ts
+
+[33mcommit 96370c1804c48845c1f94caaae205efa7949f2ee[m
+Author: denbell <denbell@ukr.net>
+Date:   Thu Aug 6 09:42:40 2020 +0300
+
+    Update hubConnecton creation
+
+[33mcommit 23e5fb5ad797efce93bf0a8056a478b9620e3783[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Wed Aug 5 23:42:25 2020 +0300
+
+    Frontend Auth done
+
+[33mcommit 69febe812ce7602b00f5728c1bc16cf3a7dc075f[m
+Merge: 8b7c990 19bade9
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Wed Aug 5 21:55:59 2020 +0300
+
+    Merge branch 'signalR' into develop
+
+[33mcommit 19bade9f26f20ed852cfb9d94c80b7407bc25fd9[m[33m ([m[1;31morigin/signalR[m[33m)[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Wed Aug 5 21:51:41 2020 +0300
+
+    hotfix added apiUrl as parameter
+
+[33mcommit a1906e582f5bc6f1c507baa431fc74bd605b77cd[m
+Author: denbell <denbell@ukr.net>
+Date:   Wed Aug 5 20:33:35 2020 +0300
+
+    Test hub methods subscriptions
+
+[33mcommit a1a4295af2cc380ec936dba19c63343be5d62710[m
+Author: denbell <denbell@ukr.net>
+Date:   Wed Aug 5 20:33:17 2020 +0300
+
+    Update hub methods handlers
+    
+    Now methods can be handled from another services/components using observables
+
+[33mcommit e97bd706a532d81a9a3b9a33ba7850878358909a[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Wed Aug 5 19:28:26 2020 +0300
+
+    Rewrite interceptor
+    
+    Header validation fixed
+
+[33mcommit a54d58410e3c7afc67f9153b1c9a9d4f4a9dcad8[m
+Author: denbell <denbell@ukr.net>
+Date:   Wed Aug 5 19:27:17 2020 +0300
+
+    Add WebrtcSignalService to app.component.ts for tests
+
+[33mcommit 0bccfe2b6cfc4651990ba1e4506126d2de4a25b2[m
+Author: denbell <denbell@ukr.net>
+Date:   Wed Aug 5 19:26:47 2020 +0300
+
+    Create webrtc-signal.service.ts
+
+[33mcommit b787bc934357eeca050167b3851ae66a447e32c9[m
+Author: denbell <denbell@ukr.net>
+Date:   Wed Aug 5 19:26:44 2020 +0300
+
+    Make HubConnection connection creation flexible with urls
+
+[33mcommit d480c9bc388c4f53bb4c1d8b0d4a8fa817361e54[m
+Author: denbell <denbell@ukr.net>
+Date:   Wed Aug 5 19:26:12 2020 +0300
+
+    Add meetingApiUrl environment variable
+
+[33mcommit a74a4d5ed8d2a0cb4f97eea805fe04f74f42bafb[m
+Author: denbell <denbell@ukr.net>
+Date:   Wed Aug 5 19:25:54 2020 +0300
+
+    Map WebRtcSignalHub and add CORS
+
+[33mcommit ee23242ae0a4d0d62d214da97c77461c1e62a6f0[m
+Author: denbell <denbell@ukr.net>
+Date:   Wed Aug 5 19:25:22 2020 +0300
+
+    Create WebRtcSignalHub.cs
+
+[33mcommit 3f089206bfc3aed97e233b4c698cded6e16d58d4[m
+Author: denbell <denbell@ukr.net>
+Date:   Wed Aug 5 19:25:11 2020 +0300
+
+    Remove sslPort
+
+[33mcommit 8b7c9903acaad1edd716d59c9c0a32359eef1efe[m
+Merge: c62326a 1c773fc
+Author: irynakopyl <52530587+irynakopyl@users.noreply.github.com>
+Date:   Wed Aug 5 19:14:55 2020 +0300
+
+    Merge pull request #9 from BinaryStudioAcademy/feature/profile-page
+    
+    profile page added
+
+[33mcommit 1c773fc567a1bcfef65c208d832ad185dae6d967[m[33m ([m[1;31morigin/feature/profile-page[m[33m)[m
+Author: Iryna Kopyl <iruna.kopyl@gmail.com>
+Date:   Wed Aug 5 19:13:50 2020 +0300
+
+    profile page added
+
+[33mcommit 8728f5e3076466068a2aca74700e5df234b18d70[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Wed Aug 5 19:13:46 2020 +0300
+
+    Delete unnecssary package
+
+[33mcommit cb0e77db1335aa36eae6fd9fe9bfdd46847e7e7a[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Wed Aug 5 18:34:51 2020 +0300
+
+    Inject BlobService and add endpoints to upload image and get image
+
+[33mcommit 700a41c2fbe0e280a6f7a851730e03c4bfee26af[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Wed Aug 5 18:33:54 2020 +0300
+
+    Add nuGet packages, and creeate BlobService
+
+[33mcommit 78dd01d587d3da9165c8709b464f3bf39d241b6d[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Wed Aug 5 18:32:00 2020 +0300
+
+    Add Azure Blob connection string
+
+[33mcommit c62326a628c86bbceb0456825d6ff3ad7ed0399a[m
+Merge: db4fac1 ccbde1e
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Wed Aug 5 18:28:20 2020 +0300
+
+    Merge pull request #5 from BinaryStudioAcademy/feature/landing-page
+    
+    Feature/landing page
+
+[33mcommit 909bf32a59e88d10e749f6d99e12d745d2a271c5[m
+Merge: a4c2074 db4fac1
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Wed Aug 5 17:52:34 2020 +0300
+
+    Merge branch 'develop' into firebase-auth
+
+[33mcommit a4c20740c29579591bca79da28c6e190be237b92[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Wed Aug 5 17:46:35 2020 +0300
+
+    Add LoginDialog
+
+[33mcommit db4fac121931db90488385dc0dd6e3bb421426e2[m
+Merge: 2d8c1c6 b554986
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Wed Aug 5 17:40:09 2020 +0300
+
+    Merge branch 'signalR' into develop
+
+[33mcommit b55498623dec8a2e2e19a53d59af45b5d451abb8[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Wed Aug 5 17:38:46 2020 +0300
+
+    hotfix tslint problems
+
+[33mcommit 2d8c1c6c70bb2cb3f40a4cbabb5fcc623e264658[m
+Merge: f6e3b80 be3e64c
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Wed Aug 5 17:37:23 2020 +0300
+
+    Merge pull request #8 from BinaryStudioAcademy/feature/meeting-page
+    
+    added cards for meeting page
+
+[33mcommit be3e64c88371c24c39fbaeee9fb798b2f8f72b45[m
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Wed Aug 5 17:32:00 2020 +0300
+
+    add cards
+
+[33mcommit f6e3b80b917f02c78cf9a4dd3e9a6b624c3e4724[m
+Merge: 5c9f12a 4f9230c
+Author: denys-belik <53171742+denbell5@users.noreply.github.com>
+Date:   Wed Aug 5 17:26:29 2020 +0300
+
+    Merge pull request #7 from BinaryStudioAcademy/feature/http-service
+    
+    Feature/http service
+
+[33mcommit 5c9f12a6da87cbac5222a74ee7ebfdbe9ff23ba7[m
+Merge: 65cb05b 89ed0a5
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Wed Aug 5 15:01:36 2020 +0300
+
+    Merge branch 'path/meeting-webApi' into develop
+
+[33mcommit 89ed0a545c7cc25f2ca55148081ea23e0fb8b173[m[33m ([m[1;31morigin/path/meeting-webApi[m[33m)[m
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Wed Aug 5 15:00:39 2020 +0300
+
+    Add enpoint for check authorization
+
+[33mcommit 4f9230c612530b12196c4d593fdf79e0f041c5d2[m[33m ([m[1;31morigin/feature/http-service[m[33m)[m
+Author: denys-belik <53171742+denbell5@users.noreply.github.com>
+Date:   Wed Aug 5 14:32:59 2020 +0300
+
+    Update http.service.ts
+
+[33mcommit 3b1d41c0532d76149d7ebdde4905bdec8885c386[m
+Author: denbell <denbell@ukr.net>
+Date:   Wed Aug 5 14:26:35 2020 +0300
+
+    Import HttpClientModule
+
+[33mcommit 0ff133d2e2b2ce4a49eebb4b989b648fef35bf42[m
+Author: denbell <denbell@ukr.net>
+Date:   Wed Aug 5 14:25:52 2020 +0300
+
+    Create http.service.ts
+
+[33mcommit ca733ad81b37623501bb38c1469fb334f57c0ce3[m
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Wed Aug 5 14:20:44 2020 +0300
+
+    Add health endpoint for check DbContext
+
+[33mcommit 65cb05b7dfeb46bcb65edd208b257a535efcb470[m
+Merge: e3b03ab 5ab072c
+Author: Übermensch <47750010+genebloch@users.noreply.github.com>
+Date:   Wed Aug 5 13:25:33 2020 +0300
+
+    Merge pull request #6 from BinaryStudioAcademy/feature/meeting-page
+    
+    desighed meeting page
+
+[33mcommit 5ab072c2238ea7e7c5c2a92585989e8bea9e3c06[m
+Author: Übermensch <genebloch00@gmail.com>
+Date:   Wed Aug 5 13:22:56 2020 +0300
+
+    desighed meeting page
+
+[33mcommit ccbde1e228d15cbf4409316cb72fdccbc5b757cc[m[33m ([m[1;31morigin/feature/landing-page[m[33m)[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Wed Aug 5 11:46:26 2020 +0300
+
+    Delete unnecessary button
+
+[33mcommit a4be61ee418152bbb38295d7b65b631459c9ef80[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Wed Aug 5 11:40:48 2020 +0300
+
+    change class names, fix min-height issue on first screen, fix issue in third screen
+
+[33mcommit 141a58c6d9767b2584965f629b99184c515a9ae6[m
+Merge: 9ff4cf6 1bc8ce6
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Wed Aug 5 10:35:50 2020 +0300
+
+    Merge branch 'firebase-auth' of https://github.com/BinaryStudioAcademy/bsa-2020-whale into firebase-auth
+
+[33mcommit 9ff4cf6335f200b9b8145db5931a1ee6d5ff0e23[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Wed Aug 5 10:33:26 2020 +0300
+
+    Simplified authService
+
+[33mcommit 1bc8ce685ccc5e98dfd2b21ebecd449f97ddbcc0[m
+Author: Ivan Grynenko <grynenko.ivan@gmail.com>
+Date:   Wed Aug 5 10:12:04 2020 +0300
+
+    Adding http interceptor and initial backend validation
+
+[33mcommit c4ceadd823f2a65c9156076a8119182d1095d3d3[m
+Merge: e3b03ab 7e9eb5e
+Author: Ivan Grynenko <grynenko.ivan@gmail.com>
+Date:   Tue Aug 4 21:28:13 2020 +0300
+
+    Merge branch 'firebase-auth' of https://github.com/BinaryStudioAcademy/bsa-2020-whale into develop
+
+[33mcommit 7e9eb5e0b7cf090cfd01b136e6ed890e1597d6ac[m
+Merge: a5b187d 2876c0e
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Tue Aug 4 19:47:56 2020 +0300
+
+    Merge branch 'develop' into firebase-auth
+
+[33mcommit a5b187dbf309af47f3e4c6d003124009c4705ba9[m
+Author: Anton Komisarov <apofis96@gmail.com>
+Date:   Tue Aug 4 19:41:00 2020 +0300
+
+    Add FirebaseAuth service
+
+[33mcommit e3b03abe7b14e4cccc50f999fda0a3b23abbba8a[m
+Merge: 2876c0e 268ff08
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Tue Aug 4 19:35:36 2020 +0300
+
+    Merge pull request #4 from BinaryStudioAcademy/hotfix/Whale.API-dependencies
+    
+    fix project dependencies
+
+[33mcommit 268ff08f3ce7f64efc59040585d9f397b6984ffd[m[33m ([m[1;31morigin/hotfix/Whale.API-dependencies[m[33m)[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Tue Aug 4 19:34:18 2020 +0300
+
+    fix project dependencies
+
+[33mcommit 2876c0e23a5d48d0e450ae773ea150ba894bdd95[m
+Merge: 85b4767 cfbb75e
+Author: Vitalii Yarmus <55307415+325Vitalik@users.noreply.github.com>
+Date:   Tue Aug 4 19:10:35 2020 +0300
+
+    Merge pull request #3 from BinaryStudioAcademy/feature/landing-page
+    
+    Feature/landing page
+
+[33mcommit cfbb75eae7a963a5fb3ebf4b05aa70cbf5a75abd[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Tue Aug 4 19:03:57 2020 +0300
+
+    delete link on semantic ui
+
+[33mcommit a785724ca97fecdaa3b58cae3bdc536e54174c4a[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Tue Aug 4 18:57:43 2020 +0300
+
+    Create landing-page module and landing-page component, add default route for landing-page
+
+[33mcommit 9d95566729129ea920434c1cb2cb910b30a09e59[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Tue Aug 4 18:56:09 2020 +0300
+
+    Delete all data from app component, update shared module, add link fot semantic ui
+
+[33mcommit 20c11663d79decbd698c34a3c71a542734c0f2d2[m
+Author: 325Vitalik <mr.yarmus@gmail.com>
+Date:   Tue Aug 4 18:54:05 2020 +0300
+
+    Add all images for landing page
+
+[33mcommit 85b4767df4100da8985d919ca9253ac9af7003b6[m
+Author: Olya <50491792+0lyaMelnyk@users.noreply.github.com>
+Date:   Tue Aug 4 17:29:57 2020 +0300
+
+    delete repeat Project
+
+[33mcommit e1c21093a95ba9bace16934b3384c5e6e02b2c26[m
+Merge: aa9ae8d 4374e8b
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Tue Aug 4 17:19:32 2020 +0300
+
+    Merge branch 'path/create-database-structure' into develop
+
+[33mcommit 4374e8b84cf8e2e245f91d18800a2342a8b3618d[m
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Tue Aug 4 17:19:04 2020 +0300
+
+    update sln file
+
+[33mcommit aa9ae8d9cfd68e451b504bbebcf506a58e737999[m
+Merge: dcc6406 01f5f52
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Tue Aug 4 17:07:13 2020 +0300
+
+    Merge branch 'path/create-database-structure' into develop
+
+[33mcommit 01f5f52539fb8edba1d01e28d1c460b33a2bbf24[m
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Tue Aug 4 17:03:49 2020 +0300
+
+    update scheme database
+
+[33mcommit dcc6406d5d03c3eec1bd7b90eca8ca0027e89a58[m
+Merge: ab728da 5e1e0b3
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Tue Aug 4 15:42:33 2020 +0300
+
+    Merge branch 'signalR' into develop
+
+[33mcommit bee682ec7441ba8b3d3b11e88b8f88c9a8218305[m[33m ([m[1;31morigin/path/create-database-structure[m[33m)[m
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Tue Aug 4 15:39:16 2020 +0300
+
+    add Initial migration
+
+[33mcommit ab728dafd8fe349921bebab1036803733ad7e463[m
+Merge: 94385fe 0f81250
+Author: irynakopyl <52530587+irynakopyl@users.noreply.github.com>
+Date:   Tue Aug 4 14:52:50 2020 +0300
+
+    Merge pull request #1 from BinaryStudioAcademy/semantic-ui
+    
+    semantic ui library added
+
+[33mcommit 0f8125049224005e3bda8235e797ea1059bf017a[m[33m ([m[1;31morigin/semantic-ui[m[33m)[m
+Author: Iryna Kopyl <kopylif@gmail.com>
+Date:   Tue Aug 4 14:47:46 2020 +0300
+
+    semantic ui library added
+
+[33mcommit 917c38952e6e09dd21a05016d4067765fdb02015[m
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Tue Aug 4 14:38:58 2020 +0300
+
+    add WhaleDbContext
+
+[33mcommit 6f386467f06be063c4d97ca544c679d07752443b[m
+Author: Olya Melnyk <olga14.olg@gmail.com>
+Date:   Tue Aug 4 14:29:33 2020 +0300
+
+    create models
+
+[33mcommit 5e1e0b3583113bda2c718515439379f5d55b1f9e[m
+Author: Ostap Kernytskyi <okernytskiy@gmail.com>
+Date:   Tue Aug 4 14:03:12 2020 +0300
+
+    added signalR service on front and chatHub on back
+
+[33mcommit 94385fe258a344a3569b325a1dc13b26e6c44e62[m
+Author: bogdaner2 <KonorinDeveloper@gmail.com>
+Date:   Tue Aug 4 08:50:45 2020 +0300
+
+    Added lint/ changed minimal setup
+
+[33mcommit 38d7ad632800ed1fa40a87a43617bd6e0c1d941c[m
+Author: bogdaner2 <KonorinDeveloper@gmail.com>
+Date:   Mon Aug 3 23:54:02 2020 +0300
+
+    Added DB schema/ Added angular architecture sample
+
+[33mcommit 8a2e23c8b712f2300b70437b8f91db486a861689[m
+Author: bogdaner2 <KonorinDeveloper@gmail.com>
+Date:   Sun Aug 2 00:32:39 2020 +0300
+
+    Added WebApi empty project
+
+[33mcommit b8062a2a23906b266d649f4075c304d242bf3994[m
+Author: bogdaner2 <KonorinDeveloper@gmail.com>
+Date:   Sun Aug 2 00:18:19 2020 +0300
+
+    Added frontend and backend folders
+
+[33mcommit 9e88f5e150acb7f03fc8b6fa393a830adbe9a0d2[m[33m ([m[1;31morigin/master[m[33m)[m
+Author: Nikita Krasnov <krasnov.n.u@gmail.com>
+Date:   Wed Jul 29 15:13:00 2020 +0300
+
+    Initial commit

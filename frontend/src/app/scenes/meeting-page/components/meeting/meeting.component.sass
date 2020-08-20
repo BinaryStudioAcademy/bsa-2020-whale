@@ -323,7 +323,7 @@ div:moz-full-screen
     height: 500px
     width: 500px
     right: 30px
-    bottom: 80px
+    bottom: 85px
     box-shadow: 0px 0px 5px grey
     background-color: white
     z-index: 9999
@@ -333,6 +333,38 @@ div:moz-full-screen
     @media screen and (max-width: 600px)
         height: 300px
         width: 300px
+
+.board
+    height: 468px
+    width: 100%
+    @media screen and (max-width: 1000px)
+        height: 368px
+        width: 100%
+    @media screen and (max-width: 600px)
+        height: 268px
+        width: 100%
+
+.whiteboard-header
+    background-color: #f1f1f1
+    height: 30px
+
+.whiteboard-title
+    float: left
+    padding-top: 6px
+    padding-left: 10px
+
+.whiteboard-close
+    margin-left: 93%
+    padding-top: 4px
+
+.pulse
+    animation: pulse 2s infinite
+
+@keyframes pulse
+    0%
+        color: #da0909
+    100%
+        -color: #4e4b4b
 
 // media settings
 .settings

@@ -223,7 +223,11 @@
                 class="big wechat icon big-left-margin"
               ></i>
             </span>
-            <span data-tooltip="Canvas" data-position="top right">
+            <span
+              data-tooltip="Whiteboard"
+              data-position="top right"
+              [ngClass]="{ pulse: checkDrawing() }"
+            >
               <i (click)="showCanvas()" class="big paint brush icon"></i>
             </span>
             <span data-tooltip="Fullscreen" data-position="top right">
@@ -255,13 +259,21 @@
         </div>
       </div>
       <div class="canvas" *ngIf="canvasIsDisplayed">
-        <canvas-whiteboard
-          #canvasWhiteboard
-          [options]="canvasOptions"
-          (onBatchUpdate)="onCanvasDraw($event)"
-          (onClear)="onCanvasClear()"
-        >
-        </canvas-whiteboard>
+        <div class="whiteboard-header">
+          <div class="whiteboard-title">Whiteboard</div>
+          <div class="whiteboard-close">
+            <i (click)="showCanvas()" class="large times icon"></i>
+          </div>
+        </div>
+        <div class="board">
+          <canvas-whiteboard
+            #canvasWhiteboard
+            [options]="canvasOptions"
+            (onBatchUpdate)="onCanvasDraw($event)"
+            (onClear)="onCanvasClear()"
+          >
+          </canvas-whiteboard>
+        </div>
       </div>
 
       <div class="users" *ngIf="mediaData.length > 1">
