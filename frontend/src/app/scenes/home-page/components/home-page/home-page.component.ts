@@ -179,6 +179,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
       this.contactsVisibility = !this.contactsVisibility;
     }
   }
+  public onGroupsClick(): void {
+    if (this.groups.length) {
+      this.groupsVisibility = !this.groupsVisibility;
+    }
+  }
 }
 export interface UserModel {
   id: number;

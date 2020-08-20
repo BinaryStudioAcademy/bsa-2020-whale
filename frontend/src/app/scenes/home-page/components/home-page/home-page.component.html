@@ -75,10 +75,7 @@
         </div>
       </div>
       <spiner *ngIf="isGroupsLoading" [size]="'medium'"></spiner>
-      <a
-        id="home-toggle-groups"
-        (click)="groupsVisibility = !groupsVisibility"
-        class="item header"
+      <a id="home-toggle-groups" (click)="onGroupsClick()" class="item header"
         >Groups
         <button
           id="home-add-group"
