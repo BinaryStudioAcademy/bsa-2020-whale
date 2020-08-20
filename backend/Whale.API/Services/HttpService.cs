@@ -41,6 +41,13 @@ namespace Whale.API.Services
                 throw new Exception($"{response.StatusCode}: {await response.Content.ReadAsStringAsync()}");
         }
 
+        public async Task PutAsync<T1>(string requestUrl, T1 body)
+        {
+            var response = await _httpClient.PutAsJsonAsync($"{_baseUrl}/{requestUrl}", body);
+            if (response.StatusCode != HttpStatusCode.OK)
+                throw new Exception($"{response.StatusCode}: {await response.Content.ReadAsStringAsync()}");
+        }
+
         public async Task<T2> PutAsync<T1, T2>(string requestUrl, T1 body)
         {
             var response = await _httpClient.PutAsJsonAsync($"{_baseUrl}/{requestUrl}", body);

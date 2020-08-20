@@ -31,9 +31,12 @@ export class HomePageComponent implements OnInit, OnDestroy {
   contacts: Contact[];
   groups: Group[];
   loggedInUser: User;
+  actionsVisibility = true;
   contactsVisibility = false;
   groupsVisibility = false;
-  chatVisibility = true;
+  chatVisibility = false;
+  historyVisibility = false;
+
   ownerEmail: string;
   contactSelected: Contact;
   private hubConnection: HubConnection;
@@ -132,20 +135,21 @@ export class HomePageComponent implements OnInit, OnDestroy {
       .subscribe();
   }
 
-  visibilityChange(event): void {
-    this.chatVisibility = event;
-    this.contactSelected = undefined;
-  }
-  onContactClick(contact: Contact): void {
-    this.chatVisibility = false;
-    this.contactSelected = contact;
-  }
+  // visibilityChange(event): void {
+  //   this.chatVisibility = event;
+  //   this.contactSelected = undefined;
+  // }
+  // onContactClick(contact: Contact): void {
+  //   this.chatVisibility = false;
+  //   this.contactSelected = contact;
+  // }
 
   onGroupClick(group: Group): void {}
 
   isContactActive(contact): boolean {
     return this.contactSelected === contact;
   }
+
   createMeeting(): void {
     this.isMeetingLoading = true;
     this.meetingService
@@ -169,9 +173,54 @@ export class HomePageComponent implements OnInit, OnDestroy {
         (error) => console.log(error.message)
       );
   }
+
   goToPage(pageName: string): void {
     this.router.navigate([`${pageName}`]);
   }
+
+  public falseAllBooleans() {
+    this.chatVisibility = false;
+    this.groupsVisibility = false;
+    this.contactsVisibility = false;
+    this.actionsVisibility = false;
+    this.historyVisibility = false;
+  }
+
+  visibilityChange(event): void {
+    console.log(event);
+    this.chatVisibility = event;
+    this.contactSelected = undefined;
+    this.actionsVisibility = true;
+  }
+
+  onContactClick(contact: Contact): void {
+    this.falseAllBooleans();
+    this.chatVisibility = true;
+    this.contactSelected = contact;
+  }
+
+  // onGroupClick(): void {
+  //   this.falseAllBooleans();
+  //   this.chatVisibility = true;
+  // }
+
+  // isContactActive(contact): boolean {
+  //   return this.contactSelected === contact;
+  // }
+
+  public onMeetingHistoryClick() {
+    this.chatVisibility = false;
+    this.groupsVisibility = false;
+    this.contactsVisibility = false;
+    this.actionsVisibility = false;
+
+    this.historyVisibility = !this.historyVisibility;
+
+    if (!this.historyVisibility) {
+      this.actionsVisibility = true;
+    }
+  }
+
   returnCorrectLink(contact: Contact): string {
     return contact?.secondMember.avatarUrl.startsWith('http') ||
       contact?.secondMember.avatarUrl.startsWith('data')

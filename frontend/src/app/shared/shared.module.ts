@@ -13,10 +13,12 @@ import { MeetingStatisticsComponent } from './components/meeting-statistics/meet
 import { CopyClipboardComponent } from './components/copy-clipboard/copy-clipboard.component';
 import { IncomingCallComponent } from './components/incoming-call/incoming-call.component';
 import { AngularDraggableModule } from 'angular2-draggable';
+import { ProgressBarDirective } from './directives/progress-bar.directive';
 import { AudioSettingsComponent } from '@shared/components/settings/audio-settings/audio-settings.component';
 import { VideoSettingsComponent } from '@shared/components/settings/video-settings/video-settings.component';
 import { OutputSettingsComponent } from './components/settings/output-settings/output-settings.component';
 import { NotificationComponent } from './components/notification/notification.component';
+
 @NgModule({
   declarations: [
     PageHeaderComponent,
@@ -29,6 +31,7 @@ import { NotificationComponent } from './components/notification/notification.co
     MeetingStatisticsComponent,
     CopyClipboardComponent,
     IncomingCallComponent,
+    ProgressBarDirective,
     AudioSettingsComponent,
     VideoSettingsComponent,
     OutputSettingsComponent,

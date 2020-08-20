@@ -43,7 +43,7 @@ import {
   CanvasWhiteboardUpdate,
 } from 'ng2-canvas-whiteboard';
 import { MediaSettingsService } from 'app/core/services/media-settings.service';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { GetMessages } from '@shared/models/meeting/message/get-messages';
 
 @Component({
@@ -59,6 +59,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public isShowStatistics = false;
   public isScreenRecording = false;
   public isShowCurrentParticipantCard = true;
+  public canLeave = true;
 
   @ViewChild('currentVideo') currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) mainArea: ElementRef<HTMLElement>;
@@ -370,7 +371,35 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public ngOnDestroy(): void {
+    this.destroyPeer();
     this.currentUserStream?.getTracks().forEach((track) => track.stop());
+
+    this.connectionData.participant = this.currentParticipant;
+    this.meetingSignalrService.invoke(
+      SignalMethods.OnParticipantLeft,
+      this.connectionData
+    );
+
+    const ended: boolean =
+      this.currentParticipant.role == ParticipantRole.Host ||
+      this.meeting.participants.findIndex(
+        (p) => p.id != this.currentParticipant.id
+      ) == -1;
+
+    if (ended) {
+      this.httpService
+        .getRequest(
+          environment.apiUrl + '/api/meeting/end',
+          new HttpParams().set('meetingId', this.meeting.id)
+        )
+        .subscribe(
+          () => {},
+          (error) => console.error(error.Message)
+        );
+
+      this.pollService.savePollResults(this.meeting.id);
+    }
+
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
   }
@@ -380,26 +409,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public leave(): void {
-    let canLeave = true;
-    if (this.currentParticipant?.role === ParticipantRole.Host) {
-      canLeave = confirm('You will end current meeting!');
-    }
-
-    if (canLeave) {
-      this.destroyPeer();
-      this.connectionData.participant = this.currentParticipant;
-      this.meetingSignalrService.invoke(
-        SignalMethods.OnParticipantLeft,
-        this.connectionData
-      );
-      if (this.currentParticipant?.role === ParticipantRole.Host) {
-        this.pollService.savePollResults(this.meeting.id);
-      }
-
-      this.router.navigate(['/home']);
-      this.currentUserStream?.getTracks().forEach((track) => track.stop());
-      window.onbeforeunload = function (ev: BeforeUnloadEvent) {};
-    }
+    this.router.navigate(['/home']);
   }
 
   private addParticipantToMeeting(participant: Participant): void {
