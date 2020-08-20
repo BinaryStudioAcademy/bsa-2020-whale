@@ -237,6 +237,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
   onContactClick(contact: Contact): void {
     this.falseAllBooleans();
+    this.contactsVisibility = true;
     this.chatVisibility = true;
     this.contactSelected = contact;
   }
@@ -295,6 +296,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   public onContactsClick(): void {
+    console.log('open/close');
     if (this.contacts.length) {
       this.contactsVisibility = !this.contactsVisibility;
     }

@@ -52,6 +52,7 @@ import { GetMessages } from '@shared/models/meeting/message/get-messages';
 })
 export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public meeting: Meeting;
+  public otherParticipants: Participant[] = [];
   public meetingStatistics: Statistics;
   public isShowChat = false;
   public isShowParticipants = false;
@@ -95,7 +96,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public msgText = '';
   public msgReceiverEmail: string = '';
   public currentParticipant: Participant;
-  public otherParticipants: Participant[];
   public connectionData: MeetingConnectionData;
   private meetingSignalrService: MeetingSignalrService;
   public pollService: PollService;
@@ -181,11 +181,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
           } else {
             this.addParticipantToMeeting(connectData.participant);
           }
-          // if (this.currentParticipant != null) {
-          //   this.otherParticipants = this.meeting.participants.filter(
-          //     (p) => p.id !== this.currentParticipant.id
-          //   );
-          // }
 
           console.log('connected with peer: ' + connectData.peerId);
           this.connect(connectData.peerId);
@@ -221,9 +216,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((connectionData) => {
         this.removeParticipantFromMeeting(connectionData.participant);
-        this.otherParticipants = this.meeting.participants.filter(
-          (p) => p.id !== this.currentParticipant.id
-        );
         if (this.connectedPeers.has(connectionData.peerId)) {
           this.connectedPeers.delete(connectionData.peerId);
         }
@@ -246,9 +238,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((participant) => {
         this.removeParticipantFromMeeting(participant);
-        this.otherParticipants = this.meeting.participants.filter(
-          (p) => p.id !== this.currentParticipant.id
-        );
 
         this.connectedPeers = new Map(
           [...this.connectedPeers].filter(
@@ -452,11 +441,15 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   private addParticipantToMeeting(participant: Participant): void {
     if (!this.meeting.participants.some((p) => p.id === participant.id)) {
       this.meeting.participants.push(participant);
+      this.otherParticipants.push(participant);
     }
   }
 
   private removeParticipantFromMeeting(participant: Participant): void {
     this.meeting.participants = this.meeting.participants.filter(
+      (p) => p.id !== participant.id
+    );
+    this.otherParticipants = this.otherParticipants.filter(
       (p) => p.id !== participant.id
     );
   }
@@ -498,6 +491,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
             SignalMethods.OnConferenceStartRecording,
             'Conference start recording'
           );
+          this.toastr.info('Start recording a conference');
         } else {
           this.isScreenRecording = false;
         }
@@ -516,6 +510,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       SignalMethods.OnConferenceStopRecording,
       'Conference stop recording'
     );
+    this.toastr.info('Stop recording a conference');
   }
 
   public onPollIconClick(): void {
