@@ -19,10 +19,11 @@ namespace Whale.Shared.Services
 {
     public class ContactsService : BaseService
     {
+        private readonly NotificationsService _notifications;
         private readonly BlobStorageSettings _blobStorageSettings;
-
-        public ContactsService(WhaleDbContext context, IMapper mapper, BlobStorageSettings blobStorageSettings) : base(context, mapper)
+        public ContactsService(WhaleDbContext context, IMapper mapper, NotificationsService notifications, BlobStorageSettings blobStorageSettings) : base(context, mapper)
         {
+            _notifications = notifications;
             _blobStorageSettings = blobStorageSettings;
         }
 
@@ -38,7 +39,7 @@ namespace Whale.Shared.Services
                  .Include(c => c.PinnedMessage)
                  .Include(c => c.FirstMemberSettings)
                  .Include(c => c.SecondMemberSettings)
-                 .Where(c => c.FirstMemberId == user.Id || c.SecondMemberId == user.Id)
+                 .Where(c => (c.FirstMemberId == user.Id || c.SecondMemberId == user.Id) && c.isAccepted)
                  .ToListAsync();
 
             contacts = (await contacts.LoadAvatars(_blobStorageSettings, c => c.FirstMember)).ToList();
@@ -130,8 +131,18 @@ namespace Whale.Shared.Services
                 .FirstOrDefaultAsync(c =>
                 (c.FirstMemberId == contactner.Id && c.SecondMemberId == owner.Id) ||
                 (c.SecondMemberId == contactner.Id && c.FirstMemberId == owner.Id));
+
             if (contact is object)
+            {
+                if (!contact.isAccepted && contact.SecondMemberId == owner.Id)
+                {
+                    contact.isAccepted = true;
+                    _context.Contacts.Update(contact);
+                    await _context.SaveChangesAsync();
+                    return await GetContactAsync(contact.Id, ownerEmail);
+                }
                 throw new AlreadyExistsException("Contact");
+            }
 
             var ownerSettings = new ContactSetting()
             {
@@ -155,10 +166,12 @@ namespace Whale.Shared.Services
                 SecondMemberId = contactner.Id,
                 FirstMemberSettings = ownerSettings,
                 SecondMemberSettings = contactnerSettings,
+                isAccepted = false,
             };
             _context.Contacts.Add(contact);
             await _context.SaveChangesAsync();
-            return await GetContactAsync(contact.Id, ownerEmail);
+            await _notifications.AddContactNotification(ownerEmail, contactnerEmail);
+            return null;
         }
     }
 }

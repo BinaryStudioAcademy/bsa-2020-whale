@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Whale.DAL;
 
 namespace Whale.DAL.Migrations
 {
     [DbContext(typeof(WhaleDbContext))]
-    partial class WhaleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200819142451_AddNotifications")]
+    partial class AddNotifications
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -56,9 +58,6 @@ namespace Whale.DAL.Migrations
 
                     b.Property<Guid?>("SecondMemberSettingsId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("isAccepted")
-                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
