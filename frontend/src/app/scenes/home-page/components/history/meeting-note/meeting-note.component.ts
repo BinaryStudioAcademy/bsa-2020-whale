@@ -28,7 +28,7 @@ export class MeetingNoteComponent implements OnInit {
     const minutes = duration.getUTCMinutes();
 
     const hourString = hours == 0 ? '' : `${hours} hours `;
-    const minuteString = minutes == 0 ? '' : `${minutes} minutes`;
+    const minuteString = minutes == 0 && hours != 0 ? '' : `${minutes} minutes`;
 
     return hourString + minuteString;
   }
