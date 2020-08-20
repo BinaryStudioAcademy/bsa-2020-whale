@@ -4,6 +4,6 @@
     <div class="mini ui buttons">
         <button class="ui button" (click)="onClose(); $event.stopPropagation()">Close</button>
         <div *ngIf="isPendingContact" class="or"></div>
-        <button *ngIf="isPendingContact" class="ui positive button" (click)="$event.stopPropagation()">Add</button>
+        <button *ngIf="isPendingContact" class="ui positive button" (click)="onAddContact(); $event.stopPropagation()">Add</button>
       </div>
 </div>

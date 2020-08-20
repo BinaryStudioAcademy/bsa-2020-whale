@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpService } from './http.service';
 import { Observable } from 'rxjs';
-import { Notification } from '@shared/models/notification/notification'
+import { Notification } from '@shared/models/notification/notification';
 
 @Injectable({
   providedIn: 'root',
