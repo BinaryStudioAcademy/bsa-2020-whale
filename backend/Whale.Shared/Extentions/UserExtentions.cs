@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Whale.DAL.Models;
 using Whale.DAL.Settings;
+using Whale.Shared.Exceptions;
 
 namespace Whale.Shared.Extentions
 {
@@ -58,6 +59,10 @@ namespace Whale.Shared.Extentions
             if (blob != null)
             {
                 user.AvatarUrl = blob.Uri.AbsoluteUri;
+            }
+            else
+            {
+                throw new NotFoundException("Blob not found" + user.AvatarUrl);
             }
             return user;
         }
