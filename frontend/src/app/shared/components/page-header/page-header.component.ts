@@ -9,6 +9,10 @@ import { BlobService } from '../../../core/services/blob.service';
 import { LinkTypeEnum } from '@shared/Enums/LinkTypeEnum';
 import { UpstateService } from '../../../core/services/upstate.service';
 import { NotificationService } from 'app/core/services/notification.service';
+import {
+  WhaleSignalService,
+  SignalMethods,
+} from 'app/core/services/whale-signal.service';
 
 @Component({
   selector: 'app-page-header',
@@ -31,7 +35,8 @@ export class PageHeaderComponent implements OnInit {
     private httpService: HttpService,
     private blobService: BlobService,
     private upstateService: UpstateService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private whaleSignalrService: WhaleSignalService
   ) {}
 
   public showNotificationsMenu(): void {
@@ -64,9 +69,10 @@ export class PageHeaderComponent implements OnInit {
       });
   }
   getNotifications(): void {
-    this.notificationService.GetNotifications()
+    this.notificationService
+      .GetNotifications()
       .pipe(tap(() => (this.isNotificationsLoading = false)))
-      .subscribe( notifications => {
+      .subscribe((notifications) => {
         this.notificationsList = notifications;
       });
   }
@@ -74,11 +80,15 @@ export class PageHeaderComponent implements OnInit {
     this.router.navigate([`${pageName}`]);
   }
   logOut(): void {
+    this.whaleSignalrService.invoke(
+      SignalMethods.OnUserDisconnect,
+      this.loggedInUser.email
+    );
     this.auth.logout().subscribe(() => this.router.navigate(['/']));
   }
 
   onNotificationDelete(id: string): void {
-    this.notificationsList = this.notificationsList.filter(n => n.id !== id );
+    this.notificationsList = this.notificationsList.filter((n) => n.id !== id);
     this.notificationService.DeleteNotification(id);
   }
 }

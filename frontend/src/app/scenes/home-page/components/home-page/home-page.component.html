@@ -71,6 +71,13 @@
                 {{ contact?.secondMember.secondName }}
               </div>
             </div>
+            <i
+              [ngClass]="
+                contact?.secondMember.connectionId
+                  ? 'circle online small icon'
+                  : 'circle outline small icon'
+              "
+            ></i>
           </div>
         </div>
       </div>

@@ -14,6 +14,9 @@ import { AuthService } from 'app/core/auth/auth.service';
 import { LinkTypeEnum } from '@shared/Enums/LinkTypeEnum';
 import { BlobService } from '../../../../core/services/blob.service';
 import { UpstateService } from '../../../../core/services/upstate.service';
+import { WhaleSignalService } from 'app/core/services/whale-signal.service';
+import { SignalRService } from 'app/core/services/signal-r.service';
+import { UserOnline } from '@shared/models/user/user-online';
 
 @Component({
   selector: 'app-home-page',
@@ -43,7 +46,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
     private router: Router,
     private authService: AuthService,
     private blobService: BlobService,
-    private upstateService: UpstateService
+    private upstateService: UpstateService,
+    private signalRService: SignalRService,
+    private whaleSignalrService: WhaleSignalService
   ) {}
 
   ngOnDestroy(): void {
@@ -66,12 +71,52 @@ export class HomePageComponent implements OnInit, OnDestroy {
             .subscribe(
               (data: Contact[]) => {
                 this.contacts = data;
+
+                this.whaleSignalrService.signalUserConected$
+                  .pipe(takeUntil(this.unsubscribe$))
+                  .subscribe(
+                    (onlineUser) => {
+                      console.log('whalesignalr user connected:', onlineUser);
+                      this.userConnected(onlineUser);
+                    },
+                    (err) => {
+                      this.toastr.error(err.Message);
+                    }
+                  );
+
+                this.whaleSignalrService.signalUserDisconected$
+                  .pipe(takeUntil(this.unsubscribe$))
+                  .subscribe(
+                    (userEmail) => {
+                      this.userDisconnected(userEmail);
+                    },
+                    (err) => {
+                      this.toastr.error(err.Message);
+                    }
+                  );
               },
               (error) => this.toastr.error(error.Message)
             );
         },
         (error) => this.toastr.error(error.Message)
       );
+  }
+  userConnected(onlineUser: UserOnline): void {
+    const index = this.contacts.findIndex(
+      (c) => c.secondMember?.id === onlineUser.id
+    );
+    if (index >= 0) {
+      this.contacts[index].secondMember.connectionId = onlineUser.connectionId;
+    }
+  }
+
+  userDisconnected(userEmail: string): void {
+    const index = this.contacts.findIndex(
+      (c) => c.secondMember?.email === userEmail
+    );
+    if (index >= 0) {
+      this.contacts[index].secondMember.connectionId = null;
+    }
   }
 
   addNewGroup(): void {

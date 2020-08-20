@@ -32,12 +32,12 @@ namespace Whale.Shared.Services
             var users = await _context.Users.ToListAsync();
             await users.LoadAvatarsAsync(_blobStorageSettings);
 
-            return users.Select(async u =>
+            return users.Select(u =>
             {
                 var user = _mapper.Map<UserDTO>(u);
-                user.ConnectionId = await GetConnectionId(u.Id);
+                user.ConnectionId = GetConnectionId(u.Id);
                 return user;
-            }).Select(u => u.Result);
+            });
         }
 
         public async Task<UserDTO> GetUserAsync(Guid userId)
@@ -50,7 +50,7 @@ namespace Whale.Shared.Services
             await user.LoadAvatarAsync(_blobStorageSettings);
 
             var userDto = _mapper.Map<UserDTO>(user);
-            userDto.ConnectionId = await GetConnectionId(user.Id);
+            userDto.ConnectionId = GetConnectionId(user.Id);
             return userDto;
         }
 
@@ -62,7 +62,7 @@ namespace Whale.Shared.Services
             await user.LoadAvatarAsync(_blobStorageSettings);
 
             var userDto = _mapper.Map<UserDTO>(user);
-            userDto.ConnectionId = await GetConnectionId(user.Id);
+            userDto.ConnectionId = GetConnectionId(user.Id);
             return userDto;
         }
 
@@ -133,16 +133,19 @@ namespace Whale.Shared.Services
             return true;
         }
 
-        private async Task<string> GetConnectionId(Guid userId)
+        private string GetConnectionId(Guid userId)
         {
-            await _redisService.ConnectAsync();
-            var onlineUsers = await _redisService.GetAsync<ICollection<UserOnlineDTO>>(onlineUsersKey);
-            if(onlineUsers != null)
+            _redisService.Connect();
+            try
             {
+                var onlineUsers = _redisService.Get<ICollection<UserOnlineDTO>>(onlineUsersKey);
                 var userOnline = onlineUsers.FirstOrDefault(u => u.Id == userId);
                 return userOnline?.ConnectionId;
             }
-            return null;
+            catch (Exception)
+            {
+                return null;
+            }
         }
     }
 }

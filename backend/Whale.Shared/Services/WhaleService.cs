@@ -22,8 +22,12 @@ namespace Whale.Shared.Services
         public async Task<UserOnlineDTO> UserConnect(string userEmail, string connectionId)
         {
             await _redisService.ConnectAsync();
-            var onlineUsers = _redisService.Get<ICollection<UserOnlineDTO>>(OnlineUsersKey);
-            if (onlineUsers == null)
+            ICollection<UserOnlineDTO> onlineUsers;
+            try
+            {
+                onlineUsers = await _redisService.GetAsync<ICollection<UserOnlineDTO>>(OnlineUsersKey);
+            }
+            catch(Exception)
             {
                 onlineUsers = new List<UserOnlineDTO>();
             }
@@ -34,14 +38,14 @@ namespace Whale.Shared.Services
             return newUserOnline;
         }
 
-        public async Task UserDisconnect(string userEmail)
+        public async Task UserDisconnect(string userEmail, string connectionId)
         {
             await _redisService.ConnectAsync();
             var onlineUsers = _redisService.Get<ICollection<UserOnlineDTO>>(OnlineUsersKey);
             if(onlineUsers != null)
             {
                 var user = await _userService.GetUserByEmail(userEmail);
-                var onlineUser = onlineUsers.FirstOrDefault(u => u.Id == user.Id);
+                var onlineUser = onlineUsers.FirstOrDefault(u => u.Id == user.Id && u.ConnectionId == connectionId);
                 if(onlineUser != null)
                 {
                     onlineUsers.Remove(onlineUser);

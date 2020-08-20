@@ -27,7 +27,7 @@ namespace Whale.SignalR.Hubs
         [HubMethodName("OnUserDisconnect")]
         public async Task UserDisconnect(string userEmail)
         {
-            await _whaleService.UserDisconnect(userEmail);
+            await _whaleService.UserDisconnect(userEmail, Context.ConnectionId);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, WhaleService.OnlineUsersKey);
             await Clients.Group(WhaleService.OnlineUsersKey).SendAsync("OnUserDisconnect", userEmail);
         }
