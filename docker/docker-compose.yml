@@ -40,6 +40,7 @@ services:
       - "4203:4203"
     environment:
       ConnectionStrings:WhaleDatabase: ${WhaleDBConnectionString}
+      BlobStorageSettings:ConnectionString: ${WhaleBlobStorageConnectionString}
       ConnectionStrings:RedisOptions: "redis:6379"
       ASPNETCORE_URLS: http://+:4203
 

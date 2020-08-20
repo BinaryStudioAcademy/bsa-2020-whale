@@ -26,13 +26,8 @@ namespace Whale.Shared.Services
 
         public async Task<IEnumerable<UserDTO>> GetAllUsers()
         {
-            var users = await _context.Users.LoadAvatars(_blobStorageSettings).ToArrayAsync();
-            //var usersTasks = users.Select(async (u) =>
-            //{
-            //    u.AvatarUrl = u.LinkType == LinkTypeEnum.Internal ? await _fileStorageProvider.GetImageByNameAsync(u.AvatarUrl) : u.AvatarUrl;
-            //    return u;
-            //});
-            //users = await Task.WhenAll(usersTasks);
+            var users = await _context.Users.ToListAsync();
+            await users.LoadAvatarsAsync(_blobStorageSettings);
 
             return _mapper.Map<IEnumerable<UserDTO>>(users);
         }

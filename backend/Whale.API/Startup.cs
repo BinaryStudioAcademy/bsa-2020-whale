@@ -54,6 +54,7 @@ namespace Whale.API
                 mc.AddProfile<ParticipantProfile>();
                 mc.AddProfile<GroupProfile>();
                 mc.AddProfile<GroupMessageProfile>();
+                mc.AddProfile<NotificationProfile>();
             });
 
             services.AddSingleton(mappingConfig.CreateMapper());
@@ -68,6 +69,7 @@ namespace Whale.API
             services.AddScoped(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
 
 
+            services.AddTransient<NotificationsService>();
             services.AddScoped<HttpClient>();
             services.AddTransient(p => new HttpService(p.GetRequiredService<HttpClient>(), Configuration.GetValue<string>("MeetingAPI")));
             services.AddTransient(p => new SignalrService(Configuration.GetValue<string>("SignalR")));

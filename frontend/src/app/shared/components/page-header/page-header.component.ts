@@ -8,6 +8,7 @@ import { tap, filter } from 'rxjs/operators';
 import { BlobService } from '../../../core/services/blob.service';
 import { LinkTypeEnum } from '@shared/Enums/LinkTypeEnum';
 import { UpstateService } from '../../../core/services/upstate.service';
+import { NotificationService } from 'app/core/services/notification.service';
 
 @Component({
   selector: 'app-page-header',
@@ -16,36 +17,21 @@ import { UpstateService } from '../../../core/services/upstate.service';
 })
 export class PageHeaderComponent implements OnInit {
   public isUserLoadig = true;
+  public isNotificationsLoading = true;
 
   settingsMenuVisible = false;
   isNotificationsVisible = false;
   loggedInUser: User;
 
-  notification1: Notification = {
-    text: 'Missed call from USER',
-    time: new Date(2020, 5, 11, 8, 25, 42),
-  };
-  notification2: Notification = {
-    text: 'USER want to add you to contacts',
-    time: new Date(2020, 7, 13, 17, 25, 12),
-  };
-  notification3: Notification = {
-    text: 'Missed call from USER',
-    time: new Date(2020, 9, 2, 21, 20, 2),
-  };
-
-  public notificationsList: Notification[] = [
-    this.notification1,
-    this.notification2,
-    this.notification3,
-  ];
+  public notificationsList: Notification[];
 
   constructor(
     private router: Router,
     public auth: AuthService,
     private httpService: HttpService,
     private blobService: BlobService,
-    private upstateService: UpstateService
+    private upstateService: UpstateService,
+    private notificationService: NotificationService
   ) {}
 
   public showNotificationsMenu(): void {
@@ -66,6 +52,7 @@ export class PageHeaderComponent implements OnInit {
 
   ngOnInit(): void {
     this.getUser();
+    this.getNotifications();
   }
 
   getUser(): void {
@@ -76,10 +63,23 @@ export class PageHeaderComponent implements OnInit {
         this.loggedInUser = userFromDB;
       });
   }
+  getNotifications(): void {
+    this.notificationService
+      .GetNotifications()
+      .pipe(tap(() => (this.isNotificationsLoading = false)))
+      .subscribe((notifications) => {
+        this.notificationsList = notifications;
+      });
+  }
   goToPage(pageName: string): void {
     this.router.navigate([`${pageName}`]);
   }
   logOut(): void {
     this.auth.logout().subscribe(() => this.router.navigate(['/']));
+  }
+
+  onNotificationDelete(id: string): void {
+    this.notificationsList = this.notificationsList.filter((n) => n.id !== id);
+    this.notificationService.DeleteNotification(id);
   }
 }

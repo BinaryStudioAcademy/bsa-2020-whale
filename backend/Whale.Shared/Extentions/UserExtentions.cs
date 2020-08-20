@@ -23,9 +23,9 @@ namespace Whale.Shared.Extentions
             return getLinkFromStorage(user, response);
         }
 
-        public static IEnumerable<T> LoadAvatars<T>(this IEnumerable<T> source, BlobStorageSettings settings, Func<T, User> predicate)
+        public static async Task<IEnumerable<T>> LoadAvatarsAsync<T>(this IEnumerable<T> source, BlobStorageSettings settings, Func<T, User> predicate)
         {
-            var response = getAllBlobs(settings);
+            var response = await getAllBlobsAsync(settings);
 
             return source.Select(t =>
             {
@@ -34,9 +34,9 @@ namespace Whale.Shared.Extentions
             });
         }
 
-        public static IQueryable<User> LoadAvatars(this IQueryable<User> source, BlobStorageSettings settings)
+        public static async Task<IEnumerable<User>> LoadAvatarsAsync(this IEnumerable<User> source, BlobStorageSettings settings)
         {
-            var response = getAllBlobs(settings);
+            var response = await getAllBlobsAsync(settings);
 
             return source.Select(u => u.getLinkFromStorage(response));
         }
@@ -46,15 +46,8 @@ namespace Whale.Shared.Extentions
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(settings.ConnectionString);
             var blobClient = storageAccount.CreateCloudBlobClient();
             var container = blobClient.GetContainerReference(settings.ImageContainerName);
+            await SetPublicContainerPermissionsAsync(container);
             return await container.ListBlobsSegmentedAsync(null);
-        }
-
-        private static BlobResultSegment getAllBlobs(BlobStorageSettings settings)
-        {
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(settings.ConnectionString);
-            var blobClient = storageAccount.CreateCloudBlobClient();
-            var container = blobClient.GetContainerReference(settings.ImageContainerName);
-            return container.ListBlobsSegmented(null);
         }
 
         private static User getLinkFromStorage(this User user, BlobResultSegment response)
@@ -67,6 +60,16 @@ namespace Whale.Shared.Extentions
                 user.AvatarUrl = blob.Uri.AbsoluteUri;
             }
             return user;
+        }
+
+        private static async Task SetPublicContainerPermissionsAsync(CloudBlobContainer container)
+        {
+            await container.CreateIfNotExistsAsync();
+            BlobContainerPermissions permissions = new BlobContainerPermissions
+            {
+                PublicAccess = BlobContainerPublicAccessType.Blob
+            };
+            await container.SetPermissionsAsync(permissions);
         }
     }
 }

@@ -35,7 +35,7 @@ namespace Whale.SignalR
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<WhaleDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("WhaleDatabase")));
-
+            services.AddTransient<NotificationsService>();
             services.AddTransient<ContactsService>();
             services.AddTransient<MeetingService>();
             services.AddTransient<ParticipantService>();
@@ -65,6 +65,7 @@ namespace Whale.SignalR
                 cfg.AddProfile<ParticipantProfile>();
                 cfg.AddProfile<ContactProfile>();
                 cfg.AddProfile<DirectMessageProfile>();
+                cfg.AddProfile<NotificationProfile>();
             },
             Assembly.GetExecutingAssembly());
         }
