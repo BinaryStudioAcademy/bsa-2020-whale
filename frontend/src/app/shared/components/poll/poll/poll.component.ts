@@ -48,9 +48,7 @@ export class PollComponent implements OnInit {
   onSubmit() {
     let choosedOptions = this.poll.isSingleChoice
       ? [this.poll.options[Number(this.form.controls.answers.value)]]
-      : this.answers.controls
-          .filter((ctrl) => ctrl.value)
-          .map((ctrl, index) => this.poll.options[index]);
+      : this.getMuptipleAnswers();
 
     console.log(choosedOptions);
     if (choosedOptions.length == 0 || choosedOptions[0] === undefined) {
@@ -82,5 +80,17 @@ export class PollComponent implements OnInit {
       .subscribe(() => {
         this.toastr.success('Answer saved!');
       });
+  }
+
+  public getMuptipleAnswers(): string[] {
+    const choosedOptions: string[] = [];
+
+    this.answers.controls.forEach((ctrl, index) => {
+      if (ctrl.value) {
+        choosedOptions.push(this.poll.options[index]);
+      }
+    });
+
+    return choosedOptions;
   }
 }
