@@ -4,7 +4,6 @@ import {
   ViewChild,
   ElementRef,
   AfterViewInit,
-  AfterContentInit,
   EventEmitter,
   OnDestroy,
   Inject,
@@ -93,7 +92,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public currentParticipant: Participant;
   public otherParticipants: Participant[];
   public connectionData: MeetingConnectionData;
-
   private meetingSignalrService: MeetingSignalrService;
   public pollService: PollService;
   private unsubscribe$ = new Subject<void>();
@@ -111,7 +109,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private meetingService: MeetingService,
-    private signalRService: SignalRService,
     private toastr: ToastrService,
     private blobService: BlobService,
     private httpService: HttpService,
@@ -120,7 +117,8 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     private simpleModalService: SimpleModalService,
     private canvasWhiteboardService: CanvasWhiteboardService,
     private mediaSettingsService: MediaSettingsService,
-    private http: HttpClient
+    private http: HttpClient,
+    signalRService: SignalRService
   ) {
     this.meetingSignalrService = new MeetingSignalrService(signalRService);
     this.pollService = new PollService(
@@ -135,6 +133,9 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.currentUserStream = await navigator.mediaDevices.getUserMedia(
       await this.mediaSettingsService.getMediaConstraints()
     );
+
+    this.connectedStreams.push(this.currentUserStream);
+
     const enterModal = await this.simpleModalService
       .addModal(EnterModalComponent)
       .toPromise();
@@ -149,6 +150,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       this.toggleMicrophone();
     }
     this.currentStreamLoaded.emit();
+
     // create new peer
     this.peer = new Peer(environment.peerOptions);
 
@@ -157,9 +159,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (connectData) => {
-          console.log(connectData);
-          console.log(this.meeting);
-
           if (connectData.peerId === this.peer.id) {
             this.pollService.getPollsAndResults(
               this.meeting.id,
@@ -188,7 +187,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
           this.toastr.success('Connected successfuly');
         },
         (err) => {
-          console.log(err.message);
           this.toastr.error(err.Message);
           this.leave();
         }
@@ -265,14 +263,51 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       });
 
+    this.meetingSignalrService.mediaStateRequested$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe((senderConnectionId) => {
+        this.invokeMediaStateChanged(senderConnectionId);
+      });
+
+    this.meetingSignalrService.participantMediaStateChanged$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (mediaData) => {
+          console.log(mediaData);
+          const changedStream = this.connectedStreams.find(
+            (s) => s.id === mediaData.streamId
+          );
+          if (!changedStream) {
+            return;
+          }
+
+          changedStream.getTracks().forEach((t) => {
+            if (t.kind === 'video') {
+              t.dispatchEvent(
+                new Event(mediaData.isVideoActive ? 'enabled' : 'disabled')
+              );
+            } else {
+              t.dispatchEvent(
+                new Event(mediaData.isAudioActive ? 'enabled' : 'disabled')
+              );
+            }
+          });
+        },
+        () => {
+          this.toastr.error(
+            'Error occured during participants media state updating'
+          );
+        }
+      );
+
     this.meetingSignalrService.meetingEnded$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
-        (connectionData) => {
+        () => {
           this.toastr.show('Meeting ended');
           this.leave();
         },
-        (err) => {
+        () => {
           this.toastr.error('Error occured when ending meeting');
         }
       );
@@ -283,7 +318,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
         (messages) => {
           this.messages = messages;
         },
-        (err) => {
+        () => {
           this.toastr.error('Error occured when getting messages');
         }
       );
@@ -294,7 +329,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
         (message) => {
           this.messages.push(message);
         },
-        (err) => {
+        () => {
           this.toastr.error('Error occured when sending message');
         }
       );
@@ -305,7 +340,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
         (strokes) => {
           this.canvasWhiteboardService.drawCanvas(strokes);
         },
-        (err) => {
+        () => {
           this.toastr.error('Error occured while trying to get drawings');
         }
       );
@@ -316,7 +351,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
         (erase) => {
           if (erase) this.canvasWhiteboardService.clearCanvas();
         },
-        (err) => {
+        () => {
           this.toastr.error('Error occured while trying to erase drawings');
         }
       );
@@ -333,7 +368,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
           this.connectedStreams.push(stream);
           console.log(call.peer, 'call peer');
 
-          console.log(this.meeting);
           const participant = this.meeting.participants.find(
             (p) => p.streamId == stream.id
           );
@@ -346,9 +380,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       // send mediaStream to caller
       call.answer(this.currentUserStream);
     });
-
-    // disables ability to close browser tab if user didn't visit any element on the tab
-    this.mainArea.nativeElement.classList.add('visited');
 
     // show a warning dialog if close current tab or window
     window.onbeforeunload = function (ev: BeforeUnloadEvent) {
@@ -414,33 +445,29 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   toggleMicrophone(): void {
-    if (!this.isMicrophoneMuted) {
-      this.currentUserStream.getAudioTracks().forEach((track) => {
-        track.enabled = false;
-        track.dispatchEvent(new Event('disabled'));
-      });
-    } else {
-      this.currentUserStream.getAudioTracks().forEach((track) => {
-        track.enabled = true;
-        track.dispatchEvent(new Event('enabled'));
-      });
-    }
+    this.isMicrophoneMuted
+      ? this.currentUserStream.getAudioTracks().forEach((track) => {
+          track.enabled = true;
+        })
+      : this.currentUserStream.getAudioTracks().forEach((track) => {
+          track.enabled = false;
+        });
+
     this.isMicrophoneMuted = !this.isMicrophoneMuted;
+    this.invokeMediaStateChanged();
   }
 
   toggleCamera(): void {
-    if (!this.isCameraMuted) {
-      this.currentUserStream.getVideoTracks().forEach((track) => {
-        track.enabled = false;
-        track.dispatchEvent(new Event('disabled'));
-      });
-    } else {
-      this.currentUserStream.getVideoTracks().forEach((track) => {
-        track.enabled = true;
-        track.dispatchEvent(new Event('enabled'));
-      });
-    }
+    this.isCameraMuted
+      ? this.currentUserStream.getVideoTracks().forEach((track) => {
+          track.enabled = true;
+        })
+      : this.currentUserStream.getVideoTracks().forEach((track) => {
+          track.enabled = false;
+        });
+
     this.isCameraMuted = !this.isCameraMuted;
+    this.invokeMediaStateChanged();
   }
 
   public startRecording(): void {
@@ -590,6 +617,11 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     participant: Participant,
     shouldPrepend = false
   ): void {
+    const stream =
+      participant.streamId === this.currentParticipant.streamId
+        ? this.currentUserStream
+        : this.connectedStreams.find((s) => s.id === participant.streamId);
+
     var newMediaData = {
       id: participant.id,
       userFirstName: participant.user.firstName,
@@ -597,15 +629,27 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       avatarUrl: participant.user.avatarUrl,
       isCurrentUser: participant.id === this.currentParticipant.id,
       isUserHost: participant.role == ParticipantRole.Host,
-      stream:
-        participant.id === this.currentParticipant.id
-          ? this.currentUserStream
-          : this.connectedStreams.find((s) => s.id === participant.streamId),
+      stream: stream,
+      isVideoEnabled:
+        stream.id === this.currentUserStream.id
+          ? this.currentUserStream.getVideoTracks().some((vt) => vt.enabled)
+          : false,
+      isAudioEnabled:
+        stream.id === this.currentUserStream.id
+          ? this.currentUserStream.getAudioTracks().some((at) => at.enabled)
+          : true,
     };
 
     shouldPrepend
       ? this.mediaData.unshift(newMediaData)
       : this.mediaData.push(newMediaData);
+
+    if (stream.id !== this.currentUserStream.id) {
+      this.meetingSignalrService.invoke(
+        SignalMethods.OnMediaStateRequested,
+        stream.id
+      );
+    }
 
     this.setOutputDevice();
   }
@@ -687,6 +731,15 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
           };
           this.getMeeting(link);
         });
+    });
+  }
+
+  private invokeMediaStateChanged(receiverConnectionId = '') {
+    this.meetingSignalrService.invoke(SignalMethods.OnMediaStateChanged, {
+      streamId: this.currentUserStream.id,
+      receiverConnectionId: receiverConnectionId,
+      isVideoActive: !this.isCameraMuted,
+      isAudioActive: !this.isMicrophoneMuted,
     });
   }
 
