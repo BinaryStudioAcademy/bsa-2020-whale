@@ -15,6 +15,9 @@ using Microsoft.OpenApi.Models;
 using Whale.MeetingAPI.Services;
 using Whale.Shared.MappingProfiles;
 using Whale.Shared.Helpers;
+using Whale.DAL.Settings;
+using Whale.Shared.Exceptions;
+using System;
 
 namespace Whale.MeetingAPI
 {
@@ -68,6 +71,8 @@ namespace Whale.MeetingAPI
                 cfg.AddProfile<ParticipantProfile>();
             },
             Assembly.GetExecutingAssembly());
+
+            services.AddScoped<BlobStorageSettings>(options => Configuration.Bind<BlobStorageSettings>("BlobStorageSettings"));
 
             services.AddScoped(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
 

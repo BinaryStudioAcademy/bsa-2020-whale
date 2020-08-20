@@ -26,7 +26,7 @@ export class AddContactModalComponent extends SimpleModalComponent<
   }
 
   public submit(): void {
-    this.contactCervice.createContactByEmail(this.contactnerEmail).subscribe(
+    this.contactCervice.createContactByEmail(this.contactnerEmail.toLowerCase()).subscribe(
       (resp) => {
         if (resp.status === 204){
           this.toastr.success('Request has been sent');

@@ -1,24 +1,24 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Whale.DAL;
-using Microsoft.EntityFrameworkCore;
-using AutoMapper;
 using Microsoft.IdentityModel.Tokens;
-using Whale.Shared.Services;
-using Whale.DAL.Settings;
-using Whale.API.Extensions;
-using Whale.API.Middleware;
 using Microsoft.OpenApi.Models;
-using Whale.API.Services;
+using System.Net.Http;
 using Whale.API.MappingProfiles;
+using Whale.API.Middleware;
 using Whale.API.Providers;
+using Whale.API.Services;
+using Whale.DAL;
+using Whale.DAL.Settings;
+using Whale.Shared.Exceptions;
 using Whale.Shared.Helpers;
 using Whale.Shared.MappingProfiles;
-using System.Net.Http;
+using Whale.Shared.Services;
 
 namespace Whale.API
 {
@@ -60,7 +60,7 @@ namespace Whale.API
             services.AddTransient<ContactChatService>();
             services.AddTransient<NotificationsService>();
             services.AddScoped<HttpClient>();
-            services.AddTransient(p =>  new HttpService(p.GetRequiredService<HttpClient>(), Configuration.GetValue<string>("MeetingAPI")));
+            services.AddTransient(p => new HttpService(p.GetRequiredService<HttpClient>(), Configuration.GetValue<string>("MeetingAPI")));
             services.AddTransient(p => new SignalrService(Configuration.GetValue<string>("SignalR")));
 
             services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
@@ -70,9 +70,10 @@ namespace Whale.API
                 .AllowAnyHeader()
                 .AllowCredentials()
                 .WithOrigins("http://localhost:4200", "http://bsa2020-whale.westeurope.cloudapp.azure.com");
-        }));
+            }));
 
-            services.AddTransient(x => new FileStorageProvider(Configuration.Bind<BlobStorageSettings>("BlobStorageSettings")));
+            services.AddScoped<BlobStorageSettings>(options => Configuration.Bind<BlobStorageSettings>("BlobStorageSettings"));
+            services.AddScoped<FileStorageProvider>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(opt =>
