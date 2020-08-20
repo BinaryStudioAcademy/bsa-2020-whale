@@ -16,7 +16,10 @@ import { ParticipantRole } from '@shared/models/participant/participant-role';
 export class LastParticipantGuard implements CanDeactivate<MeetingComponent> {
   canDeactivate(component: MeetingComponent): boolean {
     /*component.meeting.participants.findIndex(p => p.id != component.currentParticipant.id) == -1*/
-    if (component.currentParticipant.role == ParticipantRole.Host) {
+    if (
+      component.currentParticipant &&
+      component.currentParticipant.role == ParticipantRole.Host
+    ) {
       return confirm('You will end current meeting.');
     }
 
