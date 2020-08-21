@@ -109,6 +109,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public isAudioSettings = false;
   public isVideoSettings = false;
   public isWaitingForRecord = false;
+  public pattern = new RegExp(/^\S+.*/);
 
   constructor(
     private route: ActivatedRoute,
@@ -605,14 +606,16 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public sendMessage(): void {
-    this.meetingSignalrService.invoke(SignalMethods.OnSendMessage, {
-      authorEmail: this.authService.currentUser.email,
-      meetingId: this.meeting.id,
-      message: this.msgText,
-      receiverEmail: this.msgReceiverEmail,
-    } as MeetingMessageCreate);
+    if (this.msgText.trim().length !== 0) {
+      this.meetingSignalrService.invoke(SignalMethods.OnSendMessage, {
+        authorEmail: this.authService.currentUser.email,
+        meetingId: this.meeting.id,
+        message: this.msgText,
+        receiverEmail: this.msgReceiverEmail,
+      } as MeetingMessageCreate);
 
-    this.msgText = '';
+      this.msgText = '';
+    }
   }
 
   public onEnterKeyPress(event: KeyboardEvent): void {
