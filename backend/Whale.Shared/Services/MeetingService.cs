@@ -65,6 +65,7 @@ namespace Whale.Shared.Services
             if (!meeting.IsScheduled)
             {
                 meeting.StartTime = DateTimeOffset.Now;
+                meeting.EndTime = DateTimeOffset.Now.AddHours(1);
             }
             await _context.Meetings.AddAsync(meeting);
             await _context.SaveChangesAsync();
@@ -150,18 +151,18 @@ namespace Whale.Shared.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<string> GetShortInviteLink(string fullURL)
+        public async Task<string> GetShortInviteLink(string id, string pwd)
         {
             await _redisService.ConnectAsync();
-
-            return await _redisService.GetAsync<string>(fullURL);
+            string shortUrl = await _redisService.GetAsync<string>($"?id={id}&pwd={pwd}");
+            return shortUrl;
         }
 
         public async Task<string> GetFullInviteLink(string shortURL)
         {
             await _redisService.ConnectAsync();
-
-            return await _redisService.GetAsync<string>(shortURL);
+            string longUrl = await _redisService.GetAsync<string>(shortURL);
+            return longUrl;
         }
     }
 }

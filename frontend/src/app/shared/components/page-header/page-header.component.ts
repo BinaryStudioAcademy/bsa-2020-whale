@@ -13,6 +13,10 @@ import { HubConnection } from '@aspnet/signalr';
 import { Subject, from } from 'rxjs';
 import { SignalRService } from 'app/core/services/signal-r.service';
 import { environment } from '@env';
+import {
+  WhaleSignalService,
+  SignalMethods,
+} from 'app/core/services/whale-signal.service';
 
 @Component({
   selector: 'app-page-header',
@@ -40,6 +44,7 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
     private upstateService: UpstateService,
     private notificationService: NotificationService,
     private signalRService: SignalRService,
+    private whaleSignalrService: WhaleSignalService
   ) {}
 
   public showNotificationsMenu(): void {
@@ -80,15 +85,15 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
       });
   }
   getNotifications(): void {
-    this.notificationService
-      .GetNotifications()
-      .subscribe((notifications) => {
-        this.notificationsList = notifications;
-      });
+    this.notificationService.GetNotifications().subscribe((notifications) => {
+      this.notificationsList = notifications;
+    });
   }
 
   subscribeNotifications(): void {
-    from(this.signalRService.registerHub(environment.signalrUrl, 'notificationHub'))
+    from(
+      this.signalRService.registerHub(environment.signalrUrl, 'notificationHub')
+    )
       .pipe(
         tap((hub) => {
           this.hubConnection = hub;
@@ -116,6 +121,10 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
     this.router.navigate([`${pageName}`]);
   }
   logOut(): void {
+    this.whaleSignalrService.invoke(
+      SignalMethods.OnUserDisconnect,
+      this.loggedInUser.email
+    );
     this.auth.logout().subscribe(() => this.router.navigate(['/']));
   }
 

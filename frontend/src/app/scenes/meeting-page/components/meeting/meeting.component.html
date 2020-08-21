@@ -276,7 +276,13 @@
         </div>
       </div>
 
-      <div class="users" *ngIf="mediaData.length > 1">
+      <div
+        class="users"
+        *ngIf="
+          mediaData.length > 1 ||
+          (mediaData.length === 1 && mediaData[0].id !== currentParticipant.id)
+        "
+      >
         <app-participant-card
           *ngFor="let data of mediaData"
           (hideViewEvent)="hideViewEventHandler($event)"
@@ -287,6 +293,7 @@
             currentParticipant.id === $event ? toggleCamera() : ''
           "
           [data]="data"
+          [meetingHolder]="currentParticipant"
         >
         </app-participant-card>
       </div>
@@ -301,7 +308,12 @@
         #currentVideo
         autoplay="autoplay"
         class="participant-fullscreen"
-        [hidden]="mediaData.length > 1 || isCameraMuted"
+        [hidden]="
+          mediaData.length > 1 ||
+          (mediaData.length === 1 &&
+            mediaData[0].id !== currentParticipant.id) ||
+          isCameraMuted
+        "
         [muted]="'muted'"
       ></video>
 
@@ -356,7 +368,7 @@
                 {{ message?.sentDate | date: "short" }}
               </div>
             </div>
-            <div class="message">{{ message?.message }}</div>
+            <div disabled class="message">{{ message?.message }}</div>
           </div>
         </div>
       </div>
@@ -382,13 +394,20 @@
             placeholder="Enter to send.
   Enter+Shift for new line."
             [(ngModel)]="msgText"
-          ></textarea>
-          <i
-            id="meeting-sendmessage"
-            aria-hidden="true"
-            class="paper plane link icon blue"
+            required
+          >
+          </textarea>
+          <button
+            class="sendMessage"
             (click)="sendMessage()"
-          ></i>
+            [disabled]="msgText === ''"
+          >
+            <i
+              id="meeting-sendmessage"
+              aria-hidden="true"
+              class="paper plane link icon blue"
+            ></i>
+          </button>
         </div>
       </div>
     </div>

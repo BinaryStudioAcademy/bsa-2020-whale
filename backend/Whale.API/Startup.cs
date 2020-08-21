@@ -90,6 +90,8 @@ namespace Whale.API
             services.AddScoped<BlobStorageSettings>(options => Configuration.Bind<BlobStorageSettings>("BlobStorageSettings"));
             services.AddScoped<FileStorageProvider>();
 
+            services.AddScoped(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
+
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(opt =>
                 {

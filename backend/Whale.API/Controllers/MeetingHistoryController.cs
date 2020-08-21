@@ -19,9 +19,9 @@ namespace Whale.API.Controllers
 		}
 
 		[HttpGet]
-		public async Task<IActionResult> GetMeetings(Guid userId)
+		public async Task<IActionResult> GetMeetings(Guid userId, int skip, int take)
 		{
-			var meetings = await _meetingHistoryService.GetMeetingsWithParticipantsAndPollResults(userId);
+			var meetings = await _meetingHistoryService.GetMeetingsWithParticipantsAndPollResults(userId, skip, take);
 			return Ok(meetings);
 		}
 	}

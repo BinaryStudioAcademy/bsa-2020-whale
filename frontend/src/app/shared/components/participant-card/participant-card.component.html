@@ -1,27 +1,27 @@
 <div class="ui card">
   <div
     class="image"
-    [ngClass]="hasParticipantVideo ? 'without-background' : addAvatar()"
+    [ngClass]="data.isVideoEnabled ? 'without-background' : addAvatar()"
   >
     <video
       class="video"
       autoplay
-      [ngClass]="hasParticipantVideo ? 'visible' : 'hidden'"
+      [ngClass]="data.isVideoEnabled ? 'visible' : 'hidden'"
       [muted]="data.isCurrentUser ? 'muted' : ''"
     ></video>
     <p
       class="participant-initials"
-      [ngClass]="hasParticipantVideo ? 'hidden' : 'visible'"
+      [ngClass]="data.isVideoEnabled ? 'hidden' : 'visible'"
     ></p>
   </div>
   <div class="content">
     <div class="participant-name-wrapper">
       <i
         class="microphone icon"
-        *ngIf="isParticipantMuted || data.isCurrentUser || data.isUserHost"
-        [ngClass]="isParticipantMuted ? 'red' : 'blue'"
+        *ngIf="!data.isAudioEnabled || data.isCurrentUser || data.isUserHost"
+        [ngClass]="data.isAudioEnabled ? 'blue' : 'red'"
         [class.slash]="
-          (!isMicrophoneHovered && isParticipantMuted) ||
+          (!isMicrophoneHovered && !data.isAudioEnabled) ||
           (isMicrophoneHovered &&
             !data.isCurrentUser &&
             isMicrophoneHovered &&
@@ -41,10 +41,10 @@
 <div class="current-user-actions">
   <ul>
     <li (click)="toggleMicrophone()">
-      {{ isParticipantMuted ? "Unmute My Audio" : "Mute My Audio" }}
+      {{ data.isAudioEnabled ? "Mute My Audio" : "Unmute My Audio" }}
     </li>
     <li (click)="toggleCamera()">
-      {{ hasParticipantVideo ? "Stop Video" : "Start Video" }}
+      {{ data.isVideoEnabled ? "Stop Video" : "Start Video" }}
     </li>
     <li (click)="pinVideo()">Pin Video</li>
     <li (click)="hideCurrentCard()">Hide Self View</li>
@@ -53,9 +53,11 @@
 <div class="other-participant-actions">
   <ul>
     <li (click)="pinVideo()">Pin Video</li>
-    <li *ngIf="data.isUserHost" (click)="toggleCamera()">Stop Video</li>
+    <li *ngIf="meetingHolder.role === 1" (click)="toggleCamera()">
+      Stop Video
+    </li>
     <li
-      *ngIf="data.isUserHost && !isParticipantMuted"
+      *ngIf="meetingHolder.role === 1 && data.isAudioEnabled"
       (click)="toggleMicrophone()"
     >
       Mute Audio

@@ -1,5 +1,5 @@
 export interface CallDecline {
-  contactId: string;
+  userId: string;
   email: string;
   meetingId: string;
 }
