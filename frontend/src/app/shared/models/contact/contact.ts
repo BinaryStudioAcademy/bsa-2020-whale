@@ -8,6 +8,4 @@ export interface Contact {
   secondMemberId: string;
   secondMember?: User;
   pinnedMessage: DirectMessage;
-  settings;
-  contactnerSettings;
 }
