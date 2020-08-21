@@ -53,8 +53,7 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
         this.settingsMenuVisible = false;
       }
       this.isNotificationsVisible = !this.isNotificationsVisible;
-    }
-    else {
+    } else {
       this.isNotificationsVisible = false;
     }
   }
