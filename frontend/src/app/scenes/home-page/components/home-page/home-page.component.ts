@@ -225,7 +225,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
   public falseAllBooleans() {
     this.chatVisibility = false;
-    this.groupsVisibility = false;
+    //this.groupsVisibility = false;
     this.contactsVisibility = false;
     this.actionsVisibility = false;
     this.historyVisibility = false;
