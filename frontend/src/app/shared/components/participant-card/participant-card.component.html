@@ -53,10 +53,12 @@
 <div class="other-participant-actions">
   <ul>
     <li (click)="pinVideo()">Pin Video</li>
-    <li *ngIf="data.isUserHost" (click)="toggleCamera()">Stop Video</li>
+    <li *ngIf="meetingHolder.role === 1" (click)="switchOfCameraAsHost()">
+      Stop Video
+    </li>
     <li
-      *ngIf="data.isUserHost && data.isAudioEnabled"
-      (click)="toggleMicrophone()"
+      *ngIf="meetingHolder.role === 1 && data.isAudioEnabled"
+      (click)="switchOfMicrophoneAsHost()"
     >
       Mute Audio
     </li>

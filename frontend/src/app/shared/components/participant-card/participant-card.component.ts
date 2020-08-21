@@ -9,6 +9,7 @@ import {
 import { UserMediaData } from '@shared/models/media/user-media-data';
 import { createPopper } from '@popperjs/core';
 import flip from '@popperjs/core/lib/modifiers/flip.js';
+import { Participant } from '@shared/models/participant/participant';
 
 @Component({
   selector: 'app-participant-card',
@@ -17,11 +18,14 @@ import flip from '@popperjs/core/lib/modifiers/flip.js';
 })
 export class ParticipantCardComponent implements OnInit {
   @Input() data: UserMediaData;
+  @Input() meetingHolder: Participant;
   @Output() pinVideEvent = new EventEmitter<string>();
   @Output() hideViewEvent = new EventEmitter<string>();
   @Output() stopVideoEvent = new EventEmitter<string>();
   @Output() toggleCameraEvent = new EventEmitter<string>();
   @Output() toggleMicrophoneEvent = new EventEmitter<string>();
+  @Output() switchOffCameraAsHostEvent = new EventEmitter<string>();
+  @Output() switchOffMicrophoneAsHostEvent = new EventEmitter<string>();
 
   public actionsIcon: HTMLElement;
   public actionsPopupContent: HTMLElement;
@@ -55,6 +59,14 @@ export class ParticipantCardComponent implements OnInit {
 
   public hideCurrentCard(): void {
     this.hideViewEvent.emit(this.data.id);
+  }
+
+  public switchOfCameraAsHost(): void {
+    this.switchOffCameraAsHostEvent.emit(this.data.id);
+  }
+
+  public switchOfMicrophoneAsHost(): void {
+    this.switchOffMicrophoneAsHostEvent.emit(this.data.id);
   }
 
   public addAvatar() {

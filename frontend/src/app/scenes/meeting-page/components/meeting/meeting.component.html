@@ -286,7 +286,10 @@
           (toggleCameraEvent)="
             currentParticipant.id === $event ? toggleCamera() : ''
           "
+          (switchOffCameraAsHostEvent)="switchOfMediaAsHost(true)"
+          (switchOffMicrophoneAsHostEvent)="switchOfMediaAsHost(false)"
           [data]="data"
+          [meetingHolder]="currentParticipant"
         >
         </app-participant-card>
       </div>
