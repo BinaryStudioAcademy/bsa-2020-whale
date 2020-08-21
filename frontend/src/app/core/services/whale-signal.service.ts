@@ -20,6 +20,9 @@ export class WhaleSignalService {
   private signalUserDisconected = new Subject<string>();
   public signalUserDisconected$ = this.signalUserDisconected.asObservable();
 
+  private signalUserDisconectedError = new Subject<string>();
+  public signalUserDisconectedError$ = this.signalUserDisconectedError.asObservable();
+
   private startCallOthers = new Subject<Call>();
   public startCallOthers$ = this.startCallOthers.asObservable();
 
@@ -46,6 +49,10 @@ export class WhaleSignalService {
 
         this.signalHub.on('OnUserDisconnect', (userEmail: string) => {
           this.signalUserDisconected.next(userEmail);
+        });
+
+        this.signalHub.on('OnUserDisconnectOnError', (userId: string) => {
+          this.signalUserDisconectedError.next(userId);
         });
 
         this.signalHub.on('OnStartCallOthers', (call: Call) => {
