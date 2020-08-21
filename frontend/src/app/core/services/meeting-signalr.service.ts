@@ -39,6 +39,9 @@ export class MeetingSignalrService {
   private mediaStateRequested = new Subject<string>();
   public mediaStateRequested$ = this.mediaStateRequested.asObservable();
 
+  private switchOffMediaByHost = new Subject<boolean>();
+  public switchOffMediaByHost$ = this.switchOffMediaByHost.asObservable();
+
   private meetingEnded = new Subject<MeetingConnectionData>();
   public meetingEnded$ = this.meetingEnded.asObservable();
 
@@ -131,6 +134,10 @@ export class MeetingSignalrService {
           }
         );
 
+        this.signalHub.on('OnSwitchOffMediaByHost', (isVideo: boolean) => {
+          this.switchOffMediaByHost.next(isVideo);
+        });
+
         this.signalHub.on('OnSendMessage', (message: MeetingMessage) => {
           this.sendMessage.next(message);
         });
@@ -176,6 +183,7 @@ export enum SignalMethods {
   OnParticipantLeft,
   OnMediaStateChanged,
   OnMediaStateRequested,
+  OnSwitchOffMediaByHost,
   OnConferenceStartRecording,
   OnConferenceStopRecording,
   OnSendMessage,

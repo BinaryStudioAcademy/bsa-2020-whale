@@ -44,6 +44,7 @@ import {
 import { MediaSettingsService } from 'app/core/services/media-settings.service';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { GetMessages } from '@shared/models/meeting/message/get-messages';
+import { SwitchMedia } from '@shared/models/media/switch-media';
 
 @Component({
   selector: 'app-meeting',
@@ -59,7 +60,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public isShowStatistics = false;
   public isScreenRecording = false;
   public isShowCurrentParticipantCard = true;
-  public canLeave = true;
 
   @ViewChild('currentVideo') currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) mainArea: ElementRef<HTMLElement>;
@@ -293,6 +293,23 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       );
 
+    this.meetingSignalrService.switchOffMediaByHost$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (isVideo) => {
+          if (isVideo && !this.isCameraMuted) {
+            this.toggleCamera();
+            this.toastr.info('The host switchet off your camera');
+          } else if (!isVideo && !this.isMicrophoneMuted) {
+            this.toggleMicrophone();
+            this.toastr.info('The host switchet off your microphone');
+          }
+        },
+        (err) => {
+          this.toastr.error(err.message);
+        }
+      );
+
     this.meetingSignalrService.meetingEnded$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
@@ -482,6 +499,14 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.invokeMediaStateChanged();
   }
 
+  public switchOfMediaAsHost(isVideo: SwitchMedia): void {
+    this.meetingSignalrService.invoke(SignalMethods.OnSwitchOffMediaByHost, {
+      mutedStreamId: this.currentUserStream.id,
+      meetingId: this.meeting.id,
+      isVideo: isVideo,
+    });
+  }
+
   public startRecording(): void {
     this.isScreenRecording = true;
 
@@ -621,7 +646,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // card actions
   public hideViewEventHandler(mediaDataId): void {
     this.mediaData = this.mediaData.filter((d) => d.id != mediaDataId);
     this.isShowCurrentParticipantCard = false;
