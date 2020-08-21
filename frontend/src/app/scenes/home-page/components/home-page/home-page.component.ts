@@ -164,8 +164,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
       this.groupService.deleteGroup(group).subscribe(
         (response) => {
           if (response.status === 204) {
-            this.toastr.success('Deleted successfuly');
+            this.toastr.success(`${group.label} deleted successfuly`);
             this.groups.splice(this.groups.indexOf(group), 1);
+            if (!this.groups.length) {
+              this.groupsVisibility = !this.groupsVisibility;
+            }
           }
         },
         (error) => this.toastr.error(error.Message)
