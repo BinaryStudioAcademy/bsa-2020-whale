@@ -872,4 +872,8 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isAudioSettings = false;
     this.isVideoSettings = !this.isVideoSettings;
   }
+
+  public splitMessage(message: string) {
+    return message.split(/\n/gi);
+  }
 }
