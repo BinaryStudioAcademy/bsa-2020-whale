@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Whale.Shared.Services;
 using Whale.Shared.DTO.Group;
+using Whale.Shared.Models.Group.GroupUser;
+using Whale.Shared.DTO.Group.GroupUser;
 
 namespace Whale.API.Controllers
 {
@@ -37,20 +39,20 @@ namespace Whale.API.Controllers
         }
 
         [HttpGet("id/{groupId}")]
-        public async Task<IActionResult> Get(Guid groupId)
+        public async Task<ActionResult<GroupDTO>> Get(Guid groupId)
         {
             string email = HttpContext?.User.Claims
                 .FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
 
-            var contact = await _groupService.GetGroupAsync(groupId, email);
+            var group = await _groupService.GetGroupAsync(groupId, email);
 
-            if (contact == null) return NotFound();
+            if (group == null) return NotFound();
 
-            return Ok(contact);
+            return Ok(group);
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateNewGroup([FromBody] GroupCreateDTO newGroup)
+        public async Task<ActionResult<GroupDTO>> CreateNewGroup([FromBody] GroupCreateDTO newGroup)
         {
             var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
             var createdGroup = await _groupService.CreateGroupAsync(newGroup, ownerEmail);
@@ -66,6 +68,18 @@ namespace Whale.API.Controllers
 
             return NotFound();
         }
+        [HttpPost("user")]
+        public async Task<ActionResult<GroupUserDTO>> CreateNewUserInGroup([FromBody] GroupUserCreateDTO newUserInGroup)
+        {
+            Console.WriteLine(newUserInGroup.UserEmail);
+            var createdUserInGroup = await _groupService.AddUserToGroupAsync(newUserInGroup);
+            return Created($"id/{createdUserInGroup.Id}", createdUserInGroup);
+        }
 
+        [HttpGet("users/{id}")]
+        public async Task<ActionResult<IEnumerable<GroupUserDTO>>> GetAllUsersInGroup(Guid id)
+        {
+            return Ok(await _groupService.GetAllUsersInGroupAsync(id));
+        }
     }
 }

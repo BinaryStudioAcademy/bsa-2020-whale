@@ -115,10 +115,15 @@
   <div class="right-col">
     <div class="actions">
       <app-contacts-chat
-        *ngIf="chatVisibility"
+        *ngIf="contactChatVisibility"
         [contactSelected]="contactSelected"
-        (chat)="visibilityChange($event)"
+        (chat)="contactVisibilityChange($event)"
       ></app-contacts-chat>
+      <app-group-chat
+        *ngIf="groupChatVisibility"
+        [groupSelected]="groupSelected"
+        (chat)="groupVisibilityChange($event)"
+      ></app-group-chat>
       <div *ngIf="historyVisibility">
         <app-history
           [user]="loggedInUser"

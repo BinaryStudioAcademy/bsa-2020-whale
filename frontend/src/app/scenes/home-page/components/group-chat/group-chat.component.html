@@ -1,48 +1,70 @@
 <div class="chat ui secondary segment">
   <div class="ui chat-inner feed">
     <div class="event chat-label">
-      <div class="label">
-        <img src="{{ contactSelected.secondMember?.avatarUrl }}" />
-      </div>
+      <!-- <div class="label">
+          <img src="{{ groupSelected.label }}" />
+        </div> -->
       <div class="content">
         <div class="user-info">
           <div>
             <span class="user user-chat-label ui header">
-              {{ contactSelected.secondMember.firstName }}
-              {{ contactSelected.secondMember.secondName }}
+              {{ groupSelected.label }}
               <span class="grey sub header">
-                {{ contactSelected.secondMember.email }}
+                {{ groupSelected.description }}
               </span>
             </span>
           </div>
-          <div
-            *ngIf="contactSelected?.secondMember.connectionId"
-            data-tooltip="Online"
-            data-position="right center"
-          >
-            <i class="circle small icon"></i>
-          </div>
-          <div
-            *ngIf="contactSelected?.secondMember.connectionId"
-            data-tooltip="Call"
-            data-position="right center"
-          >
+          <div data-tooltip="Call" data-position="bottom center">
             <i id="chat-call" class="large phone icon" (click)="call()"></i>
           </div>
         </div>
+        <div class="ui simple active dropdown">
+          <span data-tooltip="Group members list" data-position="bottom center">
+            <i
+              id="chat-close"
+              class="large address book outline icon"
+              (click)="isMembersVisible = !isMembersVisible"
+            ></i>
+          </span>
+          <div *ngIf="isMembersVisible" class="menu">
+            <div
+              *ngFor="let user of groupMembers"
+              class="contacts-container user-list ui middle aligned selection list"
+            >
+              <!-- <img
+                        class="ui avatar image"
+                        src="{{returnCorrectLink(user) }}"
+                      /> -->
+              <div class="content">
+                <div class="description">
+                  {{ user?.firstName }}
+                  {{ user?.secondName }}
+                  {{ user?.email }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        <span data-tooltip="Close chat" data-position="left center">
+        <span data-tooltip="Add new member" data-position="bottom center">
+          <i
+            id="chat-close"
+            class="large user plus icon"
+            (click)="addNewMember()"
+          ></i>
+        </span>
+        <span data-tooltip="Close chat" data-position="bottom right">
           <i id="chat-close" class="large close icon" (click)="close()"></i>
         </span>
       </div>
     </div>
-    <spiner *ngIf="isMessagesLoading" [size]="'medium'"></spiner>
     <div
-      *ngIf="messages.length == 0 && !isMessagesLoading"
+      *ngIf="messages.length == 0"
       class="ui large message vertically-aligned"
     >
       There is still no messages yet!
     </div>
+    <div></div>
     <div *ngFor="let message of messages" class="event message-event">
       <div class="label">
         <img src="{{ message.author?.avatarUrl }}" />
@@ -57,7 +79,7 @@
             {{ message.createdAt | date: "short" }}
           </div>
         </div>
-        <div disabled class="message">
+        <div class="message">
           <div *ngFor="let row of splitMessage(message?.message)">
             {{ row }}
           </div>
