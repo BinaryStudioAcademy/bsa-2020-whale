@@ -110,6 +110,17 @@ export class HomePageComponent implements OnInit, OnDestroy {
                       this.toastr.error(err.Message);
                     }
                   );
+
+                this.whaleSignalrService.signalUserDisconectedError$
+                  .pipe(takeUntil(this.unsubscribe$))
+                  .subscribe(
+                    (userId) => {
+                      this.userDisconnectedError(userId);
+                    },
+                    (err) => {
+                      this.toastr.error(err.Message);
+                    }
+                  );
               },
               (error) => this.toastr.error(error.Message)
             );
@@ -141,6 +152,13 @@ export class HomePageComponent implements OnInit, OnDestroy {
     const index = this.contacts.findIndex(
       (c) => c.secondMember?.email === userEmail
     );
+    if (index >= 0) {
+      this.contacts[index].secondMember.connectionId = null;
+    }
+  }
+
+  userDisconnectedError(userId: string): void {
+    const index = this.contacts.findIndex((c) => c.secondMember?.id === userId);
     if (index >= 0) {
       this.contacts[index].secondMember.connectionId = null;
     }
@@ -216,6 +234,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
   public falseAllBooleans() {
     this.chatVisibility = false;
+    this.groupsVisibility = false;
+    this.contactsVisibility = false;
     this.actionsVisibility = false;
     this.historyVisibility = false;
   }
@@ -227,7 +247,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   onContactClick(contact: Contact): void {
-    this.falseAllBooleans();
+    //this.falseAllBooleans();
+    this.actionsVisibility = false;
+    this.historyVisibility = false;
     this.chatVisibility = true;
     this.contactSelected = contact;
   }

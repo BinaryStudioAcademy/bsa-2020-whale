@@ -36,9 +36,9 @@
         </span>
       </div>
     </div>
-
+    <spiner *ngIf="isMessagesLoading" [size]="'medium'"></spiner>
     <div
-      *ngIf="messages.length == 0"
+      *ngIf="messages.length == 0 && !isMessagesLoading"
       class="ui large message vertically-aligned"
     >
       There is still no messages yet!
@@ -57,7 +57,11 @@
             {{ message.createdAt | date: "short" }}
           </div>
         </div>
-        <div disabled class="message">{{ message.message }}</div>
+        <div disabled class="message">
+          <div *ngFor="let row of splitMessage(message?.message)">
+            {{ row }}
+          </div>
+        </div>
       </div>
     </div>
   </div>

@@ -35,6 +35,7 @@ import { CallModalComponent } from '../call-modal/call-modal.component';
 export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
   private hubConnection: HubConnection;
   counter = 0;
+  isMessagesLoading = true;
 
   private receivedMsg = new Subject<DirectMessage>();
   public receivedMsg$ = this.receivedMsg.asObservable();
@@ -68,7 +69,7 @@ export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
       .subscribe(
         (data: DirectMessage[]) => {
           this.messages = data;
-          console.log('messages new');
+          this.isMessagesLoading = false;
         },
         (error) => console.log(error)
       );
@@ -139,5 +140,8 @@ export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
     if (valid) {
       this.sendMessage();
     }
+  }
+  public splitMessage(message: string) {
+    return message.split(/\n/gi);
   }
 }

@@ -24,6 +24,8 @@ export class ParticipantCardComponent implements OnInit {
   @Output() stopVideoEvent = new EventEmitter<string>();
   @Output() toggleCameraEvent = new EventEmitter<string>();
   @Output() toggleMicrophoneEvent = new EventEmitter<string>();
+  @Output() switchOffCameraAsHostEvent = new EventEmitter<string>();
+  @Output() switchOffMicrophoneAsHostEvent = new EventEmitter<string>();
 
   public actionsIcon: HTMLElement;
   public actionsPopupContent: HTMLElement;
@@ -57,6 +59,14 @@ export class ParticipantCardComponent implements OnInit {
 
   public hideCurrentCard(): void {
     this.hideViewEvent.emit(this.data.id);
+  }
+
+  public switchOfCameraAsHost(): void {
+    this.switchOffCameraAsHostEvent.emit(this.data.id);
+  }
+
+  public switchOfMicrophoneAsHost(): void {
+    this.switchOffMicrophoneAsHostEvent.emit(this.data.id);
   }
 
   public addAvatar() {

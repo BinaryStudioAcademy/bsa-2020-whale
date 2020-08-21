@@ -1,4 +1,11 @@
-import { Component, OnInit, Input, Output, EventEmitter, HostListener } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  Input,
+  Output,
+  EventEmitter,
+  HostListener,
+} from '@angular/core';
 import { User } from '@shared/models/user/user';
 import { Meeting } from '@shared/models/meeting/meeting';
 import { HttpService } from 'app/core/services/http.service';
@@ -18,7 +25,7 @@ export class HistoryComponent implements OnInit {
   public meetings: Meeting[] = [];
 
   public take: number = 10;
-  
+
   public isScrolled = false;
   public ishistoryLoading: boolean = true;
 

@@ -61,6 +61,27 @@ namespace Whale.Shared.Services
             }
         }
 
+        public async Task<Guid> UserDisconnectOnError(string connectionId)
+        {
+            await _redisService.ConnectAsync();
+            var onlineUsers = _redisService.Get<ICollection<UserOnlineDTO>>(OnlineUsersKey);
+            var onlineUser = onlineUsers.FirstOrDefault(u => u.ConnectionId == connectionId);
+            var onlineUserConnections = onlineUsers.Where(u => u.Id == onlineUser.Id);
+            foreach (var ou in onlineUserConnections)
+            {
+                onlineUsers.Remove(ou);
+            }
+            if (onlineUsers.Count == 0)
+            {
+                await _redisService.DeleteKey(OnlineUsersKey);
+            }
+            else
+            {
+                await _redisService.SetAsync(OnlineUsersKey, onlineUsers);
+            }
+            return onlineUser.Id;
+        }
+
         public async Task<IEnumerable<string>> GetConnections(Guid receiverId)
         {
             await _redisService.ConnectAsync();
