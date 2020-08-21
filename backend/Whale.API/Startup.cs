@@ -62,6 +62,7 @@ namespace Whale.API
 
             services.AddSingleton(mappingConfig.CreateMapper());
 
+            services.AddTransient<SlackService>();
             services.AddTransient<NotificationsService>();
             services.AddTransient<ContactsService>();
             services.AddTransient<UserService>();
