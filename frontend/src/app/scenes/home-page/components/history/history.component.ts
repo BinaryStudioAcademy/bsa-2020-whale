@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, HostListener } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, HostListener } from '@angular/core';
 import { User } from '@shared/models/user/user';
 import { Meeting } from '@shared/models/meeting/meeting';
 import { HttpService } from 'app/core/services/http.service';
@@ -14,10 +14,13 @@ export class HistoryComponent implements OnInit {
   public route = environment.apiUrl + '/api/meetingHistory';
 
   @Input() user: User;
+  @Output() historyClose: EventEmitter<void> = new EventEmitter<void>();
   public meetings: Meeting[] = [];
 
   public take: number = 10;
+  
   public isScrolled = false;
+  public ishistoryLoading: boolean = true;
 
   constructor(private httpService: HttpService) {}
 
@@ -49,12 +52,17 @@ export class HistoryComponent implements OnInit {
       .set('skip', `${this.meetings.length}`)
       .set('take', `${this.take}`);
 
+    this.ishistoryLoading = true;
     this.httpService.getRequest<Meeting[]>(this.route, params).subscribe(
       (response) => {
         this.meetings = this.meetings.concat(response);
-        console.log(this.meetings);
+        this.ishistoryLoading = false;
       },
       (error) => console.error(error)
     );
+  }
+
+  public close(): void {
+    this.historyClose.emit();
   }
 }

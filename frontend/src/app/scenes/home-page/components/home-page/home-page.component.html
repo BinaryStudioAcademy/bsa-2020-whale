@@ -96,7 +96,7 @@
         </button>
       </a>
       <div
-        class="contacts-container user-list ui selection list"
+        class="contacts-container groups user-list ui selection list"
         [hidden]="!groupsVisibility"
       >
         <div *ngFor="let group of groups">
@@ -120,7 +120,10 @@
         (chat)="visibilityChange($event)"
       ></app-contacts-chat>
       <div *ngIf="historyVisibility">
-        <app-history [user]="loggedInUser"></app-history>
+        <app-history
+          [user]="loggedInUser"
+          (historyClose)="closeHistory()"
+        ></app-history>
       </div>
       <div *ngIf="actionsVisibility" class="vertically-aligned chat ui segment">
         <div
