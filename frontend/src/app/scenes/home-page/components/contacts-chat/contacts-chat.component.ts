@@ -141,4 +141,7 @@ export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
       this.sendMessage();
     }
   }
+  public splitMessage(message: string) {
+    return message.split(/\n/gi);
+  }
 }
