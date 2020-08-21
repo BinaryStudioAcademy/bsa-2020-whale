@@ -39,6 +39,14 @@ namespace Whale.SignalR.Hubs
             await Clients.Group(WhaleService.OnlineUsersKey).SendAsync("OnUserDisconnect", userEmail);
         }
 
+        public override async Task OnDisconnectedAsync(Exception exception)
+        {
+            var userId = await _whaleService.UserDisconnectOnError(Context.ConnectionId);
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, WhaleService.OnlineUsersKey);
+            await Clients.Group(WhaleService.OnlineUsersKey).SendAsync("OnUserDisconnectOnError", userId);
+            await base.OnDisconnectedAsync(exception);
+        }
+
         [HubMethodName("OnStartCall")]
         public async Task StartCall(StartCallDTO startCallDTO)
         {
