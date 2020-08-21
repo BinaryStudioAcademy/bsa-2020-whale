@@ -293,7 +293,7 @@
             currentParticipant.id === $event ? toggleCamera() : ''
           "
           (switchOffCameraAsHostEvent)="switchOfMediaAsHost($event, true)"
-          (switchOffMicrophoneAsHostEvent)="switchOfMediaAsHost($event, true)"
+          (switchOffMicrophoneAsHostEvent)="switchOfMediaAsHost($event, false)"
           [data]="data"
           [meetingHolder]="currentParticipant"
         >
