@@ -164,8 +164,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
       this.groupService.deleteGroup(group).subscribe(
         (response) => {
           if (response.status === 204) {
-            this.toastr.success('Deleted successfuly');
+            this.toastr.success(`${group.label} deleted successfuly`);
             this.groups.splice(this.groups.indexOf(group), 1);
+            if (!this.groups.length) {
+              this.groupsVisibility = !this.groupsVisibility;
+            }
           }
         },
         (error) => this.toastr.error(error.Message)
@@ -176,15 +179,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
   addNewContact(): void {
     this.simpleModalService.addModal(AddContactModalComponent).subscribe();
   }
-
-  // visibilityChange(event): void {
-  //   this.chatVisibility = event;
-  //   this.contactSelected = undefined;
-  // }
-  // onContactClick(contact: Contact): void {
-  //   this.chatVisibility = false;
-  //   this.contactSelected = contact;
-  // }
 
   onGroupClick(group: Group): void {}
 
@@ -222,14 +216,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
   public falseAllBooleans() {
     this.chatVisibility = false;
-    this.groupsVisibility = false;
-    this.contactsVisibility = false;
     this.actionsVisibility = false;
     this.historyVisibility = false;
   }
 
   visibilityChange(event): void {
-    console.log(event);
     this.chatVisibility = event;
     this.contactSelected = undefined;
     this.actionsVisibility = true;
@@ -237,24 +228,18 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
   onContactClick(contact: Contact): void {
     this.falseAllBooleans();
-    this.contactsVisibility = true;
     this.chatVisibility = true;
     this.contactSelected = contact;
   }
 
-  // onGroupClick(): void {
-  //   this.falseAllBooleans();
-  //   this.chatVisibility = true;
-  // }
-
-  // isContactActive(contact): boolean {
-  //   return this.contactSelected === contact;
-  // }
+  public closeHistory() {
+    this.falseAllBooleans();
+    this.historyVisibility = false;
+    this.actionsVisibility = true;
+  }
 
   public onMeetingHistoryClick() {
     this.chatVisibility = false;
-    this.groupsVisibility = false;
-    this.contactsVisibility = false;
     this.actionsVisibility = false;
 
     this.historyVisibility = !this.historyVisibility;

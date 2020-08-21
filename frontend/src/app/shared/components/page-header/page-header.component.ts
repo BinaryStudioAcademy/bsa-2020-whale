@@ -52,8 +52,9 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
       if (this.settingsMenuVisible) {
         this.settingsMenuVisible = false;
       }
-
       this.isNotificationsVisible = !this.isNotificationsVisible;
+    } else {
+      this.isNotificationsVisible = false;
     }
   }
 
@@ -131,5 +132,8 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
   onNotificationDelete(id: string): void {
     this.notificationsList = this.notificationsList.filter((n) => n.id !== id);
     this.notificationService.DeleteNotification(id);
+    if (!this.notificationsList.length) {
+      this.showNotificationsMenu();
+    }
   }
 }

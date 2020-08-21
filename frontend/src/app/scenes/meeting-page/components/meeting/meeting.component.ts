@@ -267,7 +267,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (mediaData) => {
-          console.log(mediaData);
           const changedStream = this.connectedStreams.find(
             (s) => s.id === mediaData.streamId
           );
@@ -452,6 +451,9 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public leave(): void {
+    //this is made to remove eventListener for other routes
+    window.onbeforeunload = function () {};
+
     this.router.navigate(['/home']);
   }
 
@@ -893,5 +895,9 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public showVideoSettings(): void {
     this.isAudioSettings = false;
     this.isVideoSettings = !this.isVideoSettings;
+  }
+
+  public splitMessage(message: string) {
+    return message.split(/\n/gi);
   }
 }

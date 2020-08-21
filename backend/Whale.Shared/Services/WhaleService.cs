@@ -60,5 +60,12 @@ namespace Whale.Shared.Services
                 }
             }
         }
+
+        public async Task<IEnumerable<string>> GetConnections(Guid receiverId)
+        {
+            await _redisService.ConnectAsync();
+            var onlineUsers = _redisService.Get<ICollection<UserOnlineDTO>>(OnlineUsersKey);
+            return onlineUsers.Where(u => u.Id == receiverId).Select(u => u.ConnectionId);
+        }
     }
 }

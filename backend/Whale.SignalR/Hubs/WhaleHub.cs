@@ -3,17 +3,24 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Whale.Shared.Models.Contact;
+using Whale.Shared.Models.Meeting;
 using Whale.Shared.Services;
+using Whale.SignalR.Models.Call;
 
 namespace Whale.SignalR.Hubs
 {
     public class WhaleHub : Hub
     {
         private readonly WhaleService _whaleService;
+        private readonly MeetingService _meetingService;
+        private readonly ContactsService _contactsService;
 
-        public WhaleHub(WhaleService whaleService)
+        public WhaleHub(WhaleService whaleService, MeetingService meetingService, ContactsService contactsService)
         {
             _whaleService = whaleService;
+            _meetingService = meetingService;
+            _contactsService = contactsService;
         }
 
         [HubMethodName("OnUserConnect")]
@@ -30,6 +37,37 @@ namespace Whale.SignalR.Hubs
             await _whaleService.UserDisconnect(userEmail, Context.ConnectionId);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, WhaleService.OnlineUsersKey);
             await Clients.Group(WhaleService.OnlineUsersKey).SendAsync("OnUserDisconnect", userEmail);
+        }
+
+        [HubMethodName("OnStartCall")]
+        public async Task StartCall(StartCallDTO startCallDTO)
+        {
+            var contact = await _contactsService.GetContactAsync(startCallDTO.ContactId, startCallDTO.Meeting.CreatorEmail);
+            var link = await _meetingService.CreateMeeting(startCallDTO.Meeting);
+            var connections = await _whaleService.GetConnections(contact.SecondMember.Id);
+            foreach(var connection in connections)
+            {
+                await Clients.Client(connection).SendAsync("OnStartCallOthers", new CallDTO { MeetingLink = link, Contact = contact, CallerEmail = startCallDTO.Meeting.CreatorEmail });
+            }
+            await Clients.Caller.SendAsync("OnStartCallCaller", link);
+        }
+
+        [HubMethodName("OnTakeCall")]
+        public async Task TakeCall(Guid userId)
+        {
+            var connections = await _whaleService.GetConnections(userId);
+            await Clients.Client(connections.LastOrDefault()).SendAsync("OnTakeCall");
+        }
+
+        [HubMethodName("OnDeclineCall")]
+        public async Task DeclineCall(DeclineCallDTO declineCallDTO)
+        {
+            await _meetingService.ParticipantDisconnect(declineCallDTO.MeetingId, declineCallDTO.Email);
+            var connections = await _whaleService.GetConnections(declineCallDTO.UserId);
+            foreach (var connection in connections)
+            {
+                await Clients.Client(connection).SendAsync("OnDeclineCall");
+            }
         }
     }
 }
