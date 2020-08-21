@@ -11,6 +11,9 @@ using Whale.Shared.Services;
 using Whale.DAL;
 using Whale.DAL.Models;
 using Whale.Shared.DTO.Group;
+using Whale.Shared.DTO.Group.GroupUser;
+using Whale.Shared.Models.Group.GroupUser;
+using Whale.Shared.Models.User;
 
 namespace Whale.Shared.Services
 {
@@ -102,6 +105,57 @@ namespace Whale.Shared.Services
             await _context.SaveChangesAsync();
 
             return true;
+        }
+        public async Task<IEnumerable<UserDTO>> GetAllUsersInGroupAsync(Guid groupId)
+        {
+            var user = await _context.Groups.FirstOrDefaultAsync(u => u.Id == groupId);
+            if (user is null)
+                throw new NotFoundException("Group", groupId.ToString());
+
+            var users = await _context.GroupUsers
+                .Include(g => g.User)
+                .Include(g => g.Group)
+                    .ThenInclude(g => g.PinnedMessage)
+                .Where(g => g.GroupId == groupId)
+                .Select(g => g.User)
+                .ToListAsync();
+
+            if (users is null)
+                throw new Exception("No users in group");
+
+            return _mapper.Map<IEnumerable<UserDTO>>(users);
+        }
+       
+        public async Task<GroupUserDTO> AddUserToGroupAsync(GroupUserCreateDTO groupUser)
+        {
+            var group = _context.Groups.FirstOrDefault(c => c.Id == groupUser.GroupId);
+            if (group is null)
+                throw new NotFoundException("Group", groupUser.GroupId.ToString());
+
+            var user = _context.Users.FirstOrDefault(c => c.Email == groupUser.UserEmail);
+            if (user is null)
+                throw new NotFoundException("Group", groupUser.UserEmail);
+
+            var userInGroup = await _context.GroupUsers
+               .Include(g => g.User)
+               .Include(g => g.Group)
+               .FirstOrDefaultAsync(g => g.UserId == user.Id && g.GroupId == group.Id);
+
+            if (userInGroup is object)
+                throw new AlreadyExistsException("User");
+
+            var GroupUserDTO = new GroupUserDTO { GroupId = groupUser.GroupId, UserId = user.Id };
+
+            var newUserInGroup = _mapper.Map<GroupUser>(GroupUserDTO);
+            _context.GroupUsers.Add(newUserInGroup);
+            await _context.SaveChangesAsync();
+
+            var newGroupUser = _context.GroupUsers
+                .Include(u => u.User)
+                .Include(u => u.Group)
+                .FirstOrDefaultAsync(g => g.Id == newUserInGroup.Id);
+
+            return _mapper.Map<GroupUserDTO>(newUserInGroup);
         }
 
     }

@@ -36,11 +36,13 @@ export class HomePageComponent implements OnInit, OnDestroy {
   actionsVisibility = true;
   contactsVisibility = false;
   groupsVisibility = false;
-  chatVisibility = false;
+  contactChatVisibility = false;
   historyVisibility = false;
+  groupChatVisibility = false;
 
   ownerEmail: string;
   contactSelected: Contact;
+  groupSelected: Group;
   private hubConnection: HubConnection;
   private receivedContact = new Subject<Contact>();
   public receivedContact$ = this.receivedContact.asObservable();
@@ -198,8 +200,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.simpleModalService.addModal(AddContactModalComponent).subscribe();
   }
 
-  onGroupClick(group: Group): void {}
-
   isContactActive(contact): boolean {
     return this.contactSelected === contact;
   }
@@ -233,27 +233,48 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   public falseAllBooleans() {
-    this.chatVisibility = false;
+    this.contactChatVisibility = false;
+    this.groupChatVisibility = false;
     this.groupsVisibility = false;
     this.contactsVisibility = false;
     this.actionsVisibility = false;
     this.historyVisibility = false;
   }
 
-  visibilityChange(event): void {
-    this.chatVisibility = event;
+  contactVisibilityChange(event): void {
+    this.contactChatVisibility = event;
     this.contactSelected = undefined;
+    this.actionsVisibility = true;
+  }
+  groupVisibilityChange(event): void {
+    this.groupChatVisibility = event;
+    this.groupSelected = undefined;
     this.actionsVisibility = true;
   }
 
   onContactClick(contact: Contact): void {
     //this.falseAllBooleans();
+    this.contactChatVisibility = true;
+    //this.contactsVisibility = true;
     this.actionsVisibility = false;
     this.historyVisibility = false;
-    this.chatVisibility = true;
     this.contactSelected = contact;
   }
 
+  onGroupClick(group: Group): void {
+    this.falseAllBooleans();
+    this.groupChatVisibility = true;
+    this.groupSelected = group;
+  }
+
+  // onGroupClick(): void {
+  //   this.falseAllBooleans();
+  //   this.contactChatVisibility = true;
+  // }
+
+  // isContactActive(contact): boolean {
+  //   return this.contactSelected === contact;
+  // }
   public closeHistory() {
     this.falseAllBooleans();
     this.historyVisibility = false;
@@ -261,7 +282,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   public onMeetingHistoryClick() {
-    this.chatVisibility = false;
+    this.contactChatVisibility = false;
+    this.groupsVisibility = false;
+    this.contactsVisibility = false;
     this.actionsVisibility = false;
 
     this.historyVisibility = !this.historyVisibility;
