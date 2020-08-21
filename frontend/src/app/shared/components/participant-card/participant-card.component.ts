@@ -62,11 +62,11 @@ export class ParticipantCardComponent implements OnInit {
   }
 
   public switchOfCameraAsHost(): void {
-    this.switchOffCameraAsHostEvent.emit(this.data.id);
+    this.switchOffCameraAsHostEvent.emit(this.data.stream.id);
   }
 
   public switchOfMicrophoneAsHost(): void {
-    this.switchOffMicrophoneAsHostEvent.emit(this.data.id);
+    this.switchOffMicrophoneAsHostEvent.emit(this.data.stream.id);
   }
 
   public addAvatar() {
