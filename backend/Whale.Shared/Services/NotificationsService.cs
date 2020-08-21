@@ -11,11 +11,7 @@ using Whale.API.Models.Notification;
 using Whale.DAL;
 using Whale.DAL.Models;
 using Whale.Shared.Exceptions;
-using Whale.Shared.Models.Contact;
-using Whale.Shared.Models.Contact.Setting;
-using Whale.Shared.Models.DirectMessage;
 using Whale.Shared.Models.Notification;
-using Whale.Shared.Models.User;
 using Whale.Shared.Services.Abstract;
 
 namespace Whale.Shared.Services

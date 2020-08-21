@@ -22,7 +22,6 @@ namespace Whale.DAL
         public DbSet<PollResult> PollResults { get; set; }
         public DbSet<Record> Records { get; set; }
         public DbSet<Setting> Settings { get; set; }
-        public DbSet<ContactSetting> ContactSettings { get; set; }
         public DbSet<UserAchivement> UserAchivements { get; set; }
         public DbSet<Notification> Notifications { get; set; }
 

@@ -33,7 +33,6 @@ export class ScheduleMeetingPageComponent implements OnInit {
   public form: FormGroup;
 
   constructor(
-    private httpService: HttpService,
     private toastr: ToastrService,
     private calendarService: GoogleCalendarService,
     private authService: AuthService,
@@ -59,40 +58,23 @@ export class ScheduleMeetingPageComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  public onSubmit() {
-    console.log(this.form.controls.topic.value);
-    console.log(this.form.controls.description.value);
-    console.log(
-      this.createDateTime(
-        this.form.controls.date.value,
-        this.form.controls.time.value
-      )
-    );
-    console.log(this.form.controls.durationHours.value);
-    console.log(this.form.controls.durationMinutes.value);
-    console.log(Boolean(this.form.controls.isGeneratedMeetingID.value));
-    console.log(this.form.controls.isPasswordEnabled.value);
-    console.log(this.form.controls.password.value);
-    console.log(this.form.controls.isDisableVideo.value);
-    console.log(this.form.controls.isDisableAudio.value);
-    console.log(this.form.controls.saveIntoCalendar.value);
-    if (this.form.controls.saveIntoCalendar.value) this.addEventToCalendar();
-    // this.httpService.postRequest<ScheduledMeetingCreateDTO, ScheduledMeetingDTO>('/meetings', scheduleDto).subscribe(
-    //   (resp) => console.log(resp),
-    //   (error) => this.toastr.error(error, 'Error')
-    // );
+  public async onSubmit(): Promise<void> {
+    if (this.form.controls.saveIntoCalendar.value) {
+      await this.addEventToCalendar();
+    }
+
     this.toastr.success('Meeting scheduled!');
     this.router.navigate(['/home']);
   }
 
-  public cancelSchedule() {
+  public cancelSchedule(): void {
     this.router.navigate(['/home']);
   }
 
   createStringFromDate(date: Date): string {
     let pieces: string[] = [];
     pieces.push(`${date.getDate()}`);
-    pieces.push(`${date.getMonth()}`);
+    pieces.push(`${date.getMonth() + 1}`);
     pieces.push(`${date.getFullYear()}`);
     pieces = pieces.map((piece) => {
       if (piece.length === 1) {
@@ -122,7 +104,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
     return date;
   }
 
-  public async addEventToCalendar() {
+  public async addEventToCalendar(): Promise<void> {
     let startTime = this.createDateTime(
       this.form.controls.date.value,
       this.form.controls.time.value
@@ -139,6 +121,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
 
     const event = {
       summary: this.form.controls.topic.value,
+      description: this.form.controls.description.value,
       start: ({
         dateTime: startTime.toISOString(),
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -153,7 +136,9 @@ export class ScheduleMeetingPageComponent implements OnInit {
       },
     } as gapi.client.calendar.Event;
 
-    this.calendarService.insertEvent(event);
+    const result = await this.calendarService.insertEvent(event);
+    if (!result)
+      this.toastr.error('Error ocured while adding event into calendar');
   }
 
   private getEndDate(
