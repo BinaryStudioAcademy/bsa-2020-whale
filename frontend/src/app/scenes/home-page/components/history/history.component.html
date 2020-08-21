@@ -5,13 +5,23 @@
   [infiniteScrollThrottle]="500"
   (scrolled)="onScroll()"
 >
-  <h2 class="center aligned header">Meeting history</h2>
-  <div *ngFor="let meeting of meetings" class="meeting-container">
-    <app-meeting-note [meeting]="meeting"></app-meeting-note>
+  <div class="ui header">
+    <h2 class="center aligned header">Meeting history</h2>
+    <div>
+      <i id="history-close" class="large close icon" (click)="close()"></i>
+    </div>
+  </div>
+  <div>
+    <div *ngFor="let meeting of meetings" class="meeting-container">
+      <app-meeting-note [meeting]="meeting"></app-meeting-note>
+    </div>
+    <div *ngIf="ishistoryLoading" class="relative">
+      <spiner size="huge"></spiner>
+    </div>
   </div>
 </div>
 
-<div class="scroll-to-top-button">
+<div *ngIf="isScrolled" class="scroll-to-top-button">
   <button (click)="scrollToTop()" class="circular ui icon button">
     <i class="big angle double up icon"></i>
   </button>

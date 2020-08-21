@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Whale.API.Services.Abstract;
 using Whale.DAL;
 using Whale.DAL.Models;
+using Whale.DAL.Models.Poll;
 using Whale.DAL.Settings;
 using Whale.Shared.Extentions;
 using Whale.Shared.Models.Meeting;
@@ -25,9 +26,10 @@ namespace Whale.API.Services
 
 		public async Task<IEnumerable<MeetingDTO>> GetMeetingsWithParticipantsAndPollResults(Guid userId, int skip, int take)
 		{
+			int participantsCount = _context.Participants.Where(p => p.UserId == userId).Count();
 			var participants2 = await _context.Participants
 				.Where(p => p.UserId == userId)
-				.Skip(skip)
+				.Skip(participantsCount - skip - take)
 				.Take(take)
 				.ToListAsync();
 
@@ -56,7 +58,22 @@ namespace Whale.API.Services
 					return m;
 				});
 
+			
+
 			meetings = (await Task.WhenAll(meetingsTasks)).ToList();
+
+			meetings = meetings.OrderByDescending(m => m.StartTime).ToList();
+
+			foreach (var meeting in meetings)
+			{
+				foreach (var pollResult in meeting.PollResults)
+				{
+					if (pollResult.IsAnonymous)
+					{
+						pollResult.OptionResults.ForEach(oR => oR.VotedUsers = new List<Voter>());
+					}
+				}
+			}
 
 			return _mapper.Map<IEnumerable<MeetingDTO>>(meetings);
 		}
