@@ -500,9 +500,9 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.invokeMediaStateChanged();
   }
 
-  public switchOfMediaAsHost(isVideo: SwitchMedia): void {
+  public switchOfMediaAsHost(streamId: string, isVideo: boolean): void {
     this.meetingSignalrService.invoke(SignalMethods.OnSwitchOffMediaByHost, {
-      mutedStreamId: this.currentUserStream.id,
+      mutedStreamId: streamId,
       meetingId: this.meeting.id,
       isVideo: isVideo,
     });
