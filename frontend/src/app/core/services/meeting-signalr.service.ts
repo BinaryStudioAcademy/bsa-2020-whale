@@ -9,7 +9,7 @@ import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
 import { Participant } from '@shared/models/participant/participant';
 import { PollDto } from '@shared/models/poll/poll-dto';
 import { PollResultDto } from '@shared/models/poll/poll-result-dto';
-import { MediaState } from '@shared/models/media/media-state';
+import { ChangedMediaState } from '@shared/models/media/media';
 import { VoteDto } from '@shared/models/poll/vote-dto';
 import { VoterDto } from '@shared/models/poll/voter-dto';
 import { CanvasWhiteboardUpdate } from 'ng2-canvas-whiteboard';
@@ -33,7 +33,7 @@ export class MeetingSignalrService {
   private participantConected = new Subject<Participant[]>();
   public participantConected$ = this.participantConected.asObservable();
 
-  private participantMediaStateChanged = new Subject<MediaState>();
+  private participantMediaStateChanged = new Subject<ChangedMediaState>();
   public participantMediaStateChanged$ = this.participantMediaStateChanged.asObservable();
 
   private mediaStateRequested = new Subject<string>();
@@ -123,9 +123,12 @@ export class MeetingSignalrService {
           }
         );
 
-        this.signalHub.on('OnMediaStateChanged', (mediaState: MediaState) => {
-          this.participantMediaStateChanged.next(mediaState);
-        });
+        this.signalHub.on(
+          'OnMediaStateChanged',
+          (mediaState: ChangedMediaState) => {
+            this.participantMediaStateChanged.next(mediaState);
+          }
+        );
 
         this.signalHub.on(
           'OnMediaStateRequested',

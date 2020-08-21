@@ -11,7 +11,7 @@ import {
 import Peer from 'peerjs';
 import { SignalRService } from 'app/core/services/signal-r.service';
 import { environment } from '@env';
-import { Subject, Observable, from } from 'rxjs';
+import { Subject, Observable, from, BehaviorSubject } from 'rxjs';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { MeetingService } from 'app/core/services/meeting.service';
 import { takeUntil, filter } from 'rxjs/operators';
@@ -33,7 +33,7 @@ import { Participant } from '@shared/models/participant/participant';
 import { ParticipantRole } from '@shared/models/participant/participant-role';
 import { Statistics } from '@shared/models/statistics/statistics';
 import { AuthService } from 'app/core/auth/auth.service';
-import { UserMediaData } from '@shared/models/media/user-media-data';
+import { MediaData } from '@shared/models/media/media-data';
 import { EnterModalComponent } from '../enter-modal/enter-modal.component';
 import { SimpleModalService } from 'ngx-simple-modal';
 import {
@@ -44,7 +44,7 @@ import {
 import { MediaSettingsService } from 'app/core/services/media-settings.service';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { GetMessages } from '@shared/models/meeting/message/get-messages';
-import { SwitchMedia } from '@shared/models/media/switch-media';
+import { ParticipantDynamicData } from '@shared/models/media/media';
 
 @Component({
   selector: 'app-meeting',
@@ -66,7 +66,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public peer: Peer;
   public connectedStreams: MediaStream[] = [];
-  public mediaData: UserMediaData[] = [];
+  public mediaData: MediaData[] = [];
   public connectedPeers = new Map<string, MediaStream>();
   public receiveingDrawings: boolean = false;
   public canvasIsDisplayed: boolean = false;
@@ -205,6 +205,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
             (p) => p.id !== this.currentParticipant.id
           );
 
+          console.log('create own card');
           this.createParticipantCard(this.currentParticipant);
         },
         (err) => {
@@ -268,24 +269,12 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (mediaData) => {
-          const changedStream = this.connectedStreams.find(
-            (s) => s.id === mediaData.streamId
+          console.log(mediaData);
+          this.updateCardDynamicData(
+            mediaData.streamId,
+            mediaData.isAudioActive,
+            mediaData.isVideoActive
           );
-          if (!changedStream) {
-            return;
-          }
-
-          changedStream.getTracks().forEach((t) => {
-            if (t.kind === 'video') {
-              t.dispatchEvent(
-                new Event(mediaData.isVideoActive ? 'enabled' : 'disabled')
-              );
-            } else {
-              t.dispatchEvent(
-                new Event(mediaData.isAudioActive ? 'enabled' : 'disabled')
-              );
-            }
-          });
         },
         () => {
           this.toastr.error(
@@ -385,6 +374,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
             (p) => p.streamId == stream.id
           );
 
+          console.log('in peer create');
           this.createParticipantCard(participant);
         }
         this.connectedPeers.set(call.peer, stream);
@@ -599,10 +589,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       document.body.removeChild(copyBox);
       this.toastr.success('Copied');
     });
-
-    // this.simpleModalService.addModal(CopyClipboardComponent, {
-    //   message: this.document.location.href,
-    // });
   }
 
   public sendMessage(): void {
@@ -658,6 +644,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     participant: Participant,
     shouldPrepend = false
   ): void {
+    console.log('created card', participant);
     const stream =
       participant.streamId === this.currentParticipant.streamId
         ? this.currentUserStream
@@ -665,20 +652,22 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
 
     var newMediaData = {
       id: participant.id,
-      userFirstName: participant.user.firstName,
-      userLastName: participant.user.secondName,
-      avatarUrl: participant.user.avatarUrl,
       isCurrentUser: participant.id === this.currentParticipant.id,
-      isUserHost: participant.role == ParticipantRole.Host,
       stream: stream,
-      isVideoEnabled:
-        stream.id === this.currentUserStream.id
-          ? this.currentUserStream.getVideoTracks().some((vt) => vt.enabled)
-          : false,
-      isAudioEnabled:
-        stream.id === this.currentUserStream.id
-          ? this.currentUserStream.getAudioTracks().some((at) => at.enabled)
-          : true,
+      dynamicData: new BehaviorSubject<ParticipantDynamicData>({
+        isUserHost: participant.role == ParticipantRole.Host,
+        userFirstName: participant.user.firstName,
+        userSecondName: participant.user.secondName,
+        avatarUrl: participant.user.avatarUrl,
+        isVideoActive:
+          stream.id === this.currentUserStream.id
+            ? this.currentUserStream.getVideoTracks().some((vt) => vt.enabled)
+            : false,
+        isAudioActive:
+          stream.id === this.currentUserStream.id
+            ? this.currentUserStream.getAudioTracks().some((at) => at.enabled)
+            : true,
+      }),
     };
 
     shouldPrepend
@@ -695,6 +684,33 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.setOutputDevice();
   }
 
+  private updateCardDynamicData(
+    streamId: string,
+    isAudioActive: boolean,
+    isVideoActive: boolean
+  ) {
+    const participant =
+      this.currentParticipant.streamId === streamId
+        ? this.currentParticipant
+        : this.meeting.participants.find((p) => p.streamId === streamId);
+    const changedMediaData = this.mediaData.find(
+      (s) => s.stream.id === streamId
+    );
+
+    if (!changedMediaData || !participant) {
+      return;
+    }
+
+    changedMediaData.dynamicData.next({
+      isUserHost: participant.role == ParticipantRole.Host,
+      userFirstName: participant.user.firstName,
+      userSecondName: participant.user.secondName,
+      avatarUrl: participant.user.avatarUrl,
+      isVideoActive: isVideoActive,
+      isAudioActive: isAudioActive,
+    });
+  }
+
   // call to peer
   private connect(recieverPeerId: string) {
     const call = this.peer.call(recieverPeerId, this.currentUserStream);
@@ -707,6 +723,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
         var participant = this.meeting.participants.find(
           (p) => p.streamId == stream.id
         );
+        console.log('create on stream');
         this.createParticipantCard(participant);
         this.connectedPeers.set(call.peer, stream);
       }
