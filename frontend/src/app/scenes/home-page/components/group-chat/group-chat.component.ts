@@ -192,4 +192,7 @@ export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
       ? user?.avatarUrl
       : '';
   }
+  public splitMessage(message: string) {
+    return message.split(/\n/gi);
+  }
 }

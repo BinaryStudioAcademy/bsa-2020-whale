@@ -112,6 +112,17 @@ export class HomePageComponent implements OnInit, OnDestroy {
                       this.toastr.error(err.Message);
                     }
                   );
+
+                this.whaleSignalrService.signalUserDisconectedError$
+                  .pipe(takeUntil(this.unsubscribe$))
+                  .subscribe(
+                    (userId) => {
+                      this.userDisconnectedError(userId);
+                    },
+                    (err) => {
+                      this.toastr.error(err.Message);
+                    }
+                  );
               },
               (error) => this.toastr.error(error.Message)
             );
@@ -148,6 +159,13 @@ export class HomePageComponent implements OnInit, OnDestroy {
     }
   }
 
+  userDisconnectedError(userId: string): void {
+    const index = this.contacts.findIndex((c) => c.secondMember?.id === userId);
+    if (index >= 0) {
+      this.contacts[index].secondMember.connectionId = null;
+    }
+  }
+
   addNewGroup(): void {
     this.simpleModalService
       .addModal(AddGroupModalComponent)
@@ -166,8 +184,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
       this.groupService.deleteGroup(group).subscribe(
         (response) => {
           if (response.status === 204) {
-            this.toastr.success('Deleted successfuly');
+            this.toastr.success(`${group.label} deleted successfuly`);
             this.groups.splice(this.groups.indexOf(group), 1);
+            if (!this.groups.length) {
+              this.groupsVisibility = !this.groupsVisibility;
+            }
           }
         },
         (error) => this.toastr.error(error.Message)
@@ -178,15 +199,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
   addNewContact(): void {
     this.simpleModalService.addModal(AddContactModalComponent).subscribe();
   }
-
-  // visibilityChange(event): void {
-  //   this.contactChatVisibility = event;
-  //   this.contactSelected = undefined;
-  // }
-  // onContactClick(contact: Contact): void {
-  //   this.contactChatVisibility = false;
-  //   this.contactSelected = contact;
-  // }
 
   isContactActive(contact): boolean {
     return this.contactSelected === contact;
@@ -241,9 +253,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   onContactClick(contact: Contact): void {
-    this.falseAllBooleans();
+    //this.falseAllBooleans();
     this.contactChatVisibility = true;
-    this.contactsVisibility = true;
+    //this.contactsVisibility = true;
+    this.actionsVisibility = false;
+    this.historyVisibility = false;
     this.contactSelected = contact;
   }
 
@@ -261,6 +275,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
   // isContactActive(contact): boolean {
   //   return this.contactSelected === contact;
   // }
+  public closeHistory() {
+    this.falseAllBooleans();
+    this.historyVisibility = false;
+    this.actionsVisibility = true;
+  }
 
   public onMeetingHistoryClick() {
     this.contactChatVisibility = false;

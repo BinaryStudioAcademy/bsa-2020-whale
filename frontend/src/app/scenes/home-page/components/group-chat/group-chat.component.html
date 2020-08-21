@@ -58,13 +58,13 @@
         </span>
       </div>
     </div>
-
     <div
       *ngIf="messages.length == 0"
       class="ui large message vertically-aligned"
     >
       There is still no messages yet!
     </div>
+    <div></div>
     <div *ngFor="let message of messages" class="event message-event">
       <div class="label">
         <img src="{{ message.author?.avatarUrl }}" />
@@ -79,7 +79,11 @@
             {{ message.createdAt | date: "short" }}
           </div>
         </div>
-        <div class="message">{{ message.message }}</div>
+        <div class="message">
+          <div *ngFor="let row of splitMessage(message?.message)">
+            {{ row }}
+          </div>
+        </div>
       </div>
     </div>
   </div>

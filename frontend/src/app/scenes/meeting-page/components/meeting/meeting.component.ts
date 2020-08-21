@@ -44,6 +44,7 @@ import {
 import { MediaSettingsService } from 'app/core/services/media-settings.service';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { GetMessages } from '@shared/models/meeting/message/get-messages';
+import { SwitchMedia } from '@shared/models/media/switch-media';
 
 @Component({
   selector: 'app-meeting',
@@ -59,7 +60,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public isShowStatistics = false;
   public isScreenRecording = false;
   public isShowCurrentParticipantCard = true;
-  public canLeave = true;
 
   @ViewChild('currentVideo') currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) mainArea: ElementRef<HTMLElement>;
@@ -109,6 +109,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public isAudioSettings = false;
   public isVideoSettings = false;
   public isWaitingForRecord = false;
+  public pattern = new RegExp(/^\S+.*/);
 
   constructor(
     private route: ActivatedRoute,
@@ -290,6 +291,23 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
           this.toastr.error(
             'Error occured during participants media state updating'
           );
+        }
+      );
+
+    this.meetingSignalrService.switchOffMediaByHost$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (isVideo) => {
+          if (isVideo && !this.isCameraMuted) {
+            this.toggleCamera();
+            this.toastr.info('The host switchet off your camera');
+          } else if (!isVideo && !this.isMicrophoneMuted) {
+            this.toggleMicrophone();
+            this.toastr.info('The host switchet off your microphone');
+          }
+        },
+        (err) => {
+          this.toastr.error(err.message);
         }
       );
 
@@ -482,6 +500,14 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.invokeMediaStateChanged();
   }
 
+  public switchOfMediaAsHost(isVideo: SwitchMedia): void {
+    this.meetingSignalrService.invoke(SignalMethods.OnSwitchOffMediaByHost, {
+      mutedStreamId: this.currentUserStream.id,
+      meetingId: this.meeting.id,
+      isVideo: isVideo,
+    });
+  }
+
   public startRecording(): void {
     this.isScreenRecording = true;
 
@@ -580,14 +606,16 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public sendMessage(): void {
-    this.meetingSignalrService.invoke(SignalMethods.OnSendMessage, {
-      authorEmail: this.authService.currentUser.email,
-      meetingId: this.meeting.id,
-      message: this.msgText,
-      receiverEmail: this.msgReceiverEmail,
-    } as MeetingMessageCreate);
+    if (this.msgText.trim().length !== 0) {
+      this.meetingSignalrService.invoke(SignalMethods.OnSendMessage, {
+        authorEmail: this.authService.currentUser.email,
+        meetingId: this.meeting.id,
+        message: this.msgText,
+        receiverEmail: this.msgReceiverEmail,
+      } as MeetingMessageCreate);
 
-    this.msgText = '';
+      this.msgText = '';
+    }
   }
 
   public onEnterKeyPress(event: KeyboardEvent): void {
@@ -621,7 +649,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // card actions
   public hideViewEventHandler(mediaDataId): void {
     this.mediaData = this.mediaData.filter((d) => d.id != mediaDataId);
     this.isShowCurrentParticipantCard = false;
@@ -871,5 +898,9 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public showVideoSettings(): void {
     this.isAudioSettings = false;
     this.isVideoSettings = !this.isVideoSettings;
+  }
+
+  public splitMessage(message: string) {
+    return message.split(/\n/gi);
   }
 }
