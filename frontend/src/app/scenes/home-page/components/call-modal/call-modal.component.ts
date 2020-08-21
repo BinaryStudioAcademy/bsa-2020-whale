@@ -28,8 +28,6 @@ export class CallModalComponent extends SimpleModalComponent<Contact, null>
   secondMemberId: string;
   secondMember?: User;
   pinnedMessage: DirectMessage;
-  settings: any;
-  contactnerSettings: any;
 
   link: MeetingLink;
 
