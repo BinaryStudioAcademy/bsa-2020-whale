@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, HostListener } from '@angular/core';
 import { User } from '@shared/models/user/user';
 import { Meeting } from '@shared/models/meeting/meeting';
 import { HttpService } from 'app/core/services/http.service';
@@ -18,6 +18,8 @@ export class HistoryComponent implements OnInit {
   public meetings: Meeting[] = [];
 
   public take: number = 10;
+  
+  public isScrolled = false;
   public ishistoryLoading: boolean = true;
 
   constructor(private httpService: HttpService) {}
@@ -32,6 +34,16 @@ export class HistoryComponent implements OnInit {
 
   public scrollToTop(): void {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  @HostListener('window:scroll', ['$event'])
+  onWindowScroll($event: Event): void {
+    const y = window.scrollY;
+    if (y >= 100) {
+      this.isScrolled = true;
+    } else {
+      this.isScrolled = false;
+    }
   }
 
   public getSomeMeetings(): void {

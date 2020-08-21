@@ -21,7 +21,7 @@
   </div>
 </div>
 
-<div class="scroll-to-top-button">
+<div *ngIf="isScrolled" class="scroll-to-top-button">
   <button (click)="scrollToTop()" class="circular ui icon button">
     <i class="big angle double up icon"></i>
   </button>
