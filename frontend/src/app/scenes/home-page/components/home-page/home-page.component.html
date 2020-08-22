@@ -6,7 +6,7 @@
       <a class="item">
         <spiner *ngIf="isUserLoadig" size="'small'"></spiner>
         <div class="ui very relaxed horizontal list">
-          <div class="item">
+          <div (click)="goToPage('profile-page')" class="item">
             <img
               class="ui circular image avatar-pic"
               src="{{ loggedInUser?.avatarUrl }}"
