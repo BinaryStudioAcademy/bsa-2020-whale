@@ -52,6 +52,7 @@ export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
   };
   groupMembers: User[] = [];
   currentUser: User;
+  isMessagesLoading = true;
   isMembersVisible = false;
   groupMessageRecieved = new EventEmitter<GroupMessage>();
   messages: GroupMessage[] = [];
@@ -71,7 +72,7 @@ export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
     private upstateSevice: UpstateService
   ) {}
   ngOnChanges(changes: SimpleChanges): void {
-    console.log(this.groupSelected);
+    this.isMembersVisible = false;
     this.upstateSevice
       .getLoggedInUser()
       .pipe(tap())
@@ -84,6 +85,7 @@ export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
       .subscribe(
         (data: GroupMessage[]) => {
           this.messages = data;
+          this.isMessagesLoading = false;
           console.log('messages new');
         },
         (error) => console.log(error)
@@ -95,7 +97,6 @@ export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
       .subscribe(
         (users) => {
           this.groupMembers = users;
-          console.log(users);
         },
         (err) => {
           console.log(err.message);

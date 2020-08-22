@@ -5,9 +5,9 @@
           <img src="{{ groupSelected.label }}" />
         </div> -->
       <div class="content">
-        <div class="user-info">
+        <div class="group-info">
           <div>
-            <span class="user user-chat-label ui header">
+            <span class="user-chat-label ui header">
               {{ groupSelected.label }}
               <span class="grey sub header">
                 {{ groupSelected.description }}
@@ -18,53 +18,56 @@
             <i id="chat-call" class="large phone icon" (click)="call()"></i>
           </div>
         </div>
-        <div class="ui simple active dropdown">
-          <span data-tooltip="Group members list" data-position="bottom center">
-            <i
-              id="chat-close"
-              class="large address book outline icon"
-              (click)="isMembersVisible = !isMembersVisible"
-            ></i>
-          </span>
-          <div *ngIf="isMembersVisible" class="menu">
-            <div
-              *ngFor="let user of groupMembers"
-              class="contacts-container user-list ui middle aligned selection list"
+        <div class="display-flex inner-block options__buttons">
+          <div class="ui simple active dropdown">
+            <span
+              data-tooltip="Group members list"
+              data-position="bottom center"
             >
-              <!-- <img
-                        class="ui avatar image"
-                        src="{{returnCorrectLink(user) }}"
-                      /> -->
-              <div class="content">
-                <div class="description">
-                  {{ user?.firstName }}
-                  {{ user?.secondName }}
-                  {{ user?.email }}
+              <i
+                id="chat-close"
+                class="large address book outline icon"
+                (click)="isMembersVisible = !isMembersVisible"
+              ></i>
+            </span>
+            <div
+              *ngIf="isMembersVisible"
+              class="left menu ui middle aligned selection list lol"
+            >
+              <div *ngFor="let user of groupMembers" class="item">
+                <img
+                  class="ui avatar image"
+                  src="{{ returnCorrectLink(user) }}"
+                />
+                <div class="content">
+                  <div class="description">
+                    {{ user?.firstName }}
+                    {{ user?.secondName }}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+          <span data-tooltip="Add new member" data-position="bottom center">
+            <i
+              id="chat-close"
+              class="large user plus icon"
+              (click)="addNewMember()"
+            ></i>
+          </span>
         </div>
-
-        <span data-tooltip="Add new member" data-position="bottom center">
-          <i
-            id="chat-close"
-            class="large user plus icon"
-            (click)="addNewMember()"
-          ></i>
-        </span>
         <span data-tooltip="Close chat" data-position="bottom right">
           <i id="chat-close" class="large close icon" (click)="close()"></i>
         </span>
       </div>
     </div>
+    <spiner *ngIf="isMessagesLoading" [size]="'medium'"></spiner>
     <div
       *ngIf="messages.length == 0"
-      class="ui large message vertically-aligned"
+      class="ui large vertically-aligned no-message"
     >
       There is still no messages yet!
     </div>
-    <div></div>
     <div *ngFor="let message of messages" class="event message-event">
       <div class="label">
         <img src="{{ message.author?.avatarUrl }}" />

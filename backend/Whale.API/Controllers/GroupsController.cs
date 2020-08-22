@@ -30,8 +30,7 @@ namespace Whale.API.Controllers
         {
             string email = HttpContext?.User.Claims
                 .FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
-            Console.WriteLine("email");
-            Console.WriteLine(email);
+            
             var contacts = await _groupService.GetAllGroupsAsync(email);
             if (contacts == null) return NotFound();
 

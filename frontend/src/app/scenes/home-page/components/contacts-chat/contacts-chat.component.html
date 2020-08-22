@@ -39,7 +39,7 @@
     <spiner *ngIf="isMessagesLoading" [size]="'medium'"></spiner>
     <div
       *ngIf="messages.length == 0 && !isMessagesLoading"
-      class="ui large message vertically-aligned"
+      class="ui vertically-aligned no-message"
     >
       There is still no messages yet!
     </div>

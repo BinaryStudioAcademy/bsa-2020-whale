@@ -100,7 +100,11 @@
         [hidden]="!groupsVisibility"
       >
         <div *ngFor="let group of groups">
-          <a id="home-group" class="item" (click)="onGroupClick(group)">
+          <a
+            id="home-group"
+            [ngClass]="isGroupActive(group) ? 'active item' : 'item'"
+            (click)="onGroupClick(group)"
+          >
             <i
               class="trash alternate outline icon"
               (click)="deleteGroup(group); $event.stopPropagation()"

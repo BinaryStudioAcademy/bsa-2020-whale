@@ -31,7 +31,7 @@ namespace Whale.API.Services
             var messages = await _context.GroupMessages
                 .Include(msg => msg.Author)
                 .OrderBy(msg => msg.CreatedAt)
-                .Where(p => p.GroupId == groupId) // Filter here
+                .Where(p => p.GroupId == groupId) 
                 .ToListAsync();
             if (messages == null) throw new Exception("No messages");
             return _mapper.Map<ICollection<GroupMessage>>(await messages.LoadAvatarsAsync(_blobStorageSettings, msg => msg.Author));
@@ -39,7 +39,6 @@ namespace Whale.API.Services
         public async Task<GroupMessageDTO> CreateGroupMessage(GroupMessageCreateDTO groupMessageDto)
         {
             var messageEntity = _mapper.Map<GroupMessage>(groupMessageDto);
-            //messageEntity.CreatedAt = DateTimeOffset.UtcNow;
             _context.GroupMessages.Add(messageEntity);
             await _context.SaveChangesAsync();
 
