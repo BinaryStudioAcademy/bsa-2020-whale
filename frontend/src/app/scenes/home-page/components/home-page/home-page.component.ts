@@ -203,6 +203,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
   isContactActive(contact): boolean {
     return this.contactSelected === contact;
   }
+  isGroupActive(group): boolean {
+    return this.groupSelected === group;
+  }
 
   createMeeting(): void {
     this.isMeetingLoading = true;
@@ -254,16 +257,20 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
   onContactClick(contact: Contact): void {
     //this.falseAllBooleans();
+    this.groupChatVisibility = false;
     this.contactChatVisibility = true;
-    //this.contactsVisibility = true;
     this.actionsVisibility = false;
     this.historyVisibility = false;
+    this.groupSelected = undefined;
     this.contactSelected = contact;
   }
 
   onGroupClick(group: Group): void {
-    this.falseAllBooleans();
+    this.actionsVisibility = false;
+    this.historyVisibility = false;
+    this.contactChatVisibility = false;
     this.groupChatVisibility = true;
+    this.contactSelected = undefined;
     this.groupSelected = group;
   }
 

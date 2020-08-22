@@ -134,7 +134,7 @@ namespace Whale.Shared.Services
 
             var user = _context.Users.FirstOrDefault(c => c.Email == groupUser.UserEmail);
             if (user is null)
-                throw new NotFoundException("Group", groupUser.UserEmail);
+                throw new NotFoundException("User", groupUser.UserEmail);
 
             var userInGroup = await _context.GroupUsers
                .Include(g => g.User)
