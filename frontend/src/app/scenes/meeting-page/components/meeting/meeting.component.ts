@@ -209,8 +209,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
           this.otherParticipants = participants.filter(
             (p) => p.id !== this.currentParticipant.id
           );
-
-          console.log('create own card');
           this.createParticipantCard(this.currentParticipant);
         },
         (err) => {
@@ -866,36 +864,30 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public async changeStateVideo(event: any) {
     this.mediaSettingsService.changeVideoDevice(event);
     this.currentUserStream.getVideoTracks()?.forEach((track) => track.stop());
-    this.currentUserStream = await navigator.mediaDevices.getUserMedia({
+    const newVideoStream = await navigator.mediaDevices.getUserMedia({
       video: { deviceId: event },
       audio: false,
     });
-    this.handleSuccessVideo(this.currentUserStream);
+    this.handleSuccessVideo(newVideoStream);
     this.isAudioSettings = false;
     this.isVideoSettings = false;
   }
 
   private async handleSuccessVideo(stream: MediaStream): Promise<void> {
-    const video = document.querySelector('video');
-    video.srcObject = stream;
-    const keys = Object.keys(this.peer.connections);
-    const peerConnection = this.peer.connections[keys[0]];
     const videoTrack = stream.getVideoTracks()[0];
-    peerConnection.forEach((pc) => {
-      const sender = pc.peerConnection.getSenders().find((s) => {
-        return s.track.kind === videoTrack.kind;
-      });
-      sender.replaceTrack(videoTrack);
+    this.currentUserStream.getVideoTracks().forEach((vt) => {
+      this.currentUserStream.removeTrack(vt);
     });
+    this.currentUserStream.addTrack(videoTrack);
   }
 
   public async changeInputDevice(deviceId: string) {
     this.mediaSettingsService.changeInputDevice(deviceId);
-    this.currentUserStream = await navigator.mediaDevices.getUserMedia({
+    const newAudioStream = await navigator.mediaDevices.getUserMedia({
       video: false,
       audio: { deviceId: deviceId },
     });
-    this.handleSuccess(this.currentUserStream);
+    this.handleSuccess(newAudioStream);
     this.isAudioSettings = false;
     this.isVideoSettings = false;
   }
@@ -909,17 +901,11 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private async handleSuccess(stream: MediaStream): Promise<void> {
-    const audio = document.querySelector('audio');
-    audio.srcObject = stream;
-    const keys = Object.keys(this.peer.connections);
-    const peerConnection = this.peer.connections[keys[0]];
     const audioTrack = stream.getAudioTracks()[0];
-    peerConnection.forEach((pc) => {
-      const sender = pc.peerConnection.getSenders().find((s) => {
-        return s.track.kind === audioTrack.kind;
-      });
-      sender.replaceTrack(audioTrack);
+    this.currentUserStream.getAudioTracks().forEach((at) => {
+      this.currentUserStream.removeTrack(at);
     });
+    this.currentUserStream.addTrack(audioTrack);
   }
 
   public showAudioSettings(): void {
