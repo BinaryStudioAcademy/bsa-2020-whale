@@ -183,17 +183,15 @@ i.big.icon.wechat
     -webkit-box-shadow: 1px 1px 5px 0px #4e4e4ebf
     -moz-box-shadow: 1px 1px 5px 0px #4e4e4ebf
     box-shadow: 1px 1px 5px 0px #4e4e4ebf
-    padding-left: 5px
-    padding-bottom: 20px
+    padding-left: 3px
     z-index: 2
     position: relative
     display: flex
     flex-direction: column
 
 .ui.divided.list
-    overflow-x: auto
-    margin-right: 5px
-    flex: 1 1 auto
+    width: fit-content
+    overflow-x: visible
 
 div.invite-icon-container
     padding: 15px 10px 0px 0px
@@ -203,20 +201,25 @@ div.invite-icon-container
 
 div div.item.participant
     margin: 2px 0px
-    padding: 5px 7px
-    min-width: 110px
+    padding: 5px 2.5em 5px 5px
+    min-width: fit-content
     width: 100%
     white-space: nowrap
     cursor: default
     display: flex
     align-items: center
     img
-        margin-right: 10%
+        margin-right: 0.5em
     span
         margin-top: 1px
 
 div div.participant:hover
     background-color: rgb(241, 241, 241)
+
+.participants-wrapper
+    height: 100%
+    overflow-x: auto
+    margin-right: 3px
 
 .users-icon-fix
     display: inline

@@ -9,7 +9,7 @@ import { User } from 'firebase';
 import { Title } from '@angular/platform-browser';
 import {
   WhaleSignalService,
-  SignalMethods,
+  WhaleSignalMethods,
 } from './core/services/whale-signal.service';
 import { ToastrService } from 'ngx-toastr';
 
@@ -40,7 +40,7 @@ export class AppComponent implements OnInit, OnDestroy {
   @HostListener('window:beforeunload')
   beforeunload(): void {
     this.whaleSignalrService.invoke(
-      SignalMethods.OnUserDisconnect,
+      WhaleSignalMethods.OnUserDisconnect,
       this.authService.currentUser.email
     );
   }
@@ -74,7 +74,7 @@ export class AppComponent implements OnInit, OnDestroy {
           })
           .subscribe((user) => {
             this.whaleSignalrService.invoke(
-              SignalMethods.OnUserConnect,
+              WhaleSignalMethods.OnUserConnect,
               this.authService.currentUser.email
             );
           });
