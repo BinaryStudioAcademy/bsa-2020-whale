@@ -1,20 +1,16 @@
-﻿using System.Net.Mail;
+﻿using Flurl.Http;
+using System.Threading.Tasks;
+using Whale.API.Models.Slack;
 
 namespace Whale.API.Services
 {
     public class SlackService
     {
-        public bool IsValidEmail(string email)
+        public async Task SendSlackReplyAsync(string text, string responseUrl)
         {
-            try
-            {
-                var address = new MailAddress(email);
-                return address.Address == email;
-            }
-            catch
-            {
-                return false;
-            }
+            var slackReply = new SlackReply() { text = text };
+
+            await responseUrl.PostJsonAsync(slackReply);
         }
     }
 }
