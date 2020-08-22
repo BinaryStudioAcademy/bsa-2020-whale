@@ -11,6 +11,11 @@
       <i id="history-close" class="large close icon" (click)="close()"></i>
     </div>
   </div>
+
+  <div *ngIf="isMeetingHistoryEmpty" class="meeting-list-empty">
+    <p>You don't have any meetings yet</p>
+  </div>
+
   <div>
     <div *ngFor="let meeting of meetings" class="meeting-container">
       <app-meeting-note [meeting]="meeting"></app-meeting-note>
