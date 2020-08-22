@@ -14,10 +14,7 @@ import { tap, takeUntil } from 'rxjs/operators';
 import { CallDecline } from '@shared/models/call/call-decline';
 import { environment } from '@env';
 import { HubConnection } from '@aspnet/signalr';
-import {
-  WhaleSignalService,
-  SignalMethods,
-} from 'app/core/services/whale-signal.service';
+import { WhaleSignalService, WhaleSignalMethods } from 'app/core/services';
 @Component({
   selector: 'app-incoming-call',
   templateUrl: './incoming-call.component.html',
@@ -48,7 +45,7 @@ export class IncomingCallComponent implements OnInit, OnDestroy {
 
   confirm(): void {
     this.whaleSignalrService.invoke(
-      SignalMethods.OnTakeCall,
+      WhaleSignalMethods.OnTakeCall,
       this.call.contact.firstMember.id
     );
     this.close();
@@ -59,7 +56,7 @@ export class IncomingCallComponent implements OnInit, OnDestroy {
   }
 
   decline(): void {
-    this.whaleSignalrService.invoke(SignalMethods.OnDeclineCall, {
+    this.whaleSignalrService.invoke(WhaleSignalMethods.OnDeclineCall, {
       userId: this.call.contact.firstMember.id,
       email: this.call.contact.firstMember.email,
       meetingId: this.call.meetingLink.id,

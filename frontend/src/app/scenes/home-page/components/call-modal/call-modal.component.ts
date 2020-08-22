@@ -10,10 +10,7 @@ import { CallStart } from '@shared/models/call/call-start';
 import { CallDecline } from '@shared/models/call/call-decline';
 import { MeetingCreate } from '@shared/models/meeting/meeting-create';
 import { takeUntil } from 'rxjs/operators';
-import {
-  WhaleSignalService,
-  SignalMethods,
-} from 'app/core/services/whale-signal.service';
+import { WhaleSignalService, WhaleSignalMethods } from 'app/core/services';
 
 @Component({
   selector: 'app-call-modal',
@@ -68,7 +65,7 @@ export class CallModalComponent extends SimpleModalComponent<Contact, null>
       });
 
     console.log(this.firstMember);
-    this.whaleSignalrService.invoke(SignalMethods.OnStartCall, {
+    this.whaleSignalrService.invoke(WhaleSignalMethods.OnStartCall, {
       contactId: this?.id,
       meeting: {
         settings: '',
@@ -82,7 +79,7 @@ export class CallModalComponent extends SimpleModalComponent<Contact, null>
   }
 
   decline(): void {
-    this.whaleSignalrService.invoke(SignalMethods.OnDeclineCall, {
+    this.whaleSignalrService.invoke(WhaleSignalMethods.OnDeclineCall, {
       userId: this?.secondMember?.id,
       email: this?.firstMember?.email,
       meetingId: this?.link?.id,

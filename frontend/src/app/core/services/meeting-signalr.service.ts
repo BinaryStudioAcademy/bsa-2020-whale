@@ -9,9 +9,7 @@ import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
 import { Participant } from '@shared/models/participant/participant';
 import { PollDto } from '@shared/models/poll/poll-dto';
 import { PollResultDto } from '@shared/models/poll/poll-result-dto';
-import { ChangedMediaState } from '@shared/models/media/media';
-import { VoteDto } from '@shared/models/poll/vote-dto';
-import { VoterDto } from '@shared/models/poll/voter-dto';
+import { ChangedMediaState } from '@shared/models';
 import { CanvasWhiteboardUpdate } from 'ng2-canvas-whiteboard';
 
 @Injectable({

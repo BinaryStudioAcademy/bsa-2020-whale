@@ -7,12 +7,16 @@ import {
   EventEmitter,
   OnDestroy,
 } from '@angular/core';
-import { MediaData, ParticipantDynamicData } from '@shared/models/media/media';
 import { createPopper } from '@popperjs/core';
 import flip from '@popperjs/core/lib/modifiers/flip.js';
-import { Participant } from '@shared/models/participant/participant';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+
+import {
+  MediaData,
+  ParticipantDynamicData,
+  Participant,
+} from '../../../shared/models';
 
 @Component({
   selector: 'app-participant-card',

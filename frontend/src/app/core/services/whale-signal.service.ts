@@ -35,7 +35,7 @@ export class WhaleSignalService {
   private declineCall = new Subject<void>();
   public declineCall$ = this.declineCall.asObservable();
 
-  constructor(private hubService: SignalRService) {
+  constructor(hubService: SignalRService) {
     from(hubService.registerHub(environment.signalrUrl, 'whale'))
       .pipe(
         tap((hub) => {
@@ -73,12 +73,14 @@ export class WhaleSignalService {
       });
   }
 
-  public invoke(method: SignalMethods, arg: any): Observable<void> {
-    return from(this.signalHub.invoke(SignalMethods[method].toString(), arg));
+  public invoke(method: WhaleSignalMethods, arg: any): Observable<void> {
+    return from(
+      this.signalHub.invoke(WhaleSignalMethods[method].toString(), arg)
+    );
   }
 }
 
-export enum SignalMethods {
+export enum WhaleSignalMethods {
   OnUserConnect,
   OnUserDisconnect,
   OnStartCall,

@@ -91,10 +91,15 @@
             *ngFor="let participant of meeting?.participants"
             class="ui item participant"
           >
-            <img class="ui avatar image" src="{{ participant.user.avatarUrl }}" />
+            <img
+              class="ui avatar image"
+              src="{{ participant.user.avatarUrl }}"
+            />
             <span>
               {{ participant.user.firstName }}
-              {{participant.user.secondName ? participant.user.secondName : ""}}
+              {{
+                participant.user.secondName ? participant.user.secondName : ""
+              }}
             </span>
           </div>
         </div>
@@ -291,8 +296,12 @@
           (toggleCameraEvent)="
             currentParticipant.id === $event ? toggleCamera() : ''
           "
-          (switchOffCameraAsHostEvent)="switchOfMediaAsHost($event, true)"
-          (switchOffMicrophoneAsHostEvent)="switchOfMediaAsHost($event, false)"
+          (switchOffCameraAsHostEvent)="
+            toggleOtherParticipantMediaAsHost($event, true)
+          "
+          (switchOffMicrophoneAsHostEvent)="
+            toggleOtherParticipantMediaAsHost($event, false)
+          "
           [data]="data"
           [meetingHolder]="currentParticipant"
         >
