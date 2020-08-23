@@ -177,6 +177,13 @@ export class HomePageComponent implements OnInit, OnDestroy {
       });
   }
 
+  public leftGroup(group: Group): void {
+    this.groups.splice(this.groups.indexOf(group), 1);
+    if (!this.groups.length) {
+      this.groupsVisibility = !this.groupsVisibility;
+    }
+  }
+
   deleteGroup(group: Group): void {
     if (
       confirm('Are you sure want to delete the group ' + group.label + ' ?')

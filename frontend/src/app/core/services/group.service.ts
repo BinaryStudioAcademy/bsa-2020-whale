@@ -32,6 +32,16 @@ export class GroupService {
       groupUser
     );
   }
+
+  public leaveGroup(
+    groupId: string,
+    userEmail: string
+  ): Observable<HttpResponse<void>> {
+    return this.httpService.deleteFullRequest<void>(
+      `${this.routePrefix}/${groupId}/${userEmail}`
+    );
+  }
+
   public getAllGroupUsers(groupId: string): Observable<User[]> {
     return this.httpService.getRequest<User[]>(
       `${this.routePrefix}/users/` + groupId

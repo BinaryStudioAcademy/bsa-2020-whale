@@ -31,6 +31,7 @@ import { GroupUser } from '@shared/models/group/groupuser';
 import { AddUserToGroupModalComponent } from '../add-user-to-group-modal/add-user-to-group-modal.component';
 import { UpstateService } from 'app/core/services/upstate.service';
 import { AuthService } from 'app/core/auth/auth.service';
+import { HomePageComponent } from '../home-page/home-page.component';
 
 @Component({
   selector: 'app-group-chat',
@@ -69,7 +70,8 @@ export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
     private toastr: ToastrService,
     private simpleModalService: SimpleModalService,
     private groupService: GroupService,
-    private upstateSevice: UpstateService
+    private upstateSevice: UpstateService,
+    private homePageComponent: HomePageComponent
   ) {}
   ngOnChanges(changes: SimpleChanges): void {
     this.isMembersVisible = false;
@@ -165,6 +167,21 @@ export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
   public call(): void {
     // console.log(this.groupSelected);
     // this.simpleModalService.addModal(CallModalComponent, this.groupSelected);
+  }
+
+  public leaveGroup(): void {
+    this.groupService
+      .leaveGroup(this.groupSelected.id, this.currentUser.email)
+      .subscribe(
+        (resp) => {
+          console.log(resp.body);
+        },
+        (error) => this.toastr.error(error.Message)
+      );
+
+    this.hubConnection?.invoke('LeaveGroup', this.groupSelected.id);
+    this.close();
+    this.homePageComponent.leftGroup(this.groupSelected);
   }
 
   public onEnterKeyPress(event: KeyboardEvent, valid: boolean): void {
