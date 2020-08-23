@@ -901,9 +901,12 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public async changeOutputDevice(deviceId: string) {
-    const audio = document.querySelector('audio');
+    const videos = document.querySelectorAll('video');
+    console.log(videos);
     this.mediaSettingsService.changeOutputDevice(deviceId);
-    this.mediaSettingsService.attachSinkId(audio, deviceId);
+    videos.forEach((video) => {
+      this.mediaSettingsService.attachSinkId(video, deviceId);
+    });
     this.isAudioSettings = false;
     this.isVideoSettings = false;
   }

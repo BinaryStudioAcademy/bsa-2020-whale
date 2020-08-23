@@ -238,8 +238,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
   public falseAllBooleans() {
     this.contactChatVisibility = false;
     this.groupChatVisibility = false;
-    this.groupsVisibility = false;
-    this.contactsVisibility = false;
     this.actionsVisibility = false;
     this.historyVisibility = false;
   }
@@ -256,32 +254,19 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   onContactClick(contact: Contact): void {
-    //this.falseAllBooleans();
-    this.groupChatVisibility = false;
+    this.falseAllBooleans();
     this.contactChatVisibility = true;
-    this.actionsVisibility = false;
-    this.historyVisibility = false;
     this.groupSelected = undefined;
     this.contactSelected = contact;
   }
 
   onGroupClick(group: Group): void {
-    this.actionsVisibility = false;
-    this.historyVisibility = false;
-    this.contactChatVisibility = false;
+    this.falseAllBooleans();
     this.groupChatVisibility = true;
     this.contactSelected = undefined;
     this.groupSelected = group;
   }
 
-  // onGroupClick(): void {
-  //   this.falseAllBooleans();
-  //   this.contactChatVisibility = true;
-  // }
-
-  // isContactActive(contact): boolean {
-  //   return this.contactSelected === contact;
-  // }
   public closeHistory() {
     this.falseAllBooleans();
     this.historyVisibility = false;
@@ -290,9 +275,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
   public onMeetingHistoryClick() {
     this.contactChatVisibility = false;
-    this.groupsVisibility = false;
-    this.contactsVisibility = false;
     this.actionsVisibility = false;
+    this.groupChatVisibility = false;
 
     this.historyVisibility = !this.historyVisibility;
 
