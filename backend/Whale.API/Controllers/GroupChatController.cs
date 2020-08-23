@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Whale.API.Services;
-using Whale.Shared.DTO.GroupMessage;
 using Whale.Shared.Models.GroupMessage;
 
 namespace Whale.API.Controllers

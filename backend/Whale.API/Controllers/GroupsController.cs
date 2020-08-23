@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Whale.Shared.Services;
-using Whale.Shared.DTO.Group;
+using Whale.Shared.Models.Group;
 using Whale.Shared.Models.Group.GroupUser;
 using Whale.Shared.DTO.Group.GroupUser;
 

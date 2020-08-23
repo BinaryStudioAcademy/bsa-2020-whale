@@ -64,7 +64,7 @@ namespace Whale.SignalR.Hubs
 
         [HubMethodName("OnStartGroupCall")]
         public async Task StartGroupCall(StartGroupCallDTO startCallDTO)
-        {
+        {   
             var group = await _groupsService.GetGroupAsync(startCallDTO.GroupId, startCallDTO.Meeting.CreatorEmail);
             var groupUsers = await _groupsService.GetAllUsersInGroupAsync(startCallDTO.GroupId);
             var userToCall = groupUsers.Where(x => x.Email != startCallDTO.Meeting.CreatorEmail);
@@ -73,7 +73,7 @@ namespace Whale.SignalR.Hubs
                 var connections = await _whaleService.GetConnections(usr.Id);
                 foreach (var connection in connections)
                 {
-                    await Clients.Client(connection).SendAsync("OnStartCallOthers", new GroupCallDTO { MeetingLink = link, Group = group, CallerEmail = startCallDTO.Meeting.CreatorEmail });
+                    await Clients.Client(connection).SendAsync("OnStartCallOthersInGroup", new GroupCallDTO { MeetingLink = link, Group = group, CallerEmail = startCallDTO.Meeting.CreatorEmail });
                 }
             }
             await Clients.Caller.SendAsync("OnStartCallCaller", link);
@@ -86,6 +86,19 @@ namespace Whale.SignalR.Hubs
             await Clients.Client(connections.LastOrDefault()).SendAsync("OnTakeCall");
         }
 
+        [HubMethodName("OnTakeGroupCall")]
+        public async Task TakeGroupCall(Guid groupId)
+        {
+            var group = await _groupsService.GetGroupAsync(groupId);
+            var groupUsers = await _groupsService.GetAllUsersInGroupAsync(group.Id);
+            //var userToCall = groupUsers.Where(x => x.Email != startCallDTO.Meeting.CreatorEmail);
+            foreach (var usr in groupUsers)
+            {
+                var connections = await _whaleService.GetConnections(usr.Id);
+                await Clients.Client(connections.LastOrDefault()).SendAsync("OnTakeGroupCall");
+            }
+        }
+
         [HubMethodName("OnDeclineCall")]
         public async Task DeclineCall(DeclineCallDTO declineCallDTO)
         {
@@ -96,5 +109,26 @@ namespace Whale.SignalR.Hubs
                 await Clients.Client(connection).SendAsync("OnDeclineCall");
             }
         }
+
+        [HubMethodName("OnDeclineGroupCall")]
+        public async Task DeclineGroupCall(DeclineGroupCallDTO declineCallDTO)
+        {
+            await _meetingService.ParticipantDisconnect(declineCallDTO.MeetingId, declineCallDTO.Email);
+            var groupUsers = await _groupsService.GetAllUsersInGroupAsync(declineCallDTO.GroupId);
+            var isUserCaller = groupUsers.FirstOrDefault(x => x.Email == declineCallDTO.Email);
+            if (declineCallDTO.UserId == isUserCaller.Id )
+            {
+                foreach (var usr in groupUsers)
+                {
+                    var connections = await _whaleService.GetConnections(usr.Id);
+                    foreach (var connection in connections)
+                    {
+                        await Clients.Client(connection).SendAsync("OnDeclineGroupCall");
+                    }
+                }
+            }
+        }
+
+
     }
 }

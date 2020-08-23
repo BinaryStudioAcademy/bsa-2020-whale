@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import { Call } from '@shared/models/call/call';
+import { GroupCall } from '@shared/models/call/group-call';
 import { environment } from '@env';
 import { User } from 'firebase';
 import { Title } from '@angular/platform-browser';
@@ -21,6 +22,7 @@ import { ToastrService } from 'ngx-toastr';
 export class AppComponent implements OnInit, OnDestroy {
   title = 'Whale';
   call: Call;
+  groupCall: GroupCall;
   user: User;
 
   private getUserUrl: string = environment.apiUrl + '/api/user/email';
@@ -64,6 +66,20 @@ export class AppComponent implements OnInit, OnDestroy {
         }
       );
 
+    this.whaleSignalrService.startCallOthersInGroup$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (call) => {
+          if (this.user.email !== call.callerEmail) {
+            this.groupCall = call;
+            console.log(call);
+          }
+        },
+        (err) => {
+          this.toastr.error(err.Message);
+        }
+      );
+
     this.authService.user$
       .pipe(filter((user) => Boolean(user)))
       .subscribe((user) => {
@@ -83,5 +99,8 @@ export class AppComponent implements OnInit, OnDestroy {
 
   closeIncomingCall(): void {
     this.call = null;
+  }
+  closeIncomingGroupCall(): void {
+    this.groupCall = null;
   }
 }

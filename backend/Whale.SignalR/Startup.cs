@@ -40,6 +40,7 @@ namespace Whale.SignalR
             services.AddTransient<MeetingService>();
             services.AddTransient<ParticipantService>();
             services.AddTransient<UserService>();
+            services.AddTransient<GroupService>();
             services.AddTransient<WhaleService>();
 
             services.AddTransient(p => new SignalrService(Configuration.GetValue<string>("SignalR")));
@@ -67,6 +68,7 @@ namespace Whale.SignalR
                 cfg.AddProfile<ParticipantProfile>();
                 cfg.AddProfile<ContactProfile>();
                 cfg.AddProfile<DirectMessageProfile>();
+                cfg.AddProfile<GroupProfile>();
                 cfg.AddProfile<NotificationProfile>();
             },
             Assembly.GetExecutingAssembly());

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using System.Threading.Tasks;
-using Whale.Shared.DTO.GroupMessage;
+using Whale.Shared.Models.GroupMessage;
 using Whale.Shared.Models.DirectMessage;
 using Whale.Shared.Services;
 using Whale.SignalR.Models.Call;

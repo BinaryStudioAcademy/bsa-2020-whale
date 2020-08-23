@@ -31,6 +31,7 @@ import { GroupUser } from '@shared/models/group/groupuser';
 import { AddUserToGroupModalComponent } from '../add-user-to-group-modal/add-user-to-group-modal.component';
 import { UpstateService } from 'app/core/services/upstate.service';
 import { AuthService } from 'app/core/auth/auth.service';
+import { GroupCallModalComponent } from '../group-call-modal/group-call-modal.component';
 
 @Component({
   selector: 'app-group-chat',
@@ -115,8 +116,6 @@ export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
         this.hubConnection.on(
           'NewGroupMessageReceived',
           (message: GroupMessage) => {
-            console.log('GOT IT!');
-            console.log(message);
             this.receivedMsg.next(message);
           }
         );
@@ -163,8 +162,11 @@ export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   public call(): void {
-    // console.log(this.groupSelected);
-    // this.simpleModalService.addModal(CallModalComponent, this.groupSelected);
+    console.log(this.groupSelected);
+    this.simpleModalService.addModal(
+      GroupCallModalComponent,
+      this.groupSelected
+    );
   }
 
   public onEnterKeyPress(event: KeyboardEvent, valid: boolean): void {

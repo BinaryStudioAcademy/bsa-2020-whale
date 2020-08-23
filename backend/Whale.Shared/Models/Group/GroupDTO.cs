@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Whale.Shared.DTO.GroupMessage;
+using Whale.Shared.Models.GroupMessage;
 
 namespace Whale.Shared.Models.Group
 {
