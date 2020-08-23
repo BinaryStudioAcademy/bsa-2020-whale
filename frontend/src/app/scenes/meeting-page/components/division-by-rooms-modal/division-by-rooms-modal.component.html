@@ -1,0 +1,33 @@
+<div class="ui dimmer modals page visible active">
+  <div class="ui small modal visible active">
+    <div class="ui header">
+      <div>
+        <h2>Rooms</h2>
+      </div>
+    </div>
+    <div class="content">
+      <div
+        class="ui divided list"
+        *ngFor="let participantsOfRoom of devidedParticipants"
+      >
+        <div class="ui header">
+          Room:
+        </div>
+        <div
+          class="ui item participant"
+          *ngFor="let participant of participantsOfRoom"
+        >
+          <img class="ui avatar image" src="{{ participant.user.avatarUrl }}" />
+          <div>
+            {{ participant.user.firstName }} {{ participant.user.secondName }}
+          </div>
+        </div>
+        <div class="ui fitted divider"></div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="ui button" (click)="close()">Leave</button>
+      <button class="ui primary button">Divide</button>
+    </div>
+  </div>
+</div>

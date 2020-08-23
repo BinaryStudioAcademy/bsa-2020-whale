@@ -47,6 +47,7 @@ import {
   MediaData,
 } from '../../../../shared/models';
 import { EnterModalComponent } from '../enter-modal/enter-modal.component';
+import { DivisionByRoomsModalComponent } from '../division-by-rooms-modal/division-by-rooms-modal.component';
 
 @Component({
   selector: 'app-meeting',
@@ -398,8 +399,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public ngAfterViewInit(): void {
     this.elem = this.mainArea.nativeElement;
-    console.log('elem', this.elem);
-    console.log('currentVideo first', this.currentVideo);
     this.currentStreamLoaded.subscribe(() => {
       this.currentVideo.nativeElement.srcObject = this.currentUserStream;
       this.setOutputDevice();
@@ -947,4 +946,14 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
   //#endregion media settings
+
+  //#region Rooms
+  public async openRoomsModal(): Promise<void> {
+    await this.simpleModalService
+      .addModal(DivisionByRoomsModalComponent, {
+        participants: this.meeting.participants,
+        numberOfRooms: 2,
+      })
+      .toPromise();
+  }
 }
