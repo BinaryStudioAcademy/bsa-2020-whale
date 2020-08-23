@@ -170,18 +170,26 @@ export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   public leaveGroup(): void {
-    this.groupService
-      .leaveGroup(this.groupSelected.id, this.currentUser.email)
-      .subscribe(
-        (resp) => {
-          console.log(resp.body);
-        },
-        (error) => this.toastr.error(error.Message)
-      );
+    if (
+      confirm(
+        'Are you sure want to leave the group ' + this.groupSelected.label + '?'
+      )
+    ) {
+      this.groupService
+        .leaveGroup(this.groupSelected.id, this.currentUser.email)
+        .subscribe(
+          () => {
+            this.toastr.success(
+              `You successfully left the group "${this.groupSelected.label}"`
+            );
+          },
+          (error) => this.toastr.error(error.Message)
+        );
 
-    this.hubConnection?.invoke('LeaveGroup', this.groupSelected.id);
-    this.close();
-    this.homePageComponent.leftGroup(this.groupSelected);
+      this.hubConnection?.invoke('LeaveGroup', this.groupSelected.id);
+      this.close();
+      this.homePageComponent.leftGroup(this.groupSelected);
+    }
   }
 
   public onEnterKeyPress(event: KeyboardEvent, valid: boolean): void {
