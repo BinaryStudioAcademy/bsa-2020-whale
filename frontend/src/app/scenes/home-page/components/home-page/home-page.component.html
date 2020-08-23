@@ -59,6 +59,7 @@
           <div
             id="home-contact"
             [ngClass]="isContactActive(contact) ? 'active item' : 'item'"
+            [className]="contact.isAccepted ? '' : 'inactive'"
             (click)="onContactClick(contact)"
           >
             <img

@@ -30,13 +30,14 @@ export class AddContactModalComponent extends SimpleModalComponent<
       .createContactByEmail(this.contactnerEmail.toLowerCase())
       .subscribe(
         (resp) => {
-          if (resp.status === 204) {
+          if (resp.body.isAccepted) {
             this.toastr.success('Request has been sent');
-            this.close();
-          } else {
-            this.result = resp.body;
-            this.close();
           }
+          else {
+            this.toastr.success('Contact has been added');
+          }
+          this.result = resp.body;
+          this.close();
         },
         (error) => this.toastr.error(error.Message)
       );

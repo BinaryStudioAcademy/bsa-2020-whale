@@ -197,7 +197,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   addNewContact(): void {
-    this.simpleModalService.addModal(AddContactModalComponent).subscribe();
+    this.simpleModalService.addModal(AddContactModalComponent).subscribe(
+      c => this.contactAdd(c)
+    );
   }
 
   isContactActive(contact): boolean {
@@ -254,6 +256,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   onContactClick(contact: Contact): void {
+    if (!contact.isAccepted) {
+      return;
+    }
     this.falseAllBooleans();
     this.contactChatVisibility = true;
     this.groupSelected = undefined;
@@ -307,13 +312,21 @@ export class HomePageComponent implements OnInit, OnDestroy {
       });
     this.receivedContact$.pipe(takeUntil(this.unsubscribe$)).subscribe(
       (contact) => {
-        this.contacts.push(contact);
-        this.contactsVisibility = true;
+        this.contactAdd(contact);
       },
       (err) => {
         console.log(err.message);
       }
     );
+  }
+
+  contactAdd(contact: Contact): void {
+    this.contactsVisibility = true;
+    this.removeContact(contact);
+    this.contacts.push(contact);
+  }
+  removeContact(contact: Contact): void {
+    this.contacts = this.contacts.filter((c) => c.id !== contact.id);
   }
 
   public onContactsClick(): void {

@@ -42,7 +42,7 @@ namespace Whale.Shared.Services
                  .Include(c => c.FirstMember)
                  .Include(c => c.SecondMember)
                  .Include(c => c.PinnedMessage)
-                 .Where(c => (c.FirstMemberId == user.Id || c.SecondMemberId == user.Id) && c.isAccepted)
+                 .Where(c => c.FirstMemberId == user.Id || (c.SecondMemberId == user.Id && c.isAccepted))
                  .ToListAsync();
 
             contacts = (await contacts.LoadAvatarsAsync(_blobStorageSettings, c => c.FirstMember)).ToList();
@@ -59,6 +59,7 @@ namespace Whale.Shared.Services
                     SecondMemberId = (c.SecondMemberId == user.Id) ? c.FirstMemberId : c.SecondMemberId,
                     SecondMember = _mapper.Map<UserDTO>((c.SecondMemberId == user.Id) ? c.FirstMember : c.SecondMember),
                     PinnedMessage = _mapper.Map<DirectMessageDTO>(c.PinnedMessage),
+                    isAccepted = c.isAccepted,
                 };
                 contact.FirstMember.ConnectionId = GetConnectionId(contact.FirstMember.Id);
                 contact.SecondMember.ConnectionId = GetConnectionId(contact.SecondMember.Id);
@@ -91,6 +92,7 @@ namespace Whale.Shared.Services
                 SecondMemberId = (contact.SecondMemberId == user.Id) ? contact.FirstMemberId : contact.SecondMemberId,
                 SecondMember = _mapper.Map<UserDTO>((contact.SecondMemberId == user.Id) ? contact.FirstMember : contact.SecondMember),
                 PinnedMessage = _mapper.Map<DirectMessageDTO>(contact.PinnedMessage),
+                isAccepted = contact.isAccepted,
             };
             dtoContact.FirstMember.ConnectionId = GetConnectionId(contact.FirstMember.Id);
             dtoContact.SecondMember.ConnectionId = GetConnectionId(contact.SecondMember.Id);
@@ -100,16 +102,28 @@ namespace Whale.Shared.Services
 
         public async Task UpdateContactAsync(ContactEditDTO contactDTO, string userEmail)
         {
-            var entity = _context.Contacts.FirstOrDefault(c => c.Id == contactDTO.Id);
+            var entity = _context.Contacts
+                .Include(c => c.FirstMember)
+                .Include(c => c.SecondMember)
+                .FirstOrDefault(c => c.Id == contactDTO.Id);
 
-            if (entity == null) throw new NotFoundException("Contact", contactDTO.Id.ToString());
+            if (entity.FirstMember.Email != userEmail && entity.SecondMember.Email != userEmail)
+                throw new InvalidCredentials();
+            if (entity == null)
+                throw new NotFoundException("Contact", contactDTO.Id.ToString());
 
             await _context.SaveChangesAsync();
         }
 
-        public async Task<bool> DeleteContactAsync(Guid contactId)
+        public async Task<bool> DeleteContactAsync(Guid contactId, string userEmail)
         {
-            var contact = _context.Contacts.FirstOrDefault(c => c.Id == contactId);
+            var contact = _context.Contacts
+                .Include(c => c.FirstMember)
+                .Include(c => c.SecondMember)
+                .FirstOrDefault(c => c.Id == contactId);
+
+            if (contact.FirstMember.Email != userEmail && contact.SecondMember.Email != userEmail)
+                throw new InvalidCredentials();
 
             if (contact == null) return false;
 
@@ -160,7 +174,7 @@ namespace Whale.Shared.Services
             _context.Contacts.Add(contact);
             await _context.SaveChangesAsync();
             await _notifications.AddContactNotification(ownerEmail, contactnerEmail);
-            return null;
+            return await GetContactAsync(contact.Id, ownerEmail);
         }
 
         private string GetConnectionId(Guid userId)
