@@ -24,6 +24,7 @@ import { WhaleSignalService } from 'app/core/services/whale-signal.service';
 import { UserOnline } from '@shared/models/user/user-online';
 import { UpstateService } from 'app/core/services/upstate.service';
 import { ContactService } from 'app/core/services';
+import { ConfirmationModalComponent } from '@shared/components/confirmation-modal/confirmation-modal.component';
 
 @Component({
   selector: 'app-home-page',
@@ -261,7 +262,15 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
   onContactClick(contact: Contact): void {
     if (!contact.isAccepted) {
-      this.contactService.DeletePendingContact(contact.secondMember.email);
+      this.simpleModalService
+      .addModal(ConfirmationModalComponent, {
+        message: 'Are you sure you want to cancel the request?'
+      })
+      .subscribe((isConfirm) => {
+        if (isConfirm) {
+          this.contactService.DeletePendingContact(contact.secondMember.email);
+        }
+      });
       return;
     }
     this.falseAllBooleans();
