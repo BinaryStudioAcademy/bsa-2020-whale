@@ -1,16 +1,24 @@
-﻿using Flurl.Http;
-using System.Threading.Tasks;
-using Whale.API.Models.Slack;
+﻿using System.Threading.Tasks;
+using SlackAPI;
+using Microsoft.Extensions.Configuration;
 
 namespace Whale.API.Services
 {
     public class SlackService
     {
-        public async Task SendSlackReplyAsync(string text, string responseUrl)
-        {
-            var slackReply = new SlackReply() { text = text };
+        private readonly SlackTaskClient _slackClient;
+        private readonly IConfiguration _configuration;
 
-            await responseUrl.PostJsonAsync(slackReply);
+        public SlackService(IConfiguration configuration)
+        {
+            _configuration = configuration;
+
+            _slackClient = new SlackTaskClient(_configuration.GetValue<string>("SlackBotToken"));
+        }
+
+        public async Task SendSlackReplyAsync(string text, string channel)
+        {
+            await _slackClient.PostMessageAsync(channel, text);
         }
     }
 }
