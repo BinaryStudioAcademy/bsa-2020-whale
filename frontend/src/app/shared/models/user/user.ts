@@ -9,4 +9,5 @@ export interface User {
   linkType: LinkTypeEnum;
   email: string;
   phone?: string;
+  connectionId: string;
 }

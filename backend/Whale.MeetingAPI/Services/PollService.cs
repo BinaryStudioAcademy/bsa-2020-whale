@@ -88,12 +88,12 @@ namespace Whale.MeetingAPI.Services
 			
 			if (pollResult.IsAnonymous)
 			{
-				pollResult.OptionResults.Select(optionResult => new OptionResult
+				pollResult.OptionResults = pollResult.OptionResults.Select(optionResult => new OptionResult
 				{
 					Option = optionResult.Option,
 					VoteCount = optionResult.VoteCount,
 					VotedUsers = Enumerable.Empty<Voter>().ToList()
-				});
+				}).ToList();
 			}
 
 			// signal
@@ -114,24 +114,23 @@ namespace Whale.MeetingAPI.Services
 				.Any(optRes => optRes.VotedUsers
 				.Any(user => user.Email == userEmail))).ToList();
 
-
-			var nonAnonymousResults = resultsToSend.Where(result => !result.IsAnonymous);
-
-			foreach (var result in resultsToSend.Except(nonAnonymousResults))
+			//var anonResults = resultsToSend.Where(result => !result.IsAnonymous);
+			//var nonAnonResults = resultsToSend.Except(anonResults);
+			resultsToSend.ForEach(result =>
 			{
-				result.OptionResults.Select(optionResult => new OptionResult
+				if (result.IsAnonymous)
 				{
-					Option = optionResult.Option,
-					VoteCount = optionResult.VoteCount,
-					VotedUsers = Enumerable.Empty<Voter>().ToList() 
-				});
-			}
+					result.OptionResults.ForEach(oR => oR.VotedUsers = new List<Voter>());
+				}
+			});
+
+			//resultsToSend = anonResults.Concat(resultsToSend.Except(anonResults)).ToList();
 
 			var pollsToSend = new List<Poll>();
 
 			foreach (var poll in polls)
 			{
-				if(resultsToSend.Any(result => result.PollId != poll.Id))
+				if(!resultsToSend.Any(result => result.PollId == poll.Id))
 				{
 					pollsToSend.Add(poll);
 				}

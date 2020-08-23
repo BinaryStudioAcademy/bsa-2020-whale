@@ -9,6 +9,8 @@ using Whale.Shared.Models.Meeting;
 using Whale.Shared.Models.Meeting.MeetingMessage;
 using Whale.Shared.Models.Poll;
 using Whale.SignalR.Models.Drawing;
+using Whale.SignalR.Models.Media;
+using Whale.DAL.Models;
 
 namespace Whale.SignalR.Hubs
 {
@@ -69,7 +71,8 @@ namespace Whale.SignalR.Hubs
         [HubMethodName("OnParticipantLeft")]
         public async Task ParticipantLeft(MeetingConnectDTO ConnectionData)
         {
-            var disconnectedParticipant = _groupsParticipants[ConnectionData.MeetingId].Find(p => p.Id == ConnectionData.Participant.Id);
+            var disconnectedParticipant = _groupsParticipants[ConnectionData.MeetingId]
+                .Find(p => p.Id == ConnectionData.Participant.Id);
 
             ConnectionData.Participant = disconnectedParticipant;
             _groupsParticipants[ConnectionData.MeetingId].Remove(disconnectedParticipant);
@@ -79,6 +82,53 @@ namespace Whale.SignalR.Hubs
             if (await _meetingService.ParticipantDisconnect(ConnectionData.MeetingId, ConnectionData.UserEmail))
             {
                await Clients.Group(ConnectionData.MeetingId).SendAsync("OnMeetingEnded", ConnectionData);
+            }
+        }
+
+
+        [HubMethodName("OnMediaStateChanged")]
+        public async Task ParticipantMediaStateChanged(MediaStateDTO mediaState)
+        {
+            if (string.IsNullOrEmpty(mediaState.ReceiverConnectionId))
+            {
+                var participantInGroup = _groupsParticipants
+               .FirstOrDefault(g => g.Value.Any(p => p.ActiveConnectionId == Context.ConnectionId));
+
+                await Clients.Group(participantInGroup.Key).SendAsync("OnMediaStateChanged", mediaState);
+            }
+            else
+            {
+                await Clients.Client(mediaState.ReceiverConnectionId).SendAsync("OnMediaStateChanged", mediaState);
+            }
+        }
+
+        [HubMethodName("OnMediaStateRequested")]
+        public async Task ParticipantMediaStateRequested(string streamId)
+        {
+            var requestReceiver = _groupsParticipants
+            .FirstOrDefault(g => g.Value.Any(p => p.StreamId == streamId))
+            .Value
+            .FirstOrDefault(p => p.StreamId == streamId);
+
+            await Clients.Client(requestReceiver.ActiveConnectionId)
+                .SendAsync("OnMediaStateRequested", Context.ConnectionId);
+        }
+
+        [HubMethodName("OnSwitchOffMediaByHost")]
+        public async Task SwitchOffMediaByHost(SwitchMediaDTO switchMedia)
+        {
+            var isCallerHost = _groupsParticipants[switchMedia.MeetingId]
+                .Any(p => p.ActiveConnectionId == Context.ConnectionId
+                    && p.Role == ParticipantRole.Host);
+
+            var switchCommandReceiver = _groupsParticipants
+                .FirstOrDefault(g => g.Value.Any(p => p.StreamId == switchMedia.MutedStreamId))
+                .Value
+                .FirstOrDefault(p => p.StreamId == switchMedia.MutedStreamId);
+            if (isCallerHost)
+            {
+                await Clients.Client(switchCommandReceiver.ActiveConnectionId)
+                    .SendAsync("OnSwitchOffMediaByHost", switchMedia.IsVideo);
             }
         }
 

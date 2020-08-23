@@ -38,6 +38,7 @@
     "ng2-canvas-whiteboard": "^3.1.1",
     "ng2-date-picker": "^10.0.0",
     "ngx-image-cropper": "^3.2.1",
+    "ngx-infinite-scroll": "^9.0.0",
     "ngx-simple-modal": "^1.4.13",
     "ngx-toastr": "^13.0.0",
     "recordrtc": "^5.6.1",

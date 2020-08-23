@@ -6,7 +6,7 @@
       <a class="item">
         <spiner *ngIf="isUserLoadig" size="'small'"></spiner>
         <div class="ui very relaxed horizontal list">
-          <div class="item">
+          <div (click)="goToPage('profile-page')" class="item">
             <img
               class="ui circular image avatar-pic"
               src="{{ loggedInUser?.avatarUrl }}"
@@ -71,6 +71,16 @@
                 {{ contact?.secondMember.secondName }}
               </div>
             </div>
+            <div
+              data-tooltip="Online"
+              data-position="right center"
+              class="icon-wrapper"
+            >
+              <i
+                *ngIf="contact?.secondMember.connectionId"
+                class="circle small icon"
+              ></i>
+            </div>
           </div>
         </div>
       </div>
@@ -86,11 +96,15 @@
         </button>
       </a>
       <div
-        class="contacts-container user-list ui selection list"
+        class="contacts-container groups user-list ui selection list"
         [hidden]="!groupsVisibility"
       >
         <div *ngFor="let group of groups">
-          <a id="home-group" class="item" (click)="onGroupClick(group)">
+          <a
+            id="home-group"
+            [ngClass]="isGroupActive(group) ? 'active item' : 'item'"
+            (click)="onGroupClick(group)"
+          >
             <i
               class="trash alternate outline icon"
               (click)="deleteGroup(group); $event.stopPropagation()"
@@ -105,12 +119,20 @@
   <div class="right-col">
     <div class="actions">
       <app-contacts-chat
-        *ngIf="chatVisibility"
+        *ngIf="contactChatVisibility"
         [contactSelected]="contactSelected"
-        (chat)="visibilityChange($event)"
+        (chat)="contactVisibilityChange($event)"
       ></app-contacts-chat>
+      <app-group-chat
+        *ngIf="groupChatVisibility"
+        [groupSelected]="groupSelected"
+        (chat)="groupVisibilityChange($event)"
+      ></app-group-chat>
       <div *ngIf="historyVisibility">
-        <app-history [user]="loggedInUser"></app-history>
+        <app-history
+          [user]="loggedInUser"
+          (historyClose)="closeHistory()"
+        ></app-history>
       </div>
       <div *ngIf="actionsVisibility" class="vertically-aligned chat ui segment">
         <div

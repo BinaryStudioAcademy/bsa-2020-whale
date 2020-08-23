@@ -9,8 +9,7 @@ import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
 import { Participant } from '@shared/models/participant/participant';
 import { PollDto } from '@shared/models/poll/poll-dto';
 import { PollResultDto } from '@shared/models/poll/poll-result-dto';
-import { VoteDto } from '@shared/models/poll/vote-dto';
-import { VoterDto } from '@shared/models/poll/voter-dto';
+import { ChangedMediaState } from '@shared/models';
 import { CanvasWhiteboardUpdate } from 'ng2-canvas-whiteboard';
 
 @Injectable({
@@ -31,6 +30,15 @@ export class MeetingSignalrService {
 
   private participantConected = new Subject<Participant[]>();
   public participantConected$ = this.participantConected.asObservable();
+
+  private participantMediaStateChanged = new Subject<ChangedMediaState>();
+  public participantMediaStateChanged$ = this.participantMediaStateChanged.asObservable();
+
+  private mediaStateRequested = new Subject<string>();
+  public mediaStateRequested$ = this.mediaStateRequested.asObservable();
+
+  private switchOffMediaByHost = new Subject<boolean>();
+  public switchOffMediaByHost$ = this.switchOffMediaByHost.asObservable();
 
   private meetingEnded = new Subject<MeetingConnectionData>();
   public meetingEnded$ = this.meetingEnded.asObservable();
@@ -113,6 +121,24 @@ export class MeetingSignalrService {
           }
         );
 
+        this.signalHub.on(
+          'OnMediaStateChanged',
+          (mediaState: ChangedMediaState) => {
+            this.participantMediaStateChanged.next(mediaState);
+          }
+        );
+
+        this.signalHub.on(
+          'OnMediaStateRequested',
+          (senderConnectionId: string) => {
+            this.mediaStateRequested.next(senderConnectionId);
+          }
+        );
+
+        this.signalHub.on('OnSwitchOffMediaByHost', (isVideo: boolean) => {
+          this.switchOffMediaByHost.next(isVideo);
+        });
+
         this.signalHub.on('OnSendMessage', (message: MeetingMessage) => {
           this.sendMessage.next(message);
         });
@@ -156,6 +182,9 @@ export interface SignalData {
 export enum SignalMethods {
   OnUserConnect,
   OnParticipantLeft,
+  OnMediaStateChanged,
+  OnMediaStateRequested,
+  OnSwitchOffMediaByHost,
   OnConferenceStartRecording,
   OnConferenceStopRecording,
   OnSendMessage,

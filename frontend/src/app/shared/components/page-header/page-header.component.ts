@@ -13,6 +13,7 @@ import { HubConnection } from '@aspnet/signalr';
 import { Subject, from } from 'rxjs';
 import { SignalRService } from 'app/core/services/signal-r.service';
 import { environment } from '@env';
+import { WhaleSignalService, WhaleSignalMethods } from 'app/core/services';
 
 @Component({
   selector: 'app-page-header',
@@ -40,6 +41,7 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
     private upstateService: UpstateService,
     private notificationService: NotificationService,
     private signalRService: SignalRService,
+    private whaleSignalrService: WhaleSignalService
   ) {}
 
   public showNotificationsMenu(): void {
@@ -47,8 +49,9 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
       if (this.settingsMenuVisible) {
         this.settingsMenuVisible = false;
       }
-
       this.isNotificationsVisible = !this.isNotificationsVisible;
+    } else {
+      this.isNotificationsVisible = false;
     }
   }
 
@@ -80,15 +83,15 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
       });
   }
   getNotifications(): void {
-    this.notificationService
-      .GetNotifications()
-      .subscribe((notifications) => {
-        this.notificationsList = notifications;
-      });
+    this.notificationService.GetNotifications().subscribe((notifications) => {
+      this.notificationsList = notifications;
+    });
   }
 
   subscribeNotifications(): void {
-    from(this.signalRService.registerHub(environment.signalrUrl, 'notificationHub'))
+    from(
+      this.signalRService.registerHub(environment.signalrUrl, 'notificationHub')
+    )
       .pipe(
         tap((hub) => {
           this.hubConnection = hub;
@@ -116,11 +119,18 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
     this.router.navigate([`${pageName}`]);
   }
   logOut(): void {
+    this.whaleSignalrService.invoke(
+      WhaleSignalMethods.OnUserDisconnect,
+      this.loggedInUser.email
+    );
     this.auth.logout().subscribe(() => this.router.navigate(['/']));
   }
 
   onNotificationDelete(id: string): void {
     this.notificationsList = this.notificationsList.filter((n) => n.id !== id);
     this.notificationService.DeleteNotification(id);
+    if (!this.notificationsList.length) {
+      this.showNotificationsMenu();
+    }
   }
 }

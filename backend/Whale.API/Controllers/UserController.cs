@@ -8,6 +8,7 @@ using System.Linq;
 using Whale.Shared.Services;
 using Whale.Shared.Exceptions;
 using Whale.Shared.Models.User;
+using System.Security.Claims;
 
 namespace Whale.API.Controllers
 {
@@ -27,7 +28,7 @@ namespace Whale.API.Controllers
         public async Task<IActionResult> GetCurrentUser()
         {
             string email = HttpContext?.User.Claims
-                .FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+                .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
             Console.WriteLine("email");
             Console.WriteLine(email);
             var contacts = await _userService.GetUserByEmail(email);
@@ -66,7 +67,9 @@ namespace Whale.API.Controllers
         [HttpPost]
         public async Task<ActionResult<UserDTO>> AddUser([FromBody] UserModel user)
         {
-            if (!ModelState.IsValid)
+            var email =  HttpContext?.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var name = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
+            if (!ModelState.IsValid || user.Email != email || user.DisplayName != name)
                 throw new BaseCustomException("Invalid data");
 
             var result = await _userService.CreateUser(user);
@@ -77,6 +80,9 @@ namespace Whale.API.Controllers
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] UserDTO userDTO)
         {
+            var email = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            if (!ModelState.IsValid || userDTO.Email != email)
+                throw new BaseCustomException("Invalid data");
             await _userService.UpdateUserAsync(userDTO);
 
             return Ok();

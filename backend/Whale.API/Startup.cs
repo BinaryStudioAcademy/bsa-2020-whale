@@ -13,7 +13,6 @@ using System.Net.Http;
 using Whale.API.MappingProfiles;
 using Whale.API.Middleware;
 using Whale.API.Providers;
-using Whale.API.Services;
 using Whale.DAL;
 using Whale.DAL.Settings;
 using Whale.Shared.Exceptions;
@@ -57,11 +56,13 @@ namespace Whale.API
                 mc.AddProfile<MeetingMessage>();
                 mc.AddProfile<GroupProfile>();
                 mc.AddProfile<GroupMessageProfile>();
+                mc.AddProfile<GroupUserProfile>();
                 mc.AddProfile<NotificationProfile>();
             });
 
             services.AddSingleton(mappingConfig.CreateMapper());
 
+            services.AddTransient<SlackService>();
             services.AddTransient<NotificationsService>();
             services.AddTransient<ContactsService>();
             services.AddTransient<UserService>();
@@ -71,6 +72,7 @@ namespace Whale.API
             services.AddTransient<MeetingService>();
             services.AddTransient<ParticipantService>();
             services.AddTransient<GroupService>();
+            services.AddTransient<GroupChatService>();
             services.AddScoped(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
             services.AddScoped<HttpClient>();
             services.AddTransient(p => new HttpService(p.GetRequiredService<HttpClient>(), Configuration.GetValue<string>("MeetingAPI")));
@@ -89,6 +91,8 @@ namespace Whale.API
 
             services.AddScoped<BlobStorageSettings>(options => Configuration.Bind<BlobStorageSettings>("BlobStorageSettings"));
             services.AddScoped<FileStorageProvider>();
+
+            services.AddScoped(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(opt =>

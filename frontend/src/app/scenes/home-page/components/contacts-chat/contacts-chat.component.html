@@ -1,5 +1,5 @@
 <div class="chat ui secondary segment">
-  <div class="ui chat-inner feed">
+  <div class="ui chat-header feed">
     <div class="event chat-label">
       <div class="label">
         <img src="{{ contactSelected.secondMember?.avatarUrl }}" />
@@ -15,7 +15,18 @@
               </span>
             </span>
           </div>
-          <div data-tooltip="Call" data-position="right center">
+          <div
+            *ngIf="contactSelected?.secondMember.connectionId"
+            data-tooltip="Online"
+            data-position="right center"
+          >
+            <i class="circle small icon"></i>
+          </div>
+          <div
+            *ngIf="contactSelected?.secondMember.connectionId"
+            data-tooltip="Call"
+            data-position="right center"
+          >
             <i id="chat-call" class="large phone icon" (click)="call()"></i>
           </div>
         </div>
@@ -25,10 +36,12 @@
         </span>
       </div>
     </div>
-
+  </div>
+  <div class="ui chat-inner feed">
+    <spiner *ngIf="isMessagesLoading" [size]="'medium'"></spiner>
     <div
-      *ngIf="messages.length == 0"
-      class="ui large message vertically-aligned"
+      *ngIf="messages.length == 0 && !isMessagesLoading"
+      class="ui vertically-aligned no-message"
     >
       There is still no messages yet!
     </div>
@@ -46,35 +59,41 @@
             {{ message.createdAt | date: "short" }}
           </div>
         </div>
-        <div class="message">{{ message.message }}</div>
+        <div disabled class="message">
+          <div *ngFor="let row of splitMessage(message?.message)">
+            {{ row }}
+          </div>
+        </div>
       </div>
     </div>
   </div>
-  <form class="ui form vertically-aligned" #chatForm="ngForm">
-    <div class="field">
-      <textarea
-        (keydown.enter)="onEnterKeyPress($event, chatForm.valid)"
-        rows="2"
-        placeholder="Print your message there"
-        type="text"
-        id="message"
-        name="newMessage"
-        [(ngModel)]="newMessage.message"
-        required
-      ></textarea>
+  <div class="forma">
+    <form class="ui form vertically-aligned" #chatForm="ngForm">
+      <div class="field">
+        <textarea
+          (keydown.enter)="onEnterKeyPress($event, chatForm.valid)"
+          rows="2"
+          placeholder="Print your message there"
+          type="text"
+          id="message"
+          name="newMessage"
+          [(ngModel)]="newMessage.message"
+          required
+        ></textarea>
+      </div>
+      <button
+        id="chat-submit"
+        class="ui button tiny send"
+        type="submit"
+        id="sendmessage"
+        [disabled]="!chatForm.valid"
+        (click)="sendMessage()"
+      >
+        Send <i class="paper plane outline icon"></i>
+      </button>
+    </form>
+    <div class="subheader">
+      Enter to send. Enter+Shift for new line.
     </div>
-    <button
-      id="chat-submit"
-      class="ui button tiny send"
-      type="submit"
-      id="sendmessage"
-      [disabled]="!chatForm.valid"
-      (click)="sendMessage()"
-    >
-      Send <i class="paper plane outline icon"></i>
-    </button>
-  </form>
-  <div class="ui pointing mini label">
-    Enter to send. Enter+Shift for new line.
   </div>
 </div>
