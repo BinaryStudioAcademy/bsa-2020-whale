@@ -1,9 +1,6 @@
 <div class="chat ui secondary segment">
-  <div class="ui chat-inner feed">
+  <div class="ui chat-header feed">
     <div class="event chat-label">
-      <!-- <div class="label">
-          <img src="{{ groupSelected.label }}" />
-        </div> -->
       <div class="content">
         <div class="group-info">
           <div>
@@ -61,6 +58,8 @@
         </span>
       </div>
     </div>
+  </div>
+  <div class="ui chat-inner feed">
     <spiner *ngIf="isMessagesLoading" [size]="'medium'"></spiner>
     <div
       *ngIf="messages.length == 0"
