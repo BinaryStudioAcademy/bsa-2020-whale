@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Whale.API.Services;
+using Whale.DAL.Models.Email;
+using Whale.Shared.Models.Email;
 
 namespace Whale.API.Controllers
 {
@@ -19,10 +21,10 @@ namespace Whale.API.Controllers
 		}
 
 		[HttpPost]
-		public async Task<OkResult> SendEmail([FromBody] object inviteDto)
+		public async Task<IActionResult> SendEmail([FromBody] MeetingInviteDTO inviteDto)
 		{
-			await _emailServcice.Execute();
-			return Ok();
+			var data = await _emailServcice.SendMeetingInvites(inviteDto);
+			return Ok(data);
 		}
 	}
 }
