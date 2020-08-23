@@ -69,6 +69,18 @@ namespace Whale.API.Controllers
             return NotFound();
         }
 
+        [HttpDelete("email/{contactEmail}")]
+        public async Task<IActionResult> DeletePendingContactByEmail(string contactEmail)
+        {
+            string userEmail = HttpContext?.User.Claims
+                .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var deleted = await _contactsService.DeletePendingContactByEmailAsync(contactEmail, userEmail);
+
+            if (deleted) return NoContent();
+
+            return NotFound();
+        }
+
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] ContactEditDTO contactDTO)
         {

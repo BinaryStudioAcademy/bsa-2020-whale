@@ -131,7 +131,23 @@ namespace Whale.Shared.Services
             await _context.SaveChangesAsync();
             return true;
         }
+        public async Task<bool> DeletePendingContactByEmailAsync(string contactnerEmail, string userEmail)
+        {
+            var contact = _context.Contacts
+                .Include(c => c.FirstMember)
+                .Include(c => c.SecondMember)
+                .FirstOrDefault(c => ((c.FirstMember.Email == contactnerEmail && c.SecondMember.Email == userEmail) ||
+                    (c.FirstMember.Email == userEmail && c.SecondMember.Email == contactnerEmail)) && !c.isAccepted);
 
+            if (contact == null)
+                throw new NotFoundException("Pending Contact", contactnerEmail);
+            _context.Contacts.Remove(contact);
+            await _context.SaveChangesAsync();
+            var connection = await _signalrService.ConnectHubAsync("contactsHub");
+            await connection.InvokeAsync("onDeleteContact", contact);
+            await _notifications.DeleteNotificationPendingContactAsync(userEmail, contactnerEmail);
+            return true;
+        }
         public async Task<ContactDTO> CreateContactFromEmailAsync(string ownerEmail, string contactnerEmail)
         {
             if (ownerEmail == contactnerEmail)

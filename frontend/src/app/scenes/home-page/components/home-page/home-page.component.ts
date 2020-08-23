@@ -23,6 +23,7 @@ import { HubConnection } from '@aspnet/signalr';
 import { WhaleSignalService } from 'app/core/services/whale-signal.service';
 import { UserOnline } from '@shared/models/user/user-online';
 import { UpstateService } from 'app/core/services/upstate.service';
+import { ContactService } from 'app/core/services';
 
 @Component({
   selector: 'app-home-page',
@@ -46,6 +47,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
   private hubConnection: HubConnection;
   private receivedContact = new Subject<Contact>();
   public receivedContact$ = this.receivedContact.asObservable();
+  private removedContact = new Subject<string>();
+  public removedContact$ = this.removedContact.asObservable();
 
   public isContactsLoading = true;
   public isUserLoadig = true;
@@ -65,7 +68,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
     private blobService: BlobService,
     private upstateService: UpstateService,
     private signalRService: SignalRService,
-    private whaleSignalrService: WhaleSignalService
+    private whaleSignalrService: WhaleSignalService,
+    private contactService: ContactService
   ) {}
 
   ngOnDestroy(): void {
@@ -237,7 +241,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.router.navigate([`${pageName}`]);
   }
 
-  public falseAllBooleans() {
+  public falseAllBooleans(): void {
     this.contactChatVisibility = false;
     this.groupChatVisibility = false;
     this.actionsVisibility = false;
@@ -257,6 +261,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
   onContactClick(contact: Contact): void {
     if (!contact.isAccepted) {
+      this.contactService.DeletePendingContact(contact.secondMember.email);
       return;
     }
     this.falseAllBooleans();
@@ -272,13 +277,13 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.groupSelected = group;
   }
 
-  public closeHistory() {
+  public closeHistory(): void {
     this.falseAllBooleans();
     this.historyVisibility = false;
     this.actionsVisibility = true;
   }
 
-  public onMeetingHistoryClick() {
+  public onMeetingHistoryClick(): void {
     this.contactChatVisibility = false;
     this.actionsVisibility = false;
     this.groupChatVisibility = false;
@@ -308,6 +313,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
         this.hubConnection.on('onNewContact', (contact: Contact) => {
           this.receivedContact.next(contact);
         });
+        this.hubConnection.on('onDeleteContact', (contactId: string) => {
+          this.removedContact.next(contactId);
+        });
         this.hubConnection.invoke('onConect', this.loggedInUser.email);
       });
     this.receivedContact$.pipe(takeUntil(this.unsubscribe$)).subscribe(
@@ -318,15 +326,26 @@ export class HomePageComponent implements OnInit, OnDestroy {
         console.log(err.message);
       }
     );
+    this.removedContact$.pipe(takeUntil(this.unsubscribe$)).subscribe(
+      (contactId) => {
+        this.removeContact(contactId);
+      },
+      (err) => {
+        console.log(err.message);
+      }
+    );
   }
 
   contactAdd(contact: Contact): void {
-    this.contactsVisibility = true;
-    this.removeContact(contact);
+    this.removeContact(contact.id);
     this.contacts.push(contact);
+    this.contactsVisibility = true;
   }
-  removeContact(contact: Contact): void {
-    this.contacts = this.contacts.filter((c) => c.id !== contact.id);
+  removeContact(contactId: string): void {
+    this.contacts = this.contacts.filter((c) => c.id !== contactId);
+    if (!this.contacts.length) {
+      this.contactsVisibility = false;
+    }
   }
 
   public onContactsClick(): void {

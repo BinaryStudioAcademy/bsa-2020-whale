@@ -20,4 +20,9 @@ export class ContactService {
       null
     );
   }
+  public DeletePendingContact(email: string): void {
+    this.httpService
+      .deleteRequest<void>(`${this.routePrefix}/email/${email}`)
+      .subscribe();
+  }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using System;
 using System.Threading.Tasks;
 using Whale.Shared.Models.DirectMessage;
 using Whale.Shared.Models.Notification;
@@ -20,6 +21,12 @@ namespace Whale.SignalR.Hubs
         public async Task SendNotification(string email, NotificationDTO notificationDTO)
         {
             await Clients.Group(email).SendAsync("onNewNotification", notificationDTO);
+        }
+
+        [HubMethodName("onDeleteNotification")]
+        public async Task DeleteNotification(string email, Guid notificationId)
+        {
+            await Clients.Group(email).SendAsync("onDeleteNotification", notificationId);
         }
 
         public async Task Disconnect(string email)

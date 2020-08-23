@@ -25,6 +25,8 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
   public isUserLoadig = true;
   private receivedNotify = new Subject<Notification>();
   public receivedNotify$ = this.receivedNotify.asObservable();
+  private removeNotify = new Subject<string>();
+  public removeNotify$ = this.removeNotify.asObservable();
   private unsubscribe$ = new Subject<void>();
 
   settingsMenuVisible = false;
@@ -104,11 +106,25 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
             this.receivedNotify.next(notification);
           }
         );
+        this.hubConnection.on(
+          'onDeleteNotification',
+          (notificationId: string) => {
+            this.removeNotify.next(notificationId);
+          }
+        );
         this.hubConnection.invoke('onConect', this.loggedInUser.email);
       });
     this.receivedNotify$.pipe(takeUntil(this.unsubscribe$)).subscribe(
       (newNotification) => {
         this.notificationsList.push(newNotification);
+      },
+      (err) => {
+        console.log(err.message);
+      }
+    );
+    this.removeNotify$.pipe(takeUntil(this.unsubscribe$)).subscribe(
+      (notificationId) => {
+        this.onNotificationDelete(notificationId);
       },
       (err) => {
         console.log(err.message);
