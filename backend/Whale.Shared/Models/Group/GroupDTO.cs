@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Whale.Shared.DTO.GroupMessage;
 
-namespace Whale.Shared.DTO.Group
+namespace Whale.Shared.Models.Group
 {
     public class GroupDTO
     {

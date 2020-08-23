@@ -10,8 +10,8 @@ using Whale.Shared.Services.Abstract;
 using Whale.Shared.Services;
 using Whale.DAL;
 using Whale.DAL.Models;
-using Whale.Shared.DTO.Group;
-using Whale.Shared.DTO.Group.GroupUser;
+using Whale.Shared.Models.Group;
+using Whale.Shared.Models.Group.GroupUser;
 using Whale.Shared.Models.Group.GroupUser;
 using Whale.Shared.Models.User;
 
