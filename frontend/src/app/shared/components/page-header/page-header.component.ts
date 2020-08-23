@@ -13,10 +13,7 @@ import { HubConnection } from '@aspnet/signalr';
 import { Subject, from } from 'rxjs';
 import { SignalRService } from 'app/core/services/signal-r.service';
 import { environment } from '@env';
-import {
-  WhaleSignalService,
-  SignalMethods,
-} from 'app/core/services/whale-signal.service';
+import { WhaleSignalService, WhaleSignalMethods } from 'app/core/services';
 
 @Component({
   selector: 'app-page-header',
@@ -123,7 +120,7 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
   }
   logOut(): void {
     this.whaleSignalrService.invoke(
-      SignalMethods.OnUserDisconnect,
+      WhaleSignalMethods.OnUserDisconnect,
       this.loggedInUser.email
     );
     this.auth.logout().subscribe(() => this.router.navigate(['/']));

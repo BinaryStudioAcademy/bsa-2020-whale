@@ -1,0 +1,49 @@
+<div
+  id="modal-div-close"
+  class="ui dimmer modals page visible active"
+  (click)="cancel(userGroupForm.dirty)"
+>
+  <div class="ui mini modal visible active" (click)="$event.stopPropagation()">
+    <div class="header">Add new user to {{ label }}</div>
+    <form class="ui form" #userGroupForm="ngForm" (ngSubmit)="submit()">
+      <div class="content">
+        <div class="ui segment">
+          <div class="field">
+            <label>User Email</label>
+            <input
+              type="text"
+              name="email"
+              [(ngModel)]="groupUser.userEmail"
+              #email="ngModel"
+              placeholder="Email"
+              required
+              pattern="[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?"
+            />
+            <div
+              class="ui error message"
+              *ngIf="email.invalid && email.touched"
+            >
+              Email invalid
+            </div>
+          </div>
+          <button
+            id="submit-contact"
+            class="ui button primary"
+            type="submit"
+            [disabled]="userGroupForm.invalid"
+          >
+            Add
+          </button>
+          <button
+            id="modal-close"
+            class="ui button"
+            type="button"
+            (click)="cancel(userGroupForm.dirty)"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

@@ -6,7 +6,7 @@
       <a class="item">
         <spiner *ngIf="isUserLoadig" size="'small'"></spiner>
         <div class="ui very relaxed horizontal list">
-          <div class="item">
+          <div (click)="goToPage('profile-page')" class="item">
             <img
               class="ui circular image avatar-pic"
               src="{{ loggedInUser?.avatarUrl }}"
@@ -100,7 +100,11 @@
         [hidden]="!groupsVisibility"
       >
         <div *ngFor="let group of groups">
-          <a id="home-group" class="item" (click)="onGroupClick(group)">
+          <a
+            id="home-group"
+            [ngClass]="isGroupActive(group) ? 'active item' : 'item'"
+            (click)="onGroupClick(group)"
+          >
             <i
               class="trash alternate outline icon"
               (click)="deleteGroup(group); $event.stopPropagation()"
@@ -115,10 +119,15 @@
   <div class="right-col">
     <div class="actions">
       <app-contacts-chat
-        *ngIf="chatVisibility"
+        *ngIf="contactChatVisibility"
         [contactSelected]="contactSelected"
-        (chat)="visibilityChange($event)"
+        (chat)="contactVisibilityChange($event)"
       ></app-contacts-chat>
+      <app-group-chat
+        *ngIf="groupChatVisibility"
+        [groupSelected]="groupSelected"
+        (chat)="groupVisibilityChange($event)"
+      ></app-group-chat>
       <div *ngIf="historyVisibility">
         <app-history
           [user]="loggedInUser"

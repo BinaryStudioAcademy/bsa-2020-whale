@@ -29,6 +29,7 @@ export class HistoryComponent implements OnInit {
   public take: number = 10;
 
   public isScrolled = false;
+  public isMeetingHistoryEmpty = false;
   public ishistoryLoading: boolean = true;
   public requestSent = false;
   public allDataLoaded = false;
@@ -74,6 +75,10 @@ export class HistoryComponent implements OnInit {
     this.ishistoryLoading = true;
     this.httpService.getRequest<Meeting[]>(this.route, params).subscribe(
       (response) => {
+        if (response.length === 0) {
+          this.isMeetingHistoryEmpty = true;
+        }
+
         this.meetings = this.meetings.concat(response);
         this.ishistoryLoading = false;
         if (response.length == 0) {
