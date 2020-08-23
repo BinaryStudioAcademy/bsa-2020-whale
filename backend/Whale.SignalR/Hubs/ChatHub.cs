@@ -25,6 +25,13 @@ namespace Whale.SignalR.Hubs
             await Clients.Group(groupName).SendAsync("JoinedGroup", Context.ConnectionId);
         }
 
+        [HubMethodName("LeaveGroup")]
+        public async Task Leave(string groupName)
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
+            await Clients.Group(groupName).SendAsync("LeftGroup", Context.ConnectionId);
+        }
+
         [HubMethodName("NewMessageReceived")]
         public async Task SendMessage(DirectMessageDTO directMessageDTO)
         {
