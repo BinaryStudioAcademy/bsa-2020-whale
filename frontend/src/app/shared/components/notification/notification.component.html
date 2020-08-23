@@ -5,12 +5,12 @@
     <button
       *ngIf="isPendingContact"
       class="ui teal button"
-      (click)="onAddContact(); $event.stopPropagation()"
+      (click)="onAcceptContact(); $event.stopPropagation()"
     >
         Accept
     </button>
     <div class="or"></div>
-    <button class="ui button" (click)="onClose(); $event.stopPropagation()">
+    <button class="ui button" (click)="onRejectContact(); $event.stopPropagation()">
         Reject
     </button>
   </div>

@@ -203,7 +203,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
   addNewContact(): void {
     this.simpleModalService.addModal(AddContactModalComponent).subscribe(
-      c => this.contactAdd(c)
+      contact => this.contactAdd(contact)
     );
   }
 
@@ -268,7 +268,12 @@ export class HomePageComponent implements OnInit, OnDestroy {
       })
       .subscribe((isConfirm) => {
         if (isConfirm) {
-          this.contactService.DeletePendingContact(contact.secondMember.email);
+          this.contactService.DeletePendingContact(contact.secondMember.email).subscribe(
+            (resp) => {
+              this.toastr.success('Canceled');
+            },
+            (error) => this.toastr.error(error.Message)
+          );
         }
       });
       return;
@@ -346,9 +351,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   contactAdd(contact: Contact): void {
-    this.removeContact(contact.id);
-    this.contacts.push(contact);
-    this.contactsVisibility = true;
+    if (contact) {
+      this.removeContact(contact.id);
+      this.contacts.push(contact);
+      this.contactsVisibility = true;
+    }
   }
   removeContact(contactId: string): void {
     this.contacts = this.contacts.filter((c) => c.id !== contactId);

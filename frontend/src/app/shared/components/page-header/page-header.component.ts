@@ -124,7 +124,10 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
     );
     this.removeNotify$.pipe(takeUntil(this.unsubscribe$)).subscribe(
       (notificationId) => {
-        this.onNotificationDelete(notificationId);
+        this.notificationsList = this.notificationsList.filter((n) => n.id !== notificationId);
+        if (!this.notificationsList.length) {
+          this.showNotificationsMenu();
+    }
       },
       (err) => {
         console.log(err.message);

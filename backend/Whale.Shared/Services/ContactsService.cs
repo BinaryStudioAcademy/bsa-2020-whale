@@ -145,21 +145,26 @@ namespace Whale.Shared.Services
             await _context.SaveChangesAsync();
             var connection = await _signalrService.ConnectHubAsync("contactsHub");
             await connection.InvokeAsync("onDeleteContact", contact);
-            await _notifications.DeleteNotificationPendingContactAsync(userEmail, contactnerEmail);
+            if (contact.SecondMember.Email == userEmail)
+                await _notifications.AddTextNotification(contactnerEmail, userEmail + " rejected your request.");
+            else
+                await _notifications.DeleteNotificationPendingContactAsync(userEmail, contactnerEmail);
             return true;
         }
-        public async Task<ContactDTO> CreateContactFromEmailAsync(string ownerEmail, string contactnerEmail)
+        public async Task<ContactDTO> CreateContactFromEmailAsync(string ownerEmail, string contacterEmail)
         {
-            if (ownerEmail == contactnerEmail)
+            if (ownerEmail == contacterEmail)
                 throw new BaseCustomException("You cannot add yourself to contacts");
             var owner = await _context.Users.FirstOrDefaultAsync(u => u.Email == ownerEmail);
-            var contactner = await _context.Users.FirstOrDefaultAsync(u => u.Email == contactnerEmail);
+            var contactner = await _context.Users.FirstOrDefaultAsync(u => u.Email == contacterEmail);
             if (owner is null)
                 throw new NotFoundException("Owner", ownerEmail);
             if (contactner is null)
-                throw new NotFoundException("Contactner", contactnerEmail);
+                throw new NotFoundException("Contacter", contacterEmail);
 
             var contact = await _context.Contacts
+                .Include(c => c.FirstMember)
+                .Include(c => c.SecondMember)
                 .FirstOrDefaultAsync(c =>
                 (c.FirstMemberId == contactner.Id && c.SecondMemberId == owner.Id) ||
                 (c.SecondMemberId == contactner.Id && c.FirstMemberId == owner.Id));
@@ -172,7 +177,7 @@ namespace Whale.Shared.Services
                     _context.Contacts.Update(contact);
                     await _context.SaveChangesAsync();
                     var contactOwnerDTO = await GetContactAsync(contact.Id, ownerEmail);
-                    var contactContactnerEmailDTO = await GetContactAsync(contact.Id, contactnerEmail);
+                    var contactContactnerEmailDTO = await GetContactAsync(contact.Id, contacterEmail);
                     var connection = await _signalrService.ConnectHubAsync("contactsHub");
                     await connection.InvokeAsync("onNewContact", contactOwnerDTO);
                     await connection.InvokeAsync("onNewContact", contactContactnerEmailDTO);
@@ -189,7 +194,7 @@ namespace Whale.Shared.Services
             };
             _context.Contacts.Add(contact);
             await _context.SaveChangesAsync();
-            await _notifications.AddContactNotification(ownerEmail, contactnerEmail);
+            await _notifications.AddContactNotification(ownerEmail, contacterEmail);
             return await GetContactAsync(contact.Id, ownerEmail);
         }
 
