@@ -8,6 +8,7 @@ import { PollResultDto } from '../../../models/poll/poll-result-dto';
 import { environment } from '@env';
 import { User } from '@shared/models/user/user';
 import { VoterDto } from '@shared/models/poll/voter-dto';
+import { PollService } from 'app/core/services/poll.service';
 
 @Component({
   selector: 'app-poll',
@@ -18,6 +19,8 @@ export class PollComponent implements OnInit {
   @Input() poll: PollDto;
   @Input() user: User;
   @Output() pollAnswered = new EventEmitter<PollDto>();
+
+  public isLoading = false;
 
   public form: FormGroup;
 
@@ -46,6 +49,7 @@ export class PollComponent implements OnInit {
   }
 
   onSubmit() {
+    this.isLoading = true;
     let choosedOptions = this.poll.isSingleChoice
       ? [this.poll.options[Number(this.form.controls.answers.value)]]
       : this.getMuptipleAnswers();
@@ -53,12 +57,14 @@ export class PollComponent implements OnInit {
     console.log(choosedOptions);
     if (choosedOptions.length == 0 || choosedOptions[0] === undefined) {
       this.toastr.error('No options were selected!');
+      this.isLoading = false;
       return;
     }
 
     this.pollAnswered.emit(this.poll);
 
     const voter: VoterDto = {
+      id: this.user.id,
       firstName: this.user.firstName,
       secondName: this.user.secondName,
       email: this.user.email,
@@ -66,7 +72,7 @@ export class PollComponent implements OnInit {
     };
 
     const voteDto: VoteDto = {
-      poll: this.poll,
+      pollId: this.poll.id,
       meetingId: this.poll.meetingId,
       user: voter,
       choosedOptions: choosedOptions,
@@ -77,9 +83,16 @@ export class PollComponent implements OnInit {
         environment.meetingApiUrl + '/api/polls/answers',
         voteDto
       )
-      .subscribe(() => {
-        this.toastr.success('Answer saved!');
-      });
+      .subscribe(
+        () => {
+          this.isLoading = false;
+          this.toastr.success('Answer saved!');
+        },
+        (error) => {
+          this.isLoading = false;
+          this.toastr.error(error.Message);
+        }
+      );
   }
 
   public getMuptipleAnswers(): string[] {

@@ -168,7 +168,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
           if (connectData.peerId === this.peer.id) {
             this.pollService.getPollsAndResults(
               this.meeting.id,
-              connectData.participant.user.email
+              connectData.participant.user.id
             );
             return;
           }

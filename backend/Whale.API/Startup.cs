@@ -13,7 +13,6 @@ using System.Net.Http;
 using Whale.API.MappingProfiles;
 using Whale.API.Middleware;
 using Whale.API.Providers;
-using Whale.API.Services;
 using Whale.DAL;
 using Whale.DAL.Settings;
 using Whale.Shared.Exceptions;

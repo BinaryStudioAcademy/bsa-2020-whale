@@ -5,7 +5,7 @@ namespace Whale.Shared.Models.Poll
 {
 	public class PollsAndResultsDTO
 	{
-		public ICollection<PollDTO> Polls { get; set; }
-		public ICollection<PollResultDTO> Results { get; set; }
+		public IEnumerable<PollDTO> Polls { get; set; }
+		public IEnumerable<PollResultDTO> Results { get; set; }
 	}
 }

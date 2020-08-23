@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Whale.DAL.Models.Poll;
 
 namespace Whale.Shared.Models.Poll
 {
@@ -10,7 +11,8 @@ namespace Whale.Shared.Models.Poll
         public string Title { get; set; }
         public bool IsAnonymous { get; set; }
         public bool IsSingleChoice { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
 
-        public ICollection<string> Options { get; set; }
+        public string[] Options { get; set; }
     }
 }

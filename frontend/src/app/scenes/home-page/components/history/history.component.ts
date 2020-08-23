@@ -11,6 +11,8 @@ import { Meeting } from '@shared/models/meeting/meeting';
 import { HttpService } from 'app/core/services/http.service';
 import { environment } from '@env';
 import { HttpParams } from '@angular/common/http';
+import { timeStamp } from 'console';
+import { ThrowStmt } from '@angular/compiler';
 
 @Component({
   selector: 'app-history',
@@ -28,6 +30,8 @@ export class HistoryComponent implements OnInit {
 
   public isScrolled = false;
   public ishistoryLoading: boolean = true;
+  public requestSent = false;
+  public allDataLoaded = false;
 
   constructor(private httpService: HttpService) {}
 
@@ -36,6 +40,10 @@ export class HistoryComponent implements OnInit {
   }
 
   public onScroll() {
+    if (this.requestSent) {
+      return;
+    }
+    this.requestSent = true;
     this.getSomeMeetings();
   }
 
@@ -54,6 +62,10 @@ export class HistoryComponent implements OnInit {
   }
 
   public getSomeMeetings(): void {
+    if (this.allDataLoaded) {
+      return;
+    }
+
     const params = new HttpParams()
       .set('userId', this.user.id)
       .set('skip', `${this.meetings.length}`)
@@ -64,8 +76,16 @@ export class HistoryComponent implements OnInit {
       (response) => {
         this.meetings = this.meetings.concat(response);
         this.ishistoryLoading = false;
+        if (response.length == 0) {
+          this.allDataLoaded = true;
+        }
+        this.requestSent = false;
       },
-      (error) => console.error(error)
+      (error) => {
+        console.error(error);
+        this.ishistoryLoading = false;
+        this.requestSent = false;
+      }
     );
   }
 
