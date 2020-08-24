@@ -95,6 +95,9 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public msgText = '';
   public msgReceiverEmail: string = '';
   public messages: MeetingMessage[] = [];
+  public selectedMessages: MeetingMessage[] = [];
+  public newMsgFrom: string[] = [];
+  public isNewMsg = false;
   public otherParticipants: Participant[] = [];
   public pattern = new RegExp(/^\S+.*/);
   public peer: Peer;
@@ -321,6 +324,8 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe(
         (messages) => {
           this.messages = messages;
+          this.updateSelectedMessages();
+          this.messages.forEach((m) => this.notifyNewMsg(m));
         },
         () => {
           this.toastr.error('Error occured when getting messages');
@@ -332,6 +337,8 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe(
         (message) => {
           this.messages.push(message);
+          this.updateSelectedMessages();
+          this.notifyNewMsg(message);
         },
         () => {
           this.toastr.error('Error occured when sending message');
@@ -607,6 +614,9 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.otherParticipants = this.otherParticipants.filter(
       (p) => p.id !== participant.id
     );
+    this.newMsgFrom = this.newMsgFrom.filter(
+      (e) => e !== participant.user.email
+    );
   }
 
   // call to peer
@@ -794,6 +804,10 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   //#region chat
   public showChat(): void {
     this.isShowChat = !this.isShowChat;
+    if (this.isShowChat) {
+      this.receiverChanged();
+    }
+    this.isNewMsg = !this.isShowChat && this.newMsgFrom.length > 0;
   }
 
   public sendMessage(): void {
@@ -974,5 +988,43 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     chanks.push(shortId);
 
     return chanks.join('/');
+  }
+
+  public receiverChanged(): void {
+    this.updateSelectedMessages();
+    this.newMsgFrom = this.newMsgFrom.filter(
+      (e) => e !== this.msgReceiverEmail
+    );
+  }
+
+  public updateSelectedMessages(): void {
+    if (this.msgReceiverEmail === '') {
+      this.selectedMessages = this.messages.filter((m) => m.receiver == null);
+    } else {
+      this.selectedMessages = this.messages.filter(
+        (m) =>
+          m.receiver != null &&
+          (m?.receiver?.email === this.msgReceiverEmail ||
+            m?.author?.email === this.msgReceiverEmail)
+      );
+    }
+  }
+
+  public notifyNewMsg(msg: MeetingMessage): void {
+    if (msg.author.email !== this.authService.currentUser.email) {
+      this.isNewMsg = !this.isShowChat;
+      if (msg.receiver == null && this.msgReceiverEmail !== '') {
+        this.newMsgFrom.push('');
+      }
+      if (
+        msg.receiver != null &&
+        this.msgReceiverEmail !== msg.author.email &&
+        this.otherParticipants.findIndex(
+          (p) => p.user.email === msg.author.email
+        ) >= 0
+      ) {
+        this.newMsgFrom.push(msg.author.email);
+      }
+    }
   }
 }

@@ -225,6 +225,7 @@
               <i
                 id="meeting-options-chat"
                 (click)="showChat()"
+                [ngClass]="{ pulse: isNewMsg }"
                 class="big wechat icon big-left-margin"
               ></i>
             </span>
@@ -345,7 +346,10 @@
 
     <div *ngIf="isShowChat" class="ui chat card">
       <div class="ui chat-inner feed">
-        <div *ngFor="let message of messages" class="event message-event">
+        <div
+          *ngFor="let message of selectedMessages"
+          class="event message-event"
+        >
           <div class="label">
             <img src="{{ message?.author?.avatarUrl }}" />
           </div>
@@ -355,25 +359,6 @@
                 {{ message?.author?.firstName }}
                 {{ message?.author?.secondName }}
               </a>
-              <div
-                *ngIf="
-                  message.receiver &&
-                  message.receiver.email !== currentParticipant.user.email
-                "
-                class="message_receiver"
-              >
-                To: {{ message?.receiver?.firstName }}
-                {{ message?.receiver?.secondName }}
-              </div>
-              <div
-                *ngIf="
-                  message.receiver &&
-                  message.receiver.email === currentParticipant.user.email
-                "
-                class="privately-received"
-              >
-                privately
-              </div>
               <div class="date">
                 {{ message?.sentDate | date: "short" }}
               </div>
@@ -390,12 +375,22 @@
         <div class="ui right labeled input">
           <label for="receiver" class="ui label">Send To:</label>
           <select
-            class="ui compact selection dropdown"
+            [ngClass]="
+              newMsgFrom.length > 0
+                ? 'ui compact selection dropdown pulse'
+                : 'ui compact selection dropdown'
+            "
             id="receiver"
             [(ngModel)]="msgReceiverEmail"
+            (change)="receiverChanged()"
           >
-            <option value="">Everyone</option>
-            <option *ngFor="let p of otherParticipants" [value]="p.user.email"
+            <option value="" [ngClass]="{ pulse: newMsgFrom.includes('') }"
+              >Everyone</option
+            >
+            <option
+              *ngFor="let p of otherParticipants"
+              [value]="p.user.email"
+              [ngClass]="{ pulse: newMsgFrom.includes(p?.user?.email) }"
               >{{ p.user.firstName }} {{ p.user.secondName }}</option
             >
           </select>
