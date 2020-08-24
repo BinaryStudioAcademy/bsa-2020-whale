@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Whale.API.Services.Abstract;
 using Whale.DAL;
+using Whale.DAL.Models;
 using Whale.DAL.Models.Email;
 using Whale.Shared.Models.Email;
 using Whale.Shared.Services;
@@ -18,6 +19,8 @@ namespace Whale.API.Services
         private readonly RedisService _redisService;
         private readonly UserService _userService;
 
+        public EmailAddress From { get; set; } = new EmailAddress("whale@whale.com", "Whale");
+
         public EmailService(WhaleDbContext context, IMapper mapper, RedisService redisService, UserService userService)
             :base(context, mapper)
         {
@@ -25,7 +28,7 @@ namespace Whale.API.Services
             _userService = userService;
         }
 
-        public async Task<SendGridMessage> SendMeetingInvites(MeetingInviteDTO meetingInviteDto)
+        public async Task SendMeetingInvites(MeetingInviteDTO meetingInviteDto)
         {
             var apiKey = Environment.GetEnvironmentVariable("SENDGRID_API_KEY");
             var client = new SendGridClient(apiKey);
@@ -34,25 +37,30 @@ namespace Whale.API.Services
             var sender = _context.Users.FirstOrDefault(user => user.Id == meetingInviteDto.SenderId);
             var receivers = _context.Users.Where(user => meetingInviteDto.ReceiverEmails.Any(email => user.Email == email));
 
-            var from = new EmailAddress("da@whale.com", "Whale");
             var tos = receivers.Select(user => new EmailAddress { Email = user.Email }).ToList();
-            
-            var da = receivers.Select(r => new MeetingInvite
-            {
-                MeetingLink = "meeting__link",
-                SenderName = $"{sender.FirstName} {sender.SecondName}",
-                ReceiverName = $"{r.FirstName} {r.SecondName}"
-            });
+
+            var templateData = GenerateMeetingInviteTemplateData(sender, receivers, meetingInviteDto.MeetingLink);
 
             var mail = MailHelper.CreateMultipleTemplateEmailsToMultipleRecipients(
-                from,
+                From,
                 tos,
                 "d-34bfcd5441b544a1a3e7cb8a0cdcac24",
-                da as List<object>
+                templateData
             );
-            // await client.SendEmailAsync(mail);
 
-            return mail;
+            await client.SendEmailAsync(mail);
+        }
+
+        public List<object> GenerateMeetingInviteTemplateData(User sender, IEnumerable<User> receivers, string meetingLink)
+        {
+            return 
+            receivers.Select(u => new Dictionary<string, string>
+            {
+                { "senderName", sender.FirstName },
+                { "receiverName", u.FirstName },
+                { "meetingLink", meetingLink }
+            } as object)
+            .ToList();
         }
     }
 }

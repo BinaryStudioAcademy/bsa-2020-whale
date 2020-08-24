@@ -21,10 +21,10 @@ namespace Whale.API.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> SendEmail([FromBody] MeetingInviteDTO inviteDto)
+		public async Task<OkResult> SendEmail([FromBody] MeetingInviteDTO inviteDto)
 		{
-			var data = await _emailServcice.SendMeetingInvites(inviteDto);
-			return Ok(data);
+			await _emailServcice.SendMeetingInvites(inviteDto);
+			return Ok();
 		}
 	}
 }

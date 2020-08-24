@@ -18,6 +18,8 @@ import { AudioSettingsComponent } from '@shared/components/settings/audio-settin
 import { VideoSettingsComponent } from '@shared/components/settings/video-settings/video-settings.component';
 import { OutputSettingsComponent } from './components/settings/output-settings/output-settings.component';
 import { NotificationComponent } from './components/notification/notification.component';
+import { MeetingInviteComponent } from './components/meeting-invite/meeting-invite.component';
+import { EmailTagComponent } from './components/meeting-invite/email-tag/email-tag.component';
 
 @NgModule({
   declarations: [
@@ -36,6 +38,8 @@ import { NotificationComponent } from './components/notification/notification.co
     VideoSettingsComponent,
     OutputSettingsComponent,
     NotificationComponent,
+    MeetingInviteComponent,
+    EmailTagComponent,
   ],
   imports: [
     CommonModule,
