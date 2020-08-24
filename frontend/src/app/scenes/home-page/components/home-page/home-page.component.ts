@@ -10,16 +10,10 @@ import { ToastrService } from 'ngx-toastr';
 import { MeetingService } from 'app/core/services/meeting.service';
 import { Router } from '@angular/router';
 import { MeetingCreate } from '@shared/models/meeting/meeting-create';
-import { filter, takeUntil, tap } from 'rxjs/operators';
-import { Subject, from } from 'rxjs';
-import { AuthService } from 'app/core/auth/auth.service';
-import { LinkTypeEnum } from '@shared/Enums/LinkTypeEnum';
-import { BlobService } from '../../../../core/services/blob.service';
+import { takeUntil, tap } from 'rxjs/operators';
+import { Subject} from 'rxjs';
 import { Group } from '@shared/models/group/group';
 import { GroupService } from 'app/core/services/group.service';
-import { environment } from '@env';
-import { SignalRService } from 'app/core/services/signal-r.service';
-import { HubConnection } from '@aspnet/signalr';
 import { WhaleSignalService } from 'app/core/services/whale-signal.service';
 import { UserOnline } from '@shared/models/user/user-online';
 import { UpstateService } from 'app/core/services/upstate.service';
@@ -45,11 +39,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
   ownerEmail: string;
   contactSelected: Contact;
   groupSelected: Group;
-  private hubConnection: HubConnection;
-  private receivedContact = new Subject<Contact>();
-  public receivedContact$ = this.receivedContact.asObservable();
-  private removedContact = new Subject<string>();
-  public removedContact$ = this.removedContact.asObservable();
 
   public isContactsLoading = true;
   public isUserLoadig = true;
@@ -64,11 +53,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
     private simpleModalService: SimpleModalService,
     private meetingService: MeetingService,
     private router: Router,
-    private authService: AuthService,
     private groupService: GroupService,
-    private blobService: BlobService,
     private upstateService: UpstateService,
-    private signalRService: SignalRService,
     private whaleSignalrService: WhaleSignalService,
     private contactService: ContactService
   ) {}
@@ -128,11 +114,31 @@ export class HomePageComponent implements OnInit, OnDestroy {
                       this.toastr.error(err.Message);
                     }
                   );
+
+                this.whaleSignalrService.receiveContact$
+                  .pipe(takeUntil(this.unsubscribe$))
+                  .subscribe(
+                    (contact) => {
+                      this.contactAdd(contact);
+                    },
+                    (err) => {
+                      console.log(err.message);
+                    }
+                  );
+
+                this.whaleSignalrService.removeContact$
+                  .pipe(takeUntil(this.unsubscribe$))
+                  .subscribe(
+                    (contactId) => {
+                      this.removeContact(contactId);
+                    },
+                    (err) => {
+                      console.log(err.message);
+                    }
+                  );
               },
               (error) => this.toastr.error(error.Message)
             );
-
-          this.subscribeContacts();
         },
         (error) => this.toastr.error(error.Message)
       );
@@ -321,40 +327,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
       contact?.secondMember.avatarUrl.startsWith('data')
       ? contact?.secondMember.avatarUrl
       : '';
-  }
-
-  subscribeContacts(): void {
-    from(this.signalRService.registerHub(environment.signalrUrl, 'contactsHub'))
-      .pipe(
-        tap((hub) => {
-          this.hubConnection = hub;
-        })
-      )
-      .subscribe(() => {
-        this.hubConnection.on('onNewContact', (contact: Contact) => {
-          this.receivedContact.next(contact);
-        });
-        this.hubConnection.on('onDeleteContact', (contactId: string) => {
-          this.removedContact.next(contactId);
-        });
-        this.hubConnection.invoke('onConect', this.loggedInUser.email);
-      });
-    this.receivedContact$.pipe(takeUntil(this.unsubscribe$)).subscribe(
-      (contact) => {
-        this.contactAdd(contact);
-      },
-      (err) => {
-        console.log(err.message);
-      }
-    );
-    this.removedContact$.pipe(takeUntil(this.unsubscribe$)).subscribe(
-      (contactId) => {
-        this.removeContact(contactId);
-      },
-      (err) => {
-        console.log(err.message);
-      }
-    );
   }
 
   contactAdd(contact: Contact): void {

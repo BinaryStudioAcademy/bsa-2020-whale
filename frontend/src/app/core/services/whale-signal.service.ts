@@ -4,9 +4,7 @@ import { SignalRService } from '../services/signal-r.service';
 import { from, Observable, Subject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { UserOnline } from '../../shared/models/user/user-online';
-import { Call } from '@shared/models/call/call';
-import { MeetingLink } from '@shared/models/meeting/meeting-link';
+import { Notification, Contact, MeetingLink, Call, UserOnline } from '@shared/models';
 
 @Injectable({
   providedIn: 'root',
@@ -34,6 +32,18 @@ export class WhaleSignalService {
 
   private declineCall = new Subject<void>();
   public declineCall$ = this.declineCall.asObservable();
+
+  private receiveContact = new Subject<Contact>();
+  public receiveContact$ = this.receiveContact.asObservable();
+
+  private removeContact = new Subject<string>();
+  public removeContact$ = this.removeContact.asObservable();
+
+  private receiveNotify = new Subject<Notification>();
+  public receiveNotify$ = this.receiveNotify.asObservable();
+
+  private removeNotify = new Subject<string>();
+  public removeNotify$ = this.removeNotify.asObservable();
 
   constructor(hubService: SignalRService) {
     from(hubService.registerHub(environment.signalrUrl, 'whale'))
@@ -70,6 +80,23 @@ export class WhaleSignalService {
         this.signalHub.on('OnDeclineCall', () => {
           this.declineCall.next();
         });
+
+        this.signalHub.on('onNewContact', (contact: Contact) => {
+          this.receiveContact.next(contact);
+        });
+
+        this.signalHub.on('onDeleteContact', (contactId: string) => {
+          this.removeContact.next(contactId);
+        });
+
+        this.signalHub.on('onNewNotification', (notification: Notification) => {
+          this.receiveNotify.next(notification);
+        });
+
+        this.signalHub.on('onDeleteNotification', (notificationId: string) => {
+          this.removeNotify.next(notificationId);
+        });
+
       });
   }
 
@@ -86,4 +113,8 @@ export enum WhaleSignalMethods {
   OnStartCall,
   OnTakeCall,
   OnDeclineCall,
+  onNewContact,
+  onDeleteContact,
+  onNewNotification,
+  onDeleteNotification
 }

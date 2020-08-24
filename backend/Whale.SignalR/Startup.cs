@@ -89,8 +89,6 @@ namespace Whale.SignalR
             {
                 endpoints.MapHub<ChatHub>("/chatHub");
                 endpoints.MapHub<MeetingHub>("/meeting");
-                endpoints.MapHub<NotificationHub>("/notificationHub");
-                endpoints.MapHub<ContactsHub>("/contactsHub");
                 endpoints.MapHub<WhaleHub>("/whale");
             });
         }

@@ -62,7 +62,7 @@ namespace Whale.Shared.Services
             await _context.SaveChangesAsync();
             var createdNotificationDTO = _mapper.Map<NotificationDTO>(notification);
 
-            var connection = await _signalrService.ConnectHubAsync("notificationHub");
+            var connection = await _signalrService.ConnectHubAsync("whale");
             await connection.InvokeAsync("onNewNotification", userEmail, createdNotificationDTO);
 
             return createdNotificationDTO;
@@ -103,7 +103,7 @@ namespace Whale.Shared.Services
                 throw new NotFoundException("Notification");
             _context.Notifications.Remove(notification);
             await _context.SaveChangesAsync();
-            var connection = await _signalrService.ConnectHubAsync("notificationHub");
+            var connection = await _signalrService.ConnectHubAsync("whale");
             await connection.InvokeAsync("onDeleteNotification", contacter, notification.Id);
             return;
         }

@@ -143,7 +143,7 @@ namespace Whale.Shared.Services
                 throw new NotFoundException("Pending Contact", contactnerEmail);
             _context.Contacts.Remove(contact);
             await _context.SaveChangesAsync();
-            var connection = await _signalrService.ConnectHubAsync("contactsHub");
+            var connection = await _signalrService.ConnectHubAsync("whale");
             await connection.InvokeAsync("onDeleteContact", contact);
             if (contact.SecondMember.Email == userEmail)
                 await _notifications.AddTextNotification(contactnerEmail, userEmail + " rejected your request.");
@@ -178,7 +178,7 @@ namespace Whale.Shared.Services
                     await _context.SaveChangesAsync();
                     var contactOwnerDTO = await GetContactAsync(contact.Id, ownerEmail);
                     var contactContactnerEmailDTO = await GetContactAsync(contact.Id, contacterEmail);
-                    var connection = await _signalrService.ConnectHubAsync("contactsHub");
+                    var connection = await _signalrService.ConnectHubAsync("whale");
                     await connection.InvokeAsync("onNewContact", contactOwnerDTO);
                     await connection.InvokeAsync("onNewContact", contactContactnerEmailDTO);
                     return contactOwnerDTO;

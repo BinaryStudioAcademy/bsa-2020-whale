@@ -2,9 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Whale.DAL.Models;
 using Whale.Shared.Models.Contact;
 using Whale.Shared.Models.Meeting;
+using Whale.Shared.Models.Notification;
 using Whale.Shared.Services;
 using Whale.SignalR.Models.Call;
 
@@ -26,6 +29,7 @@ namespace Whale.SignalR.Hubs
         [HubMethodName("OnUserConnect")]
         public async Task UserConnect(string userEmail)
         {
+            await Groups.AddToGroupAsync(Context.ConnectionId, userEmail);
             await Groups.AddToGroupAsync(Context.ConnectionId, WhaleService.OnlineUsersKey);
             var userOnline = await _whaleService.UserConnect(userEmail, Context.ConnectionId);
             await Clients.Group(WhaleService.OnlineUsersKey).SendAsync("OnUserConnect", userOnline);
@@ -34,6 +38,7 @@ namespace Whale.SignalR.Hubs
         [HubMethodName("OnUserDisconnect")]
         public async Task UserDisconnect(string userEmail)
         {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, userEmail);
             await _whaleService.UserDisconnect(userEmail, Context.ConnectionId);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, WhaleService.OnlineUsersKey);
             await Clients.Group(WhaleService.OnlineUsersKey).SendAsync("OnUserDisconnect", userEmail);
@@ -42,6 +47,9 @@ namespace Whale.SignalR.Hubs
         public override async Task OnDisconnectedAsync(Exception exception)
         {
             var userId = await _whaleService.UserDisconnectOnError(Context.ConnectionId);
+            var userEmail = Context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            if (userEmail is object)
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, userEmail);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, WhaleService.OnlineUsersKey);
             await Clients.Group(WhaleService.OnlineUsersKey).SendAsync("OnUserDisconnectOnError", userId);
             await base.OnDisconnectedAsync(exception);
@@ -76,6 +84,30 @@ namespace Whale.SignalR.Hubs
             {
                 await Clients.Client(connection).SendAsync("OnDeclineCall");
             }
+        }
+
+        [HubMethodName("onNewNotification")]
+        public Task NewNotification(string userEmail, NotificationDTO notificationDTO)
+        {
+            return Clients.Group(userEmail).SendAsync("onNewNotification", notificationDTO);
+        }
+
+        [HubMethodName("onDeleteNotification")]
+        public Task DeleteNotification(string userEmail, Guid notificationId)
+        {
+            return Clients.Group(userEmail).SendAsync("onDeleteNotification", notificationId);
+        }
+
+        [HubMethodName("onNewContact")]
+        public Task NewContact(ContactDTO contactDTO)
+        {
+            return Clients.Group(contactDTO.FirstMember.Email).SendAsync("onNewContact", contactDTO);
+        }
+        [HubMethodName("onDeleteContact")]
+        public async Task DeleteContact(Contact contact)
+        {
+            await Clients.Group(contact.FirstMember.Email).SendAsync("onDeleteContact", contact.Id);
+            await Clients.Group(contact.SecondMember.Email).SendAsync("onDeleteContact", contact.Id);
         }
     }
 }
