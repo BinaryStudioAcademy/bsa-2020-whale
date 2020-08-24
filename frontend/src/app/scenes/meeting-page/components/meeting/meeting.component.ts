@@ -418,7 +418,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     );
 
     const ended: boolean =
-      this.currentParticipant.role == ParticipantRole.Host ||
       this.meeting.participants.findIndex(
         (p) => p.id != this.currentParticipant.id
       ) == -1;
