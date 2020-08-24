@@ -78,11 +78,6 @@ namespace Whale.SignalR.Hubs
             _groupsParticipants[ConnectionData.MeetingId].Remove(disconnectedParticipant);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, ConnectionData.MeetingId);
             await Clients.Group(ConnectionData.MeetingId).SendAsync("OnParticipantLeft", ConnectionData);
-
-            if (await _meetingService.ParticipantDisconnect(ConnectionData.MeetingId, ConnectionData.UserEmail))
-            {
-               await Clients.Group(ConnectionData.MeetingId).SendAsync("OnMeetingEnded", ConnectionData);
-            }
         }
 
 

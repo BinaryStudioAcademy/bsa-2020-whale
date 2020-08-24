@@ -50,7 +50,7 @@ namespace Whale.API.Controllers
         [HttpGet("end")]
         public async Task<OkResult> SaveMeetingEndTime(Guid meetingId)
         {
-            await _meetingService.SaveMeetingEndTime(meetingId);
+            await _meetingService.EndMeeting(meetingId);
             return Ok();
         }
     }

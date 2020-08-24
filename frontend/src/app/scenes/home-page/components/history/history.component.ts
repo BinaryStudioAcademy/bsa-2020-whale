@@ -5,6 +5,8 @@ import {
   Output,
   EventEmitter,
   HostListener,
+  ViewChild,
+  ElementRef,
 } from '@angular/core';
 import { User } from '@shared/models/user/user';
 import { Meeting } from '@shared/models/meeting/meeting';
@@ -24,15 +26,17 @@ export class HistoryComponent implements OnInit {
 
   @Input() user: User;
   @Output() historyClose: EventEmitter<void> = new EventEmitter<void>();
+  @ViewChild('scrollable') scrollElement: ElementRef;
   public meetings: Meeting[] = [];
 
-  public take: number = 10;
+  public take = 10;
 
   public isScrolled = false;
   public isMeetingHistoryEmpty = false;
-  public ishistoryLoading: boolean = true;
+  public ishistoryLoading = true;
   public requestSent = false;
   public allDataLoaded = false;
+
 
   constructor(private httpService: HttpService) {}
 
@@ -40,7 +44,13 @@ export class HistoryComponent implements OnInit {
     this.getSomeMeetings();
   }
 
-  public onScroll() {
+  public onScroll(): void {
+    if (this.scrollElement.nativeElement.scrollTop >= 100) {
+      this.isScrolled = true;
+    }
+    else {
+      this.isScrolled = false;
+    }
     if (this.requestSent) {
       return;
     }
@@ -49,17 +59,7 @@ export class HistoryComponent implements OnInit {
   }
 
   public scrollToTop(): void {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  @HostListener('window:scroll', ['$event'])
-  onWindowScroll($event: Event): void {
-    const y = window.scrollY;
-    if (y >= 100) {
-      this.isScrolled = true;
-    } else {
-      this.isScrolled = false;
-    }
+    this.scrollElement.nativeElement.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   public getSomeMeetings(): void {
@@ -75,13 +75,13 @@ export class HistoryComponent implements OnInit {
     this.ishistoryLoading = true;
     this.httpService.getRequest<Meeting[]>(this.route, params).subscribe(
       (response) => {
-        if (response.length === 0) {
+        if (response.length === 0 && this.meetings.length === 0) {
           this.isMeetingHistoryEmpty = true;
         }
 
         this.meetings = this.meetings.concat(response);
         this.ishistoryLoading = false;
-        if (response.length == 0) {
+        if (response.length === 0) {
           this.allDataLoaded = true;
         }
         this.requestSent = false;

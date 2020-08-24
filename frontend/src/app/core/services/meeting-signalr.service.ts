@@ -40,7 +40,7 @@ export class MeetingSignalrService {
   private switchOffMediaByHost = new Subject<boolean>();
   public switchOffMediaByHost$ = this.switchOffMediaByHost.asObservable();
 
-  private meetingEnded = new Subject<MeetingConnectionData>();
+  private meetingEnded = new Subject<void>();
   public meetingEnded$ = this.meetingEnded.asObservable();
 
   private conferenceStartRecording = new Subject<string>();
@@ -117,7 +117,7 @@ export class MeetingSignalrService {
         this.signalHub.on(
           'OnMeetingEnded',
           (connectionData: MeetingConnectionData) => {
-            this.meetingEnded.next(connectionData);
+            this.meetingEnded.next();
           }
         );
 

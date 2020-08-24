@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Whale.API.Services;
+using Whale.Shared.Models.Meeting;
 
 namespace Whale.API.Controllers
 {
@@ -19,7 +20,7 @@ namespace Whale.API.Controllers
 		}
 
 		[HttpGet]
-		public async Task<IActionResult> GetMeetings(Guid userId, int skip, int take)
+		public async Task<ActionResult<IEnumerable<MeetingDTO>>> GetMeetings(Guid userId, int skip, int take)
 		{
 			var meetings = await _meetingHistoryService.GetMeetingsWithParticipantsAndPollResults(userId, skip, take);
 			return Ok(meetings);
