@@ -83,7 +83,7 @@
     </div>
     <div *ngIf="isShowParticipants" class="ui participants-container">
       <div class="invite-icon-container">
-        <i class="user plus icon"></i>
+        <i class="user plus icon" (click)="openInviteUsersModal()"></i>
       </div>
       <div class="participants-wrapper">
         <div class="ui divided list">
@@ -339,7 +339,6 @@
         <app-output-settings
           (onClick)="changeOutputDevice($event)"
         ></app-output-settings>
-        <audio></audio>
       </div>
     </div>
 

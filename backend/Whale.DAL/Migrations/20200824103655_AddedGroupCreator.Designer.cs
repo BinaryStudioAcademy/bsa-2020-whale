@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Whale.DAL;
 
 namespace Whale.DAL.Migrations
 {
     [DbContext(typeof(WhaleDbContext))]
-    partial class WhaleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200824103655_AddedGroupCreator")]
+    partial class AddedGroupCreator
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -251,19 +253,13 @@ namespace Whale.DAL.Migrations
                     b.ToTable("Participants");
                 });
 
-            modelBuilder.Entity("Whale.DAL.Models.Poll.Poll", b =>
+            modelBuilder.Entity("Whale.DAL.Models.Poll.PollResult", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
-
                     b.Property<bool>("IsAnonymous")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsSingleChoice")
                         .HasColumnType("bit");
 
                     b.Property<Guid>("MeetingId")
@@ -272,15 +268,19 @@ namespace Whale.DAL.Migrations
                     b.Property<string>("OptionResults")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid>("PollId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("VotedUsers")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("TotalVoted")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VoteCount")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("MeetingId");
 
                     b.ToTable("PollResults");
                 });
@@ -473,15 +473,6 @@ namespace Whale.DAL.Migrations
                     b.HasOne("Whale.DAL.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Whale.DAL.Models.Poll.Poll", b =>
-                {
-                    b.HasOne("Whale.DAL.Models.Meeting", "Meeting")
-                        .WithMany("PollResults")
-                        .HasForeignKey("MeetingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

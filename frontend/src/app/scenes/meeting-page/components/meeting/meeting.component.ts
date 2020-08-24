@@ -47,6 +47,7 @@ import {
   MediaData,
 } from '../../../../shared/models';
 import { EnterModalComponent } from '../enter-modal/enter-modal.component';
+import { MeetingInviteComponent } from '@shared/components/meeting-invite/meeting-invite.component';
 
 @Component({
   selector: 'app-meeting',
@@ -901,9 +902,12 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public async changeOutputDevice(deviceId: string) {
-    const audio = document.querySelector('audio');
+    const videos = document.querySelectorAll('video');
+    console.log(videos);
     this.mediaSettingsService.changeOutputDevice(deviceId);
-    this.mediaSettingsService.attachSinkId(audio, deviceId);
+    videos.forEach((video) => {
+      this.mediaSettingsService.attachSinkId(video, deviceId);
+    });
     this.isAudioSettings = false;
     this.isVideoSettings = false;
   }
@@ -944,4 +948,32 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
   //#endregion media settings
+
+  public async openInviteUsersModal() {
+    this.getShortInviteLink().subscribe(
+      async (shortId) => {
+        const shortLink = this.buildShortLink(shortId);
+        await this.simpleModalService
+          .addModal(MeetingInviteComponent, {
+            inviteLink: shortLink,
+            meetingId: this.meeting.id,
+            senderId: this.currentParticipant.user.id,
+          })
+          .toPromise();
+      },
+      (error) => {
+        console.error(error);
+      }
+    );
+  }
+
+  private buildShortLink(shortId: string) {
+    const URL: string = this.document.location.href;
+    let chanks = URL.split('/');
+    chanks.splice(3, chanks.length - 3);
+    chanks.push('redirection');
+    chanks.push(shortId);
+
+    return chanks.join('/');
+  }
 }
