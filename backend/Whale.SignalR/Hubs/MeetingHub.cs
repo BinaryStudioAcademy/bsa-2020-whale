@@ -11,6 +11,7 @@ using Whale.Shared.Models.Poll;
 using Whale.SignalR.Models.Drawing;
 using Whale.SignalR.Models.Media;
 using Whale.DAL.Models;
+using shortid;
 
 namespace Whale.SignalR.Hubs
 {
@@ -18,21 +19,41 @@ namespace Whale.SignalR.Hubs
     {
         private readonly MeetingService _meetingService;
         private readonly ParticipantService _participantService;
+        private readonly RedisService _redisService;
+        private readonly UserService _userService;
         private readonly static Dictionary<string, List<ParticipantDTO>> _groupsParticipants = 
             new Dictionary<string, List<ParticipantDTO>>();
 
-        public MeetingHub(MeetingService meetingService, ParticipantService participantService)
+        public MeetingHub(MeetingService meetingService, ParticipantService participantService, RedisService redisService, UserService userService)
         {
             _meetingService = meetingService;
             _participantService = participantService;
+            _redisService = redisService;
+            _userService = userService;
         }
 
         [HubMethodName("OnUserConnect")]
         public async Task Join(MeetingConnectDTO connectionData)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, connectionData.MeetingId);
-            var participant = await _participantService.GetMeetingParticipantByEmail(
-                Guid.Parse(connectionData.MeetingId), connectionData.UserEmail);
+            ParticipantDTO participant = null;
+            if (connectionData.IsRoom)
+            {
+                participant = new ParticipantDTO
+                {
+                    Id = Guid.NewGuid(),
+                    ActiveConnectionId = "",
+                    Role = ParticipantRole.Participant,
+                    StreamId = "",
+                    User = await _userService.GetUserByEmail(connectionData.UserEmail),
+                    Meeting = null
+                };
+            }
+            else
+            {
+                participant = await _participantService.GetMeetingParticipantByEmail(
+                    Guid.Parse(connectionData.MeetingId), connectionData.UserEmail);
+            }
             participant.StreamId = connectionData.StreamId;
             connectionData.Participant = participant;
             connectionData.Participant.ActiveConnectionId = Context.ConnectionId;
@@ -199,6 +220,15 @@ namespace Whale.SignalR.Hubs
         {
             await Clients.GroupExcept(drawingDTO.MeetingId, new List<string> { Context.ConnectionId })
                 .SendAsync("OnErasing", drawingDTO.Erase);
+        }
+
+        [HubMethodName("CreateRoom")]
+        public async Task CreateRoom(string meetingId)
+        {
+            var roomUrl = ShortId.Generate(true, true);
+            await _redisService.ConnectAsync();
+            await _redisService.SetAsync(roomUrl, new MeetingMessagesAndPasswordDTO { Password = "" });
+            await Clients.Group(meetingId).SendAsync("OnRoomCreated", roomUrl);
         }
     }
 }

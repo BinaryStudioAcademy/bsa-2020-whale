@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { SimpleModalComponent } from 'ngx-simple-modal';
 import { Participant, ParticipantRole, User, Meeting } from '@shared/models';
+import { MeetingSignalrService, SignalMethods } from 'app/core/services';
 
 export interface RoomsParticipants {
   participants: Participant[];
   numberOfRooms: number;
+  meetingId: string;
 }
 
 @Component({
@@ -15,9 +17,10 @@ export interface RoomsParticipants {
 export class DivisionByRoomsModalComponent
   extends SimpleModalComponent<RoomsParticipants, void>
   implements RoomsParticipants {
-  constructor() {
+  constructor(private meetingSignalrService: MeetingSignalrService) {
     super();
   }
+  public meetingId: string;
   public numberOfRooms: number;
   public participants: Array<Participant>;
   public devidedParticipants: Array<Array<Participant>>;
@@ -27,6 +30,11 @@ export class DivisionByRoomsModalComponent
       this.participants,
       Math.round(this.participants.length / this.numberOfRooms)
     );
+  }
+
+  public divide(): void {
+    this.meetingSignalrService.invoke(SignalMethods.CreateRoom, this.meetingId);
+    this.close();
   }
 
   private randChunkSplit(

@@ -362,6 +362,18 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       );
 
+    this.meetingSignalrService.onRoomCreated$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (roomId) => {
+          console.log(roomId);
+          this.router.navigate([`/room/${roomId}`]);
+        },
+        (err) => {
+          this.toastr.error('Error occured while trying to connect to room');
+        }
+      );
+
     // when peer opened send my peer id everyone
     this.peer.on('open', (id) => this.onPeerOpen(id));
 
@@ -620,7 +632,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
         var participant = this.meeting.participants.find(
           (p) => p.streamId == stream.id
         );
-        console.log('create on stream');
         this.createParticipantCard(participant);
         this.connectedPeers.set(call.peer, stream);
       }
@@ -628,7 +639,35 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private getMeeting(link: string): void {
-    console.log('get meeting');
+    if (window.location.pathname.includes('room')) {
+      this.meeting = {
+        id: this.route.snapshot.params['id'],
+        settings: '',
+        startTime: new Date(),
+        isScheduled: false,
+        isRecurrent: false,
+        anonymousCount: 0,
+        pollResults: [],
+        participants: [],
+      };
+
+      this.connectionData.meetingId = this.route.snapshot.params['id'];
+      this.connectionData.meetingPwd = '';
+      this.connectionData.isRoom = true;
+
+      this.meetingSignalrService.invoke(
+        SignalMethods.OnUserConnect,
+        this.connectionData
+      );
+
+      this.meetingSignalrService.invoke(SignalMethods.OnGetMessages, {
+        meetingId: this.meeting.id,
+        email: this.authService.currentUser.email,
+      } as GetMessages);
+
+      return;
+    }
+
     this.meetingService
       .connectMeeting(link)
       .pipe(takeUntil(this.unsubscribe$))
@@ -679,19 +718,17 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       const groupId = urlParams.get('id');
       const groupPwd = urlParams.get('pwd');
 
-      this.authService.user$
-        .pipe(filter((user) => Boolean(user)))
-        .subscribe((user) => {
-          this.connectionData = {
-            peerId: id,
-            userEmail: this.authService.currentUser.email,
-            meetingId: groupId,
-            meetingPwd: groupPwd,
-            streamId: this.currentUserStream.id,
-            participant: this.currentParticipant, // this.currentParticipant is undefined here
-          };
-          this.getMeeting(link);
-        });
+      this.connectionData = {
+        peerId: id,
+        userEmail: this.authService.currentUser.email,
+        meetingId: groupId,
+        meetingPwd: groupPwd,
+        streamId: this.currentUserStream.id,
+        participant: this.currentParticipant, // this.currentParticipant is undefined here
+        isRoom: false,
+      };
+
+      this.getMeeting(link);
     });
   }
 
@@ -952,6 +989,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     await this.simpleModalService
       .addModal(DivisionByRoomsModalComponent, {
         participants: this.meeting.participants,
+        meetingId: this.meeting.id,
         numberOfRooms: 2,
       })
       .toPromise();

@@ -70,6 +70,9 @@ export class MeetingSignalrService {
   private canvasErase = new Subject<boolean>();
   public readonly canvasErase$ = this.canvasErase.asObservable();
 
+  private onRoomCreated = new Subject<string>();
+  public readonly onRoomCreated$ = this.onRoomCreated.asObservable();
+
   constructor(private hubService: SignalRService) {
     from(hubService.registerHub(environment.signalrUrl, 'meeting'))
       .pipe(
@@ -166,6 +169,10 @@ export class MeetingSignalrService {
         this.signalHub.on('OnErasing', (erase: boolean) => {
           this.canvasErase.next(erase);
         });
+
+        this.signalHub.on('OnRoomCreated', (roomId: string) => {
+          this.onRoomCreated.next(roomId);
+        });
       });
   }
 
@@ -193,4 +200,5 @@ export enum SignalMethods {
   OnPollCreated,
   OnDrawing,
   OnErasing,
+  CreateRoom,
 }
