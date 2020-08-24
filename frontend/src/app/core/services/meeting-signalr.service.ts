@@ -73,6 +73,9 @@ export class MeetingSignalrService {
   private onRoomCreated = new Subject<string>();
   public readonly onRoomCreated$ = this.onRoomCreated.asObservable();
 
+  private onRoomClosed = new Subject<string>();
+  public readonly onRoomClosed$ = this.onRoomClosed.asObservable();
+
   constructor(private hubService: SignalRService) {
     from(hubService.registerHub(environment.signalrUrl, 'meeting'))
       .pipe(
@@ -172,6 +175,10 @@ export class MeetingSignalrService {
 
         this.signalHub.on('OnRoomCreated', (roomId: string) => {
           this.onRoomCreated.next(roomId);
+        });
+
+        this.signalHub.on('OnRoomClosed', (sth: string) => {
+          this.onRoomClosed.next(sth);
         });
       });
   }

@@ -7,6 +7,7 @@ export interface RoomsParticipants {
   participants: Participant[];
   numberOfRooms: number;
   meetingId: string;
+  meetingLink: string;
 }
 
 @Component({
@@ -20,6 +21,7 @@ export class DivisionByRoomsModalComponent
   constructor(private meetingSignalrService: MeetingSignalrService) {
     super();
   }
+  public meetingLink: string;
   public meetingId: string;
   public numberOfRooms: number;
   public participants: Array<Participant>;
@@ -36,6 +38,7 @@ export class DivisionByRoomsModalComponent
     this.devidedParticipants.forEach((participants) => {
       this.meetingSignalrService.invoke(SignalMethods.CreateRoom, {
         meetingId: this.meetingId,
+        meetingLink: this.meetingLink,
         participantsIds: participants.map((p) => p.id),
       });
     });

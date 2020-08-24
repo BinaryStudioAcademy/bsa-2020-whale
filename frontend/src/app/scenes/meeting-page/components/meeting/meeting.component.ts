@@ -101,6 +101,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public pollService: PollService;
   public receiveingDrawings: boolean = false;
   public isHost = false;
+  public isRoom = false;
 
   @ViewChild('currentVideo') private currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
@@ -143,6 +144,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   //#region hooks
   public async ngOnInit() {
+    this.isRoom = window.location.pathname.includes('room');
     this.currentUserStream = await navigator.mediaDevices.getUserMedia(
       await this.mediaSettingsService.getMediaConstraints()
     );
@@ -365,13 +367,18 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (roomId) => {
-          console.log(roomId);
           this.router.navigate([`/room/${roomId}`]);
         },
         (err) => {
           this.toastr.error('Error occured while trying to connect to room');
         }
       );
+
+    this.meetingSignalrService.onRoomClosed$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe((link) => {
+        this.router.navigate([`/meeting-page/${link}`]);
+      });
 
     // create new peer
     this.peer = new Peer(environment.peerOptions);
@@ -423,16 +430,18 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.destroyPeer();
     this.currentUserStream?.getTracks().forEach((track) => track.stop());
 
-    this.connectionData.participant = this.currentParticipant;
-    this.meetingSignalrService.invoke(
-      SignalMethods.OnParticipantLeft,
-      this.connectionData
-    );
+    if (this.connectionData) {
+      this.connectionData.participant = this.currentParticipant;
+      this.meetingSignalrService.invoke(
+        SignalMethods.OnParticipantLeft,
+        this.connectionData
+      );
+    }
 
     const ended: boolean =
-      this.currentParticipant.role == ParticipantRole.Host ||
-      this.meeting.participants.findIndex(
-        (p) => p.id != this.currentParticipant.id
+      this.currentParticipant?.role == ParticipantRole.Host ||
+      this.meeting?.participants?.findIndex(
+        (p) => p.id != this.currentParticipant?.id
       ) == -1;
 
     if (ended) {
@@ -446,7 +455,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
           (error) => console.error(error.Message)
         );
 
-      this.pollService.savePollResults(this.meeting.id);
+      this.pollService.savePollResults(this.meeting?.id);
     }
 
     this.unsubscribe$.next();
@@ -641,7 +650,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private getMeeting(link: string): void {
-    if (window.location.pathname.includes('room')) {
+    if (this.isRoom) {
       this.meeting = {
         id: this.route.snapshot.params['id'],
         settings: '',
@@ -988,10 +997,13 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   //#region Rooms
   public async openRoomsModal(): Promise<void> {
+    const link = this.route.snapshot.params['link'];
+
     await this.simpleModalService
       .addModal(DivisionByRoomsModalComponent, {
         participants: this.meeting.participants,
         meetingId: this.meeting.id,
+        meetingLink: link,
         numberOfRooms: 2,
       })
       .toPromise();

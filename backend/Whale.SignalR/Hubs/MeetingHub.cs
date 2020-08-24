@@ -238,6 +238,10 @@ namespace Whale.SignalR.Hubs
                 var participant = _groupsParticipants[roomCreateData.MeetingId].Find(p => p.Id.ToString() == participantId);
                 await Clients.Client(participant.ActiveConnectionId).SendAsync("OnRoomCreated", roomUrl);
             }
+
+            await Task.Delay(30000);
+            Console.WriteLine("elapsed");
+            await Clients.All.SendAsync("OnRoomClosed", roomCreateData.MeetingLink);
         }
     }
 }
