@@ -14,10 +14,10 @@ export class AddContactModalComponent extends SimpleModalComponent<
   null,
   Contact
 > {
-  public contactnerEmail: string;
+  public contacterEmail: string;
   public ownerEmail: string;
   constructor(
-    private contactCervice: ContactService,
+    private contactService: ContactService,
     private toastr: ToastrService,
     private authService: AuthService
   ) {
@@ -26,17 +26,18 @@ export class AddContactModalComponent extends SimpleModalComponent<
   }
 
   public submit(): void {
-    this.contactCervice
-      .createContactByEmail(this.contactnerEmail.toLowerCase())
+    this.contactService
+      .createContactByEmail(this.contacterEmail.toLowerCase())
       .subscribe(
         (resp) => {
-          if (resp.status === 204) {
+          if (!resp.body.isAccepted) {
             this.toastr.success('Request has been sent');
-            this.close();
-          } else {
-            this.result = resp.body;
-            this.close();
           }
+          else {
+            this.toastr.success('Contact has been added');
+          }
+          this.result = resp.body;
+          this.close();
         },
         (error) => this.toastr.error(error.Message)
       );

@@ -20,7 +20,7 @@ export class NotificationComponent implements OnInit {
   public isText = false;
   public show = true;
   constructor(
-    private contactCervice: ContactService,
+    private contactService: ContactService,
     private toastr: ToastrService
   ) {}
 
@@ -48,17 +48,26 @@ export class NotificationComponent implements OnInit {
     }
   }
 
-  onClose(): void {
-    this.delete.emit(this.notification.id);
-    this.show = false;
-  }
-  onAddContact(): void {
-    this.contactCervice.createContactByEmail(this.contactEmail).subscribe(
+  onRejectContact(): void {
+    this.contactService.DeletePendingContact(this.contactEmail).subscribe(
       (resp) => {
-        this.toastr.success('Contact Add');
+        this.toastr.success('Contact Rejected');
       },
       (error) => this.toastr.error(error.Message)
     );
     this.onClose();
+  }
+  onAcceptContact(): void {
+    this.contactService.createContactByEmail(this.contactEmail).subscribe(
+      (resp) => {
+        this.toastr.success('Contact Accepted');
+      },
+      (error) => this.toastr.error(error.Message)
+    );
+    this.onClose();
+  }
+  onClose(): void {
+    this.delete.emit(this.notification.id);
+    this.show = false;
   }
 }
