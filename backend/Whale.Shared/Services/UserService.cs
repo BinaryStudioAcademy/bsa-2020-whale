@@ -112,6 +112,8 @@ namespace Whale.Shared.Services
             entity.FirstName = userDTO.FirstName;
             entity.SecondName = userDTO.SecondName;
             entity.Phone = userDTO.Phone;
+            entity.AvatarUrl = userDTO.AvatarUrl;
+            entity.LinkType = userDTO.LinkType;
 
             _context.Users.Update(entity);
 
