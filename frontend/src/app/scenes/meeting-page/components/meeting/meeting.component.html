@@ -253,6 +253,7 @@
             <span
               data-tooltip="Divide participants by rooms"
               data-position="top right"
+              *ngIf="isHost"
             >
               <i
                 (click)="openRoomsModal()"

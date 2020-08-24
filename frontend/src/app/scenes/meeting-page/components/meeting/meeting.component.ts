@@ -100,6 +100,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public peer: Peer;
   public pollService: PollService;
   public receiveingDrawings: boolean = false;
+  public isHost = false;
 
   @ViewChild('currentVideo') private currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
@@ -163,9 +164,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.currentStreamLoaded.emit();
 
-    // create new peer
-    this.peer = new Peer(environment.peerOptions);
-
     // when someone connected to meeting
     this.meetingSignalrService.signalUserConected$
       .pipe(takeUntil(this.unsubscribe$))
@@ -207,6 +205,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
           this.currentParticipant = participants.find(
             (p) => p.user.email === this.authService.currentUser.email
           );
+          this.isHost = this.currentParticipant.role === ParticipantRole.Host;
           this.otherParticipants = participants.filter(
             (p) => p.id !== this.currentParticipant.id
           );
@@ -373,6 +372,9 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
           this.toastr.error('Error occured while trying to connect to room');
         }
       );
+
+    // create new peer
+    this.peer = new Peer(environment.peerOptions);
 
     // when peer opened send my peer id everyone
     this.peer.on('open', (id) => this.onPeerOpen(id));
@@ -625,7 +627,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     const call = this.peer.call(recieverPeerId, this.currentUserStream);
 
     // get answer and show other user
-    call.on('stream', (stream) => {
+    call?.on('stream', (stream) => {
       this.connectedStreams.push(stream);
       const connectedPeer = this.connectedPeers.get(call.peer);
       if (!connectedPeer || connectedPeer.id !== stream.id) {

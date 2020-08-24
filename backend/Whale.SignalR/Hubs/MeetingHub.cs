@@ -55,7 +55,7 @@ namespace Whale.SignalR.Hubs
                 participant = await _participantService.GetMeetingParticipantByEmail(
                     Guid.Parse(connectionData.MeetingId), connectionData.UserEmail);
             }
-            participant.StreamId = connectionData.StreamId;
+                                participant.StreamId = connectionData.StreamId;
             connectionData.Participant = participant;
             connectionData.Participant.ActiveConnectionId = Context.ConnectionId;
 
@@ -94,17 +94,17 @@ namespace Whale.SignalR.Hubs
         public async Task ParticipantLeft(MeetingConnectDTO ConnectionData)
         {
             var disconnectedParticipant = _groupsParticipants[ConnectionData.MeetingId]
-                .Find(p => p.Id == ConnectionData.Participant.Id);
+                .Find(p => p.User.Email == ConnectionData.UserEmail);
 
             ConnectionData.Participant = disconnectedParticipant;
             _groupsParticipants[ConnectionData.MeetingId].Remove(disconnectedParticipant);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, ConnectionData.MeetingId);
             await Clients.Group(ConnectionData.MeetingId).SendAsync("OnParticipantLeft", ConnectionData);
 
-            if (await _meetingService.ParticipantDisconnect(ConnectionData.MeetingId, ConnectionData.UserEmail))
-            {
-               await Clients.Group(ConnectionData.MeetingId).SendAsync("OnMeetingEnded", ConnectionData);
-            }
+            //if (await _meetingService.ParticipantDisconnect(ConnectionData.MeetingId, ConnectionData.UserEmail))
+            //{
+            //   await Clients.Group(ConnectionData.MeetingId).SendAsync("OnMeetingEnded", ConnectionData);
+            //}
         }
 
 
@@ -226,7 +226,10 @@ namespace Whale.SignalR.Hubs
         [HubMethodName("CreateRoom")]
         public async Task CreateRoom(RoomCreate roomCreateData)
         {
-            var roomUrl = ShortId.Generate(true, true);
+            var participantHost = _groupsParticipants[roomCreateData.MeetingId]?.FirstOrDefault(p => p.ActiveConnectionId == Context.ConnectionId);
+            if (participantHost?.Role == ParticipantRole.Participant) return;
+
+            var roomUrl = ShortId.Generate(false, false);
             await _redisService.ConnectAsync();
             await _redisService.SetAsync(roomUrl, new MeetingMessagesAndPasswordDTO { Password = "" });
 
