@@ -107,6 +107,7 @@
             (click)="onGroupClick(group)"
           >
             <i
+              *ngIf="group.creatorEmail == loggedInUser?.email"
               class="trash alternate outline icon"
               (click)="deleteGroup(group); $event.stopPropagation()"
             ></i>
