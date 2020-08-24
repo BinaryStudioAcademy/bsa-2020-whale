@@ -1,4 +1,5 @@
 <div class="poll-container">
+  <spiner *ngIf="isLoading" [size]="'medium'"></spiner>
   <h4>{{ poll.title }}</h4>
   <form class="ui form" [formGroup]="form" (ngSubmit)="onSubmit()">
     <div *ngIf="poll.isSingleChoice" class="answers-container">

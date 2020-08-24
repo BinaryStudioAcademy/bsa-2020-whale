@@ -11,7 +11,6 @@ export class ProgressBarDirective implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log(this.progress);
     this.el.nativeElement.style.width = `${this.progress}%`;
   }
 }

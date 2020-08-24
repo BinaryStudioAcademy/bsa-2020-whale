@@ -19,6 +19,8 @@ import { VideoSettingsComponent } from '@shared/components/settings/video-settin
 import { OutputSettingsComponent } from './components/settings/output-settings/output-settings.component';
 import { NotificationComponent } from './components/notification/notification.component';
 import { IncomingGroupCallComponent } from './components/incoming-group-call/incoming-group-call.component';
+import { MeetingInviteComponent } from './components/meeting-invite/meeting-invite.component';
+import { EmailTagComponent } from './components/meeting-invite/email-tag/email-tag.component';
 import { ConfirmationModalComponent } from './components/confirmation-modal/confirmation-modal.component';
 
 @NgModule({
@@ -39,6 +41,8 @@ import { ConfirmationModalComponent } from './components/confirmation-modal/conf
     OutputSettingsComponent,
     NotificationComponent,
     IncomingGroupCallComponent,
+    MeetingInviteComponent,
+    EmailTagComponent,
     ConfirmationModalComponent,
   ],
   imports: [

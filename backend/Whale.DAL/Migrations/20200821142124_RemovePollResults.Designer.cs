@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Whale.DAL;
 
 namespace Whale.DAL.Migrations
 {
     [DbContext(typeof(WhaleDbContext))]
-    partial class WhaleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200821142124_RemovePollResults")]
+    partial class RemovePollResults
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -45,10 +47,16 @@ namespace Whale.DAL.Migrations
                     b.Property<Guid>("FirstMemberId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("FirstMemberSettingsId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid?>("PinnedMessageId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("SecondMemberId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("SecondMemberSettingsId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("isAccepted")
@@ -58,11 +66,37 @@ namespace Whale.DAL.Migrations
 
                     b.HasIndex("FirstMemberId");
 
+                    b.HasIndex("FirstMemberSettingsId");
+
                     b.HasIndex("PinnedMessageId");
 
                     b.HasIndex("SecondMemberId");
 
+                    b.HasIndex("SecondMemberSettingsId");
+
                     b.ToTable("Contacts");
+                });
+
+            modelBuilder.Entity("Whale.DAL.Models.ContactSetting", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsBloked")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsMuted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ContactSettings");
                 });
 
             modelBuilder.Entity("Whale.DAL.Models.DirectMessage", b =>
@@ -101,9 +135,6 @@ namespace Whale.DAL.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("CreatorEmail")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -390,6 +421,10 @@ namespace Whale.DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Whale.DAL.Models.ContactSetting", "FirstMemberSettings")
+                        .WithMany()
+                        .HasForeignKey("FirstMemberSettingsId");
+
                     b.HasOne("Whale.DAL.Models.DirectMessage", "PinnedMessage")
                         .WithMany()
                         .HasForeignKey("PinnedMessageId");
@@ -397,6 +432,19 @@ namespace Whale.DAL.Migrations
                     b.HasOne("Whale.DAL.Models.User", "SecondMember")
                         .WithMany()
                         .HasForeignKey("SecondMemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Whale.DAL.Models.ContactSetting", "SecondMemberSettings")
+                        .WithMany()
+                        .HasForeignKey("SecondMemberSettingsId");
+                });
+
+            modelBuilder.Entity("Whale.DAL.Models.ContactSetting", b =>
+                {
+                    b.HasOne("Whale.DAL.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

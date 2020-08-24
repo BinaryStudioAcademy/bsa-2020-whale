@@ -53,56 +53,41 @@ export class PollService {
       });
   }
 
-  public getPollsAndResults(meetingId: string, userEmail: string) {
+  public getPollsAndResults(meetingId: string, userId: string) {
     const httpParams = new HttpParams()
       .set('meetingId', meetingId)
-      .set('userEmail', userEmail);
+      .set('userId', userId);
 
     this.httpService
       .getRequest<PollsAndResultsDto>(
         environment.meetingApiUrl + '/api/polls',
         httpParams
       )
-      .subscribe((pollsAndResults: PollsAndResultsDto) => {
-        this.polls = pollsAndResults.polls;
-        this.pollResults = pollsAndResults.results;
-      });
-  }
-
-  public onPollCreated(
-    pollCreateDto: PollCreateDto,
-    meetingId: string,
-    userEmail: string
-  ) {
-    this.httpService
-      .postRequest<PollCreateDto, PollDto>(
-        environment.meetingApiUrl + '/api/polls',
-        pollCreateDto
-      )
       .subscribe(
-        (response: PollDto) => {
-          const pollData: PollData = {
-            userId: userEmail,
-            groupId: meetingId,
-            pollDto: response,
-          };
-
-          this.meetingSignalrService.invoke(
-            SignalMethods.OnPollCreated,
-            pollData
-          );
-
-          this.isPollCreating = false;
-          this.toastr.success('Poll was created!', 'Success');
+        (pollsAndResults: PollsAndResultsDto) => {
+          this.polls = pollsAndResults.polls;
+          this.pollResults = pollsAndResults.results;
         },
         (error) => {
-          this.toastr.error(error);
+          this.toastr.error(error.Message);
         }
       );
   }
 
+  public onPollCreated(pollDto: PollDto, meetingId: string, userEmail: string) {
+    const pollData: PollData = {
+      userId: userEmail,
+      groupId: meetingId,
+      pollDto: pollDto,
+    };
+
+    this.meetingSignalrService.invoke(SignalMethods.OnPollCreated, pollData);
+
+    this.isPollCreating = false;
+  }
+
   public onPollReceived(poll: PollDto) {
-    this.polls.push(poll);
+    this.polls.unshift(poll);
     this.isShowPoll = true;
   }
 
@@ -118,7 +103,7 @@ export class PollService {
     if (pollResultIndex != -1) {
       this.pollResults[pollResultIndex] = pollResultDto;
     } else {
-      this.pollResults.push(pollResultDto);
+      this.pollResults.unshift(pollResultDto);
     }
   }
 
