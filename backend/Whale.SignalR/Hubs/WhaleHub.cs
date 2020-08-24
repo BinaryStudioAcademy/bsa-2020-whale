@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Whale.DAL.Models;
 using Whale.Shared.Models.Contact;
+using Whale.Shared.Models.Group;
 using Whale.Shared.Models.Meeting;
 using Whale.Shared.Models.Notification;
 using Whale.Shared.Services;
@@ -63,7 +64,7 @@ namespace Whale.SignalR.Hubs
             var contact = await _contactsService.GetContactAsync(startCallDTO.ContactId, startCallDTO.Meeting.CreatorEmail);
             var link = await _meetingService.CreateMeeting(startCallDTO.Meeting);
             var connections = await _whaleService.GetConnections(contact.SecondMember.Id);
-            foreach(var connection in connections)
+            foreach (var connection in connections)
             {
                 await Clients.Client(connection).SendAsync("OnStartCallOthers", new CallDTO { MeetingLink = link, Contact = contact, CallerEmail = startCallDTO.Meeting.CreatorEmail });
             }
@@ -72,12 +73,13 @@ namespace Whale.SignalR.Hubs
 
         [HubMethodName("OnStartGroupCall")]
         public async Task StartGroupCall(StartGroupCallDTO startCallDTO)
-        {   
+        {
             var group = await _groupsService.GetGroupAsync(startCallDTO.GroupId, startCallDTO.Meeting.CreatorEmail);
             var groupUsers = await _groupsService.GetAllUsersInGroupAsync(startCallDTO.GroupId);
             var userToCall = groupUsers.Where(x => x.Email != startCallDTO.Meeting.CreatorEmail);
             var link = await _meetingService.CreateMeeting(startCallDTO.Meeting);
-            foreach (var usr in userToCall) {
+            foreach (var usr in userToCall)
+            {
                 var connections = await _whaleService.GetConnections(usr.Id);
                 foreach (var connection in connections)
                 {
@@ -123,7 +125,7 @@ namespace Whale.SignalR.Hubs
             await _meetingService.ParticipantDisconnect(declineCallDTO.MeetingId, declineCallDTO.Email);
             var groupUsers = await _groupsService.GetAllUsersInGroupAsync(declineCallDTO.GroupId);
             var isUserCaller = groupUsers.FirstOrDefault(x => x.Email == declineCallDTO.Email);
-            if (declineCallDTO.UserId == isUserCaller.Id )
+            if (declineCallDTO.UserId == isUserCaller.Id)
             {
                 foreach (var usr in groupUsers)
                 {
@@ -135,8 +137,6 @@ namespace Whale.SignalR.Hubs
                 }
             }
         }
-
-
 
         [HubMethodName("onNewNotification")]
         public Task NewNotification(string userEmail, NotificationDTO notificationDTO)
@@ -161,5 +161,36 @@ namespace Whale.SignalR.Hubs
             await Clients.Group(contact.FirstMember.Email).SendAsync("onDeleteContact", contact.Id);
             await Clients.Group(contact.SecondMember.Email).SendAsync("onDeleteContact", contact.Id);
         }
+
+        [HubMethodName("OnNewGroup")]
+        public async Task NewGroup(GroupDTO groupDTO, Guid userId)
+        {
+            var group = await _groupsService.GetGroupAsync(groupDTO.Id, groupDTO.CreatorEmail);
+            var groupUsers = await _groupsService.GetAllUsersInGroupAsync(groupDTO.Id);
+            var userToNotify = groupUsers.Where(x => x.Email != groupDTO.CreatorEmail);
+            var connections = await _whaleService.GetConnections(userId);
+            foreach (var connection in connections)
+            {
+                await Clients.Client(connection).SendAsync("OnNewGroup", groupDTO);
+            }
+        }
+
+        [HubMethodName("OnDeleteGroup")]
+        public async Task DeleteGroup(Guid groupDTO, IEnumerable<GroupUser> groupUsers)
+        {
+            var _groupUsers = groupUsers;
+            foreach (var usr in _groupUsers)
+            {
+                var connections = await _whaleService.GetConnections(usr.UserId);
+                foreach (var connection in connections)
+                {
+                    await Clients.Client(connection).SendAsync("OnDeleteGroup", groupDTO);
+                }
+            }
+
+        }
+
+
+
     }
 }
