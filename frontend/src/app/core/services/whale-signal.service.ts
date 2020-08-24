@@ -4,7 +4,13 @@ import { SignalRService } from '../services/signal-r.service';
 import { from, Observable, Subject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { Notification, Contact, MeetingLink, Call, UserOnline } from '@shared/models';
+import {
+  Notification,
+  Contact,
+  MeetingLink,
+  Call,
+  UserOnline,
+} from '@shared/models';
 
 @Injectable({
   providedIn: 'root',
@@ -96,7 +102,6 @@ export class WhaleSignalService {
         this.signalHub.on('onDeleteNotification', (notificationId: string) => {
           this.removeNotify.next(notificationId);
         });
-
       });
   }
 
@@ -116,5 +121,5 @@ export enum WhaleSignalMethods {
   onNewContact,
   onDeleteContact,
   onNewNotification,
-  onDeleteNotification
+  onDeleteNotification,
 }

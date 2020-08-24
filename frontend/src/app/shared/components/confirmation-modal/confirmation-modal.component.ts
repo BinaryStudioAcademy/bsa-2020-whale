@@ -7,10 +7,11 @@ export interface ConfirmationModal {
 @Component({
   selector: 'app-confirmation-modal',
   templateUrl: './confirmation-modal.component.html',
-  styleUrls: ['./confirmation-modal.component.sass']
+  styleUrls: ['./confirmation-modal.component.sass'],
 })
-export class ConfirmationModalComponent extends SimpleModalComponent<ConfirmationModal, boolean>
-implements ConfirmationModal {
+export class ConfirmationModalComponent
+  extends SimpleModalComponent<ConfirmationModal, boolean>
+  implements ConfirmationModal {
   message: string;
   constructor() {
     super();

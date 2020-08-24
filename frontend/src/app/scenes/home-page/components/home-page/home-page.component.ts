@@ -11,7 +11,7 @@ import { MeetingService } from 'app/core/services/meeting.service';
 import { Router } from '@angular/router';
 import { MeetingCreate } from '@shared/models/meeting/meeting-create';
 import { takeUntil, tap } from 'rxjs/operators';
-import { Subject} from 'rxjs';
+import { Subject } from 'rxjs';
 import { Group } from '@shared/models/group/group';
 import { GroupService } from 'app/core/services/group.service';
 import { WhaleSignalService } from 'app/core/services/whale-signal.service';
@@ -215,9 +215,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   addNewContact(): void {
-    this.simpleModalService.addModal(AddContactModalComponent).subscribe(
-      contact => this.contactAdd(contact)
-    );
+    this.simpleModalService
+      .addModal(AddContactModalComponent)
+      .subscribe((contact) => this.contactAdd(contact));
   }
 
   isContactActive(contact): boolean {
@@ -276,19 +276,21 @@ export class HomePageComponent implements OnInit, OnDestroy {
   onContactClick(contact: Contact): void {
     if (!contact.isAccepted) {
       this.simpleModalService
-      .addModal(ConfirmationModalComponent, {
-        message: 'Are you sure you want to cancel the request?'
-      })
-      .subscribe((isConfirm) => {
-        if (isConfirm) {
-          this.contactService.DeletePendingContact(contact.secondMember.email).subscribe(
-            (resp) => {
-              this.toastr.success('Canceled');
-            },
-            (error) => this.toastr.error(error.Message)
-          );
-        }
-      });
+        .addModal(ConfirmationModalComponent, {
+          message: 'Are you sure you want to cancel the request?',
+        })
+        .subscribe((isConfirm) => {
+          if (isConfirm) {
+            this.contactService
+              .DeletePendingContact(contact.secondMember.email)
+              .subscribe(
+                (resp) => {
+                  this.toastr.success('Canceled');
+                },
+                (error) => this.toastr.error(error.Message)
+              );
+          }
+        });
       return;
     }
     this.falseAllBooleans();

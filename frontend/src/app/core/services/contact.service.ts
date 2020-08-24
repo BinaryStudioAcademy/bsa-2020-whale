@@ -21,6 +21,8 @@ export class ContactService {
     );
   }
   public DeletePendingContact(email: string): Observable<HttpResponse<void>> {
-    return this.httpService.deleteFullRequest<void>(`${this.routePrefix}/email/${email}`);
+    return this.httpService.deleteFullRequest<void>(
+      `${this.routePrefix}/email/${email}`
+    );
   }
 }

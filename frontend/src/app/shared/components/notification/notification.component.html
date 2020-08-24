@@ -7,11 +7,14 @@
       class="ui teal button"
       (click)="onAcceptContact(); $event.stopPropagation()"
     >
-        Accept
+      Accept
     </button>
     <div class="or"></div>
-    <button class="ui button" (click)="onRejectContact(); $event.stopPropagation()">
-        Reject
+    <button
+      class="ui button"
+      (click)="onRejectContact(); $event.stopPropagation()"
+    >
+      Reject
     </button>
   </div>
   <div *ngIf="isText" class="mini ui buttons">

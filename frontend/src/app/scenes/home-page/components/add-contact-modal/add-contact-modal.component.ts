@@ -32,8 +32,7 @@ export class AddContactModalComponent extends SimpleModalComponent<
         (resp) => {
           if (!resp.body.isAccepted) {
             this.toastr.success('Request has been sent');
-          }
-          else {
+          } else {
             this.toastr.success('Contact has been added');
           }
           this.result = resp.body;

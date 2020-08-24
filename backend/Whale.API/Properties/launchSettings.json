@@ -14,6 +14,7 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
+        "SENDGRID_API_KEY": "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",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
