@@ -33,7 +33,12 @@ export class DivisionByRoomsModalComponent
   }
 
   public divide(): void {
-    this.meetingSignalrService.invoke(SignalMethods.CreateRoom, this.meetingId);
+    this.devidedParticipants.forEach((participants) => {
+      this.meetingSignalrService.invoke(SignalMethods.CreateRoom, {
+        meetingId: this.meetingId,
+        participantsIds: participants.map((p) => p.id),
+      });
+    });
     this.close();
   }
 

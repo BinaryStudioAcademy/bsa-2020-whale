@@ -8,6 +8,7 @@ using Whale.Shared.Models.Participant;
 using Whale.Shared.Models.Meeting;
 using Whale.Shared.Models.Meeting.MeetingMessage;
 using Whale.Shared.Models.Poll;
+using Whale.Shared.Models.Room;
 using Whale.SignalR.Models.Drawing;
 using Whale.SignalR.Models.Media;
 using Whale.DAL.Models;
@@ -223,12 +224,17 @@ namespace Whale.SignalR.Hubs
         }
 
         [HubMethodName("CreateRoom")]
-        public async Task CreateRoom(string meetingId)
+        public async Task CreateRoom(RoomCreate roomCreateData)
         {
             var roomUrl = ShortId.Generate(true, true);
             await _redisService.ConnectAsync();
             await _redisService.SetAsync(roomUrl, new MeetingMessagesAndPasswordDTO { Password = "" });
-            await Clients.Group(meetingId).SendAsync("OnRoomCreated", roomUrl);
+
+            foreach (var participantId in roomCreateData.ParticipantsIds) 
+            {
+                var participant = _groupsParticipants[roomCreateData.MeetingId].Find(p => p.Id.ToString() == participantId);
+                await Clients.Client(participant.ActiveConnectionId).SendAsync("OnRoomCreated", roomUrl);
+            }
         }
     }
 }
