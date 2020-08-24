@@ -11,7 +11,9 @@ namespace Whale.DAL.Models.Poll
         public string Title { get; set; }
         public bool IsAnonymous { get; set; }
         public bool IsSingleChoice { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
 
-        public ICollection<string> Options { get; set; }
+        public IEnumerable<OptionResult> OptionResults { get; set; } = new List<OptionResult>();
+        public IEnumerable<Voter> VotedUsers { get; set; } = new List<Voter>();
     }
 }

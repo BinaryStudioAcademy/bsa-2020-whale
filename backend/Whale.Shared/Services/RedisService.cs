@@ -54,13 +54,13 @@ namespace Whale.Shared.Services
             await db.SetAddAsync(setKey, JsonConvert.SerializeObject(value));
         }
 
-        public async Task<ICollection<T>> GetSetMembers<T>(string setKey)
+        public async Task<IEnumerable<T>> GetSetMembers<T>(string setKey)
         {
             var db = _redis.GetDatabase();
             RedisValue[] values = await db.SetMembersAsync(setKey);
             var stringValues = values.ToStringArray();
             var json = $"[{String.Join(",", stringValues)}]";
-            return JsonConvert.DeserializeObject<ICollection<T>>(json);
+            return JsonConvert.DeserializeObject<IEnumerable<T>>(json);
         }
 
         public async Task DeleteSetMember<T>(string setKey, T setMember)

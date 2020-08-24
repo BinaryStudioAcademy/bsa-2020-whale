@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 using System.Text.Json.Serialization;
 using Whale.DAL.Abstraction;
-using Whale.DAL.Models.Poll;
+using Polls = Whale.DAL.Models.Poll;
 
 namespace Whale.DAL.Models
 {
@@ -19,8 +19,8 @@ namespace Whale.DAL.Models
 
         [NotMapped]
         public IEnumerable<Participant> Participants { get; set; }
-        [NotMapped]
-        public IEnumerable<PollResult> PollResults { get; set; }
+
+        public IEnumerable<Polls.Poll> PollResults { get; set; }
 
         public Meeting() { }
 
@@ -43,7 +43,7 @@ namespace Whale.DAL.Models
             Participants = participants;
         }
 
-        public Meeting(Meeting meeting, IEnumerable<PollResult> pollResults) : this(meeting)
+        public Meeting(Meeting meeting, IEnumerable<Polls.Poll> pollResults) : this(meeting)
         {
             PollResults = pollResults;
         }

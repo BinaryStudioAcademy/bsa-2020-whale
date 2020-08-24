@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,23 +38,10 @@ namespace Whale.MeetingAPI.Services
 
 			Poll pollEntity = _mapper.Map<Poll>(pollCreateDto);
 			pollEntity.Id = Guid.NewGuid();
+			pollEntity.CreatedAt = DateTimeOffset.Now;
 
 			_redisService.Connect();
 			await _redisService.AddToSet<Poll>(pollEntity.MeetingId.ToString() + nameof(Poll), pollEntity);
-
-			var emptyPollResult = new PollResult
-			{
-				PollId = pollEntity.Id,
-				Title = pollEntity.Title,
-				IsAnonymous = pollEntity.IsAnonymous,
-			};
-
-			// fill emptyPollResult's OptionResults
-			emptyPollResult.OptionResults = pollEntity.Options
-				.Select(option => new OptionResult { Option = option })
-				.ToList();
-
-			await _redisService.AddToSet<PollResult>(pollEntity.MeetingId.ToString() + nameof(PollResult), emptyPollResult);
 
 			var pollDto = _mapper.Map<PollDTO>(pollEntity);
 			return pollDto;
@@ -65,81 +53,51 @@ namespace Whale.MeetingAPI.Services
 
 			var voteEntity = _mapper.Map<Vote>(voteDto);
 
-			string resultSetKey = voteDto.MeetingId + nameof(PollResult);
-			var pollResults = await _redisService.GetSetMembers<PollResult>(resultSetKey);
-			var pollResult = pollResults.FirstOrDefault(result => result.PollId == voteDto.Poll.Id);
+			string resultSetKey = voteDto.MeetingId + nameof(Poll);
+			var polls = await _redisService.GetSetMembers<Poll>(resultSetKey);
+			var poll = polls.FirstOrDefault(poll => poll.Id == voteDto.PollId);
 
-			await _redisService.DeleteSetMember<PollResult>(resultSetKey, pollResult);
-
+			await _redisService.DeleteSetMember<Poll>(resultSetKey, poll);
 
 			// include user's vote in OptionResults
-			foreach(string choosedOption in voteDto.ChoosedOptions)
+			foreach (string choosedOption in voteDto.ChoosedOptions)
 			{
-				OptionResult optionResult = pollResult.OptionResults.FirstOrDefault(optResult => optResult.Option == choosedOption);
-				optionResult.VotedUsers.Add(voteEntity.User);
-				optionResult.VoteCount += 1;
+				OptionResult optionResult = poll.OptionResults.FirstOrDefault(optResult => optResult.Option == choosedOption);
+				optionResult.VotedUserIds = optionResult.VotedUserIds.Append(voteDto.User.Id);
 			}
 
-			pollResult.TotalVoted += 1;
-			pollResult.VoteCount += voteDto.ChoosedOptions.Length;
-
-
-			await _redisService.AddToSet<PollResult>(resultSetKey, pollResult);
+			if (!poll.IsAnonymous && !poll.VotedUsers.Any(voter => voter.Id == voteDto.User.Id))
+			{
+				var voter = _mapper.Map<Voter>(voteDto.User);
+				poll.VotedUsers = poll.VotedUsers.Append(voter);
+			}
 			
-			if (pollResult.IsAnonymous)
-			{
-				pollResult.OptionResults = pollResult.OptionResults.Select(optionResult => new OptionResult
-				{
-					Option = optionResult.Option,
-					VoteCount = optionResult.VoteCount,
-					VotedUsers = Enumerable.Empty<Voter>().ToList()
-				}).ToList();
-			}
+			await _redisService.AddToSet<Poll>(resultSetKey, poll);
 
 			// signal
 			var connection = await _signalrService.ConnectHubAsync("meeting");
-			await connection.InvokeAsync("OnPollResults", voteDto.MeetingId.ToString(), pollResult);
+			var pollResultDto = _mapper.Map<PollResultDTO>(poll);
+			await connection.InvokeAsync("OnPollResults", voteDto.MeetingId.ToString(), pollResultDto);
 		}
 
-		public async Task<PollsAndResultsDTO> GetPolls(string meetingId, string userEmail)
+		public async Task<PollsAndResultsDTO> GetPollsAndResults(Guid meetingId, Guid userId)
 		{
 			_redisService.Connect();
 
 			var polls = await _redisService.GetSetMembers<Poll>(meetingId + nameof(Poll));
-			var pollResults = await _redisService.GetSetMembers<PollResult>(meetingId + nameof(PollResult));
+			polls = polls.OrderByDescending(poll => poll.CreatedAt);
 
+			var resultsToSend = polls
+				.Where(poll => poll.OptionResults
+				.Any(optRes => optRes.VotedUserIds
+				.Any(id => id == userId)));
 
-			var resultsToSend = pollResults
-				.Where(pollResult => pollResult.OptionResults
-				.Any(optRes => optRes.VotedUsers
-				.Any(user => user.Email == userEmail))).ToList();
-
-			//var anonResults = resultsToSend.Where(result => !result.IsAnonymous);
-			//var nonAnonResults = resultsToSend.Except(anonResults);
-			resultsToSend.ForEach(result =>
-			{
-				if (result.IsAnonymous)
-				{
-					result.OptionResults.ForEach(oR => oR.VotedUsers = new List<Voter>());
-				}
-			});
-
-			//resultsToSend = anonResults.Concat(resultsToSend.Except(anonResults)).ToList();
-
-			var pollsToSend = new List<Poll>();
-
-			foreach (var poll in polls)
-			{
-				if(!resultsToSend.Any(result => result.PollId == poll.Id))
-				{
-					pollsToSend.Add(poll);
-				}
-			}
+			var pollsToSend = polls.Except(resultsToSend);
 
 			var pollsAndResultsDTO = new PollsAndResultsDTO
 			{
-				Polls = _mapper.Map<ICollection<PollDTO>>(pollsToSend),
-				Results = _mapper.Map<ICollection<PollResultDTO>>(resultsToSend),
+				Polls = _mapper.Map<IEnumerable<PollDTO>>(pollsToSend),
+				Results = _mapper.Map<IEnumerable<PollResultDTO>>(resultsToSend),
 			};
 
 			return pollsAndResultsDTO;
@@ -150,16 +108,9 @@ namespace Whale.MeetingAPI.Services
 			_redisService.Connect();
 
 			string pollsKey = meetingId + nameof(Poll);
-			string resultsKey = meetingId + nameof(PollResult);
-
 			var polls = await _redisService.GetSetMembers<Poll>(pollsKey);
-			var pollResults = await _redisService.GetSetMembers<PollResult>(resultsKey);
-
 			var pollToDelete = polls.FirstOrDefault(poll => poll.Id.ToString() == pollId);
-			var resultToDelete = pollResults.FirstOrDefault(result => result.PollId.ToString() == pollId);
-
 			await _redisService.DeleteSetMember(pollsKey, pollToDelete);
-			await _redisService.DeleteSetMember(resultsKey, resultToDelete);
 
 			// signal
 			var connection = await _signalrService.ConnectHubAsync("meeting");
@@ -169,32 +120,24 @@ namespace Whale.MeetingAPI.Services
 		public async Task SavePollResultsToDatabaseAndDeleteFromRedis(Guid meetingId)
 		{
 			_redisService.Connect();
-			var pollResults = await _redisService.GetSetMembers<PollResult>(meetingId + nameof(PollResult));
 			var polls = await _redisService.GetSetMembers<Poll>(meetingId + nameof(Poll));
 
-			foreach (var result in pollResults)
-			{
-				result.MeetingId = meetingId;
-			}
-			await _context.PollResults.AddRangeAsync(pollResults);
+			await _context.PollResults.AddRangeAsync(polls);
 			await _context.SaveChangesAsync();
  
-			await DeletePollsAndResultsFromRedis(meetingId, polls, pollResults);
+			await DeletePollsAndResultsFromRedis(meetingId, polls);
 		}
 
-		public async Task DeletePollsAndResultsFromRedis(Guid meetingId, ICollection<Poll> polls, ICollection<PollResult> pollResults)
+		public async Task DeletePollsAndResultsFromRedis(Guid meetingId, IEnumerable<Poll> polls)
 		{
-			var pollList = polls.ToList();
-			var resultList = pollResults.ToList();
+			string key = meetingId + nameof(Poll);
 
-			foreach (int index in Enumerable.Range(0, polls.Count))
+			foreach (var poll in polls)
 			{
-				await _redisService.DeleteSetMember<Poll>(meetingId + nameof(Poll), pollList[index]);
-				await _redisService.DeleteSetMember<PollResult>(meetingId + nameof(PollResult), resultList[index]);
+				await _redisService.DeleteSetMember<Poll>(key, poll);
 			}
 
 			await _redisService.DeleteKey(meetingId + nameof(Poll));
-			await _redisService.DeleteKey(meetingId + nameof(PollResult));
 		}
 	}
 }

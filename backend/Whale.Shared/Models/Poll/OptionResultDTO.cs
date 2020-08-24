@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Collections.Generic;
 
 namespace Whale.Shared.Models.Poll
@@ -6,7 +7,6 @@ namespace Whale.Shared.Models.Poll
 	public class OptionResultDTO
 	{
 		public string Option { get; set; }
-		public int VoteCount { get; set; }
-		public List<VoterDTO> VotedUsers { get; set; }
+		public IEnumerable<Guid> VotedUserIds { get; set; }
 	}
 }
