@@ -91,7 +91,6 @@ namespace Whale.SignalR.Hubs
         {
             var group = await _groupsService.GetGroupAsync(groupId);
             var groupUsers = await _groupsService.GetAllUsersInGroupAsync(group.Id);
-            //var userToCall = groupUsers.Where(x => x.Email != startCallDTO.Meeting.CreatorEmail);
             foreach (var usr in groupUsers)
             {
                 var connections = await _whaleService.GetConnections(usr.Id);

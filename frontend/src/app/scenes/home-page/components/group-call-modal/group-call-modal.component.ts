@@ -29,6 +29,7 @@ export class GroupCallModalComponent extends SimpleModalComponent<Group, null>
   description: string;
   pinnedMessageId?: string;
 
+  isAnyoneThere: Boolean;
   link: MeetingLink;
   callCreator: User;
   private unsubscribe$ = new Subject<void>();
@@ -46,6 +47,7 @@ export class GroupCallModalComponent extends SimpleModalComponent<Group, null>
   }
 
   ngOnInit(): void {
+    this.isAnyoneThere = true;
     this.upstateService
       .getLoggedInUser()
       .pipe(tap())
@@ -84,6 +86,12 @@ export class GroupCallModalComponent extends SimpleModalComponent<Group, null>
         ]);
         this.close();
       });
+    setTimeout(() => {
+      this.isAnyoneThere = false;
+      setTimeout(() => {
+        this.decline();
+      }, 5000);
+    }, 100000);
   }
 
   decline(): void {

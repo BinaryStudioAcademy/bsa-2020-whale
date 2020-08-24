@@ -5,6 +5,11 @@
 >
   <div class="ui mini modal visible active" (click)="$event.stopPropagation()">
     <div class="header">Calling to {{ label }} group</div>
+    <div class="content">
+      <div class="ui floating message" *ngIf="!isAnyoneThere">
+        Seems noone has joined the call...
+      </div>
+    </div>
     <!-- <div class="content">
       <img
         class="ui centered circular small image"
