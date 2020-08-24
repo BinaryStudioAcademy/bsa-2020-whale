@@ -26,7 +26,7 @@ namespace Whale.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<ActionResult<IEnumerable<GroupDTO>>> GetAll()
         {
             string email = HttpContext?.User.Claims
                 .FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;

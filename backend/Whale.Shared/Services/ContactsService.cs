@@ -100,7 +100,7 @@ namespace Whale.Shared.Services
             return dtoContact;
         }
 
-        public async Task UpdateContactAsync(ContactEditDTO contactDTO, string userEmail)
+        public async Task<ContactDTO> UpdateContactAsync(ContactEditDTO contactDTO, string userEmail)
         {
             var entity = _context.Contacts
                 .Include(c => c.FirstMember)
@@ -111,8 +111,10 @@ namespace Whale.Shared.Services
                 throw new InvalidCredentials();
             if (entity == null)
                 throw new NotFoundException("Contact", contactDTO.Id.ToString());
-
+            entity.PinnedMessageId = contactDTO.PinnedMessageId;
+            _context.Contacts.Update(entity);
             await _context.SaveChangesAsync();
+            return await GetContactAsync(entity.Id, userEmail);
         }
 
         public async Task<bool> DeleteContactAsync(Guid contactId, string userEmail)

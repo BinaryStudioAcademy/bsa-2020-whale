@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -23,7 +24,7 @@ namespace Whale.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<ActionResult<IEnumerable<ContactDTO>>> GetAll()
         {
             string email = HttpContext?.User.Claims
                 .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
@@ -36,7 +37,7 @@ namespace Whale.API.Controllers
         }
 
         [HttpGet("id/{contactId}")]
-        public async Task<IActionResult> Get(Guid contactId)
+        public async Task<ActionResult<ContactDTO>> Get(Guid contactId)
         {
             string email = HttpContext?.User.Claims
                 .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
@@ -49,7 +50,7 @@ namespace Whale.API.Controllers
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> CreateFromEmail([FromQuery(Name = "email")] string contactnerEmail)
+        public async Task<ActionResult<ContactDTO>> CreateFromEmail([FromQuery(Name = "email")] string contactnerEmail)
         {
             var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
             var createdContact = await _contactsService.CreateContactFromEmailAsync(ownerEmail, contactnerEmail);
@@ -82,14 +83,12 @@ namespace Whale.API.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update([FromBody] ContactEditDTO contactDTO)
+        public async Task<ActionResult<ContactDTO>> Update([FromBody] ContactEditDTO contactDTO)
         {
             string email = HttpContext?.User.Claims
                 .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 
-            await _contactsService.UpdateContactAsync(contactDTO, email);
-
-            return Ok();
+            return Ok (await _contactsService.UpdateContactAsync(contactDTO, email));
         }
     }
 }
