@@ -130,12 +130,11 @@
         [groupSelected]="groupSelected"
         (chat)="groupVisibilityChange($event)"
       ></app-group-chat>
-      <div *ngIf="historyVisibility">
-        <app-history
-          [user]="loggedInUser"
-          (historyClose)="closeHistory()"
-        ></app-history>
-      </div>
+      <app-history
+        *ngIf="historyVisibility"
+        [user]="loggedInUser"
+        (historyClose)="closeHistory()"
+      ></app-history>
       <div *ngIf="actionsVisibility" class="vertically-aligned chat ui segment">
         <div
           id="home-chat-go-shedule"
