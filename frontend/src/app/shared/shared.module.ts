@@ -20,6 +20,7 @@ import { OutputSettingsComponent } from './components/settings/output-settings/o
 import { NotificationComponent } from './components/notification/notification.component';
 import { MeetingInviteComponent } from './components/meeting-invite/meeting-invite.component';
 import { EmailTagComponent } from './components/meeting-invite/email-tag/email-tag.component';
+import { ConfirmationModalComponent } from './components/confirmation-modal/confirmation-modal.component';
 
 @NgModule({
   declarations: [
@@ -40,6 +41,7 @@ import { EmailTagComponent } from './components/meeting-invite/email-tag/email-t
     NotificationComponent,
     MeetingInviteComponent,
     EmailTagComponent,
+    ConfirmationModalComponent,
   ],
   imports: [
     CommonModule,

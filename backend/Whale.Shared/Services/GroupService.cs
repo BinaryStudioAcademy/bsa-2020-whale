@@ -106,6 +106,26 @@ namespace Whale.Shared.Services
 
             return true;
         }
+
+        public async Task<bool> RemoveUserFromGroup(Guid groupId, string userEmail)
+        {
+            var group = _context.Groups.FirstOrDefault(c => c.Id == groupId);
+            if (group is null) return false;
+
+            var user = _context.Users.FirstOrDefault(c => c.Email == userEmail);
+            if (user is null) return false;
+
+            var userInGroup = await _context.GroupUsers
+               .Include(g => g.User)
+               .Include(g => g.Group)
+               .FirstOrDefaultAsync(g => g.UserId == user.Id && g.GroupId == group.Id);
+
+            _context.GroupUsers.Remove(userInGroup);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
         public async Task<IEnumerable<UserDTO>> GetAllUsersInGroupAsync(Guid groupId)
         {
             var user = await _context.Groups.FirstOrDefaultAsync(u => u.Id == groupId);

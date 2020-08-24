@@ -62,7 +62,7 @@ namespace Whale.Shared.Services
             await _context.SaveChangesAsync();
             var createdNotificationDTO = _mapper.Map<NotificationDTO>(notification);
 
-            var connection = await _signalrService.ConnectHubAsync("notificationHub");
+            var connection = await _signalrService.ConnectHubAsync("whale");
             await connection.InvokeAsync("onNewNotification", userEmail, createdNotificationDTO);
 
             return createdNotificationDTO;
@@ -86,6 +86,26 @@ namespace Whale.Shared.Services
             };
 
             return AddNotification(contacter, JsonConvert.SerializeObject(options, camelSettings), NotificationTypeEnum.AddContactNotification);
+        }
+
+        public async Task DeleteNotificationPendingContactAsync(string owner, string contacter)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == contacter);
+            if (user is null)
+                throw new NotFoundException("User", contacter);
+            var options = new OptionsAddContact
+            {
+                ContactEmail = owner,
+            };
+            var optionsDTO = JsonConvert.SerializeObject(options, camelSettings);
+            var notification = await _context.Notifications.FirstOrDefaultAsync(n => n.UserId == user.Id && n.Options == optionsDTO);
+            if (notification is null)
+                throw new NotFoundException("Notification");
+            _context.Notifications.Remove(notification);
+            await _context.SaveChangesAsync();
+            var connection = await _signalrService.ConnectHubAsync("whale");
+            await connection.InvokeAsync("onDeleteNotification", contacter, notification.Id);
+            return;
         }
 
         public async Task DeleteNotificationAsync(string userEmail, Guid notificationId)

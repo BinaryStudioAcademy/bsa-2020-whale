@@ -67,6 +67,17 @@ namespace Whale.API.Controllers
 
             return NotFound();
         }
+
+        [HttpDelete("{groupId}/{userEmail}")]
+        public async Task<IActionResult> RemoveUserFromGroup(Guid groupId, string userEmail)
+        {
+            var deleted = await _groupService.RemoveUserFromGroup(groupId, userEmail);
+
+            if (deleted) return NoContent();
+
+            return NotFound();
+        }
+
         [HttpPost("user")]
         public async Task<ActionResult<GroupUserDTO>> CreateNewUserInGroup([FromBody] GroupUserCreateDTO newUserInGroup)
         {

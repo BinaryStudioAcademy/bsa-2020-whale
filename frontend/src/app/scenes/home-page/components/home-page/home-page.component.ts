@@ -10,19 +10,15 @@ import { ToastrService } from 'ngx-toastr';
 import { MeetingService } from 'app/core/services/meeting.service';
 import { Router } from '@angular/router';
 import { MeetingCreate } from '@shared/models/meeting/meeting-create';
-import { filter, takeUntil, tap } from 'rxjs/operators';
-import { Subject, from } from 'rxjs';
-import { AuthService } from 'app/core/auth/auth.service';
-import { LinkTypeEnum } from '@shared/Enums/LinkTypeEnum';
-import { BlobService } from '../../../../core/services/blob.service';
+import { takeUntil, tap } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 import { Group } from '@shared/models/group/group';
 import { GroupService } from 'app/core/services/group.service';
-import { environment } from '@env';
-import { SignalRService } from 'app/core/services/signal-r.service';
-import { HubConnection } from '@aspnet/signalr';
 import { WhaleSignalService } from 'app/core/services/whale-signal.service';
 import { UserOnline } from '@shared/models/user/user-online';
 import { UpstateService } from 'app/core/services/upstate.service';
+import { ContactService } from 'app/core/services';
+import { ConfirmationModalComponent } from '@shared/components/confirmation-modal/confirmation-modal.component';
 
 @Component({
   selector: 'app-home-page',
@@ -43,9 +39,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
   ownerEmail: string;
   contactSelected: Contact;
   groupSelected: Group;
-  private hubConnection: HubConnection;
-  private receivedContact = new Subject<Contact>();
-  public receivedContact$ = this.receivedContact.asObservable();
 
   public isContactsLoading = true;
   public isUserLoadig = true;
@@ -60,12 +53,10 @@ export class HomePageComponent implements OnInit, OnDestroy {
     private simpleModalService: SimpleModalService,
     private meetingService: MeetingService,
     private router: Router,
-    private authService: AuthService,
     private groupService: GroupService,
-    private blobService: BlobService,
     private upstateService: UpstateService,
-    private signalRService: SignalRService,
-    private whaleSignalrService: WhaleSignalService
+    private whaleSignalrService: WhaleSignalService,
+    private contactService: ContactService
   ) {}
 
   ngOnDestroy(): void {
@@ -123,11 +114,31 @@ export class HomePageComponent implements OnInit, OnDestroy {
                       this.toastr.error(err.Message);
                     }
                   );
+
+                this.whaleSignalrService.receiveContact$
+                  .pipe(takeUntil(this.unsubscribe$))
+                  .subscribe(
+                    (contact) => {
+                      this.contactAdd(contact);
+                    },
+                    (err) => {
+                      console.log(err.message);
+                    }
+                  );
+
+                this.whaleSignalrService.removeContact$
+                  .pipe(takeUntil(this.unsubscribe$))
+                  .subscribe(
+                    (contactId) => {
+                      this.removeContact(contactId);
+                    },
+                    (err) => {
+                      console.log(err.message);
+                    }
+                  );
               },
               (error) => this.toastr.error(error.Message)
             );
-
-          this.subscribeContacts();
         },
         (error) => this.toastr.error(error.Message)
       );
@@ -177,6 +188,13 @@ export class HomePageComponent implements OnInit, OnDestroy {
       });
   }
 
+  public leftGroup(group: Group): void {
+    this.groups.splice(this.groups.indexOf(group), 1);
+    if (!this.groups.length) {
+      this.groupsVisibility = !this.groupsVisibility;
+    }
+  }
+
   deleteGroup(group: Group): void {
     if (
       confirm('Are you sure want to delete the group ' + group.label + ' ?')
@@ -197,7 +215,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   addNewContact(): void {
-    this.simpleModalService.addModal(AddContactModalComponent).subscribe();
+    this.simpleModalService
+      .addModal(AddContactModalComponent)
+      .subscribe((contact) => this.contactAdd(contact));
   }
 
   isContactActive(contact): boolean {
@@ -235,11 +255,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.router.navigate([`${pageName}`]);
   }
 
-  public falseAllBooleans() {
+  public falseAllBooleans(): void {
     this.contactChatVisibility = false;
     this.groupChatVisibility = false;
-    this.groupsVisibility = false;
-    this.contactsVisibility = false;
     this.actionsVisibility = false;
     this.historyVisibility = false;
   }
@@ -256,43 +274,48 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   onContactClick(contact: Contact): void {
-    //this.falseAllBooleans();
-    this.groupChatVisibility = false;
+    if (!contact.isAccepted) {
+      this.simpleModalService
+        .addModal(ConfirmationModalComponent, {
+          message: 'Are you sure you want to cancel the request?',
+        })
+        .subscribe((isConfirm) => {
+          if (isConfirm) {
+            this.contactService
+              .DeletePendingContact(contact.secondMember.email)
+              .subscribe(
+                (resp) => {
+                  this.toastr.success('Canceled');
+                },
+                (error) => this.toastr.error(error.Message)
+              );
+          }
+        });
+      return;
+    }
+    this.falseAllBooleans();
     this.contactChatVisibility = true;
-    this.actionsVisibility = false;
-    this.historyVisibility = false;
     this.groupSelected = undefined;
     this.contactSelected = contact;
   }
 
   onGroupClick(group: Group): void {
-    this.actionsVisibility = false;
-    this.historyVisibility = false;
-    this.contactChatVisibility = false;
+    this.falseAllBooleans();
     this.groupChatVisibility = true;
     this.contactSelected = undefined;
     this.groupSelected = group;
   }
 
-  // onGroupClick(): void {
-  //   this.falseAllBooleans();
-  //   this.contactChatVisibility = true;
-  // }
-
-  // isContactActive(contact): boolean {
-  //   return this.contactSelected === contact;
-  // }
-  public closeHistory() {
+  public closeHistory(): void {
     this.falseAllBooleans();
     this.historyVisibility = false;
     this.actionsVisibility = true;
   }
 
-  public onMeetingHistoryClick() {
+  public onMeetingHistoryClick(): void {
     this.contactChatVisibility = false;
-    this.groupsVisibility = false;
-    this.contactsVisibility = false;
     this.actionsVisibility = false;
+    this.groupChatVisibility = false;
 
     this.historyVisibility = !this.historyVisibility;
 
@@ -308,28 +331,18 @@ export class HomePageComponent implements OnInit, OnDestroy {
       : '';
   }
 
-  subscribeContacts(): void {
-    from(this.signalRService.registerHub(environment.signalrUrl, 'contactsHub'))
-      .pipe(
-        tap((hub) => {
-          this.hubConnection = hub;
-        })
-      )
-      .subscribe(() => {
-        this.hubConnection.on('onNewContact', (contact: Contact) => {
-          this.receivedContact.next(contact);
-        });
-        this.hubConnection.invoke('onConect', this.loggedInUser.email);
-      });
-    this.receivedContact$.pipe(takeUntil(this.unsubscribe$)).subscribe(
-      (contact) => {
-        this.contacts.push(contact);
-        this.contactsVisibility = true;
-      },
-      (err) => {
-        console.log(err.message);
-      }
-    );
+  contactAdd(contact: Contact): void {
+    if (contact) {
+      this.removeContact(contact.id);
+      this.contacts.push(contact);
+      this.contactsVisibility = true;
+    }
+  }
+  removeContact(contactId: string): void {
+    this.contacts = this.contacts.filter((c) => c.id !== contactId);
+    if (!this.contacts.length) {
+      this.contactsVisibility = false;
+    }
   }
 
   public onContactsClick(): void {
