@@ -4,7 +4,7 @@
 
 <div #mainArea class="bg-white">
   <div class="content display-flex">
-    <div class="tools" ngDraggable>
+    <div class="tools" ngDraggable [handle]="handleHand">
       <span data-tooltip="Toggle Microphone" data-position="top left">
         <i
           id="meeting-draggable-mute"
@@ -80,6 +80,7 @@
           class="big user plus icon big-left-margin"
         ></i>
       </span>
+      <i #handleHand class="big hand rock icon drag-icon"></i>
     </div>
     <div *ngIf="isShowParticipants" class="ui participants-container">
       <div class="invite-icon-container">
