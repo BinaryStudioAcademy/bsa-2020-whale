@@ -10,10 +10,10 @@ using Whale.Shared.Services.Abstract;
 using Whale.Shared.Services;
 using Whale.DAL;
 using Whale.DAL.Models;
-using Whale.Shared.DTO.Group;
-using Whale.Shared.DTO.Group.GroupUser;
+using Whale.Shared.Models.Group;
 using Whale.Shared.Models.Group.GroupUser;
 using Whale.Shared.Models.User;
+using Whale.Shared.DTO.Group.GroupUser;
 
 namespace Whale.Shared.Services
 {
@@ -60,6 +60,18 @@ namespace Whale.Shared.Services
                 throw new NotFoundException("Group", groupId.ToString());
 
             return _mapper.Map<GroupDTO>(userGroup.Group);
+        }
+
+        public async Task<GroupDTO> GetGroupAsync(Guid groupId)
+        {
+            var group = await _context.Groups
+                   .Include(g => g.PinnedMessage)
+               .FirstOrDefaultAsync(c => c.Id == groupId);
+
+            if (group == null)
+                throw new NotFoundException("Group", groupId.ToString());
+
+            return _mapper.Map<GroupDTO>(group);
         }
 
         public async Task<GroupDTO> CreateGroupAsync(GroupCreateDTO newGroup, string userEmail)

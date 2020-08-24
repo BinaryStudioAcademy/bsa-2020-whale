@@ -10,6 +10,7 @@ import {
   MeetingLink,
   Call,
   UserOnline,
+  GroupCall,
 } from '@shared/models';
 
 @Injectable({
@@ -30,14 +31,23 @@ export class WhaleSignalService {
   private startCallOthers = new Subject<Call>();
   public startCallOthers$ = this.startCallOthers.asObservable();
 
+  private startCallOthersInGroup = new Subject<GroupCall>();
+  public startCallOthersInGroup$ = this.startCallOthersInGroup.asObservable();
+
   private startCallCaller = new Subject<MeetingLink>();
   public startCallCaller$ = this.startCallCaller.asObservable();
 
   private takeCall = new Subject<void>();
   public takeCall$ = this.takeCall.asObservable();
 
+  private takeGroupCall = new Subject<void>();
+  public takeGroupCall$ = this.takeGroupCall.asObservable();
+
   private declineCall = new Subject<void>();
   public declineCall$ = this.declineCall.asObservable();
+
+  private declineGroupCall = new Subject<void>();
+  public declineGroupCall$ = this.declineGroupCall.asObservable();
 
   private receiveContact = new Subject<Contact>();
   public receiveContact$ = this.receiveContact.asObservable();
@@ -55,6 +65,7 @@ export class WhaleSignalService {
     from(hubService.registerHub(environment.signalrUrl, 'whale'))
       .pipe(
         tap((hub) => {
+          console.log('whale hub connected');
           this.signalHub = hub;
         })
       )
@@ -75,6 +86,13 @@ export class WhaleSignalService {
           this.startCallOthers.next(call);
         });
 
+        this.signalHub.on(
+          'OnStartCallOthersInGroup',
+          (groupCall: GroupCall) => {
+            this.startCallOthersInGroup.next(groupCall);
+          }
+        );
+
         this.signalHub.on('OnStartCallCaller', (link: MeetingLink) => {
           this.startCallCaller.next(link);
         });
@@ -83,8 +101,16 @@ export class WhaleSignalService {
           this.takeCall.next();
         });
 
+        this.signalHub.on('OnTakeGroupCall', () => {
+          this.takeGroupCall.next();
+        });
+
         this.signalHub.on('OnDeclineCall', () => {
           this.declineCall.next();
+        });
+
+        this.signalHub.on('OnDeclineGroupCall', () => {
+          this.declineGroupCall.next();
         });
 
         this.signalHub.on('onNewContact', (contact: Contact) => {
@@ -116,8 +142,11 @@ export enum WhaleSignalMethods {
   OnUserConnect,
   OnUserDisconnect,
   OnStartCall,
+  OnStartGroupCall,
   OnTakeCall,
+  OnTakeGroupCall,
   OnDeclineCall,
+  OnDeclineGroupCall,
   onNewContact,
   onDeleteContact,
   onNewNotification,

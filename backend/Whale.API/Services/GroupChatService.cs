@@ -8,9 +8,8 @@ using System.Threading.Tasks;
 using Whale.DAL;
 using Whale.DAL.Models;
 using Whale.DAL.Settings;
-using Whale.Shared.DTO.GroupMessage;
-using Whale.Shared.Extentions;
 using Whale.Shared.Models.GroupMessage;
+using Whale.Shared.Extentions;
 using Whale.Shared.Services;
 using Whale.Shared.Services.Abstract;
 

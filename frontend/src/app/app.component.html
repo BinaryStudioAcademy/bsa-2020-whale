@@ -5,3 +5,9 @@
   [call]="call"
   (closeEvent)="closeIncomingCall()"
 ></app-incoming-call>
+
+<app-incoming-group-call
+  *ngIf="groupCall"
+  [groupCall]="groupCall"
+  (closeEvent)="closeIncomingGroupCall()"
+></app-incoming-group-call>
