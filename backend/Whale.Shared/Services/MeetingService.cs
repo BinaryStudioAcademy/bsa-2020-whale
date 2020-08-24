@@ -13,6 +13,7 @@ using Whale.Shared.Models.Meeting;
 using Whale.Shared.Models.Participant;
 using Whale.Shared.Models.Meeting.MeetingMessage;
 using shortid;
+using Microsoft.AspNetCore.SignalR.Client;
 
 namespace Whale.Shared.Services
 {
@@ -22,14 +23,16 @@ namespace Whale.Shared.Services
         private readonly UserService _userService;
         private readonly ParticipantService _participantService;
         private readonly EncryptHelper _encryptService;
+        private readonly SignalrService _signalrService;
 
-        public MeetingService(WhaleDbContext context, IMapper mapper, RedisService redisService, UserService userService, ParticipantService participantService, EncryptHelper encryptService)
+        public MeetingService(WhaleDbContext context, IMapper mapper, RedisService redisService, UserService userService, ParticipantService participantService, EncryptHelper encryptService, SignalrService signalrService)
             : base(context, mapper)
         {
             _redisService = redisService;
             _userService = userService;
             _participantService = participantService;
             _encryptService = encryptService;
+            _signalrService = signalrService;
         }
 
         public async Task<MeetingDTO> ConnectToMeeting(MeetingLinkDTO linkDTO, string userEmail)
@@ -121,22 +124,14 @@ namespace Whale.Shared.Services
                 .Where(m => m.Receiver == null || m.Author.Email == userEmail || m.Receiver.Email == userEmail);
         }
 
-        public async Task<bool> ParticipantDisconnect(string groupname, string userEmail)
+        public async Task ParticipantDisconnect(string groupname, string userEmail)
         {
             var participant = await _participantService.GetMeetingParticipantByEmail(Guid.Parse(groupname), userEmail);
             if (participant == null)
                 throw new NotFoundException("Participant");
-
-            var isHost = participant.Role == ParticipantRole.Host;
-            if (isHost)
-            {
-                await _redisService.ConnectAsync();
-                await _redisService.RemoveAsync(groupname);
-            }
-            return isHost;
         }
 
-        public async Task SaveMeetingEndTime(Guid meetingId)
+        public async Task EndMeeting(Guid meetingId)
         {
             var meeting = await _context.Meetings.FirstOrDefaultAsync(m => m.Id == meetingId);
 
@@ -145,8 +140,10 @@ namespace Whale.Shared.Services
                 throw new NotFoundException(nameof(Meeting));
             }
 
-            meeting.EndTime = DateTimeOffset.Now;
+            await _redisService.ConnectAsync();
+            await _redisService.RemoveAsync(meetingId.ToString());
 
+            meeting.EndTime = DateTimeOffset.Now;
             _context.Update(meeting);
             await _context.SaveChangesAsync();
         }
