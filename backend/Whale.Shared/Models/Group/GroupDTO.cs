@@ -12,5 +12,6 @@ namespace Whale.Shared.Models.Group
         public string Description { get; set; }
         public Guid PinnedMessageId { get; set; }
         public GroupMessageDTO PinnedMessage { get; set; }
+        public string CreatorEmail { get; set; }
     }
 }

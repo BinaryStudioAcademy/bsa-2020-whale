@@ -1,0 +1,24 @@
+<div class="ui dimmer modals page visible active">
+  <div class="ui mini modal visible active">
+    <h3 class="header">Confirmation</h3>
+    <div class="content">
+      <p>{{ message }}</p>
+    </div>
+    <div class="actions">
+      <div
+        id="confirmation-modal-confirm"
+        class="ui primary button"
+        (click)="onButtonClick(true)"
+      >
+        Confirm
+      </div>
+      <div
+        id="confirmation-modal-cancel"
+        class="ui button"
+        (click)="onButtonClick(false)"
+      >
+        Cancel
+      </div>
+    </div>
+  </div>
+</div>

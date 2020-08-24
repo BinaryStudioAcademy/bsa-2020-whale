@@ -25,7 +25,7 @@ export class CallModalComponent extends SimpleModalComponent<Contact, null>
   secondMemberId: string;
   secondMember?: User;
   pinnedMessage: DirectMessage;
-
+  isAccepted: boolean;
   link: MeetingLink;
 
   private unsubscribe$ = new Subject<void>();

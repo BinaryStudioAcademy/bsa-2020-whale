@@ -1,18 +1,12 @@
-import { Component, OnInit, Input, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from 'app/core/auth/auth.service';
 import { Notification } from 'app/shared/models/notification/notification';
 import { User } from '@shared/models/user';
-import { HttpService } from '../../../core/services/http.service';
-import { tap, filter, takeUntil } from 'rxjs/operators';
-import { BlobService } from '../../../core/services/blob.service';
-import { LinkTypeEnum } from '@shared/Enums/LinkTypeEnum';
+import { tap, takeUntil } from 'rxjs/operators';
 import { UpstateService } from '../../../core/services/upstate.service';
 import { NotificationService } from 'app/core/services/notification.service';
-import { HubConnection } from '@aspnet/signalr';
-import { Subject, from } from 'rxjs';
-import { SignalRService } from 'app/core/services/signal-r.service';
-import { environment } from '@env';
+import { Subject } from 'rxjs';
 import { WhaleSignalService, WhaleSignalMethods } from 'app/core/services';
 
 @Component({
@@ -21,10 +15,7 @@ import { WhaleSignalService, WhaleSignalMethods } from 'app/core/services';
   styleUrls: ['./page-header.component.sass'],
 })
 export class PageHeaderComponent implements OnInit, OnDestroy {
-  private hubConnection: HubConnection;
   public isUserLoadig = true;
-  private receivedNotify = new Subject<Notification>();
-  public receivedNotify$ = this.receivedNotify.asObservable();
   private unsubscribe$ = new Subject<void>();
 
   settingsMenuVisible = false;
@@ -36,11 +27,8 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     public auth: AuthService,
-    private httpService: HttpService,
-    private blobService: BlobService,
     private upstateService: UpstateService,
     private notificationService: NotificationService,
-    private signalRService: SignalRService,
     private whaleSignalrService: WhaleSignalService
   ) {}
 
@@ -59,13 +47,13 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
     if (this.isNotificationsVisible) {
       this.isNotificationsVisible = false;
     }
-
     this.settingsMenuVisible = !this.settingsMenuVisible;
   }
 
   ngOnInit(): void {
     this.getUser();
     this.getNotifications();
+    this.subscribeNotifications();
   }
 
   ngOnDestroy(): void {
@@ -79,7 +67,6 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
       .pipe(tap(() => (this.isUserLoadig = false)))
       .subscribe((userFromDB: User) => {
         this.loggedInUser = userFromDB;
-        this.subscribeNotifications();
       });
   }
   getNotifications(): void {
@@ -89,35 +76,38 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
   }
 
   subscribeNotifications(): void {
-    from(
-      this.signalRService.registerHub(environment.signalrUrl, 'notificationHub')
-    )
-      .pipe(
-        tap((hub) => {
-          this.hubConnection = hub;
-        })
-      )
-      .subscribe(() => {
-        this.hubConnection.on(
-          'onNewNotification',
-          (notification: Notification) => {
-            this.receivedNotify.next(notification);
+    this.whaleSignalrService.receiveNotify$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (newNotification) => {
+          this.notificationsList.push(newNotification);
+        },
+        (err) => {
+          console.log(err.message);
+        }
+      );
+
+    this.whaleSignalrService.removeNotify$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (notificationId) => {
+          this.notificationsList = this.notificationsList.filter(
+            (n) => n.id !== notificationId
+          );
+          if (!this.notificationsList.length) {
+            this.showNotificationsMenu();
           }
-        );
-        this.hubConnection.invoke('onConect', this.loggedInUser.email);
-      });
-    this.receivedNotify$.pipe(takeUntil(this.unsubscribe$)).subscribe(
-      (newNotification) => {
-        this.notificationsList.push(newNotification);
-      },
-      (err) => {
-        console.log(err.message);
-      }
-    );
+        },
+        (err) => {
+          console.log(err.message);
+        }
+      );
   }
+
   goToPage(pageName: string): void {
     this.router.navigate([`${pageName}`]);
   }
+
   logOut(): void {
     this.whaleSignalrService.invoke(
       WhaleSignalMethods.OnUserDisconnect,

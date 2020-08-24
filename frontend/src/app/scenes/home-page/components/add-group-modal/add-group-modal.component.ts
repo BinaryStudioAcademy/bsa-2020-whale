@@ -16,6 +16,7 @@ export class AddGroupModalComponent extends SimpleModalComponent<null, Group> {
     id: '',
     label: '',
     description: '',
+    creatorEmail: '',
   };
   constructor(
     private groupService: GroupService,
@@ -27,6 +28,7 @@ export class AddGroupModalComponent extends SimpleModalComponent<null, Group> {
   }
 
   public submit(): void {
+    this.newGroup.creatorEmail = this.authService.currentUser.email;
     this.groupService.createGroup(this.newGroup).subscribe(
       (resp) => {
         this.result = resp.body;

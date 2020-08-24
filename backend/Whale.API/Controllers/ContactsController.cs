@@ -53,15 +53,28 @@ namespace Whale.API.Controllers
         {
             var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
             var createdContact = await _contactsService.CreateContactFromEmailAsync(ownerEmail, contactnerEmail);
-            if(createdContact is object)
-                return Created($"id/{createdContact.Id}", createdContact);
-            return NoContent();
+            return Created($"id/{createdContact.Id}", createdContact);
+
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var deleted = await _contactsService.DeleteContactAsync(id);
+            string email = HttpContext?.User.Claims
+                .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var deleted = await _contactsService.DeleteContactAsync(id, email);
+
+            if (deleted) return NoContent();
+
+            return NotFound();
+        }
+
+        [HttpDelete("email/{contactEmail}")]
+        public async Task<IActionResult> DeletePendingContactByEmail(string contactEmail)
+        {
+            string userEmail = HttpContext?.User.Claims
+                .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var deleted = await _contactsService.DeletePendingContactByEmailAsync(contactEmail, userEmail);
 
             if (deleted) return NoContent();
 
