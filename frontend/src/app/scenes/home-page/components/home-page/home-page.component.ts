@@ -19,6 +19,7 @@ import { UserOnline } from '@shared/models/user/user-online';
 import { UpstateService } from 'app/core/services/upstate.service';
 import { ContactService } from 'app/core/services';
 import { ConfirmationModalComponent } from '@shared/components/confirmation-modal/confirmation-modal.component';
+import { group } from 'console';
 
 @Component({
   selector: 'app-home-page',
@@ -136,6 +137,31 @@ export class HomePageComponent implements OnInit, OnDestroy {
                       console.log(err.message);
                     }
                   );
+
+                this.whaleSignalrService.receiveGroup$
+                  .pipe(takeUntil(this.unsubscribe$))
+                  .subscribe(
+                    (group) => {
+                      this.toastr.success(
+                        'You were added to ' + group.label + ' group'
+                      );
+                      this.addGroup(group);
+                    },
+                    (err) => {
+                      console.log(err.message);
+                    }
+                  );
+
+                this.whaleSignalrService.removeGroup$
+                  .pipe(takeUntil(this.unsubscribe$))
+                  .subscribe(
+                    (groupId) => {
+                      this.removeGroup(groupId);
+                    },
+                    (err) => {
+                      console.log(err.message);
+                    }
+                  );
               },
               (error) => this.toastr.error(error.Message)
             );
@@ -182,7 +208,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
       .addModal(AddGroupModalComponent)
       .subscribe((group) => {
         if (group !== undefined) {
-          this.groups.push(group);
+          this.addGroup(group);
           this.toastr.success('Group created successfuly');
         }
       });
@@ -203,7 +229,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
         (response) => {
           if (response.status === 204) {
             this.toastr.success(`${group.label} deleted successfuly`);
-            this.groups.splice(this.groups.indexOf(group), 1);
+            this.removeGroup(group.id);
             if (!this.groups.length) {
               this.groupsVisibility = !this.groupsVisibility;
             }
@@ -342,6 +368,24 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.contacts = this.contacts.filter((c) => c.id !== contactId);
     if (!this.contacts.length) {
       this.contactsVisibility = false;
+    }
+  }
+
+  addGroup(group: Group): void {
+    if (group) {
+      this.removeContact(group.id);
+      this.groups.push(group);
+      this.groupsVisibility = true;
+    }
+  }
+  removeGroup(groupId: string): void {
+    if (this.groupSelected?.id === groupId) {
+      this.groupChatVisibility = false;
+      this.actionsVisibility = true;
+    }
+    this.groups = this.groups.filter((c) => c.id !== groupId);
+    if (!this.groups.length) {
+      this.groupsVisibility = false;
     }
   }
 

@@ -11,6 +11,7 @@ import {
   Call,
   UserOnline,
   GroupCall,
+  Group,
 } from '@shared/models';
 
 @Injectable({
@@ -60,6 +61,12 @@ export class WhaleSignalService {
 
   private removeNotify = new Subject<string>();
   public removeNotify$ = this.removeNotify.asObservable();
+
+  private receiveGroup = new Subject<Group>();
+  public receiveGroup$ = this.receiveGroup.asObservable();
+
+  private removeGroup = new Subject<string>();
+  public removeGroup$ = this.removeGroup.asObservable();
 
   constructor(hubService: SignalRService) {
     from(hubService.registerHub(environment.signalrUrl, 'whale'))
@@ -128,6 +135,14 @@ export class WhaleSignalService {
         this.signalHub.on('onDeleteNotification', (notificationId: string) => {
           this.removeNotify.next(notificationId);
         });
+
+        this.signalHub.on('OnNewGroup', (group: Group) => {
+          this.receiveGroup.next(group);
+        });
+
+        this.signalHub.on('OnDeleteGroup', (groupId: string) => {
+          this.removeGroup.next(groupId);
+        });
       });
   }
 
@@ -151,4 +166,6 @@ export enum WhaleSignalMethods {
   onDeleteContact,
   onNewNotification,
   onDeleteNotification,
+  OnNewGroup,
+  OnDeleteGroup,
 }

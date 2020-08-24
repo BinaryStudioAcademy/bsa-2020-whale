@@ -4,7 +4,7 @@ using System.Text;
 using Whale.Shared.Models.User;
 using Whale.Shared.Models.Group;
 
-namespace Whale.Shared.DTO.Group.GroupUser
+namespace Whale.Shared.Models.Group.GroupUser
 {
     public class GroupUserDTO
     {
