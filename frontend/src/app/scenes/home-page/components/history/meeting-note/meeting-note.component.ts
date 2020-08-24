@@ -1,5 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Meeting } from '@shared/models/meeting/meeting';
+import { Duration } from '@shared/models/other/duration';
 
 @Component({
   selector: 'app-meeting-note',
@@ -16,19 +17,29 @@ export class MeetingNoteComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  public calculateDuration(): Date {
+  public calculateDuration(): Duration {
     const start: number = new Date(this.meeting.startTime).getTime();
     const end: number = new Date(this.meeting.endTime).getTime();
 
-    return new Date(end - start);
+    const durationMinutes: number = (end - start) / 60_000;
+    let hours = 0;
+    let minutes = 0;
+
+    hours = Math.floor(durationMinutes / 60);
+    minutes = Math.round(durationMinutes % 60);
+
+    return {
+      hours: hours,
+      minutes: minutes,
+    };
   }
 
-  public stringifyDuration(duration: Date): string {
-    const hours = duration.getUTCHours();
-    const minutes = duration.getUTCMinutes();
-
-    const hourString = hours == 0 ? '' : `${hours} hours `;
-    const minuteString = minutes == 0 && hours != 0 ? '' : `${minutes} minutes`;
+  public stringifyDuration(duration: Duration): string {
+    const hourString = duration.hours == 0 ? '' : `${duration.hours} hours `;
+    const minuteString =
+      duration.minutes == 0 && duration.hours != 0
+        ? ''
+        : `${duration.minutes} minutes`;
 
     return hourString + minuteString;
   }

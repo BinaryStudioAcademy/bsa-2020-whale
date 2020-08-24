@@ -75,7 +75,7 @@ export class HistoryComponent implements OnInit {
     this.ishistoryLoading = true;
     this.httpService.getRequest<Meeting[]>(this.route, params).subscribe(
       (response) => {
-        if (response.length === 0) {
+        if (response.length === 0 && this.meetings.length === 0) {
           this.isMeetingHistoryEmpty = true;
         }
 
