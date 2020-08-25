@@ -257,19 +257,20 @@ namespace Whale.SignalR.Hubs
             var participantHost = _groupsParticipants[roomCreateData.MeetingId]?.FirstOrDefault(p => p.ActiveConnectionId == Context.ConnectionId);
             if (participantHost?.Role == ParticipantRole.Participant) return;
 
-            var roomUrl = Guid.NewGuid().ToString();
+            var roomId = Guid.NewGuid().ToString();
             await _redisService.ConnectAsync();
-            await _redisService.SetAsync(roomUrl, new MeetingMessagesAndPasswordDTO { Password = "", IsRoom = true });
+            await _redisService.SetAsync(roomId, new MeetingMessagesAndPasswordDTO { Password = "", IsRoom = true });
 
-            foreach (var participantId in roomCreateData.ParticipantsIds) 
-            {
-                var participant = _groupsParticipants[roomCreateData.MeetingId].Find(p => p.Id.ToString() == participantId);
-                await Clients.Client(participant.ActiveConnectionId).SendAsync("OnRoomCreated", roomUrl);
-            }
+            await Clients.Caller.SendAsync("OnRoomCreated", roomId);
 
-            await Clients.Caller.SendAsync("OnRoomCreated", roomUrl);
+            var participants = _groupsParticipants[roomCreateData.MeetingId]
+                    .Where(p => roomCreateData.ParticipantsIds.Contains(p.Id.ToString()))
+                    .Select(p => p.ActiveConnectionId)
+                    .ToList();
 
-            _roomService.CloseRoomAfterTimeExpire(roomCreateData.Duration, roomCreateData.MeetingLink, roomUrl);
+            await Clients.Clients(participants).SendAsync("OnRoomCreated", roomId);
+
+            _roomService.CloseRoomAfterTimeExpire(roomCreateData.Duration, roomCreateData.MeetingLink, roomId);
         }
 
         [HubMethodName("OnMoveIntoRoom")]
