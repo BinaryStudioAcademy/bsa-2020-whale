@@ -14,7 +14,11 @@ import { tap, takeUntil } from 'rxjs/operators';
 import { CallDecline } from '@shared/models/call/call-decline';
 import { environment } from '@env';
 import { HubConnection } from '@aspnet/signalr';
-import { WhaleSignalService, WhaleSignalMethods } from 'app/core/services';
+import {
+  WhaleSignalService,
+  WhaleSignalMethods,
+  BlobService,
+} from 'app/core/services';
 @Component({
   selector: 'app-incoming-call',
   templateUrl: './incoming-call.component.html',
@@ -25,10 +29,12 @@ export class IncomingCallComponent implements OnInit, OnDestroy {
   @Output() closeEvent = new EventEmitter();
 
   private hubConnection: HubConnection;
+  audioLink = '';
   private unsubscribe$ = new Subject<void>();
   constructor(
     private whaleSignalrService: WhaleSignalService,
-    private router: Router
+    private router: Router,
+    private blobService: BlobService
   ) {}
   ngOnDestroy(): void {
     this.unsubscribe$.next();
@@ -36,6 +42,10 @@ export class IncomingCallComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.blobService.getAudio('incoming-call').subscribe((resp) => {
+      this.audioLink = resp;
+    });
+
     this.whaleSignalrService.declineCall$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(() => {
