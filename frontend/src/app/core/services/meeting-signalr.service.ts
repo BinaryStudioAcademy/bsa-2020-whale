@@ -70,6 +70,11 @@ export class MeetingSignalrService {
   private canvasErase = new Subject<boolean>();
   public readonly canvasErase$ = this.canvasErase.asObservable();
 
+  private shareScreen = new Subject<string>();
+  public readonly shareScreen$ = this.shareScreen.asObservable();
+
+  private shareScreenStop = new Subject<string>();
+  public readonly shareScreenStop$ = this.shareScreenStop.asObservable();
   constructor(private hubService: SignalRService) {
     from(hubService.registerHub(environment.signalrUrl, 'meeting'))
       .pipe(
@@ -166,6 +171,14 @@ export class MeetingSignalrService {
         this.signalHub.on('OnErasing', (erase: boolean) => {
           this.canvasErase.next(erase);
         });
+
+        this.signalHub.on('OnStartShareScreen', (streamId: string) => {
+          console.log(streamId);
+          this.shareScreen.next(streamId);
+        });
+        this.signalHub.on('OnStopShareScreen', () => {
+          this.shareScreenStop.next();
+        });
       });
   }
 
@@ -193,4 +206,6 @@ export enum SignalMethods {
   OnPollCreated,
   OnDrawing,
   OnErasing,
+  OnStartShareScreen,
+  OnStopShareScreen,
 }

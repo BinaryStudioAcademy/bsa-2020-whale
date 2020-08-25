@@ -197,6 +197,15 @@
               <i
                 id="meeting-options-share"
                 class="big share square icon big-left-margin"
+                (click)="shareScreen()"
+                *ngIf="!isSharing"
+              ></i>
+            </span>
+            <span data-tooltip="Share Screen Stop" data-position="top left">
+              <i
+                class="big stop icon"
+                *ngIf="isSharing"
+                (click)="removeSharingVideo()"
               ></i>
             </span>
             <span data-tooltip="Polls">
