@@ -375,7 +375,9 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (roomId) => {
-          this.router.navigate([`/room/${roomId}`]);
+          if (!this.isHost) {
+            this.router.navigate([`/room/${roomId}`]);
+          }
         },
         (err) => {
           this.toastr.error('Error occured while trying to connect to room');
@@ -444,26 +446,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
         SignalMethods.OnParticipantLeft,
         this.connectionData
       );
-    }
-
-    const ended: boolean =
-      this.currentParticipant?.role == ParticipantRole.Host ||
-      this.meeting?.participants?.findIndex(
-        (p) => p.id != this.currentParticipant?.id
-      ) == -1;
-
-    if (ended) {
-      this.httpService
-        .getRequest(
-          environment.apiUrl + '/api/meeting/end',
-          new HttpParams().set('meetingId', this.meeting.id)
-        )
-        .subscribe(
-          () => {},
-          (error) => console.error(error.Message)
-        );
-
-      this.pollService.savePollResults(this.meeting?.id);
     }
 
     this.unsubscribe$.next();

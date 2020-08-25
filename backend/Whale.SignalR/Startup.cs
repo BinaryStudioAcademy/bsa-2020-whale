@@ -13,6 +13,7 @@ using Whale.Shared.Helpers;
 using Whale.Shared.MappingProfiles;
 using Whale.Shared.Services;
 using Whale.SignalR.Hubs;
+using Whale.SignalR.Services;
 
 namespace Whale.SignalR
 {
@@ -42,6 +43,7 @@ namespace Whale.SignalR
             services.AddTransient<UserService>();
             services.AddTransient<GroupService>();
             services.AddTransient<WhaleService>();
+            services.AddScoped<RoomService>();
 
             services.AddTransient(p => new SignalrService(Configuration.GetValue<string>("SignalR")));
             services.AddScoped(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));

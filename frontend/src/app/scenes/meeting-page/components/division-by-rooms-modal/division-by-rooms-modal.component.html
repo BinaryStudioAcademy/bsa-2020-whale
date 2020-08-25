@@ -6,6 +6,9 @@
       </div>
     </div>
     <div class="content">
+      <div class="ui input">
+        <input type="number" placeholder="Minutes" [(ngModel)]="roomExpiry" />
+      </div>
       <div
         class="ui divided list"
         *ngFor="let participantsOfRoom of devidedParticipants"
@@ -26,7 +29,7 @@
       </div>
     </div>
     <div class="actions">
-      <button class="ui button" (click)="close()">Leave</button>
+      <button class="ui button" (click)="close()">Close</button>
       <button class="ui primary button" (click)="divide()">Divide</button>
     </div>
   </div>

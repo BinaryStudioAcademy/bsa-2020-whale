@@ -14,6 +14,7 @@ using Whale.SignalR.Models.Media;
 using Whale.DAL.Models;
 using shortid;
 using Whale.Shared.Exceptions;
+using Whale.SignalR.Services;
 
 namespace Whale.SignalR.Hubs
 {
@@ -23,15 +24,17 @@ namespace Whale.SignalR.Hubs
         private readonly ParticipantService _participantService;
         private readonly RedisService _redisService;
         private readonly UserService _userService;
+        private readonly RoomService _roomService;
         private readonly static Dictionary<string, List<ParticipantDTO>> _groupsParticipants = 
             new Dictionary<string, List<ParticipantDTO>>();
 
-        public MeetingHub(MeetingService meetingService, ParticipantService participantService, RedisService redisService, UserService userService)
+        public MeetingHub(MeetingService meetingService, ParticipantService participantService, RedisService redisService, UserService userService, RoomService roomService)
         {
             _meetingService = meetingService;
             _participantService = participantService;
             _redisService = redisService;
             _userService = userService;
+            _roomService = roomService;
         }
 
         [HubMethodName("OnUserConnect")]
@@ -248,10 +251,9 @@ namespace Whale.SignalR.Hubs
                 await Clients.Client(participant.ActiveConnectionId).SendAsync("OnRoomCreated", roomUrl);
             }
 
-            await Task.Delay(30000);
-            Console.WriteLine("elapsed");
-            await _redisService.DeleteKey(roomUrl);
-            await Clients.All.SendAsync("OnRoomClosed", roomCreateData.MeetingLink);
+            await Clients.Caller.SendAsync("OnRoomCreated", roomUrl);
+
+            _roomService.CloseRoomAfterTimeExpire(roomCreateData.RoomExpiry, roomCreateData.MeetingLink, roomUrl);
         }
 
         private async Task DeleteMeeting(string meetingId)
