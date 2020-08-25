@@ -106,6 +106,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public receiveingDrawings: boolean = false;
   public isHost = false;
   public isRoom = false;
+  public rooms: string[] = [];
 
   @ViewChild('currentVideo') private currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
@@ -376,7 +377,10 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe(
         (roomId) => {
           if (!this.isHost) {
+            this.connectionData.isMoveToRoom = true;
             this.router.navigate([`/room/${roomId}`]);
+          } else {
+            this.rooms.push(roomId);
           }
         },
         (err) => {
@@ -743,6 +747,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
         streamId: this.currentUserStream.id,
         participant: this.currentParticipant, // this.currentParticipant is undefined here
         isRoom: false,
+        isMoveToRoom: false,
       };
 
       this.getMeeting(link);

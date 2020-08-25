@@ -113,6 +113,8 @@ namespace Whale.SignalR.Hubs
         [HubMethodName("OnParticipantLeft")]
         public async Task ParticipantLeft(MeetingConnectDTO ConnectionData)
         {
+            if (ConnectionData.IsMoveToRoom) return;
+
             var disconnectedParticipant = _groupsParticipants[ConnectionData.MeetingId]
                 .Find(p => p.User.Email == ConnectionData.UserEmail);
 

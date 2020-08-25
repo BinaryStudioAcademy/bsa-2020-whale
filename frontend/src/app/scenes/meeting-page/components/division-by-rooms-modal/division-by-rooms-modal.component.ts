@@ -1,16 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { SimpleModalComponent } from 'ngx-simple-modal';
-import { Participant, ParticipantRole, User, Meeting } from '@shared/models';
+import {
+  Participant,
+  ParticipantRole,
+  RoomCreate,
+  RoomCreateModal,
+} from '@shared/models';
 import { MeetingSignalrService, SignalMethods } from 'app/core/services';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-
-export interface RoomsParticipants {
-  participants: Participant[];
-  numberOfRooms: number;
-  meetingId: string;
-  meetingLink: string;
-}
 
 @Component({
   selector: 'division-by-rooms-modal',
@@ -18,8 +15,8 @@ export interface RoomsParticipants {
   styleUrls: ['./division-by-rooms-modal.component.sass'],
 })
 export class DivisionByRoomsModalComponent
-  extends SimpleModalComponent<RoomsParticipants, void>
-  implements RoomsParticipants, OnInit, OnDestroy {
+  extends SimpleModalComponent<RoomCreateModal, void>
+  implements RoomCreateModal, OnInit, OnDestroy {
   private unsubscribe$ = new Subject<void>();
 
   public meetingLink: string;
@@ -42,13 +39,6 @@ export class DivisionByRoomsModalComponent
       this.participants,
       Math.round(this.participants.length / this.numberOfRooms)
     );
-
-    this.meetingSignalrService.onRoomCreated$
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe((roomId) => {
-        this.rooms.push(roomId);
-        console.log(this.rooms);
-      });
   }
 
   ngOnDestroy(): void {
@@ -63,7 +53,7 @@ export class DivisionByRoomsModalComponent
         meetingLink: this.meetingLink,
         duration: this.duration,
         participantsIds: participants.map((p) => p.id),
-      });
+      } as RoomCreate);
     });
   }
 
