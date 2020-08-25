@@ -37,9 +37,9 @@ namespace Whale.API.Controllers.Slack
                 var meetingLinkDTO = await _httpService.PostAsync<MeetingCreateDTO, MeetingLinkDTO>("api/meeting", meetingDTO);
                 var link = $"{_baseURL}/meeting-page/%3Fid%3D{meetingLinkDTO.Id}&pwd%3D{meetingLinkDTO.Password}";
 
-                await _slackService.SendSlackReplyAsync(link, userData.channel_id);
+                await _slackService.SendSlackReplyAsync("", userData.channel_id, link);
             }
-            catch(Exception)
+            catch(Exception ex)
             {
                 await _slackService.SendSlackReplyAsync("Some troubles happened", userData.channel_id);
             }
