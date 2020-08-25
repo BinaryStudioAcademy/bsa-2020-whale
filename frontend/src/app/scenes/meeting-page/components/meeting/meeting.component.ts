@@ -89,6 +89,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public isShowStatistics = false;
   public isVideoSettings = false;
   public isWaitingForRecord = false;
+  public isAddParticipantDisabled = false;
   public mediaData: MediaData[] = [];
   public meeting: Meeting;
   public meetingStatistics: Statistics;
@@ -963,6 +964,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   //#endregion media settings
 
   public async openInviteUsersModal() {
+    this.isAddParticipantDisabled = true;
     this.getShortInviteLink().subscribe(
       async (shortId) => {
         const shortLink = this.buildShortLink(shortId);
@@ -973,9 +975,11 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
             senderId: this.currentParticipant.user.id,
           })
           .toPromise();
+        this.isAddParticipantDisabled = false;
       },
       (error) => {
         console.error(error);
+        this.isAddParticipantDisabled = false;
       }
     );
   }
