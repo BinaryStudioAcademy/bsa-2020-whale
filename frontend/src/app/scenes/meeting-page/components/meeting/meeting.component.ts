@@ -903,6 +903,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       audio: false,
     });
     this.handleSuccessVideo(this.currentUserStream);
+    document.querySelector('video').srcObject = this.currentUserStream;
     this.isAudioSettings = false;
     this.isVideoSettings = false;
   }
@@ -911,12 +912,14 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     const videoTrack = stream.getVideoTracks()[0];
     const keys = Object.keys(this.peer.connections);
     const peerConnection = this.peer.connections[keys[0]];
-    peerConnection.forEach((pc) => {
-      const sender = pc.peerConnection.getSenders().find((s) => {
-        return s.track.kind === videoTrack.kind;
+    if (peerConnection !== undefined) {
+      peerConnection.forEach((pc) => {
+        const sender = pc.peerConnection.getSenders().find((s) => {
+          return s.track.kind === videoTrack.kind;
+        });
+        sender.replaceTrack(videoTrack);
       });
-      sender.replaceTrack(videoTrack);
-    });
+    }
     this.currentUserStream.getVideoTracks().forEach((vt) => {
       this.currentUserStream.removeTrack(vt);
     });

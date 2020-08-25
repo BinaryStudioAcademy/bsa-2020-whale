@@ -32,6 +32,7 @@ import { UpstateService } from 'app/core/services/upstate.service';
 import { AuthService } from 'app/core/auth/auth.service';
 import { GroupCallModalComponent } from '../group-call-modal/group-call-modal.component';
 import { HomePageComponent } from '../home-page/home-page.component';
+import { BlobService } from 'app/core/services/blob.service';
 
 @Component({
   selector: 'app-group-chat',
@@ -71,7 +72,8 @@ export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
     private simpleModalService: SimpleModalService,
     private groupService: GroupService,
     private upstateSevice: UpstateService,
-    private homePageComponent: HomePageComponent
+    private homePageComponent: HomePageComponent,
+    private blobService: BlobService
   ) {}
   ngOnChanges(changes: SimpleChanges): void {
     this.isMembersVisible = false;
@@ -160,6 +162,22 @@ export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
   close(): void {
     this.chat.emit(false);
     this.hubConnection.invoke('Disconnect', this.groupSelected.id);
+  }
+
+  public changeImage(event): void {
+    const photo = event.target.files[0];
+
+    this.blobService.postBlobUploadImage(photo).subscribe((resp) => {
+      console.log(`image: ${resp}`);
+
+      this.groupSelected.photoUrl = resp;
+      this.groupService.updateGroup(this.groupSelected).subscribe(
+        () => {
+          this.toastr.success('Group image successfuly changed');
+        },
+        (error) => this.toastr.error(error.Message)
+      );
+    });
   }
 
   public call(): void {
