@@ -57,10 +57,11 @@
     </div>
     <div
       *ngFor="let message of messages"
+      class="event message-event"
       [ngClass]="
         contactSelected.firstMemberId !== message.author?.id
-          ? 'event'
-          : 'event row-reverse '
+          ? 'event visavis'
+          : 'event row-reverse author'
       "
     >
       <div class="label">
