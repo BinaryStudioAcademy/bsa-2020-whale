@@ -76,6 +76,9 @@ export class MeetingSignalrService {
   private onRoomClosed = new Subject<string>();
   public readonly onRoomClosed$ = this.onRoomClosed.asObservable();
 
+  private onParticipentMoveIntoRoom = new Subject<MeetingConnectionData>();
+  public onParticipentMoveIntoRoom$ = this.onParticipentMoveIntoRoom.asObservable();
+
   constructor(private hubService: SignalRService) {
     from(hubService.registerHub(environment.signalrUrl, 'meeting'))
       .pipe(
@@ -177,8 +180,12 @@ export class MeetingSignalrService {
           this.onRoomCreated.next(roomId);
         });
 
-        this.signalHub.on('OnRoomClosed', (sth: string) => {
-          this.onRoomClosed.next(sth);
+        this.signalHub.on('OnRoomClosed', (meetingLink: string) => {
+          this.onRoomClosed.next(meetingLink);
+        });
+
+        this.signalHub.on('onParticipentMoveIntoRoom', (connectionData) => {
+          this.onParticipentMoveIntoRoom.next(connectionData);
         });
       });
   }
@@ -208,4 +215,5 @@ export enum SignalMethods {
   OnDrawing,
   OnErasing,
   CreateRoom,
+  OnMoveIntoRoom,
 }
