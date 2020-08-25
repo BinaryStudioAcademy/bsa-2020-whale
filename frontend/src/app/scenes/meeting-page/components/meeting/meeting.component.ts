@@ -743,6 +743,13 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
         ? this.currentUserStream
         : this.connectedStreams.find((s) => s.id === participant.streamId);
 
+    const audioContext = new AudioContext();
+    const mediaStreamSource = audioContext.createMediaStreamSource(stream);
+    const processor = audioContext.createScriptProcessor(256, 1, 1);
+    mediaStreamSource.connect(audioContext.destination);
+    mediaStreamSource.connect(processor);
+    processor.connect(audioContext.destination);
+
     var newMediaData = {
       id: participant.id,
       isCurrentUser: participant.id === this.currentParticipant.id,
@@ -761,6 +768,18 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
             ? this.currentUserStream.getAudioTracks().some((at) => at.enabled)
             : true,
       }),
+      volume: 0,
+    };
+
+    processor.onaudioprocess = (e) => {
+      const inputData = e.inputBuffer.getChannelData(0);
+      const inputDataLength = inputData.length;
+      let total = 0;
+
+      for (let i = 0; i < inputDataLength; i++) {
+        total += Math.abs(inputData[i++]);
+      }
+      newMediaData.volume = Math.sqrt(total / inputDataLength) * 100;
     };
 
     shouldPrepend
