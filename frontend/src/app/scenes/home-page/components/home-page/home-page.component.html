@@ -74,7 +74,7 @@
             </div>
             <div
               data-tooltip="Online"
-              data-position="right center"
+              data-position="left center"
               class="icon-wrapper"
             >
               <i
@@ -106,11 +106,22 @@
             [ngClass]="isGroupActive(group) ? 'active item' : 'item'"
             (click)="onGroupClick(group)"
           >
-            <i
-              *ngIf="group.creatorEmail == loggedInUser?.email"
-              class="trash alternate outline icon"
-              (click)="deleteGroup(group); $event.stopPropagation()"
-            ></i>
+            <img
+              class="ui avatar image"
+              src="{{ group.photoUrl }}"
+              alt="{{ group.label }}"
+            />
+            <span
+              class="icon-tooltip"
+              data-tooltip="Delete group"
+              data-position="left center"
+            >
+              <i
+                *ngIf="group.creatorEmail == loggedInUser?.email"
+                class="trash alternate outline icon"
+                (click)="deleteGroup(group); $event.stopPropagation()"
+              ></i>
+            </span>
             {{ group.label }}
           </a>
         </div>

@@ -174,6 +174,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
       .subscribe(
         (data: Group[]) => {
           this.groups = data;
+          this.groupsVisibility = this.groups.length == 0 ? false : true;
         },
         (error) => this.toastr.error(error.Message)
       );
@@ -342,7 +343,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.contactChatVisibility = false;
     this.actionsVisibility = false;
     this.groupChatVisibility = false;
-
+    this.contactSelected = undefined;
+    this.groupSelected = undefined;
     this.historyVisibility = !this.historyVisibility;
 
     if (!this.historyVisibility) {
@@ -365,6 +367,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
     }
   }
   removeContact(contactId: string): void {
+    if (this.contactSelected?.id === contactId) {
+      this.contactVisibilityChange(false);
+    }
     this.contacts = this.contacts.filter((c) => c.id !== contactId);
     if (!this.contacts.length) {
       this.contactsVisibility = false;

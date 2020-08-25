@@ -1,6 +1,6 @@
 <div class="custom-select">
   <div class="select">
-    Microphone:
+    <div>Microphone:</div>
     <div class="custom-select ui compact menu">
       <select
         id="setting-audio-input"
@@ -19,7 +19,7 @@
   <div class="wrapper">
     <audio></audio>
     <button id="setting-audio-test" class="ui button" (click)="testMicro()">
-      <span>Check input level</span>
+      Check input level
     </button>
     <progress class="bar" value="{{ this.db }}" max="100"></progress>
   </div>

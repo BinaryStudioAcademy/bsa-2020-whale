@@ -104,7 +104,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public peer: Peer;
   public pollService: PollService;
   public receiveingDrawings: boolean = false;
-
+  public isSharing: boolean = false;
   @ViewChild('currentVideo') private currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
     HTMLElement
@@ -369,6 +369,23 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
           this.toastr.error('Error occured while trying to erase drawings');
         }
       );
+    this.meetingSignalrService.shareScreen$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (streamId) => {
+          console.log(streamId);
+          this.fullPage(streamId);
+          this.toastr.success('Start sharing screen');
+        },
+        () => {
+          this.toastr.error('Error while trying to share screen');
+        }
+      );
+    this.meetingSignalrService.shareScreenStop$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(() => {
+        this.stopShare();
+      });
 
     // when peer opened send my peer id everyone
     this.peer.on('open', (id) => this.onPeerOpen(id));
@@ -881,11 +898,12 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public async changeStateVideo(event: any) {
     this.mediaSettingsService.changeVideoDevice(event);
     this.currentUserStream.getVideoTracks()?.forEach((track) => track.stop());
-    const newVideoStream = await navigator.mediaDevices.getUserMedia({
+    this.currentUserStream = await navigator.mediaDevices.getUserMedia({
       video: { deviceId: event },
       audio: false,
     });
-    this.handleSuccessVideo(newVideoStream);
+    this.handleSuccessVideo(this.currentUserStream);
+    document.querySelector('video').srcObject = this.currentUserStream;
     this.isAudioSettings = false;
     this.isVideoSettings = false;
   }
@@ -894,12 +912,14 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     const videoTrack = stream.getVideoTracks()[0];
     const keys = Object.keys(this.peer.connections);
     const peerConnection = this.peer.connections[keys[0]];
-    peerConnection.forEach((pc) => {
-      const sender = pc.peerConnection.getSenders().find((s) => {
-        return s.track.kind === videoTrack.kind;
+    if (peerConnection !== undefined) {
+      peerConnection.forEach((pc) => {
+        const sender = pc.peerConnection.getSenders().find((s) => {
+          return s.track.kind === videoTrack.kind;
+        });
+        sender.replaceTrack(videoTrack);
       });
-      sender.replaceTrack(videoTrack);
-    });
+    }
     this.currentUserStream.getVideoTracks().forEach((vt) => {
       this.currentUserStream.removeTrack(vt);
     });
@@ -964,7 +984,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
   //#endregion media settings
-
   public async openInviteUsersModal() {
     this.isAddParticipantDisabled = true;
     this.getShortInviteLink().subscribe(
@@ -1032,5 +1051,46 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
         this.newMsgFrom.push(msg.author.email);
       }
     }
+  }
+  async shareScreen() {
+    const mediaDevices = navigator.mediaDevices as any;
+    let stream = await mediaDevices.getDisplayMedia();
+    await this.handleSuccessVideo(stream);
+    this.meetingSignalrService.invoke(SignalMethods.OnStartShareScreen, {
+      streamId: this.currentUserStream.id,
+      meetingId: this.meeting.id,
+    });
+    this.isSharing = true;
+  }
+  public fullPage(streamId) {
+    const stream = this.connectedStreams.find((x) => x.id === streamId);
+    console.log(stream.getVideoTracks());
+    const fullVideo = document.createElement('video');
+    const parrent = document.getElementsByClassName('main-content')[0];
+    parrent.appendChild(fullVideo);
+    fullVideo.className += 'fullVideo';
+    fullVideo.style.width = '100vw';
+    fullVideo.style.height = '100vh';
+    fullVideo.style.objectFit = 'cover';
+    fullVideo.style.position = 'fixed';
+    fullVideo.srcObject = stream;
+    fullVideo.play();
+  }
+  async removeSharingVideo() {
+    this.meetingSignalrService.invoke(
+      SignalMethods.OnStopShareScreen,
+      this.meeting.id
+    );
+  }
+  async stopShare() {
+    let fullVideo = document.getElementsByClassName('fullVideo')[0];
+    fullVideo.remove();
+    this.currentUserStream = await navigator.mediaDevices.getUserMedia(
+      await this.mediaSettingsService.getMediaConstraints()
+    );
+    this.handleSuccessVideo(this.currentUserStream);
+    document.querySelector('video').srcObject = this.currentUserStream;
+    this.isSharing = false;
+    this.toastr.info('Stop sharing screen');
   }
 }
