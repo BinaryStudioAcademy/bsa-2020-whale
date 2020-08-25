@@ -7,7 +7,6 @@ import {
   EventEmitter,
   OnDestroy,
   Inject,
-  AfterContentChecked,
   AfterViewChecked,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
@@ -158,15 +157,18 @@ export class MeetingComponent
 
   //#region accessors
   private set currentUserStream(value: MediaStream) {
-    this.meetingSignalrService?.invoke(
-      SignalMethods.OnParticipantStreamChanged,
-      {
-        oldStreamId: this.userStream?.id,
-        newStreamId: value.id,
-        isVideoActive: value.getVideoTracks().some((vt) => vt.enabled),
-        isAudioActive: value.getAudioTracks().some((at) => at.enabled),
-      }
-    );
+    if (this.userStream) {
+      this.meetingSignalrService.invoke(
+        SignalMethods.OnParticipantStreamChanged,
+        {
+          oldStreamId: this.userStream?.id,
+          newStreamId: value.id,
+          isVideoActive: value.getVideoTracks().some((vt) => vt.enabled),
+          isAudioActive: value.getAudioTracks().some((at) => at.enabled),
+        }
+      );
+    }
+
     this.userStream = value;
   }
 

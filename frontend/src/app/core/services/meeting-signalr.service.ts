@@ -9,11 +9,7 @@ import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
 import { Participant } from '@shared/models/participant/participant';
 import { PollDto } from '@shared/models/poll/poll-dto';
 import { PollResultDto } from '@shared/models/poll/poll-result-dto';
-import {
-  ChangedMediaState,
-  MediaState,
-  StreamChangedData,
-} from '@shared/models';
+import { ChangedMediaState, StreamChangedData } from '@shared/models';
 import { CanvasWhiteboardUpdate } from 'ng2-canvas-whiteboard';
 
 @Injectable({
