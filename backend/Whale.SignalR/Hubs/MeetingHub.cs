@@ -249,7 +249,7 @@ namespace Whale.SignalR.Hubs
             var participantHost = _groupsParticipants[roomCreateData.MeetingId]?.FirstOrDefault(p => p.ActiveConnectionId == Context.ConnectionId);
             if (participantHost?.Role == ParticipantRole.Participant) return;
 
-            var roomUrl = ShortId.Generate(false, false);
+            var roomUrl = Guid.NewGuid().ToString();
             await _redisService.ConnectAsync();
             await _redisService.SetAsync(roomUrl, new MeetingMessagesAndPasswordDTO { Password = "", IsRoom = true });
 

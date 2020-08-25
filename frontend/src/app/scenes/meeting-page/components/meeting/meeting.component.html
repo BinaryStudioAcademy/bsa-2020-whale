@@ -461,7 +461,7 @@
   >
     <button
       id="meeting-poll-new"
-      *ngIf="currentParticipant && currentParticipant.role == 1"
+      *ngIf="isHost || isRoom"
       (click)="pollService.onNewPollClick()"
       class="ui button"
       id="new-poll-btn"
@@ -475,7 +475,7 @@
         <hr class="poll-divider" />
         <span
           id="meeting-poll-delete"
-          *ngIf="currentParticipant.role == 1"
+          *ngIf="isHost"
           class="delete-poll-icon"
           (click)="pollService.onDeletePollIconClick(pollx)"
         >
