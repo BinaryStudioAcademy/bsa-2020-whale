@@ -32,7 +32,7 @@ namespace Whale.Shared.Services
                 onlineUsers = new List<UserOnlineDTO>();
             }
             var user = await _userService.GetUserByEmail(userEmail);
-            onlineUsers = onlineUsers.Where(u => u.Id != user.Id).ToList();
+            onlineUsers = onlineUsers?.Where(u => u.Id != user.Id).ToList() ?? new List<UserOnlineDTO>(); //TODO: Fix it 
             var newUserOnline = new UserOnlineDTO { Id = user.Id, ConnectionId = connectionId };
             onlineUsers.Add(newUserOnline);
             await _redisService.SetAsync(OnlineUsersKey, onlineUsers);
@@ -54,7 +54,7 @@ namespace Whale.Shared.Services
             await _redisService.ConnectAsync();
             var onlineUsers = _redisService.Get<ICollection<UserOnlineDTO>>(OnlineUsersKey);
             var onlineUser = onlineUsers.FirstOrDefault(u => u.ConnectionId == connectionId);
-            var onlineUserConnections = onlineUsers.Where(u => u.Id == onlineUser?.Id);
+            var onlineUserConnections = onlineUsers.Where(u => u.Id == onlineUser?.Id).ToList();
             foreach (var ou in onlineUserConnections)
             {
                 onlineUsers.Remove(ou);
