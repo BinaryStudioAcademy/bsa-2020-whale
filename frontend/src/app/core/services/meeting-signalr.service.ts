@@ -9,11 +9,7 @@ import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
 import { Participant } from '@shared/models/participant/participant';
 import { PollDto } from '@shared/models/poll/poll-dto';
 import { PollResultDto } from '@shared/models/poll/poll-result-dto';
-import {
-  ChangedMediaState,
-  MediaState,
-  StreamChangedData,
-} from '@shared/models';
+import { ChangedMediaState } from '@shared/models';
 import { CanvasWhiteboardUpdate } from 'ng2-canvas-whiteboard';
 
 @Injectable({
@@ -40,9 +36,6 @@ export class MeetingSignalrService {
 
   private mediaStateRequested = new Subject<string>();
   public mediaStateRequested$ = this.mediaStateRequested.asObservable();
-
-  private participantStreamChanged = new Subject<StreamChangedData>();
-  public participantStreamChanged$ = this.participantStreamChanged.asObservable();
 
   private switchOffMediaByHost = new Subject<boolean>();
   public switchOffMediaByHost$ = this.switchOffMediaByHost.asObservable();
@@ -141,13 +134,6 @@ export class MeetingSignalrService {
         );
 
         this.signalHub.on(
-          'OnParticipantStreamChanged',
-          (streamChangedData: StreamChangedData) => {
-            this.participantStreamChanged.next(streamChangedData);
-          }
-        );
-
-        this.signalHub.on(
           'OnMediaStateRequested',
           (senderConnectionId: string) => {
             this.mediaStateRequested.next(senderConnectionId);
@@ -214,7 +200,6 @@ export enum SignalMethods {
   OnSwitchOffMediaByHost,
   OnConferenceStartRecording,
   OnConferenceStopRecording,
-  OnParticipantStreamChanged,
   OnSendMessage,
   OnGetMessages,
   OnPoll,
