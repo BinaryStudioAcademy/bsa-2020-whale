@@ -109,15 +109,15 @@ export class MeetingComponent
   public pollService: PollService;
   public receiveingDrawings: boolean = false;
   public isSharing: boolean = false;
+
   @ViewChild('currentVideo') private currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
     HTMLElement
   >;
-  @ViewChild('meetingChat', { static: false }) chatBlock: ElementRef<
+  @ViewChild('meetingChat', { static: false }) private chatBlock: ElementRef<
     HTMLElement
   >;
   private chatElement: any;
-  private currentUserStream: MediaStream;
   private currentStreamLoaded = new EventEmitter<void>();
   private contectedAt = new Date();
   private elem: any;
@@ -126,6 +126,7 @@ export class MeetingComponent
     CanvasWhiteboardUpdate[]
   >();
   private unsubscribe$ = new Subject<void>();
+  userStream: MediaStream;
   //#endregion fields
 
   constructor(
@@ -154,6 +155,25 @@ export class MeetingComponent
   ngAfterViewChecked(): void {
     if (this.isShowChat) this.chatElement = this.chatBlock.nativeElement;
   }
+
+  //#region accessors
+  private set currentUserStream(value: MediaStream) {
+    this.meetingSignalrService.invoke(
+      SignalMethods.OnParticipantStreamChanged,
+      {
+        oldStreamId: this.userStream?.id,
+        newStreamId: value.id,
+        isVideoActive: value.getVideoTracks().some((vt) => vt.enabled),
+        isAudioActive: value.getAudioTracks().some((at) => at.enabled),
+      }
+    );
+    this.userStream = value;
+  }
+
+  private get currentUserStream() {
+    return this.userStream;
+  }
+  //#endregion accessors
 
   //#region hooks
   public async ngOnInit() {
@@ -289,6 +309,7 @@ export class MeetingComponent
       .subscribe(
         (mediaData) => {
           console.log(mediaData);
+          console.log('stateChangedmediaDataId', mediaData.streamId);
           this.updateCardDynamicData(
             mediaData.streamId,
             mediaData.isAudioActive,
@@ -298,6 +319,40 @@ export class MeetingComponent
         () => {
           this.toastr.error(
             'Error occured during participants media state updating'
+          );
+        }
+      );
+
+    this.meetingSignalrService.participantStreamChanged$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (streamChangedData) => {
+          console.log(
+            'streamChangedmediaDataId',
+            streamChangedData.newStreamId
+          );
+
+          const changedMediaData = this.mediaData.find(
+            (md) => md.currentStreamId === streamChangedData.oldStreamId
+          );
+          if (changedMediaData) {
+            const changedParticipant = this.meeting.participants.find(
+              (p) => p.streamId === streamChangedData.oldStreamId
+            );
+            if (changedParticipant) {
+              changedParticipant.streamId = streamChangedData.newStreamId;
+            }
+            changedMediaData.currentStreamId = streamChangedData.newStreamId;
+            this.updateCardDynamicData(
+              streamChangedData.newStreamId,
+              streamChangedData.isAudioActive,
+              streamChangedData.isVideoActive
+            );
+          }
+        },
+        () => {
+          this.toastr.error(
+            'Error occured during participants media stream changing'
           );
         }
       );
@@ -785,6 +840,7 @@ export class MeetingComponent
     var newMediaData = {
       id: participant.id,
       isCurrentUser: participant.id === this.currentParticipant.id,
+      currentStreamId: stream.id,
       stream: stream,
       dynamicData: new BehaviorSubject<ParticipantDynamicData>({
         isUserHost: participant.role == ParticipantRole.Host,
@@ -849,13 +905,19 @@ export class MeetingComponent
     isAudioActive: boolean,
     isVideoActive: boolean
   ) {
+    console.log('streamId', streamId);
+    console.log('participants', this.meeting.participants);
+    console.log('mediass', this.mediaData);
     const participant =
       this.currentParticipant.streamId === streamId
         ? this.currentParticipant
         : this.meeting.participants.find((p) => p.streamId === streamId);
     const changedMediaData = this.mediaData.find(
-      (s) => s.stream.id === streamId
+      (s) => s.currentStreamId === streamId
     );
+
+    console.log('participant', participant);
+    console.log('media', changedMediaData);
 
     if (!changedMediaData || !participant) {
       return;
@@ -950,70 +1012,59 @@ export class MeetingComponent
   public async changeStateVideo(event: any) {
     this.mediaSettingsService.changeVideoDevice(event);
     this.currentUserStream.getVideoTracks()?.forEach((track) => track.stop());
-    this.currentUserStream = await navigator.mediaDevices.getUserMedia({
-      video: { deviceId: event },
-      audio: false,
-    });
+    this.currentUserStream = await navigator.mediaDevices.getUserMedia(
+      await this.mediaSettingsService.getMediaConstraints()
+    );
     this.handleSuccessVideo(this.currentUserStream);
     document.querySelector('video').srcObject = this.currentUserStream;
     this.isAudioSettings = false;
     this.isVideoSettings = false;
   }
 
-  private async handleSuccessVideo(stream: MediaStream): Promise<void> {
-    const videoTrack = stream.getVideoTracks()[0];
+  async handleSuccessVideo(stream: MediaStream): Promise<void> {
+    const video = document.querySelector('video');
+    video.srcObject = stream;
     const keys = Object.keys(this.peer.connections);
     const peerConnection = this.peer.connections[keys[0]];
-    if (peerConnection !== undefined) {
-      peerConnection.forEach((pc) => {
-        const sender = pc.peerConnection.getSenders().find((s) => {
-          return s.track.kind === videoTrack.kind;
-        });
-        sender.replaceTrack(videoTrack);
+    const videoTrack = stream.getVideoTracks()[0];
+    peerConnection.forEach((pc) => {
+      const sender = pc.peerConnection.getSenders().find((s) => {
+        return s.track.kind === videoTrack.kind;
       });
-    }
-    this.currentUserStream.getVideoTracks().forEach((vt) => {
-      this.currentUserStream.removeTrack(vt);
+      sender.replaceTrack(videoTrack);
     });
-    this.currentUserStream.addTrack(videoTrack);
   }
 
   public async changeInputDevice(deviceId: string) {
     this.mediaSettingsService.changeInputDevice(deviceId);
-    const newAudioStream = await navigator.mediaDevices.getUserMedia({
-      video: false,
-      audio: { deviceId: deviceId },
-    });
-    this.handleSuccess(newAudioStream);
+    this.currentUserStream = await navigator.mediaDevices.getUserMedia(
+      await this.mediaSettingsService.getMediaConstraints()
+    );
+    this.handleSuccessAudio(this.currentUserStream);
     this.isAudioSettings = false;
     this.isVideoSettings = false;
   }
 
-  public async changeOutputDevice(deviceId: string) {
-    const videos = document.querySelectorAll('video');
-    console.log(videos);
-    this.mediaSettingsService.changeOutputDevice(deviceId);
-    videos.forEach((video) => {
-      this.mediaSettingsService.attachSinkId(video, deviceId);
-    });
-    this.isAudioSettings = false;
-    this.isVideoSettings = false;
-  }
-
-  private async handleSuccess(stream: MediaStream): Promise<void> {
-    const audioTrack = stream.getAudioTracks()[0];
+  private async handleSuccessAudio(stream): Promise<void> {
+    const audio = document.querySelector('audio');
+    audio.srcObject = stream;
     const keys = Object.keys(this.peer.connections);
     const peerConnection = this.peer.connections[keys[0]];
+    const audioTrack = stream.getAudioTracks()[0];
     peerConnection.forEach((pc) => {
       const sender = pc.peerConnection.getSenders().find((s) => {
         return s.track.kind === audioTrack.kind;
       });
       sender.replaceTrack(audioTrack);
     });
-    this.currentUserStream.getAudioTracks().forEach((at) => {
-      this.currentUserStream.removeTrack(at);
-    });
-    this.currentUserStream.addTrack(audioTrack);
+  }
+
+  public async changeOutputDevice(deviceId: string) {
+    const audio = document.querySelector('audio');
+    this.mediaSettingsService.changeOutputDevice(deviceId);
+    this.mediaSettingsService.attachSinkId(audio, deviceId);
+    this.isAudioSettings = false;
+    this.isVideoSettings = false;
   }
 
   public showAudioSettings(): void {

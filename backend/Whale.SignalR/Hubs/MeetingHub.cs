@@ -87,7 +87,7 @@ namespace Whale.SignalR.Hubs
             if (string.IsNullOrEmpty(mediaState.ReceiverConnectionId))
             {
                 var participantInGroup = _groupsParticipants
-               .FirstOrDefault(g => g.Value.Any(p => p.ActiveConnectionId == Context.ConnectionId));
+                    .FirstOrDefault(g => g.Value.Any(p => p.ActiveConnectionId == Context.ConnectionId));
 
                 await Clients.Group(participantInGroup.Key).SendAsync("OnMediaStateChanged", mediaState);
             }
@@ -95,6 +95,29 @@ namespace Whale.SignalR.Hubs
             {
                 await Clients.Client(mediaState.ReceiverConnectionId).SendAsync("OnMediaStateChanged", mediaState);
             }
+        }
+
+        [HubMethodName("OnParticipantStreamChanged")]
+        public async Task ParticipantStreamChanged(StreamChangedDTO streamChangedData)
+        {
+            KeyValuePair<string, List<ParticipantDTO>> participantInGroup;
+            try
+            {
+                participantInGroup = _groupsParticipants
+                    .First(g => g.Value.Any(p => p.ActiveConnectionId == Context.ConnectionId));
+            }
+            catch (Exception)
+            {
+                return;
+            }
+          
+            var currentParticipant = participantInGroup
+                .Value
+                .First(p => p.ActiveConnectionId == Context.ConnectionId);
+
+            currentParticipant.StreamId = streamChangedData.NewStreamId;
+
+                await Clients.Group(participantInGroup.Key).SendAsync("OnParticipantStreamChanged", streamChangedData);
         }
 
         [HubMethodName("OnMediaStateRequested")]
