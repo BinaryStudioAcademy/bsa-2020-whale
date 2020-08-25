@@ -18,6 +18,9 @@ export class MeetingNoteComponent implements OnInit {
   ngOnInit(): void {}
 
   public calculateDuration(): Duration {
+    if (!this.meeting.endTime) {
+      return null;
+    }
     const start: number = new Date(this.meeting.startTime).getTime();
     const end: number = new Date(this.meeting.endTime).getTime();
 
@@ -35,6 +38,9 @@ export class MeetingNoteComponent implements OnInit {
   }
 
   public stringifyDuration(duration: Duration): string {
+    if (!duration) {
+      return 'No data';
+    }
     const hourString = duration.hours == 0 ? '' : `${duration.hours} hours `;
     const minuteString =
       duration.minutes == 0 && duration.hours != 0
