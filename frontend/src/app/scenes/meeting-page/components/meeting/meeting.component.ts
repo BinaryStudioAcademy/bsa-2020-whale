@@ -543,23 +543,31 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     const URL: string = this.document.location.href;
     const chanks = URL.split('/');
 
+    if (this.isRoom) {
+      this.createTextareaAndCopy(URL);
+    }
+
     this.getShortInviteLink().subscribe((short) => {
       chanks[chanks.length - 1] = short;
       chanks[chanks.length - 2] = 'redirection';
 
-      const copyBox = document.createElement('textarea');
-      copyBox.style.position = 'fixed';
-      copyBox.style.left = '0';
-      copyBox.style.top = '0';
-      copyBox.style.opacity = '0';
-      copyBox.value = chanks.join('/');
-      document.body.appendChild(copyBox);
-      copyBox.focus();
-      copyBox.select();
-      document.execCommand('copy');
-      document.body.removeChild(copyBox);
-      this.toastr.success('Copied');
+      this.createTextareaAndCopy(chanks.join('/'));
     });
+  }
+
+  private createTextareaAndCopy(value: string): void {
+    const copyBox = document.createElement('textarea');
+    copyBox.style.position = 'fixed';
+    copyBox.style.left = '0';
+    copyBox.style.top = '0';
+    copyBox.style.opacity = '0';
+    copyBox.value = value;
+    document.body.appendChild(copyBox);
+    copyBox.focus();
+    copyBox.select();
+    document.execCommand('copy');
+    document.body.removeChild(copyBox);
+    this.toastr.success('Copied');
   }
 
   public goFullscreen(): void {
