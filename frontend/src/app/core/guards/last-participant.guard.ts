@@ -17,7 +17,7 @@ export class LastParticipantGuard implements CanDeactivate<MeetingComponent> {
   canDeactivate(component: MeetingComponent): boolean {
     /*component.meeting.participants.findIndex(p => p.id != component.currentParticipant.id) == -1*/
     if (
-      component.meeting.participants.findIndex(
+      component.meeting?.participants?.findIndex(
         (p) => p.id != component.currentParticipant.id
       ) == -1
     ) {

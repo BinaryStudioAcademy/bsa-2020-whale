@@ -419,14 +419,16 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.destroyPeer();
     this.currentUserStream?.getTracks().forEach((track) => track.stop());
 
-    this.connectionData.participant = this.currentParticipant;
-    this.meetingSignalrService.invoke(
-      SignalMethods.OnParticipantLeft,
-      this.connectionData
-    );
+    if (this.connectionData) {
+      this.connectionData.participant = this.currentParticipant;
+      this.meetingSignalrService.invoke(
+        SignalMethods.OnParticipantLeft,
+        this.connectionData
+      );
+    }
 
     const ended: boolean =
-      this.meeting.participants.findIndex(
+      this.meeting?.participants?.findIndex(
         (p) => p.id != this.currentParticipant.id
       ) == -1;
 
