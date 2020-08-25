@@ -482,7 +482,7 @@ export class MeetingComponent
       });
 
       // send mediaStream to caller
-      call.answer(this.currentUserStream);
+      call.answer(this.currentUserStream, {sdpTransform:(sdp) => {return this.setMediaBitrates(sdp);}});
     });
 
     // show a warning dialog if close current tab or window
@@ -730,7 +730,7 @@ export class MeetingComponent
 
   // call to peer
   private connect(recieverPeerId: string) {
-    const call = this.peer.call(recieverPeerId, this.currentUserStream);
+    const call = this.peer.call(recieverPeerId, this.currentUserStream, {sdpTransform:(sdp) => {return this.setMediaBitrates(sdp);}});
 
     // get answer and show other user
     call.on('stream', (stream) => {
@@ -745,6 +745,50 @@ export class MeetingComponent
         this.connectedPeers.set(call.peer, stream);
       }
     });
+  }
+
+  setMediaBitrates(sdp) {
+    const newsdp = this.setMediaBitrate(this.setMediaBitrate(sdp, "video", 125), "audio", 125);
+    console.log(newsdp);
+    return newsdp;
+  }
+   
+  setMediaBitrate(sdp, media, bitrate) {
+    var lines = sdp.split("\n");
+    var line = -1;
+    for (var i = 0; i < lines.length; i++) {
+      if (lines[i].indexOf("m="+media) === 0) {
+        line = i;
+        break;
+      }
+    }
+    if (line === -1) {
+      console.debug("Could not find the m line for", media);
+      return sdp;
+    }
+    console.debug("Found the m line for", media, "at line", line);
+   
+    // Pass the m line
+    line++;
+   
+    // Skip i and c lines
+    while(lines[line].indexOf("i=") === 0 || lines[line].indexOf("c=") === 0) {
+      line++;
+    }
+   
+    // If we're on a b line, replace it
+    if (lines[line].indexOf("b") === 0) {
+      console.debug("Replaced b line at line", line);
+      lines[line] = "b=AS:"+bitrate;
+      return lines.join("\n");
+    }
+    
+    // Add a new b line
+    console.debug("Adding new b line before line", line);
+    var newLines = lines.slice(0, line)
+    newLines.push("b=AS:"+bitrate)
+    newLines = newLines.concat(lines.slice(line, lines.length))
+    return newLines.join("\n")
   }
 
   private getMeeting(link: string): void {

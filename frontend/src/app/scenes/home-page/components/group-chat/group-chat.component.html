@@ -100,12 +100,31 @@
     >
       There is still no messages yet!
     </div>
-    <div *ngFor="let message of messages" class="event message-event">
+    <div
+      *ngFor="let message of messages"
+      [ngClass]="
+        currentUser.email !== message.author?.email
+          ? 'event'
+          : 'event row-reverse '
+      "
+    >
       <div class="label">
         <img src="{{ message.author?.avatarUrl }}" />
       </div>
-      <div class="content">
-        <div class="summary">
+      <div
+        [ngClass]="
+          currentUser.email !== message.author?.email
+            ? 'content'
+            : 'content row-reverse'
+        "
+      >
+        <div
+          [ngClass]="
+            currentUser.email !== message.author?.email
+              ? 'summary'
+              : 'summary row-reverse'
+          "
+        >
           <a class="user">
             {{ message.author?.firstName }}
             {{ message.author?.secondName }}
@@ -114,7 +133,14 @@
             {{ message.createdAt | date: "short" }}
           </div>
         </div>
-        <div class="message">
+        <div
+          disabled
+          [ngClass]="
+            currentUser.email !== message.author?.email
+              ? 'message'
+              : 'message current-user-message'
+          "
+        >
           <div *ngFor="let row of splitMessage(message?.message)">
             {{ row }}
           </div>
@@ -124,9 +150,6 @@
   </div>
   <div class="forma">
     <form class="ui form vertically-aligned" #chatForm="ngForm">
-      <div class="subheader helper">
-        Enter to send. Enter+Shift for new line.
-      </div>
       <div class="field">
         <textarea
           (keydown.enter)="onEnterKeyPress($event, chatForm.valid)"
@@ -138,6 +161,9 @@
           [(ngModel)]="newMessage.message"
           required
         ></textarea>
+        <div class="subheader helper">
+          Enter to send. Enter+Shift for new line.
+        </div>
       </div>
       <button
         id="chat-submit"
