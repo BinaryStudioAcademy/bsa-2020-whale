@@ -54,10 +54,19 @@ namespace Whale.Shared.Services
             await _redisService.ConnectAsync();
             var onlineUsers = _redisService.Get<ICollection<UserOnlineDTO>>(OnlineUsersKey);
             var onlineUser = onlineUsers.FirstOrDefault(u => u.ConnectionId == connectionId);
-            onlineUsers = onlineUsers.Where(u => u.Id != onlineUser.Id).ToList();
-
-            await _redisService.SetAsync(OnlineUsersKey, onlineUsers);
-
+            var onlineUserConnections = onlineUsers.Where(u => u.Id == onlineUser?.Id);
+            foreach (var ou in onlineUserConnections)
+            {
+                onlineUsers.Remove(ou);
+            }
+            if (onlineUsers.Count == 0)
+            {
+                await _redisService.DeleteKey(OnlineUsersKey);
+            }
+            else
+            {
+                await _redisService.SetAsync(OnlineUsersKey, onlineUsers);
+            }
             return onlineUser.Id;
         }
 
