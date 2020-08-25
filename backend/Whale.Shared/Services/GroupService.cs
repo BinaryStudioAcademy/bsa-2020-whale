@@ -101,7 +101,8 @@ namespace Whale.Shared.Services
         {
             var group = _context.Groups.FirstOrDefault(c => c.Id == id);
 
-            if (group == null) return false;
+            if (group == null)
+                throw new NotFoundException("Group", id.ToString());
 
             var userGroups = await _context.GroupUsers
                 .Include(g => g.User)
