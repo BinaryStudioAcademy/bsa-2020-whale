@@ -146,9 +146,9 @@ namespace Whale.SignalR.Hubs
             if(msg.Receiver != null)
             {
                 var receiver = _groupsParticipants[msgDTO.MeetingId].Find(p => p.User.Id == msg.Receiver.Id);
-                if(receiver != null)
+                await Clients.Caller.SendAsync("OnSendMessage", msg);
+                if (receiver != null)
                 {
-                    await Clients.Caller.SendAsync("OnSendMessage", msg);
                     await Clients.Client(receiver.ActiveConnectionId).SendAsync("OnSendMessage", msg);
                 }
             } else
