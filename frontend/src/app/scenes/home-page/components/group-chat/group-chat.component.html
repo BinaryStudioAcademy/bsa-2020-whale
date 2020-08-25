@@ -3,10 +3,19 @@
     <div class="event chat-label">
       <div class="content">
         <div class="group-info">
-          <img
-            class="ui avatar image"
-            src="{{ groupSelected.photoUrl }}"
-            alt="{{ groupSelected.label }}"
+          <label for="newImage">
+            <img
+              class="ui avatar image"
+              src="{{ groupSelected.photoUrl }}"
+              alt="{{ groupSelected.label }}"
+            />
+          </label>
+          <input
+            hidden
+            type="file"
+            id="newImage"
+            (change)="changeImage($event)"
+            accept="image/*"
           />
           <div>
             <span class="user-chat-label ui header">

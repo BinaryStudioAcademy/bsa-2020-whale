@@ -77,6 +77,12 @@ namespace Whale.API.Controllers
             return NotFound();
         }
 
+        [HttpPut("update")]
+        public async Task<ActionResult<GroupDTO>> UpdateGroup([FromBody] UpdateGroupDTO groupDTO)
+        {
+            return Ok(await _groupService.UpdateGroup(groupDTO));
+        }
+
         [HttpPost("user")]
         public async Task<ActionResult<GroupUserDTO>> CreateNewUserInGroup([FromBody] GroupUserCreateDTO newUserInGroup)
         {
