@@ -6,13 +6,15 @@
     &:hover
         display: block
 
-.ui.card:hover .small.ellipsis.vertical.icon, 
-.ui.card:hover .blue.microphone.icon
-    display: block
+.micro-pulse
+    animation: micro-pulse .5s infinite
 
-.blue.microphone.icon
-    display: none
-    
+@keyframes micro-pulse
+    0%
+        color: #2185d0
+    100%
+        -color: #212121
+
 .ui.card
     width: 100%
 
