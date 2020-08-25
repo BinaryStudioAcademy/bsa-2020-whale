@@ -986,13 +986,16 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.getShortInviteLink().subscribe(
       async (shortId) => {
         const shortLink = this.buildShortLink(shortId);
-        await this.simpleModalService
+        this.simpleModalService
           .addModal(MeetingInviteComponent, {
             inviteLink: shortLink,
             meetingId: this.meeting.id,
             senderId: this.currentParticipant.user.id,
           })
-          .toPromise();
+          .toPromise()
+          .then(() => {
+            this.isShowParticipants = false;
+          });
         this.isAddParticipantDisabled = false;
       },
       (error) => {
