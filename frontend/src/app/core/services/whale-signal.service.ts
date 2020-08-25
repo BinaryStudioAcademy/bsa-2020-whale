@@ -4,7 +4,15 @@ import { SignalRService } from '../services/signal-r.service';
 import { from, Observable, Subject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { UserOnline } from '../../shared/models/user/user-online';
+import {
+  Notification,
+  Contact,
+  MeetingLink,
+  Call,
+  UserOnline,
+  GroupCall,
+  Group,
+} from '@shared/models';
 
 @Injectable({
   providedIn: 'root',
@@ -18,10 +26,53 @@ export class WhaleSignalService {
   private signalUserDisconected = new Subject<string>();
   public signalUserDisconected$ = this.signalUserDisconected.asObservable();
 
-  constructor(private hubService: SignalRService) {
+  private signalUserDisconectedError = new Subject<string>();
+  public signalUserDisconectedError$ = this.signalUserDisconectedError.asObservable();
+
+  private startCallOthers = new Subject<Call>();
+  public startCallOthers$ = this.startCallOthers.asObservable();
+
+  private startCallOthersInGroup = new Subject<GroupCall>();
+  public startCallOthersInGroup$ = this.startCallOthersInGroup.asObservable();
+
+  private startCallCaller = new Subject<MeetingLink>();
+  public startCallCaller$ = this.startCallCaller.asObservable();
+
+  private takeCall = new Subject<void>();
+  public takeCall$ = this.takeCall.asObservable();
+
+  private takeGroupCall = new Subject<void>();
+  public takeGroupCall$ = this.takeGroupCall.asObservable();
+
+  private declineCall = new Subject<void>();
+  public declineCall$ = this.declineCall.asObservable();
+
+  private declineGroupCall = new Subject<void>();
+  public declineGroupCall$ = this.declineGroupCall.asObservable();
+
+  private receiveContact = new Subject<Contact>();
+  public receiveContact$ = this.receiveContact.asObservable();
+
+  private removeContact = new Subject<string>();
+  public removeContact$ = this.removeContact.asObservable();
+
+  private receiveNotify = new Subject<Notification>();
+  public receiveNotify$ = this.receiveNotify.asObservable();
+
+  private removeNotify = new Subject<string>();
+  public removeNotify$ = this.removeNotify.asObservable();
+
+  private receiveGroup = new Subject<Group>();
+  public receiveGroup$ = this.receiveGroup.asObservable();
+
+  private removeGroup = new Subject<string>();
+  public removeGroup$ = this.removeGroup.asObservable();
+
+  constructor(hubService: SignalRService) {
     from(hubService.registerHub(environment.signalrUrl, 'whale'))
       .pipe(
         tap((hub) => {
+          console.log('whale hub connected');
           this.signalHub = hub;
         })
       )
@@ -33,15 +84,88 @@ export class WhaleSignalService {
         this.signalHub.on('OnUserDisconnect', (userEmail: string) => {
           this.signalUserDisconected.next(userEmail);
         });
+
+        this.signalHub.on('OnUserDisconnectOnError', (userId: string) => {
+          this.signalUserDisconectedError.next(userId);
+        });
+
+        this.signalHub.on('OnStartCallOthers', (call: Call) => {
+          this.startCallOthers.next(call);
+        });
+
+        this.signalHub.on(
+          'OnStartCallOthersInGroup',
+          (groupCall: GroupCall) => {
+            this.startCallOthersInGroup.next(groupCall);
+          }
+        );
+
+        this.signalHub.on('OnStartCallCaller', (link: MeetingLink) => {
+          this.startCallCaller.next(link);
+        });
+
+        this.signalHub.on('OnTakeCall', () => {
+          this.takeCall.next();
+        });
+
+        this.signalHub.on('OnTakeGroupCall', () => {
+          this.takeGroupCall.next();
+        });
+
+        this.signalHub.on('OnDeclineCall', () => {
+          this.declineCall.next();
+        });
+
+        this.signalHub.on('OnDeclineGroupCall', () => {
+          this.declineGroupCall.next();
+        });
+
+        this.signalHub.on('onNewContact', (contact: Contact) => {
+          this.receiveContact.next(contact);
+        });
+
+        this.signalHub.on('onDeleteContact', (contactId: string) => {
+          this.removeContact.next(contactId);
+        });
+
+        this.signalHub.on('onNewNotification', (notification: Notification) => {
+          this.receiveNotify.next(notification);
+        });
+
+        this.signalHub.on('onDeleteNotification', (notificationId: string) => {
+          this.removeNotify.next(notificationId);
+        });
+
+        this.signalHub.on('OnNewGroup', (group: Group) => {
+          this.receiveGroup.next(group);
+        });
+
+        this.signalHub.on('OnDeleteGroup', (groupId: string) => {
+          this.removeGroup.next(groupId);
+        });
       });
   }
 
-  public invoke(method: SignalMethods, arg: any): Observable<void> {
-    return from(this.signalHub.invoke(SignalMethods[method].toString(), arg));
+  public invoke(method: WhaleSignalMethods, arg: any): Observable<void> {
+    return from(
+      this.signalHub.invoke(WhaleSignalMethods[method].toString(), arg)
+    );
   }
 }
 
-export enum SignalMethods {
+export enum WhaleSignalMethods {
   OnUserConnect,
   OnUserDisconnect,
+  OnStartCall,
+  OnStartGroupCall,
+  OnTakeCall,
+  OnTakeGroupCall,
+  OnDeclineCall,
+  OnDeclineGroupCall,
+  onNewContact,
+  onDeleteContact,
+  onNewNotification,
+  onDeleteNotification,
+  OnNewGroup,
+  OnDeleteGroup,
 }

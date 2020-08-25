@@ -5,7 +5,7 @@ using Whale.DAL.Abstraction;
 
 namespace Whale.DAL.Models.Poll
 {
-	public class Voter
+	public class Voter : BaseEntity
 	{
 		public string FirstName { get; set; }
 		public string SecondName { get; set; }

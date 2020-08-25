@@ -1,36 +1,40 @@
 <div class="ui card">
   <div
     class="image"
-    [ngClass]="data.isVideoEnabled ? 'without-background' : addAvatar()"
+    [ngClass]="dynamicData.isVideoActive ? 'without-background' : ''"
   >
     <video
       class="video"
       autoplay
-      [ngClass]="data.isVideoEnabled ? 'visible' : 'hidden'"
+      [ngClass]="dynamicData.isVideoActive ? 'visible' : 'hidden'"
       [muted]="data.isCurrentUser ? 'muted' : ''"
     ></video>
     <p
       class="participant-initials"
-      [ngClass]="data.isVideoEnabled ? 'hidden' : 'visible'"
+      [ngClass]="dynamicData.isVideoActive ? 'hidden' : 'visible'"
     ></p>
   </div>
   <div class="content">
     <div class="participant-name-wrapper">
       <i
         class="microphone icon"
-        *ngIf="!data.isAudioEnabled || data.isCurrentUser || data.isUserHost"
-        [ngClass]="data.isAudioEnabled ? 'blue' : 'red'"
+        *ngIf="
+          !dynamicData.isAudioActive ||
+          data.isCurrentUser ||
+          dynamicData.isUserHost
+        "
+        [ngClass]="dynamicData.isAudioActive ? 'blue' : 'red'"
         [class.slash]="
-          (!isMicrophoneHovered && !data.isAudioEnabled) ||
+          (!isMicrophoneHovered && !dynamicData.isAudioActive) ||
           (isMicrophoneHovered &&
             !data.isCurrentUser &&
             isMicrophoneHovered &&
-            !data.isUserHost)
+            !dynamicData.isUserHost)
         "
         (mouseenter)="isMicrophoneHovered = true"
         (mouseleave)="isMicrophoneHovered = false"
         (click)="
-          data.isCurrentUser || data.isUserHost ? toggleMicrophone() : ''
+          data.isCurrentUser || dynamicData.isUserHost ? toggleMicrophone() : ''
         "
       ></i>
       <a class="header"></a>
@@ -41,10 +45,10 @@
 <div class="current-user-actions">
   <ul>
     <li (click)="toggleMicrophone()">
-      {{ data.isAudioEnabled ? "Mute My Audio" : "Unmute My Audio" }}
+      {{ dynamicData.isAudioActive ? "Mute My Audio" : "Unmute My Audio" }}
     </li>
     <li (click)="toggleCamera()">
-      {{ data.isVideoEnabled ? "Stop Video" : "Start Video" }}
+      {{ dynamicData.isVideoActive ? "Stop Video" : "Start Video" }}
     </li>
     <li (click)="pinVideo()">Pin Video</li>
     <li (click)="hideCurrentCard()">Hide Self View</li>
@@ -53,12 +57,15 @@
 <div class="other-participant-actions">
   <ul>
     <li (click)="pinVideo()">Pin Video</li>
-    <li *ngIf="meetingHolder.role === 1" (click)="toggleCamera()">
+    <li
+      *ngIf="meetingHolder.role === 1 && dynamicData.isVideoActive"
+      (click)="switchOfCameraAsHost()"
+    >
       Stop Video
     </li>
     <li
-      *ngIf="meetingHolder.role === 1 && data.isAudioEnabled"
-      (click)="toggleMicrophone()"
+      *ngIf="meetingHolder.role === 1 && dynamicData.isAudioActive"
+      (click)="switchOfMicrophoneAsHost()"
     >
       Mute Audio
     </li>

@@ -103,7 +103,7 @@ namespace Whale.Shared.Services
             return _mapper.Map<UserDTO>(newUser);
         }
 
-        public async Task UpdateUserAsync(UserDTO userDTO)
+        public async Task<UserDTO> UpdateUserAsync(UserDTO userDTO)
         {
             var entity = _context.Users.FirstOrDefault(c => c.Id == userDTO.Id);
 
@@ -111,15 +111,14 @@ namespace Whale.Shared.Services
 
             entity.FirstName = userDTO.FirstName;
             entity.SecondName = userDTO.SecondName;
-            entity.Email = userDTO.Email;
-            entity.AvatarUrl = userDTO.AvatarUrl;
-            entity.LinkType = (LinkTypeEnum)userDTO.LinkType;
-            entity.RegistrationDate = entity.RegistrationDate;
             entity.Phone = userDTO.Phone;
+            entity.AvatarUrl = userDTO.AvatarUrl;
+            entity.LinkType = userDTO.LinkType;
 
             _context.Users.Update(entity);
 
             await _context.SaveChangesAsync();
+            return await GetUserAsync(entity.Id);
         }
 
         public async Task<bool> DeleteUserAsync(Guid userId)

@@ -9,9 +9,7 @@ import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
 import { Participant } from '@shared/models/participant/participant';
 import { PollDto } from '@shared/models/poll/poll-dto';
 import { PollResultDto } from '@shared/models/poll/poll-result-dto';
-import { MediaState } from '@shared/models/media/media-state';
-import { VoteDto } from '@shared/models/poll/vote-dto';
-import { VoterDto } from '@shared/models/poll/voter-dto';
+import { ChangedMediaState } from '@shared/models';
 import { CanvasWhiteboardUpdate } from 'ng2-canvas-whiteboard';
 
 @Injectable({
@@ -33,13 +31,16 @@ export class MeetingSignalrService {
   private participantConected = new Subject<Participant[]>();
   public participantConected$ = this.participantConected.asObservable();
 
-  private participantMediaStateChanged = new Subject<MediaState>();
+  private participantMediaStateChanged = new Subject<ChangedMediaState>();
   public participantMediaStateChanged$ = this.participantMediaStateChanged.asObservable();
 
   private mediaStateRequested = new Subject<string>();
   public mediaStateRequested$ = this.mediaStateRequested.asObservable();
 
-  private meetingEnded = new Subject<MeetingConnectionData>();
+  private switchOffMediaByHost = new Subject<boolean>();
+  public switchOffMediaByHost$ = this.switchOffMediaByHost.asObservable();
+
+  private meetingEnded = new Subject<void>();
   public meetingEnded$ = this.meetingEnded.asObservable();
 
   private conferenceStartRecording = new Subject<string>();
@@ -69,6 +70,11 @@ export class MeetingSignalrService {
   private canvasErase = new Subject<boolean>();
   public readonly canvasErase$ = this.canvasErase.asObservable();
 
+  private shareScreen = new Subject<string>();
+  public readonly shareScreen$ = this.shareScreen.asObservable();
+
+  private shareScreenStop = new Subject<string>();
+  public readonly shareScreenStop$ = this.shareScreenStop.asObservable();
   constructor(private hubService: SignalRService) {
     from(hubService.registerHub(environment.signalrUrl, 'meeting'))
       .pipe(
@@ -116,13 +122,16 @@ export class MeetingSignalrService {
         this.signalHub.on(
           'OnMeetingEnded',
           (connectionData: MeetingConnectionData) => {
-            this.meetingEnded.next(connectionData);
+            this.meetingEnded.next();
           }
         );
 
-        this.signalHub.on('OnMediaStateChanged', (mediaState: MediaState) => {
-          this.participantMediaStateChanged.next(mediaState);
-        });
+        this.signalHub.on(
+          'OnMediaStateChanged',
+          (mediaState: ChangedMediaState) => {
+            this.participantMediaStateChanged.next(mediaState);
+          }
+        );
 
         this.signalHub.on(
           'OnMediaStateRequested',
@@ -130,6 +139,10 @@ export class MeetingSignalrService {
             this.mediaStateRequested.next(senderConnectionId);
           }
         );
+
+        this.signalHub.on('OnSwitchOffMediaByHost', (isVideo: boolean) => {
+          this.switchOffMediaByHost.next(isVideo);
+        });
 
         this.signalHub.on('OnSendMessage', (message: MeetingMessage) => {
           this.sendMessage.next(message);
@@ -158,6 +171,14 @@ export class MeetingSignalrService {
         this.signalHub.on('OnErasing', (erase: boolean) => {
           this.canvasErase.next(erase);
         });
+
+        this.signalHub.on('OnStartShareScreen', (streamId: string) => {
+          console.log(streamId);
+          this.shareScreen.next(streamId);
+        });
+        this.signalHub.on('OnStopShareScreen', () => {
+          this.shareScreenStop.next();
+        });
       });
   }
 
@@ -176,6 +197,7 @@ export enum SignalMethods {
   OnParticipantLeft,
   OnMediaStateChanged,
   OnMediaStateRequested,
+  OnSwitchOffMediaByHost,
   OnConferenceStartRecording,
   OnConferenceStopRecording,
   OnSendMessage,
@@ -184,4 +206,6 @@ export enum SignalMethods {
   OnPollCreated,
   OnDrawing,
   OnErasing,
+  OnStartShareScreen,
+  OnStopShareScreen,
 }

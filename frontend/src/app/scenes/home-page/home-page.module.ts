@@ -9,7 +9,10 @@ import { CallModalComponent } from './components/call-modal/call-modal.component
 import { HistoryComponent } from './components/history/history.component';
 import { MeetingNoteComponent } from './components/history/meeting-note/meeting-note.component';
 import { AddGroupModalComponent } from './components/add-group-modal/add-group-modal.component';
+import { GroupChatComponent } from './components/group-chat/group-chat.component';
+import { AddUserToGroupModalComponent } from './components/add-user-to-group-modal/add-user-to-group-modal.component';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
+import { GroupCallModalComponent } from './components/group-call-modal/group-call-modal.component';
 
 @NgModule({
   declarations: [
@@ -20,8 +23,11 @@ import { InfiniteScrollModule } from 'ngx-infinite-scroll';
     HistoryComponent,
     MeetingNoteComponent,
     AddGroupModalComponent,
+    GroupChatComponent,
+    AddUserToGroupModalComponent,
+    GroupCallModalComponent,
   ],
   imports: [CommonModule, SharedModule, FormsModule, InfiniteScrollModule],
-  entryComponents: [CallModalComponent],
+  entryComponents: [CallModalComponent, GroupCallModalComponent],
 })
 export class HomePageModule {}

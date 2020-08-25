@@ -3,14 +3,18 @@
 
 .chat
     height: 100%
-    margin-left: 2em
+    left: 10px
 
 .chat-inner
     overflow-y: auto
     margin-left: 2em
     margin-right: 2em
-    height: 80%
+    height: 70%
   
+.chat-header 
+    margin-left: 2em
+    margin-right: 2em
+
 .ui.placeholder.segment.field
         max-width: 20rem
 
@@ -89,11 +93,32 @@
     background: #f3f4f5
 
 .subheader
-    font-size: 12px
+    font-size: 14px
 
 .forma
-    height: 20%
+    height: 15%
    
 .circle.icon
     margin-left: 10px
     color: #2bac76
+
+.no-message
+    margin-top: 20% 
+
+.helper
+    margin-top: 3px
+    width: 100%
+    opacity: 0.6
+    text-align: center
+
+.large.close.icon:hover
+    cursor: pointer
+
+.options__buttons
+    display: flex
+    margin-left: auto
+    margin-right: 4rem
+    float: right
+
+[data-position="bottom center"][data-tooltip]:before
+    left: 20%

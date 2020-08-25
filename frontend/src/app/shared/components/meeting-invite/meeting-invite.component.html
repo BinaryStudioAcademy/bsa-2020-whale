@@ -1,0 +1,74 @@
+<div class="ui dimmer modals page visible active">
+  <div class="ui mini modal visible active container">
+    <h3 class="header">
+      Invite users
+      <div class="close-icon">
+        <span (click)="close()">
+          &times;
+        </span>
+      </div>
+    </h3>
+    <div class="content">
+      <form [formGroup]="formSearch">
+        <div class="ui small input">
+          <input
+            placeholder="Search contact"
+            formControlName="contactSearch"
+            (ngModelChange)="filterContacts($event)"
+          />
+        </div>
+      </form>
+      <div class="ui relaxed divided selection list">
+        <div class="item" *ngFor="let contact of cachedContacts">
+          <app-contact
+            [contact]="contact"
+            (contactClicked)="onContactClicked($event)"
+          ></app-contact>
+        </div>
+      </div>
+      <form
+        class="email-form"
+        [formGroup]="form"
+        (keydown.enter)="addEmailTag()"
+      >
+        <div class="email-input">
+          <div class="ui small input">
+            <input
+              formControlName="email"
+              type="text"
+              placeholder="Add by email"
+            />
+          </div>
+          <div
+            data-tooltip="Enter email and press Enter"
+            class="email-question"
+          >
+            <i class="question circle outline icon"></i>
+          </div>
+        </div>
+      </form>
+
+      <div class="label-div">Users to invite:</div>
+      <div class="tag-container">
+        <div *ngFor="let email of emails" class="tag">
+          <app-tag
+            [email]="getEmailOrName(email)"
+            (tagRemoved)="removeTag($event)"
+          ></app-tag>
+        </div>
+      </div>
+    </div>
+    <div class="actions">
+      <div>
+        <button
+          class="ui button primary"
+          type="submit"
+          [disabled]="emails.length == 0 || isLoading"
+          (click)="sendInvites()"
+        >
+          Send invites
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

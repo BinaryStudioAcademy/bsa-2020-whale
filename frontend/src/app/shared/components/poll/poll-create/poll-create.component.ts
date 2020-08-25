@@ -3,6 +3,8 @@ import { FormGroup, FormControl, Validators, FormArray } from '@angular/forms';
 import { PollCreateDto } from '../../../models/poll/poll-create-dto';
 import { HttpService } from 'app/core/services/http.service';
 import { ToastrService } from 'ngx-toastr';
+import { environment } from '@env';
+import { PollDto } from '@shared/models/poll/poll-dto';
 
 @Component({
   selector: 'app-poll-create',
@@ -11,11 +13,13 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class PollCreateComponent implements OnInit {
   @Input() meetingId: string;
-  @Output() pollCreated = new EventEmitter<PollCreateDto>();
+  @Output() pollCreated = new EventEmitter<PollDto>();
+
+  public isLoading = false;
 
   public form: FormGroup;
 
-  constructor(private toastr: ToastrService) {
+  constructor(private httpService: HttpService, private toastr: ToastrService) {
     this.form = new FormGroup({
       title: new FormControl('', Validators.required),
       isAnonymous: new FormControl(false),
@@ -36,7 +40,7 @@ export class PollCreateComponent implements OnInit {
       this.toastr.warning('Maximum 5 options', 'Warning');
       return;
     }
-    this.options.push(new FormControl(''));
+    this.options.push(new FormControl('', Validators.required));
   }
 
   removeOption(event: MouseEvent) {
@@ -46,10 +50,12 @@ export class PollCreateComponent implements OnInit {
   ngOnInit(): void {}
 
   public onSubmit() {
+    this.isLoading = true;
     let options = this.options.controls.map((ctrl) => ctrl.value);
 
     if (new Set(options).size !== options.length) {
       this.toastr.error('Options must be unique', 'Error');
+      this.isLoading = false;
       return;
     }
 
@@ -61,6 +67,20 @@ export class PollCreateComponent implements OnInit {
       options: this.options.controls.map((ctrl) => ctrl.value),
     };
 
-    this.pollCreated.emit(pollCreateDto);
+    this.httpService
+      .postRequest<PollCreateDto, PollDto>(
+        environment.meetingApiUrl + '/api/polls',
+        pollCreateDto
+      )
+      .subscribe(
+        (response: PollDto) => {
+          this.isLoading = true;
+          this.pollCreated.emit(response);
+        },
+        (error) => {
+          this.isLoading = false;
+          this.toastr.error(error);
+        }
+      );
   }
 }

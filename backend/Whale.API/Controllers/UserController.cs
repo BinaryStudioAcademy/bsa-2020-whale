@@ -8,6 +8,7 @@ using System.Linq;
 using Whale.Shared.Services;
 using Whale.Shared.Exceptions;
 using Whale.Shared.Models.User;
+using System.Security.Claims;
 
 namespace Whale.API.Controllers
 {
@@ -24,20 +25,18 @@ namespace Whale.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetCurrentUser()
+        public async Task<ActionResult<UserDTO>> GetCurrentUser()
         {
             string email = HttpContext?.User.Claims
-                .FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
-            Console.WriteLine("email");
-            Console.WriteLine(email);
-            var contacts = await _userService.GetUserByEmail(email);
-            if (contacts == null) return NotFound();
+                .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var contact = await _userService.GetUserByEmail(email);
+            if (contact == null) return NotFound();
 
-            return Ok(contacts);
+            return Ok(contact);
         }
         
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(Guid id)
+        public async Task<ActionResult<UserDTO>> Get(Guid id)
         {
             if (id == Guid.Empty)
                 throw new BaseCustomException("Invalid id");
@@ -66,7 +65,9 @@ namespace Whale.API.Controllers
         [HttpPost]
         public async Task<ActionResult<UserDTO>> AddUser([FromBody] UserModel user)
         {
-            if (!ModelState.IsValid)
+            var email =  HttpContext?.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var name = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
+            if (!ModelState.IsValid || user.Email != email || user.DisplayName != name)
                 throw new BaseCustomException("Invalid data");
 
             var result = await _userService.CreateUser(user);
@@ -75,11 +76,12 @@ namespace Whale.API.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update([FromBody] UserDTO userDTO)
+        public async Task<ActionResult<UserDTO>> Update([FromBody] UserDTO userDTO)
         {
-            await _userService.UpdateUserAsync(userDTO);
-
-            return Ok();
+            var email = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            if (!ModelState.IsValid || userDTO.Email != email)
+                throw new BaseCustomException("Invalid data");
+            return Ok( await _userService.UpdateUserAsync(userDTO));
         }
 
         [HttpDelete("{id}")]

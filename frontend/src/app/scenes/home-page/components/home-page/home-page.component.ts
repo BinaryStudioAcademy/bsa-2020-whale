@@ -10,19 +10,16 @@ import { ToastrService } from 'ngx-toastr';
 import { MeetingService } from 'app/core/services/meeting.service';
 import { Router } from '@angular/router';
 import { MeetingCreate } from '@shared/models/meeting/meeting-create';
-import { filter, takeUntil, tap } from 'rxjs/operators';
-import { Subject, from } from 'rxjs';
-import { AuthService } from 'app/core/auth/auth.service';
-import { LinkTypeEnum } from '@shared/Enums/LinkTypeEnum';
-import { BlobService } from '../../../../core/services/blob.service';
+import { takeUntil, tap } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 import { Group } from '@shared/models/group/group';
 import { GroupService } from 'app/core/services/group.service';
-import { environment } from '@env';
-import { SignalRService } from 'app/core/services/signal-r.service';
-import { HubConnection } from '@aspnet/signalr';
 import { WhaleSignalService } from 'app/core/services/whale-signal.service';
 import { UserOnline } from '@shared/models/user/user-online';
 import { UpstateService } from 'app/core/services/upstate.service';
+import { ContactService } from 'app/core/services';
+import { ConfirmationModalComponent } from '@shared/components/confirmation-modal/confirmation-modal.component';
+import { group } from 'console';
 
 @Component({
   selector: 'app-home-page',
@@ -36,14 +33,13 @@ export class HomePageComponent implements OnInit, OnDestroy {
   actionsVisibility = true;
   contactsVisibility = false;
   groupsVisibility = false;
-  chatVisibility = false;
+  contactChatVisibility = false;
   historyVisibility = false;
+  groupChatVisibility = false;
 
   ownerEmail: string;
   contactSelected: Contact;
-  private hubConnection: HubConnection;
-  private receivedContact = new Subject<Contact>();
-  public receivedContact$ = this.receivedContact.asObservable();
+  groupSelected: Group;
 
   public isContactsLoading = true;
   public isUserLoadig = true;
@@ -58,12 +54,10 @@ export class HomePageComponent implements OnInit, OnDestroy {
     private simpleModalService: SimpleModalService,
     private meetingService: MeetingService,
     private router: Router,
-    private authService: AuthService,
     private groupService: GroupService,
-    private blobService: BlobService,
     private upstateService: UpstateService,
-    private signalRService: SignalRService,
-    private whaleSignalrService: WhaleSignalService
+    private whaleSignalrService: WhaleSignalService,
+    private contactService: ContactService
   ) {}
 
   ngOnDestroy(): void {
@@ -110,11 +104,67 @@ export class HomePageComponent implements OnInit, OnDestroy {
                       this.toastr.error(err.Message);
                     }
                   );
+
+                this.whaleSignalrService.signalUserDisconectedError$
+                  .pipe(takeUntil(this.unsubscribe$))
+                  .subscribe(
+                    (userId) => {
+                      this.userDisconnectedError(userId);
+                    },
+                    (err) => {
+                      this.toastr.error(err.Message);
+                    }
+                  );
+
+                this.whaleSignalrService.receiveContact$
+                  .pipe(takeUntil(this.unsubscribe$))
+                  .subscribe(
+                    (contact) => {
+                      this.contactAdd(contact);
+                    },
+                    (err) => {
+                      console.log(err.message);
+                    }
+                  );
+
+                this.whaleSignalrService.removeContact$
+                  .pipe(takeUntil(this.unsubscribe$))
+                  .subscribe(
+                    (contactId) => {
+                      this.removeContact(contactId);
+                    },
+                    (err) => {
+                      console.log(err.message);
+                    }
+                  );
+
+                this.whaleSignalrService.receiveGroup$
+                  .pipe(takeUntil(this.unsubscribe$))
+                  .subscribe(
+                    (group) => {
+                      this.toastr.success(
+                        'You were added to ' + group.label + ' group'
+                      );
+                      this.addGroup(group);
+                    },
+                    (err) => {
+                      console.log(err.message);
+                    }
+                  );
+
+                this.whaleSignalrService.removeGroup$
+                  .pipe(takeUntil(this.unsubscribe$))
+                  .subscribe(
+                    (groupId) => {
+                      this.removeGroup(groupId);
+                    },
+                    (err) => {
+                      console.log(err.message);
+                    }
+                  );
               },
               (error) => this.toastr.error(error.Message)
             );
-
-          this.subscribeContacts();
         },
         (error) => this.toastr.error(error.Message)
       );
@@ -124,6 +174,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
       .subscribe(
         (data: Group[]) => {
           this.groups = data;
+          this.groupsVisibility = this.groups.length == 0 ? false : true;
         },
         (error) => this.toastr.error(error.Message)
       );
@@ -146,15 +197,29 @@ export class HomePageComponent implements OnInit, OnDestroy {
     }
   }
 
+  userDisconnectedError(userId: string): void {
+    const index = this.contacts.findIndex((c) => c.secondMember?.id === userId);
+    if (index >= 0) {
+      this.contacts[index].secondMember.connectionId = null;
+    }
+  }
+
   addNewGroup(): void {
     this.simpleModalService
       .addModal(AddGroupModalComponent)
       .subscribe((group) => {
         if (group !== undefined) {
-          this.groups.push(group);
+          this.addGroup(group);
           this.toastr.success('Group created successfuly');
         }
       });
+  }
+
+  public leftGroup(group: Group): void {
+    this.groups.splice(this.groups.indexOf(group), 1);
+    if (!this.groups.length) {
+      this.groupsVisibility = !this.groupsVisibility;
+    }
   }
 
   deleteGroup(group: Group): void {
@@ -164,8 +229,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
       this.groupService.deleteGroup(group).subscribe(
         (response) => {
           if (response.status === 204) {
-            this.toastr.success('Deleted successfuly');
-            this.groups.splice(this.groups.indexOf(group), 1);
+            this.toastr.success(`${group.label} deleted successfuly`);
+            this.removeGroup(group.id);
+            if (!this.groups.length) {
+              this.groupsVisibility = !this.groupsVisibility;
+            }
           }
         },
         (error) => this.toastr.error(error.Message)
@@ -174,22 +242,16 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   addNewContact(): void {
-    this.simpleModalService.addModal(AddContactModalComponent).subscribe();
+    this.simpleModalService
+      .addModal(AddContactModalComponent)
+      .subscribe((contact) => this.contactAdd(contact));
   }
-
-  // visibilityChange(event): void {
-  //   this.chatVisibility = event;
-  //   this.contactSelected = undefined;
-  // }
-  // onContactClick(contact: Contact): void {
-  //   this.chatVisibility = false;
-  //   this.contactSelected = contact;
-  // }
-
-  onGroupClick(group: Group): void {}
 
   isContactActive(contact): boolean {
     return this.contactSelected === contact;
+  }
+  isGroupActive(group): boolean {
+    return this.groupSelected === group;
   }
 
   createMeeting(): void {
@@ -220,43 +282,69 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.router.navigate([`${pageName}`]);
   }
 
-  public falseAllBooleans() {
-    this.chatVisibility = false;
-    this.groupsVisibility = false;
-    this.contactsVisibility = false;
+  public falseAllBooleans(): void {
+    this.contactChatVisibility = false;
+    this.groupChatVisibility = false;
     this.actionsVisibility = false;
     this.historyVisibility = false;
   }
 
-  visibilityChange(event): void {
-    console.log(event);
-    this.chatVisibility = event;
+  contactVisibilityChange(event): void {
+    this.contactChatVisibility = event;
     this.contactSelected = undefined;
+    this.actionsVisibility = true;
+  }
+  groupVisibilityChange(event): void {
+    this.groupChatVisibility = event;
+    this.groupSelected = undefined;
     this.actionsVisibility = true;
   }
 
   onContactClick(contact: Contact): void {
+    if (!contact.isAccepted) {
+      this.simpleModalService
+        .addModal(ConfirmationModalComponent, {
+          message: 'Are you sure you want to cancel the request?',
+        })
+        .subscribe((isConfirm) => {
+          if (isConfirm) {
+            this.contactService
+              .DeletePendingContact(contact.secondMember.email)
+              .subscribe(
+                (resp) => {
+                  this.toastr.success('Canceled');
+                },
+                (error) => this.toastr.error(error.Message)
+              );
+          }
+        });
+      return;
+    }
     this.falseAllBooleans();
-    this.contactsVisibility = true;
-    this.chatVisibility = true;
+    this.contactChatVisibility = true;
+    this.groupSelected = undefined;
     this.contactSelected = contact;
   }
 
-  // onGroupClick(): void {
-  //   this.falseAllBooleans();
-  //   this.chatVisibility = true;
-  // }
+  onGroupClick(group: Group): void {
+    this.falseAllBooleans();
+    this.groupChatVisibility = true;
+    this.contactSelected = undefined;
+    this.groupSelected = group;
+  }
 
-  // isContactActive(contact): boolean {
-  //   return this.contactSelected === contact;
-  // }
+  public closeHistory(): void {
+    this.falseAllBooleans();
+    this.historyVisibility = false;
+    this.actionsVisibility = true;
+  }
 
-  public onMeetingHistoryClick() {
-    this.chatVisibility = false;
-    this.groupsVisibility = false;
-    this.contactsVisibility = false;
+  public onMeetingHistoryClick(): void {
+    this.contactChatVisibility = false;
     this.actionsVisibility = false;
-
+    this.groupChatVisibility = false;
+    this.contactSelected = undefined;
+    this.groupSelected = undefined;
     this.historyVisibility = !this.historyVisibility;
 
     if (!this.historyVisibility) {
@@ -271,28 +359,39 @@ export class HomePageComponent implements OnInit, OnDestroy {
       : '';
   }
 
-  subscribeContacts(): void {
-    from(this.signalRService.registerHub(environment.signalrUrl, 'contactsHub'))
-      .pipe(
-        tap((hub) => {
-          this.hubConnection = hub;
-        })
-      )
-      .subscribe(() => {
-        this.hubConnection.on('onNewContact', (contact: Contact) => {
-          this.receivedContact.next(contact);
-        });
-        this.hubConnection.invoke('onConect', this.loggedInUser.email);
-      });
-    this.receivedContact$.pipe(takeUntil(this.unsubscribe$)).subscribe(
-      (contact) => {
-        this.contacts.push(contact);
-        this.contactsVisibility = true;
-      },
-      (err) => {
-        console.log(err.message);
-      }
-    );
+  contactAdd(contact: Contact): void {
+    if (contact) {
+      this.removeContact(contact.id);
+      this.contacts.push(contact);
+      this.contactsVisibility = true;
+    }
+  }
+  removeContact(contactId: string): void {
+    if (this.contactSelected?.id === contactId) {
+      this.contactVisibilityChange(false);
+    }
+    this.contacts = this.contacts.filter((c) => c.id !== contactId);
+    if (!this.contacts.length) {
+      this.contactsVisibility = false;
+    }
+  }
+
+  addGroup(group: Group): void {
+    if (group) {
+      this.removeContact(group.id);
+      this.groups.push(group);
+      this.groupsVisibility = true;
+    }
+  }
+  removeGroup(groupId: string): void {
+    if (this.groupSelected?.id === groupId) {
+      this.groupChatVisibility = false;
+      this.actionsVisibility = true;
+    }
+    this.groups = this.groups.filter((c) => c.id !== groupId);
+    if (!this.groups.length) {
+      this.groupsVisibility = false;
+    }
   }
 
   public onContactsClick(): void {

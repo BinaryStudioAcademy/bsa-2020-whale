@@ -6,7 +6,7 @@
       <a class="item">
         <spiner *ngIf="isUserLoadig" size="'small'"></spiner>
         <div class="ui very relaxed horizontal list">
-          <div class="item">
+          <div (click)="goToPage('profile-page')" class="item">
             <img
               class="ui circular image avatar-pic"
               src="{{ loggedInUser?.avatarUrl }}"
@@ -59,6 +59,7 @@
           <div
             id="home-contact"
             [ngClass]="isContactActive(contact) ? 'active item' : 'item'"
+            [className]="contact.isAccepted ? '' : 'inactive'"
             (click)="onContactClick(contact)"
           >
             <img
@@ -73,7 +74,7 @@
             </div>
             <div
               data-tooltip="Online"
-              data-position="right center"
+              data-position="left center"
               class="icon-wrapper"
             >
               <i
@@ -96,15 +97,31 @@
         </button>
       </a>
       <div
-        class="contacts-container user-list ui selection list"
+        class="contacts-container groups user-list ui selection list"
         [hidden]="!groupsVisibility"
       >
         <div *ngFor="let group of groups">
-          <a id="home-group" class="item" (click)="onGroupClick(group)">
-            <i
-              class="trash alternate outline icon"
-              (click)="deleteGroup(group); $event.stopPropagation()"
-            ></i>
+          <a
+            id="home-group"
+            [ngClass]="isGroupActive(group) ? 'active item' : 'item'"
+            (click)="onGroupClick(group)"
+          >
+            <img
+              class="ui avatar image"
+              src="{{ group.photoUrl }}"
+              alt="{{ group.label }}"
+            />
+            <span
+              class="icon-tooltip"
+              data-tooltip="Delete group"
+              data-position="left center"
+            >
+              <i
+                *ngIf="group.creatorEmail == loggedInUser?.email"
+                class="trash alternate outline icon"
+                (click)="deleteGroup(group); $event.stopPropagation()"
+              ></i>
+            </span>
             {{ group.label }}
           </a>
         </div>
@@ -115,13 +132,20 @@
   <div class="right-col">
     <div class="actions">
       <app-contacts-chat
-        *ngIf="chatVisibility"
+        *ngIf="contactChatVisibility"
         [contactSelected]="contactSelected"
-        (chat)="visibilityChange($event)"
+        (chat)="contactVisibilityChange($event)"
       ></app-contacts-chat>
-      <div *ngIf="historyVisibility">
-        <app-history [user]="loggedInUser"></app-history>
-      </div>
+      <app-group-chat
+        *ngIf="groupChatVisibility"
+        [groupSelected]="groupSelected"
+        (chat)="groupVisibilityChange($event)"
+      ></app-group-chat>
+      <app-history
+        *ngIf="historyVisibility"
+        [user]="loggedInUser"
+        (historyClose)="closeHistory()"
+      ></app-history>
       <div *ngIf="actionsVisibility" class="vertically-aligned chat ui segment">
         <div
           id="home-chat-go-shedule"

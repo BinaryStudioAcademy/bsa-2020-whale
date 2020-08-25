@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Whale.Shared.DTO.GroupMessage;
+using Whale.Shared.Models.GroupMessage;
 
-namespace Whale.Shared.DTO.Group
+namespace Whale.Shared.Models.Group
 {
     public class GroupDTO
     {
@@ -12,5 +12,7 @@ namespace Whale.Shared.DTO.Group
         public string Description { get; set; }
         public Guid PinnedMessageId { get; set; }
         public GroupMessageDTO PinnedMessage { get; set; }
+        public string CreatorEmail { get; set; }
+        public string PhotoUrl { get; set; }
     }
 }

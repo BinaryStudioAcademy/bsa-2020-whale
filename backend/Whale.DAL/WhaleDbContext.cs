@@ -19,10 +19,9 @@ namespace Whale.DAL
         public DbSet<GroupUser> GroupUsers { get; set; }
         public DbSet<Meeting> Meetings { get; set; }
         public DbSet<Participant> Participants { get; set; }
-        public DbSet<PollResult> PollResults { get; set; }
+        public DbSet<Poll> PollResults { get; set; }
         public DbSet<Record> Records { get; set; }
         public DbSet<Setting> Settings { get; set; }
-        public DbSet<ContactSetting> ContactSettings { get; set; }
         public DbSet<UserAchivement> UserAchivements { get; set; }
         public DbSet<Notification> Notifications { get; set; }
 
@@ -37,11 +36,18 @@ namespace Whale.DAL
                 .WithMany();
            
 
-            modelBuilder.Entity<PollResult>()
+            modelBuilder.Entity<Poll>()
                 .Property(pollResult => pollResult.OptionResults)
                 .HasConversion(
                     v => Newtonsoft.Json.JsonConvert.SerializeObject(v),
-                    v => Newtonsoft.Json.JsonConvert.DeserializeObject<List<OptionResult>>(v)
+                    v => Newtonsoft.Json.JsonConvert.DeserializeObject<IEnumerable<OptionResult>>(v)
+                );
+
+            modelBuilder.Entity<Poll>()
+                .Property(pollResult => pollResult.VotedUsers)
+                .HasConversion(
+                    v => Newtonsoft.Json.JsonConvert.SerializeObject(v),
+                    v => Newtonsoft.Json.JsonConvert.DeserializeObject<IEnumerable<Voter>>(v)
                 );
 
             base.OnModelCreating(modelBuilder);

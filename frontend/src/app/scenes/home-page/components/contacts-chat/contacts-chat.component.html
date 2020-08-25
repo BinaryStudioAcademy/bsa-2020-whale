@@ -1,5 +1,5 @@
 <div class="chat ui secondary segment">
-  <div class="ui chat-inner feed" #chatWindow>
+  <div class="ui chat-header feed" #chatWindow>
     <div class="event chat-label">
       <div class="label">
         <img src="{{ contactSelected.secondMember?.avatarUrl }}" />
@@ -15,15 +15,30 @@
               </span>
             </span>
           </div>
-          <div data-tooltip="Online" data-position="right center">
-            <i
-              *ngIf="contactSelected?.secondMember.connectionId"
-              class="circle small icon"
-            ></i>
+          <div
+            *ngIf="contactSelected?.secondMember.connectionId"
+            data-tooltip="Online"
+            data-position="right center"
+          >
+            <i class="circle small icon"></i>
           </div>
-          <div data-tooltip="Call" data-position="right center">
+          <div
+            *ngIf="contactSelected?.secondMember.connectionId"
+            data-tooltip="Call"
+            data-position="right center"
+          >
             <i id="chat-call" class="large phone icon" (click)="call()"></i>
           </div>
+        </div>
+
+        <div class="display-flex inner-block options__buttons">
+          <span data-tooltip="Delete contact" data-position="bottom center">
+            <i
+              id="delete-contact"
+              class="large trash icon"
+              (click)="onDelete()"
+            ></i>
+          </span>
         </div>
 
         <span data-tooltip="Close chat" data-position="left center">
@@ -31,10 +46,12 @@
         </span>
       </div>
     </div>
-
+  </div>
+  <div class="ui chat-inner feed">
+    <spiner *ngIf="isMessagesLoading" [size]="'medium'"></spiner>
     <div
-      *ngIf="messages.length == 0"
-      class="ui large message vertically-aligned"
+      *ngIf="messages.length == 0 && !isMessagesLoading"
+      class="ui vertically-aligned no-message"
     >
       There is still no messages yet!
     </div>
@@ -53,12 +70,20 @@
             {{ message.createdAt | date: "short" }}
           </div>
         </div>
-        <textarea disabled class="message">{{ message.message }}</textarea>
+        <div disabled class="message">
+          <div *ngFor="let row of splitMessage(message?.message)">
+            {{ row }}
+          </div>
+        </div>
       </div>
     </div>
   </div>
   <div class="forma">
-    <form class="ui form vertically-aligned" #chatForm="ngForm">
+    <form
+      class="ui form vertically-aligned"
+      #chatForm="ngForm"
+      style="padding-bottom: 0; margin-bottom: 0;"
+    >
       <div class="field">
         <textarea
           (keydown.enter)="onEnterKeyPress($event, chatForm.valid)"
@@ -70,6 +95,9 @@
           [(ngModel)]="newMessage.message"
           required
         ></textarea>
+        <div class="subheader helper">
+          Enter to send. Enter+Shift for new line.
+        </div>
       </div>
       <button
         id="chat-submit"
@@ -82,8 +110,5 @@
         Send <i class="paper plane outline icon"></i>
       </button>
     </form>
-    <div class="subheader">
-      Enter to send. Enter+Shift for new line.
-    </div>
   </div>
 </div>

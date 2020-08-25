@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Whale.DAL.Models;
-using Whale.Shared.DTO.Group; 
+using Whale.Shared.Models.Group; 
 
 namespace Whale.Shared.MappingProfiles
 {
@@ -13,6 +13,8 @@ namespace Whale.Shared.MappingProfiles
         {
             CreateMap<GroupCreateDTO, Group>();
             CreateMap<Group, GroupDTO>().ReverseMap();
+            CreateMap<Group, UpdateGroupDTO>().ReverseMap();
+            CreateMap<GroupDTO, UpdateGroupDTO>().ReverseMap();
         }
     }
 }

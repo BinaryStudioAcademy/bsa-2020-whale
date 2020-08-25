@@ -27,38 +27,45 @@ namespace Whale.Shared.Services
             {
                 onlineUsers = await _redisService.GetAsync<ICollection<UserOnlineDTO>>(OnlineUsersKey);
             }
-            catch(Exception)
+            catch (Exception)
             {
                 onlineUsers = new List<UserOnlineDTO>();
             }
             var user = await _userService.GetUserByEmail(userEmail);
+            onlineUsers = onlineUsers.Where(u => u.Id != user.Id).ToList();
             var newUserOnline = new UserOnlineDTO { Id = user.Id, ConnectionId = connectionId };
             onlineUsers.Add(newUserOnline);
             await _redisService.SetAsync(OnlineUsersKey, onlineUsers);
             return newUserOnline;
         }
 
-        public async Task UserDisconnect(string userEmail, string connectionId)
+        public async Task UserDisconnect(string userEmail)
+        {
+            await _redisService.ConnectAsync();
+            var onlineUsers = await _redisService.GetAsync<ICollection<UserOnlineDTO>>(OnlineUsersKey);
+            var user = await _userService.GetUserByEmail(userEmail);
+            onlineUsers = onlineUsers.Where(u => u.Id != user.Id).ToList();
+
+            await _redisService.SetAsync(OnlineUsersKey, onlineUsers);
+        }
+
+        public async Task<Guid> UserDisconnectOnError(string connectionId)
         {
             await _redisService.ConnectAsync();
             var onlineUsers = _redisService.Get<ICollection<UserOnlineDTO>>(OnlineUsersKey);
-            if(onlineUsers != null)
-            {
-                var user = await _userService.GetUserByEmail(userEmail);
-                var onlineUser = onlineUsers.FirstOrDefault(u => u.Id == user.Id && u.ConnectionId == connectionId);
-                if(onlineUser != null)
-                {
-                    onlineUsers.Remove(onlineUser);
-                }
-                if(onlineUsers.Count == 0)
-                {
-                    await _redisService.DeleteKey(OnlineUsersKey);
-                }
-                else
-                {
-                    await _redisService.SetAsync(OnlineUsersKey, onlineUsers);
-                }
-            }
+            var onlineUser = onlineUsers.FirstOrDefault(u => u.ConnectionId == connectionId);
+            onlineUsers = onlineUsers.Where(u => u.Id != onlineUser.Id).ToList();
+
+            await _redisService.SetAsync(OnlineUsersKey, onlineUsers);
+
+            return onlineUser.Id;
+        }
+
+        public async Task<IEnumerable<string>> GetConnections(Guid receiverId)
+        {
+            await _redisService.ConnectAsync();
+            var onlineUsers = _redisService.Get<ICollection<UserOnlineDTO>>(OnlineUsersKey);
+            return onlineUsers.Where(u => u.Id == receiverId).Select(u => u.ConnectionId);
         }
     }
 }

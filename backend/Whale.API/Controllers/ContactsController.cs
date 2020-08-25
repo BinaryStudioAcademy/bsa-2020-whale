@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -23,7 +24,7 @@ namespace Whale.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<ActionResult<IEnumerable<ContactDTO>>> GetAll()
         {
             string email = HttpContext?.User.Claims
                 .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
@@ -35,8 +36,21 @@ namespace Whale.API.Controllers
             return Ok(contacts);
         }
 
+        [HttpGet("accepted")]
+        public async Task<ActionResult<IEnumerable<ContactDTO>>> GetAccepted()
+        {
+            string email = HttpContext?.User.Claims
+                .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            Console.WriteLine("email");
+            Console.WriteLine(email);
+            var contacts = await _contactsService.GetAcceptedContactsAsync(email);
+            if (contacts == null) return NotFound();
+
+            return Ok(contacts);
+        }
+
         [HttpGet("id/{contactId}")]
-        public async Task<IActionResult> Get(Guid contactId)
+        public async Task<ActionResult<ContactDTO>> Get(Guid contactId)
         {
             string email = HttpContext?.User.Claims
                 .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
@@ -49,19 +63,32 @@ namespace Whale.API.Controllers
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> CreateFromEmail([FromQuery(Name = "email")] string contactnerEmail)
+        public async Task<ActionResult<ContactDTO>> CreateFromEmail([FromQuery(Name = "email")] string contactnerEmail)
         {
             var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
             var createdContact = await _contactsService.CreateContactFromEmailAsync(ownerEmail, contactnerEmail);
-            if(createdContact is object)
-                return Created($"id/{createdContact.Id}", createdContact);
-            return NoContent();
+            return Created($"id/{createdContact.Id}", createdContact);
+
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var deleted = await _contactsService.DeleteContactAsync(id);
+            string email = HttpContext?.User.Claims
+                .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var deleted = await _contactsService.DeleteContactAsync(id, email);
+
+            if (deleted) return NoContent();
+
+            return NotFound();
+        }
+
+        [HttpDelete("email/{contactEmail}")]
+        public async Task<IActionResult> DeletePendingContactByEmail(string contactEmail)
+        {
+            string userEmail = HttpContext?.User.Claims
+                .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var deleted = await _contactsService.DeletePendingContactByEmailAsync(contactEmail, userEmail);
 
             if (deleted) return NoContent();
 
@@ -69,14 +96,12 @@ namespace Whale.API.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update([FromBody] ContactEditDTO contactDTO)
+        public async Task<ActionResult<ContactDTO>> Update([FromBody] ContactEditDTO contactDTO)
         {
             string email = HttpContext?.User.Claims
                 .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 
-            await _contactsService.UpdateContactAsync(contactDTO, email);
-
-            return Ok();
+            return Ok (await _contactsService.UpdateContactAsync(contactDTO, email));
         }
     }
 }

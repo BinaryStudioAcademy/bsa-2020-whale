@@ -4,6 +4,7 @@ import { Group } from 'app/shared/models/group/group';
 import { GroupService } from 'app/core/services/group.service';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from 'app/core/auth/auth.service';
+import { BlobService } from 'app/core/services/blob.service';
 
 @Component({
   selector: 'app-add-group-modal',
@@ -12,21 +13,35 @@ import { AuthService } from 'app/core/auth/auth.service';
 })
 export class AddGroupModalComponent extends SimpleModalComponent<null, Group> {
   public ownerEmail: string;
+  public imageName: string;
   public newGroup: Group = {
     id: '',
     label: '',
     description: '',
+    creatorEmail: '',
+    photoUrl: '',
   };
   constructor(
     private groupService: GroupService,
     private toastr: ToastrService,
-    private authService: AuthService
+    private authService: AuthService,
+    private blobService: BlobService
   ) {
     super();
     this.ownerEmail = authService.currentUser.email;
   }
 
+  public uploadPhoto(event): void {
+    const photo = event.target.files[0];
+
+    this.blobService.postBlobUploadImage(photo).subscribe((resp) => {
+      this.newGroup.photoUrl = resp;
+      console.log(`image: ${resp}`);
+    });
+  }
+
   public submit(): void {
+    this.newGroup.creatorEmail = this.authService.currentUser.email;
     this.groupService.createGroup(this.newGroup).subscribe(
       (resp) => {
         this.result = resp.body;
