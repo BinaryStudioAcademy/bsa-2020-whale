@@ -659,6 +659,8 @@ export class MeetingComponent
   private addParticipantToMeeting(participant: Participant): void {
     if (!this.meeting.participants.some((p) => p.id === participant.id)) {
       this.meeting.participants.push(participant);
+    }
+    if (!this.otherParticipants.some((p) => p.id === participant.id)) {
       this.otherParticipants.push(participant);
     }
   }
@@ -666,12 +668,6 @@ export class MeetingComponent
   private removeParticipantFromMeeting(participant: Participant): void {
     this.meeting.participants = this.meeting.participants.filter(
       (p) => p.id !== participant.id
-    );
-    this.otherParticipants = this.otherParticipants.filter(
-      (p) => p.id !== participant.id
-    );
-    this.newMsgFrom = this.newMsgFrom.filter(
-      (e) => e !== participant.user.email
     );
   }
 
