@@ -26,16 +26,23 @@ namespace Whale.SignalR.Hubs
         private readonly RedisService _redisService;
         private readonly UserService _userService;
         private readonly RoomService _roomService;
+        private readonly MeetingHttpService _meetingHttpService;
         private readonly static Dictionary<string, List<ParticipantDTO>> _groupsParticipants = 
             new Dictionary<string, List<ParticipantDTO>>();
 
-        public MeetingHub(MeetingService meetingService, ParticipantService participantService, RedisService redisService, UserService userService, RoomService roomService)
+        public MeetingHub(MeetingService meetingService, 
+            ParticipantService participantService, 
+            RedisService redisService, 
+            UserService userService, 
+            RoomService roomService,
+            MeetingHttpService meetingHttpService)
         {
             _meetingService = meetingService;
             _participantService = participantService;
             _redisService = redisService;
             _userService = userService;
             _roomService = roomService;
+            _meetingHttpService = meetingHttpService;
         }
 
         [HubMethodName("OnUserConnect")]
@@ -265,6 +272,7 @@ namespace Whale.SignalR.Hubs
             if (!redisDto.IsRoom)
             {
                 await _meetingService.EndMeeting(Guid.Parse(meetingId));
+                await _meetingHttpService.DeleteMeetingPolls(meetingId);
             } else
             {
                 await _redisService.RemoveAsync(meetingId);

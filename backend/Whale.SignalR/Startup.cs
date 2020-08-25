@@ -43,6 +43,7 @@ namespace Whale.SignalR
             services.AddTransient<UserService>();
             services.AddTransient<GroupService>();
             services.AddTransient<WhaleService>();
+            services.AddTransient<MeetingHttpService>(s => new MeetingHttpService(Configuration.GetValue<string>("MeetingAPI")));
             services.AddScoped<RoomService>();
 
             services.AddTransient(p => new SignalrService(Configuration.GetValue<string>("SignalR")));
