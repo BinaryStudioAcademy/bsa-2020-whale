@@ -39,7 +39,7 @@ export class MeetingNoteComponent implements OnInit {
 
   public stringifyDuration(duration: Duration): string {
     if (!duration) {
-      return 'No data';
+      return 'N/A';
     }
     const hourString = duration.hours == 0 ? '' : `${duration.hours} hours `;
     const minuteString =
