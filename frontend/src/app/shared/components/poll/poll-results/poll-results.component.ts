@@ -28,6 +28,9 @@ export class PollResultsComponent implements OnInit {
   }
 
   public calculatePercentage(index: number) {
+    if (this.totalVotes == 0) {
+      return 0;
+    }
     return Math.round(
       (this.pollResult.optionResults[index].votedUserIds.length * 100) /
         this.totalVotes
