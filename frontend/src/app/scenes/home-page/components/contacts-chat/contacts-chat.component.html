@@ -30,6 +30,17 @@
             <i id="chat-call" class="large phone icon" (click)="call()"></i>
           </div>
         </div>
+        
+
+        <div class="display-flex inner-block options__buttons">
+          <span data-tooltip="Delete contact" data-position="bottom center">
+            <i
+              id="delete-contact"
+              class="large trash icon"
+              (click)="onDelete()"
+            ></i>
+          </span>
+        </div>
 
         <span data-tooltip="Close chat" data-position="left center">
           <i id="chat-close" class="large close icon" (click)="close()"></i>

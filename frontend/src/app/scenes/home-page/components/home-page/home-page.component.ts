@@ -365,6 +365,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
     }
   }
   removeContact(contactId: string): void {
+    if (this.contactSelected?.id === contactId) {
+      this.contactVisibilityChange(false);
+    }
     this.contacts = this.contacts.filter((c) => c.id !== contactId);
     if (!this.contacts.length) {
       this.contactsVisibility = false;
