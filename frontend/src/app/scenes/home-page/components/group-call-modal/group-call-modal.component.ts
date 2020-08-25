@@ -28,6 +28,7 @@ export class GroupCallModalComponent extends SimpleModalComponent<Group, null>
   label: string;
   description: string;
   pinnedMessageId?: string;
+  photoUrl?: string;
 
   isAnyoneThere: Boolean;
   link: MeetingLink;
