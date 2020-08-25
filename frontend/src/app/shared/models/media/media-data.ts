@@ -6,4 +6,5 @@ export interface MediaData {
   isCurrentUser?: boolean;
   stream: MediaStream;
   dynamicData: BehaviorSubject<ParticipantDynamicData>;
+  volume: number;
 }

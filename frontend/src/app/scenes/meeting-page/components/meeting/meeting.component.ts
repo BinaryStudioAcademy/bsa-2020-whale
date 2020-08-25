@@ -23,7 +23,7 @@ import { SimpleModalService } from 'ngx-simple-modal';
 import { ToastrService } from 'ngx-toastr';
 import Peer from 'peerjs';
 import { Subject, Observable, BehaviorSubject } from 'rxjs';
-import { takeUntil, filter } from 'rxjs/operators';
+import { takeUntil, filter, first } from 'rxjs/operators';
 
 import { AuthService } from 'app/core/auth/auth.service';
 import {
@@ -50,6 +50,7 @@ import {
 } from '../../../../shared/models';
 import { EnterModalComponent } from '../enter-modal/enter-modal.component';
 import { MeetingInviteComponent } from '@shared/components/meeting-invite/meeting-invite.component';
+import { RecordModalComponent } from '../record-modal/record-modal.component';
 
 @Component({
   selector: 'app-meeting',
@@ -521,6 +522,19 @@ export class MeetingComponent
             'Conference start recording'
           );
           this.toastr.info('Start recording a conference');
+          this.blobService.recordReady$
+            .pipe(takeUntil(this.unsubscribe$))
+            .pipe(first())
+            .subscribe(
+              (resp) => {
+                this.simpleModalService.addModal(RecordModalComponent, {
+                  link: resp,
+                });
+              },
+              (err) => {
+                console.log(err.message);
+              }
+            );
         } else {
           this.isScreenRecording = false;
         }
@@ -765,6 +779,13 @@ export class MeetingComponent
         ? this.currentUserStream
         : this.connectedStreams.find((s) => s.id === participant.streamId);
 
+    const audioContext = new AudioContext();
+    const mediaStreamSource = audioContext.createMediaStreamSource(stream);
+    const processor = audioContext.createScriptProcessor(256, 1, 1);
+    mediaStreamSource.connect(audioContext.destination);
+    mediaStreamSource.connect(processor);
+    processor.connect(audioContext.destination);
+
     var newMediaData = {
       id: participant.id,
       isCurrentUser: participant.id === this.currentParticipant.id,
@@ -783,6 +804,18 @@ export class MeetingComponent
             ? this.currentUserStream.getAudioTracks().some((at) => at.enabled)
             : true,
       }),
+      volume: 0,
+    };
+
+    processor.onaudioprocess = (e) => {
+      const inputData = e.inputBuffer.getChannelData(0);
+      const inputDataLength = inputData.length;
+      let total = 0;
+
+      for (let i = 0; i < inputDataLength; i++) {
+        total += Math.abs(inputData[i++]);
+      }
+      newMediaData.volume = Math.sqrt(total / inputDataLength) * 100;
     };
 
     shouldPrepend

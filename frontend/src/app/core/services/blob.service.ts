@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -12,6 +12,8 @@ export class BlobService {
   baseUrl: string = environment.apiUrl;
   recorder: MediaRecorder;
   stream: MediaStream;
+  private recordReady = new Subject<string>();
+  public recordReady$ = this.recordReady.asObservable();
 
   public startRecording(): Observable<boolean> {
     return new Observable<boolean>((subscriber) => {
@@ -34,7 +36,7 @@ export class BlobService {
 
             this.postBlob(blob).subscribe((resp) => {
               subscriber.complete();
-              alert(resp);
+              this.recordReady.next(resp);
             });
           };
           this.recorder.start();
