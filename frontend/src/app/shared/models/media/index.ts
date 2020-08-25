@@ -4,3 +4,4 @@ export * from './media-settings';
 export * from './switch-media';
 export * from './media-data';
 export * from './participant-dynamic-data';
+export * from './stream-changed-data';
