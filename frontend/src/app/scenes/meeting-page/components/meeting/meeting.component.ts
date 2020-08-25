@@ -264,7 +264,7 @@ export class MeetingComponent
         }
 
         const disconectedMediaDataIndex = this.mediaData.findIndex(
-          (m) => m.stream.id == connectionData.participant.streamId
+          (m) => m.currentStreamId == connectionData.participant.streamId
         );
         if (disconectedMediaDataIndex) {
           this.mediaData.splice(disconectedMediaDataIndex, 1);
@@ -289,7 +289,7 @@ export class MeetingComponent
         );
 
         const disconectedMediaDataIndex = this.mediaData.findIndex(
-          (m) => m.stream.id == participant.streamId
+          (m) => m.currentStreamId == participant.streamId
         );
         if (disconectedMediaDataIndex) {
           this.mediaData.splice(disconectedMediaDataIndex, 1);
