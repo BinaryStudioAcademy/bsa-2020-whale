@@ -3,12 +3,14 @@
     <div class="event chat-label">
       <div class="content">
         <div class="group-info">
+          <img
+            class="ui avatar image"
+            src="{{ groupSelected.photoUrl }}"
+            alt="{{ groupSelected.label }}"
+          />
           <div>
             <span class="user-chat-label ui header">
               {{ groupSelected.label }}
-              <span class="grey sub header">
-                {{ groupSelected.creatorEmail }}
-              </span>
               <span class="grey sub header">
                 {{ groupSelected.description }}
               </span>

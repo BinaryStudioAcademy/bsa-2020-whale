@@ -7,12 +7,10 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { Call } from '@shared/models/call/call';
-import { SignalRService } from 'app/core/services/signal-r.service';
 import { Router } from '@angular/router';
 import { Subject, from } from 'rxjs';
-import { tap, takeUntil } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 import { CallDecline } from '@shared/models/call/call-decline';
-import { environment } from '@env';
 import { HubConnection } from '@aspnet/signalr';
 import { WhaleSignalService, WhaleSignalMethods } from 'app/core/services';
 @Component({
