@@ -58,7 +58,9 @@
         >
           <div
             id="home-contact"
-            [ngClass]="isContactActive(contact) ? 'active item' : 'item'"
+            [ngClass]="
+              isContactActive(contact) ? 'active item contact' : 'item contact'
+            "
             [className]="contact.isAccepted ? '' : 'inactive'"
             (click)="onContactClick(contact)"
           >
@@ -66,11 +68,9 @@
               class="ui avatar image"
               src="{{ returnCorrectLink(contact) }}"
             />
-            <div class="content">
-              <div class="description">
-                {{ contact?.secondMember.firstName }}
-                {{ contact?.secondMember.secondName }}
-              </div>
+            <div class="description">
+              {{ contact?.secondMember.firstName }}
+              {{ contact?.secondMember.secondName }}
             </div>
             <div
               data-tooltip="Online"

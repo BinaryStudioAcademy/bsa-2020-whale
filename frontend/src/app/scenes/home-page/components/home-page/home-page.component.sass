@@ -59,9 +59,10 @@
     overflow-y: overlay
     .icon-wrapper
         display: inline-block
+        width: 15px
         float: right
-        margin-top: 6px
         margin-right: 25px
+        margin-left: auto
         .circle.icon
             color: #2bac76
     
@@ -160,3 +161,16 @@
 
 span.icon-tooltip
     float: right
+
+.description
+    display: inline-block
+    margin-left: 7px
+    width: calc(100% - 90px)
+    white-space: nowrap
+    overflow: hidden !important
+    text-overflow: ellipsis
+
+div.item.contact
+    display: flex !important
+    align-items: center !important
+    flex-wrap: nowrap !important
