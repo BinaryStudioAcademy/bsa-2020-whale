@@ -55,12 +55,31 @@
     >
       There is still no messages yet!
     </div>
-    <div *ngFor="let message of messages" class="event message-event">
+    <div
+      *ngFor="let message of messages"
+      [ngClass]="
+        contactSelected.firstMemberId !== message.author?.id
+          ? 'event'
+          : 'event row-reverse '
+      "
+    >
       <div class="label">
         <img src="{{ message.author?.avatarUrl }}" />
       </div>
-      <div class="content">
-        <div class="summary">
+      <div
+        [ngClass]="
+          contactSelected.firstMemberId !== message.author?.id
+            ? 'content'
+            : 'content row-reverse'
+        "
+      >
+        <div
+          [ngClass]="
+            contactSelected.firstMemberId !== message.author?.id
+              ? 'summary'
+              : 'summary row-reverse'
+          "
+        >
           <a class="user">
             {{ message.author?.firstName }}
             {{ message.author?.secondName }}
@@ -69,7 +88,14 @@
             {{ message.createdAt | date: "short" }}
           </div>
         </div>
-        <div disabled class="message">
+        <div
+          disabled
+          [ngClass]="
+            contactSelected.firstMemberId !== message.author?.id
+              ? 'message'
+              : 'message current-user-message'
+          "
+        >
           <div *ngFor="let row of splitMessage(message?.message)">
             {{ row }}
           </div>
