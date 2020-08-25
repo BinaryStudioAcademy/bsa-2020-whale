@@ -71,4 +71,10 @@ export class BlobService {
       responseType: 'text',
     });
   }
+
+  public getAudio(fname: string): Observable<string> {
+    return this.http.get(`${this.baseUrl}/api/storage/audio/${fname}`, {
+      responseType: 'text',
+    });
+  }
 }

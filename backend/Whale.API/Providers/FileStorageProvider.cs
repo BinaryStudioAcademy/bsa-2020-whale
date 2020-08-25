@@ -3,6 +3,7 @@ using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using MimeTypes;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using Whale.DAL.Settings;
 
@@ -48,6 +49,24 @@ namespace Whale.API.Providers
 
             return blockBlob.Uri.AbsoluteUri;
         }
+
+        public async Task<string> GetAudioLink(string Fname)
+        {
+            var container = _blobClient.GetContainerReference(_settings.AudioContainerName);
+            await SetPublicContainerPermissionsAsync(container);
+            var fileName = $"{Fname}.mp3";
+
+            var fileExist = container.GetBlockBlobReference(fileName).Exists();
+            var blockBlob = container.GetBlockBlobReference(fileName);
+            if (!fileExist) {
+                var localFilePath = Path.Combine("./Resources/Audio/", fileName);
+                using var stream = File.OpenRead(localFilePath);
+                await blockBlob.UploadFromStreamAsync(stream);
+                stream.Close();
+            }
+            return blockBlob.Uri.AbsoluteUri;
+        }
+
 
         private async Task SetPublicContainerPermissionsAsync(CloudBlobContainer container)
         {

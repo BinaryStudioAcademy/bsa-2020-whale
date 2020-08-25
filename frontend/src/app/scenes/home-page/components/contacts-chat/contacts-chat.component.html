@@ -68,10 +68,11 @@
     </div>
   </div>
   <div class="forma">
-    <form class="ui form vertically-aligned" #chatForm="ngForm">
-      <div class="subheader helper">
-        Enter to send. Enter+Shift for new line.
-      </div>
+    <form
+      class="ui form vertically-aligned"
+      #chatForm="ngForm"
+      style="padding-bottom: 0; margin-bottom: 0;"
+    >
       <div class="field">
         <textarea
           (keydown.enter)="onEnterKeyPress($event, chatForm.valid)"
@@ -83,6 +84,9 @@
           [(ngModel)]="newMessage.message"
           required
         ></textarea>
+        <div class="subheader helper">
+          Enter to send. Enter+Shift for new line.
+        </div>
       </div>
       <button
         id="chat-submit"
