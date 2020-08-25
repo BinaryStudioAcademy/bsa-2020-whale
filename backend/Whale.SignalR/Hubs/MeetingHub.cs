@@ -13,6 +13,7 @@ using Whale.SignalR.Models.Drawing;
 using Whale.SignalR.Models.Media;
 using Whale.DAL.Models;
 using shortid;
+using Whale.Shared.Exceptions;
 
 namespace Whale.SignalR.Hubs
 {
@@ -36,10 +37,10 @@ namespace Whale.SignalR.Hubs
         [HubMethodName("OnUserConnect")]
         public async Task Join(MeetingConnectDTO connectionData)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, connectionData.MeetingId);
-            ParticipantDTO participant = null;
+            ParticipantDTO participant;
             if (connectionData.IsRoom)
             {
+                if (await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(connectionData.MeetingId) is null) throw new NotFoundException("Room");
                 participant = new ParticipantDTO
                 {
                     Id = Guid.NewGuid(),
@@ -55,7 +56,10 @@ namespace Whale.SignalR.Hubs
                 participant = await _participantService.GetMeetingParticipantByEmail(
                     Guid.Parse(connectionData.MeetingId), connectionData.UserEmail);
             }
-                                participant.StreamId = connectionData.StreamId;
+
+            await Groups.AddToGroupAsync(Context.ConnectionId, connectionData.MeetingId);
+
+            participant.StreamId = connectionData.StreamId;
             connectionData.Participant = participant;
             connectionData.Participant.ActiveConnectionId = Context.ConnectionId;
 

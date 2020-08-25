@@ -677,10 +677,15 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       this.connectionData.meetingPwd = '';
       this.connectionData.isRoom = true;
 
-      this.meetingSignalrService.invoke(
-        SignalMethods.OnUserConnect,
-        this.connectionData
-      );
+      this.meetingSignalrService
+        .invoke(SignalMethods.OnUserConnect, this.connectionData)
+        .subscribe(
+          () => {},
+          (err) => {
+            this.toastr.error('Unable to connect to meeting');
+            this.router.navigate(['/home']);
+          }
+        );
 
       this.meetingSignalrService.invoke(SignalMethods.OnGetMessages, {
         meetingId: this.meeting.id,
