@@ -1,5 +1,5 @@
 <div class="chat ui secondary segment">
-  <div class="ui chat-inner feed">
+  <div class="ui chat-inner feed" #chatWindow>
     <div class="event chat-label">
       <div class="label">
         <img src="{{ contactSelected.secondMember?.avatarUrl }}" />
@@ -42,6 +42,7 @@
       <div class="label">
         <img src="{{ message.author?.avatarUrl }}" />
       </div>
+      <!-- ngClass here -->
       <div class="content">
         <div class="summary">
           <a class="user">

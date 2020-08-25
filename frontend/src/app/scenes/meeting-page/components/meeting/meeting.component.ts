@@ -344,7 +344,11 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (erase) => {
-          if (erase) this.canvasWhiteboardService.clearCanvas();
+          if (erase) {
+            this.canvasWhiteboardService.clearCanvas();
+            this.savedStrokes = new Array<CanvasWhiteboardUpdate[]>();
+            this.receiveingDrawings = false;
+          }
         },
         () => {
           this.toastr.error('Error occured while trying to erase drawings');

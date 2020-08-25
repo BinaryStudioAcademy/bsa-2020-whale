@@ -8,6 +8,10 @@ import {
   AfterContentInit,
   OnChanges,
   SimpleChanges,
+  ViewChild,
+  ElementRef,
+  AfterViewInit,
+  AfterViewChecked,
 } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { DirectMessage } from '@shared/models/message/direct-message';
@@ -32,7 +36,8 @@ import { CallModalComponent } from '../call-modal/call-modal.component';
   templateUrl: './contacts-chat.component.html',
   styleUrls: ['./contacts-chat.component.sass'],
 })
-export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
+export class ContactsChatComponent
+  implements OnInit, OnChanges, OnDestroy, AfterViewInit, AfterViewChecked {
   private hubConnection: HubConnection;
   counter = 0;
 
@@ -40,6 +45,11 @@ export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
   public receivedMsg$ = this.receivedMsg.asObservable();
 
   private unsubscribe$ = new Subject<void>();
+
+  @ViewChild('chatWindow', { static: false }) chatBlock: ElementRef<
+    HTMLElement
+  >;
+  chatElement: any;
 
   @Input() contactSelected: Contact;
   @Output() chat: EventEmitter<boolean> = new EventEmitter<boolean>();
@@ -59,6 +69,23 @@ export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
     private simpleModalService: SimpleModalService
   ) {}
 
+  ngAfterViewChecked(): void {
+    this.scrollDown();
+  }
+
+  ngAfterViewInit(): void {
+    this.chatElement = this.chatBlock.nativeElement;
+  }
+
+  scrollDown(): void {
+    const chatHtml = this.chatElement as HTMLElement;
+    const isScrolledToBottom =
+      chatHtml.scrollHeight - chatHtml.clientHeight > chatHtml.scrollTop;
+
+    if (isScrolledToBottom)
+      chatHtml.scrollTop = chatHtml.scrollHeight - chatHtml.clientHeight;
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
     this.httpService
       .getRequest<DirectMessage[]>(
@@ -69,11 +96,13 @@ export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
         (data: DirectMessage[]) => {
           this.messages = data;
           console.log('messages new');
+          // this.scrollDown();
         },
         (error) => console.log(error)
       );
     this.hubConnection?.invoke('JoinGroup', this.contactSelected.id);
   }
+
   ngOnInit(): void {
     from(this.signalRService.registerHub(environment.signalrUrl, 'chatHub'))
       .pipe(
@@ -119,7 +148,10 @@ export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
       )
       .pipe(take(1))
       .subscribe(
-        () => (this.newMessage.message = ''),
+        () => {
+          this.newMessage.message = '';
+          this.scrollDown();
+        },
         (error) => this.toastr.error(error.Message)
       );
   }
