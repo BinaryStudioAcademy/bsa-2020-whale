@@ -165,10 +165,10 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     if (enterModal.cameraOff) {
-      this.toggleCamera();
+      this.toggleCamera(true);
     }
     if (enterModal.microOff) {
-      this.toggleMicrophone();
+      this.toggleMicrophone(true);
     }
     this.currentStreamLoaded.emit();
 
@@ -489,7 +489,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   //#endregion hooks
 
   //#region options
-  public toggleMicrophone(): void {
+  public toggleMicrophone(isMissSignaling: boolean = false): void {
     this.isMicrophoneMuted
       ? this.currentUserStream.getAudioTracks().forEach((track) => {
           track.enabled = true;
@@ -499,10 +499,10 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
         });
 
     this.isMicrophoneMuted = !this.isMicrophoneMuted;
-    this.invokeMediaStateChanged();
+    if (!isMissSignaling) this.invokeMediaStateChanged();
   }
 
-  public toggleCamera(): void {
+  public toggleCamera(isMissSignaling: boolean = false): void {
     this.isCameraMuted
       ? this.currentUserStream.getVideoTracks().forEach((track) => {
           track.enabled = true;
@@ -512,7 +512,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
         });
 
     this.isCameraMuted = !this.isCameraMuted;
-    this.invokeMediaStateChanged();
+    if (!isMissSignaling) this.invokeMediaStateChanged();
   }
 
   public startRecording(): void {
@@ -1092,7 +1092,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
   //#endregion Rooms
 
-  //region InviteUserModal
+  //#region InviteUserModal
   public async openInviteUsersModal() {
     this.getShortInviteLink().subscribe(
       async (shortId) => {
