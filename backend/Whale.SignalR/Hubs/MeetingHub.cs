@@ -77,7 +77,15 @@ namespace Whale.SignalR.Hubs
 
             if (_groupsParticipants.TryGetValue(connectionData.MeetingId, out var groupParticipants))
             {
-                groupParticipants.Add(participant);
+                var existingParticipant = groupParticipants.FirstOrDefault(p => p.User.Id == participant.User.Id);
+                if (existingParticipant is null)
+                {
+                    groupParticipants.Add(participant);
+                } else
+                {
+                    var participantIndex = groupParticipants.IndexOf(existingParticipant);
+                    groupParticipants[participantIndex] = participant;
+                }
             }
             else
             {
@@ -113,8 +121,6 @@ namespace Whale.SignalR.Hubs
         [HubMethodName("OnParticipantLeft")]
         public async Task ParticipantLeft(MeetingConnectDTO ConnectionData)
         {
-            if (ConnectionData.IsMoveToRoom) return;
-
             var disconnectedParticipant = _groupsParticipants[ConnectionData.MeetingId]
                 .Find(p => p.User.Email == ConnectionData.UserEmail);
 
@@ -264,6 +270,16 @@ namespace Whale.SignalR.Hubs
             await Clients.Caller.SendAsync("OnRoomCreated", roomUrl);
 
             _roomService.CloseRoomAfterTimeExpire(roomCreateData.Duration, roomCreateData.MeetingLink, roomUrl);
+        }
+
+        [HubMethodName("OnMoveIntoRoom")]
+        public async Task OnMoveIntoRoom(MeetingConnectDTO connectionData)
+        {
+            var disconnectedParticipant = _groupsParticipants[connectionData.MeetingId]
+                                            .Find(p => p.User.Email == connectionData.UserEmail);
+            connectionData.Participant = disconnectedParticipant;
+
+            await Clients.Group(connectionData.MeetingId).SendAsync("onParticipentMoveIntoRoom", connectionData);
         }
 
         private async Task DeleteMeeting(string meetingId)

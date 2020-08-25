@@ -106,6 +106,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public receiveingDrawings: boolean = false;
   public isHost = false;
   public isRoom = false;
+  public isMoveToRoom = false;
   public rooms: string[] = [];
 
   @ViewChild('currentVideo') private currentVideo: ElementRef;
@@ -377,7 +378,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe(
         (roomId) => {
           if (!this.isHost) {
-            this.connectionData.isMoveToRoom = true;
+            this.isMoveToRoom = true;
             this.router.navigate([`/room/${roomId}`]);
           } else {
             this.rooms.push(roomId);
@@ -392,6 +393,27 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((link) => {
         this.router.navigate([`/meeting-page/${link}`]);
+      });
+
+    this.meetingSignalrService.onParticipentMoveIntoRoom$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe((connectionData) => {
+        if (this.connectedPeers.has(connectionData.peerId)) {
+          this.connectedPeers.delete(connectionData.peerId);
+        }
+
+        const disconectedMediaDataIndex = this.mediaData.findIndex(
+          (m) => m.stream.id == connectionData.participant.streamId
+        );
+        if (disconectedMediaDataIndex) {
+          this.mediaData.splice(disconectedMediaDataIndex, 1);
+          const secondName = ` ${
+            connectionData.participant.user.secondName ?? ''
+          }`;
+          this.toastr.show(
+            `${connectionData.participant.user.firstName}${secondName} moved into room`
+          );
+        }
       });
 
     // create new peer
@@ -445,11 +467,19 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.currentUserStream?.getTracks().forEach((track) => track.stop());
 
     if (this.connectionData) {
-      this.connectionData.participant = this.currentParticipant;
-      this.meetingSignalrService.invoke(
-        SignalMethods.OnParticipantLeft,
-        this.connectionData
-      );
+      if (!this.isMoveToRoom) {
+        this.connectionData.participant = this.currentParticipant;
+        this.meetingSignalrService.invoke(
+          SignalMethods.OnParticipantLeft,
+          this.connectionData
+        );
+      } else
+        [
+          this.meetingSignalrService.invoke(
+            SignalMethods.OnMoveIntoRoom,
+            this.connectionData
+          ),
+        ];
     }
 
     this.unsubscribe$.next();
@@ -747,7 +777,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
         streamId: this.currentUserStream.id,
         participant: this.currentParticipant, // this.currentParticipant is undefined here
         isRoom: false,
-        isMoveToRoom: false,
       };
 
       this.getMeeting(link);
