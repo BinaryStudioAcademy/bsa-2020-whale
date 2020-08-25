@@ -152,19 +152,18 @@ export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
     this.simpleModalService
       .addModal(ConfirmationModalComponent, {
         message: 'Are you sure you want to delete the contact?',
-      }).subscribe(
-        (isConfirm) => {
-          if (isConfirm) {
-            this.contactService.DeleteContact(this.contactSelected.id).subscribe(
-              (resp) => {
-                if (resp.status === 204) {
-                  this.close();
-                }
-              },
-              (error) => this.toastr.error(error.Message)
-            );
-          }
+      })
+      .subscribe((isConfirm) => {
+        if (isConfirm) {
+          this.contactService.DeleteContact(this.contactSelected.id).subscribe(
+            (resp) => {
+              if (resp.status === 204) {
+                this.close();
+              }
+            },
+            (error) => this.toastr.error(error.Message)
+          );
         }
-    );
+      });
   }
 }

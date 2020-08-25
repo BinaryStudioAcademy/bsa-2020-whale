@@ -5,11 +5,12 @@ import { ToastrService } from 'ngx-toastr';
 @Component({
   selector: 'app-record-modal',
   templateUrl: './record-modal.component.html',
-  styleUrls: ['./record-modal.component.sass']
+  styleUrls: ['./record-modal.component.sass'],
 })
-export class RecordModalComponent extends SimpleModalComponent<RecordModal, void>
+export class RecordModalComponent
+  extends SimpleModalComponent<RecordModal, void>
   implements RecordModal {
-    link: string;
+  link: string;
   constructor(private toastr: ToastrService) {
     super();
   }

@@ -162,6 +162,16 @@ export class HomePageComponent implements OnInit, OnDestroy {
                       console.log(err.message);
                     }
                   );
+                this.whaleSignalrService.removedFromGroup$
+                  .pipe(takeUntil(this.unsubscribe$))
+                  .subscribe(
+                    (groupId) => {
+                      this.removeGroup(groupId);
+                    },
+                    (err) => {
+                      console.log(err.message);
+                    }
+                  );
               },
               (error) => this.toastr.error(error.Message)
             );

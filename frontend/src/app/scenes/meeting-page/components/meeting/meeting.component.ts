@@ -499,7 +499,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public startRecording(): void {
     this.isScreenRecording = true;
-    
+
     this.blobService.startRecording().subscribe({
       complete: () => (this.isWaitingForRecord = false),
       next: (permited) => {
@@ -509,15 +509,19 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
             'Conference start recording'
           );
           this.toastr.info('Start recording a conference');
-          this.blobService.recordReady$.pipe(takeUntil(this.unsubscribe$)).pipe(first())
-                  .subscribe(
-                    (resp) => {
-                      this.simpleModalService.addModal(RecordModalComponent, { link: resp })
-                    },
-                    (err) => {
-                      console.log(err.message);
-                    }
-                  );
+          this.blobService.recordReady$
+            .pipe(takeUntil(this.unsubscribe$))
+            .pipe(first())
+            .subscribe(
+              (resp) => {
+                this.simpleModalService.addModal(RecordModalComponent, {
+                  link: resp,
+                });
+              },
+              (err) => {
+                console.log(err.message);
+              }
+            );
         } else {
           this.isScreenRecording = false;
         }
