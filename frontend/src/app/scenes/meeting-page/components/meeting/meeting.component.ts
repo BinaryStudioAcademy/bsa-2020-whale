@@ -7,6 +7,8 @@ import {
   EventEmitter,
   OnDestroy,
   Inject,
+  AfterContentChecked,
+  AfterViewChecked,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
@@ -55,7 +57,8 @@ import { RecordModalComponent } from '../record-modal/record-modal.component';
   templateUrl: './meeting.component.html',
   styleUrls: ['./meeting.component.sass'],
 })
-export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
+export class MeetingComponent
+  implements OnInit, AfterViewInit, OnDestroy, AfterViewChecked {
   //#region fields
   public canvasIsDisplayed: boolean = false;
   public canvasOptions: CanvasWhiteboardOptions = {
@@ -110,6 +113,10 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
     HTMLElement
   >;
+  @ViewChild('meetingChat', { static: false }) chatBlock: ElementRef<
+    HTMLElement
+  >;
+  private chatElement: any;
   private currentUserStream: MediaStream;
   private currentStreamLoaded = new EventEmitter<void>();
   private contectedAt = new Date();
@@ -143,6 +150,9 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       this.toastr,
       this.unsubscribe$
     );
+  }
+  ngAfterViewChecked(): void {
+    if (this.isShowChat) this.chatElement = this.chatBlock.nativeElement;
   }
 
   //#region hooks
@@ -364,7 +374,11 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (erase) => {
-          if (erase) this.canvasWhiteboardService.clearCanvas();
+          if (erase) {
+            this.canvasWhiteboardService.clearCanvas();
+            this.savedStrokes = new Array<CanvasWhiteboardUpdate[]>();
+            this.receiveingDrawings = false;
+          }
         },
         () => {
           this.toastr.error('Error occured while trying to erase drawings');
@@ -425,7 +439,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public ngAfterViewInit(): void {
     this.elem = this.mainArea.nativeElement;
-    console.log('elem', this.elem);
     console.log('currentVideo first', this.currentVideo);
     this.currentStreamLoaded.subscribe(() => {
       this.currentVideo.nativeElement.srcObject = this.currentUserStream;
@@ -589,6 +602,15 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       document.body.removeChild(copyBox);
       this.toastr.success('Copied');
     });
+  }
+
+  scrollDown(): void {
+    const chatHtml = this.chatElement as HTMLElement;
+    const isScrolledToBottom =
+      chatHtml.scrollHeight - chatHtml.clientHeight > chatHtml.scrollTop;
+
+    if (isScrolledToBottom)
+      chatHtml.scrollTop = chatHtml.scrollHeight - chatHtml.clientHeight;
   }
 
   public goFullscreen(): void {
@@ -873,6 +895,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       } as MeetingMessageCreate);
 
       this.msgText = '';
+      this.scrollDown();
     }
   }
 
@@ -1058,7 +1081,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
-  public updateSelectedMessages(): void {
+  public async updateSelectedMessages(): Promise<void> {
     if (this.msgReceiverEmail === '') {
       this.selectedMessages = this.messages.filter((m) => m.receiver == null);
     } else {
@@ -1069,6 +1092,8 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
             m?.author?.email === this.msgReceiverEmail)
       );
     }
+    await this.delay(50);
+    this.scrollDown();
   }
 
   public notifyNewMsg(msg: MeetingMessage): void {

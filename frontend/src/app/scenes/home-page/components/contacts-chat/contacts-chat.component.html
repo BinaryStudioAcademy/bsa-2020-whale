@@ -47,7 +47,7 @@
       </div>
     </div>
   </div>
-  <div class="ui chat-inner feed">
+  <div class="ui chat-inner feed" #chatWindow>
     <spiner *ngIf="isMessagesLoading" [size]="'medium'"></spiner>
     <div
       *ngIf="messages.length == 0 && !isMessagesLoading"

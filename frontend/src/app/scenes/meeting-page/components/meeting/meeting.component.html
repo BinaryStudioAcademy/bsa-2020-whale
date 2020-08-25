@@ -362,7 +362,7 @@
     </div>
 
     <div *ngIf="isShowChat" class="ui chat card">
-      <div class="ui chat-inner feed">
+      <div class="ui chat-inner feed" #meetingChat>
         <div
           *ngFor="let message of selectedMessages"
           class="event message-event"
