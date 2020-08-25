@@ -1,11 +1,11 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 
 @Component({
-  selector: 'app-email-tag',
-  templateUrl: './email-tag.component.html',
-  styleUrls: ['./email-tag.component.sass'],
+  selector: 'app-tag',
+  templateUrl: './tag.component.html',
+  styleUrls: ['./tag.component.sass'],
 })
-export class EmailTagComponent implements OnInit {
+export class TagComponent implements OnInit {
   @Input() email: string;
   @Output() tagRemoved = new EventEmitter<string>();
 

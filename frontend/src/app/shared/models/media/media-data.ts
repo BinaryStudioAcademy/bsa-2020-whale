@@ -7,4 +7,5 @@ export interface MediaData {
   currentStreamId: string;
   stream: MediaStream;
   dynamicData: BehaviorSubject<ParticipantDynamicData>;
+  volume: number;
 }
