@@ -195,5 +195,15 @@ namespace Whale.SignalR.Hubs
             await Clients.GroupExcept(drawingDTO.MeetingId, new List<string> { Context.ConnectionId })
                 .SendAsync("OnErasing", drawingDTO.Erase);
         }
+        [HubMethodName("OnStartShareScreen")]
+        public async Task OnStartShare(ShareScreenDTO share)
+        {
+            await Clients.Group(share.meetingId).SendAsync("OnStartShareScreen",share.streamId);
+        }
+        [HubMethodName("OnStopShareScreen")]
+        public async Task OnStopShare(string meetingId)
+        {
+            await Clients.Group(meetingId).SendAsync("OnStopShareScreen");
+        }
     }
 }

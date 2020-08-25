@@ -5,6 +5,10 @@
 <div #mainArea class="bg-white">
   <div class="content display-flex">
     <div class="tools" ngDraggable [handle]="handleHand">
+      <div #handleHand class="drag-icon">
+        <i class="ellipsis vertical icon"></i>
+        <i class="ellipsis vertical icon"></i>
+      </div>
       <span data-tooltip="Toggle Microphone" data-position="top left">
         <i
           id="meeting-draggable-mute"
@@ -80,11 +84,15 @@
           class="big user plus icon big-left-margin"
         ></i>
       </span>
-      <i #handleHand class="big hand rock icon drag-icon"></i>
+      <!-- <i #handleHand class="big hand rock icon drag-icon"></i> -->
     </div>
     <div *ngIf="isShowParticipants" class="ui participants-container">
       <div class="invite-icon-container">
-        <i class="user plus icon" (click)="openInviteUsersModal()"></i>
+        <i
+          class="user plus icon"
+          [disabled]="isAddParticipantDisabled"
+          (click)="openInviteUsersModal()"
+        ></i>
       </div>
       <div class="participants-wrapper">
         <div class="ui divided list">
@@ -198,6 +206,15 @@
               <i
                 id="meeting-options-share"
                 class="big share square icon big-left-margin"
+                (click)="shareScreen()"
+                *ngIf="!isSharing"
+              ></i>
+            </span>
+            <span data-tooltip="Share Screen Stop" data-position="top left">
+              <i
+                class="big stop icon"
+                *ngIf="isSharing"
+                (click)="removeSharingVideo()"
               ></i>
             </span>
             <span data-tooltip="Polls">

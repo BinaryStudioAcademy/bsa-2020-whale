@@ -52,4 +52,11 @@ export class GroupService {
       `${this.routePrefix}/${group.id}`
     );
   }
+
+  public updateGroup(group: Group): Observable<HttpResponse<Group>> {
+    return this.httpService.putFullRequest<Group, Group>(
+      `${this.routePrefix}/update`,
+      group
+    );
+  }
 }

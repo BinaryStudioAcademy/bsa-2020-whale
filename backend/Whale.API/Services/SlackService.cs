@@ -13,7 +13,7 @@ namespace Whale.API.Services
         {
             _configuration = configuration;
 
-            _slackClient = new SlackTaskClient(_configuration.GetValue<string>("SlackBotToken"));
+            _slackClient = new SlackTaskClient(_configuration.GetValue<string>("WhaleSlackBotToken"));
         }
 
         public async Task SendSlackReplyAsync(string text, string channel)

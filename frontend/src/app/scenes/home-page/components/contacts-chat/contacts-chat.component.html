@@ -31,6 +31,16 @@
           </div>
         </div>
 
+        <div class="display-flex inner-block options__buttons">
+          <span data-tooltip="Delete contact" data-position="bottom center">
+            <i
+              id="delete-contact"
+              class="large trash icon"
+              (click)="onDelete()"
+            ></i>
+          </span>
+        </div>
+
         <span data-tooltip="Close chat" data-position="left center">
           <i id="chat-close" class="large close icon" (click)="close()"></i>
         </span>
@@ -68,10 +78,11 @@
     </div>
   </div>
   <div class="forma">
-    <form class="ui form vertically-aligned" #chatForm="ngForm">
-      <div class="subheader helper">
-        Enter to send. Enter+Shift for new line.
-      </div>
+    <form
+      class="ui form vertically-aligned"
+      #chatForm="ngForm"
+      style="padding-bottom: 0; margin-bottom: 0;"
+    >
       <div class="field">
         <textarea
           (keydown.enter)="onEnterKeyPress($event, chatForm.valid)"
@@ -83,6 +94,9 @@
           [(ngModel)]="newMessage.message"
           required
         ></textarea>
+        <div class="subheader helper">
+          Enter to send. Enter+Shift for new line.
+        </div>
       </div>
       <button
         id="chat-submit"

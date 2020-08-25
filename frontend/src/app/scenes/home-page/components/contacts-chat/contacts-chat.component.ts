@@ -26,6 +26,8 @@ import { stringify } from 'querystring';
 import { HttpResponse } from '@angular/common/http';
 import { SimpleModalService } from 'ngx-simple-modal';
 import { CallModalComponent } from '../call-modal/call-modal.component';
+import { ContactService } from 'app/core/services';
+import { ConfirmationModalComponent } from '@shared/components/confirmation-modal/confirmation-modal.component';
 
 @Component({
   selector: 'app-contacts-chat',
@@ -57,7 +59,8 @@ export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
     private signalRService: SignalRService,
     private httpService: HttpService,
     private toastr: ToastrService,
-    private simpleModalService: SimpleModalService
+    private simpleModalService: SimpleModalService,
+    private contactService: ContactService
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -143,5 +146,24 @@ export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
   }
   public splitMessage(message: string) {
     return message.split(/\n/gi);
+  }
+
+  public onDelete(): void {
+    this.simpleModalService
+      .addModal(ConfirmationModalComponent, {
+        message: 'Are you sure you want to delete the contact?',
+      })
+      .subscribe((isConfirm) => {
+        if (isConfirm) {
+          this.contactService.DeleteContact(this.contactSelected.id).subscribe(
+            (resp) => {
+              if (resp.status === 204) {
+                this.close();
+              }
+            },
+            (error) => this.toastr.error(error.Message)
+          );
+        }
+      });
   }
 }

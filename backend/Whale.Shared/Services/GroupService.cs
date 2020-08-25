@@ -76,6 +76,20 @@ namespace Whale.Shared.Services
             return _mapper.Map<GroupDTO>(group);
         }
 
+        public async Task<GroupDTO> UpdateGroup(UpdateGroupDTO updateGroup)
+        {
+            var group = _context.Groups.FirstOrDefault(g => g.Id == updateGroup.Id);
+
+            if (group == null) throw new NotFoundException("Group", updateGroup.Id.ToString());
+
+            group.PhotoUrl = updateGroup.PhotoUrl;
+
+            _context.Groups.Update(group);
+            await _context.SaveChangesAsync();
+
+            return await GetGroupAsync(group.Id);
+        }
+
         public async Task<GroupDTO> CreateGroupAsync(GroupCreateDTO newGroup, string userEmail)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);

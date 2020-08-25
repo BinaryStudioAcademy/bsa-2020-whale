@@ -6,8 +6,9 @@ import { FormsModule } from '@angular/forms';
 import { AngularDraggableModule } from 'angular2-draggable';
 import { CanvasWhiteboardModule } from 'ng2-canvas-whiteboard';
 import { EnterModalComponent } from './components/enter-modal/enter-modal.component';
+import { RecordModalComponent } from './components/record-modal/record-modal.component';
 @NgModule({
-  declarations: [MeetingComponent, EnterModalComponent],
+  declarations: [MeetingComponent, EnterModalComponent, RecordModalComponent],
   imports: [
     SharedModule,
     FormsModule,

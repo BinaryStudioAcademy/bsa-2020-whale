@@ -435,10 +435,20 @@ div:moz-full-screen
     background: white
 
 .drag-icon
-    margin-left: 5px
-    margin-right: 15px
-    padding-left: 15px
-    border-left: 2px solid rgba(0, 0, 0, 0.8)
+    display: inline-block
+    padding-right: 6px
+    // padding-left: 11px
+    margin-right: 9px
+    border-right: 2px solid rgba(0, 0, 0, 0.8)
+    height: 100%
+    vertical-align: middle
+    i:nth-child(2)
+
+        margin-left: -13px !important
 
 .drag-icon:hover
     cursor: grabbing !important
+    i
+        cursor: grabbing
+        opacity: 1
+    

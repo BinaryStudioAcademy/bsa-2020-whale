@@ -13,6 +13,8 @@ namespace Whale.Shared.MappingProfiles
         {
             CreateMap<GroupCreateDTO, Group>();
             CreateMap<Group, GroupDTO>().ReverseMap();
+            CreateMap<Group, UpdateGroupDTO>().ReverseMap();
+            CreateMap<GroupDTO, UpdateGroupDTO>().ReverseMap();
         }
     }
 }
