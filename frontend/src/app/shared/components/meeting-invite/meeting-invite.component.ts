@@ -6,6 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 import { SimpleModalComponent } from 'ngx-simple-modal';
 import { MeetingInviteModalData } from '@shared/models/email/meeting-invite-modal-data';
 import { MeetingInvite } from '@shared/models/email/meeting-invite';
+import { Contact, User } from '@shared/models';
 
 @Component({
   selector: 'app-meeting-invite',
@@ -16,7 +17,11 @@ export class MeetingInviteComponent
   extends SimpleModalComponent<MeetingInviteModalData, void>
   implements OnInit {
   public emails: string[] = [];
+  public contacts: Contact[];
+  public cachedContacts: Contact[];
+
   public form: FormGroup;
+  public formSearch: FormGroup;
 
   public isLoading = false;
 
@@ -29,12 +34,21 @@ export class MeetingInviteComponent
     this.form = new FormGroup({
       email: new FormControl(''),
     });
+
+    this.formSearch = new FormGroup({
+      contactSearch: new FormControl(''),
+    });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.getContacts();
+  }
 
   public addEmailTag(): void {
-    if (this.form.controls.email.value) {
+    if (
+      this.form.controls.email.value &&
+      !this.emails.find((email) => email == this.form.controls.email.value)
+    ) {
       this.emails.push(this.form.controls.email.value);
     }
     this.form.controls.email.setValue('');
@@ -76,5 +90,54 @@ export class MeetingInviteComponent
           this.isLoading = false;
         }
       );
+  }
+
+  public getContacts() {
+    this.httpService
+      .getRequest<Contact[]>(environment.apiUrl + '/api/Contacts/accepted')
+      .subscribe(
+        (response) => {
+          console.log(response);
+          this.contacts = response;
+          this.cachedContacts = response;
+        },
+        (error) => {
+          console.error(error);
+        }
+      );
+  }
+
+  public filterContacts(value: string) {
+    this.cachedContacts = this.contacts.filter((contact) => {
+      return `${contact.secondMember.firstName} ${contact.secondMember.secondName}`.includes(
+        value
+      );
+    });
+  }
+
+  public onContactClicked(contact: Contact) {
+    const index = this.emails.findIndex(
+      (email) => email == contact.secondMember.email
+    );
+    if (index == -1) {
+      this.emails.push(contact.secondMember.email);
+    } else {
+      this.emails.splice(index, 1);
+    }
+  }
+
+  public getEmailOrName(email: string) {
+    const contact = this.contacts.find((c) => c.secondMember.email == email);
+    if (contact) {
+      return this.getName(contact.secondMember);
+    } else {
+      return email;
+    }
+  }
+
+  public getName(user: User) {
+    return user.secondName
+      ? `${user.firstName} ${user.secondName}`
+      : user.firstName;
   }
 }

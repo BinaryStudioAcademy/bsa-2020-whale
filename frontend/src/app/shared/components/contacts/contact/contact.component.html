@@ -1,0 +1,23 @@
+<div
+  (click)="onContactClick()"
+  [ngClass]="isContactSelected ? 'contact bg-grey' : 'contact'"
+>
+  <div id="invite-contact" class="contact-container">
+    <div></div>
+    <img class="ui avatar image" src="{{ returnCorrectLink() }}" />
+    <div class="contact-name">
+      {{ contact?.secondMember.firstName }}
+      {{ contact?.secondMember.secondName }}
+    </div>
+    <div
+      data-tooltip="Online"
+      data-position="left center"
+      class="icon-container"
+    >
+      <i
+        *ngIf="contact?.secondMember.connectionId"
+        class="circle small icon"
+      ></i>
+    </div>
+  </div>
+</div>
