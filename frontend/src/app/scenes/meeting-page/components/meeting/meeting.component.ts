@@ -158,7 +158,7 @@ export class MeetingComponent
 
   //#region accessors
   private set currentUserStream(value: MediaStream) {
-    this.meetingSignalrService.invoke(
+    this.meetingSignalrService?.invoke(
       SignalMethods.OnParticipantStreamChanged,
       {
         oldStreamId: this.userStream?.id,
