@@ -10,6 +10,7 @@ namespace Whale.Shared.Models.Meeting
             Messages = new List<MeetingMessageDTO>();
         }
         public string Password { get; set; }
+        public bool IsRoom { get; set; } = false;
 
         public ICollection<MeetingMessageDTO> Messages { get; }
     }

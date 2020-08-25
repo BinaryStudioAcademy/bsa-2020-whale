@@ -40,6 +40,7 @@ namespace Whale.SignalR.Hubs
             ParticipantDTO participant;
             if (connectionData.IsRoom)
             {
+                await _redisService.ConnectAsync();
                 if (await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(connectionData.MeetingId) is null) throw new NotFoundException("Room");
                 participant = new ParticipantDTO
                 {
@@ -89,6 +90,10 @@ namespace Whale.SignalR.Hubs
                 _groupsParticipants[group.Key].Remove(disconnectedParticipant);
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, group.Key);
                 await Clients.Group(group.Key).SendAsync("OnParticipantDisconnected", disconnectedParticipant);
+                if(group.Value.Count <= 0)
+                {
+                    await this.DeleteMeeting(group.Key);
+                }
             }
 
             await base.OnDisconnectedAsync(exception);
@@ -104,6 +109,11 @@ namespace Whale.SignalR.Hubs
             _groupsParticipants[ConnectionData.MeetingId].Remove(disconnectedParticipant);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, ConnectionData.MeetingId);
             await Clients.Group(ConnectionData.MeetingId).SendAsync("OnParticipantLeft", ConnectionData);
+
+            if(_groupsParticipants[ConnectionData.MeetingId].Count <= 0)
+            {
+                await this.DeleteMeeting(ConnectionData.MeetingId);
+            }
         }
 
 
@@ -230,7 +240,7 @@ namespace Whale.SignalR.Hubs
 
             var roomUrl = ShortId.Generate(false, false);
             await _redisService.ConnectAsync();
-            await _redisService.SetAsync(roomUrl, new MeetingMessagesAndPasswordDTO { Password = "" });
+            await _redisService.SetAsync(roomUrl, new MeetingMessagesAndPasswordDTO { Password = "", IsRoom = true });
 
             foreach (var participantId in roomCreateData.ParticipantsIds) 
             {
@@ -240,7 +250,22 @@ namespace Whale.SignalR.Hubs
 
             await Task.Delay(30000);
             Console.WriteLine("elapsed");
+            await _redisService.DeleteKey(roomUrl);
             await Clients.All.SendAsync("OnRoomClosed", roomCreateData.MeetingLink);
+        }
+
+        private async Task DeleteMeeting(string meetingId)
+        {
+            _groupsParticipants.Remove(meetingId);
+            await _redisService.ConnectAsync();
+            var redisDto = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(meetingId);
+            if (!redisDto.IsRoom)
+            {
+                await _meetingService.EndMeeting(Guid.Parse(meetingId));
+            } else
+            {
+                await _redisService.RemoveAsync(meetingId);
+            }
         }
     }
 }
