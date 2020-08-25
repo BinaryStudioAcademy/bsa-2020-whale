@@ -30,7 +30,7 @@ namespace Whale.API.Services
 
         public async Task SendMeetingInvites(MeetingInviteDTO meetingInviteDto)
         {
-            var apiKey = Environment.GetEnvironmentVariable("SENDGRID_API_KEY");
+            var apiKey = Environment.GetEnvironmentVariable("SENDGRID_API_KEY", EnvironmentVariableTarget.Machine);
             var client = new SendGridClient(apiKey);
 
             var meeting = _context.Meetings.FirstOrDefault(meeting => meeting.Id == meetingInviteDto.MeetingId);

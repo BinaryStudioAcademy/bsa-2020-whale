@@ -1,0 +1,23 @@
+<div
+  id="record-modal-close"
+  class="ui dimmer modals page visible active"
+  (click)="close()"
+>
+  <div class="ui mini modal visible active" (click)="$event.stopPropagation()">
+    <h3 class="header">The Record is ready</h3>
+    <div class="actions">
+        <div id="record-modal-copy" class="ui right labeled icon button" (click)="onCopy()">
+          Copy Link
+          <i class="copy icon"></i>
+        </div>
+        <div
+          id="record-modal-open"
+          class="ui right labeled icon button"
+          (click)="onDownload()"
+        >
+          Open in New Tab
+          <i class="external alternate icon"></i>
+        </div>
+      </div>
+  </div>
+</div>

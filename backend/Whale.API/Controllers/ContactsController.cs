@@ -36,6 +36,19 @@ namespace Whale.API.Controllers
             return Ok(contacts);
         }
 
+        [HttpGet("accepted")]
+        public async Task<ActionResult<IEnumerable<ContactDTO>>> GetAccepted()
+        {
+            string email = HttpContext?.User.Claims
+                .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            Console.WriteLine("email");
+            Console.WriteLine(email);
+            var contacts = await _contactsService.GetAcceptedContactsAsync(email);
+            if (contacts == null) return NotFound();
+
+            return Ok(contacts);
+        }
+
         [HttpGet("id/{contactId}")]
         public async Task<ActionResult<ContactDTO>> Get(Guid contactId)
         {

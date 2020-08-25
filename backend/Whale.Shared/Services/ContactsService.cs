@@ -69,6 +69,44 @@ namespace Whale.Shared.Services
             return contactsDto;
         }
 
+        public async Task<IEnumerable<ContactDTO>> GetAcceptedContactsAsync(string userEmail)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+            if (user is null)
+                throw new NotFoundException("User", userEmail);
+
+            var contacts = await _context.Contacts
+                 .Include(c => c.FirstMember)
+                 .Include(c => c.SecondMember)
+                 .Include(c => c.PinnedMessage)
+                 .Where(c => c.FirstMemberId == user.Id || (c.SecondMemberId == user.Id && c.isAccepted))
+                 .Where(c => c.isAccepted)
+                 .ToListAsync();
+
+            contacts = (await contacts.LoadAvatarsAsync(_blobStorageSettings, c => c.FirstMember)).ToList();
+            contacts = (await contacts.LoadAvatarsAsync(_blobStorageSettings, c => c.SecondMember)).ToList();
+
+            var contactsDto = contacts
+                .Select(c =>
+                {
+                    var contact = new ContactDTO()
+                    {
+                        Id = c.Id,
+                        FirstMemberId = (c.FirstMemberId == user.Id) ? c.FirstMemberId : c.SecondMemberId,
+                        FirstMember = _mapper.Map<UserDTO>((c.FirstMemberId == user.Id) ? c.FirstMember : c.SecondMember),
+                        SecondMemberId = (c.SecondMemberId == user.Id) ? c.FirstMemberId : c.SecondMemberId,
+                        SecondMember = _mapper.Map<UserDTO>((c.SecondMemberId == user.Id) ? c.FirstMember : c.SecondMember),
+                        PinnedMessage = _mapper.Map<DirectMessageDTO>(c.PinnedMessage),
+                        isAccepted = c.isAccepted,
+                    };
+                    contact.FirstMember.ConnectionId = GetConnectionId(contact.FirstMember.Id);
+                    contact.SecondMember.ConnectionId = GetConnectionId(contact.SecondMember.Id);
+                    return contact;
+                });
+
+            return contactsDto;
+        }
+
         public async Task<ContactDTO> GetContactAsync(Guid contactId, string userEmail)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
