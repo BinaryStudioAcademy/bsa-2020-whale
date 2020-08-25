@@ -22,5 +22,11 @@ namespace Whale.API.Controllers
             var file = Request.Form.Files[0];
             return Ok(await _storageProvider.UploadFileAsync(file));
         }
+
+        [HttpGet("audio/{fname}")]
+        public async Task<ActionResult<string>> GetAudio(string fname)
+        {
+            return Ok(await _storageProvider.GetAudioLink(fname));
+        }
     }
 }

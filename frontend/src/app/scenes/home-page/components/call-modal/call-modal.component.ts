@@ -10,7 +10,11 @@ import { CallStart } from '@shared/models/call/call-start';
 import { CallDecline } from '@shared/models/call/call-decline';
 import { MeetingCreate } from '@shared/models/meeting/meeting-create';
 import { takeUntil } from 'rxjs/operators';
-import { WhaleSignalService, WhaleSignalMethods } from 'app/core/services';
+import {
+  WhaleSignalService,
+  WhaleSignalMethods,
+  BlobService,
+} from 'app/core/services';
 
 @Component({
   selector: 'app-call-modal',
@@ -27,12 +31,14 @@ export class CallModalComponent extends SimpleModalComponent<Contact, null>
   pinnedMessage: DirectMessage;
   isAccepted: boolean;
   link: MeetingLink;
+  audioLink = '';
 
   private unsubscribe$ = new Subject<void>();
 
   constructor(
     private whaleSignalrService: WhaleSignalService,
-    private router: Router
+    private router: Router,
+    private blobService: BlobService
   ) {
     super();
   }
@@ -42,6 +48,10 @@ export class CallModalComponent extends SimpleModalComponent<Contact, null>
   }
 
   ngOnInit(): void {
+    this.blobService.getAudio('outgoing-call').subscribe((resp) => {
+      this.audioLink = resp;
+    });
+
     this.whaleSignalrService.startCallCaller$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((link) => {
