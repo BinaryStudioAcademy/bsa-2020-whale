@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Whale.DAL.Models;
-using Whale.Shared.DTO.Group.GroupUser;
+using Whale.Shared.Models.Group.GroupUser;
 
 namespace Whale.Shared.MappingProfiles
 {

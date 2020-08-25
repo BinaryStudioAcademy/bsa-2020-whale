@@ -102,6 +102,9 @@ namespace Whale.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("CreatorEmail")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
@@ -248,13 +251,19 @@ namespace Whale.DAL.Migrations
                     b.ToTable("Participants");
                 });
 
-            modelBuilder.Entity("Whale.DAL.Models.Poll.PollResult", b =>
+            modelBuilder.Entity("Whale.DAL.Models.Poll.Poll", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<bool>("IsAnonymous")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSingleChoice")
                         .HasColumnType("bit");
 
                     b.Property<Guid>("MeetingId")
@@ -263,19 +272,15 @@ namespace Whale.DAL.Migrations
                     b.Property<string>("OptionResults")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("PollId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TotalVoted")
-                        .HasColumnType("int");
-
-                    b.Property<int>("VoteCount")
-                        .HasColumnType("int");
+                    b.Property<string>("VotedUsers")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("MeetingId");
 
                     b.ToTable("PollResults");
                 });
@@ -468,6 +473,15 @@ namespace Whale.DAL.Migrations
                     b.HasOne("Whale.DAL.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Whale.DAL.Models.Poll.Poll", b =>
+                {
+                    b.HasOne("Whale.DAL.Models.Meeting", "Meeting")
+                        .WithMany("PollResults")
+                        .HasForeignKey("MeetingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

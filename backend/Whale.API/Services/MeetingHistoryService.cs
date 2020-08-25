@@ -16,59 +16,44 @@ namespace Whale.API.Services
 {
 	public class MeetingHistoryService : BaseService
 	{
-        private readonly BlobStorageSettings _blobStorageSettings;
+		private readonly BlobStorageSettings _blobStorageSettings;
 
-        public MeetingHistoryService(WhaleDbContext context, IMapper mapper, BlobStorageSettings blobStorageSettings)
+		public MeetingHistoryService(WhaleDbContext context, IMapper mapper, BlobStorageSettings blobStorageSettings)
 			: base(context, mapper)
 		{
 			_blobStorageSettings = blobStorageSettings;
 		}
-
 		public async Task<IEnumerable<MeetingDTO>> GetMeetingsWithParticipantsAndPollResults(Guid userId, int skip, int take)
 		{
-			var participants2 = await _context.Participants
+			var meetings = _context.Participants
 				.Include(p => p.Meeting)
 				.Where(p => p.UserId == userId)
-				.OrderByDescending(p => p.Meeting.StartTime)
+				.Select(p => p.Meeting)
+				.OrderByDescending(m => m.StartTime)
 				.Skip(skip)
-				.Take(take)
-				.ToListAsync();
+				.Take(take);
 
-			var meetings = participants2.Select(p => p.Meeting);
-
-			var meetingsTasks = meetings
-				.GroupJoin(
-					_context.PollResults,
-					m => m.Id,
-					pR => pR.MeetingId,
-					(m, pRGroup) => new Meeting(m, pRGroup)
-				)
+			var meetingTasks = meetings
+				.ToList()
 				.GroupJoin(
 					_context.Participants.Include(p => p.User),
 					m => m.Id,
 					p => p.MeetingId,
-					(m, pGroup) => new Meeting(m, pGroup)
-				)
+					(m, pGroup) => new Meeting(m, pGroup))
+				.GroupJoin(
+					_context.PollResults,
+					m => m.Id,
+					p => p.MeetingId,
+					(m, pGroup) => new Meeting(m, pGroup))
 				.Select(async m =>
 				{
 					m.Participants = await m.Participants.LoadAvatarsAsync(_blobStorageSettings, p => p.User);
 					return m;
 				});
 
-			meetings = (await Task.WhenAll(meetingsTasks)).ToList();
+			var meetingList = (await Task.WhenAll(meetingTasks)).ToList();
 
-			foreach (var meeting in meetings)
-			{
-				foreach (var pollResult in meeting.PollResults)
-				{
-					if (pollResult.IsAnonymous)
-					{
-						pollResult.OptionResults.ForEach(oR => oR.VotedUsers = new List<Voter>());
-					}
-				}
-			}
-
-			return _mapper.Map<IEnumerable<MeetingDTO>>(meetings);
+			return _mapper.Map<IEnumerable<MeetingDTO>>(meetingList);
 		}
 	}
 }

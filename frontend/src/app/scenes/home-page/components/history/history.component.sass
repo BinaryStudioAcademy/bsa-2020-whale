@@ -22,6 +22,7 @@ div.ui.card.width-100
     position: fixed
     bottom: 5%
     right: 5%
+    z-index: 10
 
 .circular.ui.icon.button
     background-color: #e8e8e8
@@ -39,9 +40,14 @@ div.ui.card.width-100
 .ui.header
     display: flex
     justify-content: space-between
+    margin-bottom: -18px
 
 .relative
     height: 100px
 
 .close.icon
     cursor: pointer
+
+.scrollable
+    max-height: 100%
+    overflow-y: auto

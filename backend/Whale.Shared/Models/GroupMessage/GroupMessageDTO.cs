@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Whale.Shared.DTO.Group;
-using Whale.Shared.Models.Contact;
+using Whale.Shared.Models.Group;
 using Whale.Shared.Models.User;
 
-namespace Whale.Shared.DTO.GroupMessage
+namespace Whale.Shared.Models.GroupMessage
 {
     public class GroupMessageDTO
     {

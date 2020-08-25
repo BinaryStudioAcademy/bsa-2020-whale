@@ -7,21 +7,21 @@
     <div class="option-percentage">{{ calculatePercentage(i) }}%</div>
     <div class="option-container">
       <div>{{ optionResult.option }}</div>
-      <div class="ui tiny progress">
+      <div class="ui tiny progress result-progress">
         <div class="bar" [appProgressBar]="calculatePercentage(i)"></div>
       </div>
-      <div class="avatar-container">
+      <div *ngIf="!pollResult.isAnonymous" class="avatar-container">
         <div
-          *ngFor="let user of optionResult.votedUsers"
+          *ngFor="let userId of optionResult.votedUserIds"
           class="voted-user-column padding-0"
         >
           <img
             title="{{
-              user.secondName
-                ? user.firstName + ' ' + user.secondName
-                : user.firstName
+              getVoter(userId).secondName
+                ? getVoter(userId).firstName + ' ' + getVoter(userId).secondName
+                : getVoter(userId).firstName
             }}"
-            src="{{ user.avatarUrl }}"
+            src="{{ getVoter(userId).avatarUrl }}"
             class="voted-user-avatar margin-0 padding-0"
           />
         </div>
@@ -29,6 +29,6 @@
     </div>
   </div>
   <div>
-    <p>{{ pollResult.totalVoted }} people voted so far</p>
+    <p>{{ totalVoted }} people voted so far</p>
   </div>
 </div>

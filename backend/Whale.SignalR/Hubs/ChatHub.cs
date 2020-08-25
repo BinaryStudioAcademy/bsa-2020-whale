@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using System.Threading.Tasks;
-using Whale.Shared.DTO.GroupMessage;
+using Whale.Shared.Models.GroupMessage;
 using Whale.Shared.Models.DirectMessage;
 using Whale.Shared.Services;
 using Whale.SignalR.Models.Call;
@@ -23,6 +23,13 @@ namespace Whale.SignalR.Hubs
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
             await Clients.Group(groupName).SendAsync("JoinedGroup", Context.ConnectionId);
+        }
+
+        [HubMethodName("LeaveGroup")]
+        public async Task Leave(string groupName)
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
+            await Clients.Group(groupName).SendAsync("LeftGroup", Context.ConnectionId);
         }
 
         [HubMethodName("NewMessageReceived")]

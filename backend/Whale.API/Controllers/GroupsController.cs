@@ -6,9 +6,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Whale.Shared.Services;
-using Whale.Shared.DTO.Group;
+using Whale.Shared.Models.Group;
 using Whale.Shared.Models.Group.GroupUser;
-using Whale.Shared.DTO.Group.GroupUser;
 
 namespace Whale.API.Controllers
 {
@@ -26,7 +25,7 @@ namespace Whale.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<ActionResult<IEnumerable<GroupDTO>>> GetAll()
         {
             string email = HttpContext?.User.Claims
                 .FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
@@ -67,6 +66,17 @@ namespace Whale.API.Controllers
 
             return NotFound();
         }
+
+        [HttpDelete("{groupId}/{userEmail}")]
+        public async Task<IActionResult> RemoveUserFromGroup(Guid groupId, string userEmail)
+        {
+            var deleted = await _groupService.RemoveUserFromGroup(groupId, userEmail);
+
+            if (deleted) return NoContent();
+
+            return NotFound();
+        }
+
         [HttpPost("user")]
         public async Task<ActionResult<GroupUserDTO>> CreateNewUserInGroup([FromBody] GroupUserCreateDTO newUserInGroup)
         {

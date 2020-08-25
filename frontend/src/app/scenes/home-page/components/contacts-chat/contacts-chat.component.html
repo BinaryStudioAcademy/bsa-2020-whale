@@ -69,6 +69,9 @@
   </div>
   <div class="forma">
     <form class="ui form vertically-aligned" #chatForm="ngForm">
+      <div class="subheader helper">
+        Enter to send. Enter+Shift for new line.
+      </div>
       <div class="field">
         <textarea
           (keydown.enter)="onEnterKeyPress($event, chatForm.valid)"
@@ -92,8 +95,5 @@
         Send <i class="paper plane outline icon"></i>
       </button>
     </form>
-    <div class="subheader">
-      Enter to send. Enter+Shift for new line.
-    </div>
   </div>
 </div>

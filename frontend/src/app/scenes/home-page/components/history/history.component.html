@@ -1,9 +1,10 @@
 <div
-  class="ui container segment"
+  class="ui container segment scrollable"
   infiniteScroll
   [infiniteScrollDistance]="2"
   [infiniteScrollThrottle]="500"
-  (scrolled)="onScroll()"
+  (scroll)="onScroll()"
+  #scrollable
 >
   <div class="ui header">
     <h2 class="center aligned header">Meeting history</h2>

@@ -59,6 +59,7 @@
           <div
             id="home-contact"
             [ngClass]="isContactActive(contact) ? 'active item' : 'item'"
+            [className]="contact.isAccepted ? '' : 'inactive'"
             (click)="onContactClick(contact)"
           >
             <img
@@ -106,6 +107,7 @@
             (click)="onGroupClick(group)"
           >
             <i
+              *ngIf="group.creatorEmail == loggedInUser?.email"
               class="trash alternate outline icon"
               (click)="deleteGroup(group); $event.stopPropagation()"
             ></i>
@@ -128,12 +130,11 @@
         [groupSelected]="groupSelected"
         (chat)="groupVisibilityChange($event)"
       ></app-group-chat>
-      <div *ngIf="historyVisibility">
-        <app-history
-          [user]="loggedInUser"
-          (historyClose)="closeHistory()"
-        ></app-history>
-      </div>
+      <app-history
+        *ngIf="historyVisibility"
+        [user]="loggedInUser"
+        (historyClose)="closeHistory()"
+      ></app-history>
       <div *ngIf="actionsVisibility" class="vertically-aligned chat ui segment">
         <div
           id="home-chat-go-shedule"

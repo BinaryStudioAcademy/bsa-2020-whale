@@ -4,7 +4,7 @@
 
 <div #mainArea class="bg-white">
   <div class="content display-flex">
-    <div class="tools" ngDraggable>
+    <div class="tools" ngDraggable [handle]="handleHand">
       <span data-tooltip="Toggle Microphone" data-position="top left">
         <i
           id="meeting-draggable-mute"
@@ -80,10 +80,11 @@
           class="big user plus icon big-left-margin"
         ></i>
       </span>
+      <i #handleHand class="big hand rock icon drag-icon"></i>
     </div>
     <div *ngIf="isShowParticipants" class="ui participants-container">
       <div class="invite-icon-container">
-        <i class="user plus icon"></i>
+        <i class="user plus icon" (click)="openInviteUsersModal()"></i>
       </div>
       <div class="participants-wrapper">
         <div class="ui divided list">
@@ -224,6 +225,7 @@
               <i
                 id="meeting-options-chat"
                 (click)="showChat()"
+                [ngClass]="{ pulse: isNewMsg }"
                 class="big wechat icon big-left-margin"
               ></i>
             </span>
@@ -355,7 +357,10 @@
 
     <div *ngIf="isShowChat" class="ui chat card">
       <div class="ui chat-inner feed">
-        <div *ngFor="let message of messages" class="event message-event">
+        <div
+          *ngFor="let message of selectedMessages"
+          class="event message-event"
+        >
           <div class="label">
             <img src="{{ message?.author?.avatarUrl }}" />
           </div>
@@ -365,25 +370,6 @@
                 {{ message?.author?.firstName }}
                 {{ message?.author?.secondName }}
               </a>
-              <div
-                *ngIf="
-                  message.receiver &&
-                  message.receiver.email !== currentParticipant.user.email
-                "
-                class="message_receiver"
-              >
-                To: {{ message?.receiver?.firstName }}
-                {{ message?.receiver?.secondName }}
-              </div>
-              <div
-                *ngIf="
-                  message.receiver &&
-                  message.receiver.email === currentParticipant.user.email
-                "
-                class="privately-received"
-              >
-                privately
-              </div>
               <div class="date">
                 {{ message?.sentDate | date: "short" }}
               </div>
@@ -400,12 +386,22 @@
         <div class="ui right labeled input">
           <label for="receiver" class="ui label">Send To:</label>
           <select
-            class="ui compact selection dropdown"
+            [ngClass]="
+              newMsgFrom.length > 0
+                ? 'ui compact selection dropdown pulse'
+                : 'ui compact selection dropdown'
+            "
             id="receiver"
             [(ngModel)]="msgReceiverEmail"
+            (change)="receiverChanged()"
           >
-            <option value="">Everyone</option>
-            <option *ngFor="let p of otherParticipants" [value]="p.user.email"
+            <option value="" [ngClass]="{ pulse: newMsgFrom.includes('') }"
+              >Everyone</option
+            >
+            <option
+              *ngFor="let p of otherParticipants"
+              [value]="p.user.email"
+              [ngClass]="{ pulse: newMsgFrom.includes(p?.user?.email) }"
               >{{ p.user.firstName }} {{ p.user.secondName }}</option
             >
           </select>

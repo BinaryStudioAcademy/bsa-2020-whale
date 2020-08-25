@@ -48,6 +48,7 @@ import {
 } from '../../../../shared/models';
 import { EnterModalComponent } from '../enter-modal/enter-modal.component';
 import { DivisionByRoomsModalComponent } from '../division-by-rooms-modal/division-by-rooms-modal.component';
+import { MeetingInviteComponent } from '@shared/components/meeting-invite/meeting-invite.component';
 
 @Component({
   selector: 'app-meeting',
@@ -95,6 +96,9 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public msgText = '';
   public msgReceiverEmail: string = '';
   public messages: MeetingMessage[] = [];
+  public selectedMessages: MeetingMessage[] = [];
+  public newMsgFrom: string[] = [];
+  public isNewMsg = false;
   public otherParticipants: Participant[] = [];
   public pattern = new RegExp(/^\S+.*/);
   public peer: Peer;
@@ -174,7 +178,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
           if (connectData.peerId === this.peer.id) {
             this.pollService.getPollsAndResults(
               this.meeting.id,
-              connectData.participant.user.email
+              connectData.participant.user.id
             );
             return;
           }
@@ -322,6 +326,8 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe(
         (messages) => {
           this.messages = messages;
+          this.updateSelectedMessages();
+          this.messages.forEach((m) => this.notifyNewMsg(m));
         },
         () => {
           this.toastr.error('Error occured when getting messages');
@@ -333,6 +339,8 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe(
         (message) => {
           this.messages.push(message);
+          this.updateSelectedMessages();
+          this.notifyNewMsg(message);
         },
         () => {
           this.toastr.error('Error occured when sending message');
@@ -629,6 +637,9 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.otherParticipants = this.otherParticipants.filter(
       (p) => p.id !== participant.id
     );
+    this.newMsgFrom = this.newMsgFrom.filter(
+      (e) => e !== participant.user.email
+    );
   }
 
   // call to peer
@@ -841,6 +852,10 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   //#region chat
   public showChat(): void {
     this.isShowChat = !this.isShowChat;
+    if (this.isShowChat) {
+      this.receiverChanged();
+    }
+    this.isNewMsg = !this.isShowChat && this.newMsgFrom.length > 0;
   }
 
   public sendMessage(): void {
@@ -865,6 +880,44 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public splitMessage(message: string) {
     return message.split(/\n/gi);
+  }
+
+  public receiverChanged(): void {
+    this.updateSelectedMessages();
+    this.newMsgFrom = this.newMsgFrom.filter(
+      (e) => e !== this.msgReceiverEmail
+    );
+  }
+
+  public updateSelectedMessages(): void {
+    if (this.msgReceiverEmail === '') {
+      this.selectedMessages = this.messages.filter((m) => m.receiver == null);
+    } else {
+      this.selectedMessages = this.messages.filter(
+        (m) =>
+          m.receiver != null &&
+          (m?.receiver?.email === this.msgReceiverEmail ||
+            m?.author?.email === this.msgReceiverEmail)
+      );
+    }
+  }
+
+  public notifyNewMsg(msg: MeetingMessage): void {
+    if (msg.author.email !== this.authService.currentUser.email) {
+      this.isNewMsg = !this.isShowChat;
+      if (msg.receiver == null && this.msgReceiverEmail !== '') {
+        this.newMsgFrom.push('');
+      }
+      if (
+        msg.receiver != null &&
+        this.msgReceiverEmail !== msg.author.email &&
+        this.otherParticipants.findIndex(
+          (p) => p.user.email === msg.author.email
+        ) >= 0
+      ) {
+        this.newMsgFrom.push(msg.author.email);
+      }
+    }
   }
   //#endregion chat
 
@@ -1008,4 +1061,35 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       })
       .toPromise();
   }
+  //#endregion Rooms
+
+  //region InviteUserModal
+  public async openInviteUsersModal() {
+    this.getShortInviteLink().subscribe(
+      async (shortId) => {
+        const shortLink = this.buildShortLink(shortId);
+        await this.simpleModalService
+          .addModal(MeetingInviteComponent, {
+            inviteLink: shortLink,
+            meetingId: this.meeting.id,
+            senderId: this.currentParticipant.user.id,
+          })
+          .toPromise();
+      },
+      (error) => {
+        console.error(error);
+      }
+    );
+  }
+
+  private buildShortLink(shortId: string) {
+    const URL: string = this.document.location.href;
+    let chanks = URL.split('/');
+    chanks.splice(3, chanks.length - 3);
+    chanks.push('redirection');
+    chanks.push(shortId);
+
+    return chanks.join('/');
+  }
+  //#endregion InviteUserModal
 }
