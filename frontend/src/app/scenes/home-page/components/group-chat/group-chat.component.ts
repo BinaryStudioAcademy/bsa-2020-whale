@@ -32,6 +32,9 @@ import { UpstateService } from 'app/core/services/upstate.service';
 import { AuthService } from 'app/core/auth/auth.service';
 import { GroupCallModalComponent } from '../group-call-modal/group-call-modal.component';
 import { HomePageComponent } from '../home-page/home-page.component';
+import { ConfirmationModalComponent } from '@shared/components/confirmation-modal/confirmation-modal.component';
+import { WhaleSignalMethods, WhaleSignalService } from 'app/core/services';
+import { BlobService } from 'app/core/services/blob.service';
 
 @Component({
   selector: 'app-group-chat',
@@ -66,12 +69,14 @@ export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
   };
   constructor(
     private signalRService: SignalRService,
+    private whaleSignalrService: WhaleSignalService,
     private httpService: HttpService,
     private toastr: ToastrService,
     private simpleModalService: SimpleModalService,
     private groupService: GroupService,
     private upstateSevice: UpstateService,
-    private homePageComponent: HomePageComponent
+    private homePageComponent: HomePageComponent,
+    private blobService: BlobService
   ) {}
   ngOnChanges(changes: SimpleChanges): void {
     this.isMembersVisible = false;
@@ -88,7 +93,6 @@ export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
         (data: GroupMessage[]) => {
           this.messages = data;
           this.isMessagesLoading = false;
-          console.log('messages new');
         },
         (error) => console.log(error)
       );
@@ -162,6 +166,22 @@ export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
     this.hubConnection.invoke('Disconnect', this.groupSelected.id);
   }
 
+  public changeImage(event): void {
+    const photo = event.target.files[0];
+
+    this.blobService.postBlobUploadImage(photo).subscribe((resp) => {
+      console.log(`image: ${resp}`);
+
+      this.groupSelected.photoUrl = resp;
+      this.groupService.updateGroup(this.groupSelected).subscribe(
+        () => {
+          this.toastr.success('Group image successfuly changed');
+        },
+        (error) => this.toastr.error(error.Message)
+      );
+    });
+  }
+
   public call(): void {
     console.log(this.groupSelected);
     this.simpleModalService.addModal(
@@ -212,6 +232,34 @@ export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
           this.toastr.success('User added successfuly');
         }
       });
+  }
+  public deleteUserFromGroup(user: User): void {
+    this.simpleModalService
+      .addModal(ConfirmationModalComponent, {
+        message: `Are you sure want to delete ${user.firstName}  ${user.secondName} from the group ${this.groupSelected.label}?`,
+      })
+      .subscribe((t) => {
+        if (t) {
+          this.groupService
+            .leaveGroup(this.groupSelected.id, user.email)
+            .subscribe(
+              () => {
+                this.removeUser(user.id);
+                this.toastr.success(
+                  `You successfully deleted ${user.firstName} ${user.secondName} from the group "${this.groupSelected.label}"`
+                );
+                this.whaleSignalrService.invoke(
+                  WhaleSignalMethods.OnRemovedFromGroup,
+                  { groupId: this.groupSelected.id, userEmail: user.email }
+                );
+              },
+              (error) => this.toastr.error(error.Message)
+            );
+        }
+      });
+  }
+  removeUser(userId: string) {
+    this.groupMembers = this.groupMembers.filter((c) => c.id !== userId);
   }
   returnCorrectLink(user: User): string {
     return user?.avatarUrl.startsWith('http') ||

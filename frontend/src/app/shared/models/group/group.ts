@@ -4,4 +4,5 @@ export interface Group {
   description: string;
   pinnedMessageId?: string;
   creatorEmail?: string;
+  photoUrl?: string;
 }

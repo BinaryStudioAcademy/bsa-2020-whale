@@ -111,6 +111,9 @@ namespace Whale.DAL.Migrations
                     b.Property<string>("Label")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PhotoUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid?>("PinnedMessageId")
                         .HasColumnType("uniqueidentifier");
 

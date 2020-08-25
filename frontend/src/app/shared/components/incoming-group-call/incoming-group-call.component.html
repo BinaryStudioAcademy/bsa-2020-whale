@@ -1,14 +1,11 @@
 <div class="ui card" ngDraggable>
   <div class="ui header">{{ groupCall?.group?.label }} group is calling...</div>
   <div class="content">
-    <!-- <img
-        class="ui centered circular tiny image"
-        src="{{ call?.contact?.firstMember?.avatarUrl }}"
-      /> -->
-    <!-- <audio
-        src="https://r2---sn-5nug503g-afve.googlevideo.com/videoplayback?expire=1597335018&ei=ihE1X-i8K5Cc7QT_4aTwCw&ip=176.118.55.218&id=o-AFJNEC1M3tZcDhCp8ay3cnjl57VnyxSSgGO34-y-DPFb&itag=140&source=youtube&requiressl=yes&mh=Ec&mm=31%2C29&mn=sn-5nug503g-afve%2Csn-3c27sn76&ms=au%2Crdu&mv=m&mvi=2&pcm2cms=yes&pl=24&nh=%2CIgpwcjAyLmticDAyKgkxMjcuMC4wLjE&initcwndbps=1250000&vprv=1&mime=audio%2Fmp4&gir=yes&clen=4867985&dur=300.744&lmt=1577228009877170&mt=1597313320&fvip=9&keepalive=yes&fexp=23883098&c=WEB&txp=5311222&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cvprv%2Cmime%2Cgir%2Cclen%2Cdur%2Clmt&sig=AOq0QJ8wRgIhAMQ6fHd3_m3dvEmxw3I9yAIfcWJtLORXiIhGeHgEil2_AiEA9CNvbzEdPUB7085eWBXws8Pv5G6_EgwDi8l4AH03dhE%3D&lsparams=mh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpcm2cms%2Cpl%2Cnh%2Cinitcwndbps&lsig=AG3C_xAwRQIgK3QAL4bJkIg2bl5SgyN6ElBbFxqB02uJT0AwdGL_VC4CIQCkLyp8P4Wq7lYRWGkmAYlAQ8Q2Lww_8azZQocEFdEVBw%3D%3D"
-        autoplay
-      ></audio> -->
+    <img
+      class="ui centered circular tiny image"
+      src="{{ groupCall.group?.photoUrl }}"
+    />
+    <audio src="assets/audio/incoming-call.mp3" autoplay loop></audio>
   </div>
 
   <div class="icon-wrapper">

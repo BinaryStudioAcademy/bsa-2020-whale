@@ -11,6 +11,8 @@
 
 .trash.alternate.outline.icon
     padding-right: 24px
+    padding-top: 7px
+    color: #151515
 
 .left-col
     max-height: 100%
@@ -39,6 +41,14 @@
 .user-list 
     margin-left: 10px
 
+#home-group.item
+    padding-left: 0
+    padding-top: 0
+    padding-bottom: 0
+    margin-top: 5px
+    margin-bottom: 7px
+    color: rgb(0 0 0 / 70%)
+
 .contacts-container
     flex-grow: 1
     margin-top: 10px
@@ -49,9 +59,10 @@
     overflow-y: overlay
     .icon-wrapper
         display: inline-block
+        width: 15px
         float: right
-        margin-top: 6px
         margin-right: 25px
+        margin-left: auto
         .circle.icon
             color: #2bac76
     
@@ -147,3 +158,19 @@
 .inactive
     opacity: 0.8
     filter: grayscale(100%)
+
+span.icon-tooltip
+    float: right
+
+.description
+    display: inline-block
+    margin-left: 7px
+    width: calc(100% - 90px)
+    white-space: nowrap
+    overflow: hidden !important
+    text-overflow: ellipsis
+
+div.item.contact
+    display: flex !important
+    align-items: center !important
+    flex-wrap: nowrap !important

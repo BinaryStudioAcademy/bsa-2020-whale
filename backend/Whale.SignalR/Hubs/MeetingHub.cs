@@ -142,7 +142,7 @@ namespace Whale.SignalR.Hubs
             if (string.IsNullOrEmpty(mediaState.ReceiverConnectionId))
             {
                 var participantInGroup = _groupsParticipants
-               .FirstOrDefault(g => g.Value.Any(p => p.ActiveConnectionId == Context.ConnectionId));
+                    .FirstOrDefault(g => g.Value.Any(p => p.ActiveConnectionId == Context.ConnectionId));
 
                 await Clients.Group(participantInGroup.Key).SendAsync("OnMediaStateChanged", mediaState);
             }
@@ -150,6 +150,29 @@ namespace Whale.SignalR.Hubs
             {
                 await Clients.Client(mediaState.ReceiverConnectionId).SendAsync("OnMediaStateChanged", mediaState);
             }
+        }
+
+        [HubMethodName("OnParticipantStreamChanged")]
+        public async Task ParticipantStreamChanged(StreamChangedDTO streamChangedData)
+        {
+            KeyValuePair<string, List<ParticipantDTO>> participantInGroup;
+            try
+            {
+                participantInGroup = _groupsParticipants
+                    .First(g => g.Value.Any(p => p.ActiveConnectionId == Context.ConnectionId));
+            }
+            catch (Exception)
+            {
+                return;
+            }
+          
+            var currentParticipant = participantInGroup
+                .Value
+                .First(p => p.ActiveConnectionId == Context.ConnectionId);
+
+            currentParticipant.StreamId = streamChangedData.NewStreamId;
+
+                await Clients.Group(participantInGroup.Key).SendAsync("OnParticipantStreamChanged", streamChangedData);
         }
 
         [HubMethodName("OnMediaStateRequested")]
@@ -201,9 +224,9 @@ namespace Whale.SignalR.Hubs
             if(msg.Receiver != null)
             {
                 var receiver = _groupsParticipants[msgDTO.MeetingId].Find(p => p.User.Id == msg.Receiver.Id);
-                if(receiver != null)
+                await Clients.Caller.SendAsync("OnSendMessage", msg);
+                if (receiver != null)
                 {
-                    await Clients.Caller.SendAsync("OnSendMessage", msg);
                     await Clients.Client(receiver.ActiveConnectionId).SendAsync("OnSendMessage", msg);
                 }
             } else
@@ -297,6 +320,15 @@ namespace Whale.SignalR.Hubs
                 await _redisService.RemoveAsync(meetingId);
                 await _redisService.RemoveAsync(meetingId + nameof(Poll));
             }
+        [HubMethodName("OnStartShareScreen")]
+        public async Task OnStartShare(ShareScreenDTO share)
+        {
+            await Clients.Group(share.meetingId).SendAsync("OnStartShareScreen",share.streamId);
+        }
+        [HubMethodName("OnStopShareScreen")]
+        public async Task OnStopShare(string meetingId)
+        {
+            await Clients.Group(meetingId).SendAsync("OnStopShareScreen");
         }
     }
 }

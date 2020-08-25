@@ -8,6 +8,10 @@ import {
   AfterContentInit,
   OnChanges,
   SimpleChanges,
+  ViewChild,
+  ElementRef,
+  AfterViewInit,
+  AfterViewChecked,
 } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { DirectMessage } from '@shared/models/message/direct-message';
@@ -26,13 +30,16 @@ import { stringify } from 'querystring';
 import { HttpResponse } from '@angular/common/http';
 import { SimpleModalService } from 'ngx-simple-modal';
 import { CallModalComponent } from '../call-modal/call-modal.component';
+import { ContactService } from 'app/core/services';
+import { ConfirmationModalComponent } from '@shared/components/confirmation-modal/confirmation-modal.component';
 
 @Component({
   selector: 'app-contacts-chat',
   templateUrl: './contacts-chat.component.html',
   styleUrls: ['./contacts-chat.component.sass'],
 })
-export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
+export class ContactsChatComponent
+  implements OnInit, OnChanges, OnDestroy, AfterViewInit, AfterViewChecked {
   private hubConnection: HubConnection;
   counter = 0;
   isMessagesLoading = true;
@@ -41,6 +48,11 @@ export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
   public receivedMsg$ = this.receivedMsg.asObservable();
 
   private unsubscribe$ = new Subject<void>();
+
+  @ViewChild('chatWindow', { static: false }) chatBlock: ElementRef<
+    HTMLElement
+  >;
+  chatElement: any;
 
   @Input() contactSelected: Contact;
   @Output() chat: EventEmitter<boolean> = new EventEmitter<boolean>();
@@ -57,8 +69,26 @@ export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
     private signalRService: SignalRService,
     private httpService: HttpService,
     private toastr: ToastrService,
-    private simpleModalService: SimpleModalService
+    private simpleModalService: SimpleModalService,
+    private contactService: ContactService
   ) {}
+
+  ngAfterViewChecked(): void {
+    this.scrollDown();
+  }
+
+  ngAfterViewInit(): void {
+    this.chatElement = this.chatBlock.nativeElement;
+  }
+
+  scrollDown(): void {
+    const chatHtml = this.chatElement as HTMLElement;
+    const isScrolledToBottom =
+      chatHtml.scrollHeight - chatHtml.clientHeight > chatHtml.scrollTop;
+
+    if (isScrolledToBottom)
+      chatHtml.scrollTop = chatHtml.scrollHeight - chatHtml.clientHeight;
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     this.httpService
@@ -69,12 +99,14 @@ export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
       .subscribe(
         (data: DirectMessage[]) => {
           this.messages = data;
+          console.log('messages new');
           this.isMessagesLoading = false;
         },
         (error) => console.log(error)
       );
     this.hubConnection?.invoke('JoinGroup', this.contactSelected.id);
   }
+
   ngOnInit(): void {
     from(this.signalRService.registerHub(environment.signalrUrl, 'chatHub'))
       .pipe(
@@ -120,7 +152,10 @@ export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
       )
       .pipe(take(1))
       .subscribe(
-        () => (this.newMessage.message = ''),
+        () => {
+          this.newMessage.message = '';
+          this.scrollDown();
+        },
         (error) => this.toastr.error(error.Message)
       );
   }
@@ -143,5 +178,24 @@ export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
   }
   public splitMessage(message: string) {
     return message.split(/\n/gi);
+  }
+
+  public onDelete(): void {
+    this.simpleModalService
+      .addModal(ConfirmationModalComponent, {
+        message: 'Are you sure you want to delete the contact?',
+      })
+      .subscribe((isConfirm) => {
+        if (isConfirm) {
+          this.contactService.DeleteContact(this.contactSelected.id).subscribe(
+            (resp) => {
+              if (resp.status === 204) {
+                this.close();
+              }
+            },
+            (error) => this.toastr.error(error.Message)
+          );
+        }
+      });
   }
 }

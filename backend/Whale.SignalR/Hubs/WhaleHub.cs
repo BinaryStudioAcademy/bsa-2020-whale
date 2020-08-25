@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Whale.DAL.Models;
 using Whale.Shared.Models.Contact;
 using Whale.Shared.Models.Group;
+using Whale.Shared.Models.Group.GroupUser;
 using Whale.Shared.Models.Meeting;
 using Whale.Shared.Models.Notification;
 using Whale.Shared.Services;
@@ -20,13 +21,16 @@ namespace Whale.SignalR.Hubs
         private readonly MeetingService _meetingService;
         private readonly ContactsService _contactsService;
         private readonly GroupService _groupsService;
+        private readonly UserService _userService;
 
-        public WhaleHub(WhaleService whaleService, MeetingService meetingService, ContactsService contactsService, GroupService groupsService)
+
+        public WhaleHub(WhaleService whaleService, MeetingService meetingService, UserService userService, ContactsService contactsService, GroupService groupsService)
         {
             _whaleService = whaleService;
             _meetingService = meetingService;
             _contactsService = contactsService;
             _groupsService = groupsService;
+            _userService = userService;
         }
 
         [HubMethodName("OnUserConnect")]
@@ -187,9 +191,20 @@ namespace Whale.SignalR.Hubs
                     await Clients.Client(connection).SendAsync("OnDeleteGroup", groupDTO);
                 }
             }
-
         }
 
+        [HubMethodName("OnRemovedFromGroup")]
+        public async Task RemoveFromGroup(DeleteUserFromGroupDTO userGroup)
+        {
+            var group = await _groupsService.GetGroupAsync(userGroup.GroupId);
+            var userInGroup = await _userService.GetUserByEmail(userGroup.UserEmail);
+            var connections = await _whaleService.GetConnections(userInGroup.Id);
+            foreach (var connection in connections)
+            {
+                await Clients.Client(connection).SendAsync("OnRemovedFromGroup", group.Id);
+                await Groups.RemoveFromGroupAsync(connection, userGroup.GroupId.ToString());
+            }
+        }
 
 
     }

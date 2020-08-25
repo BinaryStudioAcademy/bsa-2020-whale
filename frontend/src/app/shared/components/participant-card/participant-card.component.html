@@ -18,21 +18,9 @@
     <div class="participant-name-wrapper">
       <i
         class="microphone icon"
-        *ngIf="
-          !dynamicData.isAudioActive ||
-          data.isCurrentUser ||
-          dynamicData.isUserHost
-        "
-        [ngClass]="dynamicData.isAudioActive ? 'blue' : 'red'"
-        [class.slash]="
-          (!isMicrophoneHovered && !dynamicData.isAudioActive) ||
-          (isMicrophoneHovered &&
-            !data.isCurrentUser &&
-            isMicrophoneHovered &&
-            !dynamicData.isUserHost)
-        "
-        (mouseenter)="isMicrophoneHovered = true"
-        (mouseleave)="isMicrophoneHovered = false"
+        [ngClass]="dynamicData.isAudioActive ? '' : 'red'"
+        [class.slash]="!dynamicData.isAudioActive"
+        [class.micro-pulse]="data.volume > 1"
         (click)="
           data.isCurrentUser || dynamicData.isUserHost ? toggleMicrophone() : ''
         "

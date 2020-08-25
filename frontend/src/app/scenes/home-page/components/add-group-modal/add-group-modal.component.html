@@ -44,6 +44,26 @@
               Please enter the group description
             </div>
           </div>
+          <div class="field">
+            <label>Image</label>
+            <div class="photo-field">
+              {{ imageName }}
+            </div>
+            <label for="file" class="ui button">
+              Browse
+            </label>
+            <input
+              hidden
+              type="file"
+              id="file"
+              [(ngModel)]="imageName"
+              #photo="ngModel"
+              name="photo"
+              (change)="uploadPhoto($event)"
+              accept="image/*"
+              required
+            />
+          </div>
           <button
             id="submit-contact"
             class="ui button primary"
