@@ -25,4 +25,9 @@ export class ContactService {
       `${this.routePrefix}/email/${email}`
     );
   }
+  public DeleteContact(id: string): Observable<HttpResponse<void>> {
+    return this.httpService.deleteFullRequest<void>(
+      `${this.routePrefix}/${id}`
+    );
+  }
 }
