@@ -55,7 +55,11 @@
     >
       There is still no messages yet!
     </div>
-    <div *ngFor="let message of messages" class="event message-event">
+    <div
+      *ngFor="let message of messages"
+      class="event message-event"
+      [ngClass]="loggedInUser.id === message.authorId ? 'author' : 'visavis'"
+    >
       <div class="label">
         <img src="{{ message.author?.avatarUrl }}" />
       </div>
