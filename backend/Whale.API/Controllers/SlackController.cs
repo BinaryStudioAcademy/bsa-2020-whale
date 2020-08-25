@@ -28,7 +28,7 @@ namespace Whale.API.Controllers.Slack
         {
             var userEmail = userData.text;
 
-            if (userEmail == null) await _slackService.SendSlackReplyAsync("You should to specify email. (ex. /whale user@gmail.com)", userData.channel_name);
+            if (userEmail == null) await _slackService.SendSlackReplyAsync("You should to specify email. (ex. /whale user@gmail.com)", userData.channel_id);
 
             var meetingDTO = new MeetingCreateDTO() { CreatorEmail = userEmail, IsScheduled = false };
 
@@ -37,11 +37,11 @@ namespace Whale.API.Controllers.Slack
                 var meetingLinkDTO = await _httpService.PostAsync<MeetingCreateDTO, MeetingLinkDTO>("api/meeting", meetingDTO);
                 var link = $"{_baseURL}/meeting-page/%3Fid%3D{meetingLinkDTO.Id}&pwd%3D{meetingLinkDTO.Password}";
 
-                await _slackService.SendSlackReplyAsync(link, userData.channel_name);
+                await _slackService.SendSlackReplyAsync(link, userData.channel_id);
             }
             catch(Exception)
             {
-                await _slackService.SendSlackReplyAsync("Some troubles happened", userData.channel_name);
+                await _slackService.SendSlackReplyAsync("Some troubles happened", userData.channel_id);
             }
         }
     }
