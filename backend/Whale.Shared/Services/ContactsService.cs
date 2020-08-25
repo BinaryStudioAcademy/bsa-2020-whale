@@ -129,8 +129,13 @@ namespace Whale.Shared.Services
 
             if (contact == null) return false;
 
+            var contactnerEmail = userEmail == contact.FirstMember.Email ? contact.SecondMember.Email : contact.FirstMember.Email;
+
             _context.Contacts.Remove(contact);
             await _context.SaveChangesAsync();
+            var connection = await _signalrService.ConnectHubAsync("whale");
+            await connection.InvokeAsync("onDeleteContact", contact);
+            await _notifications.AddTextNotification(contactnerEmail, userEmail + " removed you from contacts.");
             return true;
         }
         public async Task<bool> DeletePendingContactByEmailAsync(string contactnerEmail, string userEmail)
