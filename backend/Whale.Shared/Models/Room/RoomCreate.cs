@@ -9,7 +9,7 @@ namespace Whale.Shared.Models.Room
         public string MeetingId { get; set; }
 
         public string MeetingLink { get; set; }
-        public int RoomExpiry { get; set; } = 10;
+        public int Duration { get; set; } = 10;
         public ICollection<string> ParticipantsIds { get; set; }
     }
 }

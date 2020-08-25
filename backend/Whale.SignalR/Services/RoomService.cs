@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+using Whale.DAL.Models.Poll;
 using Whale.Shared.Services;
 using Whale.SignalR.Hubs;
 
@@ -29,8 +30,10 @@ namespace Whale.SignalR.Services
                 timer.Stop();
                 timer.Dispose();
 
-                await _redisService.DeleteKey(roomId);
                 await _meetingHub.Clients.Group(roomId).SendAsync("OnRoomClosed", meetingLink);
+                await _redisService.ConnectAsync();
+                await _redisService.DeleteKey(roomId);
+                await _redisService.DeleteKey(roomId + nameof(Poll));
             };
 
             timer.Start();

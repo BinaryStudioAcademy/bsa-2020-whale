@@ -28,7 +28,7 @@ export class DivisionByRoomsModalComponent
   public participants: Array<Participant>;
   public devidedParticipants: Array<Array<Participant>>;
   public rooms: string[] = [];
-  public roomExpiry: number = 10;
+  public duration: number = 10;
 
   constructor(private meetingSignalrService: MeetingSignalrService) {
     super();
@@ -61,7 +61,7 @@ export class DivisionByRoomsModalComponent
       this.meetingSignalrService.invoke(SignalMethods.CreateRoom, {
         meetingId: this.meetingId,
         meetingLink: this.meetingLink,
-        roomExpiry: this.roomExpiry,
+        duration: this.duration,
         participantsIds: participants.map((p) => p.id),
       });
     });

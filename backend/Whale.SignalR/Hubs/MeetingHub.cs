@@ -15,6 +15,7 @@ using Whale.DAL.Models;
 using shortid;
 using Whale.Shared.Exceptions;
 using Whale.SignalR.Services;
+using Whale.DAL.Models.Poll;
 
 namespace Whale.SignalR.Hubs
 {
@@ -253,7 +254,7 @@ namespace Whale.SignalR.Hubs
 
             await Clients.Caller.SendAsync("OnRoomCreated", roomUrl);
 
-            _roomService.CloseRoomAfterTimeExpire(roomCreateData.RoomExpiry, roomCreateData.MeetingLink, roomUrl);
+            _roomService.CloseRoomAfterTimeExpire(roomCreateData.Duration, roomCreateData.MeetingLink, roomUrl);
         }
 
         private async Task DeleteMeeting(string meetingId)
@@ -267,6 +268,7 @@ namespace Whale.SignalR.Hubs
             } else
             {
                 await _redisService.RemoveAsync(meetingId);
+                await _redisService.RemoveAsync(meetingId + nameof(Poll));
             }
         }
     }
