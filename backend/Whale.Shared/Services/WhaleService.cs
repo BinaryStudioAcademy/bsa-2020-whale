@@ -67,7 +67,7 @@ namespace Whale.Shared.Services
             {
                 await _redisService.SetAsync(OnlineUsersKey, onlineUsers);
             }
-            return onlineUser.Id;
+            return onlineUser?.Id ?? Guid.NewGuid(); //TODO: Fix it
         }
 
         public async Task<IEnumerable<string>> GetConnections(Guid receiverId)

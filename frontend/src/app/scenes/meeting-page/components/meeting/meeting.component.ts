@@ -117,7 +117,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   private currentStreamLoaded = new EventEmitter<void>();
   private contectedAt = new Date();
   private elem: any;
-  private meetingSignalrService: MeetingSignalrService;
   private savedStrokes: CanvasWhiteboardUpdate[][] = new Array<
     CanvasWhiteboardUpdate[]
   >();
@@ -137,9 +136,8 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     private router: Router,
     private simpleModalService: SimpleModalService,
     private toastr: ToastrService,
-    signalRService: SignalRService
+    private meetingSignalrService: MeetingSignalrService
   ) {
-    this.meetingSignalrService = new MeetingSignalrService(signalRService);
     this.pollService = new PollService(
       this.meetingSignalrService,
       this.httpService,
@@ -1081,12 +1079,13 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public async openRoomsModal(): Promise<void> {
     const link = this.route.snapshot.params['link'];
 
-    await this.simpleModalService
+    this.isMoveToRoom = await this.simpleModalService
       .addModal(DivisionByRoomsModalComponent, {
         participants: this.meeting.participants,
         meetingId: this.meeting.id,
         meetingLink: link,
         numberOfRooms: 2,
+        rooms: this.rooms,
       })
       .toPromise();
   }

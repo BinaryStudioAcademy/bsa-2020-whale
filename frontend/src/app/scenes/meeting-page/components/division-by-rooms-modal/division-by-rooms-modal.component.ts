@@ -8,6 +8,7 @@ import {
 } from '@shared/models';
 import { MeetingSignalrService, SignalMethods } from 'app/core/services';
 import { Subject } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'division-by-rooms-modal',
@@ -15,7 +16,7 @@ import { Subject } from 'rxjs';
   styleUrls: ['./division-by-rooms-modal.component.sass'],
 })
 export class DivisionByRoomsModalComponent
-  extends SimpleModalComponent<RoomCreateModal, void>
+  extends SimpleModalComponent<RoomCreateModal, boolean>
   implements RoomCreateModal, OnInit, OnDestroy {
   private unsubscribe$ = new Subject<void>();
 
@@ -27,7 +28,10 @@ export class DivisionByRoomsModalComponent
   public rooms: string[] = [];
   public duration: number = 10;
 
-  constructor(private meetingSignalrService: MeetingSignalrService) {
+  constructor(
+    private meetingSignalrService: MeetingSignalrService,
+    private router: Router
+  ) {
     super();
   }
 
@@ -55,6 +59,12 @@ export class DivisionByRoomsModalComponent
         participantsIds: participants.map((p) => p.id),
       } as RoomCreate);
     });
+  }
+
+  public redirectIntoRoom(roomId: string): void {
+    this.result = true;
+    this.close();
+    this.router.navigate([`/room/${roomId}`]);
   }
 
   private randChunkSplit(

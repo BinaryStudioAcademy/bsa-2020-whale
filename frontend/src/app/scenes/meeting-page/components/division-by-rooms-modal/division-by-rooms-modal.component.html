@@ -10,6 +10,17 @@
         <label>Duration</label>
         <input type="number" placeholder="Minutes" [(ngModel)]="duration" />
       </div>
+      <span
+        data-tooltip="Moove to room"
+        data-position="top right"
+        *ngFor="let room of rooms"
+      >
+        <i
+          (click)="redirectIntoRoom(room)"
+          class="big user caret square right icon big-left-margin"
+        >
+        </i>
+      </span>
       <div
         class="ui divided list"
         *ngFor="let participantsOfRoom of devidedParticipants"

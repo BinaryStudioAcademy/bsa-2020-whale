@@ -5,4 +5,5 @@ export interface RoomCreateModal {
   numberOfRooms: number;
   meetingId: string;
   meetingLink: string;
+  rooms: string[];
 }
