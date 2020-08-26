@@ -206,12 +206,25 @@ export class ProfilePageComponent implements OnInit {
     );
   }
 
+  private randomColor(): string {
+    const randomColor = Math.floor(Math.random() * 16777215).toString(16);
+
+    return `#${randomColor}`;
+  }
+
+  private hasSecondName(): boolean {
+    return this.loggedInUser.secondName !== '';
+  }
+
   public removeAvatar(): void {
     const avatar = new Avatar(this.avatar, {
       useGravatar: false,
-      initials: `${this.loggedInUser.firstName[0]}`,
+      initials: `${this.loggedInUser.firstName[0]}${
+        this.hasSecondName() ? this.loggedInUser.secondName[0] : ''
+      }`,
       initial_fg: '#ffffff',
-      initial_bg: '#00325c',
+      initial_size: 30,
+      initial_bg: this.randomColor(),
       initial_font_family: "'Lato', 'Lato-Regular', 'Helvetica Neue'",
     });
 
