@@ -554,18 +554,18 @@ export class MeetingComponent
     this.currentUserStream?.getTracks().forEach((track) => track.stop());
 
     if (this.connectionData) {
-      //if (!this.isMoveToRoom) {
-      this.connectionData.participant = this.currentParticipant;
-      this.meetingSignalrService.invoke(
-        SignalMethods.OnParticipantLeft,
-        this.connectionData
-      );
-      // } else {
-      //   this.meetingSignalrService.invoke(
-      //     SignalMethods.OnMoveIntoRoom,
-      //     this.connectionData
-      //   );
-      // }
+      if (!this.isMoveToRoom) {
+        this.connectionData.participant = this.currentParticipant;
+        this.meetingSignalrService.invoke(
+          SignalMethods.OnParticipantLeft,
+          this.connectionData
+        );
+      } else {
+        this.meetingSignalrService.invoke(
+          SignalMethods.OnMoveIntoRoom,
+          this.connectionData
+        );
+      }
     }
 
     this.unsubscribe$.next();
@@ -900,7 +900,7 @@ export class MeetingComponent
   ): void {
     console.log('created card', participant);
     const stream =
-      participant.streamId === this.currentParticipant.streamId
+      participant?.streamId === this.currentParticipant.streamId
         ? this.currentUserStream
         : this.connectedStreams.find((s) => s.id === participant.streamId);
 

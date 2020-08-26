@@ -45,7 +45,7 @@ namespace Whale.Shared.Services
         {
             var db = _redis.GetDatabase();
             var value = db.StringGet(key);
-            return value == value.IsNull ? default : JsonConvert.DeserializeObject<T>(value);
+            return value.IsNullOrEmpty ? default : JsonConvert.DeserializeObject<T>(value);
         }
 
         public async Task AddToSet<T>(string setKey, T value)

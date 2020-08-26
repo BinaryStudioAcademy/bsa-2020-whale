@@ -303,6 +303,7 @@ namespace Whale.SignalR.Hubs
                                             .Find(p => p.User.Email == connectionData.UserEmail);
             connectionData.Participant = disconnectedParticipant;
 
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, connectionData.MeetingId);
             await Clients.Group(connectionData.MeetingId).SendAsync("onParticipentMoveIntoRoom", connectionData);
         }
 
