@@ -6,6 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 import { AuthService } from 'app/core/auth/auth.service';
 import { BlobService } from 'app/core/services/blob.service';
 import { AddUserToGroupModalComponent } from '../add-user-to-group-modal/add-user-to-group-modal.component';
+import { ImageCroppedEvent } from 'ngx-image-cropper';
 
 @Component({
   selector: 'app-add-group-modal',
@@ -22,6 +23,12 @@ export class AddGroupModalComponent extends SimpleModalComponent<null, Group> {
     creatorEmail: '',
     photoUrl: '',
   };
+  public isImageCropped = false;
+  public isFileUploaded = false;
+  imageChangedEvent: any = '';
+  croppedImage: string;
+  public fileToUpload: File;
+
   constructor(
     private groupService: GroupService,
     private toastr: ToastrService,
@@ -33,13 +40,40 @@ export class AddGroupModalComponent extends SimpleModalComponent<null, Group> {
     this.ownerEmail = authService.currentUser.email;
   }
 
-  public uploadPhoto(event): void {
-    const photo = event.target.files[0];
+  imageCropped(event: ImageCroppedEvent): void {
+    this.croppedImage = event.base64;
+    this.isImageCropped = true;
+  }
 
-    this.blobService.postBlobUploadImage(photo).subscribe((resp) => {
+  public uploadFile(event): void {
+    this.imageChangedEvent = event;
+    this.fileToUpload = event.target.files[0];
+    if (!this.fileToUpload) {
+      event.target.value = '';
+      return;
+    }
+    const size = this.fileToUpload.size / 1024 / 1024;
+    if (size > 5) {
+      this.toastr.error(`File can't be heavier than ~5MB`);
+    }
+    this.isFileUploaded = true;
+  }
+
+  public imageCroppedUpload(event: ImageCroppedEvent): void {
+    // Preview
+    this.croppedImage = event.base64;
+  }
+
+  public uploadPhoto(): void {
+    const blob = this.dataURLtoBlob(this.croppedImage);
+    this.blobService.postBlobUploadImage(blob).subscribe((resp) => {
       this.newGroup.photoUrl = resp;
       console.log(`image: ${resp}`);
     });
+
+    this.isImageCropped = false;
+    this.croppedImage = '';
+    this.imageChangedEvent = '';
   }
 
   public submit(): void {
@@ -62,6 +96,18 @@ export class AddGroupModalComponent extends SimpleModalComponent<null, Group> {
       },
       (error) => this.toastr.error(error.Message)
     );
+    const blob = this.dataURLtoBlob(this.croppedImage);
+    this.blobService.postBlobUploadImage(blob).subscribe((photo) => {
+      this.newGroup.photoUrl = photo;
+      this.newGroup.creatorEmail = this.authService.currentUser.email;
+      this.groupService.createGroup(this.newGroup).subscribe(
+        (resp) => {
+          this.result = resp.body;
+          this.close();
+        },
+        (error) => this.toastr.error(error.Message)
+      );
+    });
   }
 
   public cancel(dirty: boolean): void {
@@ -70,7 +116,32 @@ export class AddGroupModalComponent extends SimpleModalComponent<null, Group> {
         this.close();
       }
     } else {
-      this.close();
+      this.closeModal();
     }
+  }
+
+  public closeModal(): void {
+    this.isImageCropped = false;
+    this.croppedImage = '';
+    this.imageChangedEvent = '';
+    this.close();
+  }
+
+  private dataURLtoBlob(dataURL: any): Blob {
+    let byteString: string;
+    if (dataURL.split(',')[0].indexOf('base64') >= 0) {
+      byteString = atob(dataURL.split(',')[1]);
+    } else {
+      byteString = unescape(dataURL.split(',')[1]);
+    }
+
+    const mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
+
+    const ia = new Uint8Array(byteString.length);
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+
+    return new Blob([ia], { type: mimeString });
   }
 }

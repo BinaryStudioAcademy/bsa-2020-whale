@@ -3,7 +3,7 @@
   class="ui dimmer modals page visible active"
   (click)="cancel(groupForm.dirty)"
 >
-  <div class="ui mini modal visible active" (click)="$event.stopPropagation()">
+  <div class="ui small modal visible active" (click)="$event.stopPropagation()">
     <div class="header">
       Add new group
     </div>
@@ -35,7 +35,6 @@
               #groupDescription="ngModel"
               name="groupDescription"
               placeholder="Group description"
-              required
             />
             <div
               class="ui error message"
@@ -45,24 +44,34 @@
             </div>
           </div>
           <div class="field">
-            <label>Image</label>
-            <div class="photo-field">
-              {{ imageName }}
+            <div class="upload-wrapper">
+              <label>Image</label>
+              <label id="group-upload" class="ui button" for="file">
+                Upload from file
+              </label>
+              <input
+                hidden
+                type="file"
+                id="file"
+                (change)="uploadFile($event)"
+                accept="image/*"
+              />
             </div>
-            <label for="file" class="ui button">
-              Browse
-            </label>
-            <input
-              hidden
-              type="file"
-              id="file"
-              [(ngModel)]="imageName"
-              #photo="ngModel"
-              name="photo"
-              (change)="uploadPhoto($event)"
-              accept="image/*"
-              required
-            />
+            <div class="upload" *ngIf="isFileUploaded">
+              <div class="cropper">
+                <image-cropper
+                  [imageChangedEvent]="imageChangedEvent"
+                  [maintainAspectRatio]="true"
+                  [aspectRatio]="1 / 1"
+                  [cropperMinWidth]="128"
+                  [resizeToWidth]="128"
+                  [onlyScaleDown]="true"
+                  format="jpeg"
+                  (imageCropped)="imageCroppedUpload($event)"
+                ></image-cropper>
+                <img [src]="croppedImage" />
+              </div>
+            </div>
           </div>
           <button
             id="submit-contact"

@@ -15,6 +15,7 @@ import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { GroupCallModalComponent } from './components/group-call-modal/group-call-modal.component';
 import { HighlightCreatorDirective } from './directives/highlight-creator.directive';
 import { ReactiveFormsModule } from '@angular/forms';
+import { ImageCropperModule } from 'ngx-image-cropper';
 
 @NgModule({
   declarations: [
@@ -36,6 +37,7 @@ import { ReactiveFormsModule } from '@angular/forms';
     FormsModule,
     InfiniteScrollModule,
     ReactiveFormsModule,
+    ImageCropperModule,
   ],
   entryComponents: [CallModalComponent, GroupCallModalComponent],
 })
