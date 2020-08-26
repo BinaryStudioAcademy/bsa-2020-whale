@@ -1,9 +1,9 @@
 import { Participant } from '../participant';
+import { EventEmitter } from '@angular/core';
 
 export interface RoomCreateModal {
   participants: Participant[];
-  numberOfRooms: number;
   meetingId: string;
   meetingLink: string;
-  rooms: string[];
+  onCanMoveIntoRoomEvent: EventEmitter<void>;
 }

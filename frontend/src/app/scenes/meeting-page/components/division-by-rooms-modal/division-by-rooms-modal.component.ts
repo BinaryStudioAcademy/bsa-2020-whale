@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, EventEmitter } from '@angular/core';
 import { SimpleModalComponent } from 'ngx-simple-modal';
 import {
   Participant,
@@ -6,7 +6,11 @@ import {
   RoomCreate,
   RoomCreateModal,
 } from '@shared/models';
-import { MeetingSignalrService, SignalMethods } from 'app/core/services';
+import {
+  MeetingSignalrService,
+  SignalMethods,
+  RoomService,
+} from 'app/core/services';
 import { Subject } from 'rxjs';
 import { Router } from '@angular/router';
 
@@ -22,15 +26,16 @@ export class DivisionByRoomsModalComponent
 
   public meetingLink: string;
   public meetingId: string;
-  public numberOfRooms: number;
+  public numberOfRooms: number = 2;
   public participants: Array<Participant>;
   public devidedParticipants: Array<Array<Participant>>;
-  public rooms: string[] = [];
   public duration: number = 10;
+  public onCanMoveIntoRoomEvent: EventEmitter<void>;
 
   constructor(
     private meetingSignalrService: MeetingSignalrService,
-    private router: Router
+    private router: Router,
+    public roomService: RoomService
   ) {
     super();
   }
@@ -64,7 +69,9 @@ export class DivisionByRoomsModalComponent
   public redirectIntoRoom(roomId: string): void {
     this.result = true;
     this.close();
-    this.router.navigate([`/room/${roomId}`]);
+    this.onCanMoveIntoRoomEvent.subscribe(() => {
+      this.router.navigate([`/room/${roomId}`]);
+    });
   }
 
   private randChunkSplit(

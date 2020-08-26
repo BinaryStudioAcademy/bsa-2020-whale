@@ -12,6 +12,8 @@ namespace Whale.Shared.Models.Meeting
         public string Password { get; set; }
         public bool IsRoom { get; set; } = false;
 
+        public ICollection<string> RoomsIds { get; set; } = new List<string>();
+
         public ICollection<MeetingMessageDTO> Messages { get; }
     }
 }

@@ -13,6 +13,7 @@ import {
   ChangedMediaState,
   MediaState,
   StreamChangedData,
+  RoomDTO,
 } from '@shared/models';
 import { CanvasWhiteboardUpdate } from 'ng2-canvas-whiteboard';
 
@@ -80,11 +81,14 @@ export class MeetingSignalrService {
   private onRoomCreated = new Subject<string>();
   public readonly onRoomCreated$ = this.onRoomCreated.asObservable();
 
+  private onRoomCreatedToHost = new Subject<RoomDTO>();
+  public readonly onRoomCreatedToHost$ = this.onRoomCreatedToHost.asObservable();
+
   private onRoomClosed = new Subject<string>();
   public readonly onRoomClosed$ = this.onRoomClosed.asObservable();
 
   private onParticipentMoveIntoRoom = new Subject<MeetingConnectionData>();
-  public onParticipentMoveIntoRoom$ = this.onParticipentMoveIntoRoom.asObservable();
+  public readonly onParticipentMoveIntoRoom$ = this.onParticipentMoveIntoRoom.asObservable();
 
   private shareScreen = new Subject<string>();
   public readonly shareScreen$ = this.shareScreen.asObservable();
@@ -199,6 +203,10 @@ export class MeetingSignalrService {
           this.onRoomCreated.next(roomId);
         });
 
+        this.signalHub.on('OnRoomCreatedToHost', (roomData: RoomDTO) => {
+          this.onRoomCreatedToHost.next(roomData);
+        });
+
         this.signalHub.on('OnRoomClosed', (meetingLink: string) => {
           this.onRoomClosed.next(meetingLink);
         });
@@ -247,4 +255,5 @@ export enum SignalMethods {
   OnMoveIntoRoom,
   OnStartShareScreen,
   OnStopShareScreen,
+  GetCreatedRooms,
 }

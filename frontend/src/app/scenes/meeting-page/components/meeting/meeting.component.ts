@@ -35,6 +35,7 @@ import {
   PollService,
   SignalMethods,
   SignalRService,
+  RoomService,
 } from 'app/core/services';
 import {
   GetMessages,
@@ -112,7 +113,7 @@ export class MeetingComponent
   public isHost = false;
   public isRoom = false;
   public isMoveToRoom = false;
-  public rooms: string[] = [];
+  public onCanMoveIntoRoomEvent = new EventEmitter<void>();
   public isSharing: boolean = false;
 
   @ViewChild('currentVideo') private currentVideo: ElementRef;
@@ -146,7 +147,8 @@ export class MeetingComponent
     private router: Router,
     private simpleModalService: SimpleModalService,
     private toastr: ToastrService,
-    private meetingSignalrService: MeetingSignalrService
+    private meetingSignalrService: MeetingSignalrService,
+    public roomService: RoomService
   ) {
     this.pollService = new PollService(
       this.meetingSignalrService,
@@ -215,14 +217,13 @@ export class MeetingComponent
           const index = this.meeting.participants.findIndex(
             (p) => p.id === connectData.participant.id
           );
-          console.log('i', index);
           if (index >= 0) {
             this.meeting.participants[index] = connectData.participant;
+            this.roomService.participants = this.meeting.participants;
           } else {
             this.addParticipantToMeeting(connectData.participant);
           }
 
-          console.log('connected with peer: ' + connectData.peerId);
           this.connect(connectData.peerId);
           this.toastr.success('Connected successfuly');
         },
@@ -237,14 +238,18 @@ export class MeetingComponent
       .subscribe(
         (participants) => {
           this.meeting.participants = participants;
+          this.roomService.participants = participants;
           this.currentParticipant = participants.find(
             (p) => p.user.email === this.authService.currentUser.email
           );
           this.isHost = this.currentParticipant.role === ParticipantRole.Host;
+          this.roomService.isUserHost = this.isHost;
           this.otherParticipants = participants.filter(
             (p) => p.id !== this.currentParticipant.id
           );
           this.createParticipantCard(this.currentParticipant);
+
+          if (this.isHost) this.roomService.getRoomsOfMeeting(this.meeting.id);
         },
         (err) => {
           this.toastr.error(err.Message);
@@ -463,12 +468,10 @@ export class MeetingComponent
           if (!this.isHost) {
             this.isMoveToRoom = true;
             this.router.navigate([`/room/${roomId}`]);
-          } else {
-            this.rooms.push(roomId);
           }
         },
         (err) => {
-          this.toastr.error('Error occured while trying to connect to room');
+          this.toastr.error('Error occured while trying to create room');
         }
       );
 
@@ -762,12 +765,14 @@ export class MeetingComponent
     if (!this.otherParticipants.some((p) => p.id === participant.id)) {
       this.otherParticipants.push(participant);
     }
+    this.roomService.participants = this.meeting.participants;
   }
 
   private removeParticipantFromMeeting(participant: Participant): void {
     this.meeting.participants = this.meeting.participants.filter(
       (p) => p.id !== participant.id
     );
+    this.roomService.participants = this.meeting.participants;
   }
 
   // call to peer
@@ -902,7 +907,7 @@ export class MeetingComponent
     const stream =
       participant?.streamId === this.currentParticipant.streamId
         ? this.currentUserStream
-        : this.connectedStreams.find((s) => s.id === participant.streamId);
+        : this.connectedStreams.find((s) => s.id === participant?.streamId);
 
     const audioContext = new AudioContext();
     const mediaStreamSource = audioContext.createMediaStreamSource(stream);
@@ -979,9 +984,6 @@ export class MeetingComponent
     isAudioActive: boolean,
     isVideoActive: boolean
   ) {
-    console.log('streamId', streamId);
-    console.log('participants', this.meeting.participants);
-    console.log('mediass', this.mediaData);
     const participant =
       this.currentParticipant.streamId === streamId
         ? this.currentParticipant
@@ -989,9 +991,6 @@ export class MeetingComponent
     const changedMediaData = this.mediaData.find(
       (s) => s.currentStreamId === streamId
     );
-
-    console.log('participant', participant);
-    console.log('media', changedMediaData);
 
     if (!changedMediaData || !participant) {
       return;
@@ -1204,15 +1203,19 @@ export class MeetingComponent
   public async openRoomsModal(): Promise<void> {
     const link = this.route.snapshot.params['link'];
 
-    this.isMoveToRoom = await this.simpleModalService
+    this.simpleModalService
       .addModal(DivisionByRoomsModalComponent, {
         participants: this.meeting.participants,
         meetingId: this.meeting.id,
         meetingLink: link,
-        numberOfRooms: 2,
-        rooms: this.rooms,
+        onCanMoveIntoRoomEvent: this.onCanMoveIntoRoomEvent,
       })
-      .toPromise();
+      .toPromise()
+      .then((isMove) => {
+        this.isMoveToRoom = isMove;
+        console.log('ismove', isMove);
+        this.onCanMoveIntoRoomEvent.emit();
+      });
   }
   //#endregion Rooms
 

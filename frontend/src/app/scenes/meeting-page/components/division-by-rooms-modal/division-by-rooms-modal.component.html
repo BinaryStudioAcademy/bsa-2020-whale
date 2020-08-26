@@ -10,31 +10,32 @@
         <label>Duration</label>
         <input type="number" placeholder="Minutes" [(ngModel)]="duration" />
       </div>
-      <span
-        data-tooltip="Moove to room"
-        data-position="top right"
-        *ngFor="let room of rooms"
-      >
-        <i
-          (click)="redirectIntoRoom(room)"
-          class="big user caret square right icon big-left-margin"
-        >
-        </i>
-      </span>
       <div
         class="ui divided list"
-        *ngFor="let participantsOfRoom of devidedParticipants"
+        *ngFor="
+          let participantsOfRoom of roomService.participantsInRooms | keyvalue
+        "
       >
         <div class="ui header">
           Room:
+          <span data-tooltip="Moove to room" data-position="top right">
+            <i
+              (click)="redirectIntoRoom(participantsOfRoom.key)"
+              class="big user caret square right icon big-left-margin"
+            >
+            </i>
+          </span>
         </div>
         <div
           class="ui item participant"
-          *ngFor="let participant of participantsOfRoom"
+          *ngFor="let participant of participantsOfRoom.value"
         >
-          <img class="ui avatar image" src="{{ participant.user.avatarUrl }}" />
+          <img
+            class="ui avatar image"
+            src="{{ participant?.user.avatarUrl }}"
+          />
           <div>
-            {{ participant.user.firstName }} {{ participant.user.secondName }}
+            {{ participant?.user.firstName }} {{ participant?.user.secondName }}
           </div>
         </div>
         <div class="ui fitted divider"></div>
