@@ -13,6 +13,7 @@ import { GroupChatComponent } from './components/group-chat/group-chat.component
 import { AddUserToGroupModalComponent } from './components/add-user-to-group-modal/add-user-to-group-modal.component';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { GroupCallModalComponent } from './components/group-call-modal/group-call-modal.component';
+import { ImageCropperModule } from 'ngx-image-cropper';
 
 @NgModule({
   declarations: [
@@ -27,7 +28,13 @@ import { GroupCallModalComponent } from './components/group-call-modal/group-cal
     AddUserToGroupModalComponent,
     GroupCallModalComponent,
   ],
-  imports: [CommonModule, SharedModule, FormsModule, InfiniteScrollModule],
+  imports: [
+    CommonModule,
+    SharedModule,
+    FormsModule,
+    InfiniteScrollModule,
+    ImageCropperModule,
+  ],
   entryComponents: [CallModalComponent, GroupCallModalComponent],
 })
 export class HomePageModule {}
