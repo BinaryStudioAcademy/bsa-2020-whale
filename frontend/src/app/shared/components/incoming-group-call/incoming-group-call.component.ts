@@ -80,4 +80,12 @@ export class IncomingGroupCallComponent implements OnInit, OnDestroy {
   close(): void {
     this.closeEvent.emit();
   }
+
+  public isImageHere(): boolean {
+    return (
+      this.groupCall.group.photoUrl !== null &&
+      this.groupCall.group.photoUrl !== undefined &&
+      this.groupCall.group.photoUrl !== ''
+    );
+  }
 }

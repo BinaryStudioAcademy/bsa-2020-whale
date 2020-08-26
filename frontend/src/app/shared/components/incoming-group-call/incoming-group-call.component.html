@@ -2,8 +2,14 @@
   <div class="ui header">{{ groupCall?.group?.label }} group is calling...</div>
   <div class="content">
     <img
-      class="ui centered circular tiny image"
+      *ngIf="isImageHere()"
+      class="ui avatar image"
       src="{{ groupCall.group?.photoUrl }}"
+    />
+    <img
+      *ngIf="!isImageHere()"
+      class="ui avatar image"
+      src="assets/img/user-group-icon.png"
     />
     <audio src="assets/audio/incoming-call.mp3" autoplay loop></audio>
   </div>

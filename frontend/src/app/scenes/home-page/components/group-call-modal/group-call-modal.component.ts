@@ -104,4 +104,11 @@ export class GroupCallModalComponent extends SimpleModalComponent<Group, null>
     } as GroupCallDecline);
     this.close();
   }
+  public isImageHere(): boolean {
+    return (
+      this.photoUrl !== null &&
+      this.photoUrl !== undefined &&
+      this.photoUrl !== ''
+    );
+  }
 }
