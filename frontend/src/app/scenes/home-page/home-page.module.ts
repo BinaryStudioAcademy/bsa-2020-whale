@@ -14,6 +14,7 @@ import { AddUserToGroupModalComponent } from './components/add-user-to-group-mod
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { GroupCallModalComponent } from './components/group-call-modal/group-call-modal.component';
 import { HighlightCreatorDirective } from './directives/highlight-creator.directive';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -29,7 +30,13 @@ import { HighlightCreatorDirective } from './directives/highlight-creator.direct
     GroupCallModalComponent,
     HighlightCreatorDirective,
   ],
-  imports: [CommonModule, SharedModule, FormsModule, InfiniteScrollModule],
+  imports: [
+    CommonModule,
+    SharedModule,
+    FormsModule,
+    InfiniteScrollModule,
+    ReactiveFormsModule,
+  ],
   entryComponents: [CallModalComponent, GroupCallModalComponent],
 })
 export class HomePageModule {}
