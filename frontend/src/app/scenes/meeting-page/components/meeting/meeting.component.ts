@@ -1241,6 +1241,8 @@ export class MeetingComponent
   public async openRoomsModal(): Promise<void> {
     const link = this.route.snapshot.params['link'];
 
+    this.roomService.getRoomsOfMeeting(this.meeting.id);
+
     this.simpleModalService
       .addModal(DivisionByRoomsModalComponent, {
         participants: this.meeting.participants,

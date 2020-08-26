@@ -312,13 +312,28 @@ namespace Whale.SignalR.Hubs
         }
 
         [HubMethodName("GetCreatedRooms")]
-        public async Task<ICollection<string>> GetCreatedRooms(string meetingId)
+        public async Task<ICollection<RoomDTO>> GetCreatedRooms(string meetingId)
         {
             var participantHost = _groupsParticipants[meetingId]?.FirstOrDefault(p => p.ActiveConnectionId == Context.ConnectionId);
             if (participantHost?.Role == ParticipantRole.Participant) throw new InvalidCredentials();
 
             await _redisService.ConnectAsync();
-            return (await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(meetingId)).RoomsIds;
+            var roomsIds = (await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(meetingId)).RoomsIds;
+            var rooms = new List<RoomDTO>();
+            var participants = _groupsParticipants[meetingId]?.ToList();
+
+            foreach(var id in roomsIds)
+            {
+                rooms.Add(new RoomDTO
+                {
+                    RoomId = id,
+                    ParticipantsIds = _groupsParticipants[id]?.Select(p =>
+                         participants.FirstOrDefault(p => p.Id == p?.Id)?.Id.ToString() // because in participant has diferent ids in rooms and meetings
+                    ).Where(p => p != null).ToList()
+                });
+            }
+
+            return rooms;
         }
 
         private async Task DeleteMeeting(string meetingId)

@@ -6,7 +6,7 @@
       </div>
     </div>
     <div class="content">
-      <div class="ui input">
+      <div class="ui input" *ngIf="!roomService.isDividedIntoRooms">
         <label>Duration</label>
         <input type="number" placeholder="Minutes" [(ngModel)]="duration" />
       </div>
@@ -21,7 +21,7 @@
           <span data-tooltip="Moove to room" data-position="top right">
             <i
               (click)="redirectIntoRoom(participantsOfRoom.key)"
-              class="big user caret square right icon big-left-margin"
+              class="caret square right icon big-left-margin"
             >
             </i>
           </span>
@@ -43,7 +43,13 @@
     </div>
     <div class="actions">
       <button class="ui button" (click)="close()">Close</button>
-      <button class="ui primary button" (click)="divide()">Divide</button>
+      <button
+        class="ui primary button"
+        *ngIf="!roomService.isDividedIntoRooms"
+        (click)="divide()"
+      >
+        Divide
+      </button>
     </div>
   </div>
 </div>
