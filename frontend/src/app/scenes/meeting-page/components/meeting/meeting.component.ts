@@ -155,9 +155,6 @@ export class MeetingComponent
       this.unsubscribe$
     );
   }
-  ngAfterViewChecked(): void {
-    if (this.isShowChat) this.chatElement = this.chatBlock.nativeElement;
-  }
 
   //#region accessors
   private set currentUserStream(value: MediaStream) {
@@ -548,24 +545,27 @@ export class MeetingComponent
     });
   }
 
+  ngAfterViewChecked(): void {
+    if (this.isShowChat) this.chatElement = this.chatBlock.nativeElement;
+  }
+
   public ngOnDestroy(): void {
     this.destroyPeer();
     this.currentUserStream?.getTracks().forEach((track) => track.stop());
 
     if (this.connectionData) {
-      if (!this.isMoveToRoom) {
-        this.connectionData.participant = this.currentParticipant;
-        this.meetingSignalrService.invoke(
-          SignalMethods.OnParticipantLeft,
-          this.connectionData
-        );
-      } else
-        [
-          this.meetingSignalrService.invoke(
-            SignalMethods.OnMoveIntoRoom,
-            this.connectionData
-          ),
-        ];
+      //if (!this.isMoveToRoom) {
+      this.connectionData.participant = this.currentParticipant;
+      this.meetingSignalrService.invoke(
+        SignalMethods.OnParticipantLeft,
+        this.connectionData
+      );
+      // } else {
+      //   this.meetingSignalrService.invoke(
+      //     SignalMethods.OnMoveIntoRoom,
+      //     this.connectionData
+      //   );
+      // }
     }
 
     this.unsubscribe$.next();

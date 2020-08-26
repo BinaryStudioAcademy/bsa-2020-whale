@@ -315,16 +315,20 @@ namespace Whale.SignalR.Hubs
             {
                 await _meetingService.EndMeeting(Guid.Parse(meetingId));
                 await _meetingHttpService.DeleteMeetingPolls(meetingId);
-            } else
+            }
+            else
             {
                 await _redisService.RemoveAsync(meetingId);
                 await _redisService.RemoveAsync(meetingId + nameof(Poll));
             }
+        }
+
         [HubMethodName("OnStartShareScreen")]
         public async Task OnStartShare(ShareScreenDTO share)
         {
             await Clients.Group(share.meetingId).SendAsync("OnStartShareScreen",share.streamId);
         }
+
         [HubMethodName("OnStopShareScreen")]
         public async Task OnStopShare(string meetingId)
         {
