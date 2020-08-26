@@ -64,6 +64,7 @@ export class DivisionByRoomsModalComponent
         participantsIds: participants.map((p) => p.id),
       } as RoomCreate);
     });
+    this.roomService.isDividedIntoRooms = true;
   }
 
   public leaveRoom(): void {

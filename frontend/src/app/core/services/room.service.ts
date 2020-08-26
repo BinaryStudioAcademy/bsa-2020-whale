@@ -39,14 +39,10 @@ export class RoomService {
     roomId: string,
     participantsIds: Array<string>
   ): void {
-    if (!this.isDividedIntoRooms) {
-      this.participantsInRooms.set(
-        roomId,
-        this.participants.filter((p) =>
-          participantsIds.some((pp) => p.id == pp)
-        )
-      );
-    }
+    this.participantsInRooms.set(
+      roomId,
+      this.participants.filter((p) => participantsIds.some((pp) => p.id == pp))
+    );
   }
 
   public getRoomsOfMeeting(meetingId: string): void {
