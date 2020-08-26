@@ -8,6 +8,11 @@ import {
   AfterContentInit,
   OnChanges,
   SimpleChanges,
+  ViewChildren,
+  AfterViewInit,
+  ViewChild,
+  QueryList,
+  ElementRef,
 } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { DirectMessage } from '@shared/models/message/direct-message';
@@ -18,7 +23,7 @@ import { HttpService } from 'app/core/services/http.service';
 import { environment } from '@env';
 import { Injectable } from '@angular/core';
 import { HubConnection } from '@aspnet/signalr';
-import { Subject, from, Observable } from 'rxjs';
+import { Subject, from, Observable, ReplaySubject } from 'rxjs';
 import { tap, takeUntil, take } from 'rxjs/operators';
 import { Message } from '@angular/compiler/src/i18n/i18n_ast';
 import { Console } from 'console';
@@ -34,13 +39,23 @@ import { ConfirmationModalComponent } from '@shared/components/confirmation-moda
   templateUrl: './contacts-chat.component.html',
   styleUrls: ['./contacts-chat.component.sass'],
 })
-export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
+export class ContactsChatComponent
+  implements OnInit, OnChanges, OnDestroy, AfterViewInit {
+  @ViewChild('intersectionRoot') intersectionRoot: ElementRef<HTMLDivElement>;
+  @ViewChildren('intersectionElement') intersectionElements: QueryList<
+    ElementRef<HTMLDivElement>
+  >;
+  public intersectionObserver: IntersectionObserver;
+
   private hubConnection: HubConnection;
   counter = 0;
   isMessagesLoading = true;
 
   private receivedMsg = new Subject<DirectMessage>();
   public receivedMsg$ = this.receivedMsg.asObservable();
+
+  private receivedMessages = new ReplaySubject<void>();
+  public receivedMessages$ = this.receivedMessages.asObservable();
 
   private unsubscribe$ = new Subject<void>();
 
@@ -63,6 +78,53 @@ export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
     private contactService: ContactService
   ) {}
 
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      console.log(this.intersectionElements.first.nativeElement);
+      this.receivedMessages$.subscribe(() => {
+        this.registerIntersectionObserve();
+      });
+    }, 5000);
+
+    //this.registerIntersectionObserve();
+    // const options = {
+    //   root: null,
+    //   rootMargin: "0px",
+    //   threshold: 0.0
+    // };
+    // this.intersectionObserver = new IntersectionObserver(this.onIntersection, options);
+    // this.messages.forEach(message => {
+    //   const element = this.intersectionElements.find(el => el.nativeElement.id == message.id);
+    //   this.intersectionObserver.observe(element.nativeElement);
+    // });
+  }
+
+  public registerIntersectionObserve() {
+    console.log(this.intersectionRoot);
+    console.log(this.intersectionElements);
+    const options = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.0,
+    };
+    this.intersectionObserver = new IntersectionObserver(
+      this.onIntersection,
+      options
+    );
+    console.log(this.messages);
+    this.messages.forEach((message) => {
+      const element = this.intersectionElements.find(
+        (el) => el.nativeElement.id == message.id
+      );
+      console.log('element', element);
+      this.intersectionObserver.observe(element.nativeElement);
+    });
+  }
+
+  public onIntersection(entry) {
+    console.log(entry);
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
     this.httpService
       .getRequest<DirectMessage[]>(
@@ -72,6 +134,8 @@ export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
       .subscribe(
         (data: DirectMessage[]) => {
           this.messages = data;
+          //this.registerIntersectionObserve();
+          this.receivedMessages.next();
           this.isMessagesLoading = false;
         },
         (error) => console.log(error)
@@ -152,19 +216,18 @@ export class ContactsChatComponent implements OnInit, OnChanges, OnDestroy {
     this.simpleModalService
       .addModal(ConfirmationModalComponent, {
         message: 'Are you sure you want to delete the contact?',
-      }).subscribe(
-        (isConfirm) => {
-          if (isConfirm) {
-            this.contactService.DeleteContact(this.contactSelected.id).subscribe(
-              (resp) => {
-                if (resp.status === 204) {
-                  this.close();
-                }
-              },
-              (error) => this.toastr.error(error.Message)
-            );
-          }
+      })
+      .subscribe((isConfirm) => {
+        if (isConfirm) {
+          this.contactService.DeleteContact(this.contactSelected.id).subscribe(
+            (resp) => {
+              if (resp.status === 204) {
+                this.close();
+              }
+            },
+            (error) => this.toastr.error(error.Message)
+          );
         }
-    );
+      });
   }
 }
