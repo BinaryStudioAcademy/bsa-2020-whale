@@ -17,6 +17,7 @@ import { HighlightCreatorDirective } from './directives/highlight-creator.direct
 import { ReactiveFormsModule } from '@angular/forms';
 import { ImageCropperModule } from 'ngx-image-cropper';
 import { EditGroupInfoModalComponent } from './components/edit-group-info-modal/edit-group-info-modal.component';
+import { UpdateGroupImageModalComponent } from './components/update-group-image-modal/update-group-image-modal.component';
 
 @NgModule({
   declarations: [
@@ -32,6 +33,7 @@ import { EditGroupInfoModalComponent } from './components/edit-group-info-modal/
     GroupCallModalComponent,
     HighlightCreatorDirective,
     EditGroupInfoModalComponent,
+    UpdateGroupImageModalComponent,
   ],
   imports: [
     CommonModule,

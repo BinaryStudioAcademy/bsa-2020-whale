@@ -40,6 +40,10 @@ import { ConfirmationModalComponent } from '@shared/components/confirmation-moda
 import { WhaleSignalMethods, WhaleSignalService } from 'app/core/services';
 import { BlobService } from 'app/core/services/blob.service';
 import { EditGroupInfoModalComponent } from '../edit-group-info-modal/edit-group-info-modal.component';
+import {
+  UpdateGroupImageModalComponent,
+  UpdateGroupImageModal,
+} from '../update-group-image-modal/update-group-image-modal.component';
 
 @Component({
   selector: 'app-group-chat',
@@ -196,19 +200,9 @@ export class GroupChatComponent
     this.hubConnection.invoke('Disconnect', this.groupSelected.id);
   }
 
-  public changeImage(event): void {
-    const photo = event.target.files[0];
-
-    this.blobService.postBlobUploadImage(photo).subscribe((resp) => {
-      console.log(`image: ${resp}`);
-
-      this.groupSelected.photoUrl = resp;
-      this.groupService.updateGroup(this.groupSelected).subscribe(
-        () => {
-          this.toastr.success('Group image successfuly changed');
-        },
-        (error) => this.toastr.error(error.Message)
-      );
+  public changeImage(): void {
+    this.simpleModalService.addModal(UpdateGroupImageModalComponent, {
+      group: this.groupSelected,
     });
   }
 
@@ -226,28 +220,28 @@ export class GroupChatComponent
         'You cannot leave the group because you are administrator. Please, assign someone else to this role.'
       );
     } else {
-      if (
-        confirm(
-          'Are you sure want to leave the group ' +
-            this.groupSelected.label +
-            '?'
-        )
-      ) {
-        this.groupService
-          .leaveGroup(this.groupSelected.id, this.currentUser.email)
-          .subscribe(
-            () => {
-              this.toastr.success(
-                `You successfully left the group "${this.groupSelected.label}"`
+      this.simpleModalService
+        .addModal(ConfirmationModalComponent, {
+          message: `Are you sure you want to leave ${this.groupSelected.label}?`,
+        })
+        .subscribe((isConfirm) => {
+          if (isConfirm) {
+            this.groupService
+              .leaveGroup(this.groupSelected.id, this.currentUser.email)
+              .subscribe(
+                () => {
+                  this.toastr.success(
+                    `You successfully left ${this.groupSelected.label}`
+                  );
+                },
+                (error) => this.toastr.error(error.Message)
               );
-            },
-            (error) => this.toastr.error(error.Message)
-          );
 
-        this.hubConnection?.invoke('LeaveGroup', this.groupSelected.id);
-        this.close();
-        this.homePageComponent.leftGroup(this.groupSelected);
-      }
+            this.hubConnection?.invoke('LeaveGroup', this.groupSelected.id);
+            this.close();
+            this.homePageComponent.leftGroup(this.groupSelected);
+          }
+        });
     }
   }
 

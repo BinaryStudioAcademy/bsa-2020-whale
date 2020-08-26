@@ -105,11 +105,7 @@
     </div>
   </div>
   <div class="forma">
-    <form
-      class="ui form vertically-aligned"
-      #chatForm="ngForm"
-      style="padding-bottom: 0; margin-bottom: 0;"
-    >
+    <form class="ui form vertically-aligned" #chatForm="ngForm">
       <div class="field">
         <textarea
           (keydown.enter)="onEnterKeyPress($event, chatForm.valid)"
