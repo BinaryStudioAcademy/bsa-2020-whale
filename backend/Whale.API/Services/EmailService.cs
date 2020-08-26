@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Options;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 using System;
@@ -9,6 +10,7 @@ using Whale.API.Services.Abstract;
 using Whale.DAL;
 using Whale.DAL.Models;
 using Whale.DAL.Models.Email;
+using Whale.DAL.Settings;
 using Whale.Shared.Models.Email;
 using Whale.Shared.Services;
 
@@ -18,19 +20,21 @@ namespace Whale.API.Services
 	{
         private readonly RedisService _redisService;
         private readonly UserService _userService;
+        private readonly IOptions<SendGridSettings> _sendGridSettings;
 
         public EmailAddress From { get; set; } = new EmailAddress("whale@whale.com", "Whale");
 
-        public EmailService(WhaleDbContext context, IMapper mapper, RedisService redisService, UserService userService)
+        public EmailService(WhaleDbContext context, IMapper mapper, RedisService redisService, UserService userService, IOptions<SendGridSettings> sendGridSettings)
             :base(context, mapper)
         {
             _redisService = redisService;
             _userService = userService;
+            _sendGridSettings = sendGridSettings;
         }
 
         public async Task SendMeetingInvites(MeetingInviteDTO meetingInviteDto)
         {
-            var apiKey = Environment.GetEnvironmentVariable("SENDGRID_API_KEY", EnvironmentVariableTarget.Machine);
+            var apiKey = _sendGridSettings.Value.ApiKey; // Environment.GetEnvironmentVariable("SENDGRID_API_KEY", EnvironmentVariableTarget.Machine);
             var client = new SendGridClient(apiKey);
 
             var meeting = _context.Meetings.FirstOrDefault(meeting => meeting.Id == meetingInviteDto.MeetingId);
