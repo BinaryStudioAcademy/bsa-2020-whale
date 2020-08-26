@@ -68,6 +68,7 @@ import { ContactComponent } from './components/contacts/contact/contact.componen
     AudioSettingsComponent,
     VideoSettingsComponent,
     OutputSettingsComponent,
+    TagComponent,
   ],
 })
 export class SharedModule {}
