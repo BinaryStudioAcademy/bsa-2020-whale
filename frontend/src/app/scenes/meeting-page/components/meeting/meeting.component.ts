@@ -7,7 +7,6 @@ import {
   EventEmitter,
   OnDestroy,
   Inject,
-  AfterContentChecked,
   AfterViewChecked,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
@@ -53,6 +52,8 @@ import { EnterModalComponent } from '../enter-modal/enter-modal.component';
 import { DivisionByRoomsModalComponent } from '../division-by-rooms-modal/division-by-rooms-modal.component';
 import { MeetingInviteComponent } from '@shared/components/meeting-invite/meeting-invite.component';
 import { RecordModalComponent } from '../record-modal/record-modal.component';
+import * as DecibelMeter from 'decibel-meter';
+import { BrowserMediaDevice } from '@shared/browser-media-device';
 
 @Component({
   selector: 'app-meeting',
@@ -115,6 +116,9 @@ export class MeetingComponent
   public isMoveToRoom = false;
   public onCanMoveIntoRoomEvent = new EventEmitter<void>();
   public isSharing: boolean = false;
+  private sdpVideoBandwidth = 125;
+  public meter = new DecibelMeter('meter');
+  public browserMediaDevice = new BrowserMediaDevice();
 
   @ViewChild('currentVideo') private currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
@@ -160,15 +164,18 @@ export class MeetingComponent
 
   //#region accessors
   private set currentUserStream(value: MediaStream) {
-    this.meetingSignalrService?.invoke(
-      SignalMethods.OnParticipantStreamChanged,
-      {
-        oldStreamId: this.userStream?.id,
-        newStreamId: value.id,
-        isVideoActive: value.getVideoTracks().some((vt) => vt.enabled),
-        isAudioActive: value.getAudioTracks().some((at) => at.enabled),
-      }
-    );
+    if (this.userStream) {
+      this.meetingSignalrService.invoke(
+        SignalMethods.OnParticipantStreamChanged,
+        {
+          oldStreamId: this.userStream?.id,
+          newStreamId: value.id,
+          isVideoActive: value.getVideoTracks().some((vt) => vt.enabled),
+          isAudioActive: value.getAudioTracks().some((at) => at.enabled),
+        }
+      );
+    }
+
     this.userStream = value;
   }
 
@@ -183,6 +190,12 @@ export class MeetingComponent
     this.currentUserStream = await navigator.mediaDevices.getUserMedia(
       await this.mediaSettingsService.getMediaConstraints()
     );
+    const settings = this.currentUserStream.getVideoTracks()[0].getSettings();
+    settings.frameRate = 20;
+    settings.height = 480;
+    settings.width = 640;
+    settings.resizeMode = 'crop-and-scale';
+    await this.currentUserStream.getVideoTracks()[0].applyConstraints(settings);
 
     this.connectedStreams.push(this.currentUserStream);
 
@@ -266,7 +279,7 @@ export class MeetingComponent
         }
 
         const disconectedMediaDataIndex = this.mediaData.findIndex(
-          (m) => m.stream.id == connectionData.participant.streamId
+          (m) => m.currentStreamId == connectionData.participant.streamId
         );
         if (disconectedMediaDataIndex) {
           this.mediaData.splice(disconectedMediaDataIndex, 1);
@@ -291,7 +304,7 @@ export class MeetingComponent
         );
 
         const disconectedMediaDataIndex = this.mediaData.findIndex(
-          (m) => m.stream.id == participant.streamId
+          (m) => m.currentStreamId == participant.streamId
         );
         if (disconectedMediaDataIndex) {
           this.mediaData.splice(disconectedMediaDataIndex, 1);
@@ -528,7 +541,10 @@ export class MeetingComponent
       });
 
       // send mediaStream to caller
-      call.answer(this.currentUserStream);
+      call.answer(this.currentUserStream, {
+        sdpTransform: (sdp) =>
+          this.setMediaBitrate(sdp, 'video', this.sdpVideoBandwidth),
+      });
     });
 
     // show a warning dialog if close current tab or window
@@ -761,8 +777,6 @@ export class MeetingComponent
   private addParticipantToMeeting(participant: Participant): void {
     if (!this.meeting.participants.some((p) => p.id === participant.id)) {
       this.meeting.participants.push(participant);
-    }
-    if (!this.otherParticipants.some((p) => p.id === participant.id)) {
       this.otherParticipants.push(participant);
     }
     this.roomService.participants = this.meeting.participants;
@@ -773,11 +787,20 @@ export class MeetingComponent
       (p) => p.id !== participant.id
     );
     this.roomService.participants = this.meeting.participants;
+    this.otherParticipants = this.otherParticipants.filter(
+      (p) => p.id !== participant.id
+    );
+    this.newMsgFrom = this.newMsgFrom.filter(
+      (e) => e !== participant.user.email
+    );
   }
 
   // call to peer
   private connect(recieverPeerId: string) {
-    const call = this.peer.call(recieverPeerId, this.currentUserStream);
+    const call = this.peer.call(recieverPeerId, this.currentUserStream, {
+      sdpTransform: (sdp: string) =>
+        this.setMediaBitrate(sdp, 'video', this.sdpVideoBandwidth),
+    });
 
     // get answer and show other user
     call?.on('stream', (stream) => {
@@ -855,6 +878,8 @@ export class MeetingComponent
   private leaveUnConnected(): void {
     this.currentUserStream.getTracks().forEach((track) => track.stop());
     this.destroyPeer();
+    this.meter.stopListening();
+    this.meter.disconnect();
     this.router.navigate(['/home']);
   }
 
@@ -909,13 +934,6 @@ export class MeetingComponent
         ? this.currentUserStream
         : this.connectedStreams.find((s) => s.id === participant?.streamId);
 
-    const audioContext = new AudioContext();
-    const mediaStreamSource = audioContext.createMediaStreamSource(stream);
-    const processor = audioContext.createScriptProcessor(256, 1, 1);
-    mediaStreamSource.connect(audioContext.destination);
-    mediaStreamSource.connect(processor);
-    processor.connect(audioContext.destination);
-
     var newMediaData = {
       id: participant.id,
       isCurrentUser: participant.id === this.currentParticipant.id,
@@ -938,16 +956,36 @@ export class MeetingComponent
       volume: 0,
     };
 
-    processor.onaudioprocess = (e) => {
-      const inputData = e.inputBuffer.getChannelData(0);
-      const inputDataLength = inputData.length;
-      let total = 0;
-
-      for (let i = 0; i < inputDataLength; i++) {
-        total += Math.abs(inputData[i++]);
-      }
-      newMediaData.volume = Math.sqrt(total / inputDataLength) * 100;
-    };
+    if (participant.id !== this.currentParticipant.id) {
+      const audioContext = new AudioContext();
+      const mediaStreamSource = audioContext.createMediaStreamSource(stream);
+      const processor = audioContext.createScriptProcessor(256, 1, 1);
+      mediaStreamSource.connect(processor);
+      processor.connect(audioContext.destination);
+      processor.onaudioprocess = (e) => {
+        const inputData = e.inputBuffer.getChannelData(0);
+        const inputDataLength = inputData.length;
+        let total = 0;
+        for (let i = 0; i < inputDataLength; i++) {
+          total += Math.abs(inputData[i++]);
+        }
+        newMediaData.volume = Math.sqrt(total / inputDataLength) * 100;
+      };
+    } else {
+      this.browserMediaDevice.getAudioInputList().then((res) => {
+        const device = res.find(
+          (d) =>
+            d.deviceId === stream.getAudioTracks()[0].getSettings().deviceId
+        ) as MediaDeviceInfo;
+        console.log('device:', device);
+        this.meter.connect(device);
+        this.meter.on(
+          'sample',
+          (dB, percent, value) => (newMediaData.volume = dB + 100)
+        );
+        this.meter.listen();
+      });
+    }
 
     shouldPrepend
       ? this.mediaData.unshift(newMediaData)
@@ -1298,4 +1336,51 @@ export class MeetingComponent
     this.toastr.info('Stop sharing screen');
   }
   //#endregion ShareScreen
+
+  setMediaBitrate(sdp: string, media: string, bitrate: number): string {
+    const lines = sdp.split('\n');
+    let line = -1;
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].indexOf('m=' + media) === 0) {
+        line = i;
+        break;
+      }
+    }
+    if (line === -1) {
+      return sdp;
+    }
+    let mediaLine = lines[line].split(' ');
+    let startIndex = 0;
+    for (let i = 0; i < mediaLine.length; i++) {
+      if (mediaLine[i].includes('UDP')) {
+        startIndex = i + 1;
+        break;
+      }
+    }
+    let tmp: string;
+    for (let i = startIndex; i < mediaLine.length; i++) {
+      if (!sdp.includes(`rtpmap:${mediaLine[startIndex]} H264`)) {
+        tmp = mediaLine[startIndex];
+        for (let j = startIndex + 1; j < mediaLine.length; j++) {
+          mediaLine[j - 1] = mediaLine[j];
+        }
+        mediaLine[mediaLine.length - 1] = tmp;
+      } else {
+        startIndex++;
+      }
+    }
+    lines[line] = mediaLine.join(' ');
+    line++;
+    while (lines[line].indexOf('i=') === 0 || lines[line].indexOf('c=') === 0) {
+      line++;
+    }
+    if (lines[line].indexOf('b') === 0) {
+      lines[line] = 'b=AS:' + bitrate;
+      return lines.join('\n');
+    }
+    let newLines = lines.slice(0, line);
+    newLines.push('b=AS:' + bitrate);
+    newLines = newLines.concat(lines.slice(line, lines.length));
+    return newLines.join('\n');
+  }
 }

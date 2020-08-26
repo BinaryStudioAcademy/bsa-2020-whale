@@ -13,6 +13,7 @@ import { GroupChatComponent } from './components/group-chat/group-chat.component
 import { AddUserToGroupModalComponent } from './components/add-user-to-group-modal/add-user-to-group-modal.component';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { GroupCallModalComponent } from './components/group-call-modal/group-call-modal.component';
+import { HighlightCreatorDirective } from './directives/highlight-creator.directive';
 
 @NgModule({
   declarations: [
@@ -26,6 +27,7 @@ import { GroupCallModalComponent } from './components/group-call-modal/group-cal
     GroupChatComponent,
     AddUserToGroupModalComponent,
     GroupCallModalComponent,
+    HighlightCreatorDirective,
   ],
   imports: [CommonModule, SharedModule, FormsModule, InfiniteScrollModule],
   entryComponents: [CallModalComponent, GroupCallModalComponent],

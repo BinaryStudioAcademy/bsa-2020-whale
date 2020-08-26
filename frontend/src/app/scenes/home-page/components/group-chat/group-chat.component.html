@@ -1,13 +1,18 @@
-<div class="chat ui secondary segment">
+<div class="chat ui segment">
   <div class="ui chat-header feed">
     <div class="event chat-label">
       <div class="content">
         <div class="group-info">
           <label for="newImage">
             <img
+              *ngIf="isImageHere()"
               class="ui avatar image"
               src="{{ groupSelected.photoUrl }}"
-              alt="{{ groupSelected.label }}"
+            />
+            <img
+              *ngIf="!isImageHere()"
+              class="ui avatar image"
+              src="assets/img/user-group-icon.png"
             />
           </label>
           <input
@@ -17,8 +22,8 @@
             (change)="changeImage($event)"
             accept="image/*"
           />
-          <div>
-            <span class="user-chat-label ui header">
+          <div class="group-chat-info">
+            <span class="group-chat-label ui header">
               {{ groupSelected.label }}
               <span class="grey sub header">
                 {{ groupSelected.description }}
@@ -58,12 +63,21 @@
                   src="{{ returnCorrectLink(user) }}"
                 />
                 <div class="content">
-                  <div class="description">
+                  <div
+                    class="description"
+                    appHighlightCreator
+                    userEmail="{{ user.email }}"
+                    creatorEmail="{{ groupSelected.creatorEmail }}"
+                  >
                     {{ user?.firstName }}
                     {{ user?.secondName }}
                   </div>
                 </div>
-                <div class="icon-wrapper">
+                <div
+                  data-tooltip="Delete user"
+                  data-position="left center"
+                  class="icon-wrapper"
+                >
                   <i
                     *ngIf="
                       groupSelected.creatorEmail == currentUser?.email &&
@@ -92,7 +106,7 @@
       </div>
     </div>
   </div>
-  <div class="ui chat-inner feed">
+  <div class="ui chat-inner feed" #chatWindow>
     <spiner *ngIf="isMessagesLoading" [size]="'medium'"></spiner>
     <div
       *ngIf="messages.length == 0"
@@ -100,12 +114,31 @@
     >
       There is still no messages yet!
     </div>
-    <div *ngFor="let message of messages" class="event message-event">
+    <div
+      *ngFor="let message of messages"
+      [ngClass]="
+        currentUser.email !== message.author?.email
+          ? 'event visavis'
+          : 'event row-reverse author'
+      "
+    >
       <div class="label">
         <img src="{{ message.author?.avatarUrl }}" />
       </div>
-      <div class="content">
-        <div class="summary">
+      <div
+        [ngClass]="
+          currentUser.email !== message.author?.email
+            ? 'content'
+            : 'content row-reverse'
+        "
+      >
+        <div
+          [ngClass]="
+            currentUser.email !== message.author?.email
+              ? 'summary'
+              : 'summary row-reverse'
+          "
+        >
           <a class="user">
             {{ message.author?.firstName }}
             {{ message.author?.secondName }}
@@ -114,7 +147,14 @@
             {{ message.createdAt | date: "short" }}
           </div>
         </div>
-        <div class="message">
+        <div
+          disabled
+          [ngClass]="
+            currentUser.email !== message.author?.email
+              ? 'message'
+              : 'message current-user-message'
+          "
+        >
           <div *ngFor="let row of splitMessage(message?.message)">
             {{ row }}
           </div>
@@ -124,9 +164,6 @@
   </div>
   <div class="forma">
     <form class="ui form vertically-aligned" #chatForm="ngForm">
-      <div class="subheader helper">
-        Enter to send. Enter+Shift for new line.
-      </div>
       <div class="field">
         <textarea
           (keydown.enter)="onEnterKeyPress($event, chatForm.valid)"
@@ -138,6 +175,9 @@
           [(ngModel)]="newMessage.message"
           required
         ></textarea>
+        <div class="subheader helper">
+          Enter to send. Enter+Shift for new line.
+        </div>
       </div>
       <button
         id="chat-submit"

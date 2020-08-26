@@ -55,6 +55,7 @@ export class ContactsChatComponent
   chatElement: any;
 
   @Input() contactSelected: Contact;
+  @Input() loggedInUser: User;
   @Output() chat: EventEmitter<boolean> = new EventEmitter<boolean>();
   directMessageRecieved = new EventEmitter<DirectMessage>();
   messages: DirectMessage[] = [];
@@ -99,7 +100,7 @@ export class ContactsChatComponent
       .subscribe(
         (data: DirectMessage[]) => {
           this.messages = data;
-          console.log('messages new');
+          console.log('messages new', data);
           this.isMessagesLoading = false;
         },
         (error) => console.log(error)

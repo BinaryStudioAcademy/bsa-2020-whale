@@ -19,6 +19,7 @@ export class MeetingInviteComponent
   public emails: string[] = [];
   public contacts: Contact[];
   public cachedContacts: Contact[];
+  public selectedContacts: Contact[] = [];
 
   public form: FormGroup;
   public formSearch: FormGroup;
@@ -44,6 +45,28 @@ export class MeetingInviteComponent
     this.getContacts();
   }
 
+  public getContacts() {
+    this.httpService
+      .getRequest<Contact[]>(environment.apiUrl + '/api/Contacts/accepted')
+      .subscribe(
+        (response) => {
+          console.log(response);
+          this.contacts = response.filter((c) => true);
+          this.cachedContacts = response.filter((c) => true);
+        },
+        (error) => {
+          console.error(error);
+        }
+      );
+  }
+
+  public onContactClicked(contact: Contact) {
+    this.selectedContacts.push(contact);
+    this.emails.push(contact.secondMember.email);
+    this.cachedContacts.splice(this.cachedContacts.indexOf(contact), 1);
+    this.contacts.splice(this.contacts.indexOf(contact), 1);
+  }
+
   public addEmailTag(): void {
     if (
       this.form.controls.email.value &&
@@ -55,10 +78,19 @@ export class MeetingInviteComponent
   }
 
   public removeTag(email: string): void {
-    this.emails.splice(
-      this.emails.findIndex((e) => e == email),
-      1
+    this.emails.splice(this.emails.indexOf(email), 1);
+    // console.log(this.emails.indexOf(email));
+    const contact = this.selectedContacts.find(
+      (c) => c.secondMember.email == email
     );
+    // console.log(contact);
+    // console.log(email);
+    // console.log(this.selectedContacts.indexOf(contact));
+    if (contact) {
+      this.cachedContacts.push(contact);
+      this.contacts.push(contact);
+      this.selectedContacts.splice(this.selectedContacts.indexOf(contact), 1);
+    }
   }
 
   public sendInvites() {
@@ -92,22 +124,8 @@ export class MeetingInviteComponent
       );
   }
 
-  public getContacts() {
-    this.httpService
-      .getRequest<Contact[]>(environment.apiUrl + '/api/Contacts/accepted')
-      .subscribe(
-        (response) => {
-          console.log(response);
-          this.contacts = response;
-          this.cachedContacts = response;
-        },
-        (error) => {
-          console.error(error);
-        }
-      );
-  }
-
   public filterContacts(value: string) {
+    console.log(this.contacts);
     this.cachedContacts = this.contacts.filter((contact) => {
       return `${contact.secondMember.firstName} ${contact.secondMember.secondName}`.includes(
         value
@@ -115,19 +133,10 @@ export class MeetingInviteComponent
     });
   }
 
-  public onContactClicked(contact: Contact) {
-    const index = this.emails.findIndex(
-      (email) => email == contact.secondMember.email
-    );
-    if (index == -1) {
-      this.emails.push(contact.secondMember.email);
-    } else {
-      this.emails.splice(index, 1);
-    }
-  }
-
   public getEmailOrName(email: string) {
-    const contact = this.contacts.find((c) => c.secondMember.email == email);
+    const contact = this.selectedContacts.find(
+      (c) => c.secondMember.email == email
+    );
     if (contact) {
       return this.getName(contact.secondMember);
     } else {

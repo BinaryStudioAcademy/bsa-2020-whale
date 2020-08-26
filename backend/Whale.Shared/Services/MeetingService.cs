@@ -68,7 +68,6 @@ namespace Whale.Shared.Services
             if (!meeting.IsScheduled)
             {
                 meeting.StartTime = DateTimeOffset.Now;
-                meeting.EndTime = DateTimeOffset.Now.AddHours(1);
             }
             await _context.Meetings.AddAsync(meeting);
             await _context.SaveChangesAsync();

@@ -8,6 +8,10 @@ import {
   AfterContentInit,
   OnChanges,
   SimpleChanges,
+  ViewChild,
+  ElementRef,
+  AfterViewInit,
+  AfterViewChecked,
 } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { GroupMessage } from '@shared/models/message/group-message';
@@ -41,7 +45,8 @@ import { BlobService } from 'app/core/services/blob.service';
   templateUrl: './group-chat.component.html',
   styleUrls: ['./group-chat.component.sass'],
 })
-export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
+export class GroupChatComponent
+  implements OnInit, OnChanges, OnDestroy, AfterViewInit, AfterViewChecked {
   private hubConnection: HubConnection;
   counter = 0;
   private receivedMsg = new Subject<GroupMessage>();
@@ -49,7 +54,12 @@ export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
 
   private unsubscribe$ = new Subject<void>();
   @Input() groupSelected: Group;
+  @Input() loggedInUser: User;
   @Output() chat: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @ViewChild('chatWindow', { static: false }) chatBlock: ElementRef<
+    HTMLElement
+  >;
+  chatElement: any;
   newUserInGroup: GroupUser = {
     userEmail: '',
     groupId: this.groupSelected?.id,
@@ -78,6 +88,24 @@ export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
     private homePageComponent: HomePageComponent,
     private blobService: BlobService
   ) {}
+
+  ngAfterViewInit(): void {
+    this.chatElement = this.chatBlock.nativeElement;
+  }
+
+  ngAfterViewChecked(): void {
+    this.scrollDown();
+  }
+
+  scrollDown(): void {
+    const chatHtml = this.chatElement as HTMLElement;
+    const isScrolledToBottom =
+      chatHtml.scrollHeight - chatHtml.clientHeight > chatHtml.scrollTop;
+
+    if (isScrolledToBottom)
+      chatHtml.scrollTop = chatHtml.scrollHeight - chatHtml.clientHeight;
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
     this.isMembersVisible = false;
     this.upstateSevice
@@ -269,5 +297,12 @@ export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
   }
   public splitMessage(message: string) {
     return message.split(/\n/gi);
+  }
+  public isImageHere(): boolean {
+    return (
+      this.groupSelected.photoUrl !== null &&
+      this.groupSelected.photoUrl !== undefined &&
+      this.groupSelected.photoUrl !== ''
+    );
   }
 }
