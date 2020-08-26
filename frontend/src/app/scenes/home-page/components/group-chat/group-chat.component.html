@@ -58,7 +58,12 @@
                   src="{{ returnCorrectLink(user) }}"
                 />
                 <div class="content">
-                  <div class="description">
+                  <div
+                    class="description"
+                    appHighlightCreator
+                    userEmail="{{ user.email }}"
+                    creatorEmail="{{ groupSelected.creatorEmail }}"
+                  >
                     {{ user?.firstName }}
                     {{ user?.secondName }}
                   </div>
