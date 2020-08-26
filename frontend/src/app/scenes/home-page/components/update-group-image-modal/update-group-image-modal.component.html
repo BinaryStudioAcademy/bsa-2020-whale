@@ -1,0 +1,58 @@
+<div
+  id="modal-div-close"
+  class="ui dimmer modals page visible active"
+  (click)="close()"
+>
+  <div class="ui small modal visible active" (click)="$event.stopPropagation()">
+    <div class="header">
+      Change group image
+    </div>
+    <div class="content">
+      <div class="ui segment">
+        <div class="field">
+          <label id="group-upload" class="ui button" for="file">
+            Upload from file
+          </label>
+          <input
+            hidden
+            type="file"
+            id="file"
+            (change)="uploadFile($event)"
+            accept="image/*"
+          />
+          <div class="upload" *ngIf="isFileUploaded">
+            <div class="cropper">
+              <image-cropper
+                [imageChangedEvent]="imageChangedEvent"
+                [maintainAspectRatio]="true"
+                [aspectRatio]="1 / 1"
+                [cropperMinWidth]="128"
+                [resizeToWidth]="128"
+                [onlyScaleDown]="true"
+                format="jpeg"
+                (imageCropped)="imageCroppedUpload($event)"
+              ></image-cropper>
+              <img [src]="croppedImage" />
+            </div>
+          </div>
+        </div>
+        <button
+          id="submit-contact"
+          class="ui button primary"
+          type="submit"
+          (click)="submit()"
+        >
+          Save
+        </button>
+        <button
+          id="modal-close"
+          class="ui button"
+          type="button"
+          (click)="close()"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

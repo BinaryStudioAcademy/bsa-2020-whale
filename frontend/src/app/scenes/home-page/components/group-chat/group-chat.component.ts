@@ -39,6 +39,10 @@ import { HomePageComponent } from '../home-page/home-page.component';
 import { ConfirmationModalComponent } from '@shared/components/confirmation-modal/confirmation-modal.component';
 import { WhaleSignalMethods, WhaleSignalService } from 'app/core/services';
 import { BlobService } from 'app/core/services/blob.service';
+import {
+  UpdateGroupImageModalComponent,
+  UpdateGroupImageModal,
+} from '../update-group-image-modal/update-group-image-modal.component';
 
 @Component({
   selector: 'app-group-chat',
@@ -194,19 +198,9 @@ export class GroupChatComponent
     this.hubConnection.invoke('Disconnect', this.groupSelected.id);
   }
 
-  public changeImage(event): void {
-    const photo = event.target.files[0];
-
-    this.blobService.postBlobUploadImage(photo).subscribe((resp) => {
-      console.log(`image: ${resp}`);
-
-      this.groupSelected.photoUrl = resp;
-      this.groupService.updateGroup(this.groupSelected).subscribe(
-        () => {
-          this.toastr.success('Group image successfuly changed');
-        },
-        (error) => this.toastr.error(error.Message)
-      );
+  public changeImage(): void {
+    this.simpleModalService.addModal(UpdateGroupImageModalComponent, {
+      group: this.groupSelected,
     });
   }
 
