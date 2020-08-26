@@ -13,6 +13,7 @@
     padding-right: 24px
     padding-top: 7px
     color: #151515
+    margin-left: 5px
 
 .left-col
     max-height: 100%
@@ -41,6 +42,12 @@
 .user-list 
     margin-left: 10px
 
+.user-label
+    margin-left: 10px
+    margin-top: auto
+    margin-bottom: auto
+    font-weight: 600
+
 #home-group.item
     padding-left: 0
     padding-top: 0
@@ -52,20 +59,20 @@
 .contacts-container
     flex-grow: 1
     margin-top: 10px
+    margin-bottom: 5px
     padding-bottom: 10px
     min-height: 3em
     overflow: hidden
     overflow-y: auto
     overflow-y: overlay
     .icon-wrapper
-        display: inline-block
+        display: inline-block   
         width: 15px
         float: right
         margin-right: 25px
         margin-left: auto
         .circle.icon
-            color: #2bac76
-    
+            color: #2bac76    
 
 .main-user-item
     display: flex
@@ -142,10 +149,12 @@
 
 .avatar-pic
     width: 50px
+    height: 50px
+    overflow: visible !important
 
-.user-label
-    margin-left: 10px
 
+.main-user
+    display: flex
 
 .contacts-container.groups
     margin-bottom: 5px
@@ -161,6 +170,7 @@
 
 span.icon-tooltip
     float: right
+    margin-left: 10px
 
 .description
     display: inline-block
@@ -174,3 +184,10 @@ div.item.contact
     display: flex !important
     align-items: center !important
     flex-wrap: nowrap !important
+
+.icon-wrapper__group
+    display: inline-block   
+    width: 15px
+    float: right
+    margin-right: 14px
+    margin-left: auto

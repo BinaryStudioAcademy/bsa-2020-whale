@@ -54,8 +54,7 @@
 .chat-label
     position: sticky
     top: 0
-    border-bottom: 2px solid white
-    
+    border-bottom: 1px solid #f3f4f5    
     .content
         display: flex
         justify-content: space-between
@@ -68,12 +67,12 @@
     margin-bottom: 10px
 
 .ui.feed > .event.chat-label
-   background: rgba(243, 244, 245, 0.98)
+   background: rgba(255 , 255, 255, 0.98)
 
 .message-event
     float: right
 
-.user-chat-label
+.group-chat-label
     color: black
 
 #message
@@ -104,7 +103,7 @@
     outline: none
     resize: none
     border: none
-    background: #f3f4f5
+    background: #ffffff
 
 .subheader
     font-size: 14px
@@ -157,9 +156,21 @@
     display: flex
     flex-direction: row-reverse
 
+.content
+    margin-right: 10px !important
+    margin-left: 10px !important
+
 .current-user-message
     float: right
+    margin-right: 0 !important
 
 .ui.feed>.event>.content .summary>.date
     margin: 0 .5em 0 .5em
 
+.icon-wrapper[data-tooltip]:after
+    font-size: .7em
+    padding: 5px
+    margin-top: 5px
+
+.group-chat-info
+    margin-left: 16px

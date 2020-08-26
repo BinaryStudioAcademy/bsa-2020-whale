@@ -415,6 +415,13 @@ export class HomePageComponent implements OnInit, OnDestroy {
       this.groupsVisibility = !this.groupsVisibility;
     }
   }
+  public isImageHere(group: Group): boolean {
+    return (
+      group.photoUrl !== null &&
+      group.photoUrl !== undefined &&
+      group.photoUrl !== ''
+    );
+  }
 }
 export interface UserModel {
   id: number;

@@ -298,4 +298,11 @@ export class GroupChatComponent
   public splitMessage(message: string) {
     return message.split(/\n/gi);
   }
+  public isImageHere(): boolean {
+    return (
+      this.groupSelected.photoUrl !== null &&
+      this.groupSelected.photoUrl !== undefined &&
+      this.groupSelected.photoUrl !== ''
+    );
+  }
 }

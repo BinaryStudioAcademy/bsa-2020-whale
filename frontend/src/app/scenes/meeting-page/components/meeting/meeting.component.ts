@@ -50,6 +50,8 @@ import {
 import { EnterModalComponent } from '../enter-modal/enter-modal.component';
 import { MeetingInviteComponent } from '@shared/components/meeting-invite/meeting-invite.component';
 import { RecordModalComponent } from '../record-modal/record-modal.component';
+import * as DecibelMeter from 'decibel-meter';
+import { BrowserMediaDevice } from '@shared/browser-media-device';
 
 @Component({
   selector: 'app-meeting',
@@ -109,6 +111,8 @@ export class MeetingComponent
   public receiveingDrawings: boolean = false;
   public isSharing: boolean = false;
   private sdpVideoBandwidth = 125;
+  public meter = new DecibelMeter('meter');
+  public browserMediaDevice = new BrowserMediaDevice();
 
   @ViewChild('currentVideo') private currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
@@ -489,7 +493,10 @@ export class MeetingComponent
       });
 
       // send mediaStream to caller
-      call.answer(this.currentUserStream, {sdpTransform: (sdp) => this.setMediaBitrate(sdp, 'video', this.sdpVideoBandwidth)});
+      call.answer(this.currentUserStream, {
+        sdpTransform: (sdp) =>
+          this.setMediaBitrate(sdp, 'video', this.sdpVideoBandwidth),
+      });
     });
 
     // show a warning dialog if close current tab or window
@@ -723,8 +730,6 @@ export class MeetingComponent
   private addParticipantToMeeting(participant: Participant): void {
     if (!this.meeting.participants.some((p) => p.id === participant.id)) {
       this.meeting.participants.push(participant);
-    }
-    if (!this.otherParticipants.some((p) => p.id === participant.id)) {
       this.otherParticipants.push(participant);
     }
   }
@@ -733,11 +738,20 @@ export class MeetingComponent
     this.meeting.participants = this.meeting.participants.filter(
       (p) => p.id !== participant.id
     );
+    this.otherParticipants = this.otherParticipants.filter(
+      (p) => p.id !== participant.id
+    );
+    this.newMsgFrom = this.newMsgFrom.filter(
+      (e) => e !== participant.user.email
+    );
   }
 
   // call to peer
   private connect(recieverPeerId: string) {
-    const call = this.peer.call(recieverPeerId, this.currentUserStream, {sdpTransform: (sdp: string) => this.setMediaBitrate(sdp, 'video', this.sdpVideoBandwidth)});
+    const call = this.peer.call(recieverPeerId, this.currentUserStream, {
+      sdpTransform: (sdp: string) =>
+        this.setMediaBitrate(sdp, 'video', this.sdpVideoBandwidth),
+    });
 
     // get answer and show other user
     call.on('stream', (stream) => {
@@ -783,6 +797,8 @@ export class MeetingComponent
   private leaveUnConnected(): void {
     this.currentUserStream.getTracks().forEach((track) => track.stop());
     this.destroyPeer();
+    this.meter.stopListening();
+    this.meter.disconnect();
     this.router.navigate(['/home']);
   }
 
@@ -839,13 +855,6 @@ export class MeetingComponent
         ? this.currentUserStream
         : this.connectedStreams.find((s) => s.id === participant.streamId);
 
-    const audioContext = new AudioContext();
-    const mediaStreamSource = audioContext.createMediaStreamSource(stream);
-    const processor = audioContext.createScriptProcessor(256, 1, 1);
-    mediaStreamSource.connect(audioContext.destination);
-    mediaStreamSource.connect(processor);
-    processor.connect(audioContext.destination);
-
     var newMediaData = {
       id: participant.id,
       isCurrentUser: participant.id === this.currentParticipant.id,
@@ -868,16 +877,36 @@ export class MeetingComponent
       volume: 0,
     };
 
-    processor.onaudioprocess = (e) => {
-      const inputData = e.inputBuffer.getChannelData(0);
-      const inputDataLength = inputData.length;
-      let total = 0;
-
-      for (let i = 0; i < inputDataLength; i++) {
-        total += Math.abs(inputData[i++]);
-      }
-      newMediaData.volume = Math.sqrt(total / inputDataLength) * 100;
-    };
+    if (participant.id !== this.currentParticipant.id) {
+      const audioContext = new AudioContext();
+      const mediaStreamSource = audioContext.createMediaStreamSource(stream);
+      const processor = audioContext.createScriptProcessor(256, 1, 1);
+      mediaStreamSource.connect(processor);
+      processor.connect(audioContext.destination);
+      processor.onaudioprocess = (e) => {
+        const inputData = e.inputBuffer.getChannelData(0);
+        const inputDataLength = inputData.length;
+        let total = 0;
+        for (let i = 0; i < inputDataLength; i++) {
+          total += Math.abs(inputData[i++]);
+        }
+        newMediaData.volume = Math.sqrt(total / inputDataLength) * 100;
+      };
+    } else {
+      this.browserMediaDevice.getAudioInputList().then((res) => {
+        const device = res.find(
+          (d) =>
+            d.deviceId === stream.getAudioTracks()[0].getSettings().deviceId
+        ) as MediaDeviceInfo;
+        console.log('device:', device);
+        this.meter.connect(device);
+        this.meter.on(
+          'sample',
+          (dB, percent, value) => (newMediaData.volume = dB + 100)
+        );
+        this.meter.listen();
+      });
+    }
 
     shouldPrepend
       ? this.mediaData.unshift(newMediaData)
