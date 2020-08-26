@@ -219,26 +219,28 @@ export class GroupChatComponent
   }
 
   public leaveGroup(): void {
-    if (
-      confirm(
-        'Are you sure want to leave the group ' + this.groupSelected.label + '?'
-      )
-    ) {
-      this.groupService
-        .leaveGroup(this.groupSelected.id, this.currentUser.email)
-        .subscribe(
-          () => {
-            this.toastr.success(
-              `You successfully left the group "${this.groupSelected.label}"`
+    this.simpleModalService
+      .addModal(ConfirmationModalComponent, {
+        message: `Are you sure you want to leave ${this.groupSelected.label}?`,
+      })
+      .subscribe((isConfirm) => {
+        if (isConfirm) {
+          this.groupService
+            .leaveGroup(this.groupSelected.id, this.currentUser.email)
+            .subscribe(
+              () => {
+                this.toastr.success(
+                  `You successfully left ${this.groupSelected.label}`
+                );
+              },
+              (error) => this.toastr.error(error.Message)
             );
-          },
-          (error) => this.toastr.error(error.Message)
-        );
 
-      this.hubConnection?.invoke('LeaveGroup', this.groupSelected.id);
-      this.close();
-      this.homePageComponent.leftGroup(this.groupSelected);
-    }
+          this.hubConnection?.invoke('LeaveGroup', this.groupSelected.id);
+          this.close();
+          this.homePageComponent.leftGroup(this.groupSelected);
+        }
+      });
   }
 
   public onEnterKeyPress(event: KeyboardEvent, valid: boolean): void {
