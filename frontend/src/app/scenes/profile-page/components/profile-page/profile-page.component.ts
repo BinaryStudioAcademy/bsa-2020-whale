@@ -10,6 +10,8 @@ import Avatar from 'avatar-initials';
 import { LinkTypeEnum } from '@shared/Enums/LinkTypeEnum';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { UpstateService } from '../../../../core/services/upstate.service';
+import { SimpleModalService } from 'ngx-simple-modal';
+import { ConfirmationModalComponent } from '@shared/components/confirmation-modal/confirmation-modal.component';
 
 @Component({
   selector: 'app-profile-page',
@@ -61,7 +63,8 @@ export class ProfilePageComponent implements OnInit {
     private blobService: BlobService,
     private httpService: HttpService,
     private authService: AuthService,
-    private upstateService: UpstateService
+    private upstateService: UpstateService,
+    private simpleModalService: SimpleModalService
   ) {}
 
   fileChangeEvent(event: any): void {}
@@ -216,8 +219,8 @@ export class ProfilePageComponent implements OnInit {
     return this.loggedInUser.secondName !== '';
   }
 
-  public removeAvatar(): void {
-    const avatar = new Avatar(this.avatar, {
+  private generateAvatarWithInitials(): Avatar {
+    return new Avatar(this.avatar, {
       useGravatar: false,
       initials: `${this.loggedInUser.firstName[0]}${
         this.hasSecondName() ? this.loggedInUser.secondName[0] : ''
@@ -227,14 +230,29 @@ export class ProfilePageComponent implements OnInit {
       initial_bg: this.randomColor(),
       initial_font_family: "'Lato', 'Lato-Regular', 'Helvetica Neue'",
     });
+  }
 
-    this.loggedInUser.avatarUrl = avatar.element.src;
-    this.loggedInUser.linkType = LinkTypeEnum.External;
-    this.httpService
-      .putFullRequest<User, string>(`${this.routePrefix}`, this.loggedInUser)
-      .subscribe((response) => {
-        console.log(`image: ${response.body}`);
-        this.header.getUser();
+  public removeAvatar(): void {
+    this.simpleModalService
+      .addModal(ConfirmationModalComponent, {
+        message: 'Are you sure you want to remove this photo?',
+      })
+      .subscribe((isConfirm) => {
+        if (isConfirm) {
+          const avatar = this.generateAvatarWithInitials();
+
+          this.loggedInUser.avatarUrl = avatar.element.src;
+          this.loggedInUser.linkType = LinkTypeEnum.External;
+          this.httpService
+            .putFullRequest<User, string>(
+              `${this.routePrefix}`,
+              this.loggedInUser
+            )
+            .subscribe((response) => {
+              console.log(`image: ${response.body}`);
+              this.header.getUser();
+            });
+        }
       });
   }
 
