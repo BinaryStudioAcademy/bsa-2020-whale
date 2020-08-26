@@ -1,4 +1,4 @@
-<div class="chat ui secondary segment">
+<div class="chat ui segment">
   <div class="ui chat-header feed">
     <div class="event chat-label">
       <div class="label">
@@ -18,14 +18,14 @@
           <div
             *ngIf="contactSelected?.secondMember.connectionId"
             data-tooltip="Online"
-            data-position="right center"
+            data-position="bottom center"
           >
             <i class="circle small icon"></i>
           </div>
           <div
             *ngIf="contactSelected?.secondMember.connectionId"
             data-tooltip="Call"
-            data-position="right center"
+            data-position="bottom center"
           >
             <i id="chat-call" class="large phone icon" (click)="call()"></i>
           </div>
@@ -41,7 +41,7 @@
           </span>
         </div>
 
-        <span data-tooltip="Close chat" data-position="left center">
+        <span data-tooltip="Close chat" data-position="bottom center">
           <i id="chat-close" class="large close icon" (click)="close()"></i>
         </span>
       </div>
