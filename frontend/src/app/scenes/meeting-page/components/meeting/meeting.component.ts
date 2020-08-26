@@ -188,6 +188,10 @@ export class MeetingComponent
   public async ngOnInit() {
     this.isRoom = window.location.pathname.includes('room');
     this.roomService.isInRoom = this.isRoom;
+    if (this.isRoom) {
+      this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+    }
+
     this.currentUserStream = await navigator.mediaDevices.getUserMedia(
       await this.mediaSettingsService.getMediaConstraints()
     );
@@ -1254,7 +1258,9 @@ export class MeetingComponent
       .toPromise()
       .then((isMove) => {
         this.isMoveToRoom = isMove;
-        this.onCanMoveIntoRoomEvent.emit();
+        if (this.isMoveToRoom) {
+          this.onCanMoveIntoRoomEvent.emit();
+        }
       });
   }
   //#endregion Rooms

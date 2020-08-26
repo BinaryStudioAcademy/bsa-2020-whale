@@ -67,6 +67,8 @@ export class DivisionByRoomsModalComponent
   }
 
   public leaveRoom(): void {
+    this.result = true;
+    this.close();
     this.router.navigate([
       `/meeting-page/${this.roomService.originalMeetingUrl}`,
     ]);
@@ -76,7 +78,9 @@ export class DivisionByRoomsModalComponent
     this.result = true;
     this.close();
     this.onCanMoveIntoRoomEvent.subscribe(() => {
-      this.roomService.originalMeetingUrl = this.meetingLink;
+      if (!this.roomService.originalMeetingUrl) {
+        this.roomService.originalMeetingUrl = this.meetingLink;
+      }
       this.router.navigate([`/room/${roomId}`]);
     });
   }

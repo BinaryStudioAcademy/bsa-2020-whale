@@ -24,7 +24,6 @@ export class RoomService {
         this.roomsIds.push(roomData.roomId);
         const participants: string[] = roomData.participantsIds;
         this.configureParticipantsInRooms(roomData.roomId, participants);
-        this.isDividedIntoRooms = true;
       },
       (err) => {
         this.toastr.error('Error occured while trying to create room');
@@ -57,9 +56,6 @@ export class RoomService {
         rooms.forEach((room) => {
           this.configureParticipantsInRooms(room.roomId, room.participantsIds);
         });
-        console.log('rooms', rooms);
-        console.log('participantsInRooms', this.participantsInRooms);
-        console.log('participants', this.participants);
         if (this.roomsIds.length > 0) this.isDividedIntoRooms = true;
       })
       .catch((err) => this.toastr.error(err));
