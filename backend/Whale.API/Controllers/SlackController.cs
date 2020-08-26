@@ -1,9 +1,9 @@
-﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Whale.API.Services;
+﻿using Microsoft.AspNetCore.Mvc;
 using System;
-using Whale.Shared.Models.Meeting;
+using System.Threading.Tasks;
 using Whale.API.Models.Slack;
+using Whale.API.Services;
+using Whale.Shared.Models.Meeting;
 
 namespace Whale.API.Controllers.Slack
 {
@@ -26,11 +26,16 @@ namespace Whale.API.Controllers.Slack
         [Produces("application/json")]
         public async Task StartMeeting(SlackCommand userData)
         {
-            var userEmail = userData.text;
 
-            if (userEmail == null) await _slackService.SendSlackReplyAsync("You should to specify email. (ex. /whale user@gmail.com)", userData.channel_id);
+            var user = await _slackService.GetUserProfileAsync(userData.user_id);
 
-            var meetingDTO = new MeetingCreateDTO() { CreatorEmail = userEmail, IsScheduled = false };
+            if (string.IsNullOrEmpty(user.profile.email) || !await _slackService.ValidateUser(user.profile.email))
+            {
+                await _slackService.SendInvitationAsync(userData.channel_id, _baseURL);
+                return;
+            }
+
+            var meetingDTO = new MeetingCreateDTO() { CreatorEmail = user.profile.email, IsScheduled = false };
 
             try
             {
@@ -39,10 +44,20 @@ namespace Whale.API.Controllers.Slack
 
                 await _slackService.SendSlackReplyAsync("", userData.channel_id, link);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 await _slackService.SendSlackReplyAsync("Some troubles happened", userData.channel_id);
             }
+        }
+
+        [Route("/api/slack/interactivity")]
+        [HttpPost]
+        [Produces("application/json")]
+        public async Task<OkResult> Interactivity(SlackCommand data)
+        {
+            //TODO the bot more interactive
+
+            return Ok();
         }
     }
 }
