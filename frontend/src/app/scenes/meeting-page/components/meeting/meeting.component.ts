@@ -108,6 +108,7 @@ export class MeetingComponent
   public pollService: PollService;
   public receiveingDrawings: boolean = false;
   public isSharing: boolean = false;
+  private sdpVideoBandwidth = 250;
 
   @ViewChild('currentVideo') private currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
@@ -482,7 +483,7 @@ export class MeetingComponent
       });
 
       // send mediaStream to caller
-      call.answer(this.currentUserStream);
+      call.answer(this.currentUserStream, {sdpTransform: (sdp) => this.setMediaBitrate(sdp, 'video', this.sdpVideoBandwidth)});
     });
 
     // show a warning dialog if close current tab or window
@@ -730,7 +731,7 @@ export class MeetingComponent
 
   // call to peer
   private connect(recieverPeerId: string) {
-    const call = this.peer.call(recieverPeerId, this.currentUserStream);
+    const call = this.peer.call(recieverPeerId, this.currentUserStream, {sdpTransform: (sdp: string) => this.setMediaBitrate(sdp, 'video', this.sdpVideoBandwidth)});
 
     // get answer and show other user
     call.on('stream', (stream) => {
@@ -1202,5 +1203,31 @@ export class MeetingComponent
     document.querySelector('video').srcObject = this.currentUserStream;
     this.isSharing = false;
     this.toastr.info('Stop sharing screen');
+  }
+
+  setMediaBitrate(sdp: string, media: string, bitrate: number): string {
+    const lines = sdp.split('\n');
+    let line = -1;
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].indexOf('m=' + media) === 0) {
+        line = i;
+        break;
+      }
+    }
+    if (line === -1) {
+      return sdp;
+    }
+    line++;
+    while (lines[line].indexOf('i=') === 0 || lines[line].indexOf('c=') === 0) {
+      line++;
+    }
+    if (lines[line].indexOf('b') === 0) {
+      lines[line] = 'b=AS:' + bitrate;
+      return lines.join('\n');
+    }
+    let newLines = lines.slice(0, line);
+    newLines.push('b=AS:' + bitrate);
+    newLines = newLines.concat(lines.slice(line, lines.length));
+    return newLines.join('\n');
   }
 }
