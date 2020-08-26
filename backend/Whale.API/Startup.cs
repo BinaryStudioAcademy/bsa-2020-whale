@@ -78,6 +78,7 @@ namespace Whale.API
             services.AddTransient(p => new HttpService(p.GetRequiredService<HttpClient>(), Configuration.GetValue<string>("MeetingAPI")));
             services.AddTransient(p => new SignalrService(Configuration.GetValue<string>("SignalR")));
             services.AddTransient<EmailService>();
+            services.Configure<SendGridSettings>(settings => settings.ApiKey = Configuration.GetValue<string>("WhaleSendGridApiKey"));
 
 
             services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>

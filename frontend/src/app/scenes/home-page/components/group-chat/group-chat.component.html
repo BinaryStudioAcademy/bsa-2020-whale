@@ -101,7 +101,7 @@
       </div>
     </div>
   </div>
-  <div class="ui chat-inner feed">
+  <div class="ui chat-inner feed" #chatWindow>
     <spiner *ngIf="isMessagesLoading" [size]="'medium'"></spiner>
     <div
       *ngIf="messages.length == 0"
@@ -113,8 +113,8 @@
       *ngFor="let message of messages"
       [ngClass]="
         currentUser.email !== message.author?.email
-          ? 'event'
-          : 'event row-reverse '
+          ? 'event visavis'
+          : 'event row-reverse author'
       "
     >
       <div class="label">
