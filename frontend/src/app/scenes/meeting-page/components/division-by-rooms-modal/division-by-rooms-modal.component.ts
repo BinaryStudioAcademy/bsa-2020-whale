@@ -66,10 +66,17 @@ export class DivisionByRoomsModalComponent
     });
   }
 
+  public leaveRoom(): void {
+    this.router.navigate([
+      `/meeting-page/${this.roomService.originalMeetingUrl}`,
+    ]);
+  }
+
   public redirectIntoRoom(roomId: string): void {
     this.result = true;
     this.close();
     this.onCanMoveIntoRoomEvent.subscribe(() => {
+      this.roomService.originalMeetingUrl = this.meetingLink;
       this.router.navigate([`/room/${roomId}`]);
     });
   }

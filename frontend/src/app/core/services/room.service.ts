@@ -12,6 +12,8 @@ export class RoomService {
   public isUserHost = false;
   public participants: Array<Participant> = [];
   public isDividedIntoRooms: boolean = false;
+  public originalMeetingUrl: string;
+  public isInRoom: boolean = false;
 
   constructor(
     private meetingSignalrService: MeetingSignalrService,

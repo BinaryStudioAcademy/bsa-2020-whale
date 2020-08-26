@@ -50,6 +50,13 @@
       >
         Divide
       </button>
+      <button
+        class="ui primary button"
+        *ngIf="roomService.isInRoom && roomService.isDividedIntoRooms"
+        (click)="leaveRoom()"
+      >
+        Leave room
+      </button>
     </div>
   </div>
 </div>
