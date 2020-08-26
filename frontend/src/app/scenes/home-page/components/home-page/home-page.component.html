@@ -143,6 +143,7 @@
         [groupSelected]="groupSelected"
         [loggedInUser]="loggedInUser"
         (chat)="groupVisibilityChange($event)"
+        (groupUpdated)="updateGroup($event)"
       ></app-group-chat>
       <app-history
         *ngIf="historyVisibility"

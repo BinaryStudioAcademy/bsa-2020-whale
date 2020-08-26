@@ -92,6 +92,17 @@
               (click)="addNewMember()"
             ></i>
           </span>
+          <span
+            *ngIf="groupSelected.creatorEmail == currentUser?.email"
+            data-tooltip="Edit group info"
+            data-position="bottom center"
+          >
+            <i
+              id="edit-group-info"
+              class="large cogs icon"
+              (click)="editGroupInfo()"
+            ></i>
+          </span>
         </div>
         <span data-tooltip="Close chat" data-position="bottom right">
           <i id="chat-close" class="large close icon" (click)="close()"></i>

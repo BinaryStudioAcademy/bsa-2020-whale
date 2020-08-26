@@ -82,6 +82,15 @@ namespace Whale.Shared.Services
 
             if (group == null) throw new NotFoundException("Group", updateGroup.Id.ToString());
 
+            var userInGroup = await _context.GroupUsers
+                .Include(gu => gu.User)
+                .FirstOrDefaultAsync(u => u.User.Email == updateGroup.CreatorEmail && u.GroupId == updateGroup.Id);
+            if (userInGroup is null)
+                throw new NotFoundException("User in group", updateGroup.CreatorEmail);
+
+            group.CreatorEmail = updateGroup.CreatorEmail;
+            group.Label = updateGroup.Label;
+            group.Description = updateGroup.Description;
             group.PhotoUrl = updateGroup.PhotoUrl;
 
             _context.Groups.Update(group);
@@ -146,6 +155,9 @@ namespace Whale.Shared.Services
 
             var user = _context.Users.FirstOrDefault(c => c.Email == userEmail);
             if (user is null) return false;
+
+            if (group.CreatorEmail == userEmail) 
+                throw new Exception("You cannot leave the group because you are administrator. Please, assign someone else.");
 
             var userInGroup = await _context.GroupUsers
                .Include(g => g.User)
