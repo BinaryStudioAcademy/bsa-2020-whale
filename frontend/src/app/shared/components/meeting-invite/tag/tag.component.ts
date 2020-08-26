@@ -7,6 +7,7 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 })
 export class TagComponent implements OnInit {
   @Input() email: string;
+  @Input() displayValue: string;
   @Output() tagRemoved = new EventEmitter<string>();
 
   constructor() {}
