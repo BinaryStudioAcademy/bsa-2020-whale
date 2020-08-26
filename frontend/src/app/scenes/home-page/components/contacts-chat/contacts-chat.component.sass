@@ -62,9 +62,6 @@
 .ui.feed > .event.chat-label
    background: rgba(243, 244, 245, 0.98)
 
-.message-event
-    float: right
-
 .user-chat-label
     color: black
 
@@ -75,6 +72,17 @@
 .ui.pointing.mini.label
     top: -1rem
 
+.event.row-reverse 
+    display: flex
+    flex-direction: row-reverse
+
+.row-reverse
+    display: flex
+    flex-direction: row-reverse
+
+.current-user-message
+    float: right
+    
 .phone
     cursor: pointer
     margin-left: 10px
@@ -91,6 +99,12 @@
     resize: none
     border: none
     background: #f3f4f5
+
+.author
+    padding-left: 30%!important
+
+.visavis
+    padding-right: 30%!important
 
 .subheader
     font-size: 14px
@@ -122,3 +136,6 @@
 
 [data-position="bottom center"][data-tooltip]:before
     left: 20%
+
+.ui.feed>.event>.content .summary>.date
+    margin: 0 .5em 0 .5em

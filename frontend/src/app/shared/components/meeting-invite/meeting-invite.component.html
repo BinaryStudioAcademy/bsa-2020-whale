@@ -52,7 +52,8 @@
       <div class="tag-container">
         <div *ngFor="let email of emails" class="tag">
           <app-tag
-            [email]="getEmailOrName(email)"
+            [email]="email"
+            [displayValue]="getEmailOrName(email)"
             (tagRemoved)="removeTag($event)"
           ></app-tag>
         </div>

@@ -134,11 +134,13 @@
       <app-contacts-chat
         *ngIf="contactChatVisibility"
         [contactSelected]="contactSelected"
+        [loggedInUser]="loggedInUser"
         (chat)="contactVisibilityChange($event)"
       ></app-contacts-chat>
       <app-group-chat
         *ngIf="groupChatVisibility"
         [groupSelected]="groupSelected"
+        [loggedInUser]="loggedInUser"
         (chat)="groupVisibilityChange($event)"
       ></app-group-chat>
       <app-history

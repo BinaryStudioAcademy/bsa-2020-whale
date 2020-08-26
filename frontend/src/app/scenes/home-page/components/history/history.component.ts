@@ -37,7 +37,6 @@ export class HistoryComponent implements OnInit {
   public requestSent = false;
   public allDataLoaded = false;
 
-
   constructor(private httpService: HttpService) {}
 
   ngOnInit(): void {
@@ -47,8 +46,7 @@ export class HistoryComponent implements OnInit {
   public onScroll(): void {
     if (this.scrollElement.nativeElement.scrollTop >= 100) {
       this.isScrolled = true;
-    }
-    else {
+    } else {
       this.isScrolled = false;
     }
     if (this.requestSent) {

@@ -13,6 +13,7 @@ import {
   ViewChild,
   QueryList,
   ElementRef,
+  AfterViewChecked,
 } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { DirectMessage } from '@shared/models/message/direct-message';
@@ -40,8 +41,8 @@ import { ConfirmationModalComponent } from '@shared/components/confirmation-moda
   styleUrls: ['./contacts-chat.component.sass'],
 })
 export class ContactsChatComponent
-  implements OnInit, OnChanges, OnDestroy, AfterViewInit {
-  @ViewChild('intersectionRoot') intersectionRoot: ElementRef<HTMLDivElement>;
+  implements OnInit, OnChanges, OnDestroy, AfterViewInit, AfterViewChecked {
+  //@ViewChild('intersectionRoot') intersectionRoot: ElementRef<HTMLDivElement>;
   @ViewChildren('intersectionElement') intersectionElements: QueryList<
     ElementRef<HTMLDivElement>
   >;
@@ -59,7 +60,13 @@ export class ContactsChatComponent
 
   private unsubscribe$ = new Subject<void>();
 
+  @ViewChild('chatWindow', { static: false }) chatBlock: ElementRef<
+    HTMLElement
+  >;
+  chatElement: any;
+
   @Input() contactSelected: Contact;
+  @Input() loggedInUser: User;
   @Output() chat: EventEmitter<boolean> = new EventEmitter<boolean>();
   directMessageRecieved = new EventEmitter<DirectMessage>();
   messages: DirectMessage[] = [];
@@ -79,6 +86,7 @@ export class ContactsChatComponent
   ) {}
 
   ngAfterViewInit(): void {
+    this.chatElement = this.chatBlock.nativeElement;
     setTimeout(() => {
       console.log(this.intersectionElements.first.nativeElement);
       this.receivedMessages$.subscribe(() => {
@@ -100,7 +108,7 @@ export class ContactsChatComponent
   }
 
   public registerIntersectionObserve() {
-    console.log(this.intersectionRoot);
+    console.log(this.chatBlock);
     console.log(this.intersectionElements);
     const options = {
       root: null,
@@ -125,6 +133,19 @@ export class ContactsChatComponent
     console.log(entry);
   }
 
+  ngAfterViewChecked(): void {
+    this.scrollDown();
+  }
+
+  scrollDown(): void {
+    const chatHtml = this.chatElement as HTMLElement;
+    const isScrolledToBottom =
+      chatHtml.scrollHeight - chatHtml.clientHeight > chatHtml.scrollTop;
+
+    if (isScrolledToBottom)
+      chatHtml.scrollTop = chatHtml.scrollHeight - chatHtml.clientHeight;
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
     this.httpService
       .getRequest<DirectMessage[]>(
@@ -134,14 +155,15 @@ export class ContactsChatComponent
       .subscribe(
         (data: DirectMessage[]) => {
           this.messages = data;
-          //this.registerIntersectionObserve();
           this.receivedMessages.next();
+          console.log('messages new', data);
           this.isMessagesLoading = false;
         },
         (error) => console.log(error)
       );
     this.hubConnection?.invoke('JoinGroup', this.contactSelected.id);
   }
+
   ngOnInit(): void {
     from(this.signalRService.registerHub(environment.signalrUrl, 'chatHub'))
       .pipe(
@@ -187,7 +209,10 @@ export class ContactsChatComponent
       )
       .pipe(take(1))
       .subscribe(
-        () => (this.newMessage.message = ''),
+        () => {
+          this.newMessage.message = '';
+          this.scrollDown();
+        },
         (error) => this.toastr.error(error.Message)
       );
   }

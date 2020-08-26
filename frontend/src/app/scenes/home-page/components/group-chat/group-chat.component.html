@@ -43,7 +43,7 @@
               data-position="bottom center"
             >
               <i
-                id="chat-close"
+                id="group-members-list"
                 class="large address book outline icon"
                 (click)="isMembersVisible = !isMembersVisible"
               ></i>
@@ -63,12 +63,24 @@
                     {{ user?.secondName }}
                   </div>
                 </div>
+                <div class="icon-wrapper">
+                  <i
+                    *ngIf="
+                      groupSelected.creatorEmail == currentUser?.email &&
+                      user.email !== currentUser?.email
+                    "
+                    class="close icon"
+                    (click)="
+                      deleteUserFromGroup(user); $event.stopPropagation()
+                    "
+                  ></i>
+                </div>
               </div>
             </div>
           </div>
           <span data-tooltip="Add new member" data-position="bottom center">
             <i
-              id="chat-close"
+              id="add-new-member"
               class="large user plus icon"
               (click)="addNewMember()"
             ></i>
@@ -80,7 +92,7 @@
       </div>
     </div>
   </div>
-  <div class="ui chat-inner feed">
+  <div class="ui chat-inner feed" #chatWindow>
     <spiner *ngIf="isMessagesLoading" [size]="'medium'"></spiner>
     <div
       *ngIf="messages.length == 0"
@@ -88,12 +100,31 @@
     >
       There is still no messages yet!
     </div>
-    <div *ngFor="let message of messages" class="event message-event">
+    <div
+      *ngFor="let message of messages"
+      [ngClass]="
+        currentUser.email !== message.author?.email
+          ? 'event visavis'
+          : 'event row-reverse author'
+      "
+    >
       <div class="label">
         <img src="{{ message.author?.avatarUrl }}" />
       </div>
-      <div class="content">
-        <div class="summary">
+      <div
+        [ngClass]="
+          currentUser.email !== message.author?.email
+            ? 'content'
+            : 'content row-reverse'
+        "
+      >
+        <div
+          [ngClass]="
+            currentUser.email !== message.author?.email
+              ? 'summary'
+              : 'summary row-reverse'
+          "
+        >
           <a class="user">
             {{ message.author?.firstName }}
             {{ message.author?.secondName }}
@@ -102,7 +133,14 @@
             {{ message.createdAt | date: "short" }}
           </div>
         </div>
-        <div class="message">
+        <div
+          disabled
+          [ngClass]="
+            currentUser.email !== message.author?.email
+              ? 'message'
+              : 'message current-user-message'
+          "
+        >
           <div *ngFor="let row of splitMessage(message?.message)">
             {{ row }}
           </div>
@@ -112,9 +150,6 @@
   </div>
   <div class="forma">
     <form class="ui form vertically-aligned" #chatForm="ngForm">
-      <div class="subheader helper">
-        Enter to send. Enter+Shift for new line.
-      </div>
       <div class="field">
         <textarea
           (keydown.enter)="onEnterKeyPress($event, chatForm.valid)"
@@ -126,6 +161,9 @@
           [(ngModel)]="newMessage.message"
           required
         ></textarea>
+        <div class="subheader helper">
+          Enter to send. Enter+Shift for new line.
+        </div>
       </div>
       <button
         id="chat-submit"

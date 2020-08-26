@@ -14,8 +14,9 @@
     overflow-y: auto
     margin-left: 2em
     margin-right: 2em
-    height: 70%
-  
+    height: calc(70% - 1rem)
+
+
 .chat-header 
     margin-left: 2em
     margin-right: 2em
@@ -90,23 +91,32 @@
 .ui.feed > .event > .label
     margin: 1%
 
+.author
+    padding-left: 30%!important
+
+.visavis
+    padding-right: 30%!important
+
 .message
     margin-right: 1%
     word-break: break-word
     overflow-wrap: break-word
+    outline: none
+    resize: none
+    border: none
+    background: #f3f4f5
 
 .subheader
-    font-size: 12px
+    font-size: 14px
 
 .forma
-    height: 20%
+    height: 15%
 
 .helper
-    width: 75px
-    margin-right: 10px
-    margin-bottom: 10px
-    overflow-wrap: break-word
-    opacity: 0.3
+    margin-top: 3px
+    width: 100%
+    opacity: 0.6
+    text-align: center
 
 
 .display-flex
@@ -129,5 +139,27 @@
     overflow-y: auto
     max-height: 400px
 
+.icon-wrapper
+    margin-left: auto
+    float: right
+    display: flex
+    .icon
+        margin-top: 2px
+
 .large.close.icon:hover
     cursor: pointer
+
+.event.row-reverse 
+    display: flex
+    flex-direction: row-reverse
+
+.row-reverse
+    display: flex
+    flex-direction: row-reverse
+
+.current-user-message
+    float: right
+
+.ui.feed>.event>.content .summary>.date
+    margin: 0 .5em 0 .5em
+

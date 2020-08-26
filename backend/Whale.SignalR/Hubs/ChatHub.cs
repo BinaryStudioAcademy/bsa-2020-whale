@@ -4,6 +4,10 @@ using Whale.Shared.Models.GroupMessage;
 using Whale.Shared.Models.DirectMessage;
 using Whale.Shared.Services;
 using Whale.SignalR.Models.Call;
+using System;
+using Whale.Shared.Models.Group;
+using System.Linq;
+using Whale.DAL.Models;
 
 namespace Whale.SignalR.Hubs
 {
@@ -11,11 +15,16 @@ namespace Whale.SignalR.Hubs
     {
         private readonly MeetingService _meetingService;
         private readonly ContactsService _contactsService;
-
-        public ChatHub(MeetingService meetingService, ContactsService contactsService)
+        private readonly GroupService _groupsService;
+        private readonly WhaleService _whaleService;
+        private readonly UserService _userService;
+        public ChatHub(MeetingService meetingService, ContactsService contactsService, GroupService groupsService, WhaleService whaleService, UserService userService)
         {
             _meetingService = meetingService;
             _contactsService = contactsService;
+            _groupsService = groupsService;
+            _userService = userService;
+            _whaleService = whaleService;
         }
 
         [HubMethodName("JoinGroup")]
@@ -43,7 +52,6 @@ namespace Whale.SignalR.Hubs
         {
             await Clients.Group(groupMessageDTO.GroupId.ToString()).SendAsync("NewGroupMessageReceived", groupMessageDTO);
         }
-
 
         public async Task Disconnect(string groupName)
         {

@@ -8,6 +8,10 @@ import {
   AfterContentInit,
   OnChanges,
   SimpleChanges,
+  ViewChild,
+  ElementRef,
+  AfterViewInit,
+  AfterViewChecked,
 } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { GroupMessage } from '@shared/models/message/group-message';
@@ -32,6 +36,8 @@ import { UpstateService } from 'app/core/services/upstate.service';
 import { AuthService } from 'app/core/auth/auth.service';
 import { GroupCallModalComponent } from '../group-call-modal/group-call-modal.component';
 import { HomePageComponent } from '../home-page/home-page.component';
+import { ConfirmationModalComponent } from '@shared/components/confirmation-modal/confirmation-modal.component';
+import { WhaleSignalMethods, WhaleSignalService } from 'app/core/services';
 import { BlobService } from 'app/core/services/blob.service';
 
 @Component({
@@ -39,7 +45,8 @@ import { BlobService } from 'app/core/services/blob.service';
   templateUrl: './group-chat.component.html',
   styleUrls: ['./group-chat.component.sass'],
 })
-export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
+export class GroupChatComponent
+  implements OnInit, OnChanges, OnDestroy, AfterViewInit, AfterViewChecked {
   private hubConnection: HubConnection;
   counter = 0;
   private receivedMsg = new Subject<GroupMessage>();
@@ -47,7 +54,12 @@ export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
 
   private unsubscribe$ = new Subject<void>();
   @Input() groupSelected: Group;
+  @Input() loggedInUser: User;
   @Output() chat: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @ViewChild('chatWindow', { static: false }) chatBlock: ElementRef<
+    HTMLElement
+  >;
+  chatElement: any;
   newUserInGroup: GroupUser = {
     userEmail: '',
     groupId: this.groupSelected?.id,
@@ -67,6 +79,7 @@ export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
   };
   constructor(
     private signalRService: SignalRService,
+    private whaleSignalrService: WhaleSignalService,
     private httpService: HttpService,
     private toastr: ToastrService,
     private simpleModalService: SimpleModalService,
@@ -75,6 +88,24 @@ export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
     private homePageComponent: HomePageComponent,
     private blobService: BlobService
   ) {}
+
+  ngAfterViewInit(): void {
+    this.chatElement = this.chatBlock.nativeElement;
+  }
+
+  ngAfterViewChecked(): void {
+    this.scrollDown();
+  }
+
+  scrollDown(): void {
+    const chatHtml = this.chatElement as HTMLElement;
+    const isScrolledToBottom =
+      chatHtml.scrollHeight - chatHtml.clientHeight > chatHtml.scrollTop;
+
+    if (isScrolledToBottom)
+      chatHtml.scrollTop = chatHtml.scrollHeight - chatHtml.clientHeight;
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
     this.isMembersVisible = false;
     this.upstateSevice
@@ -90,7 +121,6 @@ export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
         (data: GroupMessage[]) => {
           this.messages = data;
           this.isMessagesLoading = false;
-          console.log('messages new');
         },
         (error) => console.log(error)
       );
@@ -230,6 +260,34 @@ export class GroupChatComponent implements OnInit, OnChanges, OnDestroy {
           this.toastr.success('User added successfuly');
         }
       });
+  }
+  public deleteUserFromGroup(user: User): void {
+    this.simpleModalService
+      .addModal(ConfirmationModalComponent, {
+        message: `Are you sure want to delete ${user.firstName}  ${user.secondName} from the group ${this.groupSelected.label}?`,
+      })
+      .subscribe((t) => {
+        if (t) {
+          this.groupService
+            .leaveGroup(this.groupSelected.id, user.email)
+            .subscribe(
+              () => {
+                this.removeUser(user.id);
+                this.toastr.success(
+                  `You successfully deleted ${user.firstName} ${user.secondName} from the group "${this.groupSelected.label}"`
+                );
+                this.whaleSignalrService.invoke(
+                  WhaleSignalMethods.OnRemovedFromGroup,
+                  { groupId: this.groupSelected.id, userEmail: user.email }
+                );
+              },
+              (error) => this.toastr.error(error.Message)
+            );
+        }
+      });
+  }
+  removeUser(userId: string) {
+    this.groupMembers = this.groupMembers.filter((c) => c.id !== userId);
   }
   returnCorrectLink(user: User): string {
     return user?.avatarUrl.startsWith('http') ||

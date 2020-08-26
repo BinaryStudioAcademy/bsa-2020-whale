@@ -7,6 +7,7 @@ import {
   EventEmitter,
   OnDestroy,
   Inject,
+  AfterViewChecked,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
@@ -55,7 +56,8 @@ import { RecordModalComponent } from '../record-modal/record-modal.component';
   templateUrl: './meeting.component.html',
   styleUrls: ['./meeting.component.sass'],
 })
-export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
+export class MeetingComponent
+  implements OnInit, AfterViewInit, OnDestroy, AfterViewChecked {
   //#region fields
   public canvasIsDisplayed: boolean = false;
   public canvasOptions: CanvasWhiteboardOptions = {
@@ -106,11 +108,16 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public pollService: PollService;
   public receiveingDrawings: boolean = false;
   public isSharing: boolean = false;
+  private sdpVideoBandwidth = 250;
+
   @ViewChild('currentVideo') private currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
     HTMLElement
   >;
-  private currentUserStream: MediaStream;
+  @ViewChild('meetingChat', { static: false }) private chatBlock: ElementRef<
+    HTMLElement
+  >;
+  private chatElement: any;
   private currentStreamLoaded = new EventEmitter<void>();
   private contectedAt = new Date();
   private elem: any;
@@ -119,6 +126,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     CanvasWhiteboardUpdate[]
   >();
   private unsubscribe$ = new Subject<void>();
+  userStream: MediaStream;
   //#endregion fields
 
   constructor(
@@ -144,6 +152,31 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       this.unsubscribe$
     );
   }
+  ngAfterViewChecked(): void {
+    if (this.isShowChat) this.chatElement = this.chatBlock.nativeElement;
+  }
+
+  //#region accessors
+  private set currentUserStream(value: MediaStream) {
+    if (this.userStream) {
+      this.meetingSignalrService.invoke(
+        SignalMethods.OnParticipantStreamChanged,
+        {
+          oldStreamId: this.userStream?.id,
+          newStreamId: value.id,
+          isVideoActive: value.getVideoTracks().some((vt) => vt.enabled),
+          isAudioActive: value.getAudioTracks().some((at) => at.enabled),
+        }
+      );
+    }
+
+    this.userStream = value;
+  }
+
+  private get currentUserStream() {
+    return this.userStream;
+  }
+  //#endregion accessors
 
   //#region hooks
   public async ngOnInit() {
@@ -232,7 +265,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
         }
 
         const disconectedMediaDataIndex = this.mediaData.findIndex(
-          (m) => m.stream.id == connectionData.participant.streamId
+          (m) => m.currentStreamId == connectionData.participant.streamId
         );
         if (disconectedMediaDataIndex) {
           this.mediaData.splice(disconectedMediaDataIndex, 1);
@@ -257,7 +290,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
         );
 
         const disconectedMediaDataIndex = this.mediaData.findIndex(
-          (m) => m.stream.id == participant.streamId
+          (m) => m.currentStreamId == participant.streamId
         );
         if (disconectedMediaDataIndex) {
           this.mediaData.splice(disconectedMediaDataIndex, 1);
@@ -279,6 +312,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe(
         (mediaData) => {
           console.log(mediaData);
+          console.log('stateChangedmediaDataId', mediaData.streamId);
           this.updateCardDynamicData(
             mediaData.streamId,
             mediaData.isAudioActive,
@@ -288,6 +322,40 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
         () => {
           this.toastr.error(
             'Error occured during participants media state updating'
+          );
+        }
+      );
+
+    this.meetingSignalrService.participantStreamChanged$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (streamChangedData) => {
+          console.log(
+            'streamChangedmediaDataId',
+            streamChangedData.newStreamId
+          );
+
+          const changedMediaData = this.mediaData.find(
+            (md) => md.currentStreamId === streamChangedData.oldStreamId
+          );
+          if (changedMediaData) {
+            const changedParticipant = this.meeting.participants.find(
+              (p) => p.streamId === streamChangedData.oldStreamId
+            );
+            if (changedParticipant) {
+              changedParticipant.streamId = streamChangedData.newStreamId;
+            }
+            changedMediaData.currentStreamId = streamChangedData.newStreamId;
+            this.updateCardDynamicData(
+              streamChangedData.newStreamId,
+              streamChangedData.isAudioActive,
+              streamChangedData.isVideoActive
+            );
+          }
+        },
+        () => {
+          this.toastr.error(
+            'Error occured during participants media stream changing'
           );
         }
       );
@@ -364,7 +432,11 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (erase) => {
-          if (erase) this.canvasWhiteboardService.clearCanvas();
+          if (erase) {
+            this.canvasWhiteboardService.clearCanvas();
+            this.savedStrokes = new Array<CanvasWhiteboardUpdate[]>();
+            this.receiveingDrawings = false;
+          }
         },
         () => {
           this.toastr.error('Error occured while trying to erase drawings');
@@ -411,7 +483,10 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       });
 
       // send mediaStream to caller
-      call.answer(this.currentUserStream);
+      call.answer(this.currentUserStream, {
+        sdpTransform: (sdp) =>
+          this.setMediaBitrate(sdp, 'video', this.sdpVideoBandwidth),
+      });
     });
 
     // show a warning dialog if close current tab or window
@@ -425,7 +500,6 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public ngAfterViewInit(): void {
     this.elem = this.mainArea.nativeElement;
-    console.log('elem', this.elem);
     console.log('currentVideo first', this.currentVideo);
     this.currentStreamLoaded.subscribe(() => {
       this.currentVideo.nativeElement.srcObject = this.currentUserStream;
@@ -499,7 +573,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public startRecording(): void {
     this.isScreenRecording = true;
-    
+
     this.blobService.startRecording().subscribe({
       complete: () => (this.isWaitingForRecord = false),
       next: (permited) => {
@@ -509,15 +583,19 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
             'Conference start recording'
           );
           this.toastr.info('Start recording a conference');
-          this.blobService.recordReady$.pipe(takeUntil(this.unsubscribe$)).pipe(first())
-                  .subscribe(
-                    (resp) => {
-                      this.simpleModalService.addModal(RecordModalComponent, { link: resp })
-                    },
-                    (err) => {
-                      console.log(err.message);
-                    }
-                  );
+          this.blobService.recordReady$
+            .pipe(takeUntil(this.unsubscribe$))
+            .pipe(first())
+            .subscribe(
+              (resp) => {
+                this.simpleModalService.addModal(RecordModalComponent, {
+                  link: resp,
+                });
+              },
+              (err) => {
+                console.log(err.message);
+              }
+            );
         } else {
           this.isScreenRecording = false;
         }
@@ -587,6 +665,15 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  scrollDown(): void {
+    const chatHtml = this.chatElement as HTMLElement;
+    const isScrolledToBottom =
+      chatHtml.scrollHeight - chatHtml.clientHeight > chatHtml.scrollTop;
+
+    if (isScrolledToBottom)
+      chatHtml.scrollTop = chatHtml.scrollHeight - chatHtml.clientHeight;
+  }
+
   public goFullscreen(): void {
     if (this.elem.requestFullscreen) {
       this.elem.requestFullscreen();
@@ -633,6 +720,8 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   private addParticipantToMeeting(participant: Participant): void {
     if (!this.meeting.participants.some((p) => p.id === participant.id)) {
       this.meeting.participants.push(participant);
+    }
+    if (!this.otherParticipants.some((p) => p.id === participant.id)) {
       this.otherParticipants.push(participant);
     }
   }
@@ -641,17 +730,14 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.meeting.participants = this.meeting.participants.filter(
       (p) => p.id !== participant.id
     );
-    this.otherParticipants = this.otherParticipants.filter(
-      (p) => p.id !== participant.id
-    );
-    this.newMsgFrom = this.newMsgFrom.filter(
-      (e) => e !== participant.user.email
-    );
   }
 
   // call to peer
   private connect(recieverPeerId: string) {
-    const call = this.peer.call(recieverPeerId, this.currentUserStream);
+    const call = this.peer.call(recieverPeerId, this.currentUserStream, {
+      sdpTransform: (sdp: string) =>
+        this.setMediaBitrate(sdp, 'video', this.sdpVideoBandwidth),
+    });
 
     // get answer and show other user
     call.on('stream', (stream) => {
@@ -753,9 +839,17 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
         ? this.currentUserStream
         : this.connectedStreams.find((s) => s.id === participant.streamId);
 
+    const audioContext = new AudioContext();
+    const mediaStreamSource = audioContext.createMediaStreamSource(stream);
+    const processor = audioContext.createScriptProcessor(256, 1, 1);
+    mediaStreamSource.connect(audioContext.destination);
+    mediaStreamSource.connect(processor);
+    processor.connect(audioContext.destination);
+
     var newMediaData = {
       id: participant.id,
       isCurrentUser: participant.id === this.currentParticipant.id,
+      currentStreamId: stream.id,
       stream: stream,
       dynamicData: new BehaviorSubject<ParticipantDynamicData>({
         isUserHost: participant.role == ParticipantRole.Host,
@@ -771,6 +865,18 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
             ? this.currentUserStream.getAudioTracks().some((at) => at.enabled)
             : true,
       }),
+      volume: 0,
+    };
+
+    processor.onaudioprocess = (e) => {
+      const inputData = e.inputBuffer.getChannelData(0);
+      const inputDataLength = inputData.length;
+      let total = 0;
+
+      for (let i = 0; i < inputDataLength; i++) {
+        total += Math.abs(inputData[i++]);
+      }
+      newMediaData.volume = Math.sqrt(total / inputDataLength) * 100;
     };
 
     shouldPrepend
@@ -808,13 +914,19 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     isAudioActive: boolean,
     isVideoActive: boolean
   ) {
+    console.log('streamId', streamId);
+    console.log('participants', this.meeting.participants);
+    console.log('mediass', this.mediaData);
     const participant =
       this.currentParticipant.streamId === streamId
         ? this.currentParticipant
         : this.meeting.participants.find((p) => p.streamId === streamId);
     const changedMediaData = this.mediaData.find(
-      (s) => s.stream.id === streamId
+      (s) => s.currentStreamId === streamId
     );
+
+    console.log('participant', participant);
+    console.log('media', changedMediaData);
 
     if (!changedMediaData || !participant) {
       return;
@@ -850,6 +962,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       } as MeetingMessageCreate);
 
       this.msgText = '';
+      this.scrollDown();
     }
   }
 
@@ -908,70 +1021,59 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   public async changeStateVideo(event: any) {
     this.mediaSettingsService.changeVideoDevice(event);
     this.currentUserStream.getVideoTracks()?.forEach((track) => track.stop());
-    this.currentUserStream = await navigator.mediaDevices.getUserMedia({
-      video: { deviceId: event },
-      audio: false,
-    });
+    this.currentUserStream = await navigator.mediaDevices.getUserMedia(
+      await this.mediaSettingsService.getMediaConstraints()
+    );
     this.handleSuccessVideo(this.currentUserStream);
     document.querySelector('video').srcObject = this.currentUserStream;
     this.isAudioSettings = false;
     this.isVideoSettings = false;
   }
 
-  private async handleSuccessVideo(stream: MediaStream): Promise<void> {
-    const videoTrack = stream.getVideoTracks()[0];
+  async handleSuccessVideo(stream: MediaStream): Promise<void> {
+    const video = document.querySelector('video');
+    video.srcObject = stream;
     const keys = Object.keys(this.peer.connections);
     const peerConnection = this.peer.connections[keys[0]];
-    if (peerConnection !== undefined) {
-      peerConnection.forEach((pc) => {
-        const sender = pc.peerConnection.getSenders().find((s) => {
-          return s.track.kind === videoTrack.kind;
-        });
-        sender.replaceTrack(videoTrack);
+    const videoTrack = stream.getVideoTracks()[0];
+    peerConnection.forEach((pc) => {
+      const sender = pc.peerConnection.getSenders().find((s) => {
+        return s.track.kind === videoTrack.kind;
       });
-    }
-    this.currentUserStream.getVideoTracks().forEach((vt) => {
-      this.currentUserStream.removeTrack(vt);
+      sender.replaceTrack(videoTrack);
     });
-    this.currentUserStream.addTrack(videoTrack);
   }
 
   public async changeInputDevice(deviceId: string) {
     this.mediaSettingsService.changeInputDevice(deviceId);
-    const newAudioStream = await navigator.mediaDevices.getUserMedia({
-      video: false,
-      audio: { deviceId: deviceId },
-    });
-    this.handleSuccess(newAudioStream);
+    this.currentUserStream = await navigator.mediaDevices.getUserMedia(
+      await this.mediaSettingsService.getMediaConstraints()
+    );
+    this.handleSuccessAudio(this.currentUserStream);
     this.isAudioSettings = false;
     this.isVideoSettings = false;
   }
 
-  public async changeOutputDevice(deviceId: string) {
-    const videos = document.querySelectorAll('video');
-    console.log(videos);
-    this.mediaSettingsService.changeOutputDevice(deviceId);
-    videos.forEach((video) => {
-      this.mediaSettingsService.attachSinkId(video, deviceId);
-    });
-    this.isAudioSettings = false;
-    this.isVideoSettings = false;
-  }
-
-  private async handleSuccess(stream: MediaStream): Promise<void> {
-    const audioTrack = stream.getAudioTracks()[0];
+  private async handleSuccessAudio(stream): Promise<void> {
+    const audio = document.querySelector('audio');
+    audio.srcObject = stream;
     const keys = Object.keys(this.peer.connections);
     const peerConnection = this.peer.connections[keys[0]];
+    const audioTrack = stream.getAudioTracks()[0];
     peerConnection.forEach((pc) => {
       const sender = pc.peerConnection.getSenders().find((s) => {
         return s.track.kind === audioTrack.kind;
       });
       sender.replaceTrack(audioTrack);
     });
-    this.currentUserStream.getAudioTracks().forEach((at) => {
-      this.currentUserStream.removeTrack(at);
-    });
-    this.currentUserStream.addTrack(audioTrack);
+  }
+
+  public async changeOutputDevice(deviceId: string) {
+    const audio = document.querySelector('audio');
+    this.mediaSettingsService.changeOutputDevice(deviceId);
+    this.mediaSettingsService.attachSinkId(audio, deviceId);
+    this.isAudioSettings = false;
+    this.isVideoSettings = false;
   }
 
   public showAudioSettings(): void {
@@ -1035,7 +1137,7 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
-  public updateSelectedMessages(): void {
+  public async updateSelectedMessages(): Promise<void> {
     if (this.msgReceiverEmail === '') {
       this.selectedMessages = this.messages.filter((m) => m.receiver == null);
     } else {
@@ -1046,6 +1148,8 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
             m?.author?.email === this.msgReceiverEmail)
       );
     }
+    await this.delay(50);
+    this.scrollDown();
   }
 
   public notifyNewMsg(msg: MeetingMessage): void {
@@ -1105,5 +1209,31 @@ export class MeetingComponent implements OnInit, AfterViewInit, OnDestroy {
     document.querySelector('video').srcObject = this.currentUserStream;
     this.isSharing = false;
     this.toastr.info('Stop sharing screen');
+  }
+
+  setMediaBitrate(sdp: string, media: string, bitrate: number): string {
+    const lines = sdp.split('\n');
+    let line = -1;
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].indexOf('m=' + media) === 0) {
+        line = i;
+        break;
+      }
+    }
+    if (line === -1) {
+      return sdp;
+    }
+    line++;
+    while (lines[line].indexOf('i=') === 0 || lines[line].indexOf('c=') === 0) {
+      line++;
+    }
+    if (lines[line].indexOf('b') === 0) {
+      lines[line] = 'b=AS:' + bitrate;
+      return lines.join('\n');
+    }
+    let newLines = lines.slice(0, line);
+    newLines.push('b=AS:' + bitrate);
+    newLines = newLines.concat(lines.slice(line, lines.length));
+    return newLines.join('\n');
   }
 }
