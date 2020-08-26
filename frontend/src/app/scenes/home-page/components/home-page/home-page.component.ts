@@ -18,6 +18,7 @@ import { WhaleSignalService } from 'app/core/services/whale-signal.service';
 import { UserOnline } from '@shared/models/user/user-online';
 import { UpstateService } from 'app/core/services/upstate.service';
 import { ContactService } from 'app/core/services';
+import { MessageService } from 'app/core/services/message.service';
 import { ConfirmationModalComponent } from '@shared/components/confirmation-modal/confirmation-modal.component';
 import { group } from 'console';
 
@@ -57,8 +58,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
     private groupService: GroupService,
     private upstateService: UpstateService,
     private whaleSignalrService: WhaleSignalService,
-    private contactService: ContactService
-  ) {}
+    private contactService: ContactService,
+    private messageService: MessageService
+  ) {
+    console.log(messageService.creationDate);
+  }
 
   ngOnDestroy(): void {
     this.unsubscribe$.next();
@@ -80,6 +84,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
             .subscribe(
               (data: Contact[]) => {
                 this.contacts = data;
+                console.log(data);
                 this.onContactsClick();
 
                 this.whaleSignalrService.signalUserConected$

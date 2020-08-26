@@ -28,13 +28,26 @@ namespace Whale.API.Controllers
             return Ok(messages);
         }
 
+        [HttpGet("withUnread/{contactDTOId}")]
+        [AllowAnonymous]
+        public async Task<ActionResult<ICollection<DirectMessageDTO>>> Get(Guid contactDTOId, Guid userId)
+        {
+            var messages = await _chatService.GetReadAndUnreadAsync(contactDTOId, userId);
+            return Ok(messages);
+        }
+
         [HttpPost]
         public async Task<ActionResult<DirectMessageDTO>> CreateDirectMessage([FromBody] DirectMessageCreateDTO dto)
         {
             return Ok(await _chatService.CreateDirectMessage(dto));
         }
 
-
+        [HttpPost("markRead")]
+        public async Task<OkResult> MarkMessageAsRead([FromBody] UnreadMessageIdDTO unreadMessageIdDto)
+        {
+            await _chatService.MarkMessageAsRead(unreadMessageIdDto);
+            return Ok();
+        }
     }
 }
 
