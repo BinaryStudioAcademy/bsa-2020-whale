@@ -39,6 +39,7 @@ import { HomePageComponent } from '../home-page/home-page.component';
 import { ConfirmationModalComponent } from '@shared/components/confirmation-modal/confirmation-modal.component';
 import { WhaleSignalMethods, WhaleSignalService } from 'app/core/services';
 import { BlobService } from 'app/core/services/blob.service';
+import { EditGroupInfoModalComponent } from '../edit-group-info-modal/edit-group-info-modal.component';
 
 @Component({
   selector: 'app-group-chat',
@@ -56,6 +57,7 @@ export class GroupChatComponent
   @Input() groupSelected: Group;
   @Input() loggedInUser: User;
   @Output() chat: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() groupUpdated: EventEmitter<Group> = new EventEmitter<Group>();
   @ViewChild('chatWindow', { static: false }) chatBlock: ElementRef<
     HTMLElement
   >;
@@ -219,25 +221,33 @@ export class GroupChatComponent
   }
 
   public leaveGroup(): void {
-    if (
-      confirm(
-        'Are you sure want to leave the group ' + this.groupSelected.label + '?'
-      )
-    ) {
-      this.groupService
-        .leaveGroup(this.groupSelected.id, this.currentUser.email)
-        .subscribe(
-          () => {
-            this.toastr.success(
-              `You successfully left the group "${this.groupSelected.label}"`
-            );
-          },
-          (error) => this.toastr.error(error.Message)
-        );
+    if (this.groupSelected.creatorEmail === this.currentUser.email) {
+      this.toastr.error(
+        'You cannot leave the group because you are administrator. Please, assign someone else to this role.'
+      );
+    } else {
+      if (
+        confirm(
+          'Are you sure want to leave the group ' +
+            this.groupSelected.label +
+            '?'
+        )
+      ) {
+        this.groupService
+          .leaveGroup(this.groupSelected.id, this.currentUser.email)
+          .subscribe(
+            () => {
+              this.toastr.success(
+                `You successfully left the group "${this.groupSelected.label}"`
+              );
+            },
+            (error) => this.toastr.error(error.Message)
+          );
 
-      this.hubConnection?.invoke('LeaveGroup', this.groupSelected.id);
-      this.close();
-      this.homePageComponent.leftGroup(this.groupSelected);
+        this.hubConnection?.invoke('LeaveGroup', this.groupSelected.id);
+        this.close();
+        this.homePageComponent.leftGroup(this.groupSelected);
+      }
     }
   }
 
@@ -298,11 +308,27 @@ export class GroupChatComponent
   public splitMessage(message: string) {
     return message.split(/\n/gi);
   }
+
   public isImageHere(): boolean {
     return (
       this.groupSelected.photoUrl !== null &&
       this.groupSelected.photoUrl !== undefined &&
       this.groupSelected.photoUrl !== ''
     );
+  }
+
+  public editGroupInfo() {
+    this.simpleModalService
+      .addModal(EditGroupInfoModalComponent, this.groupSelected)
+      .subscribe(
+        (group) => {
+          if (group !== undefined) {
+            this.groupSelected = group;
+            this.groupUpdated.emit(this.groupSelected);
+            console.log(this.groupSelected);
+          }
+        },
+        (error) => this.toastr.error(error)
+      );
   }
 }

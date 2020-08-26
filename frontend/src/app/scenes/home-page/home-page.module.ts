@@ -16,6 +16,7 @@ import { GroupCallModalComponent } from './components/group-call-modal/group-cal
 import { HighlightCreatorDirective } from './directives/highlight-creator.directive';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ImageCropperModule } from 'ngx-image-cropper';
+import { EditGroupInfoModalComponent } from './components/edit-group-info-modal/edit-group-info-modal.component';
 
 @NgModule({
   declarations: [
@@ -30,6 +31,7 @@ import { ImageCropperModule } from 'ngx-image-cropper';
     AddUserToGroupModalComponent,
     GroupCallModalComponent,
     HighlightCreatorDirective,
+    EditGroupInfoModalComponent,
   ],
   imports: [
     CommonModule,

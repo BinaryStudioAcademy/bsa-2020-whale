@@ -422,6 +422,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
       group.photoUrl !== ''
     );
   }
+  updateGroup(event) {
+    const updateItem = this.groups.find((x) => x.id === event.id);
+    const index = this.groups.indexOf(updateItem);
+    this.groups[index] = event;
+  }
 }
 export interface UserModel {
   id: number;
