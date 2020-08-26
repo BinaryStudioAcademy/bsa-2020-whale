@@ -14,6 +14,8 @@ services:
     environment:
       ConnectionStrings:WhaleDatabase: ${WhaleDBConnectionString}
       BlobStorageSettings:ConnectionString: ${WhaleBlobStorageConnectionString}
+      WhaleSlackBotToken: ${WhaleSlackBotToken}
+      WhaleSendGridApiKey: ${WhaleSendGridApiKey}
       MeetingAPI: "http://meetingapi:4202"
       SignalR: "http://hubs:4203"
       ElasticConfiguration:Uri: "http://elasticsearch:9200"
