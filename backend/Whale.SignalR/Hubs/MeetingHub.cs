@@ -11,6 +11,11 @@ using Whale.Shared.Models.Poll;
 using Whale.SignalR.Models.Drawing;
 using Whale.SignalR.Models.Media;
 using Whale.DAL.Models;
+using shortid;
+using Whale.Shared.Exceptions;
+using Whale.SignalR.Services;
+using Whale.DAL.Models.Poll;
+using Whale.SignalR.Models.Room;
 
 namespace Whale.SignalR.Hubs
 {
@@ -18,28 +23,70 @@ namespace Whale.SignalR.Hubs
     {
         private readonly MeetingService _meetingService;
         private readonly ParticipantService _participantService;
+        private readonly RedisService _redisService;
+        private readonly UserService _userService;
+        private readonly RoomService _roomService;
+        private readonly MeetingHttpService _meetingHttpService;
         private readonly static Dictionary<string, List<ParticipantDTO>> _groupsParticipants = 
             new Dictionary<string, List<ParticipantDTO>>();
 
-        public MeetingHub(MeetingService meetingService, ParticipantService participantService)
+        public MeetingHub(MeetingService meetingService, 
+            ParticipantService participantService, 
+            RedisService redisService, 
+            UserService userService, 
+            RoomService roomService,
+            MeetingHttpService meetingHttpService)
         {
             _meetingService = meetingService;
             _participantService = participantService;
+            _redisService = redisService;
+            _userService = userService;
+            _roomService = roomService;
+            _meetingHttpService = meetingHttpService;
         }
 
         [HubMethodName("OnUserConnect")]
         public async Task Join(MeetingConnectDTO connectionData)
         {
+            ParticipantDTO participant;
+            if (connectionData.IsRoom)
+            {
+                await _redisService.ConnectAsync();
+                if (await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(connectionData.MeetingId) is null) throw new NotFoundException("Room");
+                
+                participant = new ParticipantDTO
+                {
+                    Id = Guid.NewGuid(),
+                    ActiveConnectionId = "",
+                    Role =_groupsParticipants.Any(g => g.Value.Any(p => p.User.Email == connectionData.UserEmail && p.Role == ParticipantRole.Host)) ? ParticipantRole.Host : ParticipantRole.Participant,
+                    StreamId = "",
+                    User = await _userService.GetUserByEmail(connectionData.UserEmail),
+                    Meeting = null
+                };
+            }
+            else
+            {
+                participant = await _participantService.GetMeetingParticipantByEmail(
+                    Guid.Parse(connectionData.MeetingId), connectionData.UserEmail);
+            }
+
             await Groups.AddToGroupAsync(Context.ConnectionId, connectionData.MeetingId);
-            var participant = await _participantService.GetMeetingParticipantByEmail(
-                Guid.Parse(connectionData.MeetingId), connectionData.UserEmail);
+
             participant.StreamId = connectionData.StreamId;
             connectionData.Participant = participant;
             connectionData.Participant.ActiveConnectionId = Context.ConnectionId;
 
             if (_groupsParticipants.TryGetValue(connectionData.MeetingId, out var groupParticipants))
             {
-                groupParticipants.Add(participant);
+                var existingParticipant = groupParticipants.FirstOrDefault(p => p.User.Id == participant.User.Id);
+                if (existingParticipant is null)
+                {
+                    groupParticipants.Add(participant);
+                } else
+                {
+                    var participantIndex = groupParticipants.IndexOf(existingParticipant);
+                    groupParticipants[participantIndex] = participant;
+                }
             }
             else
             {
@@ -63,6 +110,10 @@ namespace Whale.SignalR.Hubs
                 _groupsParticipants[group.Key].Remove(disconnectedParticipant);
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, group.Key);
                 await Clients.Group(group.Key).SendAsync("OnParticipantDisconnected", disconnectedParticipant);
+                if(group.Value.Count <= 0)
+                {
+                    await this.DeleteMeeting(group.Key);
+                }
             }
 
             await base.OnDisconnectedAsync(exception);
@@ -71,13 +122,23 @@ namespace Whale.SignalR.Hubs
         [HubMethodName("OnParticipantLeft")]
         public async Task ParticipantLeft(MeetingConnectDTO ConnectionData)
         {
-            var disconnectedParticipant = _groupsParticipants[ConnectionData.MeetingId]
-                .Find(p => p.Id == ConnectionData.Participant.Id);
+            var disconectedParticipantInGroups = _groupsParticipants
+                    .Where(g => g.Value.Any(p => p.ActiveConnectionId == Context.ConnectionId))
+                    .ToList();
 
-            ConnectionData.Participant = disconnectedParticipant;
-            _groupsParticipants[ConnectionData.MeetingId].Remove(disconnectedParticipant);
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, ConnectionData.MeetingId);
-            await Clients.Group(ConnectionData.MeetingId).SendAsync("OnParticipantLeft", ConnectionData);
+            foreach (var group in disconectedParticipantInGroups)
+            {
+                var disconnectedParticipant = group.Value.Find(p => p.ActiveConnectionId == Context.ConnectionId);
+
+                ConnectionData.Participant = disconnectedParticipant;
+                _groupsParticipants[group.Key].Remove(disconnectedParticipant);
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, group.Key);
+                await Clients.Group(group.Key).SendAsync("OnParticipantLeft", ConnectionData);
+                if (group.Value.Count <= 0)
+                {
+                    await this.DeleteMeeting(group.Key);
+                }
+            }
         }
 
 
@@ -218,11 +279,88 @@ namespace Whale.SignalR.Hubs
             await Clients.GroupExcept(drawingDTO.MeetingId, new List<string> { Context.ConnectionId })
                 .SendAsync("OnErasing", drawingDTO.Erase);
         }
+
+        [HubMethodName("CreateRoom")]
+        public async Task CreateRoom(RoomCreateDTO roomCreateData)
+        {
+            var participantHost = _groupsParticipants[roomCreateData.MeetingId]?.FirstOrDefault(p => p.ActiveConnectionId == Context.ConnectionId);
+            if (participantHost?.Role == ParticipantRole.Participant) return;
+
+            var roomId = Guid.NewGuid().ToString();
+            await _redisService.ConnectAsync();
+            await _redisService.SetAsync(roomId, new MeetingMessagesAndPasswordDTO { Password = "", IsRoom = true });
+            var meeetingData = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(roomCreateData.MeetingId);
+            meeetingData.RoomsIds.Add(roomId);
+            await _redisService.SetAsync(roomCreateData.MeetingId, meeetingData);
+
+            _groupsParticipants.Add(roomId, new List<ParticipantDTO>());
+
+            await Clients.Caller.SendAsync("OnRoomCreatedToHost", new RoomDTO { RoomId = roomId, ParticipantsIds = roomCreateData.ParticipantsIds});
+
+            var participants = _groupsParticipants[roomCreateData.MeetingId]
+                    .Where(p => roomCreateData.ParticipantsIds.Contains(p.Id.ToString()))
+                    .Select(p => p.ActiveConnectionId)
+                    .ToList();
+
+            await Clients.Clients(participants).SendAsync("OnRoomCreated", roomId);
+
+            _roomService.CloseRoomAfterTimeExpire(roomCreateData.Duration, roomCreateData.MeetingLink, roomId, _groupsParticipants);
+        }
+
+        [HubMethodName("OnMoveIntoRoom")]
+        public async Task OnMoveIntoRoom(MeetingConnectDTO connectionData)
+        {
+            var disconnectedParticipant = _groupsParticipants[connectionData.MeetingId]
+                                            .Find(p => p.User.Email == connectionData.UserEmail);
+            connectionData.Participant = disconnectedParticipant;
+
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, connectionData.MeetingId);
+            await Clients.Group(connectionData.MeetingId).SendAsync("onParticipentMoveIntoRoom", connectionData);
+        }
+
+        [HubMethodName("GetCreatedRooms")]
+        public async Task<ICollection<RoomDTO>> GetCreatedRooms(string meetingId)
+        {
+            var participantHost = _groupsParticipants[meetingId]?.FirstOrDefault(p => p.ActiveConnectionId == Context.ConnectionId);
+            if (participantHost?.Role == ParticipantRole.Participant) throw new InvalidCredentials();
+
+            await _redisService.ConnectAsync();
+            var roomsIds = (await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(meetingId)).RoomsIds;
+            var rooms = new List<RoomDTO>();
+            var participants = _groupsParticipants[meetingId]?.ToList();
+
+            foreach(var id in roomsIds)
+            {
+                rooms.Add(new RoomDTO
+                {
+                    RoomId = id,
+                    ParticipantsIds = _groupsParticipants[id]?.Select(p =>
+                         participants.FirstOrDefault(pp => pp?.User?.Email == p?.User?.Email)?.Id.ToString() // because in participant has diferent ids in rooms and meetings
+                    ).Where(p => p != null).ToList()
+                });
+            }
+
+            return rooms;
+        }
+
+        private async Task DeleteMeeting(string meetingId)
+        {
+            await _redisService.ConnectAsync();
+            var redisDto = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(meetingId);
+            if (!redisDto.IsRoom)
+            {
+                _groupsParticipants.Remove(meetingId);
+                await _meetingService.EndMeeting(Guid.Parse(meetingId));
+                await _meetingHttpService.DeleteMeetingPolls(meetingId);
+            }
+        }
+
         [HubMethodName("OnStartShareScreen")]
         public async Task OnStartShare(ShareScreenDTO share)
         {
             await Clients.Group(share.meetingId).SendAsync("OnStartShareScreen",share.streamId);
         }
+
         [HubMethodName("OnStopShareScreen")]
         public async Task OnStopShare(string meetingId)
         {

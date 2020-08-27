@@ -7,4 +7,5 @@ export interface MeetingConnectionData {
   meetingId: string;
   meetingPwd: string;
   participant: Participant;
+  isRoom: boolean;
 }
