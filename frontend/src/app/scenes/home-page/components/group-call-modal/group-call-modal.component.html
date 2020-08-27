@@ -6,16 +6,19 @@
   <div class="ui mini modal visible active" (click)="$event.stopPropagation()">
     <div class="header">Calling to {{ label }} group</div>
     <div class="content">
-      <div class="ui floating message" *ngIf="!isAnyoneThere">
+      <div class="ui floating message" *ngIf="!isAnyoneThere && !isAllRejected">
         Seems noone has joined the call...
       </div>
+      <div class="ui floating message" *ngIf="isAllRejected && isAnyoneThere">
+        All members rejected the call
+      </div>
       <img
-        *ngIf="isImageHere() && isAnyoneThere"
+        *ngIf="isImageHere() && isAnyoneThere && !isAllRejected"
         class="ui avatar image"
         src="{{ photoUrl }}"
       />
       <img
-        *ngIf="!isImageHere() && isAnyoneThere"
+        *ngIf="!isImageHere() && isAnyoneThere && !isAllRejected"
         class="ui avatar image"
         src="assets/img/user-group-icon.png"
       />
