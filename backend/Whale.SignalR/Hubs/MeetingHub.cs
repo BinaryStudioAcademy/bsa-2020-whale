@@ -288,6 +288,8 @@ namespace Whale.SignalR.Hubs
             meeetingData.RoomsIds.Add(roomId);
             await _redisService.SetAsync(roomCreateData.MeetingId, meeetingData);
 
+            _groupsParticipants.Add(roomId, new List<ParticipantDTO>());
+
             await Clients.Caller.SendAsync("OnRoomCreatedToHost", new RoomDTO { RoomId = roomId, ParticipantsIds = roomCreateData.ParticipantsIds});
 
             var participants = _groupsParticipants[roomCreateData.MeetingId]
