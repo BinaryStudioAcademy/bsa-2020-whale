@@ -14,6 +14,8 @@ using Whale.Shared.Models.Group;
 using Whale.Shared.Models.Group.GroupUser;
 using Whale.Shared.Models.User;
 using Microsoft.AspNetCore.SignalR.Client;
+using Whale.Shared.Extentions;
+using Whale.DAL.Settings;
 
 namespace Whale.Shared.Services
 {
@@ -21,10 +23,12 @@ namespace Whale.Shared.Services
     {
         private UserService _userService;
         private SignalrService _signalrService;
-        public GroupService(WhaleDbContext context, IMapper mapper, UserService userService, SignalrService signalrService) : base(context, mapper)
+        private readonly BlobStorageSettings _blobStorageSettings;
+        public GroupService(WhaleDbContext context, IMapper mapper, UserService userService, SignalrService signalrService, BlobStorageSettings blobStorageSettings) : base(context, mapper)
         {
-            this._userService = userService;
-            this._signalrService = signalrService;
+            _userService = userService;
+            _signalrService = signalrService;
+            _blobStorageSettings = blobStorageSettings;
         }
         public async Task<IEnumerable<GroupDTO>> GetAllGroupsAsync(string userEmail)
         {
@@ -184,10 +188,11 @@ namespace Whale.Shared.Services
                 .Select(g => g.User)
                 .ToListAsync();
 
+
             if (users is null)
                 throw new Exception("No users in group");
 
-            return _mapper.Map<IEnumerable<UserDTO>>(users);
+            return _mapper.Map<IEnumerable<UserDTO>>(await users.LoadAvatarsAsync(_blobStorageSettings));
         }
 
         public async Task<GroupUserDTO> AddUserToGroupAsync(GroupUserCreateDTO groupUser)
@@ -218,7 +223,7 @@ namespace Whale.Shared.Services
 
             var connection = await _signalrService.ConnectHubAsync("whale");
             await connection.InvokeAsync("OnNewGroup", groupDTO, user.Id);
-
+            newUserInGroup.User = await newUserInGroup.User.LoadAvatarAsync(_blobStorageSettings);
             return _mapper.Map<GroupUserDTO>(newUserInGroup);
         }
 
