@@ -153,6 +153,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
                   .subscribe(
                     (contact) => {
                       this.contactAdd(contact);
+                      this.messageService.joinGroup(contact.id);
                     },
                     (err) => {
                       console.log(err.message);
@@ -379,6 +380,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
         });
       return;
     }
+
+    if (contact == this.contactSelected) {
+      return;
+    }
+
     this.falseAllBooleans();
     this.groupSelected = undefined;
     this.contactSelected = contact;
