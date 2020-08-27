@@ -68,7 +68,7 @@ export class AddUserToGroupModalComponent
               !this.participantsEmails.find((e) => e === c.secondMember.email)
           );
           this.contacts = Array.from(filteredGroups);
-          this.contacts = Array.from(filteredGroups);
+          this.cachedContacts = Array.from(filteredGroups);
         },
         (error) => {
           console.error(error);
