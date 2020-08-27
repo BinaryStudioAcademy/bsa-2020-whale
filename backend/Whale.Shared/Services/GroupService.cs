@@ -21,10 +21,12 @@ namespace Whale.Shared.Services
     {
         private UserService _userService;
         private SignalrService _signalrService;
-        public GroupService(WhaleDbContext context, IMapper mapper, UserService userService, SignalrService signalrService) : base(context, mapper)
+        private NotificationsService _notificationsService;
+        public GroupService(WhaleDbContext context, IMapper mapper, UserService userService, SignalrService signalrService, NotificationsService notificationsService) : base(context, mapper)
         {
             this._userService = userService;
             this._signalrService = signalrService;
+            _notificationsService = notificationsService;
         }
         public async Task<IEnumerable<GroupDTO>> GetAllGroupsAsync(string userEmail)
         {
@@ -88,6 +90,9 @@ namespace Whale.Shared.Services
             if (userInGroup is null)
                 throw new NotFoundException("User in group", updateGroup.CreatorEmail);
 
+            var isAdminChanged = group.CreatorEmail != updateGroup.CreatorEmail;
+            Console.WriteLine("check" + isAdminChanged);
+
             group.CreatorEmail = updateGroup.CreatorEmail;
             group.Label = updateGroup.Label;
             group.Description = updateGroup.Description;
@@ -95,6 +100,9 @@ namespace Whale.Shared.Services
 
             _context.Groups.Update(group);
             await _context.SaveChangesAsync();
+
+            if (isAdminChanged)
+                await _notificationsService.AddTextNotification(group.CreatorEmail, $"You become an administrator of {group.Label} group");
 
             return await GetGroupAsync(group.Id);
         }
