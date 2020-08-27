@@ -542,6 +542,9 @@ export class MeetingComponent
       });
     });
 
+    if (this.mediaSettingsService.settings.IsMirrorVideo) {
+      this.currentVideo.nativeElement.style.transform = 'scale(-1,1)';
+    }
     // show a warning dialog if close current tab or window
     window.onbeforeunload = function (ev: BeforeUnloadEvent) {
       ev.preventDefault();
