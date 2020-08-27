@@ -185,7 +185,7 @@ export class MeetingComponent
   //#region hooks
   public async ngOnInit() {
     this.currentUserStream = await navigator.mediaDevices.getUserMedia(
-       await this.mediaSettingsService.getMediaConstraints()
+      await this.mediaSettingsService.getMediaConstraints()
     );
     const settings = this.currentUserStream.getVideoTracks()[0].getSettings();
     settings.frameRate = 20;
@@ -711,7 +711,8 @@ export class MeetingComponent
   public leave(): void {
     //this is made to remove eventListener for other routes
     window.onbeforeunload = function () {};
-
+    this.meter.stopListening();
+    this.meter.disconnect();
     this.router.navigate(['/home']);
   }
 
