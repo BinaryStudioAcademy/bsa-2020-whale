@@ -26,6 +26,7 @@ export class MeetingInviteComponent
   public formSearch: FormGroup;
 
   public isLoading = false;
+  public isContactsLoading = false;
 
   meetingId: string;
   senderId: string;
@@ -47,6 +48,7 @@ export class MeetingInviteComponent
   }
 
   public getContacts(): void {
+    this.isContactsLoading = true;
     this.httpService
       .getRequest<Contact[]>(environment.apiUrl + '/api/Contacts/accepted')
       .subscribe(
@@ -60,9 +62,11 @@ export class MeetingInviteComponent
           );
           this.contacts = Array.from(filteredContacts);
           this.cachedContacts = Array.from(filteredContacts);
+          this.isContactsLoading = false;
         },
         (error) => {
           console.error(error);
+          this.isContactsLoading = false;
         }
       );
   }
