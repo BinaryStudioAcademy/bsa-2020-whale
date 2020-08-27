@@ -209,12 +209,6 @@ export class ProfilePageComponent implements OnInit {
     );
   }
 
-  private randomColor(): string {
-    const randomColor = Math.floor(Math.random() * 16777215).toString(16);
-
-    return `#${randomColor}`;
-  }
-
   private hasSecondName(): boolean {
     return this.loggedInUser.secondName !== '';
   }
@@ -227,7 +221,7 @@ export class ProfilePageComponent implements OnInit {
       }`,
       initial_fg: '#ffffff',
       initial_size: 30,
-      initial_bg: this.randomColor(),
+      initial_bg: '#49A0AE',
       initial_font_family: "'Lato', 'Lato-Regular', 'Helvetica Neue'",
     });
   }
