@@ -122,17 +122,22 @@ namespace Whale.SignalR.Hubs
         [HubMethodName("OnParticipantLeft")]
         public async Task ParticipantLeft(MeetingConnectDTO ConnectionData)
         {
-            var disconnectedParticipant = _groupsParticipants[ConnectionData.MeetingId]
-                .Find(p => p.User.Email == ConnectionData.UserEmail);
+            var disconectedParticipantInGroups = _groupsParticipants
+                    .Where(g => g.Value.Any(p => p.ActiveConnectionId == Context.ConnectionId))
+                    .ToList();
 
-            ConnectionData.Participant = disconnectedParticipant;
-            _groupsParticipants[ConnectionData.MeetingId].Remove(disconnectedParticipant);
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, ConnectionData.MeetingId);
-            await Clients.Group(ConnectionData.MeetingId).SendAsync("OnParticipantLeft", ConnectionData);
-
-            if(_groupsParticipants[ConnectionData.MeetingId].Count <= 0)
+            foreach (var group in disconectedParticipantInGroups)
             {
-                await this.DeleteMeeting(ConnectionData.MeetingId);
+                var disconnectedParticipant = group.Value.Find(p => p.ActiveConnectionId == Context.ConnectionId);
+
+                ConnectionData.Participant = disconnectedParticipant;
+                _groupsParticipants[group.Key].Remove(disconnectedParticipant);
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, group.Key);
+                await Clients.Group(group.Key).SendAsync("OnParticipantLeft", ConnectionData);
+                if (group.Value.Count <= 0)
+                {
+                    await this.DeleteMeeting(group.Key);
+                }
             }
         }
 
