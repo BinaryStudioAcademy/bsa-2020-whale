@@ -67,14 +67,18 @@ export class MeetingInviteComponent
     this.contacts.splice(this.contacts.indexOf(contact), 1);
   }
 
-  public addEmailTag(): void {
-    if (
-      this.form.controls.email.value &&
-      !this.emails.find((email) => email == this.form.controls.email.value)
-    ) {
-      this.emails.push(this.form.controls.email.value);
+  public addEmailTag(valid: boolean): void {
+    if (valid) {
+      if (
+        this.form.controls.email.value &&
+        !this.emails.find(
+          (email) => email == this.form.controls.email.value.toLowerCase()
+        )
+      ) {
+        this.emails.push(this.form.controls.email.value.toLowerCase());
+      }
+      this.form.controls.email.setValue('');
     }
-    this.form.controls.email.setValue('');
   }
 
   public removeTag(email: string): void {
