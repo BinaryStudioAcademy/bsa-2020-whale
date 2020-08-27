@@ -170,24 +170,26 @@ export class ContactsChatComponent
   }
 
   sendMessage(): void {
-    console.log('Send is called');
-    this.newMessage.contactId = this.contactSelected.id;
-    this.newMessage.authorId = this.contactSelected.firstMemberId;
-    this.newMessage.createdAt = new Date();
-    console.log(this.newMessage);
-    this.httpService
-      .postRequest<DirectMessage, HttpResponse<DirectMessage>>(
-        '/api/ContactChat/',
-        this.newMessage
-      )
-      .pipe(take(1))
-      .subscribe(
-        () => {
-          this.newMessage.message = '';
-          this.scrollDown();
-        },
-        (error) => this.toastr.error(error.Message)
-      );
+    if (this.newMessage.message.trim().length !== 0) {
+      console.log('Send is called');
+      this.newMessage.contactId = this.contactSelected.id;
+      this.newMessage.authorId = this.contactSelected.firstMemberId;
+      this.newMessage.createdAt = new Date();
+      console.log(this.newMessage);
+      this.httpService
+        .postRequest<DirectMessage, HttpResponse<DirectMessage>>(
+          '/api/ContactChat/',
+          this.newMessage
+        )
+        .pipe(take(1))
+        .subscribe(
+          () => {
+            this.newMessage.message = '';
+            this.scrollDown();
+          },
+          (error) => this.toastr.error(error.Message)
+        );
+    }
   }
 
   close(): void {
