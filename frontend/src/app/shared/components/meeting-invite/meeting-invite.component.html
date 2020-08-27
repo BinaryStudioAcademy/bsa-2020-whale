@@ -19,6 +19,9 @@
         </div>
       </form>
       <div class="ui relaxed divided selection list">
+        <div *ngIf="isContactsLoading">
+          <div class="ui inverted active centered inline loader"></div>
+        </div>
         <div class="item" *ngFor="let contact of cachedContacts">
           <app-contact
             [contact]="contact"
