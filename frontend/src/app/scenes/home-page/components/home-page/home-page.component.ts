@@ -66,6 +66,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
+    this.contacts.forEach((contact) => {
+      this.messageService.leaveGroup(contact.id);
+    });
   }
 
   ngOnInit(): void {

@@ -42,7 +42,11 @@ export class MessageService implements OnDestroy {
     });
   }
 
-  public joinGroup(contactId) {
+  public joinGroup(contactId: string) {
     this.hubConnection.invoke('JoinGroup', contactId);
+  }
+
+  public leaveGroup(contactId: string) {
+    this.hubConnection.invoke('LeaveGroup', contactId);
   }
 }
