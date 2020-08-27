@@ -1269,6 +1269,7 @@ export class MeetingComponent
             inviteLink: shortLink,
             meetingId: this.meeting.id,
             senderId: this.currentParticipant.user.id,
+            participants: this.meeting.participants,
           })
           .toPromise()
           .then(() => {

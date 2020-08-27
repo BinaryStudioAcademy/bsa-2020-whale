@@ -29,7 +29,8 @@
       <form
         class="email-form"
         [formGroup]="form"
-        (keydown.enter)="addEmailTag()"
+        #emailForm="ngForm"
+        (keydown.enter)="addEmailTag(emailForm.valid)"
       >
         <div class="email-input">
           <div class="ui small input">
@@ -37,6 +38,7 @@
               formControlName="email"
               type="text"
               placeholder="Add by email"
+              pattern="[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?"
             />
           </div>
           <div
@@ -45,6 +47,12 @@
           >
             <i class="question circle outline icon"></i>
           </div>
+        </div>
+        <div
+          class="ui error message"
+          *ngIf="emailForm.invalid && emailForm.touched"
+        >
+          Email invalid
         </div>
       </form>
 
