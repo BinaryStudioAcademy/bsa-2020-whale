@@ -105,7 +105,7 @@
         class="ui button tiny send"
         type="submit"
         id="sendmessage"
-        [disabled]="!chatForm.valid"
+        [disabled]="!chatForm.valid || newMessage.message.trim().length === 0"
         (click)="sendMessage()"
       >
         Send <i class="paper plane outline icon"></i>
