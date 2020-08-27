@@ -559,6 +559,10 @@ export class MeetingComponent
     this.elem = this.mainArea.nativeElement;
     this.currentStreamLoaded.subscribe(() => {
       this.currentVideo.nativeElement.srcObject = this.currentUserStream;
+      if (this.mediaSettingsService.settings.IsMirrorVideo) {
+        this.currentVideo.nativeElement.style.transform = 'scale(-1,1)';
+        document.querySelector('video').style.transform = 'scale(-1,1)';
+      }
       this.setOutputDevice();
     });
   }
