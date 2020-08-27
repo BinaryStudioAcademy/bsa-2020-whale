@@ -6,7 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 import { SimpleModalComponent } from 'ngx-simple-modal';
 import { MeetingInviteModalData } from '@shared/models/email/meeting-invite-modal-data';
 import { MeetingInvite } from '@shared/models/email/meeting-invite';
-import { Contact, User } from '@shared/models';
+import { Contact, User, Participant } from '@shared/models';
 
 @Component({
   selector: 'app-meeting-invite',
@@ -15,11 +15,12 @@ import { Contact, User } from '@shared/models';
 })
 export class MeetingInviteComponent
   extends SimpleModalComponent<MeetingInviteModalData, void>
-  implements OnInit {
+  implements OnInit, MeetingInviteModalData {
   public emails: string[] = [];
   public contacts: Contact[];
   public cachedContacts: Contact[];
   public selectedContacts: Contact[] = [];
+  participants: Participant[];
 
   public form: FormGroup;
   public formSearch: FormGroup;
@@ -45,14 +46,18 @@ export class MeetingInviteComponent
     this.getContacts();
   }
 
-  public getContacts() {
+  public getContacts(): void {
     this.httpService
       .getRequest<Contact[]>(environment.apiUrl + '/api/Contacts/accepted')
       .subscribe(
         (response) => {
           console.log(response);
-          this.contacts = response.filter((c) => true);
-          this.cachedContacts = response.filter((c) => true);
+          this.cachedContacts = this.contacts = response.filter(
+            (c) =>
+              !this.participants.find(
+                (p) => p.user.email === c.secondMember.email
+              )
+          );
         },
         (error) => {
           console.error(error);
@@ -60,32 +65,39 @@ export class MeetingInviteComponent
       );
   }
 
-  public onContactClicked(contact: Contact) {
+  public onContactClicked(contact: Contact): void {
     this.selectedContacts.push(contact);
     this.emails.push(contact.secondMember.email);
     this.cachedContacts.splice(this.cachedContacts.indexOf(contact), 1);
     this.contacts.splice(this.contacts.indexOf(contact), 1);
   }
 
-  public addEmailTag(): void {
-    if (
-      this.form.controls.email.value &&
-      !this.emails.find((email) => email == this.form.controls.email.value)
-    ) {
-      this.emails.push(this.form.controls.email.value);
+  public addEmailTag(valid: boolean): void {
+    if (valid) {
+      const emailValue = this.form.controls.email.value.toLowerCase();
+      const isParticipant =
+        this.participants.find((p) => p.user.email === emailValue) !==
+        undefined;
+      if (isParticipant) {
+        this.toastr.show(`${emailValue} is already participant of meeting.`);
+      }
+      if (
+        emailValue &&
+        !this.emails.find((email) => email === emailValue) &&
+        !this.participants.find((p) => p.user.email === emailValue) &&
+        !isParticipant
+      ) {
+        this.emails.push(emailValue);
+      }
+      this.form.controls.email.setValue('');
     }
-    this.form.controls.email.setValue('');
   }
 
   public removeTag(email: string): void {
     this.emails.splice(this.emails.indexOf(email), 1);
-    // console.log(this.emails.indexOf(email));
     const contact = this.selectedContacts.find(
-      (c) => c.secondMember.email == email
+      (c) => c.secondMember.email === email
     );
-    // console.log(contact);
-    // console.log(email);
-    // console.log(this.selectedContacts.indexOf(contact));
     if (contact) {
       this.cachedContacts.push(contact);
       this.contacts.push(contact);
@@ -93,7 +105,7 @@ export class MeetingInviteComponent
     }
   }
 
-  public sendInvites() {
+  public sendInvites(): void {
     this.isLoading = true;
     const inviteData: MeetingInvite = {
       meetingLink: this.inviteLink,
@@ -124,7 +136,7 @@ export class MeetingInviteComponent
       );
   }
 
-  public filterContacts(value: string) {
+  public filterContacts(value: string): void {
     console.log(this.contacts);
     this.cachedContacts = this.contacts.filter((contact) => {
       return `${contact.secondMember.firstName} ${contact.secondMember.secondName}`.includes(
@@ -133,9 +145,9 @@ export class MeetingInviteComponent
     });
   }
 
-  public getEmailOrName(email: string) {
+  public getEmailOrName(email: string): string {
     const contact = this.selectedContacts.find(
-      (c) => c.secondMember.email == email
+      (c) => c.secondMember.email === email
     );
     if (contact) {
       return this.getName(contact.secondMember);
@@ -144,7 +156,7 @@ export class MeetingInviteComponent
     }
   }
 
-  public getName(user: User) {
+  public getName(user: User): string {
     return user.secondName
       ? `${user.firstName} ${user.secondName}`
       : user.firstName;

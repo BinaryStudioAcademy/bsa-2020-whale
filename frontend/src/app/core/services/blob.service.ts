@@ -49,6 +49,22 @@ export class BlobService {
     });
   }
 
+  public canUploadImage(event): boolean {
+    const image = event.target.files[0];
+    if (!image) {
+      event.target.value = '';
+      return;
+    }
+
+    const size = image.size / 1024 / 1024;
+
+    if (size > 5) {
+      return false;
+    }
+
+    return true;
+  }
+
   public stopRecording(): void {
     this.recorder.stop();
     this.stream.getVideoTracks()[0].stop();

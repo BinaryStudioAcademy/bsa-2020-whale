@@ -256,4 +256,5 @@ export enum SignalMethods {
   OnStartShareScreen,
   OnStopShareScreen,
   GetCreatedRooms,
+  OnHostChangeRoom,
 }
