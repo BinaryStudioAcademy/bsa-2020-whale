@@ -48,10 +48,7 @@
             <i class="question circle outline icon"></i>
           </div>
         </div>
-        <div
-          class="ui error message"
-          *ngIf="emailForm.invalid && emailForm.touched"
-        >
+        <div class="ui error message" *ngIf="emailForm.invalid">
           Email invalid
         </div>
       </form>
