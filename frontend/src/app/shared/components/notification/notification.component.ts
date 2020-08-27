@@ -5,6 +5,8 @@ import { OptionsAddContact } from '@shared/models/notification/options-add-conta
 import { NotificationTypeEnum } from '@shared/models/notification/notification-type-enum';
 import { ContactService } from 'app/core/services/contact.service';
 import { ToastrService } from 'ngx-toastr';
+import { OptionsInviteMeeting } from '@shared/models';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-notification',
@@ -18,10 +20,13 @@ export class NotificationComponent implements OnInit {
   public contactEmail = '';
   public isPendingContact = false;
   public isText = false;
+  public isMeetingInvite = false;
   public show = true;
+  public link = '';
   constructor(
     private contactService: ContactService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -46,6 +51,20 @@ export class NotificationComponent implements OnInit {
       this.isPendingContact = true;
       return;
     }
+    if (
+      this.notification.notificationType ===
+      NotificationTypeEnum.MeetingInviteNotification
+    ) {
+      this.contactEmail = (JSON.parse(
+        this.notification.options
+      ) as OptionsInviteMeeting).contactEmail;
+      this.link = (JSON.parse(
+        this.notification.options
+      ) as OptionsInviteMeeting).link;
+      this.message = `${this.contactEmail} invites you to meeting.`;
+      this.isMeetingInvite = true;
+      return;
+    }
   }
 
   onRejectContact(): void {
@@ -64,6 +83,11 @@ export class NotificationComponent implements OnInit {
       },
       (error) => this.toastr.error(error.Message)
     );
+    this.onClose();
+  }
+  onAcceptInvite(): void {
+    const parts = this.link.split('/');
+    this.router.navigate([`/redirection/${parts[parts.length - 1]}`]);
     this.onClose();
   }
   onClose(): void {
