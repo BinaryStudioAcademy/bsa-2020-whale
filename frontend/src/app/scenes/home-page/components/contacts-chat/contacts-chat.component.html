@@ -47,7 +47,7 @@
       </div>
     </div>
   </div>
-  <div class="ui chat-inner feed" #chatWindow>
+  <div #chatWindow class="ui chat-inner feed">
     <spiner *ngIf="isMessagesLoading" [size]="'medium'"></spiner>
     <div
       *ngIf="messages.length == 0 && !isMessagesLoading"
@@ -90,6 +90,8 @@
           </div>
         </div>
         <div
+          #intersectionElement
+          id="{{ message.id }}"
           disabled
           [ngClass]="
             contactSelected.firstMemberId !== message.author?.id

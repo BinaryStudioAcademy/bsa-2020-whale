@@ -8,13 +8,17 @@ import {
   AfterContentInit,
   OnChanges,
   SimpleChanges,
-  ViewChild,
-  ElementRef,
+  ViewChildren,
   AfterViewInit,
+  ViewChild,
+  QueryList,
+  ElementRef,
   AfterViewChecked,
 } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { DirectMessage } from '@shared/models/message/direct-message';
+import { ReadAndUnreadMessages } from '@shared/models/message/read-and-unread-messages';
+import { UnreadMessageId } from '@shared/models/message/unread-message-id';
 import { User } from '@shared/models/user/user';
 import { Contact } from '@shared/models/contact/contact';
 import { SignalRService } from 'app/core/services/signal-r.service';
@@ -22,16 +26,17 @@ import { HttpService } from 'app/core/services/http.service';
 import { environment } from '@env';
 import { Injectable } from '@angular/core';
 import { HubConnection } from '@aspnet/signalr';
-import { Subject, from, Observable } from 'rxjs';
-import { tap, takeUntil, take } from 'rxjs/operators';
+import { Subject, from, Observable, ReplaySubject } from 'rxjs';
+import { tap, takeUntil, take, first } from 'rxjs/operators';
 import { Message } from '@angular/compiler/src/i18n/i18n_ast';
 import { Console } from 'console';
 import { stringify } from 'querystring';
-import { HttpResponse } from '@angular/common/http';
+import { HttpResponse, HttpParams } from '@angular/common/http';
 import { SimpleModalService } from 'ngx-simple-modal';
 import { CallModalComponent } from '../call-modal/call-modal.component';
 import { ContactService } from 'app/core/services';
 import { ConfirmationModalComponent } from '@shared/components/confirmation-modal/confirmation-modal.component';
+import { MessageService } from 'app/core/services/message.service';
 
 @Component({
   selector: 'app-contacts-chat',
@@ -40,25 +45,23 @@ import { ConfirmationModalComponent } from '@shared/components/confirmation-moda
 })
 export class ContactsChatComponent
   implements OnInit, OnChanges, OnDestroy, AfterViewInit, AfterViewChecked {
-  private hubConnection: HubConnection;
-  counter = 0;
-  isMessagesLoading = true;
-
-  private receivedMsg = new Subject<DirectMessage>();
-  public receivedMsg$ = this.receivedMsg.asObservable();
-
-  private unsubscribe$ = new Subject<void>();
-
-  @ViewChild('chatWindow', { static: false }) chatBlock: ElementRef<
-    HTMLElement
-  >;
-  chatElement: any;
-
   @Input() contactSelected: Contact;
   @Input() loggedInUser: User;
   @Output() chat: EventEmitter<boolean> = new EventEmitter<boolean>();
+
+  @ViewChildren('intersectionElement') intersectionElements: QueryList<
+    ElementRef<HTMLDivElement>
+  >;
+  @ViewChild('chatWindow', { static: false }) chatBlock: ElementRef<
+    HTMLElement
+  >;
+
+  public intersectionObserver: IntersectionObserver;
+  chatElement: any;
+  counter = 0;
   directMessageRecieved = new EventEmitter<DirectMessage>();
   messages: DirectMessage[] = [];
+  unreadMessages: DirectMessage[] = [];
   newMessage: DirectMessage = {
     contactId: '',
     message: '',
@@ -66,20 +69,95 @@ export class ContactsChatComponent
     createdAt: new Date(),
     attachment: false,
   };
+
+  isMessagesLoading = true;
+  isFirstLoad = true;
+
+  private receivedMessages = new ReplaySubject<void>();
+  public receivedMessages$ = this.receivedMessages.asObservable();
+
+  private unsubscribe$ = new Subject<void>();
+
   constructor(
     private signalRService: SignalRService,
     private httpService: HttpService,
     private toastr: ToastrService,
     private simpleModalService: SimpleModalService,
-    private contactService: ContactService
+    private contactService: ContactService,
+    private messageService: MessageService
   ) {}
 
-  ngAfterViewChecked(): void {
-    this.scrollDown();
+  ngOnInit(): void {
+    this.messageService.receivedMessage$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (newMessage) => {
+          this.messages.push(newMessage);
+          if (newMessage.authorId == this.contactSelected?.secondMember.id) {
+            this.intersectionElements.changes.pipe(first()).subscribe(() => {
+              this.intersectionObserver.observe(
+                this.intersectionElements.last.nativeElement
+              );
+              this.unreadMessages.push(newMessage);
+              const firstUnread = this.intersectionElements.find(
+                (el) => el.nativeElement.id == this.unreadMessages[0].id
+              );
+              firstUnread.nativeElement.scrollIntoView();
+            });
+          }
+          console.log('received a messsage ', newMessage);
+        },
+        (err) => {
+          console.log(err.message);
+          this.toastr.error(err.Message);
+        }
+      );
   }
 
   ngAfterViewInit(): void {
     this.chatElement = this.chatBlock.nativeElement;
+    this.intersectionElements.changes.pipe(first()).subscribe(() => {
+      this.receivedMessages$.subscribe(() => {
+        this.registerIntersectionObserve();
+        if (this.unreadMessages.length == 0) {
+          this.scrollDown();
+        } else {
+          const firstUnread = this.intersectionElements.find(
+            (el) => el.nativeElement.id == this.unreadMessages[0].id
+          );
+          firstUnread.nativeElement.scrollIntoView();
+        }
+      });
+    });
+  }
+
+  ngAfterViewChecked(): void {
+    //console.log('after view checked');
+    //this.scrollDown();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    this.httpService
+      .getRequest<ReadAndUnreadMessages>(
+        '/api/ContactChat/withUnread/' + this.contactSelected.id,
+        new HttpParams().set('userId', this.loggedInUser.id)
+      )
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (data: ReadAndUnreadMessages) => {
+          this.messages = data.readMessages.concat(data.unreadMessages);
+          this.unreadMessages = data.unreadMessages;
+          this.receivedMessages.next();
+          console.log('messages new', data);
+          this.isMessagesLoading = false;
+        },
+        (error) => console.log(error)
+      );
+  }
+
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
 
   scrollDown(): void {
@@ -89,55 +167,6 @@ export class ContactsChatComponent
 
     if (isScrolledToBottom)
       chatHtml.scrollTop = chatHtml.scrollHeight - chatHtml.clientHeight;
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    this.httpService
-      .getRequest<DirectMessage[]>(
-        '/api/ContactChat/' + this.contactSelected.id
-      )
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(
-        (data: DirectMessage[]) => {
-          this.messages = data;
-          console.log('messages new', data);
-          this.isMessagesLoading = false;
-        },
-        (error) => console.log(error)
-      );
-    this.hubConnection?.invoke('JoinGroup', this.contactSelected.id);
-  }
-
-  ngOnInit(): void {
-    from(this.signalRService.registerHub(environment.signalrUrl, 'chatHub'))
-      .pipe(
-        tap((hub) => {
-          this.hubConnection = hub;
-        })
-      )
-      .subscribe(() => {
-        this.hubConnection.on(
-          'NewMessageReceived',
-          (message: DirectMessage) => {
-            this.receivedMsg.next(message);
-          }
-        );
-        this.hubConnection.invoke('JoinGroup', this.contactSelected.id);
-      });
-    this.receivedMsg$.pipe(takeUntil(this.unsubscribe$)).subscribe(
-      (newMessage) => {
-        this.messages.push(newMessage);
-        console.log('received a messsage ', newMessage);
-      },
-      (err) => {
-        console.log(err.message);
-        this.toastr.error(err.Message);
-      }
-    );
-  }
-  ngOnDestroy(): void {
-    this.unsubscribe$.next();
-    this.unsubscribe$.complete();
   }
 
   sendMessage(): void {
@@ -163,7 +192,7 @@ export class ContactsChatComponent
 
   close(): void {
     this.chat.emit(false);
-    this.hubConnection.invoke('Disconnect', this.contactSelected.id);
+    // this.messageService.hubConnection.invoke('Disconnect', this.contactSelected.id);
   }
 
   public call(): void {
@@ -198,5 +227,53 @@ export class ContactsChatComponent
           );
         }
       });
+  }
+
+  public registerIntersectionObserve() {
+    const options = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.0,
+    };
+
+    this.intersectionObserver = new IntersectionObserver(
+      this.onIntersection.bind(this),
+      options
+    );
+
+    this.unreadMessages.forEach((message) => {
+      const element = this.intersectionElements.find(
+        (el) => el.nativeElement.id == message.id
+      );
+      this.intersectionObserver.observe(element.nativeElement);
+    });
+  }
+
+  public onIntersection(entries: IntersectionObserverEntry[]) {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        this.intersectionObserver.unobserve(entry.target);
+        this.unreadMessages.splice(
+          this.unreadMessages.findIndex((um) => um.id == entry.target.id),
+          1
+        );
+        this.contactSelected.unreadMessageCount -= 1;
+        this.sendMarkReadRequest(entry.target.id, this.loggedInUser.id);
+      }
+    });
+  }
+
+  public sendMarkReadRequest(messageId: string, userId: string) {
+    const unreadMessageId: UnreadMessageId = {
+      messageId: messageId,
+      receiverId: userId,
+    };
+
+    this.httpService
+      .postRequest('/api/ContactChat/markRead', unreadMessageId)
+      .subscribe(
+        () => {},
+        (error) => console.error(error)
+      );
   }
 }
