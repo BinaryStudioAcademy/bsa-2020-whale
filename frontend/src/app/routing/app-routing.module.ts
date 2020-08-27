@@ -29,24 +29,21 @@ const routes: Routes = [
   {
     path: 'setting-page',
     component: SettingPageComponent,
-    canActivate: [CheckAccessToMediaGuard],
+    canActivate: [AngularFireAuthGuard],
+    data: { authGuardPipe: redirectUnauthorizedToLogin },
   },
   {
     path: 'meeting-page/:link',
     component: MeetingComponent,
-    canActivate: [CheckAccessToMediaGuard],
+    canActivate: [AngularFireAuthGuard],
     canDeactivate: [LastParticipantGuard],
+    data: { authGuardPipe: redirectUnauthorizedToLogin },
   },
   {
     path: 'redirection/:link',
     component: RedirectionComponent,
   },
-  {
-    path: 'room/:id',
-    component: MeetingComponent,
-    canActivate: [AngularFireAuthGuard],
-    data: { authGuardPipe: redirectUnauthorizedToLogin },
-  },
+  // { path: 'meeting-page', component: MeetingComponent },
   {
     path: 'profile-page',
     component: ProfilePageComponent,
