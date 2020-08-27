@@ -36,6 +36,7 @@ export class AddUserToGroupModalComponent
   public formSearch: FormGroup;
 
   public isLoading = false;
+  public isContactsLoading = false;
 
   selectedContacts = new Array<Contact>();
   public groupsUser = new Array<GroupUser>();
@@ -59,6 +60,7 @@ export class AddUserToGroupModalComponent
   }
 
   public getContacts(): void {
+    this.isContactsLoading = true;
     this.httpService
       .getRequest<Contact[]>(environment.apiUrl + '/api/Contacts/accepted')
       .subscribe(
@@ -69,9 +71,11 @@ export class AddUserToGroupModalComponent
           );
           this.contacts = Array.from(filteredGroups);
           this.cachedContacts = Array.from(filteredGroups);
+          this.isContactsLoading = false;
         },
         (error) => {
           console.error(error);
+          this.isContactsLoading = false;
         }
       );
   }
