@@ -63,8 +63,16 @@ namespace Whale.Shared.Services
                 };
                 contact.FirstMember.ConnectionId = GetConnectionId(contact.FirstMember.Id);
                 contact.SecondMember.ConnectionId = GetConnectionId(contact.SecondMember.Id);
+                int unreadMessageCount = _context.UnreadMessageIds
+                .Where(um => um.ReceiverId == contact.FirstMemberId && _context.DirectMessages
+                    .Any(dm => dm.Id == um.MessageId && dm.AuthorId == contact.SecondMemberId))
+                .Count();
+                contact.UnreadMessageCount = unreadMessageCount;
+
                 return contact;
             });
+
+
 
             return contactsDto;
         }

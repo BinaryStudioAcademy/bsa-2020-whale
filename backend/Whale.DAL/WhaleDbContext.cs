@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Whale.DAL.Models;
+using Whale.DAL.Models.Messages;
 using Whale.DAL.Models.Poll;
 
 namespace Whale.DAL
@@ -13,6 +14,7 @@ namespace Whale.DAL
         public DbSet<User> Users { get; set; }
         public DbSet<Achivement> Achivements { get; set; }
         public DbSet<Contact> Contacts { get; set; }
+        public DbSet<UnreadMessageId> UnreadMessageIds { get; set; }
         public DbSet<DirectMessage> DirectMessages { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<GroupMessage> GroupMessages { get; set; }
@@ -49,6 +51,21 @@ namespace Whale.DAL
                     v => Newtonsoft.Json.JsonConvert.SerializeObject(v),
                     v => Newtonsoft.Json.JsonConvert.DeserializeObject<IEnumerable<Voter>>(v)
                 );
+
+            //modelBuilder.Entity<UnreadMessageId>()
+            //    .HasOne(um => um.DirectMessage)
+            //    .WithMany()
+            //    .HasForeignKey(da => da.MessageId);
+
+            //modelBuilder.Entity<UnreadMessageId>()
+            //   .HasOne(um => um.GroupMessage)
+            //   .WithMany()
+            //   .HasForeignKey(da => da.MessageId);
+
+            //modelBuilder.Entity<UnreadMessageId>()
+            //  .HasOne(um => um.Receiver)
+            //  .WithMany()
+            //  .HasForeignKey(da => da.ReceiverId);
 
             base.OnModelCreating(modelBuilder);
         }

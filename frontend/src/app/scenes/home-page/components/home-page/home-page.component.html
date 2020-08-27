@@ -33,7 +33,10 @@
           Enter the meeting
         </a>
       </a>
-      <spiner *ngIf="isContactsLoading" [size]="'medium'"></spiner>
+      <spiner
+        *ngIf="isContactsLoading || isChatHubLoading"
+        [size]="'medium'"
+      ></spiner>
       <a
         id="home-toggle-contacts"
         (click)="onContactsClick()"
@@ -67,6 +70,12 @@
             <div class="description">
               {{ contact?.secondMember.firstName }}
               {{ contact?.secondMember.secondName }}
+            </div>
+            <div
+              *ngIf="contact?.unreadMessageCount > 0"
+              class="ui circular label"
+            >
+              {{ contact?.unreadMessageCount }}
             </div>
             <div
               data-tooltip="Online"

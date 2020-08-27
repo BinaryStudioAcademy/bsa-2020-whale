@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Whale.DAL;
 using Whale.DAL.Models;
+using Whale.DAL.Models.Messages;
 using Whale.DAL.Settings;
 using Whale.Shared.Extentions;
 using Whale.Shared.Models.DirectMessage;
@@ -25,6 +26,9 @@ namespace Whale.API.Services
             _signalrService = signalrService;
             _blobStorageSettings = blobStorageSettings;
         }
+        //var receivingMessages = messages.Where(m => m.ContactId != m.AuthorId);
+
+        //var unreadMessages = _context.UnreadMessages.Where(um => um.ReceiverId == contactId);
         public async Task<ICollection<DirectMessage>> GetAllContactsMessagesAsync(Guid contactId)
         {
             var messages = await _context.DirectMessages
@@ -33,14 +37,55 @@ namespace Whale.API.Services
                 .Where(p => p.ContactId == contactId) // Filter here
                 .ToListAsync();
             if (messages == null) throw new Exception("No messages");
+           
             return _mapper.Map<ICollection<DirectMessage>>(await messages.LoadAvatarsAsync(_blobStorageSettings, msg => msg.Author));
         }
+
+        public async Task<ReadAndUnreadMessagesDTO> GetReadAndUnreadAsync(Guid contactId, Guid userId)
+        {
+            var messagesWithoutAvatars = await _context.DirectMessages
+                .Include(msg => msg.Author)
+                .OrderBy(msg => msg.CreatedAt)
+                .Where(p => p.ContactId == contactId) // Filter here
+                .ToListAsync();
+
+            if (messagesWithoutAvatars == null) throw new Exception("No messages");
+
+            var messages = await messagesWithoutAvatars.LoadAvatarsAsync(_blobStorageSettings, msg => msg.Author);
+            var receivingMessages = messages.Where(m => m.AuthorId != userId);
+
+            var unreadMessages = receivingMessages.Where(
+                m => _context.UnreadMessageIds.Any(um => um.MessageId == m.Id && um.ReceiverId == userId)
+            );
+
+            var readMessages = messages.Except(unreadMessages).ToList();
+
+            var readAndUnreadMessages = new ReadAndUnreadMessagesDTO
+            {
+                ReadMessages = _mapper.Map<IEnumerable<DirectMessageDTO>>(readMessages),
+                UnreadMessages = _mapper.Map<IEnumerable<DirectMessageDTO>>(unreadMessages)
+            };
+
+            return readAndUnreadMessages;
+        }
+
         public async Task<DirectMessage> CreateDirectMessage(DirectMessageCreateDTO directMessageDto)
         {
             var messageEntity = _mapper.Map<DirectMessage>(directMessageDto);
             messageEntity.CreatedAt = DateTimeOffset.UtcNow;
             _context.DirectMessages.Add(messageEntity);
             await _context.SaveChangesAsync();
+
+
+            var contact = await _context.Contacts.FirstOrDefaultAsync(c => c.Id == directMessageDto.ContactId);
+            var receiverId = contact.FirstMemberId == directMessageDto.AuthorId ? contact.SecondMemberId : contact.FirstMemberId;
+            await _context.UnreadMessageIds.AddAsync(new UnreadMessageId
+            {
+                MessageId = messageEntity.Id,
+                ReceiverId = receiverId
+            });
+            await _context.SaveChangesAsync();
+            Console.WriteLine($"CreateMessage {messageEntity.Id}");
 
             var createdMessage = await _context.DirectMessages
                 .Include(msg => msg.Author)
@@ -54,6 +99,26 @@ namespace Whale.API.Services
             await connection.InvokeAsync("NewMessageReceived", createdMessageDTO);
 
             return createdMessageDTO;
+        }
+
+        public async Task MarkMessageAsRead(UnreadMessageIdDTO unreadMessageDto)
+        {
+            var unreadMessage = await _context.UnreadMessageIds.FirstOrDefaultAsync(
+                message => message.MessageId == unreadMessageDto.MessageId &&
+                message.ReceiverId == unreadMessageDto.ReceiverId
+            );
+
+            var message = await _context.DirectMessages.FirstOrDefaultAsync(
+                message => message.Id == unreadMessageDto.MessageId
+            );
+
+            Console.WriteLine($"MarkMessageRead {unreadMessageDto.MessageId}");
+            _context.UnreadMessageIds.Remove(unreadMessage);
+            // message.IsRead = true;
+            // _context.DirectMessages.Update(message);
+            await _context.SaveChangesAsync();
+
+            // signal to message author that message is read
         }
     }
 }
