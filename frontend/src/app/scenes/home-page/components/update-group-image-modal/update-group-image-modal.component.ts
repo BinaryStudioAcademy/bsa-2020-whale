@@ -39,12 +39,15 @@ export class UpdateGroupImageModalComponent
 
   public uploadFile(event): void {
     this.imageChangedEvent = event;
-    this.fileToUpload = event.target.files[0];
-    if (!this.fileToUpload) {
-      event.target.value = '';
-      return;
+
+    const isImageCorrect = this.blobService.canUploadImage(event);
+
+    if (isImageCorrect) {
+      this.fileToUpload = event.target.files[0];
+      this.isFileUploaded = true;
+    } else {
+      this.toastr.error(`File can't be heavier than ~5MB`);
     }
-    this.isFileUploaded = true;
   }
 
   public imageCroppedUpload(event: ImageCroppedEvent): void {
