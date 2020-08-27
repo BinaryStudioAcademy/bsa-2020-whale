@@ -81,10 +81,12 @@ export class MeetingInviteComponent
       if (isParticipant) {
         this.toastr.show(`${emailValue} is already participant of meeting.`);
       }
+      if (this.emails.find((email) => email === emailValue)) {
+        this.toastr.show(`${emailValue} is already added.`);
+      }
       if (
         emailValue &&
         !this.emails.find((email) => email === emailValue) &&
-        !this.participants.find((p) => p.user.email === emailValue) &&
         !isParticipant
       ) {
         this.emails.push(emailValue);
