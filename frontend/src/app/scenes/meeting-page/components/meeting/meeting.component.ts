@@ -1271,10 +1271,7 @@ export class MeetingComponent
             senderId: this.currentParticipant.user.id,
             participants: this.meeting.participants,
           })
-          .toPromise()
-          .then(() => {
-            this.isShowParticipants = false;
-          });
+          .toPromise();
         this.isAddParticipantDisabled = false;
       },
       (error) => {
