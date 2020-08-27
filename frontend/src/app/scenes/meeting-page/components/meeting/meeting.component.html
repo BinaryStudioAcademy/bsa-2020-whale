@@ -88,11 +88,13 @@
     </div>
     <div *ngIf="isShowParticipants" class="ui participants-container">
       <div class="invite-icon-container">
-        <i
-          class="user plus icon"
-          [disabled]="isAddParticipantDisabled"
-          (click)="openInviteUsersModal()"
-        ></i>
+        <span data-tooltip="Invite users" data-position="left center">
+          <i
+            class="user plus icon"
+            [disabled]="isAddParticipantDisabled"
+            (click)="openInviteUsersModal()"
+          ></i>
+        </span>
       </div>
       <div class="participants-wrapper">
         <div class="ui divided list">
