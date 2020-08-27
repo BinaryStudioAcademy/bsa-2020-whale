@@ -98,6 +98,11 @@ export class ContactsChatComponent
               this.intersectionObserver.observe(
                 this.intersectionElements.last.nativeElement
               );
+              this.unreadMessages.push(newMessage);
+              const firstUnread = this.intersectionElements.find(
+                (el) => el.nativeElement.id == this.unreadMessages[0].id
+              );
+              firstUnread.nativeElement.scrollIntoView();
             });
           }
           console.log('received a messsage ', newMessage);
@@ -114,6 +119,14 @@ export class ContactsChatComponent
     this.intersectionElements.changes.pipe(first()).subscribe(() => {
       this.receivedMessages$.subscribe(() => {
         this.registerIntersectionObserve();
+        if (this.unreadMessages.length == 0) {
+          this.scrollDown();
+        } else {
+          const firstUnread = this.intersectionElements.find(
+            (el) => el.nativeElement.id == this.unreadMessages[0].id
+          );
+          firstUnread.nativeElement.scrollIntoView();
+        }
       });
     });
   }
