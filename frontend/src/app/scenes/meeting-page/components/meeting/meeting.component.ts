@@ -330,8 +330,6 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (mediaData) => {
-          console.log(mediaData);
-          console.log('stateChangedmediaDataId', mediaData.streamId);
           this.updateCardDynamicData(
             mediaData.streamId,
             mediaData.isAudioActive,
@@ -349,11 +347,6 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (streamChangedData) => {
-          console.log(
-            'streamChangedmediaDataId',
-            streamChangedData.newStreamId
-          );
-
           const changedMediaData = this.mediaData.find(
             (md) => md.currentStreamId === streamChangedData.oldStreamId
           );
@@ -466,7 +459,6 @@ export class MeetingComponent
       .subscribe(
         (streamId) => {
           let stream = this.connectedStreams.find((x) => x.id == streamId);
-          console.log(this.connectedStreams.includes(stream));
           this.fullPage(streamId);
           this.toastr.success('Start sharing screen');
         },
@@ -529,18 +521,15 @@ export class MeetingComponent
 
     // when get call answer to it
     this.peer.on('call', (call) => {
-      console.log('get call');
       // show caller
       call.on('stream', (stream) => {
         if (!this.connectedStreams.includes(stream)) {
           this.connectedStreams.push(stream);
-          console.log(call.peer, 'call peer');
 
           const participant = this.meeting.participants.find(
             (p) => p.streamId == stream.id
           );
 
-          console.log('in peer create');
           this.createParticipantCard(participant);
         }
         this.connectedPeers.set(call.peer, stream);
@@ -648,7 +637,7 @@ export class MeetingComponent
                 });
               },
               (err) => {
-                console.log(err.message);
+                console.error(err.message);
               }
             );
         } else {
@@ -864,7 +853,6 @@ export class MeetingComponent
       .subscribe(
         (resp) => {
           this.meeting = resp.body;
-          console.log('meeting: ', this.meeting);
           this.connectionData.meetingId = this.meeting.id;
           this.meetingSignalrService.invoke(
             SignalMethods.OnUserConnect,
@@ -876,7 +864,7 @@ export class MeetingComponent
           } as GetMessages);
         },
         (error) => {
-          console.log(error.message);
+          console.error(error.message);
           this.leaveUnConnected();
         }
       );
@@ -903,7 +891,6 @@ export class MeetingComponent
   //#region peers
   // send message to all subscribers that added new user
   private onPeerOpen(id: string) {
-    console.log('My peer ID is: ' + id);
     this.route.params.subscribe((params: Params) => {
       const link: string = params[`link`];
       const urlParams = new URLSearchParams(link);
@@ -935,7 +922,6 @@ export class MeetingComponent
     participant: Participant,
     shouldPrepend = false
   ): void {
-    console.log('created card', participant);
     const stream =
       participant?.streamId === this.currentParticipant.streamId
         ? this.currentUserStream
@@ -984,7 +970,6 @@ export class MeetingComponent
           (d) =>
             d.deviceId === stream.getAudioTracks()[0].getSettings().deviceId
         ) as MediaDeviceInfo;
-        console.log('device:', device);
         this.meter.connect(device);
         this.meter.on(
           'sample',
