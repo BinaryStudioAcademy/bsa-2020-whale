@@ -244,7 +244,9 @@ export class MeetingComponent
           }
 
           this.connect(connectData.peerId);
-          this.toastr.success('Connected successfuly');
+
+          this.toastr.success(`${connectData.participant.user.firstName}
+          ${connectData.participant.user.secondName} connected`);
         },
         (err) => {
           this.toastr.error(err.Message);
