@@ -27,7 +27,7 @@ namespace Whale.API.Services
 		{
 			var meetings = _context.Participants
 				.Include(p => p.Meeting)
-				.Where(p => p.UserId == userId)
+				.Where(p => p.UserId == userId && p.Meeting.EndTime != null)
 				.Select(p => p.Meeting)
 				.OrderByDescending(m => m.StartTime)
 				.Skip(skip)

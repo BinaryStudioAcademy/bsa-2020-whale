@@ -186,24 +186,26 @@ export class GroupChatComponent
     this.unsubscribe$.complete();
   }
   sendMessage(): void {
-    console.log('Send is called');
-    this.newMessage.groupId = this.groupSelected.id;
-    this.newMessage.authorId = this.currentUser.id;
-    this.newMessage.createdAt = new Date();
-    console.log(this.newMessage);
-    this.httpService
-      .postRequest<GroupMessage, HttpResponse<GroupMessage>>(
-        '/api/GroupChat/',
-        this.newMessage
-      )
-      .pipe(take(1))
-      .subscribe(
-        (response) => {
-          console.log(response.body);
-          this.newMessage.message = '';
-        },
-        (error) => this.toastr.error(error.Message)
-      );
+    if (this.newMessage.message.trim().length !== 0) {
+      console.log('Send is called');
+      this.newMessage.groupId = this.groupSelected.id;
+      this.newMessage.authorId = this.currentUser.id;
+      this.newMessage.createdAt = new Date();
+      console.log(this.newMessage);
+      this.httpService
+        .postRequest<GroupMessage, HttpResponse<GroupMessage>>(
+          '/api/GroupChat/',
+          this.newMessage
+        )
+        .pipe(take(1))
+        .subscribe(
+          (response) => {
+            console.log(response.body);
+            this.newMessage.message = '';
+          },
+          (error) => this.toastr.error(error.Message)
+        );
+    }
   }
   close(): void {
     this.chat.emit(false);
