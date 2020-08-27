@@ -1,24 +1,22 @@
-<div class="chat ui secondary segment">
+<div class="chat ui segment">
   <div class="ui chat-header feed">
     <div class="event chat-label">
       <div class="content">
         <div class="group-info">
-          <label for="newImage">
+          <label for="newImage" (click)="changeImage()">
             <img
+              *ngIf="isImageHere()"
               class="ui avatar image"
               src="{{ groupSelected.photoUrl }}"
-              alt="{{ groupSelected.label }}"
+            />
+            <img
+              *ngIf="!isImageHere()"
+              class="ui avatar image"
+              src="assets/img/user-group-icon.png"
             />
           </label>
-          <input
-            hidden
-            type="file"
-            id="newImage"
-            (change)="changeImage($event)"
-            accept="image/*"
-          />
-          <div>
-            <span class="user-chat-label ui header">
+          <div class="group-chat-info">
+            <span class="group-chat-label ui header">
               {{ groupSelected.label }}
               <span class="grey sub header">
                 {{ groupSelected.description }}
@@ -58,12 +56,21 @@
                   src="{{ returnCorrectLink(user) }}"
                 />
                 <div class="content">
-                  <div class="description">
+                  <div
+                    class="description"
+                    appHighlightCreator
+                    userEmail="{{ user.email }}"
+                    creatorEmail="{{ groupSelected.creatorEmail }}"
+                  >
                     {{ user?.firstName }}
                     {{ user?.secondName }}
                   </div>
                 </div>
-                <div class="icon-wrapper">
+                <div
+                  data-tooltip="Delete user"
+                  data-position="left center"
+                  class="icon-wrapper"
+                >
                   <i
                     *ngIf="
                       groupSelected.creatorEmail == currentUser?.email &&
@@ -83,6 +90,17 @@
               id="add-new-member"
               class="large user plus icon"
               (click)="addNewMember()"
+            ></i>
+          </span>
+          <span
+            *ngIf="groupSelected.creatorEmail == currentUser?.email"
+            data-tooltip="Edit group info"
+            data-position="bottom center"
+          >
+            <i
+              id="edit-group-info"
+              class="large cogs icon"
+              (click)="editGroupInfo()"
             ></i>
           </span>
         </div>

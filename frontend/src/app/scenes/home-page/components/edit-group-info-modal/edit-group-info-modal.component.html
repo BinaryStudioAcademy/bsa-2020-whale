@@ -5,7 +5,16 @@
 >
   <div class="ui small modal visible active" (click)="$event.stopPropagation()">
     <div class="header">
-      Add new group
+      Edit group information
+      <div class="close-icon">
+        <span data-tooltip="Cancel editing" data-position="bottom right">
+          <i
+            id="chat-close"
+            class="small close icon"
+            (click)="cancel(groupForm.dirty)"
+          ></i>
+        </span>
+      </div>
     </div>
     <form class="ui form" #groupForm="ngForm" (ngSubmit)="submit()">
       <div class="content">
@@ -14,7 +23,7 @@
             <label>Name</label>
             <input
               type="text"
-              [(ngModel)]="newGroup.label"
+              [(ngModel)]="label"
               #groupName="ngModel"
               name="groupName"
               placeholder="Group name"
@@ -31,7 +40,7 @@
             <label>Short description</label>
             <input
               type="text"
-              [(ngModel)]="newGroup.description"
+              [(ngModel)]="description"
               #groupDescription="ngModel"
               name="groupDescription"
               placeholder="Group description"
@@ -43,6 +52,27 @@
               Please enter the group description
             </div>
           </div>
+          <div class="field">
+            <label>Group administrator</label>
+            <div class="select">
+              <div class="custom-select">
+                <select
+                  id="group-admin-select"
+                  name="groupAdmin"
+                  class="ui dropdown"
+                  [(ngModel)]="creatorEmail"
+                >
+                  <option
+                    *ngFor="let user of groupMembers"
+                    [ngValue]="user.email"
+                  >
+                    {{ user.firstName }} {{ user.secondName }}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+
           <div class="field">
             <div class="upload-wrapper">
               <label>Image</label>
@@ -74,20 +104,12 @@
             </div>
           </div>
           <button
-            id="submit-contact"
+            id="submit-group"
             class="ui button primary"
             type="submit"
             [disabled]="groupForm.invalid"
           >
-            Add
-          </button>
-          <button
-            id="modal-close"
-            class="ui button"
-            type="button"
-            (click)="cancel(groupForm.dirty)"
-          >
-            Close
+            Save
           </button>
         </div>
       </div>

@@ -264,23 +264,29 @@ export class HomePageComponent implements OnInit, OnDestroy {
     }
   }
 
-  deleteGroup(group: Group): void {
-    if (
-      confirm('Are you sure want to delete the group ' + group.label + ' ?')
-    ) {
-      this.groupService.deleteGroup(group).subscribe(
-        (response) => {
-          if (response.status === 204) {
-            this.toastr.success(`${group.label} deleted successfuly`);
-            this.removeGroup(group.id);
-            if (!this.groups.length) {
-              this.groupsVisibility = !this.groupsVisibility;
-            }
-          }
-        },
-        (error) => this.toastr.error(error.Message)
-      );
-    }
+  deleteGroup(selectedGroup: Group): void {
+    this.simpleModalService
+      .addModal(ConfirmationModalComponent, {
+        message: `Are you sure you want to delete ${selectedGroup.label}?`,
+      })
+      .subscribe((isConfirm) => {
+        if (isConfirm) {
+          this.groupService.deleteGroup(selectedGroup).subscribe(
+            (response) => {
+              if (response.status === 204) {
+                this.toastr.success(
+                  `${selectedGroup.label} deleted successfuly`
+                );
+                this.removeGroup(selectedGroup.id);
+                if (!this.groups.length) {
+                  this.groupsVisibility = !this.groupsVisibility;
+                }
+              }
+            },
+            (error) => this.toastr.error(error.Message)
+          );
+        }
+      });
   }
 
   addNewContact(): void {
@@ -446,6 +452,18 @@ export class HomePageComponent implements OnInit, OnDestroy {
     if (this.groups.length) {
       this.groupsVisibility = !this.groupsVisibility;
     }
+  }
+  public isImageHere(group: Group): boolean {
+    return (
+      group.photoUrl !== null &&
+      group.photoUrl !== undefined &&
+      group.photoUrl !== ''
+    );
+  }
+  updateGroup(event) {
+    const updateItem = this.groups.find((x) => x.id === event.id);
+    const index = this.groups.indexOf(updateItem);
+    this.groups[index] = event;
   }
 }
 export interface UserModel {

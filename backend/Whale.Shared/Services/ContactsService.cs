@@ -177,6 +177,8 @@ namespace Whale.Shared.Services
 
             var contactnerEmail = userEmail == contact.FirstMember.Email ? contact.SecondMember.Email : contact.FirstMember.Email;
 
+            var messages = _context.DirectMessages.Where(m => m.ContactId == contactId);
+            _context.DirectMessages.RemoveRange(messages);
             _context.Contacts.Remove(contact);
             await _context.SaveChangesAsync();
             var connection = await _signalrService.ConnectHubAsync("whale");

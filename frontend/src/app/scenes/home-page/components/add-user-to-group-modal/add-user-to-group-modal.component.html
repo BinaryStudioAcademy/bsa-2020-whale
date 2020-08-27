@@ -1,49 +1,79 @@
-<div
-  id="modal-div-close"
-  class="ui dimmer modals page visible active"
-  (click)="cancel(userGroupForm.dirty)"
->
-  <div class="ui mini modal visible active" (click)="$event.stopPropagation()">
-    <div class="header">Add new user to {{ label }}</div>
-    <form class="ui form" #userGroupForm="ngForm" (ngSubmit)="submit()">
-      <div class="content">
-        <div class="ui segment">
-          <div class="field">
-            <label>User Email</label>
-            <input
-              type="text"
-              name="email"
-              [(ngModel)]="groupUser.userEmail"
-              #email="ngModel"
-              placeholder="Email"
-              required
-              pattern="[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?"
+<div class="ui dimmer modals page visible active">
+  <div class="ui mini modal visible active container">
+    <h3 class="header">
+      Add users
+      <div class="close-icon">
+        <span data-tooltip="Close" data-position="bottom right">
+          <i id="chat-close" class="small close icon" (click)="close()"></i>
+        </span>
+      </div>
+    </h3>
+    <div class="content">
+      <form [formGroup]="formSearch">
+        <div class="ui small input">
+          <input
+            placeholder="Search contact"
+            formControlName="contactSearch"
+            (ngModelChange)="filterContacts($event)"
+          />
+        </div>
+      </form>
+      <div class="ui relaxed divided selection list">
+        <div class="item" *ngFor="let contact of cachedContacts">
+          <div [contact]="contact" (click)="addMemberToList(contact)">
+            <img
+              class="ui avatar image"
+              src="{{ contact.secondMember.avatarUrl }}"
             />
-            <div
-              class="ui error message"
-              *ngIf="email.invalid && email.touched"
-            >
-              Email invalid
-            </div>
+            {{ contact.secondMember.firstName }}
+            {{ contact.secondMember.secondName }}
           </div>
-          <button
-            id="submit-contact"
-            class="ui button primary"
-            type="submit"
-            [disabled]="userGroupForm.invalid"
-          >
-            Add
-          </button>
-          <button
-            id="modal-close"
-            class="ui button"
-            type="button"
-            (click)="cancel(userGroupForm.dirty)"
-          >
-            Close
-          </button>
         </div>
       </div>
-    </form>
+      <form
+        class="email-form"
+        [formGroup]="form"
+        (keydown.enter)="addEmailTag()"
+      >
+        <div class="email-input">
+          <div class="ui small input">
+            <input
+              formControlName="email"
+              type="text"
+              placeholder="Add by email"
+            />
+          </div>
+          <div
+            data-tooltip="Enter email and press Enter"
+            class="email-question"
+          >
+            <i class="question circle outline icon"></i>
+          </div>
+        </div>
+      </form>
+
+      <div class="label-div">Users` added:</div>
+      <div class="tag-container">
+        <div *ngFor="let email of emails" class="tag">
+          <app-tag
+            [email]="email"
+            [displayValue]="getEmailOrName(email)"
+            (tagRemoved)="removeTag($event)"
+          ></app-tag>
+        </div>
+      </div>
+    </div>
+    <div class="actions">
+      <div>
+        <button
+          class="ui button primary"
+          type="submit"
+          [disabled]="emails.length == 0 || isLoading"
+          (click)="addMembers()"
+        >
+          Add users
+        </button>
+      </div>
+    </div>
   </div>
 </div>

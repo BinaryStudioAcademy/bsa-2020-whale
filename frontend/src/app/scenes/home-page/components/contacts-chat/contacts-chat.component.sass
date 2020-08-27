@@ -4,6 +4,8 @@
 .chat
     height: 100%
     left: 10px
+    display: flex
+    flex-direction: column
 
 .chat-inner
     overflow-y: auto
@@ -35,6 +37,9 @@
     width: 80%
     align-items: center
 
+.ui.form .field
+    margin-bottom: 0px
+
 .send 
     margin-left: 1rem
     
@@ -48,8 +53,7 @@
 .chat-label
     position: sticky
     top: 0
-    border-bottom: 2px solid white
-    
+    border-bottom: 1px solid #f3f4f5
     .content
         display: flex
         justify-content: space-between
@@ -60,7 +64,7 @@
     align-items: center
 
 .ui.feed > .event.chat-label
-   background: rgba(243, 244, 245, 0.98)
+   background: rgba(255, 255, 255, 0.95)
 
 .user-chat-label
     color: black
@@ -80,8 +84,13 @@
     display: flex
     flex-direction: row-reverse
 
+.content
+    margin-right: 10px !important
+    margin-left: 10px !important
+
 .current-user-message
     float: right
+    margin-right: 0 !important
     
 .phone
     cursor: pointer
@@ -98,7 +107,7 @@
     outline: none
     resize: none
     border: none
-    background: #f3f4f5
+    background: #ffffff
 
 .author
     padding-left: 30%!important
@@ -108,9 +117,6 @@
 
 .subheader
     font-size: 14px
-
-.forma
-    height: 15%
    
 .circle.icon
     margin-left: 10px
@@ -126,6 +132,9 @@
     text-align: center
 
 .large.close.icon:hover
+    cursor: pointer
+
+.large.trash.icon:hover
     cursor: pointer
 
 .options__buttons

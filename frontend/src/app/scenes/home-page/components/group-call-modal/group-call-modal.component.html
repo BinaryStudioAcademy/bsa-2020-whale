@@ -9,8 +9,17 @@
       <div class="ui floating message" *ngIf="!isAnyoneThere">
         Seems noone has joined the call...
       </div>
+      <img
+        *ngIf="isImageHere() && isAnyoneThere"
+        class="ui avatar image"
+        src="{{ photoUrl }}"
+      />
+      <img
+        *ngIf="!isImageHere() && isAnyoneThere"
+        class="ui avatar image"
+        src="assets/img/user-group-icon.png"
+      />
     </div>
-    <img class="ui centered circular small image" src="{{ photoUrl }}" />
     <audio src="assets/audio/outgoing-call.mp3" autoplay loop></audio>
     <div class="icon-wrapper">
       <i
