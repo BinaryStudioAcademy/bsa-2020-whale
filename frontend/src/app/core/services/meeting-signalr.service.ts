@@ -9,7 +9,12 @@ import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
 import { Participant } from '@shared/models/participant/participant';
 import { PollDto } from '@shared/models/poll/poll-dto';
 import { PollResultDto } from '@shared/models/poll/poll-result-dto';
-import { ChangedMediaState, StreamChangedData } from '@shared/models';
+import {
+  ChangedMediaState,
+  MediaState,
+  StreamChangedData,
+  RoomDTO,
+} from '@shared/models';
 import { CanvasWhiteboardUpdate } from 'ng2-canvas-whiteboard';
 
 @Injectable({
@@ -72,6 +77,18 @@ export class MeetingSignalrService {
 
   private canvasErase = new Subject<boolean>();
   public readonly canvasErase$ = this.canvasErase.asObservable();
+
+  private onRoomCreated = new Subject<string>();
+  public readonly onRoomCreated$ = this.onRoomCreated.asObservable();
+
+  private onRoomCreatedToHost = new Subject<RoomDTO>();
+  public readonly onRoomCreatedToHost$ = this.onRoomCreatedToHost.asObservable();
+
+  private onRoomClosed = new Subject<string>();
+  public readonly onRoomClosed$ = this.onRoomClosed.asObservable();
+
+  private onParticipentMoveIntoRoom = new Subject<MeetingConnectionData>();
+  public readonly onParticipentMoveIntoRoom$ = this.onParticipentMoveIntoRoom.asObservable();
 
   private shareScreen = new Subject<string>();
   public readonly shareScreen$ = this.shareScreen.asObservable();
@@ -182,10 +199,27 @@ export class MeetingSignalrService {
           this.canvasErase.next(erase);
         });
 
+        this.signalHub.on('OnRoomCreated', (roomId: string) => {
+          this.onRoomCreated.next(roomId);
+        });
+
+        this.signalHub.on('OnRoomCreatedToHost', (roomData: RoomDTO) => {
+          this.onRoomCreatedToHost.next(roomData);
+        });
+
+        this.signalHub.on('OnRoomClosed', (meetingLink: string) => {
+          this.onRoomClosed.next(meetingLink);
+        });
+
+        this.signalHub.on('onParticipentMoveIntoRoom', (connectionData) => {
+          this.onParticipentMoveIntoRoom.next(connectionData);
+        });
+
         this.signalHub.on('OnStartShareScreen', (streamId: string) => {
           console.log(streamId);
           this.shareScreen.next(streamId);
         });
+
         this.signalHub.on('OnStopShareScreen', () => {
           this.shareScreenStop.next();
         });
@@ -217,6 +251,9 @@ export enum SignalMethods {
   OnPollCreated,
   OnDrawing,
   OnErasing,
+  CreateRoom,
+  OnMoveIntoRoom,
   OnStartShareScreen,
   OnStopShareScreen,
+  GetCreatedRooms,
 }

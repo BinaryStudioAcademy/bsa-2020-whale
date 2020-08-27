@@ -14,6 +14,8 @@ using Whale.Shared.Models.Group;
 using Whale.Shared.Models.Group.GroupUser;
 using Whale.Shared.Models.User;
 using Microsoft.AspNetCore.SignalR.Client;
+using Whale.Shared.Extentions;
+using Whale.DAL.Settings;
 
 namespace Whale.Shared.Services
 {
@@ -21,12 +23,16 @@ namespace Whale.Shared.Services
     {
         private UserService _userService;
         private SignalrService _signalrService;
+        private readonly BlobStorageSettings _blobStorageSettings;
         private NotificationsService _notificationsService;
-        public GroupService(WhaleDbContext context, IMapper mapper, UserService userService, SignalrService signalrService, NotificationsService notificationsService) : base(context, mapper)
+
+        public GroupService(WhaleDbContext context, IMapper mapper, UserService userService, SignalrService signalrService, NotificationsService notificationsService, BlobStorageSettings blobStorageSettings) : base(context, mapper)
         {
-            this._userService = userService;
-            this._signalrService = signalrService;
+            _userService = userService;
+            _signalrService = signalrService;
+            _blobStorageSettings = blobStorageSettings;
             _notificationsService = notificationsService;
+
         }
         public async Task<IEnumerable<GroupDTO>> GetAllGroupsAsync(string userEmail)
         {
@@ -192,10 +198,11 @@ namespace Whale.Shared.Services
                 .Select(g => g.User)
                 .ToListAsync();
 
+
             if (users is null)
                 throw new Exception("No users in group");
 
-            return _mapper.Map<IEnumerable<UserDTO>>(users);
+            return _mapper.Map<IEnumerable<UserDTO>>(await users.LoadAvatarsAsync(_blobStorageSettings));
         }
 
         public async Task<GroupUserDTO> AddUserToGroupAsync(GroupUserCreateDTO groupUser)
@@ -226,7 +233,7 @@ namespace Whale.Shared.Services
 
             var connection = await _signalrService.ConnectHubAsync("whale");
             await connection.InvokeAsync("OnNewGroup", groupDTO, user.Id);
-
+            newUserInGroup.User = await newUserInGroup.User.LoadAvatarAsync(_blobStorageSettings);
             return _mapper.Map<GroupUserDTO>(newUserInGroup);
         }
 

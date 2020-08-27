@@ -56,12 +56,7 @@
                   src="{{ returnCorrectLink(user) }}"
                 />
                 <div class="content">
-                  <div
-                    class="description"
-                    appHighlightCreator
-                    userEmail="{{ user.email }}"
-                    creatorEmail="{{ groupSelected.creatorEmail }}"
-                  >
+                  <div class="description">
                     {{ user?.firstName }}
                     {{ user?.secondName }}
                   </div>
@@ -71,6 +66,10 @@
                   data-position="left center"
                   class="icon-wrapper"
                 >
+                  <i
+                    *ngIf="user.email === groupSelected.creatorEmail"
+                    class="star icon"
+                  ></i>
                   <i
                     *ngIf="
                       groupSelected.creatorEmail == currentUser?.email &&

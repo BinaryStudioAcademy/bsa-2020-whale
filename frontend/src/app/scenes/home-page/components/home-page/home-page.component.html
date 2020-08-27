@@ -71,7 +71,10 @@
               {{ contact?.secondMember.firstName }}
               {{ contact?.secondMember.secondName }}
             </div>
-            <div>
+            <div
+              *ngIf="contact?.unreadMessageCount > 0"
+              class="ui circular label"
+            >
               {{ contact?.unreadMessageCount }}
             </div>
             <div

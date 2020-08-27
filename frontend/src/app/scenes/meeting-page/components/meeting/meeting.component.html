@@ -269,6 +269,17 @@
                 class="big user plus icon big-left-margin"
               ></i>
             </span>
+            <span
+              data-tooltip="Divide participants by rooms"
+              data-position="top right"
+              *ngIf="isHost"
+            >
+              <i
+                (click)="openRoomsModal()"
+                class="big user th large icon big-left-margin"
+              >
+              </i>
+            </span>
           </div>
           <div>
             <button
@@ -467,7 +478,7 @@
   >
     <button
       id="meeting-poll-new"
-      *ngIf="currentParticipant && currentParticipant.role == 1"
+      *ngIf="isHost || isRoom"
       (click)="pollService.onNewPollClick()"
       class="ui button"
       id="new-poll-btn"
@@ -481,7 +492,7 @@
         <hr class="poll-divider" />
         <span
           id="meeting-poll-delete"
-          *ngIf="currentParticipant.role == 1"
+          *ngIf="isHost"
           class="delete-poll-icon"
           (click)="pollService.onDeletePollIconClick(pollx)"
         >

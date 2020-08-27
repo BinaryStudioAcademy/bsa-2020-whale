@@ -380,9 +380,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
       return;
     }
     this.falseAllBooleans();
-    this.contactChatVisibility = true;
     this.groupSelected = undefined;
     this.contactSelected = contact;
+    setTimeout(() => {
+      this.contactChatVisibility = true;
+    }, 1);
   }
 
   onGroupClick(group: Group): void {

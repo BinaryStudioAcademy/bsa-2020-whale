@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using shortid;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,7 @@ using Whale.DAL;
 using Whale.DAL.Models;
 using Whale.DAL.Models.Poll;
 using Whale.Shared.Exceptions;
+using Whale.Shared.Models.Meeting;
 using Whale.Shared.Models.Poll;
 using Whale.Shared.Services;
 using Whale.Shared.Services.Abstract;
@@ -31,16 +33,14 @@ namespace Whale.MeetingAPI.Services
 
 		public async Task<PollDTO> CreatePoll(PollCreateDTO pollCreateDto)
 		{
-			if(!_context.Meetings.Any(meeting => meeting.Id == pollCreateDto.MeetingId))
-			{
-				throw new NotFoundException(nameof(Meeting));
-			}
+			_redisService.Connect();
+			var meetingData = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(pollCreateDto.MeetingId.ToString());
+			if (meetingData is null) throw new NotFoundException(nameof(Meeting));
 
 			Poll pollEntity = _mapper.Map<Poll>(pollCreateDto);
 			pollEntity.Id = Guid.NewGuid();
 			pollEntity.CreatedAt = DateTimeOffset.Now;
 
-			_redisService.Connect();
 			await _redisService.AddToSet<Poll>(pollEntity.MeetingId.ToString() + nameof(Poll), pollEntity);
 
 			var pollDto = _mapper.Map<PollDTO>(pollEntity);
