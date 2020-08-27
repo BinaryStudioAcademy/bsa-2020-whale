@@ -53,16 +53,10 @@ namespace Whale.SignalR.Hubs
             {
                 await _redisService.ConnectAsync();
                 if (await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(connectionData.MeetingId) is null) throw new NotFoundException("Room");
-                
-                participant = new ParticipantDTO
-                {
-                    Id = Guid.NewGuid(),
-                    ActiveConnectionId = "",
-                    Role =_groupsParticipants.Any(g => g.Value.Any(p => p.User.Email == connectionData.UserEmail && p.Role == ParticipantRole.Host)) ? ParticipantRole.Host : ParticipantRole.Participant,
-                    StreamId = "",
-                    User = await _userService.GetUserByEmail(connectionData.UserEmail),
-                    Meeting = null
-                };
+
+                var participantGroup = _groupsParticipants.FirstOrDefault((keyValuepair) => keyValuepair.Value.Any(p => p.User.Email == connectionData.UserEmail));
+                if (participantGroup.Equals(default(KeyValuePair<string, List<Participant>>))) throw new NotFoundException(nameof(Participant));
+                participant = participantGroup.Value.First(p => p.User.Email == connectionData.UserEmail);
             }
             else
             {
@@ -283,6 +277,7 @@ namespace Whale.SignalR.Hubs
         [HubMethodName("CreateRoom")]
         public async Task CreateRoom(RoomCreateDTO roomCreateData)
         {
+            Console.WriteLine("CreateRoom");
             var participantHost = _groupsParticipants[roomCreateData.MeetingId]?.FirstOrDefault(p => p.ActiveConnectionId == Context.ConnectionId);
             if (participantHost?.Role == ParticipantRole.Participant) return;
 
@@ -304,7 +299,7 @@ namespace Whale.SignalR.Hubs
 
             await Clients.Clients(participants).SendAsync("OnRoomCreated", roomId);
 
-            _roomService.CloseRoomAfterTimeExpire(roomCreateData.Duration, roomCreateData.MeetingLink, roomId, _groupsParticipants);
+            _roomService.CloseRoomAfterTimeExpire(roomCreateData.Duration, roomCreateData.MeetingLink, roomId, roomCreateData.MeetingId, _groupsParticipants);
         }
 
         [HubMethodName("OnMoveIntoRoom")]
@@ -321,7 +316,7 @@ namespace Whale.SignalR.Hubs
         [HubMethodName("GetCreatedRooms")]
         public async Task<ICollection<RoomDTO>> GetCreatedRooms(string meetingId)
         {
-            var participantHost = _groupsParticipants[meetingId]?.FirstOrDefault(p => p.ActiveConnectionId == Context.ConnectionId);
+            var participantHost = _groupsParticipants[meetingId].FirstOrDefault(p => p.ActiveConnectionId == Context.ConnectionId);
             if (participantHost?.Role == ParticipantRole.Participant) throw new InvalidCredentials();
 
             await _redisService.ConnectAsync();
@@ -334,9 +329,7 @@ namespace Whale.SignalR.Hubs
                 rooms.Add(new RoomDTO
                 {
                     RoomId = id,
-                    ParticipantsIds = _groupsParticipants[id]?.Select(p =>
-                         participants.FirstOrDefault(pp => pp?.User?.Email == p?.User?.Email)?.Id.ToString() // because in participant has diferent ids in rooms and meetings
-                    ).Where(p => p != null).ToList()
+                    ParticipantsIds = _groupsParticipants[id]?.Select(p => p.Id.ToString()).ToList()
                 });
             }
 

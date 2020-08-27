@@ -31,7 +31,7 @@ export class RoomService {
     );
 
     this.meetingSignalrService.onRoomClosed$.subscribe(
-      (mmetingLink) => (this.isDividedIntoRooms = false)
+      (meetingLink) => (this.isDividedIntoRooms = false)
     );
   }
 
@@ -52,8 +52,11 @@ export class RoomService {
         rooms.forEach((room) => {
           this.configureParticipantsInRooms(room.roomId, room.participantsIds);
         });
-        if (this.participantsInRooms.keys.length > 0)
+        if (rooms.length > 0) {
           this.isDividedIntoRooms = true;
+        } else {
+          this.isDividedIntoRooms = false;
+        }
       })
       .catch((err) => this.toastr.error(err));
   }
