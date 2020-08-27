@@ -86,6 +86,7 @@ export class AddGroupModalComponent extends SimpleModalComponent<null, Group> {
             id: this.result.id,
             label: this.result.label,
             description: this.result.description,
+            participantsEmails: [this.ownerEmail],
           })
           .subscribe((user) => {
             if (user !== undefined) {

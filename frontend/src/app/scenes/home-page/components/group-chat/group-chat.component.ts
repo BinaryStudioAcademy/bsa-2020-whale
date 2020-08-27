@@ -271,6 +271,7 @@ export class GroupChatComponent
         id: this.groupSelected.id,
         label: this.groupSelected.label,
         description: this.groupSelected.description,
+        participantsEmails: this.groupMembers.map((u) => u.email),
       })
       .subscribe((user) => {
         if (user !== undefined) {
