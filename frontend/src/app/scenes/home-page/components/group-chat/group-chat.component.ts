@@ -170,6 +170,16 @@ export class GroupChatComponent
         this.toastr.error(err.Message);
       }
     );
+    this.whaleSignalrService.updatedGroup$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (group) => {
+          this.groupSelected = group;
+        },
+        (err) => {
+          console.log(err.message);
+        }
+      );
   }
   ngOnDestroy(): void {
     this.unsubscribe$.next();
@@ -201,9 +211,11 @@ export class GroupChatComponent
   }
 
   public changeImage(): void {
-    this.simpleModalService.addModal(UpdateGroupImageModalComponent, {
-      group: this.groupSelected,
-    });
+    if (this.groupSelected.creatorEmail === this.currentUser.email) {
+      this.simpleModalService.addModal(UpdateGroupImageModalComponent, {
+        group: this.groupSelected,
+      });
+    }
   }
 
   public call(): void {
@@ -318,8 +330,12 @@ export class GroupChatComponent
         (group) => {
           if (group !== undefined) {
             this.groupSelected = group;
-            this.groupUpdated.emit(this.groupSelected);
-            console.log(this.groupSelected);
+            // this.groupUpdated.emit(this.groupSelected);
+            // console.log(this.groupSelected);
+            this.whaleSignalrService.invoke(
+              WhaleSignalMethods.OnGroupUpdate,
+              this.groupSelected
+            );
           }
         },
         (error) => this.toastr.error(error)

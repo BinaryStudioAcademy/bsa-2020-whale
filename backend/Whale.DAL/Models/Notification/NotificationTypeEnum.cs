@@ -3,6 +3,7 @@
     public enum NotificationTypeEnum
     {
         TextNotification,
-        AddContactNotification
+        AddContactNotification,
+        MeetingInviteNotification
     }
 }

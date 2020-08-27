@@ -204,6 +204,17 @@ export class HomePageComponent implements OnInit, OnDestroy {
                       console.log(err.message);
                     }
                   );
+
+                this.whaleSignalrService.updatedGroup$
+                  .pipe(takeUntil(this.unsubscribe$))
+                  .subscribe(
+                    (group) => {
+                      this.updateGroup(group);
+                    },
+                    (err) => {
+                      console.log(err.message);
+                    }
+                  );
               },
               (error) => this.toastr.error(error.Message)
             );
@@ -369,9 +380,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
       return;
     }
     this.falseAllBooleans();
-    this.contactChatVisibility = true;
     this.groupSelected = undefined;
     this.contactSelected = contact;
+    setTimeout(() => {
+      this.contactChatVisibility = true;
+    }, 1);
   }
 
   onGroupClick(group: Group): void {
@@ -460,10 +473,10 @@ export class HomePageComponent implements OnInit, OnDestroy {
       group.photoUrl !== ''
     );
   }
-  updateGroup(event) {
-    const updateItem = this.groups.find((x) => x.id === event.id);
+  public updateGroup(group: Group): void {
+    const updateItem = this.groups.find((x) => x.id === group.id);
     const index = this.groups.indexOf(updateItem);
-    this.groups[index] = event;
+    this.groups[index] = group;
   }
 }
 export interface UserModel {

@@ -9,6 +9,7 @@ export class MediaSettingsService {
     VideoDeviceId: null,
     InputDeviceId: null,
     OutputDeviceId: null,
+    IsMirrorVideo: false,
   } as MediaSettings;
 
   public get settings(): MediaSettings {
@@ -68,5 +69,9 @@ export class MediaSettingsService {
         deviceId: this._settings.InputDeviceId,
       },
     };
+  }
+  public changeMirror(isMirror: boolean) {
+    this._settings.IsMirrorVideo = isMirror;
+    this.saveSettingsInLocalStorage();
   }
 }
