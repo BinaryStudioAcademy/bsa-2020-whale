@@ -23,10 +23,10 @@ export class CheckAccessToMediaGuard implements CanActivate {
     next: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Promise<boolean | UrlTree> {
-    await this.authService.user$.toPromise();
-    if (!this.authService.isSignedIn) {
-      return this.router.navigate(['/']);
-    }
+    // await this.authService.user$.toPromise();
+    // if (!this.authService.isSignedIn) {
+    //   return this.router.navigate(['/']);
+    // }
     try {
       const stream = await navigator.mediaDevices.getUserMedia(
         await this.mediaSettingsService.getMediaConstraints()
