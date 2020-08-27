@@ -304,7 +304,7 @@ namespace Whale.SignalR.Hubs
 
             await Clients.Clients(participants).SendAsync("OnRoomCreated", roomId);
 
-            _roomService.CloseRoomAfterTimeExpire(roomCreateData.Duration, roomCreateData.MeetingLink, roomId);
+            _roomService.CloseRoomAfterTimeExpire(roomCreateData.Duration, roomCreateData.MeetingLink, roomId, _groupsParticipants);
         }
 
         [HubMethodName("OnMoveIntoRoom")]
@@ -335,7 +335,7 @@ namespace Whale.SignalR.Hubs
                 {
                     RoomId = id,
                     ParticipantsIds = _groupsParticipants[id]?.Select(p =>
-                         participants.FirstOrDefault(p => p.Id == p?.Id)?.Id.ToString() // because in participant has diferent ids in rooms and meetings
+                         participants.FirstOrDefault(pp => pp?.User?.Email == p?.User?.Email)?.Id.ToString() // because in participant has diferent ids in rooms and meetings
                     ).Where(p => p != null).ToList()
                 });
             }
@@ -345,18 +345,13 @@ namespace Whale.SignalR.Hubs
 
         private async Task DeleteMeeting(string meetingId)
         {
-            _groupsParticipants.Remove(meetingId);
             await _redisService.ConnectAsync();
             var redisDto = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(meetingId);
             if (!redisDto.IsRoom)
             {
+                _groupsParticipants.Remove(meetingId);
                 await _meetingService.EndMeeting(Guid.Parse(meetingId));
                 await _meetingHttpService.DeleteMeetingPolls(meetingId);
-            }
-            else
-            {
-                await _redisService.RemoveAsync(meetingId);
-                await _redisService.RemoveAsync(meetingId + nameof(Poll));
             }
         }
 

@@ -47,7 +47,6 @@ const routes: Routes = [
     path: 'room/:id',
     component: MeetingComponent,
     canActivate: [AngularFireAuthGuard],
-    canDeactivate: [LastParticipantGuard],
     data: { authGuardPipe: redirectUnauthorizedToLogin },
   },
   {

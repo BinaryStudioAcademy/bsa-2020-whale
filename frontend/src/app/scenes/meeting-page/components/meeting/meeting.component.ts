@@ -791,7 +791,7 @@ export class MeetingComponent
     this.meeting.participants = this.meeting.participants.filter(
       (p) => p.id !== participant.id
     );
-    this.roomService.participants = this.meeting.participants;
+    this.roomService.deleteParticipant(participant?.user?.email);
     this.otherParticipants = this.otherParticipants.filter(
       (p) => p.id !== participant.id
     );

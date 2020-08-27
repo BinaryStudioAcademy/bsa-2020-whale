@@ -56,4 +56,17 @@ export class RoomService {
       })
       .catch((err) => this.toastr.error(err));
   }
+
+  public deleteParticipant(participantEmail: string): void {
+    this.participants = this.participants.filter(
+      (p) => p?.user?.email != participantEmail
+    );
+    const keys = Array.from(this.participantsInRooms.keys());
+    for (const key of keys) {
+      const participants = this.participantsInRooms
+        .get(key)
+        .filter((p) => p.user.email != participantEmail);
+      this.participantsInRooms.set(key, participants);
+    }
+  }
 }
