@@ -17,6 +17,7 @@ import {
   ParticipantDynamicData,
   Participant,
 } from '../../../shared/models';
+import { MediaSettingsService } from 'app/core/services';
 
 @Component({
   selector: 'app-participant-card',
@@ -46,13 +47,22 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
   private participantName: HTMLElement;
   private unsubscribe$ = new Subject<void>();
 
-  constructor(private elRef: ElementRef) {}
+  constructor(
+    private elRef: ElementRef,
+    private mediaSettingsService: MediaSettingsService
+  ) {}
 
   public ngOnInit(): void {
     this.initCardElements();
     this.handleActionsPopup();
 
     this.video.srcObject = this.data.stream;
+    if (
+      this.mediaSettingsService.settings.IsMirrorVideo &&
+      this.data.isCurrentUser
+    ) {
+      document.querySelector('video').style.transform = 'scale(-1,1)';
+    }
     this.actionsPopupContent = this.data.isCurrentUser
       ? this.elRef.nativeElement.querySelector('.current-user-actions')
       : this.elRef.nativeElement.querySelector('.other-participant-actions');
