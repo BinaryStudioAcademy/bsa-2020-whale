@@ -52,12 +52,14 @@ export class MeetingInviteComponent
       .subscribe(
         (response) => {
           console.log(response);
-          this.cachedContacts = this.contacts = response.filter(
+          const filteredContacts = response.filter(
             (c) =>
               !this.participants.find(
                 (p) => p.user.email === c.secondMember.email
               )
           );
+          this.contacts = Array.from(filteredContacts);
+          this.cachedContacts = Array.from(filteredContacts);
         },
         (error) => {
           console.error(error);

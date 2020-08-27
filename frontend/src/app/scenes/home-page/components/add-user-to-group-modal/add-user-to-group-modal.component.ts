@@ -63,10 +63,12 @@ export class AddUserToGroupModalComponent
       .getRequest<Contact[]>(environment.apiUrl + '/api/Contacts/accepted')
       .subscribe(
         (response) => {
-          this.cachedContacts = this.contacts = response.filter(
+          const filteredGroups = response.filter(
             (c) =>
               !this.participantsEmails.find((e) => e === c.secondMember.email)
           );
+          this.contacts = Array.from(filteredGroups);
+          this.contacts = Array.from(filteredGroups);
         },
         (error) => {
           console.error(error);
