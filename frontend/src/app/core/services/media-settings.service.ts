@@ -48,9 +48,7 @@ export class MediaSettingsService {
     if (navigator.userAgent.search(/Firefox/) <= 0) {
       element
         .setSinkId(sinkId)
-        .then(() => {
-          console.log(`Success, audio output device attached: ${sinkId}`);
-        })
+        .then(() => {})
         .catch((error) => {
           let errorMessage = error;
           if (error.name === 'SecurityError') {

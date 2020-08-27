@@ -343,6 +343,17 @@ namespace Whale.SignalR.Hubs
             return rooms;
         }
 
+        [HubMethodName("OnHostChangeRoom")]
+        public async Task OnHostChangeRoom(MeetingConnectDTO connectionData)
+        {
+            var disconnectedParticipant = _groupsParticipants[connectionData.MeetingId]?.FirstOrDefault(p => p.User.Email == connectionData.UserEmail);
+
+            connectionData.Participant = disconnectedParticipant;
+            _groupsParticipants[connectionData.MeetingId].Remove(disconnectedParticipant);
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, connectionData.MeetingId);
+            await Clients.Group(connectionData.MeetingId).SendAsync("OnParticipantLeft", connectionData);
+        }
+
         private async Task DeleteMeeting(string meetingId)
         {
             await _redisService.ConnectAsync();

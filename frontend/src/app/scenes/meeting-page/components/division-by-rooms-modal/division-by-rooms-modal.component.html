@@ -40,14 +40,17 @@
         "
       >
         <div class="ui header">
-          Room:
-          <span data-tooltip="Moove to room" data-position="top right">
-            <i
-              (click)="redirectIntoRoom(participantsOfRoom.key)"
-              class="caret square right icon big-left-margin"
-            >
-            </i>
-          </span>
+          <div>
+            Room:
+          </div>
+          <div
+            data-tooltip="Join room"
+            data-position="top right"
+            class="ui inverted secondary button"
+            (click)="redirectIntoRoom(participantsOfRoom.key)"
+          >
+            Join
+          </div>
         </div>
         <div
           class="ui item participant"
