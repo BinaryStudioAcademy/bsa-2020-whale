@@ -17,6 +17,7 @@ import { MediaSettingsService } from '../services/media-settings.service';
 export class CheckAccessToMediaGuard implements CanActivate {
   constructor(
     private router: Router,
+    private toastr: ToastrService,
     private mediaSettingsService: MediaSettingsService
   ) {}
 
