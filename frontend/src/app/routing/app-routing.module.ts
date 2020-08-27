@@ -41,7 +41,12 @@ const routes: Routes = [
     path: 'redirection/:link',
     component: RedirectionComponent,
   },
-  // { path: 'meeting-page', component: MeetingComponent },
+  {
+    path: 'room/:id',
+    component: MeetingComponent,
+    canActivate: [AngularFireAuthGuard],
+    data: { authGuardPipe: redirectUnauthorizedToLogin },
+  },
   {
     path: 'profile-page',
     component: ProfilePageComponent,

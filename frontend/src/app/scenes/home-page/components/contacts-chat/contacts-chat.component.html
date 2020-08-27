@@ -63,6 +63,8 @@
           ? 'event visavis'
           : 'event row-reverse author'
       "
+      #intersectionElement
+      id="{{ message.id }}"
     >
       <div class="label">
         <img src="{{ message.author?.avatarUrl }}" />
@@ -90,8 +92,6 @@
           </div>
         </div>
         <div
-          #intersectionElement
-          id="{{ message.id }}"
           disabled
           [ngClass]="
             contactSelected.firstMemberId !== message.author?.id
