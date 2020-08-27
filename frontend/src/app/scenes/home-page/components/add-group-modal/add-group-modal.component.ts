@@ -64,29 +64,37 @@ export class AddGroupModalComponent extends SimpleModalComponent<null, Group> {
   }
 
   public submit(): void {
-    const blob = this.dataURLtoBlob(this.croppedImage);
-    this.blobService.postBlobUploadImage(blob).subscribe((photo) => {
-      this.newGroup.photoUrl = photo;
-      this.newGroup.creatorEmail = this.authService.currentUser.email;
-      this.groupService.createGroup(this.newGroup).subscribe(
-        (resp) => {
-          this.result = resp.body;
-          this.close();
-          this.simpleModalService
-            .addModal(AddUserToGroupModalComponent, {
-              id: this.result.id,
-              label: this.result.label,
-              description: this.result.description,
-            })
-            .subscribe((user) => {
-              if (user !== undefined) {
-                this.toastr.success(`Users added successfuly`);
-              }
-            });
-        },
-        (error) => this.toastr.error(error.Message)
-      );
-    });
+    this.newGroup.creatorEmail = this.authService.currentUser.email;
+    if (this.isFileUploaded) {
+      const blob = this.dataURLtoBlob(this.croppedImage);
+      this.blobService.postBlobUploadImage(blob).subscribe((photo) => {
+        this.newGroup.photoUrl = photo;
+        this.createGroup(this.newGroup);
+      });
+    } else {
+      this.createGroup(this.newGroup);
+    }
+  }
+
+  public createGroup(group: Group): void {
+    this.groupService.createGroup(this.newGroup).subscribe(
+      (resp) => {
+        this.result = resp.body;
+        this.close();
+        this.simpleModalService
+          .addModal(AddUserToGroupModalComponent, {
+            id: this.result.id,
+            label: this.result.label,
+            description: this.result.description,
+          })
+          .subscribe((user) => {
+            if (user !== undefined) {
+              this.toastr.success(`Users added successfuly`);
+            }
+          });
+      },
+      (error) => this.toastr.error(error.Message)
+    );
   }
 
   public cancel(dirty: boolean): void {
