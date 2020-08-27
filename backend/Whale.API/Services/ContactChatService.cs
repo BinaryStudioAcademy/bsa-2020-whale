@@ -109,7 +109,7 @@ namespace Whale.API.Services
             );
 
             var message = await _context.DirectMessages.FirstOrDefaultAsync(
-               message => message.Id == unreadMessageDto.MessageId
+                message => message.Id == unreadMessageDto.MessageId
             );
 
             Console.WriteLine($"MarkMessageRead {unreadMessageDto.MessageId}");

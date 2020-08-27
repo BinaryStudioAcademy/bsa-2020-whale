@@ -27,7 +27,7 @@ import { environment } from '@env';
 import { Injectable } from '@angular/core';
 import { HubConnection } from '@aspnet/signalr';
 import { Subject, from, Observable, ReplaySubject } from 'rxjs';
-import { tap, takeUntil, take } from 'rxjs/operators';
+import { tap, takeUntil, take, first } from 'rxjs/operators';
 import { Message } from '@angular/compiler/src/i18n/i18n_ast';
 import { Console } from 'console';
 import { stringify } from 'querystring';
@@ -45,33 +45,20 @@ import { MessageService } from 'app/core/services/message.service';
 })
 export class ContactsChatComponent
   implements OnInit, OnChanges, OnDestroy, AfterViewInit, AfterViewChecked {
-  @ViewChildren('intersectionElement') intersectionElements: QueryList<
-    ElementRef<HTMLDivElement>
-  >;
-  public intersectionObserver: IntersectionObserver;
-
-  private hubConnection: HubConnection;
-  counter = 0;
-  isMessagesLoading = true;
-  isFirstLoad = true;
-
-  private receivedMsg = new Subject<DirectMessage>();
-  public receivedMsg$ = this.receivedMsg.asObservable();
-
-  private receivedMessages = new ReplaySubject<void>();
-  public receivedMessages$ = this.receivedMessages.asObservable();
-
-  private unsubscribe$ = new Subject<void>();
-
-  @ViewChild('chatWindow', { static: false }) chatBlock: ElementRef<
-    HTMLElement
-  >;
-  chatElement: any;
-
   @Input() contactSelected: Contact;
   @Input() loggedInUser: User;
   @Output() chat: EventEmitter<boolean> = new EventEmitter<boolean>();
-  //@Output() messageRead = new EventEmitter<string>();
+
+  @ViewChildren('intersectionElement') intersectionElements: QueryList<
+    ElementRef<HTMLDivElement>
+  >;
+  @ViewChild('chatWindow', { static: false }) chatBlock: ElementRef<
+    HTMLElement
+  >;
+
+  public intersectionObserver: IntersectionObserver;
+  chatElement: any;
+  counter = 0;
   directMessageRecieved = new EventEmitter<DirectMessage>();
   messages: DirectMessage[] = [];
   unreadMessages: DirectMessage[] = [];
@@ -82,6 +69,15 @@ export class ContactsChatComponent
     createdAt: new Date(),
     attachment: false,
   };
+
+  isMessagesLoading = true;
+  isFirstLoad = true;
+
+  private receivedMessages = new ReplaySubject<void>();
+  public receivedMessages$ = this.receivedMessages.asObservable();
+
+  private unsubscribe$ = new Subject<void>();
+
   constructor(
     private signalRService: SignalRService,
     private httpService: HttpService,
@@ -89,49 +85,33 @@ export class ContactsChatComponent
     private simpleModalService: SimpleModalService,
     private contactService: ContactService,
     private messageService: MessageService
-  ) {
-    console.log(messageService.creationDate);
-  }
+  ) {}
 
   ngOnInit(): void {
-    from(this.signalRService.registerHub(environment.signalrUrl, 'chatHub'))
-      .pipe(
-        tap((hub) => {
-          this.hubConnection = hub;
-        })
-      )
-      .subscribe(() => {
-        this.hubConnection.on(
-          'NewMessageReceived',
-          (message: DirectMessage) => {
-            this.receivedMsg.next(message);
+    this.messageService.receivedMessage$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (newMessage) => {
+          this.messages.push(newMessage);
+          if (newMessage.authorId == this.contactSelected?.secondMember.id) {
+            this.intersectionElements.changes.pipe(first()).subscribe(() => {
+              this.intersectionObserver.observe(
+                this.intersectionElements.last.nativeElement
+              );
+            });
           }
-        );
-        this.hubConnection.invoke('JoinGroup', this.contactSelected.id);
-      });
-    this.receivedMsg$.pipe(takeUntil(this.unsubscribe$)).subscribe(
-      (newMessage) => {
-        this.messages.push(newMessage);
-        if (newMessage.authorId == this.contactSelected?.secondMember.id) {
-          this.contactSelected.unreadMessageCount += 1;
-          this.intersectionElements.changes.subscribe(() => {
-            this.intersectionObserver.observe(
-              this.intersectionElements.last.nativeElement
-            );
-          });
+          console.log('received a messsage ', newMessage);
+        },
+        (err) => {
+          console.log(err.message);
+          this.toastr.error(err.Message);
         }
-        console.log('received a messsage ', newMessage);
-      },
-      (err) => {
-        console.log(err.message);
-        this.toastr.error(err.Message);
-      }
-    );
+      );
   }
 
   ngAfterViewInit(): void {
     this.chatElement = this.chatBlock.nativeElement;
-    this.intersectionElements.changes.subscribe(() => {
+    this.intersectionElements.changes.pipe(first()).subscribe(() => {
       this.receivedMessages$.subscribe(() => {
         this.registerIntersectionObserve();
       });
@@ -160,7 +140,6 @@ export class ContactsChatComponent
         },
         (error) => console.log(error)
       );
-    this.hubConnection?.invoke('JoinGroup', this.contactSelected.id);
   }
 
   ngOnDestroy(): void {
@@ -200,7 +179,7 @@ export class ContactsChatComponent
 
   close(): void {
     this.chat.emit(false);
-    this.hubConnection.invoke('Disconnect', this.contactSelected.id);
+    // this.messageService.hubConnection.invoke('Disconnect', this.contactSelected.id);
   }
 
   public call(): void {
@@ -260,25 +239,28 @@ export class ContactsChatComponent
   public onIntersection(entries: IntersectionObserverEntry[]) {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        console.log(entry.target);
         this.intersectionObserver.unobserve(entry.target);
         this.unreadMessages.splice(
           this.unreadMessages.findIndex((um) => um.id == entry.target.id),
           1
         );
         this.contactSelected.unreadMessageCount -= 1;
-        const unreadMessageId: UnreadMessageId = {
-          messageId: entry.target.id,
-          receiverId: this.loggedInUser.id,
-        };
-        console.log(unreadMessageId);
-        this.httpService
-          .postRequest('/api/ContactChat/markRead', unreadMessageId)
-          .subscribe(
-            () => {},
-            (error) => console.error(error)
-          );
+        this.sendMarkReadRequest(entry.target.id, this.loggedInUser.id);
       }
     });
+  }
+
+  public sendMarkReadRequest(messageId: string, userId: string) {
+    const unreadMessageId: UnreadMessageId = {
+      messageId: messageId,
+      receiverId: userId,
+    };
+
+    this.httpService
+      .postRequest('/api/ContactChat/markRead', unreadMessageId)
+      .subscribe(
+        () => {},
+        (error) => console.error(error)
+      );
   }
 }

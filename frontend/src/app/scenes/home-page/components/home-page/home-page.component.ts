@@ -46,6 +46,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
   public isUserLoadig = true;
   public isMeetingLoading = false;
   public isGroupsLoading = true;
+  public isChatHubLoading = true;
 
   private unsubscribe$ = new Subject<void>();
 
@@ -60,9 +61,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
     private whaleSignalrService: WhaleSignalService,
     private contactService: ContactService,
     private messageService: MessageService
-  ) {
-    console.log(messageService.creationDate);
-  }
+  ) {}
 
   ngOnDestroy(): void {
     this.unsubscribe$.next();
@@ -84,6 +83,34 @@ export class HomePageComponent implements OnInit, OnDestroy {
             .subscribe(
               (data: Contact[]) => {
                 this.contacts = data;
+
+                this.messageService.registerHub().subscribe(
+                  () => {
+                    data.forEach((contact) => {
+                      this.messageService.joinGroup(contact.id);
+                    });
+
+                    this.isChatHubLoading = false;
+
+                    this.messageService.receivedMessage$
+                      .pipe(takeUntil(this.unsubscribe$))
+                      .subscribe((newMessage) => {
+                        console.log('home page subscription');
+                        if (this.loggedInUser.id == newMessage.authorId) {
+                          return;
+                        }
+                        const contact = this.contacts.find(
+                          (contact) => contact.id == newMessage.contact.id
+                        );
+                        contact.unreadMessageCount += 1;
+                      });
+                  },
+                  (error) => {
+                    console.error(error);
+                    this.isChatHubLoading = false;
+                  }
+                );
+
                 console.log(data);
                 this.onContactsClick();
 

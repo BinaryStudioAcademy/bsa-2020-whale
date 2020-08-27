@@ -37,7 +37,10 @@
           Enter the meeting
         </a>
       </a>
-      <spiner *ngIf="isContactsLoading" [size]="'medium'"></spiner>
+      <spiner
+        *ngIf="isContactsLoading || isChatHubLoading"
+        [size]="'medium'"
+      ></spiner>
       <a
         id="home-toggle-contacts"
         (click)="onContactsClick()"
