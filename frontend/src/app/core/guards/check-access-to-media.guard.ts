@@ -24,7 +24,7 @@ export class CheckAccessToMediaGuard implements CanActivate {
     state: RouterStateSnapshot
   ): Promise<boolean | UrlTree> {
     await this.authService.user$.toPromise();
-    if (! this.authService.isSignedIn) {
+    if (!this.authService.isSignedIn) {
       return this.router.navigate(['/']);
     }
     try {
