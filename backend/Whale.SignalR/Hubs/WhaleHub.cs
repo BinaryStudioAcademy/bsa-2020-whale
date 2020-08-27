@@ -179,6 +179,21 @@ namespace Whale.SignalR.Hubs
             }
         }
 
+        [HubMethodName("OnGroupUpdate")]
+        public async Task UpdateGroup(GroupDTO groupDTO)
+        {
+            var group = await _groupsService.GetGroupAsync(groupDTO.Id);
+            var groupUsers = await _groupsService.GetAllUsersInGroupAsync(group.Id);
+            foreach (var usr in groupUsers)
+            {
+                var connections = await _whaleService.GetConnections(usr.Id);
+                foreach (var connection in connections)
+                {
+                    await Clients.Client(connection).SendAsync("OnGroupUpdate", groupDTO);
+                }
+            }
+        }
+
         [HubMethodName("OnDeleteGroup")]
         public async Task DeleteGroup(Guid groupDTO, IEnumerable<GroupUser> groupUsers)
         {

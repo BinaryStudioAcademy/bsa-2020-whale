@@ -71,6 +71,9 @@ export class WhaleSignalService {
   private removedFromGroup = new Subject<string>();
   public removedFromGroup$ = this.removedFromGroup.asObservable();
 
+  private updatedGroup = new Subject<Group>();
+  public updatedGroup$ = this.updatedGroup.asObservable();
+
   constructor(hubService: SignalRService) {
     from(hubService.registerHub(environment.signalrUrl, 'whale'))
       .pipe(
@@ -150,6 +153,10 @@ export class WhaleSignalService {
         this.signalHub.on('OnRemovedFromGroup', (groupId: string) => {
           this.removedFromGroup.next(groupId);
         });
+
+        this.signalHub.on('OnGroupUpdate', (group: Group) => {
+          this.updatedGroup.next(group);
+        });
       });
   }
 
@@ -186,4 +193,5 @@ export enum WhaleSignalMethods {
   OnNewGroup,
   OnDeleteGroup,
   OnRemovedFromGroup,
+  OnGroupUpdate,
 }

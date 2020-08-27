@@ -88,6 +88,17 @@ namespace Whale.Shared.Services
             return AddNotification(contacter, JsonConvert.SerializeObject(options, camelSettings), NotificationTypeEnum.AddContactNotification);
         }
 
+        public Task<NotificationDTO> InviteMeetingNotification(string owner, string contacter, string link)
+        {
+            var options = new OptionsInviteMeeting
+            {
+                Link = link,
+                ContactEmail = owner
+            };
+
+            return AddNotification(contacter, JsonConvert.SerializeObject(options, camelSettings), NotificationTypeEnum.MeetingInviteNotification);
+        }
+
         public async Task DeleteNotificationPendingContactAsync(string owner, string contacter)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == contacter);
