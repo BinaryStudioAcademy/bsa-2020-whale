@@ -62,7 +62,8 @@
                   </div>
                 </div>
                 <div
-                  data-tooltip="Delete user"
+                  *ngIf="user.email === groupSelected.creatorEmail"
+                  data-tooltip="Group host"
                   data-position="left center"
                   class="icon-wrapper"
                 >
@@ -70,11 +71,17 @@
                     *ngIf="user.email === groupSelected.creatorEmail"
                     class="star icon"
                   ></i>
+                </div>
+                <div
+                  *ngIf="
+                    groupSelected.creatorEmail == currentUser?.email &&
+                    user.email !== currentUser?.email
+                  "
+                  data-tooltip="Delete user"
+                  data-position="left center"
+                  class="icon-wrapper"
+                >
                   <i
-                    *ngIf="
-                      groupSelected.creatorEmail == currentUser?.email &&
-                      user.email !== currentUser?.email
-                    "
                     class="close icon"
                     (click)="
                       deleteUserFromGroup(user); $event.stopPropagation()
