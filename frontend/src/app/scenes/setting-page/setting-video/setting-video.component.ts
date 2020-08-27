@@ -12,6 +12,8 @@ export class SettingVideoComponent implements OnInit, OnDestroy {
   public videoDevices: MediaDeviceInfo[] = [null];
   public videoStream: MediaStream;
   public deviceId: string = '';
+  public isMirror;
+  public checkbox;
   constructor(public mediaSettingsService: MediaSettingsService) {}
 
   ngOnInit(): void {
@@ -25,6 +27,12 @@ export class SettingVideoComponent implements OnInit, OnDestroy {
           );
         }
         this.deviceId = this.mediaSettingsService.settings.VideoDeviceId;
+        this.isMirror = this.mediaSettingsService.settings.IsMirrorVideo;
+        this.checkbox = document.getElementById('mirror') as any;
+        this.checkbox.checked = this.isMirror;
+        if (this.checkbox.checked) {
+          document.querySelector('video').style.transform = 'scale(-1,1)';
+        }
         this.showVideo();
       })
       .catch((error) => console.log(error));
@@ -64,5 +72,15 @@ export class SettingVideoComponent implements OnInit, OnDestroy {
       audio: false,
     });
     this.handleSuccess(this.videoStream);
+  }
+  public changeMirror(event) {
+    if (event.target.checked) {
+      this.isMirror = true;
+      document.querySelector('video').style.transform = 'scale(-1,1)';
+    } else {
+      this.isMirror = false;
+      document.querySelector('video').style.transform = 'scale(1,1)';
+    }
+    this.mediaSettingsService.changeMirror(this.isMirror);
   }
 }
