@@ -465,7 +465,8 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (streamId) => {
-          console.log(streamId);
+          let stream = this.connectedStreams.find((x) => x.id == streamId);
+          console.log(this.connectedStreams.includes(stream));
           this.fullPage(streamId);
           this.toastr.success('Start sharing screen');
         },
@@ -763,7 +764,8 @@ export class MeetingComponent
   public leave(): void {
     //this is made to remove eventListener for other routes
     window.onbeforeunload = function () {};
-
+    this.meter.stopListening();
+    this.meter.disconnect();
     this.router.navigate(['/home']);
   }
 
@@ -1303,8 +1305,8 @@ export class MeetingComponent
 
   //#region ShareScreen
   async shareScreen() {
-    const mediaDevices = navigator.mediaDevices as any;
-    let stream = await mediaDevices.getDisplayMedia();
+    const mediaDevices = (await navigator.mediaDevices) as any;
+    const stream = await mediaDevices.getDisplayMedia();
     await this.handleSuccessVideo(stream);
     this.meetingSignalrService.invoke(SignalMethods.OnStartShareScreen, {
       streamId: this.currentUserStream.id,
@@ -1314,9 +1316,8 @@ export class MeetingComponent
   }
   public fullPage(streamId) {
     const stream = this.connectedStreams.find((x) => x.id === streamId);
-    console.log(stream.getVideoTracks());
-    const fullVideo = document.createElement('video');
     const parrent = document.getElementsByClassName('main-content')[0];
+    let fullVideo = document.createElement('video');
     parrent.appendChild(fullVideo);
     fullVideo.className += 'fullVideo';
     fullVideo.style.width = '100vw';
@@ -1333,13 +1334,13 @@ export class MeetingComponent
     );
   }
   async stopShare() {
-    let fullVideo = document.getElementsByClassName('fullVideo')[0];
+    let fullVideo = document.querySelector('.fullVideo') as HTMLElement;
     fullVideo.remove();
-    this.currentUserStream = await navigator.mediaDevices.getUserMedia(
+    /*this.currentUserStream = await navigator.mediaDevices.getUserMedia(
       await this.mediaSettingsService.getMediaConstraints()
     );
     this.handleSuccessVideo(this.currentUserStream);
-    document.querySelector('video').srcObject = this.currentUserStream;
+    document.querySelector('video').srcObject = this.currentUserStream;*/
     this.isSharing = false;
     this.toastr.info('Stop sharing screen');
   }

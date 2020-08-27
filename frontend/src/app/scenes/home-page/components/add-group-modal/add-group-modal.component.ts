@@ -64,18 +64,6 @@ export class AddGroupModalComponent extends SimpleModalComponent<null, Group> {
     this.croppedImage = event.base64;
   }
 
-  public uploadPhoto(): void {
-    const blob = this.dataURLtoBlob(this.croppedImage);
-    this.blobService.postBlobUploadImage(blob).subscribe((resp) => {
-      this.newGroup.photoUrl = resp;
-      console.log(`image: ${resp}`);
-    });
-
-    this.isImageCropped = false;
-    this.croppedImage = '';
-    this.imageChangedEvent = '';
-  }
-
   public submit(): void {
     const blob = this.dataURLtoBlob(this.croppedImage);
     this.blobService.postBlobUploadImage(blob).subscribe((photo) => {

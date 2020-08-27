@@ -1,0 +1,118 @@
+<div
+  id="modal-div-close"
+  class="ui dimmer modals page visible active"
+  (click)="cancel(groupForm.dirty)"
+>
+  <div class="ui small modal visible active" (click)="$event.stopPropagation()">
+    <div class="header">
+      Edit group information
+      <div class="close-icon">
+        <span data-tooltip="Cancel editing" data-position="bottom right">
+          <i
+            id="chat-close"
+            class="small close icon"
+            (click)="cancel(groupForm.dirty)"
+          ></i>
+        </span>
+      </div>
+    </div>
+    <form class="ui form" #groupForm="ngForm" (ngSubmit)="submit()">
+      <div class="content">
+        <div class="ui segment">
+          <div class="field">
+            <label>Name</label>
+            <input
+              type="text"
+              [(ngModel)]="label"
+              #groupName="ngModel"
+              name="groupName"
+              placeholder="Group name"
+              required
+            />
+            <div
+              class="ui error message"
+              *ngIf="groupName.invalid && groupName.touched"
+            >
+              Please enter the group name
+            </div>
+          </div>
+          <div class="field">
+            <label>Short description</label>
+            <input
+              type="text"
+              [(ngModel)]="description"
+              #groupDescription="ngModel"
+              name="groupDescription"
+              placeholder="Group description"
+            />
+            <div
+              class="ui error message"
+              *ngIf="groupDescription.invalid && groupDescription.touched"
+            >
+              Please enter the group description
+            </div>
+          </div>
+          <div class="field">
+            <label>Group administrator</label>
+            <div class="select">
+              <div class="custom-select">
+                <select
+                  id="group-admin-select"
+                  name="groupAdmin"
+                  class="ui dropdown"
+                  [(ngModel)]="creatorEmail"
+                >
+                  <option
+                    *ngFor="let user of groupMembers"
+                    [ngValue]="user.email"
+                  >
+                    {{ user.firstName }} {{ user.secondName }}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="upload-wrapper">
+              <label>Image</label>
+              <label id="group-upload" class="ui button" for="file">
+                Upload from file
+              </label>
+              <input
+                hidden
+                type="file"
+                id="file"
+                (change)="uploadFile($event)"
+                accept="image/*"
+              />
+            </div>
+            <div class="upload" *ngIf="isFileUploaded">
+              <div class="cropper">
+                <image-cropper
+                  [imageChangedEvent]="imageChangedEvent"
+                  [maintainAspectRatio]="true"
+                  [aspectRatio]="1 / 1"
+                  [cropperMinWidth]="128"
+                  [resizeToWidth]="128"
+                  [onlyScaleDown]="true"
+                  format="jpeg"
+                  (imageCropped)="imageCroppedUpload($event)"
+                ></image-cropper>
+                <img [src]="croppedImage" />
+              </div>
+            </div>
+          </div>
+          <button
+            id="submit-group"
+            class="ui button primary"
+            type="submit"
+            [disabled]="groupForm.invalid"
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

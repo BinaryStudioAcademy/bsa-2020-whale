@@ -14,5 +14,6 @@ namespace Whale.Shared.Models.Contact
         public UserDTO SecondMember { get; set; }
         public DirectMessageDTO PinnedMessage { get; set; }
         public bool isAccepted { get; set; }
+        public int UnreadMessageCount { get; set; }
     }
 }

@@ -3,7 +3,7 @@
     <div class="event chat-label">
       <div class="content">
         <div class="group-info">
-          <label for="newImage">
+          <label for="newImage" (click)="changeImage()">
             <img
               *ngIf="isImageHere()"
               class="ui avatar image"
@@ -15,13 +15,6 @@
               src="assets/img/user-group-icon.png"
             />
           </label>
-          <input
-            hidden
-            type="file"
-            id="newImage"
-            (change)="changeImage($event)"
-            accept="image/*"
-          />
           <div class="group-chat-info">
             <span class="group-chat-label ui header">
               {{ groupSelected.label }}
@@ -63,12 +56,7 @@
                   src="{{ returnCorrectLink(user) }}"
                 />
                 <div class="content">
-                  <div
-                    class="description"
-                    appHighlightCreator
-                    userEmail="{{ user.email }}"
-                    creatorEmail="{{ groupSelected.creatorEmail }}"
-                  >
+                  <div class="description">
                     {{ user?.firstName }}
                     {{ user?.secondName }}
                   </div>
@@ -78,6 +66,10 @@
                   data-position="left center"
                   class="icon-wrapper"
                 >
+                  <i
+                    *ngIf="user.email === groupSelected.creatorEmail"
+                    class="star icon"
+                  ></i>
                   <i
                     *ngIf="
                       groupSelected.creatorEmail == currentUser?.email &&
@@ -97,6 +89,17 @@
               id="add-new-member"
               class="large user plus icon"
               (click)="addNewMember()"
+            ></i>
+          </span>
+          <span
+            *ngIf="groupSelected.creatorEmail == currentUser?.email"
+            data-tooltip="Edit group info"
+            data-position="bottom center"
+          >
+            <i
+              id="edit-group-info"
+              class="large cogs icon"
+              (click)="editGroupInfo()"
             ></i>
           </span>
         </div>
