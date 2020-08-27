@@ -6,10 +6,8 @@ import {
   UrlTree,
   Router,
 } from '@angular/router';
-import { Observable, from } from 'rxjs';
-import { tap, map, catchError } from 'rxjs/operators';
-import { ToastrService } from 'ngx-toastr';
 import { MediaSettingsService } from '../services/media-settings.service';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -17,14 +15,17 @@ import { MediaSettingsService } from '../services/media-settings.service';
 export class CheckAccessToMediaGuard implements CanActivate {
   constructor(
     private router: Router,
-    private toastr: ToastrService,
-    private mediaSettingsService: MediaSettingsService
+    private mediaSettingsService: MediaSettingsService,
+    private authService: AuthService
   ) {}
 
   async canActivate(
     next: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Promise<boolean | UrlTree> {
+    if (! this.authService.isSignedIn) {
+      return this.router.navigate(['/']);
+    }
     try {
       const stream = await navigator.mediaDevices.getUserMedia(
         await this.mediaSettingsService.getMediaConstraints()
