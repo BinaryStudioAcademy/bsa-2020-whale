@@ -52,7 +52,8 @@ export class RoomService {
         rooms.forEach((room) => {
           this.configureParticipantsInRooms(room.roomId, room.participantsIds);
         });
-        if (this.roomsIds.length > 0) this.isDividedIntoRooms = true;
+        if (this.participantsInRooms.keys.length > 0)
+          this.isDividedIntoRooms = true;
       })
       .catch((err) => this.toastr.error(err));
   }

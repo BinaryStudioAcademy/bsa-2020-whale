@@ -68,7 +68,7 @@ export class DivisionByRoomsModalComponent
   }
 
   public leaveRoom(): void {
-    this.result = true;
+    this.result = false;
     this.close();
     this.router.navigate([
       `/meeting-page/${this.roomService.originalMeetingUrl}`,
