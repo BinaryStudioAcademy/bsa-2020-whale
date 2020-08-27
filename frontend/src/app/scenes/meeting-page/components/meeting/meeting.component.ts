@@ -119,6 +119,7 @@ export class MeetingComponent
   private sdpVideoBandwidth = 125;
   public meter = new DecibelMeter('meter');
   public browserMediaDevice = new BrowserMediaDevice();
+  public lastTrack: MediaStreamTrack;
 
   @ViewChild('currentVideo') private currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
@@ -1161,10 +1162,9 @@ export class MeetingComponent
     this.isAudioSettings = false;
     this.isVideoSettings = false;
   }
-
-  async handleSuccessVideo(stream: MediaStream): Promise<void> {
-    const video = document.querySelector('video');
-    video.srcObject = stream;
+  handleSuccessVideo(stream: MediaStream) {
+    const video = document.querySelector('video') as HTMLVideoElement;
+    //video.srcObject = stream;
     const keys = Object.keys(this.peer.connections);
     const peerConnection = this.peer.connections[keys[0]];
     const videoTrack = stream.getVideoTracks()[0];
@@ -1174,6 +1174,10 @@ export class MeetingComponent
       });
       sender.replaceTrack(videoTrack);
     });
+    this.currentUserStream.getVideoTracks().forEach((vt) => {
+      this.currentUserStream.removeTrack(vt);
+    });
+    this.currentUserStream.addTrack(videoTrack);
   }
 
   public async changeInputDevice(deviceId: string) {
@@ -1290,6 +1294,7 @@ export class MeetingComponent
 
   //#region ShareScreen
   async shareScreen() {
+    this.lastTrack = this.currentUserStream.getVideoTracks()[0];
     const mediaDevices = (await navigator.mediaDevices) as any;
     const stream = await mediaDevices.getDisplayMedia();
     await this.handleSuccessVideo(stream);
@@ -1301,6 +1306,12 @@ export class MeetingComponent
   }
   public fullPage(streamId) {
     const stream = this.connectedStreams.find((x) => x.id === streamId);
+    console.log(stream.getVideoTracks());
+    let fullVideo = this.createPage();
+    fullVideo.srcObject = stream;
+    fullVideo.play();
+  }
+  public createPage(): HTMLVideoElement {
     const parrent = document.getElementsByClassName('main-content')[0];
     let fullVideo = document.createElement('video');
     parrent.appendChild(fullVideo);
@@ -1309,10 +1320,21 @@ export class MeetingComponent
     fullVideo.style.height = '100vh';
     fullVideo.style.objectFit = 'cover';
     fullVideo.style.position = 'fixed';
-    fullVideo.srcObject = stream;
-    fullVideo.play();
+    return fullVideo;
   }
   async removeSharingVideo() {
+    const keys = Object.keys(this.peer.connections);
+    const peerConnection = this.peer.connections[keys[0]];
+    peerConnection.forEach((pc) => {
+      const sender = pc.peerConnection.getSenders().find((s) => {
+        return s.track.kind === this.lastTrack.kind;
+      });
+      sender.replaceTrack(this.lastTrack);
+    });
+    this.currentUserStream.getVideoTracks().forEach((vt) => {
+      this.currentUserStream.removeTrack(vt);
+    });
+    this.currentUserStream.addTrack(this.lastTrack);
     this.meetingSignalrService.invoke(
       SignalMethods.OnStopShareScreen,
       this.meeting.id
@@ -1321,11 +1343,6 @@ export class MeetingComponent
   async stopShare() {
     let fullVideo = document.querySelector('.fullVideo') as HTMLElement;
     fullVideo.remove();
-    /*this.currentUserStream = await navigator.mediaDevices.getUserMedia(
-      await this.mediaSettingsService.getMediaConstraints()
-    );
-    this.handleSuccessVideo(this.currentUserStream);
-    document.querySelector('video').srcObject = this.currentUserStream;*/
     this.isSharing = false;
     this.toastr.info('Stop sharing screen');
   }
