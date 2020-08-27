@@ -9,4 +9,5 @@ export interface Contact {
   secondMember?: User;
   pinnedMessage: DirectMessage;
   isAccepted: boolean;
+  unreadMessageCount?: number;
 }

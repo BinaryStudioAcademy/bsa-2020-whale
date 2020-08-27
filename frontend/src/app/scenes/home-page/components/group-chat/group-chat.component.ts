@@ -39,6 +39,11 @@ import { HomePageComponent } from '../home-page/home-page.component';
 import { ConfirmationModalComponent } from '@shared/components/confirmation-modal/confirmation-modal.component';
 import { WhaleSignalMethods, WhaleSignalService } from 'app/core/services';
 import { BlobService } from 'app/core/services/blob.service';
+import { EditGroupInfoModalComponent } from '../edit-group-info-modal/edit-group-info-modal.component';
+import {
+  UpdateGroupImageModalComponent,
+  UpdateGroupImageModal,
+} from '../update-group-image-modal/update-group-image-modal.component';
 
 @Component({
   selector: 'app-group-chat',
@@ -56,6 +61,7 @@ export class GroupChatComponent
   @Input() groupSelected: Group;
   @Input() loggedInUser: User;
   @Output() chat: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() groupUpdated: EventEmitter<Group> = new EventEmitter<Group>();
   @ViewChild('chatWindow', { static: false }) chatBlock: ElementRef<
     HTMLElement
   >;
@@ -194,19 +200,9 @@ export class GroupChatComponent
     this.hubConnection.invoke('Disconnect', this.groupSelected.id);
   }
 
-  public changeImage(event): void {
-    const photo = event.target.files[0];
-
-    this.blobService.postBlobUploadImage(photo).subscribe((resp) => {
-      console.log(`image: ${resp}`);
-
-      this.groupSelected.photoUrl = resp;
-      this.groupService.updateGroup(this.groupSelected).subscribe(
-        () => {
-          this.toastr.success('Group image successfuly changed');
-        },
-        (error) => this.toastr.error(error.Message)
-      );
+  public changeImage(): void {
+    this.simpleModalService.addModal(UpdateGroupImageModalComponent, {
+      group: this.groupSelected,
     });
   }
 
@@ -219,28 +215,34 @@ export class GroupChatComponent
   }
 
   public leaveGroup(): void {
-    this.simpleModalService
-      .addModal(ConfirmationModalComponent, {
-        message: `Are you sure you want to leave ${this.groupSelected.label}?`,
-      })
-      .subscribe((isConfirm) => {
-        if (isConfirm) {
-          this.groupService
-            .leaveGroup(this.groupSelected.id, this.currentUser.email)
-            .subscribe(
-              () => {
-                this.toastr.success(
-                  `You successfully left ${this.groupSelected.label}`
-                );
-              },
-              (error) => this.toastr.error(error.Message)
-            );
+    if (this.groupSelected.creatorEmail === this.currentUser.email) {
+      this.toastr.error(
+        'You cannot leave the group because you are administrator. Please, assign someone else to this role.'
+      );
+    } else {
+      this.simpleModalService
+        .addModal(ConfirmationModalComponent, {
+          message: `Are you sure you want to leave ${this.groupSelected.label}?`,
+        })
+        .subscribe((isConfirm) => {
+          if (isConfirm) {
+            this.groupService
+              .leaveGroup(this.groupSelected.id, this.currentUser.email)
+              .subscribe(
+                () => {
+                  this.toastr.success(
+                    `You successfully left ${this.groupSelected.label}`
+                  );
+                },
+                (error) => this.toastr.error(error.Message)
+              );
 
-          this.hubConnection?.invoke('LeaveGroup', this.groupSelected.id);
-          this.close();
-          this.homePageComponent.leftGroup(this.groupSelected);
-        }
-      });
+            this.hubConnection?.invoke('LeaveGroup', this.groupSelected.id);
+            this.close();
+            this.homePageComponent.leftGroup(this.groupSelected);
+          }
+        });
+    }
   }
 
   public onEnterKeyPress(event: KeyboardEvent, valid: boolean): void {
@@ -300,11 +302,27 @@ export class GroupChatComponent
   public splitMessage(message: string) {
     return message.split(/\n/gi);
   }
+
   public isImageHere(): boolean {
     return (
       this.groupSelected.photoUrl !== null &&
       this.groupSelected.photoUrl !== undefined &&
       this.groupSelected.photoUrl !== ''
     );
+  }
+
+  public editGroupInfo() {
+    this.simpleModalService
+      .addModal(EditGroupInfoModalComponent, this.groupSelected)
+      .subscribe(
+        (group) => {
+          if (group !== undefined) {
+            this.groupSelected = group;
+            this.groupUpdated.emit(this.groupSelected);
+            console.log(this.groupSelected);
+          }
+        },
+        (error) => this.toastr.error(error)
+      );
   }
 }

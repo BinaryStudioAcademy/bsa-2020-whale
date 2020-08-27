@@ -10,6 +10,9 @@ namespace Whale.Shared.MappingProfiles
         {
             CreateMap<DirectMessageCreateDTO, DirectMessage>().ReverseMap();
             CreateMap<DirectMessage, DirectMessageCreateDTO>().ReverseMap();
+
+            CreateMap<DirectMessage, DirectMessageDTO>();
+            CreateMap<DirectMessageDTO, DirectMessage>();
         }
     }
 }

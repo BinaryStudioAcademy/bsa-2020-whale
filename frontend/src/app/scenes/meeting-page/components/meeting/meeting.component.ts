@@ -185,7 +185,7 @@ export class MeetingComponent
   //#region hooks
   public async ngOnInit() {
     this.currentUserStream = await navigator.mediaDevices.getUserMedia(
-       await this.mediaSettingsService.getMediaConstraints()
+      await this.mediaSettingsService.getMediaConstraints()
     );
     const settings = this.currentUserStream.getVideoTracks()[0].getSettings();
     settings.frameRate = 20;
@@ -711,7 +711,8 @@ export class MeetingComponent
   public leave(): void {
     //this is made to remove eventListener for other routes
     window.onbeforeunload = function () {};
-
+    this.meter.stopListening();
+    this.meter.disconnect();
     this.router.navigate(['/home']);
   }
 
@@ -1252,28 +1253,6 @@ export class MeetingComponent
     if (line === -1) {
       return sdp;
     }
-    let mediaLine = lines[line].split(' ');
-    let startIndex = 0;
-    for (let i = 0; i < mediaLine.length; i++) {
-      if ( mediaLine[i].includes('UDP')) {
-        startIndex = i + 1;
-        break;
-      }
-    }
-    let tmp: string;
-    for (let i = startIndex; i < mediaLine.length; i++) {
-      if (!sdp.includes(`rtpmap:${mediaLine[startIndex]} H264`)) {
-        tmp = mediaLine[startIndex];
-        for (let j = startIndex + 1; j < mediaLine.length; j++) {
-          mediaLine[j - 1] = mediaLine[j];
-        }
-        mediaLine[mediaLine.length - 1] = tmp;
-      }
-      else {
-        startIndex++;
-      }
-    }
-    lines[line] = mediaLine.join(' ');
     line++;
     while (lines[line].indexOf('i=') === 0 || lines[line].indexOf('c=') === 0) {
       line++;

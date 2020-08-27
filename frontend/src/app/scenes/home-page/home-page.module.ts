@@ -15,6 +15,8 @@ import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { GroupCallModalComponent } from './components/group-call-modal/group-call-modal.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ImageCropperModule } from 'ngx-image-cropper';
+import { EditGroupInfoModalComponent } from './components/edit-group-info-modal/edit-group-info-modal.component';
+import { UpdateGroupImageModalComponent } from './components/update-group-image-modal/update-group-image-modal.component';
 
 @NgModule({
   declarations: [
@@ -28,6 +30,8 @@ import { ImageCropperModule } from 'ngx-image-cropper';
     GroupChatComponent,
     AddUserToGroupModalComponent,
     GroupCallModalComponent,
+    EditGroupInfoModalComponent,
+    UpdateGroupImageModalComponent,
   ],
   imports: [
     CommonModule,

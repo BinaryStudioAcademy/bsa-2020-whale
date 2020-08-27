@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Whale.DAL;
 
 namespace Whale.DAL.Migrations
 {
     [DbContext(typeof(WhaleDbContext))]
-    partial class WhaleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200826113403_AddUnreadMessageIds")]
+    partial class AddUnreadMessageIds
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -207,17 +209,15 @@ namespace Whale.DAL.Migrations
 
             modelBuilder.Entity("Whale.DAL.Models.Messages.UnreadMessageId", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("MessageId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ReceiverId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                    b.HasIndex("MessageId");
+
+                    b.HasIndex("ReceiverId");
 
                     b.ToTable("UnreadMessageIds");
                 });
@@ -469,6 +469,27 @@ namespace Whale.DAL.Migrations
                     b.HasOne("Whale.DAL.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Whale.DAL.Models.Messages.UnreadMessageId", b =>
+                {
+                    b.HasOne("Whale.DAL.Models.DirectMessage", "DirectMessage")
+                        .WithMany()
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Whale.DAL.Models.GroupMessage", "GroupMessage")
+                        .WithMany()
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Whale.DAL.Models.User", "Receiver")
+                        .WithMany()
+                        .HasForeignKey("ReceiverId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
