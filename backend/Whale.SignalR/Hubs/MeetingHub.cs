@@ -54,9 +54,15 @@ namespace Whale.SignalR.Hubs
                 await _redisService.ConnectAsync();
                 if (await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(connectionData.MeetingId) is null) throw new NotFoundException("Room");
 
-                var participantGroup = _groupsParticipants.FirstOrDefault((keyValuepair) => keyValuepair.Value.Any(p => p.User.Email == connectionData.UserEmail));
-                if (participantGroup.Equals(default(KeyValuePair<string, List<Participant>>))) throw new NotFoundException(nameof(Participant));
-                participant = participantGroup.Value.First(p => p.User.Email == connectionData.UserEmail);
+                participant = new ParticipantDTO
+                {
+                    Id = Guid.NewGuid(),
+                    ActiveConnectionId = "",
+                    Role = _groupsParticipants.Any(g => g.Value.Any(p => p.User.Email == connectionData.UserEmail && p.Role == ParticipantRole.Host)) ? ParticipantRole.Host : ParticipantRole.Participant,
+                    StreamId = "",
+                    User = await _userService.GetUserByEmail(connectionData.UserEmail),
+                    Meeting = null
+                };
             }
             else
             {
@@ -305,12 +311,30 @@ namespace Whale.SignalR.Hubs
         [HubMethodName("OnMoveIntoRoom")]
         public async Task OnMoveIntoRoom(MeetingConnectDTO connectionData)
         {
-            var disconnectedParticipant = _groupsParticipants[connectionData.MeetingId]
-                                            .Find(p => p.User.Email == connectionData.UserEmail);
-            connectionData.Participant = disconnectedParticipant;
+            Console.WriteLine("OnMoveIntoRoom: " + connectionData.UserEmail + "  " + connectionData.StreamId);
+            //var disconnectedParticipant = _groupsParticipants[connectionData.MeetingId]
+            //                                .Find(p => p.User.Email == connectionData.UserEmail);
+            //connectionData.Participant = disconnectedParticipant;
 
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, connectionData.MeetingId);
-            await Clients.Group(connectionData.MeetingId).SendAsync("onParticipentMoveIntoRoom", connectionData);
+            //await Groups.RemoveFromGroupAsync(Context.ConnectionId, connectionData.MeetingId);
+            //await Clients.Group(connectionData.MeetingId).SendAsync("onParticipentMoveIntoRoom", connectionData);
+            var disconectedParticipantInGroups = _groupsParticipants
+                .Where(g => g.Value.Any(p => p.ActiveConnectionId == Context.ConnectionId))
+                .ToList();
+
+            foreach (var group in disconectedParticipantInGroups)
+            {
+                var disconnectedParticipant = group.Value.Find(p => p.ActiveConnectionId == Context.ConnectionId);
+
+                connectionData.Participant = disconnectedParticipant;
+                _groupsParticipants[group.Key].Remove(disconnectedParticipant);
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, group.Key);
+                await Clients.Group(group.Key).SendAsync("onParticipentMoveIntoRoom", connectionData);
+                if (group.Value.Count <= 0)
+                {
+                    await this.DeleteMeeting(group.Key);
+                }
+            }
         }
 
         [HubMethodName("GetCreatedRooms")]
@@ -329,7 +353,9 @@ namespace Whale.SignalR.Hubs
                 rooms.Add(new RoomDTO
                 {
                     RoomId = id,
-                    ParticipantsIds = _groupsParticipants[id]?.Select(p => p.Id.ToString()).ToList()
+                    ParticipantsIds = _groupsParticipants[id]?.Select(p =>
+                         participants.FirstOrDefault(pp => pp?.User?.Email == p?.User?.Email)?.Id.ToString() // because in participant has diferent ids in rooms and meetings
+                    ).Where(p => p != null).ToList()
                 });
             }
 
