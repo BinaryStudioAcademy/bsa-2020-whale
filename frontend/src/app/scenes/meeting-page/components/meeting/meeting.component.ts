@@ -212,21 +212,6 @@ export class MeetingComponent
 
     this.connectedStreams.push(this.currentUserStream);
 
-    // const enterModal = await this.simpleModalService
-    //   .addModal(EnterModalComponent)
-    //   .toPromise();
-    // if (enterModal.leave) {
-    //   this.leaveUnConnected();
-    //   return;
-    // }
-    // if (enterModal.cameraOff) {
-    //   this.toggleCamera(true);
-    // }
-    // if (enterModal.microOff) {
-    //   this.toggleMicrophone(true);
-    // }
-    // this.currentStreamLoaded.emit();
-
     // when someone connected to meeting
     this.meetingSignalrService.signalUserConected$
       .pipe(takeUntil(this.unsubscribe$))
@@ -390,6 +375,26 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((data) => {
         if (!data.changedParticipantConnectionId) {
+          if (
+            this.meeting.isAudioAllowed !== data.isAudioAllowed &&
+            this.currentParticipant.role !== ParticipantRole.Host
+          ) {
+            this.toastr.info(
+              `Participants' audio ${
+                data.isAudioAllowed ? 'enabled' : 'disabled'
+              } by the host`
+            );
+          } else if (
+            this.meeting.isVideoAllowed !== data.isVideoAllowed &&
+            this.currentParticipant.role !== ParticipantRole.Host
+          ) {
+            this.toastr.info(
+              `Participants' video ${
+                data.isVideoAllowed ? 'enabled' : 'disabled'
+              } by the host`
+            );
+          }
+
           this.meeting.isVideoAllowed = data.isVideoAllowed;
           this.meeting.isAudioAllowed = data.isAudioAllowed;
           this.meetingSignalrService.invoke<ChangedMediaState>(
@@ -403,9 +408,29 @@ export class MeetingComponent
             }
           );
         } else if (
-          data.changedParticipantConnectionId ==
+          data.changedParticipantConnectionId ===
           this.currentParticipant.activeConnectionId
         ) {
+          if (
+            this.meeting.isAudioAllowed !== data.isAudioAllowed &&
+            this.currentParticipant.role !== ParticipantRole.Host
+          ) {
+            this.toastr.info(
+              `Your audio ${
+                data.isAudioAllowed ? 'enabled' : 'disabled'
+              } by the host`
+            );
+          } else if (
+            this.meeting.isVideoAllowed !== data.isVideoAllowed &&
+            this.currentParticipant.role !== ParticipantRole.Host
+          ) {
+            this.toastr.info(
+              `Your video ${
+                data.isVideoAllowed ? 'enabled' : 'disabled'
+              } by the host`
+            );
+          }
+
           this.meeting.isVideoAllowed = data.isVideoAllowed;
           this.meeting.isAudioAllowed = data.isAudioAllowed;
           this.updateCardDynamicData(
@@ -1007,12 +1032,14 @@ export class MeetingComponent
       this.toggleMicrophone();
     }
 
+    this.isParticipantsVideoAllowed = modalResult.isAllowedVideoOnStart;
+    this.isParticipantsAudioAllowed = modalResult.isAllowedAudioOnStart;
+
     if (
       isCurrentParticipantHost &&
       (this.meeting.isVideoAllowed != modalResult.isAllowedVideoOnStart ||
         this.meeting.isAudioAllowed != modalResult.isAllowedAudioOnStart)
     ) {
-      console.log('before create', modalResult.isAllowedVideoOnStart);
       this.meetingService
         .updateMediaOnStart({
           meetingId: this.meeting.id,

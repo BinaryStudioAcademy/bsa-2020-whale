@@ -246,13 +246,13 @@
               *ngIf="
                 !isParticipantsAudioAllowed && currentParticipant?.role === 1
               "
-              data-tooltip="Enable Participants` Audio"
+              data-tooltip="Enable Participants' Audio"
               data-position="top left"
             >
               <i
                 id="meeting-options-allow-participants-audio"
                 (click)="switchOtherParticipantsMediaAsHost(false)"
-                class="big file audio icon"
+                class="big file audio outline icon"
               ></i>
             </span>
             <span
@@ -265,33 +265,33 @@
               <i
                 id="meeting-options-ban-participants-audio"
                 (click)="switchOtherParticipantsMediaAsHost(false)"
-                class="big file audio outline icon"
+                class="big file audio icon"
               ></i>
             </span>
             <span
               *ngIf="
                 !isParticipantsVideoAllowed && currentParticipant?.role === 1
               "
-              data-tooltip="Enable participants` video"
+              data-tooltip="Enable Participants' Video"
               data-position="top left"
             >
               <i
                 id="meeting-options-allow-participants-video"
                 (click)="switchOtherParticipantsMediaAsHost(true)"
-                class="big file video icon"
+                class="big file video outline icon"
               ></i>
             </span>
             <span
               *ngIf="
                 isParticipantsVideoAllowed && currentParticipant?.role === 1
               "
-              data-tooltip="Disable Participants Video"
+              data-tooltip="Disable Participants' Video"
               data-position="top left"
             >
               <i
                 id="meeting-options-ban-participants-video"
                 (click)="switchOtherParticipantsMediaAsHost(true)"
-                class="big file video outline icon"
+                class="big file video icon"
               ></i>
             </span>
             <span
