@@ -585,22 +585,24 @@ export class MeetingComponent
     this.destroyPeer();
     this.currentUserStream?.getTracks().forEach((track) => track.stop());
 
-    if (this.isMoveToRoom && !this.isRoom) {
-      this.meetingSignalrService.invoke(
-        SignalMethods.OnMoveIntoRoom,
-        this.connectionData
-      );
-    } else if (this.isMoveToRoom && this.isRoom && this.isHost) {
-      this.meetingSignalrService.invoke(
-        SignalMethods.OnHostChangeRoom,
-        this.connectionData
-      );
-    } else {
-      this.connectionData.participant = this.currentParticipant;
-      this.meetingSignalrService.invoke(
-        SignalMethods.OnParticipantLeft,
-        this.connectionData
-      );
+    if (this.connectionData) {
+      if (this.isMoveToRoom && !this.isRoom) {
+        this.meetingSignalrService.invoke(
+          SignalMethods.OnMoveIntoRoom,
+          this.connectionData
+        );
+      } else if (this.isMoveToRoom && this.isRoom && this.isHost) {
+        this.meetingSignalrService.invoke(
+          SignalMethods.OnHostChangeRoom,
+          this.connectionData
+        );
+      } else {
+        this.connectionData.participant = this.currentParticipant;
+        this.meetingSignalrService.invoke(
+          SignalMethods.OnParticipantLeft,
+          this.connectionData
+        );
+      }
     }
 
     this.unsubscribe$.next();
