@@ -307,7 +307,7 @@ export class MeetingComponent
           const secondName = ` ${
             connectionData.participant.user.secondName ?? ''
           }`;
-          this.toastr.show(
+          this.toastr.info(
             `${connectionData.participant.user.firstName}${secondName} has left`
           );
         }
@@ -330,7 +330,7 @@ export class MeetingComponent
         if (disconectedMediaDataIndex) {
           this.mediaData.splice(disconectedMediaDataIndex, 1);
           const secondName = ` ${participant.user.secondName ?? ''}`;
-          this.toastr.show(
+          this.toastr.info(
             `${participant.user.firstName}${secondName} disconnected`
           );
         }
@@ -409,7 +409,7 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         () => {
-          this.toastr.show('Meeting ended');
+          this.toastr.info('Meeting ended');
           this.leave();
         },
         () => {
@@ -528,7 +528,7 @@ export class MeetingComponent
           const secondName = ` ${
             connectionData.participant.user.secondName ?? ''
           }`;
-          this.toastr.show(
+          this.toastr.info(
             `${connectionData.participant.user.firstName}${secondName} moved into room`
           );
         }
