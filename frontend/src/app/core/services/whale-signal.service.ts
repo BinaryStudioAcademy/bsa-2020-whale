@@ -64,6 +64,9 @@ export class WhaleSignalService {
   private removeNotify = new Subject<string>();
   public removeNotify$ = this.removeNotify.asObservable();
 
+  private updateNotify = new Subject<Notification>();
+  public updateNotify$ = this.updateNotify.asObservable();
+
   private receiveGroup = new Subject<Group>();
   public receiveGroup$ = this.receiveGroup.asObservable();
 
@@ -146,6 +149,13 @@ export class WhaleSignalService {
         this.signalHub.on('onDeleteNotification', (notificationId: string) => {
           this.removeNotify.next(notificationId);
         });
+
+        this.signalHub.on(
+          'onUpdateNotification',
+          (notification: Notification) => {
+            this.updateNotify.next(notification);
+          }
+        );
 
         this.signalHub.on('OnNewGroup', (group: Group) => {
           this.receiveGroup.next(group);
