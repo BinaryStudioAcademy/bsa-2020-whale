@@ -290,7 +290,7 @@ namespace Whale.SignalR.Hubs
 
             _groupsParticipants.Add(roomId, new List<ParticipantDTO>());
 
-            await Clients.Caller.SendAsync("OnRoomCreatedToHost", new RoomDTO { RoomId = roomId, ParticipantsIds = roomCreateData.ParticipantsIds});
+            await Clients.Caller.SendAsync("OnRoomCreatedToHost", new RoomDTOids { RoomId = roomId, ParticipantsIds = roomCreateData.ParticipantsIds});
 
             var participants = _groupsParticipants[roomCreateData.MeetingId]
                     .Where(p => roomCreateData.ParticipantsIds.Contains(p.Id.ToString()))
@@ -329,7 +329,7 @@ namespace Whale.SignalR.Hubs
                 rooms.Add(new RoomDTO
                 {
                     RoomId = id,
-                    ParticipantsIds = _groupsParticipants[id]?.Select(p => p.Id.ToString()).ToList()
+                    Participants = _groupsParticipants[id]?.ToList()
                 });
             }
 

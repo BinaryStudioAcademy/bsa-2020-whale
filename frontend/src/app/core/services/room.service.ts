@@ -50,11 +50,13 @@ export class RoomService {
     this.meetingSignalrService.signalHub
       .invoke(
         SignalMethods[SignalMethods.GetCreatedRooms],
-        this.originalMeetingId
+        this.isInRoom ? this.originalMeetingId : meetingId
       )
       .then((rooms: RoomDTO[]) => {
+        console.log(rooms);
         rooms.forEach((room) => {
-          this.configureParticipantsInRooms(room.roomId, room.participantsIds);
+          //this.configureParticipantsInRooms(room.roomId, room.participantsIds\\\);
+          this.participantsInRooms.set(room.roomId, room.participants);
         });
         if (rooms.length > 0) {
           this.isDividedIntoRooms = true;
