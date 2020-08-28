@@ -1,9 +1,8 @@
 ﻿namespace Whale.SignalR.Models.Media
 {
-    public class MediaStateDTO
+    public class MediaPermissionsChangeDTO
     {
-        public string StreamId { get; set; }
-        public string ReceiverConnectionId {get; set; }
+        public string ChangedParticipantConnectionId { get; set; }
         public bool IsVideoAllowed { get; set; }
         public bool IsAudioAllowed { get; set; }
         public bool IsVideoActive { get; set; }

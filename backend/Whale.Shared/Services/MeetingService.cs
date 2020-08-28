@@ -69,6 +69,7 @@ namespace Whale.Shared.Services
             {
                 meeting.StartTime = DateTimeOffset.Now;
             }
+
             await _context.Meetings.AddAsync(meeting);
             await _context.SaveChangesAsync();
 
@@ -90,6 +91,24 @@ namespace Whale.Shared.Services
             });
 
             return new MeetingLinkDTO { Id = meeting.Id, Password = pwd };
+        }
+
+        public async Task UpdateMeetingMediaOnStart(MediaOnStartDTO mediaDTO)
+        {
+            var meeting = await _context.Meetings.FirstOrDefaultAsync(m => m.Id == mediaDTO.MeetingId);
+            if (meeting == null)
+                throw new NotFoundException("Meeting");
+
+            var meetingHost = await _participantService
+                .GetMeetingParticipantByEmail(meeting.Id, mediaDTO.RequestingUserEmail);
+
+            if (meetingHost == null || meetingHost.Role != ParticipantRole.Host)
+                throw new NotAllowedException(mediaDTO.RequestingUserEmail);
+
+            meeting.IsVideoAllowed = mediaDTO.IsVideoAllowed;
+            meeting.IsAudioAllowed = mediaDTO.IsAudioAllowed;
+
+            await _context.SaveChangesAsync();
         }
 
         public async Task<MeetingMessageDTO> SendMessage(MeetingMessageCreateDTO msgDTO)
