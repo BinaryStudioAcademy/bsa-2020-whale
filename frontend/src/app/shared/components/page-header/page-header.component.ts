@@ -129,7 +129,7 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
       WhaleSignalMethods.OnUserDisconnect,
       this.loggedInUser.email
     );
-    this.auth.logout().subscribe(() => this.router.navigate(['/']));
+    this.auth.logout().subscribe(() => this.router.navigate(['landing']));
   }
 
   onNotificationDelete(id: string): void {

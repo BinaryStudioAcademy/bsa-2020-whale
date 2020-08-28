@@ -10,7 +10,7 @@ import { ToastrService } from 'ngx-toastr';
 import { MeetingService } from 'app/core/services/meeting.service';
 import { Router } from '@angular/router';
 import { MeetingCreate } from '@shared/models/meeting/meeting-create';
-import { takeUntil, tap } from 'rxjs/operators';
+import { takeUntil, tap, first } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { Group } from '@shared/models/group/group';
 import { GroupService } from 'app/core/services/group.service';
@@ -98,7 +98,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
                     this.messageService.receivedMessage$
                       .pipe(takeUntil(this.unsubscribe$))
                       .subscribe((newMessage) => {
-                        console.log('home page subscription');
                         if (this.loggedInUser.id == newMessage.authorId) {
                           return;
                         }
@@ -125,6 +124,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
                       this.userConnected(onlineUser);
                     },
                     (err) => {
+                      console.log(err);
                       this.toastr.error(err.Message);
                     }
                   );
@@ -136,6 +136,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
                       this.userDisconnected(userEmail);
                     },
                     (err) => {
+                      console.log(err);
                       this.toastr.error(err.Message);
                     }
                   );
@@ -147,6 +148,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
                       this.userDisconnectedError(userId);
                     },
                     (err) => {
+                      console.log(err);
                       this.toastr.error(err.Message);
                     }
                   );
@@ -159,6 +161,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
                       this.messageService.joinGroup(contact.id);
                     },
                     (err) => {
+                      console.log(err);
                       console.log(err.message);
                     }
                   );
@@ -170,6 +173,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
                       this.removeContact(contactId);
                     },
                     (err) => {
+                      console.log(err);
                       console.log(err.message);
                     }
                   );
@@ -220,20 +224,29 @@ export class HomePageComponent implements OnInit, OnDestroy {
                     }
                   );
               },
-              (error) => this.toastr.error(error.Message)
+              (error) => {
+                console.log(error);
+                this.toastr.error(error.Message);
+              }
+            );
+          this.groupService
+            .getAllGroups()
+            .pipe(tap(() => (this.isGroupsLoading = false)))
+            .subscribe(
+              (data: Group[]) => {
+                this.groups = data;
+                this.groupsVisibility = this.groups.length == 0 ? false : true;
+              },
+              (error) => {
+                console.log(error);
+                this.toastr.error(error.Message);
+              }
             );
         },
-        (error) => this.toastr.error(error.Message)
-      );
-    this.groupService
-      .getAllGroups()
-      .pipe(tap(() => (this.isGroupsLoading = false)))
-      .subscribe(
-        (data: Group[]) => {
-          this.groups = data;
-          this.groupsVisibility = this.groups.length == 0 ? false : true;
-        },
-        (error) => this.toastr.error(error.Message)
+        (error) => {
+          console.log(error);
+          this.toastr.error(error.Message);
+        }
       );
   }
   userConnected(onlineUser: UserOnline): void {
@@ -298,7 +311,10 @@ export class HomePageComponent implements OnInit, OnDestroy {
                 }
               }
             },
-            (error) => this.toastr.error(error.Message)
+            (error) => {
+              console.log(error);
+              this.toastr.error(error.Message);
+            }
           );
         }
       });
@@ -377,7 +393,10 @@ export class HomePageComponent implements OnInit, OnDestroy {
                 (resp) => {
                   this.toastr.success('Canceled');
                 },
-                (error) => this.toastr.error(error.Message)
+                (error) => {
+                  console.log(error);
+                  this.toastr.error(error.Message);
+                }
               );
           }
         });
