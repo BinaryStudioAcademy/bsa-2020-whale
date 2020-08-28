@@ -201,8 +201,7 @@ export class MeetingComponent
         await this.mediaSettingsService.getMediaConstraints()
       );
       isActive = this.currentUserStream.active;
-    }
-    catch {
+    } catch {
       isActive = false;
     }
     if (!isActive) {

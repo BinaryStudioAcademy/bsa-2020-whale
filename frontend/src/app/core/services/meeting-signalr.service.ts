@@ -14,6 +14,7 @@ import {
   MediaState,
   StreamChangedData,
   RoomDTO,
+  RoomDTOids,
 } from '@shared/models';
 import { CanvasWhiteboardUpdate } from 'ng2-canvas-whiteboard';
 
@@ -81,7 +82,7 @@ export class MeetingSignalrService {
   private onRoomCreated = new Subject<string>();
   public readonly onRoomCreated$ = this.onRoomCreated.asObservable();
 
-  private onRoomCreatedToHost = new Subject<RoomDTO>();
+  private onRoomCreatedToHost = new Subject<RoomDTOids>();
   public readonly onRoomCreatedToHost$ = this.onRoomCreatedToHost.asObservable();
 
   private onRoomClosed = new Subject<string>();
@@ -203,7 +204,7 @@ export class MeetingSignalrService {
           this.onRoomCreated.next(roomId);
         });
 
-        this.signalHub.on('OnRoomCreatedToHost', (roomData: RoomDTO) => {
+        this.signalHub.on('OnRoomCreatedToHost', (roomData: RoomDTOids) => {
           this.onRoomCreatedToHost.next(roomData);
         });
 

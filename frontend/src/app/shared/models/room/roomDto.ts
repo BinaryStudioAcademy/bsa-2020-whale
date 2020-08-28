@@ -1,4 +1,6 @@
+import { Participant } from '../participant';
+
 export interface RoomDTO {
   roomId: string;
-  participantsIds: Array<string>;
+  participants: Array<Participant>;
 }
