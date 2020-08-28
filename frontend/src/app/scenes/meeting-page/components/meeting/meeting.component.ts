@@ -905,7 +905,7 @@ export class MeetingComponent
   }
 
   private leaveUnConnected(): void {
-    this.currentUserStream.getTracks().forEach((track) => track.stop());
+    this.currentUserStream?.getTracks()?.forEach((track) => track.stop());
     this.destroyPeer();
     this.meter.stopListening();
     this.meter.disconnect();
