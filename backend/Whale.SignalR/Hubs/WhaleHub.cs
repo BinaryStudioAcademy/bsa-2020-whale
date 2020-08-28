@@ -39,7 +39,7 @@ namespace Whale.SignalR.Hubs
             await Groups.AddToGroupAsync(Context.ConnectionId, userEmail);
             await Groups.AddToGroupAsync(Context.ConnectionId, WhaleService.OnlineUsersKey);
             var userOnline = await _whaleService.UserConnect(userEmail, Context.ConnectionId);
-            await Clients.Group(WhaleService.OnlineUsersKey).SendAsync("OnUserConnect", userOnline);
+            await Clients.GroupExcept(WhaleService.OnlineUsersKey, Context.ConnectionId).SendAsync("OnUserConnect", userOnline);
         }
 
         [HubMethodName("OnUserDisconnect")]
