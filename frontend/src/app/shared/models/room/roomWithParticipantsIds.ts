@@ -1,4 +1,4 @@
-export interface RoomDTOids {
+export interface RoomWithParticipantsIds {
   roomId: string;
   participantsIds: Array<string>;
 }

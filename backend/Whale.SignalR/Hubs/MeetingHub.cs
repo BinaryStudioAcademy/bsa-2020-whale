@@ -290,7 +290,7 @@ namespace Whale.SignalR.Hubs
 
             _groupsParticipants.Add(roomId, new List<ParticipantDTO>());
 
-            await Clients.Caller.SendAsync("OnRoomCreatedToHost", new RoomDTOids { RoomId = roomId, ParticipantsIds = roomCreateData.ParticipantsIds});
+            await Clients.Caller.SendAsync("OnRoomCreatedToHost", new RoomWithParticipantsIds { RoomId = roomId, ParticipantsIds = roomCreateData.ParticipantsIds});
 
             var participants = _groupsParticipants[roomCreateData.MeetingId]
                     .Where(p => roomCreateData.ParticipantsIds.Contains(p.Id.ToString()))
@@ -306,7 +306,7 @@ namespace Whale.SignalR.Hubs
         public async Task OnMoveIntoRoom(MeetingConnectDTO connectionData)
         {
             var disconnectedParticipant = _groupsParticipants[connectionData.MeetingId]
-                                            .Find(p => p.User.Email == connectionData.UserEmail);
+                                            .Find(p => p.ActiveConnectionId == Context.ConnectionId);
             connectionData.Participant = disconnectedParticipant;
 
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, connectionData.MeetingId);
