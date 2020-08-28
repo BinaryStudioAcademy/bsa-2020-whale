@@ -101,22 +101,22 @@
         </span>
       </div>
       <div class="participants-wrapper">
-        <div class="ui divided list">
-          <div
+        <div class="ui middle aligned selection list">
+          <a
             *ngFor="let participant of meeting?.participants"
-            class="ui item participant"
+            class="item participant"
           >
             <img
               class="ui avatar image"
               src="{{ participant.user.avatarUrl }}"
             />
-            <span>
+            <div class="user-label">
               {{ participant.user.firstName }}
               {{
                 participant.user.secondName ? participant.user.secondName : ""
               }}
-            </span>
-          </div>
+            </div>
+          </a>
         </div>
       </div>
     </div>
