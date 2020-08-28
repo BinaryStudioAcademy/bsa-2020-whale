@@ -224,7 +224,7 @@
                 class="big clipboard list icon"
               ></i
             ></span>
-            <span data-tooltip="Statistics">
+            <span data-tooltip="Statistics" *ngIf="!isRoom">
               <i
                 id="meeting-options-statistics"
                 (click)="onStatisticsIconClick()"
@@ -253,6 +253,17 @@
             >
               <i (click)="showCanvas()" class="big paint brush icon"></i>
             </span>
+            <span
+              data-tooltip="Divide participants into rooms"
+              data-position="top right"
+              *ngIf="isHost"
+            >
+              <i
+                (click)="openRoomsModal()"
+                class="big user th large icon big-left-margin"
+              >
+              </i>
+            </span>
             <span data-tooltip="Fullscreen" data-position="top right">
               <i
                 id="meeting-options-fullscreen"
@@ -268,17 +279,6 @@
                 (click)="isShowCurrentParticipantCard = true"
                 class="big user plus icon big-left-margin"
               ></i>
-            </span>
-            <span
-              data-tooltip="Divide participants by rooms"
-              data-position="top right"
-              *ngIf="isHost"
-            >
-              <i
-                (click)="openRoomsModal()"
-                class="big user th large icon big-left-margin"
-              >
-              </i>
             </span>
           </div>
           <div>

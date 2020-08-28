@@ -216,7 +216,6 @@ export class MeetingSignalrService {
         });
 
         this.signalHub.on('OnStartShareScreen', (streamId: string) => {
-          console.log(streamId);
           this.shareScreen.next(streamId);
         });
 

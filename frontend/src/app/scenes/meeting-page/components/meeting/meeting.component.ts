@@ -489,7 +489,7 @@ export class MeetingComponent
     this.meetingSignalrService.onRoomClosed$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((link) => {
-        this.router.navigate([`/meeting-page/${link}`]);
+        if (this.isRoom) this.router.navigate([`/meeting-page/${link}`]);
       });
 
     this.meetingSignalrService.onParticipentMoveIntoRoom$
