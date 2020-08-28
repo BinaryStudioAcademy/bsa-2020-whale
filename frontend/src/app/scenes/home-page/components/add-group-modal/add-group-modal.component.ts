@@ -46,17 +46,21 @@ export class AddGroupModalComponent extends SimpleModalComponent<null, Group> {
   }
 
   public uploadFile(event): void {
+    this.isFileUploaded = false;
     this.imageChangedEvent = event;
-    this.fileToUpload = event.target.files[0];
-    if (!this.fileToUpload) {
+
+    const image = event.target.files[0];
+    if (!image) {
       event.target.value = '';
       return;
     }
-    const size = this.fileToUpload.size / 1024 / 1024;
-    if (size > 5) {
+
+    if (image.size / 1024 / 1024 < 5) {
+      this.fileToUpload = event.target.files[0];
+      this.isFileUploaded = true;
+    } else {
       this.toastr.error(`File can't be heavier than ~5MB`);
     }
-    this.isFileUploaded = true;
   }
 
   public imageCroppedUpload(event: ImageCroppedEvent): void {
@@ -65,29 +69,38 @@ export class AddGroupModalComponent extends SimpleModalComponent<null, Group> {
   }
 
   public submit(): void {
-    const blob = this.dataURLtoBlob(this.croppedImage);
-    this.blobService.postBlobUploadImage(blob).subscribe((photo) => {
-      this.newGroup.photoUrl = photo;
-      this.newGroup.creatorEmail = this.authService.currentUser.email;
-      this.groupService.createGroup(this.newGroup).subscribe(
-        (resp) => {
-          this.result = resp.body;
-          this.close();
-          this.simpleModalService
-            .addModal(AddUserToGroupModalComponent, {
-              id: this.result.id,
-              label: this.result.label,
-              description: this.result.description,
-            })
-            .subscribe((user) => {
-              if (user !== undefined) {
-                this.toastr.success(`Users added successfuly`);
-              }
-            });
-        },
-        (error) => this.toastr.error(error.Message)
-      );
-    });
+    this.newGroup.creatorEmail = this.authService.currentUser.email;
+    if (this.isFileUploaded) {
+      const blob = this.dataURLtoBlob(this.croppedImage);
+      this.blobService.postBlobUploadImage(blob).subscribe((photo) => {
+        this.newGroup.photoUrl = photo;
+        this.createGroup(this.newGroup);
+      });
+    } else {
+      this.createGroup(this.newGroup);
+    }
+  }
+
+  public createGroup(group: Group): void {
+    this.groupService.createGroup(this.newGroup).subscribe(
+      (resp) => {
+        this.result = resp.body;
+        this.close();
+        this.simpleModalService
+          .addModal(AddUserToGroupModalComponent, {
+            id: this.result.id,
+            label: this.result.label,
+            description: this.result.description,
+            participantsEmails: [this.ownerEmail],
+          })
+          .subscribe((user) => {
+            if (user !== undefined) {
+              this.toastr.success(`Users added successfuly`);
+            }
+          });
+      },
+      (error) => this.toastr.error(error.Message)
+    );
   }
 
   public cancel(dirty: boolean): void {

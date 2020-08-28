@@ -49,8 +49,10 @@ export class IncomingGroupCallComponent implements OnInit, OnDestroy {
       this.currentUser = user;
       this.whaleSignalrService.declineGroupCall$
         .pipe(takeUntil(this.unsubscribe$))
-        .subscribe(() => {
-          this.close();
+        .subscribe((t) => {
+          if (t.userId === this.groupCall.caller.id) {
+            this.close();
+          }
         });
     });
   }
@@ -70,7 +72,7 @@ export class IncomingGroupCallComponent implements OnInit, OnDestroy {
   decline(): void {
     this.whaleSignalrService.invoke(WhaleSignalMethods.OnDeclineGroupCall, {
       userId: this.currentUser.id,
-      email: this.groupCall.callerEmail,
+      callCreator: this.groupCall.caller,
       meetingId: this.groupCall.meetingLink.id,
       groupId: this.groupCall.group.id,
     } as GroupCallDecline);

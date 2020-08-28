@@ -35,7 +35,7 @@
           <span data-tooltip="Delete contact" data-position="bottom center">
             <i
               id="delete-contact"
-              class="large trash icon"
+              class="large trash alternate outline icon"
               (click)="onDelete()"
             ></i>
           </span>
@@ -58,32 +58,21 @@
     <div
       *ngFor="let message of messages"
       class="event message-event"
-      [ngClass]="
-        contactSelected.firstMemberId !== message.author?.id
-          ? 'event visavis'
-          : 'event row-reverse author'
-      "
       #intersectionElement
       id="{{ message.id }}"
     >
       <div class="label">
         <img src="{{ message.author?.avatarUrl }}" />
       </div>
-      <div
-        [ngClass]="
-          contactSelected.firstMemberId !== message.author?.id
-            ? 'content'
-            : 'content row-reverse'
-        "
-      >
-        <div
-          [ngClass]="
-            contactSelected.firstMemberId !== message.author?.id
-              ? 'summary'
-              : 'summary row-reverse'
-          "
-        >
-          <a class="user">
+      <div class="content">
+        <div class="summary">
+          <a
+            *ngIf="message.author?.email === loggedInUser?.email"
+            class="user current-user-message"
+          >
+            You
+          </a>
+          <a *ngIf="message.author?.email !== loggedInUser?.email" class="user">
             {{ message.author?.firstName }}
             {{ message.author?.secondName }}
           </a>
@@ -91,14 +80,7 @@
             {{ message.createdAt | date: "short" }}
           </div>
         </div>
-        <div
-          disabled
-          [ngClass]="
-            contactSelected.firstMemberId !== message.author?.id
-              ? 'message'
-              : 'message current-user-message'
-          "
-        >
+        <div class="message">
           <div *ngFor="let row of splitMessage(message?.message)">
             {{ row }}
           </div>
@@ -128,7 +110,7 @@
         class="ui button tiny send"
         type="submit"
         id="sendmessage"
-        [disabled]="!chatForm.valid"
+        [disabled]="!chatForm.valid || newMessage.message.trim().length === 0"
         (click)="sendMessage()"
       >
         Send <i class="paper plane outline icon"></i>

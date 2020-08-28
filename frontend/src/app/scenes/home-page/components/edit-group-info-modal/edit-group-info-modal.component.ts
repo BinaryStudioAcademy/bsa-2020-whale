@@ -67,17 +67,21 @@ export class EditGroupInfoModalComponent
   }
 
   public uploadFile(event): void {
+    this.isFileUploaded = false;
     this.imageChangedEvent = event;
-    this.fileToUpload = event.target.files[0];
-    if (!this.fileToUpload) {
+
+    const image = event.target.files[0];
+    if (!image) {
       event.target.value = '';
       return;
     }
-    const size = this.fileToUpload.size / 1024 / 1024;
-    if (size > 5) {
+
+    if (image.size / 1024 / 1024 < 5) {
+      this.fileToUpload = event.target.files[0];
+      this.isFileUploaded = true;
+    } else {
       this.toastr.error(`File can't be heavier than ~5MB`);
     }
-    this.isFileUploaded = true;
   }
 
   public imageCroppedUpload(event: ImageCroppedEvent): void {
