@@ -134,5 +134,51 @@ namespace Whale.Shared.Services
             await _context.SaveChangesAsync();
             return;
         }
+
+        public async Task<NotificationDTO> UpdateNotificationAsync(NotificationDTO notDto)
+        {
+            var notification = await _context.Notifications.FirstOrDefaultAsync(n => n.Id == notDto.Id);
+            if(notification == null) throw new NotFoundException("Notification", notDto.Id.ToString());
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == notification.UserId);
+            if (user is null)
+                throw new NotFoundException("User", user.Id.ToString());
+
+            notification.NotificationType = notDto.NotificationType;
+            notification.Options = notDto.Options;
+
+            _context.Notifications.Update(notification);
+            await _context.SaveChangesAsync();
+
+            var updatedNotificationDTO = _mapper.Map<NotificationDTO>(notification);
+
+            var connection = await _signalrService.ConnectHubAsync("whale");
+            await connection.InvokeAsync("onUpdateNotification", user.Email, updatedNotificationDTO);
+
+            return updatedNotificationDTO;
+        }
+
+        public async Task UpdateInviteMeetingNotifications(string link)
+        {
+            var noticications = _context.Notifications.Where(n => n.Options.Contains(link)).ToList();
+            if(noticications.Count > 0)
+            {
+                var email = JsonConvert.DeserializeObject<OptionsInviteMeeting>(noticications[0].Options, camelSettings).ContactEmail;
+                
+                var options = new OptionsText
+                {
+                    Message = $"Missed meeting invitation from {email}",
+                };
+
+                var optionsString = JsonConvert.SerializeObject(options, camelSettings);
+                
+                foreach (var not in noticications) {
+                    var unpdatedNotification = _mapper.Map<NotificationDTO>(not);
+                    unpdatedNotification.NotificationType = NotificationTypeEnum.TextNotification;
+                    unpdatedNotification.Options = optionsString;
+                    await UpdateNotificationAsync(unpdatedNotification);
+                 }
+            }
+        }
     }
 }
