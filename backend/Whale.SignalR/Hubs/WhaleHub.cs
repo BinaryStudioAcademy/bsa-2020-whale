@@ -152,6 +152,12 @@ namespace Whale.SignalR.Hubs
             return Clients.Group(userEmail).SendAsync("onDeleteNotification", notificationId);
         }
 
+        [HubMethodName("onUpdateNotification")]
+        public Task UpdateNotification(string userEmail, NotificationDTO notificationDTO)
+        {
+            return Clients.Group(userEmail).SendAsync("onUpdateNotification", notificationDTO);
+        }
+
         [HubMethodName("onNewContact")]
         public Task NewContact(ContactDTO contactDTO)
         {

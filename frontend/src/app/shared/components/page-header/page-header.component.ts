@@ -87,6 +87,22 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
         }
       );
 
+    this.whaleSignalrService.updateNotify$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (updateNotification) => {
+          const index = this.notificationsList.findIndex(
+            (n) => n.id === updateNotification.id
+          );
+          if (index >= 0) {
+            this.notificationsList[index] = updateNotification;
+          }
+        },
+        (err) => {
+          console.log(err.message);
+        }
+      );
+
     this.whaleSignalrService.removeNotify$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
