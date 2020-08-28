@@ -26,6 +26,7 @@ namespace Whale.API.Controllers.Slack
         [Produces("application/json")]
         public async Task StartMeeting(SlackCommand userData)
         {
+            await _slackService.SendSlackReplyAsync("", userData.channel_id);
 
             var user = await _slackService.GetUserProfileAsync(userData.user_id);
 
