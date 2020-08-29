@@ -11,10 +11,10 @@ export class RoomService {
   public participantsInRooms = new Map<string, Array<Participant>>();
   public isUserHost = false;
   public participants: Array<Participant> = [];
-  public isDividedIntoRooms: boolean = false;
+  public isDividedIntoRooms = false;
   public originalMeetingUrl: string;
   public originalMeetingId: string;
-  public isInRoom: boolean = false;
+  public isInRoom = false;
 
   constructor(
     private meetingSignalrService: MeetingSignalrService,
@@ -42,7 +42,7 @@ export class RoomService {
   ): void {
     this.participantsInRooms.set(
       roomId,
-      this.participants.filter((p) => participantsIds.some((pp) => p.id == pp))
+      this.participants.filter((p) => participantsIds.some((pp) => p.id === pp))
     );
   }
 
@@ -55,7 +55,7 @@ export class RoomService {
       .then((rooms: RoomDTO[]) => {
         console.log(rooms);
         rooms.forEach((room) => {
-          //this.configureParticipantsInRooms(room.roomId, room.participantsIds\\\);
+          // this.configureParticipantsInRooms(room.roomId, room.participantsIds\\\);
           this.participantsInRooms.set(room.roomId, room.participants);
         });
         if (rooms.length > 0) {
@@ -69,13 +69,13 @@ export class RoomService {
 
   public deleteParticipant(participantEmail: string): void {
     this.participants = this.participants.filter(
-      (p) => p?.user?.email != participantEmail
+      (p) => p?.user?.email !== participantEmail
     );
     const keys = Array.from(this.participantsInRooms.keys());
     for (const key of keys) {
       const participants = this.participantsInRooms
         .get(key)
-        .filter((p) => p.user.email != participantEmail);
+        .filter((p) => p.user.email !== participantEmail);
       this.participantsInRooms.set(key, participants);
     }
   }

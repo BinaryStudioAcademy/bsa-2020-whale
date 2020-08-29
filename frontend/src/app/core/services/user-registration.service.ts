@@ -27,7 +27,7 @@ export class UserRegistrationService {
     console.error('USER REGISTRATION SERVICE');
   }
 
-  registerUser(currentUser: any) {
+  registerUser(currentUser: any): void {
     const fireUser: IFireBaseUser = {
       uid: currentUser.uid,
       displayName: currentUser.displayName,
@@ -49,9 +49,9 @@ export class UserRegistrationService {
             this.httpService
               .postClearRequest<IFireBaseUser, User>(this.addUserUrl, fireUser)
               .pipe(first())
-              .subscribe((user) => {
-                console.log(user);
-                this.userRegistered.next(user);
+              .subscribe((createdUser) => {
+                console.log(createdUser);
+                this.userRegistered.next(createdUser);
                 this.router.navigate(['/home']);
               });
           } else {

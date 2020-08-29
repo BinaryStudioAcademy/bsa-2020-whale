@@ -11,7 +11,7 @@ export class SettingVideoComponent implements OnInit, OnDestroy {
   public browserMediaDevice = new BrowserMediaDevice();
   public videoDevices: MediaDeviceInfo[] = [null];
   public videoStream: MediaStream;
-  public deviceId: string = '';
+  public deviceId = '';
   public isMirror;
   public checkbox;
   constructor(public mediaSettingsService: MediaSettingsService) {}
@@ -57,23 +57,23 @@ export class SettingVideoComponent implements OnInit, OnDestroy {
       });
   }
 
-  async handleSuccess(stream) {
+  async handleSuccess(stream): Promise<void> {
     const video = document.querySelector('video');
     video.srcObject = stream;
   }
 
-  public async changeState(deviceId: string) {
+  public async changeState(deviceId: string): Promise<void> {
     this.mediaSettingsService.changeVideoDevice(deviceId);
     this.ngOnDestroy();
     this.videoStream = await navigator.mediaDevices.getUserMedia({
       video: {
-        deviceId: deviceId,
+        deviceId,
       },
       audio: false,
     });
     this.handleSuccess(this.videoStream);
   }
-  public changeMirror(event) {
+  public changeMirror(event): void {
     if (event.target.checked) {
       this.isMirror = true;
       document.querySelector('video').style.transform = 'scale(-1,1)';

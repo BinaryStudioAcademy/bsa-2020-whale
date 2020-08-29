@@ -108,8 +108,9 @@ export class GroupChatComponent
     const isScrolledToBottom =
       chatHtml.scrollHeight - chatHtml.clientHeight > chatHtml.scrollTop;
 
-    if (isScrolledToBottom)
+    if (isScrolledToBottom) {
       chatHtml.scrollTop = chatHtml.scrollHeight - chatHtml.clientHeight;
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -305,7 +306,7 @@ export class GroupChatComponent
         }
       });
   }
-  removeUser(userId: string) {
+  removeUser(userId: string): void {
     this.groupMembers = this.groupMembers.filter((c) => c.id !== userId);
   }
   returnCorrectLink(user: User): string {
@@ -314,7 +315,7 @@ export class GroupChatComponent
       ? user?.avatarUrl
       : '';
   }
-  public splitMessage(message: string) {
+  public splitMessage(message: string): string[] {
     return message.split(/\n/gi);
   }
 
@@ -326,7 +327,7 @@ export class GroupChatComponent
     );
   }
 
-  public editGroupInfo() {
+  public editGroupInfo(): void {
     this.simpleModalService
       .addModal(EditGroupInfoModalComponent, this.groupSelected)
       .subscribe(

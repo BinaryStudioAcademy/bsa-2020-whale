@@ -70,7 +70,8 @@ export class MediaSettingsService {
       },
     };
   }
-  public changeMirror(isMirror: boolean) {
+
+  public changeMirror(isMirror: boolean): void {
     this._settings.IsMirrorVideo = isMirror;
     this.saveSettingsInLocalStorage();
   }

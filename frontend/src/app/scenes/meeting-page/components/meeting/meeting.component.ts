@@ -65,7 +65,7 @@ import { BrowserMediaDevice } from '@shared/browser-media-device';
 export class MeetingComponent
   implements OnInit, AfterViewInit, OnDestroy, AfterViewChecked {
   //#region fields
-  public canvasIsDisplayed: boolean = false;
+  public canvasIsDisplayed = false;
   public canvasOptions: CanvasWhiteboardOptions = {
     clearButtonEnabled: true,
     clearButtonText: 'Erase',
@@ -103,7 +103,7 @@ export class MeetingComponent
   public meeting: Meeting;
   public meetingStatistics: Statistics;
   public msgText = '';
-  public msgReceiverEmail: string = '';
+  public msgReceiverEmail = '';
   public messages: MeetingMessage[] = [];
   public selectedMessages: MeetingMessage[] = [];
   public newMsgFrom: string[] = [];
@@ -112,12 +112,12 @@ export class MeetingComponent
   public pattern = new RegExp(/^\S+.*/);
   public peer: Peer;
   public pollService: PollService;
-  public receiveingDrawings: boolean = false;
+  public receiveingDrawings = false;
   public isHost = false;
   public isRoom = false;
   public isMoveToRoom = false;
   public onCanMoveIntoRoomEvent = new EventEmitter<void>();
-  public isSharing: boolean = false;
+  public isSharing = false;
   private sdpVideoBandwidth = 125;
   public meter = new DecibelMeter('meter');
   public browserMediaDevice = new BrowserMediaDevice();
@@ -183,13 +183,13 @@ export class MeetingComponent
     this.userStream = value;
   }
 
-  private get currentUserStream() {
+  private get currentUserStream(): MediaStream {
     return this.userStream;
   }
   //#endregion accessors
 
   //#region hooks
-  public async ngOnInit() {
+  public async ngOnInit(): Promise<void> {
     this.isRoom = window.location.pathname.includes('room');
     this.roomService.isInRoom = this.isRoom;
     if (this.isRoom) {
@@ -283,7 +283,9 @@ export class MeetingComponent
           );
           this.createParticipantCard(this.currentParticipant);
 
-          if (this.isHost) this.roomService.getRoomsOfMeeting(this.meeting.id);
+          if (this.isHost) {
+            this.roomService.getRoomsOfMeeting(this.meeting.id);
+          }
         },
         (err) => {
           this.toastr.error(err.Message);
@@ -300,7 +302,7 @@ export class MeetingComponent
         }
 
         const disconectedMediaDataIndex = this.mediaData.findIndex(
-          (m) => m.currentStreamId == connectionData.participant.streamId
+          (m) => m.currentStreamId === connectionData.participant.streamId
         );
         if (disconectedMediaDataIndex) {
           this.mediaData.splice(disconectedMediaDataIndex, 1);
@@ -325,7 +327,7 @@ export class MeetingComponent
         );
 
         const disconectedMediaDataIndex = this.mediaData.findIndex(
-          (m) => m.currentStreamId == participant.streamId
+          (m) => m.currentStreamId === participant.streamId
         );
         if (disconectedMediaDataIndex) {
           this.mediaData.splice(disconectedMediaDataIndex, 1);
@@ -479,7 +481,7 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (streamId) => {
-          let stream = this.connectedStreams.find((x) => x.id == streamId);
+          const stream = this.connectedStreams.find((x) => x.id === streamId);
           this.fullPage(streamId);
           this.toastr.success('Start sharing screen');
         },
@@ -510,7 +512,9 @@ export class MeetingComponent
     this.meetingSignalrService.onRoomClosed$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((link) => {
-        if (this.isRoom) this.router.navigate([`/meeting-page/${link}`]);
+        if (this.isRoom) {
+          this.router.navigate([`/meeting-page/${link}`]);
+        }
       });
 
     this.meetingSignalrService.onParticipentMoveIntoRoom$
@@ -521,7 +525,7 @@ export class MeetingComponent
         }
 
         const disconectedMediaDataIndex = this.mediaData.findIndex(
-          (m) => m.stream.id == connectionData.participant.streamId
+          (m) => m.stream.id === connectionData.participant.streamId
         );
         if (disconectedMediaDataIndex) {
           this.mediaData.splice(disconectedMediaDataIndex, 1);
@@ -548,7 +552,7 @@ export class MeetingComponent
           this.connectedStreams.push(stream);
 
           const participant = this.meeting.participants.find(
-            (p) => p.streamId == stream.id
+            (p) => p.streamId === stream.id
           );
 
           this.createParticipantCard(participant);
@@ -567,7 +571,7 @@ export class MeetingComponent
       this.currentVideo.nativeElement.style.transform = 'scale(-1,1)';
     }
     // show a warning dialog if close current tab or window
-    window.onbeforeunload = function (ev: BeforeUnloadEvent) {
+    window.onbeforeunload = (ev: BeforeUnloadEvent) => {
       ev.preventDefault();
       ev = ev || window.event;
       ev.returnValue = '';
@@ -588,7 +592,9 @@ export class MeetingComponent
   }
 
   ngAfterViewChecked(): void {
-    if (this.isShowChat) this.chatElement = this.chatBlock.first?.nativeElement;
+    if (this.isShowChat) {
+      this.chatElement = this.chatBlock.first?.nativeElement;
+    }
   }
 
   public ngOnDestroy(): void {
@@ -632,7 +638,9 @@ export class MeetingComponent
         });
 
     this.isMicrophoneMuted = !this.isMicrophoneMuted;
-    if (!isMissSignaling) this.invokeMediaStateChanged();
+    if (!isMissSignaling) {
+      this.invokeMediaStateChanged();
+    }
   }
 
   public toggleCamera(isMissSignaling: boolean = false): void {
@@ -645,7 +653,9 @@ export class MeetingComponent
         });
 
     this.isCameraMuted = !this.isCameraMuted;
-    if (!isMissSignaling) this.invokeMediaStateChanged();
+    if (!isMissSignaling) {
+      this.invokeMediaStateChanged();
+    }
   }
 
   public startRecording(): void {
@@ -755,8 +765,9 @@ export class MeetingComponent
     const isScrolledToBottom =
       chatHtml.scrollHeight - chatHtml.clientHeight > chatHtml.scrollTop;
 
-    if (isScrolledToBottom)
+    if (isScrolledToBottom) {
       chatHtml.scrollTop = chatHtml.scrollHeight - chatHtml.clientHeight;
+    }
   }
 
   public goFullscreen(): void {
@@ -784,8 +795,8 @@ export class MeetingComponent
   }
 
   public leave(): void {
-    //this is made to remove eventListener for other routes
-    window.onbeforeunload = function () {};
+    // this is made to remove eventListener for other routes
+    window.onbeforeunload = () => {};
     this.meter.stopListening();
     this.meter.disconnect();
     this.router.navigate(['/home']);
@@ -825,7 +836,7 @@ export class MeetingComponent
   }
 
   // call to peer
-  private connect(recieverPeerId: string) {
+  private connect(recieverPeerId: string): void {
     const call = this.peer.call(recieverPeerId, this.currentUserStream, {
       sdpTransform: (sdp: string) =>
         this.setMediaBitrate(sdp, 'video', this.sdpVideoBandwidth),
@@ -836,8 +847,8 @@ export class MeetingComponent
       this.connectedStreams.push(stream);
       const connectedPeer = this.connectedPeers.get(call.peer);
       if (!connectedPeer || connectedPeer.id !== stream.id) {
-        var participant = this.meeting.participants.find(
-          (p) => p.streamId == stream.id
+        const participant = this.meeting.participants.find(
+          (p) => p.streamId === stream.id
         );
         this.createParticipantCard(participant);
         this.connectedPeers.set(call.peer, stream);
@@ -848,7 +859,7 @@ export class MeetingComponent
   private getMeeting(link: string): void {
     if (this.isRoom) {
       this.meeting = {
-        id: this.route.snapshot.params['id'],
+        id: this.route.snapshot.params.link,
         settings: '',
         startTime: new Date(),
         isScheduled: false,
@@ -858,7 +869,7 @@ export class MeetingComponent
         participants: [],
       };
 
-      this.connectionData.meetingId = this.route.snapshot.params['id'];
+      this.connectionData.meetingId = this.route.snapshot.params.link;
       this.connectionData.meetingPwd = '';
       this.connectionData.isRoom = true;
 
@@ -911,10 +922,10 @@ export class MeetingComponent
     this.router.navigate(['/home']);
   }
 
-  private invokeMediaStateChanged(receiverConnectionId = '') {
+  private invokeMediaStateChanged(receiverConnectionId = ''): void {
     this.meetingSignalrService.invoke(SignalMethods.OnMediaStateChanged, {
       streamId: this.currentUserStream.id,
-      receiverConnectionId: receiverConnectionId,
+      receiverConnectionId,
       isVideoActive: !this.isCameraMuted,
       isAudioActive: !this.isMicrophoneMuted,
     });
@@ -923,7 +934,7 @@ export class MeetingComponent
 
   //#region peers
   // send message to all subscribers that added new user
-  private onPeerOpen(id: string) {
+  private onPeerOpen(id: string): void {
     this.route.params.subscribe((params: Params) => {
       const link: string = params[`link`];
       const urlParams = new URLSearchParams(link);
@@ -944,7 +955,7 @@ export class MeetingComponent
     });
   }
 
-  private destroyPeer() {
+  private destroyPeer(): void {
     this.peer?.disconnect();
     this.peer?.destroy();
   }
@@ -960,13 +971,13 @@ export class MeetingComponent
         ? this.currentUserStream
         : this.connectedStreams.find((s) => s.id === participant?.streamId);
 
-    var newMediaData = {
+    const newMediaData = {
       id: participant.id,
       isCurrentUser: participant.id === this.currentParticipant.id,
       currentStreamId: stream.id,
-      stream: stream,
+      stream,
       dynamicData: new BehaviorSubject<ParticipantDynamicData>({
-        isUserHost: participant.role == ParticipantRole.Host,
+        isUserHost: participant.role === ParticipantRole.Host,
         userFirstName: participant.user.firstName,
         userSecondName: participant.user.secondName,
         avatarUrl: participant.user.avatarUrl,
@@ -1033,12 +1044,12 @@ export class MeetingComponent
     this.meetingSignalrService.invoke(SignalMethods.OnSwitchOffMediaByHost, {
       mutedStreamId: streamId,
       meetingId: this.meeting.id,
-      isVideo: isVideo,
+      isVideo,
     });
   }
 
   public hideViewEventHandler(mediaDataId: string): void {
-    this.mediaData = this.mediaData.filter((d) => d.id != mediaDataId);
+    this.mediaData = this.mediaData.filter((d) => d.id !== mediaDataId);
     this.isShowCurrentParticipantCard = false;
   }
 
@@ -1046,7 +1057,7 @@ export class MeetingComponent
     streamId: string,
     isAudioActive: boolean,
     isVideoActive: boolean
-  ) {
+  ): void {
     const participant =
       this.currentParticipant.streamId === streamId
         ? this.currentParticipant
@@ -1060,12 +1071,12 @@ export class MeetingComponent
     }
 
     changedMediaData.dynamicData.next({
-      isUserHost: participant.role == ParticipantRole.Host,
+      isUserHost: participant.role === ParticipantRole.Host,
       userFirstName: participant.user.firstName,
       userSecondName: participant.user.secondName,
       avatarUrl: participant.user.avatarUrl,
-      isVideoActive: isVideoActive,
-      isAudioActive: isAudioActive,
+      isVideoActive,
+      isAudioActive,
     });
   }
   //#endregion participant cards
@@ -1105,7 +1116,7 @@ export class MeetingComponent
     }
   }
 
-  public splitMessage(message: string) {
+  public splitMessage(message: string): string[] {
     return message.split(/\n/gi);
   }
 
@@ -1149,7 +1160,7 @@ export class MeetingComponent
   //#endregion chat
 
   //#region whiteboard
-  public onCanvasDraw(event) {
+  public onCanvasDraw(event): void {
     const strokes = event as CanvasWhiteboardUpdate[];
     this.savedStrokes.push(strokes);
     this.meetingSignalrService.invoke(SignalMethods.OnDrawing, {
@@ -1158,7 +1169,7 @@ export class MeetingComponent
     });
   }
 
-  public onCanvasClear() {
+  public onCanvasClear(): void {
     this.meetingSignalrService.invoke(SignalMethods.OnErasing, {
       meetingId: this.meeting.id.toString(),
       erase: true,
@@ -1166,7 +1177,7 @@ export class MeetingComponent
     this.savedStrokes = new Array<CanvasWhiteboardUpdate[]>();
   }
 
-  public async showCanvas() {
+  public async showCanvas(): Promise<void> {
     this.canvasIsDisplayed = !this.canvasIsDisplayed;
     this.receiveingDrawings = false;
 
@@ -1178,17 +1189,17 @@ export class MeetingComponent
     }
   }
 
-  public checkDrawing() {
+  public checkDrawing(): boolean {
     return !this.canvasIsDisplayed && this.receiveingDrawings;
   }
 
-  private delay(ms: number) {
+  private delay(ms: number): Promise<NodeJS.Timeout> {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
   //#endregion whiteboard
 
   //#region media settings
-  public async changeStateVideo(event: any) {
+  public async changeStateVideo(event: any): Promise<void> {
     this.mediaSettingsService.changeVideoDevice(event);
     this.currentUserStream.getVideoTracks()?.forEach((track) => track.stop());
     this.currentUserStream = await navigator.mediaDevices.getUserMedia(
@@ -1199,9 +1210,9 @@ export class MeetingComponent
     this.isAudioSettings = false;
     this.isVideoSettings = false;
   }
-  handleSuccessVideo(stream: MediaStream) {
+  handleSuccessVideo(stream: MediaStream): void {
     const video = document.querySelector('video') as HTMLVideoElement;
-    //video.srcObject = stream;
+    // video.srcObject = stream;
     const keys = Object.keys(this.peer.connections);
     const peerConnection = this.peer.connections[keys[0]];
     const videoTrack = stream.getVideoTracks()[0];
@@ -1217,7 +1228,7 @@ export class MeetingComponent
     this.currentUserStream.addTrack(videoTrack);
   }
 
-  public async changeInputDevice(deviceId: string) {
+  public async changeInputDevice(deviceId: string): Promise<void> {
     this.mediaSettingsService.changeInputDevice(deviceId);
     this.currentUserStream = await navigator.mediaDevices.getUserMedia(
       await this.mediaSettingsService.getMediaConstraints()
@@ -1241,7 +1252,7 @@ export class MeetingComponent
     });
   }
 
-  public async changeOutputDevice(deviceId: string) {
+  public async changeOutputDevice(deviceId: string): Promise<void> {
     const audio = document.querySelector('audio');
     this.mediaSettingsService.changeOutputDevice(deviceId);
     this.mediaSettingsService.attachSinkId(audio, deviceId);
@@ -1272,7 +1283,7 @@ export class MeetingComponent
 
   //#region Rooms
   public async openRoomsModal(): Promise<void> {
-    const link = this.route.snapshot.params['link'];
+    const link = this.route.snapshot.params.link;
 
     this.roomService.getRoomsOfMeeting(this.meeting.id);
 
@@ -1294,7 +1305,7 @@ export class MeetingComponent
   //#endregion Rooms
 
   //#region InviteUserModal
-  public async openInviteUsersModal() {
+  public async openInviteUsersModal(): Promise<void> {
     this.isAddParticipantDisabled = true;
     this.getShortInviteLink().subscribe(
       async (shortId) => {
@@ -1319,9 +1330,9 @@ export class MeetingComponent
     );
   }
 
-  private buildShortLink(shortId: string) {
+  private buildShortLink(shortId: string): string {
     const URL: string = this.document.location.href;
-    let chanks = URL.split('/');
+    const chanks = URL.split('/');
     chanks.splice(3, chanks.length - 3);
     chanks.push('redirection');
     chanks.push(shortId);
@@ -1331,7 +1342,7 @@ export class MeetingComponent
   //#endregion
 
   //#region ShareScreen
-  async shareScreen() {
+  async shareScreen(): Promise<void> {
     this.lastTrack = this.currentUserStream.getVideoTracks()[0];
     const mediaDevices = (await navigator.mediaDevices) as any;
     const stream = await mediaDevices.getDisplayMedia();
@@ -1342,16 +1353,16 @@ export class MeetingComponent
     });
     this.isSharing = true;
   }
-  public fullPage(streamId) {
+  public fullPage(streamId): void {
     const stream = this.connectedStreams.find((x) => x.id === streamId);
     console.log(stream.getVideoTracks());
-    let fullVideo = this.createPage();
+    const fullVideo = this.createPage();
     fullVideo.srcObject = stream;
     fullVideo.play();
   }
   public createPage(): HTMLVideoElement {
     const parrent = document.getElementsByClassName('main-content')[0];
-    let fullVideo = document.createElement('video');
+    const fullVideo = document.createElement('video');
     parrent.appendChild(fullVideo);
     fullVideo.className += 'fullVideo';
     fullVideo.style.width = '100vw';
@@ -1360,7 +1371,7 @@ export class MeetingComponent
     fullVideo.style.position = 'fixed';
     return fullVideo;
   }
-  async removeSharingVideo() {
+  async removeSharingVideo(): Promise<void> {
     const keys = Object.keys(this.peer.connections);
     const peerConnection = this.peer.connections[keys[0]];
     peerConnection.forEach((pc) => {
@@ -1378,8 +1389,8 @@ export class MeetingComponent
       this.meeting.id
     );
   }
-  async stopShare() {
-    let fullVideo = document.querySelector('.fullVideo') as HTMLElement;
+  async stopShare(): Promise<void> {
+    const fullVideo = document.querySelector('.fullVideo') as HTMLElement;
     fullVideo.remove();
     this.isSharing = false;
     this.toastr.info('Stop sharing screen');

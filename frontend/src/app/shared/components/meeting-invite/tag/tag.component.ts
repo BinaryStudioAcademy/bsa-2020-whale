@@ -14,7 +14,7 @@ export class TagComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  public removeTag() {
+  public removeTag(): void {
     this.tagRemoved.emit(this.email);
   }
 }
