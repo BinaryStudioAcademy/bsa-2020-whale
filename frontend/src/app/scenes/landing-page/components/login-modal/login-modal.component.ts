@@ -25,7 +25,7 @@ export class LoginModalComponent extends SimpleModalComponent<null, boolean> {
   public googleLogin(): void {
     this.auth.signInWithGoogle().then((status) => {
       this.result = status;
-      //this.router.navigate(['/home']);
+      // this.router.navigate(['/home']);
       setTimeout(() => this.close(), 200);
     });
   }

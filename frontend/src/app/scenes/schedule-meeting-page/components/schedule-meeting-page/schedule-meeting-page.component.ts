@@ -29,7 +29,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
     minutesInterval: 10,
   };
 
-  public isPasswordCheckboxChecked: boolean = true;
+  public isPasswordCheckboxChecked = true;
   public form: FormGroup;
 
   constructor(
@@ -105,19 +105,19 @@ export class ScheduleMeetingPageComponent implements OnInit {
   }
 
   public async addEventToCalendar(): Promise<void> {
-    let startTime = this.createDateTime(
+    const startTime = this.createDateTime(
       this.form.controls.date.value,
       this.form.controls.time.value
     );
 
-    let endTime = this.getEndDate(
+    const endTime = this.getEndDate(
       startTime,
       this.form.controls.durationHours.value,
       this.form.controls.durationMinutes.value
     );
 
-    let userName = this.authService.currentUser.displayName;
-    let userEmail = this.authService.currentUser.email;
+    const userName = this.authService.currentUser.displayName;
+    const userEmail = this.authService.currentUser.email;
 
     const event = {
       summary: this.form.controls.topic.value,
@@ -137,8 +137,9 @@ export class ScheduleMeetingPageComponent implements OnInit {
     } as gapi.client.calendar.Event;
 
     const result = await this.calendarService.insertEvent(event);
-    if (!result)
+    if (!result) {
       this.toastr.error('Error ocured while adding event into calendar');
+    }
   }
 
   private getEndDate(

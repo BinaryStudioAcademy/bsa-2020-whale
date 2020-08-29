@@ -11,7 +11,7 @@ import { mergeMap, filter } from 'rxjs/operators';
 export class AuthService {
   public currentUser: firebase.User;
   public user$: Observable<firebase.User>;
-  public isSignedIn: boolean = false;
+  public isSignedIn = false;
 
   constructor(
     private fireAuth: AngularFireAuth,
