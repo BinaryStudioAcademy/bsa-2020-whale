@@ -8,6 +8,8 @@ import {
   OnDestroy,
   Inject,
   AfterViewChecked,
+  ViewChildren,
+  QueryList,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
@@ -127,9 +129,10 @@ export class MeetingComponent
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
     HTMLElement
   >;
-  @ViewChild('meetingChat', { static: false }) private chatBlock: ElementRef<
-    HTMLElement
+  @ViewChildren('meetingChat') private chatBlock: QueryList<
+    ElementRef<HTMLElement>
   >;
+
   private chatElement: any;
   private currentStreamLoaded = new EventEmitter<void>();
   private contectedAt = new Date();
@@ -247,7 +250,9 @@ export class MeetingComponent
           }
 
           this.connect(connectData.peerId);
-          this.toastr.success('Connected successfuly');
+
+          this.toastr.success(`${connectData.participant.user.firstName}
+          ${connectData.participant.user.secondName} connected`);
         },
         (err) => {
           this.toastr.error(err.Message);
@@ -427,6 +432,11 @@ export class MeetingComponent
           this.messages.push(message);
           this.updateSelectedMessages();
           this.notifyNewMsg(message);
+          if (this.isShowChat) {
+            this.chatBlock.changes.pipe(first()).subscribe(() => {
+              this.scrollDown();
+            });
+          }
         },
         () => {
           this.toastr.error('Error occured when sending message');
@@ -564,14 +574,16 @@ export class MeetingComponent
     this.elem = this.mainArea.nativeElement;
     this.currentStreamLoaded.subscribe(() => {
       this.currentVideo.nativeElement.srcObject = this.currentUserStream;
+      if (this.mediaSettingsService.settings.IsMirrorVideo) {
+        this.currentVideo.nativeElement.style.transform = 'scale(-1,1)';
+        document.querySelector('video').style.transform = 'scale(-1,1)';
+      }
       this.setOutputDevice();
     });
   }
 
   ngAfterViewChecked(): void {
-    if (this.isShowChat) {
-      this.chatElement = this.chatBlock.nativeElement;
-    }
+    if (this.isShowChat) this.chatElement = this.chatBlock.first?.nativeElement;
   }
 
   public ngOnDestroy(): void {
@@ -736,7 +748,7 @@ export class MeetingComponent
   }
 
   scrollDown(): void {
-    const chatHtml = this.chatElement as HTMLElement;
+    const chatHtml = this.chatBlock.first.nativeElement as HTMLElement;
     const isScrolledToBottom =
       chatHtml.scrollHeight - chatHtml.clientHeight > chatHtml.scrollTop;
 
@@ -1061,6 +1073,12 @@ export class MeetingComponent
     this.isShowChat = !this.isShowChat;
     if (this.isShowChat) {
       this.receiverChanged();
+      this.chatBlock.changes.pipe(first()).subscribe(() => {
+        this.chatBlock.first.nativeElement.scrollTo(
+          0,
+          this.chatBlock.first.nativeElement.scrollHeight
+        );
+      });
     }
     this.isNewMsg = !this.isShowChat && this.newMsgFrom.length > 0;
   }
@@ -1075,7 +1093,6 @@ export class MeetingComponent
       } as MeetingMessageCreate);
 
       this.msgText = '';
-      this.scrollDown();
     }
   }
 
@@ -1291,7 +1308,10 @@ export class MeetingComponent
             senderId: this.currentParticipant.user.id,
             participants: this.meeting.participants,
           })
-          .toPromise();
+          .toPromise()
+          .then((isShowParticipants) => {
+            this.isShowParticipants = isShowParticipants;
+          });
         this.isAddParticipantDisabled = false;
       },
       (error) => {

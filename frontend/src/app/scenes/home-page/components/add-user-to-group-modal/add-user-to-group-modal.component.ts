@@ -36,6 +36,7 @@ export class AddUserToGroupModalComponent
   public formSearch: FormGroup;
 
   public isLoading = false;
+  public isContactsLoading = false;
 
   selectedContacts = new Array<Contact>();
   public groupsUser = new Array<GroupUser>();
@@ -59,17 +60,22 @@ export class AddUserToGroupModalComponent
   }
 
   public getContacts(): void {
+    this.isContactsLoading = true;
     this.httpService
       .getRequest<Contact[]>(environment.apiUrl + '/api/Contacts/accepted')
       .subscribe(
         (response) => {
-          this.cachedContacts = this.contacts = response.filter(
+          const filteredGroups = response.filter(
             (c) =>
               !this.participantsEmails.find((e) => e === c.secondMember.email)
           );
+          this.contacts = Array.from(filteredGroups);
+          this.cachedContacts = Array.from(filteredGroups);
+          this.isContactsLoading = false;
         },
         (error) => {
           console.error(error);
+          this.isContactsLoading = false;
         }
       );
   }

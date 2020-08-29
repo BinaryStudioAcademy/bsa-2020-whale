@@ -3,7 +3,7 @@
     <h3 class="header">
       Invite users
       <div class="close-icon">
-        <span (click)="close()">
+        <span (click)="closeModal(true)">
           &times;
         </span>
       </div>
@@ -19,6 +19,9 @@
         </div>
       </form>
       <div class="ui relaxed divided selection list">
+        <div *ngIf="isContactsLoading">
+          <div class="ui inverted active centered inline loader"></div>
+        </div>
         <div class="item" *ngFor="let contact of cachedContacts">
           <app-contact
             [contact]="contact"
@@ -48,10 +51,7 @@
             <i class="question circle outline icon"></i>
           </div>
         </div>
-        <div
-          class="ui error message"
-          *ngIf="emailForm.invalid && emailForm.touched"
-        >
+        <div class="ui error message" *ngIf="emailForm.invalid">
           Email invalid
         </div>
       </form>

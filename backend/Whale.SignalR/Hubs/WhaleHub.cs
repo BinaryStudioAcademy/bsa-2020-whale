@@ -80,14 +80,15 @@ namespace Whale.SignalR.Hubs
         {
             var group = await _groupsService.GetGroupAsync(startCallDTO.GroupId, startCallDTO.Meeting.CreatorEmail);
             var groupUsers = await _groupsService.GetAllUsersInGroupAsync(startCallDTO.GroupId);
-            var userToCall = groupUsers.Where(x => x.Email != startCallDTO.Meeting.CreatorEmail);
+            var usersToCall = groupUsers.Where(x => x.Email != startCallDTO.Meeting.CreatorEmail);
+            var creator = groupUsers.FirstOrDefault(x => x.Email == startCallDTO.Meeting.CreatorEmail);
             var link = await _meetingService.CreateMeeting(startCallDTO.Meeting);
-            foreach (var usr in userToCall)
+            foreach (var usr in usersToCall)
             {
                 var connections = await _whaleService.GetConnections(usr.Id);
                 foreach (var connection in connections)
                 {
-                    await Clients.Client(connection).SendAsync("OnStartCallOthersInGroup", new GroupCallDTO { MeetingLink = link, Group = group, CallerEmail = startCallDTO.Meeting.CreatorEmail });
+                    await Clients.Client(connection).SendAsync("OnStartCallOthersInGroup", new GroupCallDTO { MeetingLink = link, Group = group, Caller  = creator });
                 }
             }
             await Clients.Caller.SendAsync("OnStartCallCaller", link);
@@ -126,18 +127,15 @@ namespace Whale.SignalR.Hubs
         [HubMethodName("OnDeclineGroupCall")]
         public async Task DeclineGroupCall(DeclineGroupCallDTO declineCallDTO)
         {
-            await _meetingService.ParticipantDisconnect(declineCallDTO.MeetingId, declineCallDTO.Email);
+            await _meetingService.ParticipantDisconnect(declineCallDTO.MeetingId, declineCallDTO.CallCreator.Email);
             var groupUsers = await _groupsService.GetAllUsersInGroupAsync(declineCallDTO.GroupId);
-            var isUserCaller = groupUsers.FirstOrDefault(x => x.Email == declineCallDTO.Email);
-            if (declineCallDTO.UserId == isUserCaller.Id)
+            var isUserCaller = groupUsers.FirstOrDefault(x => x.Email == declineCallDTO.CallCreator.Email);
+            foreach (var usr in groupUsers)
             {
-                foreach (var usr in groupUsers)
+                var connections = await _whaleService.GetConnections(usr.Id);
+                foreach (var connection in connections)
                 {
-                    var connections = await _whaleService.GetConnections(usr.Id);
-                    foreach (var connection in connections)
-                    {
-                        await Clients.Client(connection).SendAsync("OnDeclineGroupCall");
-                    }
+                    await Clients.Client(connection).SendAsync("OnDeclineGroupCall", declineCallDTO);
                 }
             }
         }

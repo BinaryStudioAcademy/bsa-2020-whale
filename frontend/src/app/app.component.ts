@@ -70,7 +70,7 @@ export class AppComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (call) => {
-          if (this.user.email !== call.callerEmail) {
+          if (this.user.email !== call.caller.email) {
             this.groupCall = call;
             console.log(call);
           }

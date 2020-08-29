@@ -14,7 +14,7 @@ import { Contact, User, Participant } from '@shared/models';
   styleUrls: ['./meeting-invite.component.sass'],
 })
 export class MeetingInviteComponent
-  extends SimpleModalComponent<MeetingInviteModalData, void>
+  extends SimpleModalComponent<MeetingInviteModalData, boolean>
   implements OnInit, MeetingInviteModalData {
   public emails: string[] = [];
   public contacts: Contact[];
@@ -26,6 +26,7 @@ export class MeetingInviteComponent
   public formSearch: FormGroup;
 
   public isLoading = false;
+  public isContactsLoading = false;
 
   meetingId: string;
   senderId: string;
@@ -47,20 +48,25 @@ export class MeetingInviteComponent
   }
 
   public getContacts(): void {
+    this.isContactsLoading = true;
     this.httpService
       .getRequest<Contact[]>(environment.apiUrl + '/api/Contacts/accepted')
       .subscribe(
         (response) => {
           console.log(response);
-          this.cachedContacts = this.contacts = response.filter(
+          const filteredContacts = response.filter(
             (c) =>
               !this.participants.find(
                 (p) => p.user.email === c.secondMember.email
               )
           );
+          this.contacts = Array.from(filteredContacts);
+          this.cachedContacts = Array.from(filteredContacts);
+          this.isContactsLoading = false;
         },
         (error) => {
           console.error(error);
+          this.isContactsLoading = false;
         }
       );
   }
@@ -128,7 +134,7 @@ export class MeetingInviteComponent
             'Only members of Whale will receive invites',
             'Info'
           );
-          setTimeout(() => this.close(), 1000);
+          setTimeout(() => this.closeModal(false), 1000);
         },
         (error) => {
           this.toastr.error(error.Message);
@@ -162,5 +168,10 @@ export class MeetingInviteComponent
     return user.secondName
       ? `${user.firstName} ${user.secondName}`
       : user.firstName;
+  }
+
+  public closeModal(result: boolean) {
+    this.result = result; // result = isShowParticipants after modal closing
+    this.close();
   }
 }
