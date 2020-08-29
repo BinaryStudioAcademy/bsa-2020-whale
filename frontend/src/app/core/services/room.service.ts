@@ -55,7 +55,6 @@ export class RoomService {
       .then((rooms: RoomDTO[]) => {
         console.log(rooms);
         rooms.forEach((room) => {
-          //this.configureParticipantsInRooms(room.roomId, room.participantsIds\\\);
           this.participantsInRooms.set(room.roomId, room.participants);
         });
         if (rooms.length > 0) {
