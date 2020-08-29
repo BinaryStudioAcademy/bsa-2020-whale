@@ -37,9 +37,15 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
       if (this.settingsMenuVisible) {
         this.settingsMenuVisible = false;
       }
+
+      window.onclick = null;
       this.isNotificationsVisible = !this.isNotificationsVisible;
-    } else {
-      this.isNotificationsVisible = false;
+
+      if (this.isNotificationsVisible) {
+        window.onclick = () => {
+          this.isNotificationsVisible = false;
+        };
+      }
     }
   }
 
@@ -47,7 +53,15 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
     if (this.isNotificationsVisible) {
       this.isNotificationsVisible = false;
     }
+
+    window.onclick = null;
     this.settingsMenuVisible = !this.settingsMenuVisible;
+
+    if (this.settingsMenuVisible) {
+      window.onclick = () => {
+        this.settingsMenuVisible = false;
+      };
+    }
   }
 
   ngOnInit(): void {
@@ -87,6 +101,22 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
         }
       );
 
+    this.whaleSignalrService.updateNotify$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (updateNotification) => {
+          const index = this.notificationsList.findIndex(
+            (n) => n.id === updateNotification.id
+          );
+          if (index >= 0) {
+            this.notificationsList[index] = updateNotification;
+          }
+        },
+        (err) => {
+          console.log(err.message);
+        }
+      );
+
     this.whaleSignalrService.removeNotify$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
@@ -113,7 +143,7 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
       WhaleSignalMethods.OnUserDisconnect,
       this.loggedInUser.email
     );
-    this.auth.logout().subscribe(() => this.router.navigate(['/']));
+    this.auth.logout().subscribe(() => this.router.navigate(['landing']));
   }
 
   onNotificationDelete(id: string): void {

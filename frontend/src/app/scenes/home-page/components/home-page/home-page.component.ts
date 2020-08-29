@@ -10,7 +10,7 @@ import { ToastrService } from 'ngx-toastr';
 import { MeetingService } from 'app/core/services/meeting.service';
 import { Router } from '@angular/router';
 import { MeetingCreate } from '@shared/models/meeting/meeting-create';
-import { takeUntil, tap } from 'rxjs/operators';
+import { takeUntil, tap, first } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { Group } from '@shared/models/group/group';
 import { GroupService } from 'app/core/services/group.service';
@@ -98,12 +98,12 @@ export class HomePageComponent implements OnInit, OnDestroy {
                     this.messageService.receivedMessage$
                       .pipe(takeUntil(this.unsubscribe$))
                       .subscribe((newMessage) => {
-                        console.log('home page subscription');
-                        if (this.loggedInUser.id == newMessage.authorId) {
+                        if (this.loggedInUser.id === newMessage.authorId) {
                           return;
                         }
                         const contact = this.contacts.find(
-                          (contact) => contact.id == newMessage.contact.id
+                          (messageContact) =>
+                            messageContact.id === newMessage.contact.id
                         );
                         contact.unreadMessageCount += 1;
                       });
@@ -125,6 +125,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
                       this.userConnected(onlineUser);
                     },
                     (err) => {
+                      console.log(err);
                       this.toastr.error(err.Message);
                     }
                   );
@@ -136,6 +137,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
                       this.userDisconnected(userEmail);
                     },
                     (err) => {
+                      console.log(err);
                       this.toastr.error(err.Message);
                     }
                   );
@@ -147,6 +149,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
                       this.userDisconnectedError(userId);
                     },
                     (err) => {
+                      console.log(err);
                       this.toastr.error(err.Message);
                     }
                   );
@@ -159,6 +162,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
                       this.messageService.joinGroup(contact.id);
                     },
                     (err) => {
+                      console.log(err);
                       console.log(err.message);
                     }
                   );
@@ -170,6 +174,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
                       this.removeContact(contactId);
                     },
                     (err) => {
+                      console.log(err);
                       console.log(err.message);
                     }
                   );
@@ -177,11 +182,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
                 this.whaleSignalrService.receiveGroup$
                   .pipe(takeUntil(this.unsubscribe$))
                   .subscribe(
-                    (group) => {
+                    (newGroup) => {
                       this.toastr.success(
-                        'You were added to ' + group.label + ' group'
+                        'You were added to ' + newGroup.label + ' group'
                       );
-                      this.addGroup(group);
+                      this.addGroup(newGroup);
                     },
                     (err) => {
                       console.log(err.message);
@@ -212,28 +217,37 @@ export class HomePageComponent implements OnInit, OnDestroy {
                 this.whaleSignalrService.updatedGroup$
                   .pipe(takeUntil(this.unsubscribe$))
                   .subscribe(
-                    (group) => {
-                      this.updateGroup(group);
+                    (updatedGroup) => {
+                      this.updateGroup(updatedGroup);
                     },
                     (err) => {
                       console.log(err.message);
                     }
                   );
               },
-              (error) => this.toastr.error(error.Message)
+              (error) => {
+                console.log(error);
+                this.toastr.error(error.Message);
+              }
+            );
+          this.groupService
+            .getAllGroups()
+            .pipe(tap(() => (this.isGroupsLoading = false)))
+            .subscribe(
+              (data: Group[]) => {
+                this.groups = data;
+                this.groupsVisibility = this.groups.length === 0 ? false : true;
+              },
+              (error) => {
+                console.log(error);
+                this.toastr.error(error.Message);
+              }
             );
         },
-        (error) => this.toastr.error(error.Message)
-      );
-    this.groupService
-      .getAllGroups()
-      .pipe(tap(() => (this.isGroupsLoading = false)))
-      .subscribe(
-        (data: Group[]) => {
-          this.groups = data;
-          this.groupsVisibility = this.groups.length == 0 ? false : true;
-        },
-        (error) => this.toastr.error(error.Message)
+        (error) => {
+          console.log(error);
+          this.toastr.error(error.Message);
+        }
       );
   }
   userConnected(onlineUser: UserOnline): void {
@@ -264,16 +278,16 @@ export class HomePageComponent implements OnInit, OnDestroy {
   addNewGroup(): void {
     this.simpleModalService
       .addModal(AddGroupModalComponent)
-      .subscribe((group) => {
-        if (group !== undefined) {
-          this.addGroup(group);
+      .subscribe((newGroup) => {
+        if (newGroup !== undefined) {
+          this.addGroup(newGroup);
           this.toastr.success('Group created successfuly');
         }
       });
   }
 
-  public leftGroup(group: Group): void {
-    this.groups.splice(this.groups.indexOf(group), 1);
+  public leftGroup(leftGroup: Group): void {
+    this.groups.splice(this.groups.indexOf(leftGroup), 1);
     if (!this.groups.length) {
       this.groupsVisibility = !this.groupsVisibility;
     }
@@ -298,7 +312,10 @@ export class HomePageComponent implements OnInit, OnDestroy {
                 }
               }
             },
-            (error) => this.toastr.error(error.Message)
+            (error) => {
+              console.log(error);
+              this.toastr.error(error.Message);
+            }
           );
         }
       });
@@ -313,8 +330,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
   isContactActive(contact): boolean {
     return this.contactSelected === contact;
   }
-  isGroupActive(group): boolean {
-    return this.groupSelected === group;
+  isGroupActive(activeGroup): boolean {
+    return this.groupSelected === activeGroup;
   }
 
   createMeeting(): void {
@@ -326,6 +343,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
         anonymousCount: 0,
         isScheduled: false,
         isRecurrent: false,
+        isAudioAllowed: true,
+        isVideoAllowed: true,
         creatorEmail: this.ownerEmail,
       } as MeetingCreate)
       .pipe(takeUntil(this.unsubscribe$))
@@ -377,14 +396,17 @@ export class HomePageComponent implements OnInit, OnDestroy {
                 (resp) => {
                   this.toastr.success('Canceled');
                 },
-                (error) => this.toastr.error(error.Message)
+                (error) => {
+                  console.log(error);
+                  this.toastr.error(error.Message);
+                }
               );
           }
         });
       return;
     }
 
-    if (contact == this.contactSelected) {
+    if (contact === this.contactSelected) {
       return;
     }
 
@@ -396,11 +418,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
     }, 1);
   }
 
-  onGroupClick(group: Group): void {
+  onGroupClick(selectedGroup: Group): void {
     this.falseAllBooleans();
     this.groupChatVisibility = true;
     this.contactSelected = undefined;
-    this.groupSelected = group;
+    this.groupSelected = selectedGroup;
   }
 
   public closeHistory(): void {
@@ -446,10 +468,10 @@ export class HomePageComponent implements OnInit, OnDestroy {
     }
   }
 
-  addGroup(group: Group): void {
-    if (group) {
-      this.removeContact(group.id);
-      this.groups.push(group);
+  addGroup(newGroup: Group): void {
+    if (newGroup) {
+      this.removeContact(newGroup.id);
+      this.groups.push(newGroup);
       this.groupsVisibility = true;
     }
   }
@@ -475,17 +497,17 @@ export class HomePageComponent implements OnInit, OnDestroy {
       this.groupsVisibility = !this.groupsVisibility;
     }
   }
-  public isImageHere(group: Group): boolean {
+  public isImageHere(currentGroup: Group): boolean {
     return (
-      group.photoUrl !== null &&
-      group.photoUrl !== undefined &&
-      group.photoUrl !== ''
+      currentGroup.photoUrl !== null &&
+      currentGroup.photoUrl !== undefined &&
+      currentGroup.photoUrl !== ''
     );
   }
-  public updateGroup(group: Group): void {
-    const updateItem = this.groups.find((x) => x.id === group.id);
+  public updateGroup(updatedGroup: Group): void {
+    const updateItem = this.groups.find((x) => x.id === updatedGroup.id);
     const index = this.groups.indexOf(updateItem);
-    this.groups[index] = group;
+    this.groups[index] = updatedGroup;
   }
 }
 export interface UserModel {

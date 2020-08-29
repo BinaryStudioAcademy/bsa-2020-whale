@@ -1,5 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { PollResultDto } from '@shared/models/poll/poll-result-dto';
+import { VoterDto } from '@shared/models';
 
 @Component({
   selector: 'app-poll-results',
@@ -10,7 +11,7 @@ export class PollResultsComponent implements OnInit {
   @Input() pollResult: PollResultDto;
   public answers: string[];
 
-  public totalVotes: number = 0;
+  public totalVotes = 0;
 
   get totalVoted(): number {
     return this.pollResult.isAnonymous
@@ -27,8 +28,8 @@ export class PollResultsComponent implements OnInit {
       .forEach((length) => (this.totalVotes += length));
   }
 
-  public calculatePercentage(index: number) {
-    if (this.totalVotes == 0) {
+  public calculatePercentage(index: number): number {
+    if (this.totalVotes === 0) {
       return 0;
     }
     return Math.round(
@@ -37,7 +38,7 @@ export class PollResultsComponent implements OnInit {
     );
   }
 
-  public getTotalVotedOfAnonymousPoll() {
+  public getTotalVotedOfAnonymousPoll(): number {
     let votedUsers: string[] = [];
     this.pollResult.optionResults
       .map((oR) => oR.votedUserIds)
@@ -47,7 +48,7 @@ export class PollResultsComponent implements OnInit {
     return distinctVotedUsers.size;
   }
 
-  public getVoter(id: string) {
-    return this.pollResult.votedUsers.find((voter) => voter.id == id);
+  public getVoter(id: string): VoterDto {
+    return this.pollResult.votedUsers.find((voter) => voter.id === id);
   }
 }

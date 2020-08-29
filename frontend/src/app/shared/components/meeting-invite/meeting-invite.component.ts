@@ -170,7 +170,7 @@ export class MeetingInviteComponent
       : user.firstName;
   }
 
-  public closeModal(result: boolean) {
+  public closeModal(result: boolean): void {
     this.result = result; // result = isShowParticipants after modal closing
     this.close();
   }

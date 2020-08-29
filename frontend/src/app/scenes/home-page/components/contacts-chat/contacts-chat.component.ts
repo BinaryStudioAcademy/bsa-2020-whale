@@ -92,15 +92,19 @@ export class ContactsChatComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (newMessage) => {
+          if (newMessage.contactId !== this.contactSelected.id) {
+            return;
+          }
+
           this.messages.push(newMessage);
-          if (newMessage.authorId == this.contactSelected?.secondMember.id) {
+          if (newMessage.authorId === this.contactSelected?.secondMember.id) {
             this.intersectionElements.changes.pipe(first()).subscribe(() => {
               this.intersectionObserver.observe(
                 this.intersectionElements.last.nativeElement
               );
               this.unreadMessages.push(newMessage);
               const firstUnread = this.intersectionElements.find(
-                (el) => el.nativeElement.id == this.unreadMessages[0].id
+                (el) => el.nativeElement.id === this.unreadMessages[0].id
               );
               firstUnread.nativeElement.scrollIntoView();
             });
@@ -119,11 +123,11 @@ export class ContactsChatComponent
     this.intersectionElements.changes.pipe(first()).subscribe(() => {
       this.receivedMessages$.subscribe(() => {
         this.registerIntersectionObserve();
-        if (this.unreadMessages.length == 0) {
+        if (this.unreadMessages.length === 0) {
           this.scrollDown();
         } else {
           const firstUnread = this.intersectionElements.find(
-            (el) => el.nativeElement.id == this.unreadMessages[0].id
+            (el) => el.nativeElement.id === this.unreadMessages[0].id
           );
           firstUnread.nativeElement.scrollIntoView();
         }
@@ -132,8 +136,8 @@ export class ContactsChatComponent
   }
 
   ngAfterViewChecked(): void {
-    //console.log('after view checked');
-    //this.scrollDown();
+    // console.log('after view checked');
+    // this.scrollDown();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -165,8 +169,9 @@ export class ContactsChatComponent
     const isScrolledToBottom =
       chatHtml.scrollHeight - chatHtml.clientHeight > chatHtml.scrollTop;
 
-    if (isScrolledToBottom)
+    if (isScrolledToBottom) {
       chatHtml.scrollTop = chatHtml.scrollHeight - chatHtml.clientHeight;
+    }
   }
 
   sendMessage(): void {
@@ -208,7 +213,7 @@ export class ContactsChatComponent
       this.sendMessage();
     }
   }
-  public splitMessage(message: string) {
+  public splitMessage(message: string): string[] {
     return message.split(/\n/gi);
   }
 
@@ -231,7 +236,7 @@ export class ContactsChatComponent
       });
   }
 
-  public registerIntersectionObserve() {
+  public registerIntersectionObserve(): void {
     const options = {
       root: null,
       rootMargin: '0px',
@@ -245,18 +250,18 @@ export class ContactsChatComponent
 
     this.unreadMessages.forEach((message) => {
       const element = this.intersectionElements.find(
-        (el) => el.nativeElement.id == message.id
+        (el) => el.nativeElement.id === message.id
       );
       this.intersectionObserver.observe(element.nativeElement);
     });
   }
 
-  public onIntersection(entries: IntersectionObserverEntry[]) {
+  public onIntersection(entries: IntersectionObserverEntry[]): void {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
         this.intersectionObserver.unobserve(entry.target);
         this.unreadMessages.splice(
-          this.unreadMessages.findIndex((um) => um.id == entry.target.id),
+          this.unreadMessages.findIndex((um) => um.id === entry.target.id),
           1
         );
         this.contactSelected.unreadMessageCount -= 1;
@@ -265,9 +270,9 @@ export class ContactsChatComponent
     });
   }
 
-  public sendMarkReadRequest(messageId: string, userId: string) {
+  public sendMarkReadRequest(messageId: string, userId: string): void {
     const unreadMessageId: UnreadMessageId = {
-      messageId: messageId,
+      messageId,
       receiverId: userId,
     };
 

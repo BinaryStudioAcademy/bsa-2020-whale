@@ -26,10 +26,10 @@ export class DivisionByRoomsModalComponent
 
   public meetingLink: string;
   public meetingId: string;
-  public numberOfRooms: number = 2;
+  public numberOfRooms = 2;
   public participants: Array<Participant>;
   public devidedParticipants: Array<Array<Participant>>;
-  public duration: number = 10;
+  public duration = 10;
   public onCanMoveIntoRoomEvent: EventEmitter<void>;
 
   constructor(
@@ -42,7 +42,7 @@ export class DivisionByRoomsModalComponent
 
   ngOnInit(): void {
     this.participants = this.participants.filter(
-      (p) => p.role != ParticipantRole.Host
+      (p) => p.role !== ParticipantRole.Host
     );
     this.devidedParticipants = this.randChunkSplit(
       this.participants,
@@ -81,6 +81,7 @@ export class DivisionByRoomsModalComponent
     this.onCanMoveIntoRoomEvent.subscribe(() => {
       if (!this.roomService.originalMeetingUrl) {
         this.roomService.originalMeetingUrl = this.meetingLink;
+        this.roomService.originalMeetingId = this.meetingId;
       }
       this.router.navigate([`/room/${roomId}`]);
     });
@@ -92,7 +93,7 @@ export class DivisionByRoomsModalComponent
     max: number = 1
   ): Array<Array<Participant>> {
     const arrCopy = arr.slice();
-    let arrs: Array<Array<Participant>> = [];
+    const arrs: Array<Array<Participant>> = [];
     let size = 1;
     max = max >= min ? max : min;
     while (arrCopy.length > 0) {

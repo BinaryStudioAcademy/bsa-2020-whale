@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpService } from './http.service';
 import { User } from '../../shared/models/user/user';
-import { Subject, from, Observable } from 'rxjs';
-import { filter, switchMap } from 'rxjs/operators';
+import { Subject, from, Observable, pipe } from 'rxjs';
+import { filter, switchMap, first } from 'rxjs/operators';
 import { AuthService } from '../auth/auth.service';
+import { UserRegistrationService } from './user-registration.service';
 
 @Injectable({
   providedIn: 'root',
@@ -17,14 +18,19 @@ export class UpstateService {
 
   constructor(
     private httpService: HttpService,
-    private authService: AuthService
+    private authService: AuthService,
+    private registrationService: UserRegistrationService
   ) {}
   public getLoggedInUser(): Observable<User> {
     return this.authService.user$.pipe(
       filter((user) => Boolean(user)),
-      switchMap((user) =>
-        this.httpService.getRequest<User>(`${this.routePrefix}/${user.email}`)
-      )
+      switchMap(
+        (user) => {
+          return this.registrationService.userRegistered$;
+        }
+        // this.httpService.getRequest<User>(`${this.routePrefix}/${user.email}`)
+      ),
+      first()
     );
   }
 }

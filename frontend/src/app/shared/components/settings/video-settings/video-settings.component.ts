@@ -19,7 +19,7 @@ export class VideoSettingsComponent implements OnInit {
       .getVideoInputList()
       .then((res) => (this.videoDevices = res));
   }
-  isActive(event: MediaDeviceInfo) {
+  isActive(event: MediaDeviceInfo): boolean {
     return this.mediaService.settings.VideoDeviceId === event.deviceId;
   }
 }
