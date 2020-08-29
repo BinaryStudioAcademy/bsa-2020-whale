@@ -23,7 +23,7 @@ export class ContactComponent implements OnInit {
       : '';
   }
 
-  public onContactClick() {
+  public onContactClick(): void {
     this.isContactSelected = !this.isContactSelected;
     this.contactClicked.emit(this.contact);
   }

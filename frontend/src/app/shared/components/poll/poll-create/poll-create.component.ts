@@ -31,27 +31,27 @@ export class PollCreateComponent implements OnInit {
     });
   }
 
-  get options() {
+  get options(): FormArray {
     return this.form.get('options') as FormArray;
   }
 
-  addOption() {
-    if (this.options.length == 5) {
+  addOption(): void {
+    if (this.options.length === 5) {
       this.toastr.warning('Maximum 5 options', 'Warning');
       return;
     }
     this.options.push(new FormControl('', Validators.required));
   }
 
-  removeOption(event: MouseEvent) {
-    this.options.removeAt(Number((<HTMLSpanElement>event.target).id));
+  removeOption(event: MouseEvent): void {
+    this.options.removeAt(Number((event.target as HTMLSpanElement).id));
   }
 
   ngOnInit(): void {}
 
-  public onSubmit() {
+  public onSubmit(): void {
     this.isLoading = true;
-    let options = this.options.controls.map((ctrl) => ctrl.value);
+    const options = this.options.controls.map((ctrl) => ctrl.value);
 
     if (new Set(options).size !== options.length) {
       this.toastr.error('Options must be unique', 'Error');

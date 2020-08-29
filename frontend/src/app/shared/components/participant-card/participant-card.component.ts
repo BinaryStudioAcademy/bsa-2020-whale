@@ -128,14 +128,14 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
     });
   }
 
-  private addAvatar() {
+  private addAvatar(): void {
     if (this.dynamicData.avatarUrl) {
       this.participantContainer.style.background = `url(${this.dynamicData.avatarUrl})`;
       this.participantContainer.style.backgroundSize = 'contain';
       this.participantContainer.style.backgroundRepeat = 'no-repeat';
       this.participantContainer.style.backgroundPosition = 'center';
     } else {
-      var participantInitials = this.elRef.nativeElement.querySelector(
+      const participantInitials = this.elRef.nativeElement.querySelector(
         '.participant-initials'
       );
       console.log('dd', this.dynamicData);
@@ -169,7 +169,7 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
     this.addAvatar();
   }
 
-  private handleActionsPopup() {
+  private handleActionsPopup(): void {
     this.actionsIcon.addEventListener('click', () => {
       this.shouldShowActions = !this.shouldShowActions;
       if (this.shouldShowActions) {
@@ -196,8 +196,8 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
 
   private onOutsideActionsClick(ev: Event): void {
     if (
-      ev.target != this.actionsPopupContent &&
-      ev.target != this.actionsIcon
+      ev.target !== this.actionsPopupContent &&
+      ev.target !== this.actionsIcon
     ) {
       this.actionsPopupContent.style.display = 'none';
       this.actionsPopup?.destroy();

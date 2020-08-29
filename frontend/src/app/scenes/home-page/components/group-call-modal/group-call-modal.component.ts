@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
 import {
   WhaleSignalService,
@@ -24,15 +24,15 @@ import { SimpleModalComponent } from 'ngx-simple-modal';
   styleUrls: ['./group-call-modal.component.sass'],
 })
 export class GroupCallModalComponent extends SimpleModalComponent<Group, null>
-  implements Group, OnInit {
+  implements Group, OnInit, OnDestroy {
   id: string;
   label: string;
   description: string;
   pinnedMessageId?: string;
   photoUrl?: string;
 
-  isAnyoneThere: Boolean;
-  isAllRejected: Boolean;
+  isAnyoneThere: boolean;
+  isAllRejected: boolean;
   link: MeetingLink;
   callCreator: User;
   membersAmount: number;

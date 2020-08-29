@@ -10,7 +10,7 @@ export class GoogleCalendarService {
     this.initClient();
   }
 
-  private initClient() {
+  private initClient(): void {
     gapi.load('client', () => {
       gapi.client.init({
         apiKey: environment.firebase.apiKey,

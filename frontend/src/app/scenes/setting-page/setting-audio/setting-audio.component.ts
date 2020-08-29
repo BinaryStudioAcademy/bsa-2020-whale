@@ -66,7 +66,7 @@ export class SettingAudioComponent implements OnInit, OnDestroy {
     this.volume = vol;
   }
 
-  async testMicro() {
+  async testMicro(): Promise<void> {
     this.meter
       .connect(this.inputDevices.find((x) => x.deviceId === this.inputDeviceId))
       .catch((err) => alert('Connection Error'));
@@ -92,15 +92,15 @@ export class SettingAudioComponent implements OnInit, OnDestroy {
         await this.playTestAudio();
       });
   }
-  async stopTest() {
+  async stopTest(): Promise<void> {
     this.recorder.stopRecording();
     this.meter.stopListening();
     this.meter.disconnect();
   }
-  async sleep(ms) {
+  async sleep(ms): Promise<NodeJS.Timeout> {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
-  async playTestAudio() {
+  async playTestAudio(): Promise<void> {
     this.recordedChunks = this.recorder.getBlob();
     const blob = new Blob([this.recorder.getBlob()], { type: 'audio/webm' });
     const blobURL = window.URL.createObjectURL(blob);
@@ -108,16 +108,16 @@ export class SettingAudioComponent implements OnInit, OnDestroy {
     this.audio.volume = this.volume / 100;
     this.audio.play();
   }
-  public async changeInputDevice(deviceId: string) {
+  public async changeInputDevice(deviceId: string): Promise<void> {
     this.mediaSettingsService.changeInputDevice(deviceId);
     const stream = await navigator.mediaDevices.getUserMedia({
       video: false,
-      audio: { deviceId: deviceId },
+      audio: { deviceId },
     });
     this.handleSuccess(stream);
   }
 
-  public async changeOutputDevice(deviceId: string) {
+  public async changeOutputDevice(deviceId: string): Promise<void> {
     this.mediaSettingsService.changeOutputDevice(deviceId);
     this.mediaSettingsService.attachSinkId(this.audio, deviceId);
   }

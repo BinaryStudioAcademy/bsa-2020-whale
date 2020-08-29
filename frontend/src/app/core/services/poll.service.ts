@@ -53,7 +53,7 @@ export class PollService {
       });
   }
 
-  public getPollsAndResults(meetingId: string, userId: string) {
+  public getPollsAndResults(meetingId: string, userId: string): void {
     const httpParams = new HttpParams()
       .set('meetingId', meetingId)
       .set('userId', userId);
@@ -74,11 +74,15 @@ export class PollService {
       );
   }
 
-  public onPollCreated(pollDto: PollDto, meetingId: string, userEmail: string) {
+  public onPollCreated(
+    pollDto: PollDto,
+    meetingId: string,
+    userEmail: string
+  ): void {
     const pollData: PollData = {
       userId: userEmail,
       groupId: meetingId,
-      pollDto: pollDto,
+      pollDto,
     };
 
     this.meetingSignalrService.invoke(SignalMethods.OnPollCreated, pollData);
@@ -86,42 +90,42 @@ export class PollService {
     this.isPollCreating = false;
   }
 
-  public onPollReceived(poll: PollDto) {
+  public onPollReceived(poll: PollDto): void {
     this.polls.unshift(poll);
     this.isShowPoll = true;
   }
 
-  public onPollAnswered(poll: PollDto) {
-    const pollIndex = this.polls.findIndex((p) => p.id == poll.id);
+  public onPollAnswered(poll: PollDto): void {
+    const pollIndex = this.polls.findIndex((p) => p.id === poll.id);
     this.polls.splice(pollIndex, 1);
   }
 
-  public onPollResultReceived(pollResultDto: PollResultDto) {
+  public onPollResultReceived(pollResultDto: PollResultDto): void {
     const pollResultIndex = this.pollResults.findIndex(
-      (result) => result.pollId == pollResultDto.pollId
+      (result) => result.pollId === pollResultDto.pollId
     );
-    if (pollResultIndex != -1) {
+    if (pollResultIndex !== -1) {
       this.pollResults[pollResultIndex] = pollResultDto;
     } else {
       this.pollResults.unshift(pollResultDto);
     }
   }
 
-  public onPollDeleted(pollId: string) {
-    const pollIndex = this.polls.findIndex((poll) => poll.id == pollId);
-    if (pollIndex != -1) {
+  public onPollDeleted(pollId: string): void {
+    const pollIndex = this.polls.findIndex((poll) => poll.id === pollId);
+    if (pollIndex !== -1) {
       this.polls.splice(pollIndex, 1);
     }
 
     const resultIndex = this.pollResults.findIndex(
-      (result) => result.pollId == pollId
+      (result) => result.pollId === pollId
     );
-    if (resultIndex != -1) {
+    if (resultIndex !== -1) {
       this.pollResults.splice(resultIndex, 1);
     }
   }
 
-  public savePollResults(meetindId: string) {
+  public savePollResults(meetindId: string): void {
     this.httpService
       .getRequest(
         this.route + '/saveResults',
@@ -133,17 +137,17 @@ export class PollService {
       );
   }
 
-  public onPollIconClick() {
+  public onPollIconClick(): void {
     this.isPollCreating = false;
     this.isShowPoll = !this.isShowPoll;
   }
 
-  public onNewPollClick() {
+  public onNewPollClick(): void {
     this.isShowPoll = false;
     this.isPollCreating = true;
   }
 
-  public onDeletePollIconClick(poll: PollDto) {
+  public onDeletePollIconClick(poll: PollDto): void {
     const httpParams = new HttpParams()
       .set('pollId', poll.id)
       .set('meetingId', poll.meetingId);
@@ -157,7 +161,7 @@ export class PollService {
   public onDeletePollResultIconClick(
     pollResult: PollResultDto,
     meetingId: string
-  ) {
+  ): void {
     const httpParams = new HttpParams()
       .set('pollId', pollResult.pollId)
       .set('meetingId', meetingId);
