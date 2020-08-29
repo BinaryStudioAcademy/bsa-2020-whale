@@ -39,6 +39,13 @@
       >
         <i class="microphone slash icon"></i>
       </span>
+      <span
+        *ngIf="!dynamicData.isVideoAllowed && !dynamicData.isUserHost"
+        data-tooltip="Disabled by the Host"
+        data-position="top left"
+      >
+        <i class="eye slash icon"></i>
+      </span>
       <a class="header"></a>
     </div>
     <i class="small blue ellipsis vertical icon"></i>
