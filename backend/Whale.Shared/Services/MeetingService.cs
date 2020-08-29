@@ -176,10 +176,11 @@ namespace Whale.Shared.Services
             var redisMeetingData = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(meetingId.ToString());
             await _redisService.RemoveAsync(meetingId.ToString());
 
-            string fullURL = $"?id={meetingId.ToString()}&pwd={redisMeetingData.Password}";
+            string fullURL = $"?id={meetingId}&pwd={redisMeetingData.Password}";
             var shortUrl = await _redisService.GetAsync<string>(fullURL);
             await _redisService.RemoveAsync(fullURL);
             await _redisService.RemoveAsync(shortUrl);
+            await _redisService.RemoveAsync($"{meetingSettingsPrefix}{meetingId}");
 
             meeting.EndTime = DateTimeOffset.Now;
             _context.Update(meeting);
