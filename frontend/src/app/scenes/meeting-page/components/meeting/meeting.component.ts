@@ -304,7 +304,7 @@ export class MeetingComponent
         const disconectedMediaDataIndex = this.mediaData.findIndex(
           (m) => m.currentStreamId === connectionData.participant.streamId
         );
-        if (disconectedMediaDataIndex) {
+        if (disconectedMediaDataIndex >= 0) {
           this.mediaData.splice(disconectedMediaDataIndex, 1);
           const secondName = ` ${
             connectionData.participant.user.secondName ?? ''
@@ -329,7 +329,7 @@ export class MeetingComponent
         const disconectedMediaDataIndex = this.mediaData.findIndex(
           (m) => m.currentStreamId === participant.streamId
         );
-        if (disconectedMediaDataIndex) {
+        if (disconectedMediaDataIndex >= 0) {
           this.mediaData.splice(disconectedMediaDataIndex, 1);
           const secondName = ` ${participant.user.secondName ?? ''}`;
           this.toastr.info(
@@ -527,7 +527,7 @@ export class MeetingComponent
         const disconectedMediaDataIndex = this.mediaData.findIndex(
           (m) => m.stream.id === connectionData.participant.streamId
         );
-        if (disconectedMediaDataIndex) {
+        if (disconectedMediaDataIndex >= 0) {
           this.mediaData.splice(disconectedMediaDataIndex, 1);
           const secondName = ` ${
             connectionData.participant.user.secondName ?? ''

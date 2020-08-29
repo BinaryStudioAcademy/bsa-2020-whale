@@ -1,8 +1,6 @@
 // This file can be replaced during build by using the `fileReplacements` array.
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
-import freeice from 'freeice';
-
 export const environment = {
   production: false,
   apiUrl: 'http://localhost:4201',
@@ -21,24 +19,20 @@ export const environment = {
     '893944865679-eav20gfr3sbintikhq42dhhc414loq4p.apps.googleusercontent.com',
   peerOptions: {
     // ! default settings
-    key: 'peerjs',
-    host: '0.peerjs.com',
-    port: 443,
-    path: '/',
-    secure: true,
-    debug: 1,
-
-    // ! local server default settings
-    // key: "peerjs",
-    // host: "localhost",
-    // port: 9000,
-    // path: "/myapp",
+    // key: 'peerjs',
+    // host: '0.peerjs.com',
+    // port: 443,
+    // path: '/',
+    // secure: true,
     // debug: 1,
 
-    // ! free ice services
-    // config: {
-    //   iceServers: freeice()
-    // }
+    // ! remote server settings
+    key: 'peerjs',
+    host: 'whale-peerjs-server.herokuapp.com',
+    port: 443,
+    secure: true,
+    path: '/',
+    debug: 1,
 
     // ! addtional
     // ssl:{
