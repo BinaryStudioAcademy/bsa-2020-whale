@@ -20,6 +20,12 @@
         *ngIf="dynamicData.isAudioAllowed || dynamicData.isUserHost"
         class="microphone icon"
         [ngClass]="dynamicData.isAudioActive ? '' : 'red'"
+        [class.cursor-pointer]="
+          (dynamicData.isAudioAllowed &&
+            data.currentStreamId === meetingHolder.streamId) ||
+          (meetingHolder.role === 1 &&
+            data.currentStreamId === meetingHolder.streamId)
+        "
         [class.slash]="!dynamicData.isAudioActive"
         [class.micro-pulse]="data.volume > 1"
         (click)="
