@@ -188,16 +188,10 @@ namespace Whale.DAL.Migrations
                     b.Property<DateTimeOffset?>("EndTime")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<bool>("IsAudioAllowed")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsRecurrent")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsScheduled")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsVideoAllowed")
                         .HasColumnType("bit");
 
                     b.Property<string>("Settings")

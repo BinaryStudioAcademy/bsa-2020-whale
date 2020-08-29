@@ -14,8 +14,6 @@ namespace Whale.DAL.Models
         public int AnonymousCount { get; set; }
         public bool IsScheduled { get; set; }
         public bool IsRecurrent { get; set; }
-        public bool IsVideoAllowed { get; set; }
-        public bool IsAudioAllowed { get; set; }
 
         [NotMapped]
         public IEnumerable<Participant> Participants { get; set; }
@@ -33,8 +31,6 @@ namespace Whale.DAL.Models
             AnonymousCount = meeting.AnonymousCount;
             IsScheduled = meeting.IsScheduled;
             IsRecurrent = meeting.IsRecurrent;
-            IsVideoAllowed = meeting.IsVideoAllowed;
-            IsAudioAllowed = meeting.IsAudioAllowed;
 
             Participants = meeting.Participants;
             PollResults = meeting.PollResults;

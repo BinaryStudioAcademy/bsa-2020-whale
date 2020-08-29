@@ -13,12 +13,12 @@ using Whale.Shared.Models.Meeting;
 using Whale.Shared.Models.Participant;
 using Whale.Shared.Models.Meeting.MeetingMessage;
 using shortid;
-using Microsoft.AspNetCore.SignalR.Client;
 
 namespace Whale.Shared.Services
 {
     public class MeetingService : BaseService
     {
+        private const string meetingSettingsPrefix = "meeting-settings-";
         private readonly RedisService _redisService;
         private readonly UserService _userService;
         private readonly ParticipantService _participantService;
@@ -26,7 +26,15 @@ namespace Whale.Shared.Services
         private readonly SignalrService _signalrService;
         private readonly NotificationsService _notifications;
 
-        public MeetingService(WhaleDbContext context, IMapper mapper, RedisService redisService, UserService userService, ParticipantService participantService, EncryptHelper encryptService, SignalrService signalrService, NotificationsService notifications)
+        public MeetingService(
+            WhaleDbContext context,
+            IMapper mapper,
+            RedisService redisService,
+            UserService userService,
+            ParticipantService participantService,
+            EncryptHelper encryptService,
+            SignalrService signalrService,
+            NotificationsService notifications)
             : base(context, mapper)
         {
             _redisService = redisService;
@@ -58,8 +66,12 @@ namespace Whale.Shared.Services
                 });
             }
 
+            var meetingSettings = await _redisService.GetAsync<MeetingSettingsDTO>($"{meetingSettingsPrefix}{linkDTO.Id}");
+
             var meetingDTO = _mapper.Map<MeetingDTO>(meeting);
             meetingDTO.Participants = (await _participantService.GetMeetingParticipantsAsync(meeting.Id)).ToList();
+            meetingDTO.IsAudioAllowed = meetingSettings.IsAudioAllowed;
+            meetingDTO.IsVideoAllowed = meetingSettings.IsVideoAllowed;
 
             return meetingDTO;
         }
@@ -79,6 +91,11 @@ namespace Whale.Shared.Services
 
             var pwd = _encryptService.EncryptString(Guid.NewGuid().ToString());
             await _redisService.SetAsync(meeting.Id.ToString(), new MeetingMessagesAndPasswordDTO { Password = pwd });
+            await _redisService.SetAsync($"{meetingSettingsPrefix}{meeting.Id}", new MeetingSettingsDTO
+            {
+                IsAudioAllowed = meetingDTO.IsAudioAllowed,
+                IsVideoAllowed = meetingDTO.IsVideoAllowed
+            });
 
             string shortURL = ShortId.Generate();
             string fullURL = $"?id={meeting.Id}&pwd={pwd}";
@@ -97,20 +114,15 @@ namespace Whale.Shared.Services
 
         public async Task UpdateMeetingMediaOnStart(MediaOnStartDTO mediaDTO)
         {
-            var meeting = await _context.Meetings.FirstOrDefaultAsync(m => m.Id == mediaDTO.MeetingId);
-            if (meeting == null)
-                throw new NotFoundException("Meeting");
+            await _redisService.ConnectAsync();
 
-            var meetingHost = await _participantService
-                .GetMeetingParticipantByEmail(meeting.Id, mediaDTO.RequestingUserEmail);
+            var meetingSettings = 
+                await _redisService.GetAsync<MeetingSettingsDTO>($"{meetingSettingsPrefix}{mediaDTO.MeetingId}");
 
-            if (meetingHost == null || meetingHost.Role != ParticipantRole.Host)
-                throw new NotAllowedException(mediaDTO.RequestingUserEmail);
+            meetingSettings.IsVideoAllowed = mediaDTO.IsVideoAllowed;
+            meetingSettings.IsAudioAllowed = mediaDTO.IsAudioAllowed;
 
-            meeting.IsVideoAllowed = mediaDTO.IsVideoAllowed;
-            meeting.IsAudioAllowed = mediaDTO.IsAudioAllowed;
-
-            await _context.SaveChangesAsync();
+            await _redisService.SetAsync($"{meetingSettingsPrefix}{mediaDTO.MeetingId}", meetingSettings);
         }
 
         public async Task<MeetingMessageDTO> SendMessage(MeetingMessageCreateDTO msgDTO)
@@ -171,6 +183,7 @@ namespace Whale.Shared.Services
 
             meeting.EndTime = DateTimeOffset.Now;
             _context.Update(meeting);
+
             await _context.SaveChangesAsync();
             await _notifications.UpdateInviteMeetingNotifications(shortUrl);
         }
@@ -178,15 +191,13 @@ namespace Whale.Shared.Services
         public async Task<string> GetShortInviteLink(string id, string pwd)
         {
             await _redisService.ConnectAsync();
-            string shortUrl = await _redisService.GetAsync<string>($"?id={id}&pwd={pwd}");
-            return shortUrl;
+            return await _redisService.GetAsync<string>($"?id={id}&pwd={pwd}");
         }
 
         public async Task<string> GetFullInviteLink(string shortURL)
         {
             await _redisService.ConnectAsync();
-            string longUrl = await _redisService.GetAsync<string>(shortURL);
-            return longUrl;
+            return await _redisService.GetAsync<string>(shortURL);
         }
     }
 }

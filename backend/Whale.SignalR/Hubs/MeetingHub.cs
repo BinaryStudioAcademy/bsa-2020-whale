@@ -11,10 +11,8 @@ using Whale.Shared.Models.Poll;
 using Whale.SignalR.Models.Drawing;
 using Whale.SignalR.Models.Media;
 using Whale.DAL.Models;
-using shortid;
 using Whale.Shared.Exceptions;
 using Whale.SignalR.Services;
-using Whale.DAL.Models.Poll;
 using Whale.SignalR.Models.Room;
 
 namespace Whale.SignalR.Hubs

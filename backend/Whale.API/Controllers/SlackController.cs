@@ -45,7 +45,7 @@ namespace Whale.API.Controllers.Slack
 
                 await _slackService.SendSlackReplyAsync("", userData.channel_id, link);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 await _slackService.SendSlackReplyAsync("Some troubles happened", userData.channel_id);
             }

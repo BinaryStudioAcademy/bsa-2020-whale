@@ -1221,9 +1221,22 @@ export class MeetingComponent
         ? this.isParticipantsAudioAllowed
         : !this.isParticipantsAudioAllowed,
     });
+
     isVideo
       ? (this.isParticipantsVideoAllowed = !this.isParticipantsVideoAllowed)
       : (this.isParticipantsAudioAllowed = !this.isParticipantsAudioAllowed);
+
+    this.meetingService
+      .updateMediaOnStart({
+        meetingId: this.meeting.id,
+        isAudioAllowed: this.isParticipantsAudioAllowed,
+        isVideoAllowed: this.isParticipantsVideoAllowed,
+      })
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        () => {},
+        () => this.toastr.error("Media settings upon start wasn't saved")
+      );
   }
 
   public hideViewEventHandler(mediaDataId: string): void {
