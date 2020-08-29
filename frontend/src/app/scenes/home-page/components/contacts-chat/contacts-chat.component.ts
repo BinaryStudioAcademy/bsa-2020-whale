@@ -92,6 +92,10 @@ export class ContactsChatComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (newMessage) => {
+          if (newMessage.contactId != this.contactSelected.id) {
+            return;
+          }
+
           this.messages.push(newMessage);
           if (newMessage.authorId == this.contactSelected?.secondMember.id) {
             this.intersectionElements.changes.pipe(first()).subscribe(() => {

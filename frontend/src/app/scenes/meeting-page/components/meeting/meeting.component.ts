@@ -8,6 +8,8 @@ import {
   OnDestroy,
   Inject,
   AfterViewChecked,
+  ViewChildren,
+  QueryList,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
@@ -130,9 +132,10 @@ export class MeetingComponent
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
     HTMLElement
   >;
-  @ViewChild('meetingChat', { static: false }) private chatBlock: ElementRef<
-    HTMLElement
+  @ViewChildren('meetingChat') private chatBlock: QueryList<
+    ElementRef<HTMLElement>
   >;
+
   private chatElement: any;
   private currentStreamLoaded = new EventEmitter<void>();
   private contectedAt = new Date();
@@ -199,10 +202,20 @@ export class MeetingComponent
     if (this.isRoom) {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     }
-
-    this.currentUserStream = await navigator.mediaDevices.getUserMedia(
-      await this.mediaSettingsService.getMediaConstraints()
-    );
+    let isActive = false;
+    try {
+      this.currentUserStream = await navigator.mediaDevices.getUserMedia(
+        await this.mediaSettingsService.getMediaConstraints()
+      );
+      isActive = this.currentUserStream.active;
+    } catch {
+      isActive = false;
+    }
+    if (!isActive) {
+      this.toastr.error('Cannot access the camera and microphone');
+      this.leaveUnConnected();
+      return;
+    }
     const settings = this.currentUserStream.getVideoTracks()[0].getSettings();
     settings.frameRate = 20;
     settings.height = 480;
@@ -281,12 +294,12 @@ export class MeetingComponent
         const disconectedMediaDataIndex = this.mediaData.findIndex(
           (m) => m.currentStreamId == connectionData.participant.streamId
         );
-        if (disconectedMediaDataIndex) {
+        if (disconectedMediaDataIndex >= 0) {
           this.mediaData.splice(disconectedMediaDataIndex, 1);
           const secondName = ` ${
             connectionData.participant.user.secondName ?? ''
           }`;
-          this.toastr.show(
+          this.toastr.info(
             `${connectionData.participant.user.firstName}${secondName} has left`
           );
         }
@@ -306,10 +319,10 @@ export class MeetingComponent
         const disconectedMediaDataIndex = this.mediaData.findIndex(
           (m) => m.currentStreamId == participant.streamId
         );
-        if (disconectedMediaDataIndex) {
+        if (disconectedMediaDataIndex >= 0) {
           this.mediaData.splice(disconectedMediaDataIndex, 1);
           const secondName = ` ${participant.user.secondName ?? ''}`;
-          this.toastr.show(
+          this.toastr.info(
             `${participant.user.firstName}${secondName} disconnected`
           );
         }
@@ -472,7 +485,7 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         () => {
-          this.toastr.show('Meeting ended');
+          this.toastr.info('Meeting ended');
           this.leave();
         },
         () => {
@@ -500,6 +513,11 @@ export class MeetingComponent
           this.messages.push(message);
           this.updateSelectedMessages();
           this.notifyNewMsg(message);
+          if (this.isShowChat) {
+            this.chatBlock.changes.pipe(first()).subscribe(() => {
+              this.scrollDown();
+            });
+          }
         },
         () => {
           this.toastr.error('Error occured when sending message');
@@ -568,7 +586,7 @@ export class MeetingComponent
     this.meetingSignalrService.onRoomClosed$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((link) => {
-        this.router.navigate([`/meeting-page/${link}`]);
+        if (this.isRoom) this.router.navigate([`/meeting-page/${link}`]);
       });
 
     this.meetingSignalrService.onParticipentMoveIntoRoom$
@@ -581,12 +599,12 @@ export class MeetingComponent
         const disconectedMediaDataIndex = this.mediaData.findIndex(
           (m) => m.stream.id == connectionData.participant.streamId
         );
-        if (disconectedMediaDataIndex) {
+        if (disconectedMediaDataIndex >= 0) {
           this.mediaData.splice(disconectedMediaDataIndex, 1);
           const secondName = ` ${
             connectionData.participant.user.secondName ?? ''
           }`;
-          this.toastr.show(
+          this.toastr.info(
             `${connectionData.participant.user.firstName}${secondName} moved into room`
           );
         }
@@ -646,29 +664,31 @@ export class MeetingComponent
   }
 
   ngAfterViewChecked(): void {
-    if (this.isShowChat) this.chatElement = this.chatBlock.nativeElement;
+    if (this.isShowChat) this.chatElement = this.chatBlock.first?.nativeElement;
   }
 
   public ngOnDestroy(): void {
     this.destroyPeer();
     this.currentUserStream?.getTracks().forEach((track) => track.stop());
 
-    if (this.isMoveToRoom && !this.isRoom) {
-      this.meetingSignalrService.invoke(
-        SignalMethods.OnMoveIntoRoom,
-        this.connectionData
-      );
-    } else if (this.isMoveToRoom && this.isRoom && this.isHost) {
-      this.meetingSignalrService.invoke(
-        SignalMethods.OnHostChangeRoom,
-        this.connectionData
-      );
-    } else {
-      this.connectionData.participant = this.currentParticipant;
-      this.meetingSignalrService.invoke(
-        SignalMethods.OnParticipantLeft,
-        this.connectionData
-      );
+    if (this.connectionData) {
+      if (this.isMoveToRoom && !this.isRoom) {
+        this.meetingSignalrService.invoke(
+          SignalMethods.OnMoveIntoRoom,
+          this.connectionData
+        );
+      } else if (this.isMoveToRoom && this.isRoom && this.isHost) {
+        this.meetingSignalrService.invoke(
+          SignalMethods.OnHostChangeRoom,
+          this.connectionData
+        );
+      } else {
+        this.connectionData.participant = this.currentParticipant;
+        this.meetingSignalrService.invoke(
+          SignalMethods.OnParticipantLeft,
+          this.connectionData
+        );
+      }
     }
 
     this.unsubscribe$.next();
@@ -827,7 +847,7 @@ export class MeetingComponent
   }
 
   scrollDown(): void {
-    const chatHtml = this.chatElement as HTMLElement;
+    const chatHtml = this.chatBlock.first.nativeElement as HTMLElement;
     const isScrolledToBottom =
       chatHtml.scrollHeight - chatHtml.clientHeight > chatHtml.scrollTop;
 
@@ -986,7 +1006,7 @@ export class MeetingComponent
   }
 
   private leaveUnConnected(): void {
-    this.currentUserStream.getTracks().forEach((track) => track.stop());
+    this.currentUserStream?.getTracks()?.forEach((track) => track.stop());
     this.destroyPeer();
     this.meter.stopListening();
     this.meter.disconnect();
@@ -1248,6 +1268,12 @@ export class MeetingComponent
     this.isShowChat = !this.isShowChat;
     if (this.isShowChat) {
       this.receiverChanged();
+      this.chatBlock.changes.pipe(first()).subscribe(() => {
+        this.chatBlock.first.nativeElement.scrollTo(
+          0,
+          this.chatBlock.first.nativeElement.scrollHeight
+        );
+      });
     }
     this.isNewMsg = !this.isShowChat && this.newMsgFrom.length > 0;
   }
@@ -1262,7 +1288,6 @@ export class MeetingComponent
       } as MeetingMessageCreate);
 
       this.msgText = '';
-      this.scrollDown();
     }
   }
 

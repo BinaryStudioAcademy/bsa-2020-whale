@@ -131,12 +131,12 @@
       <div class="content">
         <div class="summary">
           <a
-            [ngClass]="{
-              'user current-user-message':
-                message.author?.email === currentUser?.email,
-              user: message.author?.email === currentUser?.email
-            }"
+            *ngIf="message.author?.email === currentUser?.email"
+            class="user current-user-message"
           >
+            You
+          </a>
+          <a *ngIf="message.author?.email !== currentUser?.email" class="user">
             {{ message.author?.firstName }}
             {{ message.author?.secondName }}
           </a>

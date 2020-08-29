@@ -4,6 +4,7 @@ import {
   WhaleSignalService,
   WhaleSignalMethods,
   UpstateService,
+  GroupService,
 } from 'app/core/services';
 import { Group } from '@shared/models/group/group';
 import { Router } from '@angular/router';
@@ -31,14 +32,17 @@ export class GroupCallModalComponent extends SimpleModalComponent<Group, null>
   photoUrl?: string;
 
   isAnyoneThere: Boolean;
+  isAllRejected: Boolean;
   link: MeetingLink;
   callCreator: User;
+  membersAmount: number;
   private unsubscribe$ = new Subject<void>();
 
   constructor(
     private whaleSignalrService: WhaleSignalService,
     private router: Router,
-    private upstateService: UpstateService
+    private upstateService: UpstateService,
+    private groupService: GroupService
   ) {
     super();
   }
@@ -49,6 +53,7 @@ export class GroupCallModalComponent extends SimpleModalComponent<Group, null>
 
   ngOnInit(): void {
     this.isAnyoneThere = true;
+    this.isAllRejected = false;
     this.upstateService
       .getLoggedInUser()
       .pipe(tap())
@@ -66,6 +71,11 @@ export class GroupCallModalComponent extends SimpleModalComponent<Group, null>
           } as MeetingCreate,
         } as GroupCallStart);
       });
+    this.groupService.getAllGroupUsers(this.id).subscribe((t) => {
+      this.membersAmount = t.length;
+      console.log(t.length);
+    });
+
     this.whaleSignalrService.startCallCaller$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((link) => {
@@ -74,8 +84,17 @@ export class GroupCallModalComponent extends SimpleModalComponent<Group, null>
 
     this.whaleSignalrService.declineGroupCall$
       .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(() => {
-        this.close();
+      .subscribe((t) => {
+        if (t.userId === this.callCreator.id) {
+          this.close();
+        } else if (this.membersAmount === 2) {
+          this.isAllRejected = true;
+          setTimeout(() => {
+            this.decline();
+          }, 5000);
+        } else {
+          this.membersAmount -= 1;
+        }
       });
 
     this.whaleSignalrService.takeGroupCall$
@@ -99,7 +118,7 @@ export class GroupCallModalComponent extends SimpleModalComponent<Group, null>
     this.whaleSignalrService.invoke(WhaleSignalMethods.OnDeclineGroupCall, {
       userId: this.callCreator.id,
       groupId: this.id,
-      email: this.callCreator.email,
+      callCreator: this.callCreator,
       meetingId: this?.link?.id,
     } as GroupCallDecline);
     this.close();

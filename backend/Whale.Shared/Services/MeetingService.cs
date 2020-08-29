@@ -24,8 +24,9 @@ namespace Whale.Shared.Services
         private readonly ParticipantService _participantService;
         private readonly EncryptHelper _encryptService;
         private readonly SignalrService _signalrService;
+        private readonly NotificationsService _notifications;
 
-        public MeetingService(WhaleDbContext context, IMapper mapper, RedisService redisService, UserService userService, ParticipantService participantService, EncryptHelper encryptService, SignalrService signalrService)
+        public MeetingService(WhaleDbContext context, IMapper mapper, RedisService redisService, UserService userService, ParticipantService participantService, EncryptHelper encryptService, SignalrService signalrService, NotificationsService notifications)
             : base(context, mapper)
         {
             _redisService = redisService;
@@ -33,6 +34,7 @@ namespace Whale.Shared.Services
             _participantService = participantService;
             _encryptService = encryptService;
             _signalrService = signalrService;
+            _notifications = notifications;
         }
 
         public async Task<MeetingDTO> ConnectToMeeting(MeetingLinkDTO linkDTO, string userEmail)
@@ -170,6 +172,7 @@ namespace Whale.Shared.Services
             meeting.EndTime = DateTimeOffset.Now;
             _context.Update(meeting);
             await _context.SaveChangesAsync();
+            await _notifications.UpdateInviteMeetingNotifications(shortUrl);
         }
 
         public async Task<string> GetShortInviteLink(string id, string pwd)

@@ -13,6 +13,7 @@ export class RoomService {
   public participants: Array<Participant> = [];
   public isDividedIntoRooms: boolean = false;
   public originalMeetingUrl: string;
+  public originalMeetingId: string;
   public isInRoom: boolean = false;
 
   constructor(
@@ -31,7 +32,7 @@ export class RoomService {
     );
 
     this.meetingSignalrService.onRoomClosed$.subscribe(
-      (mmetingLink) => (this.isDividedIntoRooms = false)
+      (meetingLink) => (this.isDividedIntoRooms = false)
     );
   }
 
@@ -47,15 +48,22 @@ export class RoomService {
 
   public getRoomsOfMeeting(meetingId: string): void {
     this.meetingSignalrService.signalHub
-      .invoke(SignalMethods[SignalMethods.GetCreatedRooms], meetingId)
+      .invoke(
+        SignalMethods[SignalMethods.GetCreatedRooms],
+        this.isInRoom ? this.originalMeetingId : meetingId
+      )
       .then((rooms: RoomDTO[]) => {
+        console.log(rooms);
         rooms.forEach((room) => {
-          this.configureParticipantsInRooms(room.roomId, room.participantsIds);
+          this.participantsInRooms.set(room.roomId, room.participants);
         });
-        if (this.participantsInRooms.keys.length > 0)
+        if (rooms.length > 0) {
           this.isDividedIntoRooms = true;
+        } else {
+          this.isDividedIntoRooms = false;
+        }
       })
-      .catch((err) => this.toastr.error(err));
+      .catch((err) => console.error(err));
   }
 
   public deleteParticipant(participantEmail: string): void {

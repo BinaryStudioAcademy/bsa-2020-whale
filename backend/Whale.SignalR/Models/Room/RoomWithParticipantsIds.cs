@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Whale.Shared.Models.Participant;
 
 namespace Whale.SignalR.Models.Room
 {
-    public class RoomDTO
+    public class RoomWithParticipantsIds
     {
         public string RoomId { get; set; }
-        public ICollection<ParticipantDTO> Participants { get; set; }
+        public ICollection<string> ParticipantsIds { get; set; }
     }
 }

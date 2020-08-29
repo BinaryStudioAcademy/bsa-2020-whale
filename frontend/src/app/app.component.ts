@@ -2,7 +2,7 @@ import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
 import { AuthService } from './core/auth/auth.service';
 import { HttpClient } from '@angular/common/http';
 import { Subject } from 'rxjs';
-import { filter, takeUntil } from 'rxjs/operators';
+import { filter, takeUntil, first } from 'rxjs/operators';
 import { Call } from '@shared/models/call/call';
 import { GroupCall } from '@shared/models/call/group-call';
 import { environment } from '@env';
@@ -13,6 +13,7 @@ import {
   WhaleSignalMethods,
 } from './core/services/whale-signal.service';
 import { ToastrService } from 'ngx-toastr';
+import { UserRegistrationService } from './core/services';
 
 @Component({
   selector: 'app-root',
@@ -35,7 +36,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private titleService: Title,
     private whaleSignalrService: WhaleSignalService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private registrationService: UserRegistrationService
   ) {
     titleService.setTitle(this.title);
   }
@@ -62,6 +64,7 @@ export class AppComponent implements OnInit, OnDestroy {
           }
         },
         (err) => {
+          console.log(err.Message);
           this.toastr.error(err.Message);
         }
       );
@@ -70,31 +73,38 @@ export class AppComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (call) => {
-          if (this.user.email !== call.callerEmail) {
+          if (this.user.email !== call.caller.email) {
             this.groupCall = call;
             console.log(call);
           }
         },
         (err) => {
+          console.log(err);
           this.toastr.error(err.Message);
         }
       );
 
-    this.authService.user$
-      .pipe(filter((user) => Boolean(user)))
-      .subscribe((user) => {
-        this.user = Object.assign({}, user);
-        this.http
-          .get<User>(this.getUserUrl + `/${user.email}`, {
-            observe: 'response',
-          })
-          .subscribe((user) => {
-            this.whaleSignalrService.invoke(
-              WhaleSignalMethods.OnUserConnect,
-              this.authService.currentUser.email
-            );
-          });
-      });
+    this.fireAuth.user$
+      .pipe(
+        filter((user) => Boolean(user)),
+        first()
+      )
+      .subscribe(
+        (user) => {
+          this.registrationService.userRegistered$.subscribe(
+            (userFromDb) => {
+              this.user = Object.assign({}, user);
+              console.log('before invoke');
+              this.whaleSignalrService.invoke(
+                WhaleSignalMethods.OnUserConnect,
+                this.authService.currentUser.email
+              );
+            },
+            (error) => console.log(error)
+          );
+        },
+        (error) => console.log(error)
+      );
   }
 
   closeIncomingCall(): void {

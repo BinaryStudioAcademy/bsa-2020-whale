@@ -81,6 +81,7 @@ export class DivisionByRoomsModalComponent
     this.onCanMoveIntoRoomEvent.subscribe(() => {
       if (!this.roomService.originalMeetingUrl) {
         this.roomService.originalMeetingUrl = this.meetingLink;
+        this.roomService.originalMeetingId = this.meetingId;
       }
       this.router.navigate([`/room/${roomId}`]);
     });

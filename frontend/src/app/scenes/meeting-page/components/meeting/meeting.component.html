@@ -123,22 +123,22 @@
         </span>
       </div>
       <div class="participants-wrapper">
-        <div class="ui divided list">
-          <div
+        <div class="ui middle aligned selection list">
+          <a
             *ngFor="let participant of meeting?.participants"
-            class="ui item participant"
+            class="item participant"
           >
             <img
               class="ui avatar image"
               src="{{ participant.user.avatarUrl }}"
             />
-            <span>
+            <div class="user-label">
               {{ participant.user.firstName }}
               {{
                 participant.user.secondName ? participant.user.secondName : ""
               }}
-            </span>
-          </div>
+            </div>
+          </a>
         </div>
       </div>
     </div>
@@ -327,7 +327,7 @@
                 class="big clipboard list icon"
               ></i
             ></span>
-            <span data-tooltip="Statistics">
+            <span data-tooltip="Statistics" *ngIf="!isRoom">
               <i
                 id="meeting-options-statistics"
                 (click)="onStatisticsIconClick()"
@@ -356,6 +356,17 @@
             >
               <i (click)="showCanvas()" class="big paint brush icon"></i>
             </span>
+            <span
+              data-tooltip="Divide participants into rooms"
+              data-position="top right"
+              *ngIf="isHost"
+            >
+              <i
+                (click)="openRoomsModal()"
+                class="big user th large icon big-left-margin"
+              >
+              </i>
+            </span>
             <span data-tooltip="Fullscreen" data-position="top right">
               <i
                 id="meeting-options-fullscreen"
@@ -371,17 +382,6 @@
                 (click)="isShowCurrentParticipantCard = true"
                 class="big user plus icon big-left-margin"
               ></i>
-            </span>
-            <span
-              data-tooltip="Divide participants by rooms"
-              data-position="top right"
-              *ngIf="isHost"
-            >
-              <i
-                (click)="openRoomsModal()"
-                class="big user th large icon big-left-margin"
-              >
-              </i>
             </span>
           </div>
           <div>
@@ -483,7 +483,7 @@
           </div>
           <div class="chat-content">
             <div class="summary">
-              <a class="user">
+              <a class="user message">
                 {{ message?.author?.firstName }}
                 {{ message?.author?.secondName }}
               </a>
