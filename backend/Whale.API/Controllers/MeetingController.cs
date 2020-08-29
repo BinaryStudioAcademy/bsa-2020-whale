@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Whale.API.Services;
 using Whale.Shared.Models.Meeting;
@@ -53,6 +52,17 @@ namespace Whale.API.Controllers
         {
             string shortLink = await _httpService.GetStringAsync($"api/meeting/shortenLink/{longURL}");
             return Ok(shortLink);
+        }
+
+        [Authorize]
+        [HttpPut("updateMedia")]
+        public async Task<ActionResult> UpdateMeetingMediaOnStart(MediaOnStartDTO mediaOnStartDTO)
+        {
+            mediaOnStartDTO.RequestingUserEmail =
+                (HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value);
+
+            await _httpService.PutAsync("api/meeting/updateMedia", mediaOnStartDTO);
+            return Ok();
         }
     }
 }
