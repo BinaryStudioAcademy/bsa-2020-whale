@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { SimpleModalComponent } from 'ngx-simple-modal';
 
 @Component({
@@ -6,16 +6,27 @@ import { SimpleModalComponent } from 'ngx-simple-modal';
   templateUrl: './enter-modal.component.html',
   styleUrls: ['./enter-modal.component.sass'],
 })
-export class EnterModalComponent extends SimpleModalComponent<
-  void,
-  { microOff: boolean; cameraOff: boolean; leave: boolean }
-> {
-  message: string;
-  public webcam = true;
-  public microphone = true;
+export class EnterModalComponent
+  extends SimpleModalComponent<
+    EnterMeetingModalInputData,
+    EnterMeetingModalOutputData
+  >
+  implements OnInit, EnterMeetingModalInputData {
+  public isCurrentParticipantHost: boolean;
+  public isAllowedVideoOnStart: boolean;
+  public isAllowedAudioOnStart: boolean;
+  public message: string;
+  public webcam: boolean;
+  public microphone: boolean;
   private leave = false;
+
   constructor() {
     super();
+  }
+
+  public ngOnInit(): void {
+    this.webcam = this.isAllowedVideoOnStart;
+    this.microphone = this.isAllowedAudioOnStart;
   }
 
   public onProceed(): void {
@@ -23,6 +34,8 @@ export class EnterModalComponent extends SimpleModalComponent<
       microOff: !this.microphone,
       cameraOff: !this.webcam,
       leave: this.leave,
+      isAllowedVideoOnStart: this.isAllowedVideoOnStart,
+      isAllowedAudioOnStart: this.isAllowedAudioOnStart,
     };
     this.close();
   }
@@ -31,4 +44,18 @@ export class EnterModalComponent extends SimpleModalComponent<
     this.leave = true;
     this.onProceed();
   }
+}
+
+export interface EnterMeetingModalInputData {
+  isCurrentParticipantHost: boolean;
+  isAllowedVideoOnStart: boolean;
+  isAllowedAudioOnStart: boolean;
+}
+
+export interface EnterMeetingModalOutputData {
+  microOff: boolean;
+  cameraOff: boolean;
+  leave: boolean;
+  isAllowedVideoOnStart: boolean;
+  isAllowedAudioOnStart: boolean;
 }

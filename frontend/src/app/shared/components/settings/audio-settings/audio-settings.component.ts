@@ -20,7 +20,7 @@ export class AudioSettingsComponent implements OnInit {
       .getAudioInputList()
       .then((res) => (this.inputAudioDevices = res));
   }
-  isActive(event: MediaDeviceInfo) {
+  isActive(event: MediaDeviceInfo): boolean {
     return this.mediaService.settings.InputDeviceId === event.deviceId;
   }
 }

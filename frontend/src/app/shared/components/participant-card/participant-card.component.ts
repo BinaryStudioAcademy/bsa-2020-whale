@@ -17,7 +17,8 @@ import {
   ParticipantDynamicData,
   Participant,
   ReactionsEnum,
-} from '../../../shared/models';
+  CardMediaData,
+} from '@shared/models';
 import { MediaSettingsService } from 'app/core/services';
 
 @Component({
@@ -33,8 +34,9 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
   @Output() stopVideoEvent = new EventEmitter<string>();
   @Output() toggleCameraEvent = new EventEmitter<string>();
   @Output() toggleMicrophoneEvent = new EventEmitter<string>();
-  @Output() switchOffCameraAsHostEvent = new EventEmitter<string>();
-  @Output() switchOffMicrophoneAsHostEvent = new EventEmitter<string>();
+  @Output() switchMediaPermissionAsHostEvent = new EventEmitter<
+    CardMediaData
+  >();
 
   public actionsIcon: HTMLElement;
   public actionsPopupContent: HTMLElement;
@@ -74,6 +76,21 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((dynamicData) => {
         this.dynamicData = dynamicData;
+        if (
+          !this.dynamicData.isVideoAllowed &&
+          this.dynamicData.isVideoActive &&
+          !this.dynamicData.isUserHost
+        ) {
+          this.dynamicData.isVideoActive = false;
+        }
+        if (
+          !this.dynamicData.isAudioAllowed &&
+          this.dynamicData.isAudioActive &&
+          !this.dynamicData.isUserHost
+        ) {
+          this.dynamicData.isAudioActive = false;
+        }
+
         this.updateData();
       });
     this.data.reactions
@@ -103,22 +120,28 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
     this.hideViewEvent.emit(this.data.id);
   }
 
-  public switchOfCameraAsHost(): void {
-    this.switchOffCameraAsHostEvent.emit(this.data.stream.id);
+  public switchMediaPermissionAsHost(isVideo: boolean): void {
+    this.switchMediaPermissionAsHostEvent.emit({
+      cardStreamId: this.data.stream.id,
+      isVideoAllowed: isVideo
+        ? !this.dynamicData.isVideoAllowed
+        : this.dynamicData.isVideoAllowed,
+      isAudioAllowed: isVideo
+        ? this.dynamicData.isAudioAllowed
+        : !this.dynamicData.isAudioAllowed,
+      isVideoActive: this.dynamicData.isVideoActive,
+      isAudioActive: this.dynamicData.isAudioActive,
+    });
   }
 
-  public switchOfMicrophoneAsHost(): void {
-    this.switchOffMicrophoneAsHostEvent.emit(this.data.stream.id);
-  }
-
-  private addAvatar() {
+  private addAvatar(): void {
     if (this.dynamicData.avatarUrl) {
       this.participantContainer.style.background = `url(${this.dynamicData.avatarUrl})`;
       this.participantContainer.style.backgroundSize = 'contain';
       this.participantContainer.style.backgroundRepeat = 'no-repeat';
       this.participantContainer.style.backgroundPosition = 'center';
     } else {
-      var participantInitials = this.elRef.nativeElement.querySelector(
+      const participantInitials = this.elRef.nativeElement.querySelector(
         '.participant-initials'
       );
       console.log('dd', this.dynamicData);
@@ -152,7 +175,7 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
     this.addAvatar();
   }
 
-  private handleActionsPopup() {
+  private handleActionsPopup(): void {
     this.actionsIcon.addEventListener('click', () => {
       this.shouldShowActions = !this.shouldShowActions;
       if (this.shouldShowActions) {
@@ -179,8 +202,8 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
 
   private onOutsideActionsClick(ev: Event): void {
     if (
-      ev.target != this.actionsPopupContent &&
-      ev.target != this.actionsIcon
+      ev.target !== this.actionsPopupContent &&
+      ev.target !== this.actionsIcon
     ) {
       this.actionsPopupContent.style.display = 'none';
       this.actionsPopup?.destroy();

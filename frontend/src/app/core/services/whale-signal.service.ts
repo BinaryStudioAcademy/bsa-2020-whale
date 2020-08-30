@@ -12,6 +12,8 @@ import {
   UserOnline,
   GroupCall,
   Group,
+  CallDecline,
+  GroupCallDecline,
 } from '@shared/models';
 
 @Injectable({
@@ -47,7 +49,7 @@ export class WhaleSignalService {
   private declineCall = new Subject<void>();
   public declineCall$ = this.declineCall.asObservable();
 
-  private declineGroupCall = new Subject<void>();
+  private declineGroupCall = new Subject<GroupCallDecline>();
   public declineGroupCall$ = this.declineGroupCall.asObservable();
 
   private receiveContact = new Subject<Contact>();
@@ -61,6 +63,9 @@ export class WhaleSignalService {
 
   private removeNotify = new Subject<string>();
   public removeNotify$ = this.removeNotify.asObservable();
+
+  private updateNotify = new Subject<Notification>();
+  public updateNotify$ = this.updateNotify.asObservable();
 
   private receiveGroup = new Subject<Group>();
   public receiveGroup$ = this.receiveGroup.asObservable();
@@ -122,9 +127,12 @@ export class WhaleSignalService {
           this.declineCall.next();
         });
 
-        this.signalHub.on('OnDeclineGroupCall', () => {
-          this.declineGroupCall.next();
-        });
+        this.signalHub.on(
+          'OnDeclineGroupCall',
+          (groupCall: GroupCallDecline) => {
+            this.declineGroupCall.next(groupCall);
+          }
+        );
 
         this.signalHub.on('onNewContact', (contact: Contact) => {
           this.receiveContact.next(contact);
@@ -141,6 +149,13 @@ export class WhaleSignalService {
         this.signalHub.on('onDeleteNotification', (notificationId: string) => {
           this.removeNotify.next(notificationId);
         });
+
+        this.signalHub.on(
+          'onUpdateNotification',
+          (notification: Notification) => {
+            this.updateNotify.next(notification);
+          }
+        );
 
         this.signalHub.on('OnNewGroup', (group: Group) => {
           this.receiveGroup.next(group);

@@ -41,8 +41,9 @@ i
     color: grey     
 
 .dropdown-menu
-    width: 140px
+    width: 200px
     height: auto
+    max-height: 90vh
     position: absolute
     top: 60px
     background-color: white
@@ -52,6 +53,9 @@ i
     justify-content: space-around
     flex-direction: column
     margin-right: 6em
+    div
+        overflow-y: auto
+        overflow-x: hidden
     &.notify
         width: 200px
     &.settings
@@ -63,6 +67,8 @@ i
     margin: 5px 10px 0px 10px
     padding-bottom: 5px
     border-bottom: thin solid grey
+    word-break: break-word
+    overflow-wrap: break-word
 
 .dropdown-menu-item 
     color: black
@@ -100,3 +106,5 @@ i
     
 .notify-pic-item.item
     margin-right: -14px
+
+  

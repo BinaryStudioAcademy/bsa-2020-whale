@@ -44,7 +44,7 @@ const routes: Routes = [
     component: RedirectionComponent,
   },
   {
-    path: 'room/:id',
+    path: 'room/:link',
     component: MeetingComponent,
     canActivate: [AngularFireAuthGuard],
     data: { authGuardPipe: redirectUnauthorizedToLogin },

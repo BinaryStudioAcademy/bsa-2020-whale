@@ -4,6 +4,7 @@
     {
         TextNotification,
         AddContactNotification,
-        MeetingInviteNotification
+        MeetingInviteNotification,
+        UnreadMessage
     }
 }

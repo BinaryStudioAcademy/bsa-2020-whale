@@ -26,6 +26,7 @@ export class MeetingInviteComponent
   public formSearch: FormGroup;
 
   public isLoading = false;
+  public isContactsLoading = false;
 
   meetingId: string;
   senderId: string;
@@ -47,6 +48,7 @@ export class MeetingInviteComponent
   }
 
   public getContacts(): void {
+    this.isContactsLoading = true;
     this.httpService
       .getRequest<Contact[]>(environment.apiUrl + '/api/Contacts/accepted')
       .subscribe(
@@ -60,9 +62,11 @@ export class MeetingInviteComponent
           );
           this.contacts = Array.from(filteredContacts);
           this.cachedContacts = Array.from(filteredContacts);
+          this.isContactsLoading = false;
         },
         (error) => {
           console.error(error);
+          this.isContactsLoading = false;
         }
       );
   }
@@ -166,7 +170,7 @@ export class MeetingInviteComponent
       : user.firstName;
   }
 
-  public closeModal(result: boolean) {
+  public closeModal(result: boolean): void {
     this.result = result; // result = isShowParticipants after modal closing
     this.close();
   }

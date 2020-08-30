@@ -38,11 +38,16 @@ export class UpdateGroupImageModalComponent
   }
 
   public uploadFile(event): void {
+    this.isFileUploaded = false;
     this.imageChangedEvent = event;
 
-    const isImageCorrect = this.blobService.canUploadImage(event);
+    const image = event.target.files[0];
+    if (!image) {
+      event.target.value = '';
+      return;
+    }
 
-    if (isImageCorrect) {
+    if (image.size / 1024 / 1024 < 5) {
       this.fileToUpload = event.target.files[0];
       this.isFileUploaded = true;
     } else {

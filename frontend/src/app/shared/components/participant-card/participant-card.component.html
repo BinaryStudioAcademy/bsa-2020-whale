@@ -17,14 +17,35 @@
   <div class="content">
     <div class="participant-name-wrapper">
       <i
+        *ngIf="dynamicData.isAudioAllowed || dynamicData.isUserHost"
         class="microphone icon"
         [ngClass]="dynamicData.isAudioActive ? '' : 'red'"
+        [class.cursor-pointer]="
+          (dynamicData.isAudioAllowed &&
+            data.currentStreamId === meetingHolder.streamId) ||
+          (meetingHolder.role === 1 &&
+            data.currentStreamId === meetingHolder.streamId)
+        "
         [class.slash]="!dynamicData.isAudioActive"
         [class.micro-pulse]="data.volume > 1"
         (click)="
           data.isCurrentUser || dynamicData.isUserHost ? toggleMicrophone() : ''
         "
       ></i>
+      <span
+        *ngIf="!dynamicData.isAudioAllowed && !dynamicData.isUserHost"
+        data-tooltip="Disabled by the Host"
+        data-position="top left"
+      >
+        <i class="microphone slash icon"></i>
+      </span>
+      <span
+        *ngIf="!dynamicData.isVideoAllowed && !dynamicData.isUserHost"
+        data-tooltip="Disabled by the Host"
+        data-position="top left"
+      >
+        <i class="eye slash icon"></i>
+      </span>
       <a class="header"></a>
     </div>
     <i class="small blue ellipsis vertical icon"></i>
@@ -47,16 +68,16 @@
   <ul>
     <li (click)="pinVideo()">Pin Video</li>
     <li
-      *ngIf="meetingHolder.role === 1 && dynamicData.isVideoActive"
-      (click)="switchOfCameraAsHost()"
+      *ngIf="meetingHolder.role === 1"
+      (click)="switchMediaPermissionAsHost(true)"
     >
-      Stop Video
+      {{ dynamicData.isVideoAllowed ? "Disable Video" : "Enable Video" }}
     </li>
     <li
-      *ngIf="meetingHolder.role === 1 && dynamicData.isAudioActive"
-      (click)="switchOfMicrophoneAsHost()"
+      *ngIf="meetingHolder.role === 1"
+      (click)="switchMediaPermissionAsHost(false)"
     >
-      Mute Audio
+      {{ dynamicData.isAudioAllowed ? "Disable Audio" : "Enable Audio" }}
     </li>
   </ul>
 </div>

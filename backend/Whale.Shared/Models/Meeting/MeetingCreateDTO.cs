@@ -9,6 +9,8 @@ namespace Whale.Shared.Models.Meeting
         public int AnonymousCount { get; set; }
         public bool IsScheduled { get; set; }
         public bool IsRecurrent { get; set; }
+        public bool IsVideoAllowed { get; set; }
+        public bool IsAudioAllowed { get; set; }
         public string CreatorEmail { get; set; }
     }
 }

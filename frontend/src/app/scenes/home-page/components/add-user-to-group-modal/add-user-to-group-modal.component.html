@@ -19,6 +19,9 @@
         </div>
       </form>
       <div class="ui relaxed divided selection list">
+        <div *ngIf="isContactsLoading">
+          <div class="ui inverted active centered inline loader"></div>
+        </div>
         <div class="item" *ngFor="let contact of cachedContacts">
           <div [contact]="contact" (click)="addMemberToList(contact)">
             <img
@@ -29,6 +32,9 @@
             {{ contact.secondMember.secondName }}
           </div>
         </div>
+      </div>
+      <div *ngIf="cachedContacts.length === 0" class="no-contacts">
+        No contacts
       </div>
       <form
         class="email-form"

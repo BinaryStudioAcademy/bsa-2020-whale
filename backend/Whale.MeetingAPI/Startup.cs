@@ -44,6 +44,7 @@ namespace Whale.MeetingAPI
             services.AddTransient<PollService>();
             services.AddTransient<UserService>();
             services.AddTransient<ParticipantService>();
+            services.AddTransient<NotificationsService>();
             services.AddTransient(p => new SignalrService(Configuration.GetValue<string>("SignalR")));
 
             services.AddControllers()

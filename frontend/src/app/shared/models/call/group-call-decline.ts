@@ -1,6 +1,8 @@
+import { User } from '../user/user';
+
 export interface GroupCallDecline {
   userId: string;
-  email: string;
+  callCreator: User;
   groupId: string;
   meetingId: string;
 }

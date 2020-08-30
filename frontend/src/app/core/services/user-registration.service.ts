@@ -6,6 +6,8 @@ import { IFireBaseUser, User } from '../../shared/models/user';
 import { environment } from '../../../environments/environment';
 import { LinkTypeEnum } from '@shared/Enums/LinkTypeEnum';
 import { Router } from '@angular/router';
+import { first } from 'rxjs/operators';
+import { ReplaySubject, Subject, BehaviorSubject, AsyncSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -14,14 +16,17 @@ export class UserRegistrationService {
   private getUserUrl: string = environment.apiUrl + '/api/user/email';
   private addUserUrl: string = environment.apiUrl + '/api/user';
 
+  private userRegistered = new ReplaySubject<User>(1);
+  public userRegistered$ = this.userRegistered.asObservable();
+
   constructor(
     private httpService: HttpService,
     private http: HttpClient,
     private router: Router
   ) {}
 
-  registerUser(currentUser: any) {
-    const user: IFireBaseUser = {
+  registerUser(currentUser: any): void {
+    const fireUser: IFireBaseUser = {
       uid: currentUser.uid,
       displayName: currentUser.displayName,
       email: currentUser.email,
@@ -31,20 +36,29 @@ export class UserRegistrationService {
     };
 
     this.http
-      .get<User>(this.getUserUrl + `/${user.email}`, { observe: 'response' })
+      .get<User>(this.getUserUrl + `/${fireUser.email}`, {
+        observe: 'response',
+      })
+      .pipe(first())
       .subscribe(
         (user) => {
-          console.log(`User ${user.body.email} exists`);
-          if (this.router.url === '/') {
-            this.router.navigate(['/home']);
+          if (!user.body) {
+            this.httpService
+              .postClearRequest<IFireBaseUser, User>(this.addUserUrl, fireUser)
+              .pipe(first())
+              .subscribe((createdUser) => {
+                this.userRegistered.next(createdUser);
+                this.router.navigate(['/home']);
+              });
+          } else {
+            this.userRegistered.next(user.body);
+            if (this.router.url === '/' || this.router.url === 'landing') {
+              this.router.navigate(['/home']);
+            }
           }
         },
         (error) => {
-          if (error.status === 404) {
-            this.httpService
-              .postClearRequest<IFireBaseUser, User>(this.addUserUrl, user)
-              .subscribe(() => this.router.navigate(['/home']));
-          }
+          console.log(error);
         }
       );
   }

@@ -7,7 +7,7 @@ import {
 } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, first } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class HttpService {
@@ -40,7 +40,7 @@ export class HttpService {
         headers: this.getHeaders(),
         params: httpParams,
       })
-      .pipe(catchError(this.handleError));
+      .pipe(catchError(this.handleError), first());
   }
 
   public getFullRequest<T>(
@@ -54,7 +54,7 @@ export class HttpService {
         headers: this.getHeaders(),
         params: httpParams,
       })
-      .pipe(catchError(this.handleError));
+      .pipe(catchError(this.handleError), first());
   }
 
   // POST
@@ -65,7 +65,7 @@ export class HttpService {
   ): Observable<TResponse> {
     return this.http
       .post<TResponse>(this.buildUrl(url), payload)
-      .pipe(catchError(this.handleError));
+      .pipe(catchError(this.handleError), first());
   }
 
   public postRequest<TRequest, TResponse>(
@@ -76,7 +76,7 @@ export class HttpService {
       .post<TResponse>(this.buildUrl(url), payload, {
         headers: this.getHeaders(),
       })
-      .pipe(catchError(this.handleError));
+      .pipe(catchError(this.handleError), first());
   }
 
   public postFullRequest<TRequest, TResponse>(
@@ -88,7 +88,7 @@ export class HttpService {
         headers: this.getHeaders(),
         observe: 'response',
       })
-      .pipe(catchError(this.handleError));
+      .pipe(catchError(this.handleError), first());
   }
 
   // PUT
@@ -101,7 +101,7 @@ export class HttpService {
       .put<TResponse>(this.buildUrl(url), payload, {
         headers: this.getHeaders(),
       })
-      .pipe(catchError(this.handleError));
+      .pipe(catchError(this.handleError), first());
   }
 
   public putFullRequest<TRequest, TResponse>(
@@ -113,7 +113,7 @@ export class HttpService {
         headers: this.getHeaders(),
         observe: 'response',
       })
-      .pipe(catchError(this.handleError));
+      .pipe(catchError(this.handleError), first());
   }
 
   // DELETE
@@ -124,7 +124,7 @@ export class HttpService {
         headers: this.getHeaders(),
         params: httpParams,
       })
-      .pipe(catchError(this.handleError));
+      .pipe(catchError(this.handleError), first());
   }
 
   public deleteFullRequest<T>(
@@ -137,7 +137,7 @@ export class HttpService {
         observe: 'response',
         params: httpParams,
       })
-      .pipe(catchError(this.handleError));
+      .pipe(catchError(this.handleError), first());
   }
 
   // HELPERS
@@ -162,7 +162,8 @@ export class HttpService {
       // The backend returned an unsuccessful response code.
       // The response body may contain clues as to what went wrong.
       console.error(
-        `Backend returned code ${error.error.status}, ` + `body was: ${error.error.Detailed}`
+        `Backend returned code ${error.error.status}, ` +
+          `body was: ${error.error.Detailed}`
       );
       return throwError({
         statusCode: error.error.StatusCode,

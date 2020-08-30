@@ -15,7 +15,7 @@ import { Subject } from 'rxjs';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'division-by-rooms-modal',
+  selector: 'app-division-by-rooms-modal',
   templateUrl: './division-by-rooms-modal.component.html',
   styleUrls: ['./division-by-rooms-modal.component.sass'],
 })
@@ -26,28 +26,16 @@ export class DivisionByRoomsModalComponent
 
   public meetingLink: string;
   public meetingId: string;
-  public numberOfRooms: number = 2;
-  public participants: Array<Participant>;
-  public devidedParticipants: Array<Array<Participant>>;
-  public duration: number = 10;
+  public numberOfRooms = 2;
+  public duration = 10;
   public onCanMoveIntoRoomEvent: EventEmitter<void>;
 
-  constructor(
-    private meetingSignalrService: MeetingSignalrService,
-    private router: Router,
-    public roomService: RoomService
-  ) {
+  constructor(private router: Router, public roomService: RoomService) {
     super();
   }
 
   ngOnInit(): void {
-    this.participants = this.participants.filter(
-      (p) => p.role != ParticipantRole.Host
-    );
-    this.devidedParticipants = this.randChunkSplit(
-      this.participants,
-      Math.round(this.participants.length / this.numberOfRooms)
-    );
+    this.roomService.randomlyDivide(this.numberOfRooms);
   }
 
   ngOnDestroy(): void {
@@ -56,15 +44,11 @@ export class DivisionByRoomsModalComponent
   }
 
   public divide(): void {
-    this.devidedParticipants.forEach((participants) => {
-      this.meetingSignalrService.invoke(SignalMethods.CreateRoom, {
-        meetingId: this.meetingId,
-        meetingLink: this.meetingLink,
-        duration: this.duration,
-        participantsIds: participants.map((p) => p.id),
-      } as RoomCreate);
-    });
-    this.roomService.isDividedIntoRooms = true;
+    this.roomService.createRooms(
+      this.meetingId,
+      this.meetingLink,
+      this.duration
+    );
   }
 
   public leaveRoom(): void {
@@ -81,24 +65,13 @@ export class DivisionByRoomsModalComponent
     this.onCanMoveIntoRoomEvent.subscribe(() => {
       if (!this.roomService.originalMeetingUrl) {
         this.roomService.originalMeetingUrl = this.meetingLink;
+        this.roomService.originalMeetingId = this.meetingId;
       }
       this.router.navigate([`/room/${roomId}`]);
     });
   }
 
-  private randChunkSplit(
-    arr: Array<Participant>,
-    min: number = 1,
-    max: number = 1
-  ): Array<Array<Participant>> {
-    const arrCopy = arr.slice();
-    let arrs: Array<Array<Participant>> = [];
-    let size = 1;
-    max = max >= min ? max : min;
-    while (arrCopy.length > 0) {
-      size = Math.min(max, Math.floor(Math.random() * max + min));
-      arrs.push(arrCopy.splice(0, size));
-    }
-    return arrs;
+  public numberOfRoomsChanged(): void {
+    this.roomService.changeNumberofRooms(this.numberOfRooms);
   }
 }
