@@ -7,6 +7,7 @@ import { environment } from '../../../environments/environment';
 import { MeetingLink } from '../../shared/models/meeting/meeting-link';
 import { Meeting } from '../../shared/models/meeting/meeting';
 import { MediaOnStart } from '@shared/models';
+import { UpdateSettings } from '@shared/models/meeting/update-settings';
 
 @Injectable({
   providedIn: 'root',
@@ -37,6 +38,15 @@ export class MeetingService {
     return this.httpService.putFullRequest(
       `${this.routePrefix}/updateMedia`,
       mediaOnStart
+    );
+  }
+
+  public updateMeetingSettings(
+    updateSettings: UpdateSettings
+  ): Observable<HttpResponse<void>> {
+    return this.httpService.putFullRequest(
+      `${this.routePrefix}/updateSettings`,
+      updateSettings
     );
   }
 }

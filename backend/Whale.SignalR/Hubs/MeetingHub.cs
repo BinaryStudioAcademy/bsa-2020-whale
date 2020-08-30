@@ -197,6 +197,23 @@ namespace Whale.SignalR.Hubs
             await Clients.Group(participantInGroup.Key).SendAsync("OnMediaPermissionsChanged", mediaPermissions);
         }
 
+        [HubMethodName("OnHostChangeMeetingSetting")]
+        public async Task MeetingSettingChangeByHost(UpdateSettingsDTO updateSettings)
+        {
+            var participantInGroup = _groupsParticipants
+              .First(g => g.Value.Any(p => p.ActiveConnectionId == Context.ConnectionId));
+
+            var isCallerHost = participantInGroup
+                .Value
+                .Any(p => p.ActiveConnectionId == Context.ConnectionId
+                    && p.Role == ParticipantRole.Host);
+
+            if (!isCallerHost)
+                return;
+
+            await Clients.Group(participantInGroup.Key).SendAsync("OnHostChangeMeetingSetting", updateSettings);
+        }
+
         [HubMethodName("OnPollResults")]
         public async Task PollResults(string groupName, PollResultDTO pollResult)
         {

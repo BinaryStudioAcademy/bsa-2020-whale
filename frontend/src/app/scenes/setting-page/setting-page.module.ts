@@ -16,5 +16,6 @@ import { SettingMeetingComponent } from './setting-meeting/setting-meeting.compo
     SettingMeetingComponent,
   ],
   imports: [CommonModule, FormsModule, BrowserModule, SharedModule],
+  exports: [SettingMeetingComponent],
 })
 export class SettingPageModule {}

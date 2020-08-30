@@ -72,6 +72,8 @@ namespace Whale.Shared.Services
             meetingDTO.Participants = (await _participantService.GetMeetingParticipantsAsync(meeting.Id)).ToList();
             meetingDTO.IsAudioAllowed = meetingSettings.IsAudioAllowed;
             meetingDTO.IsVideoAllowed = meetingSettings.IsVideoAllowed;
+            meetingDTO.IsPoll = meetingSettings.IsPoll;
+            meetingDTO.IsWhiteboard = meetingSettings.IsWhiteboard;
 
             return meetingDTO;
         }
@@ -94,7 +96,9 @@ namespace Whale.Shared.Services
             await _redisService.SetAsync($"{meetingSettingsPrefix}{meeting.Id}", new MeetingSettingsDTO
             {
                 IsAudioAllowed = meetingDTO.IsAudioAllowed,
-                IsVideoAllowed = meetingDTO.IsVideoAllowed
+                IsVideoAllowed = meetingDTO.IsVideoAllowed,
+                IsWhiteboard = meetingDTO.IsWhiteboard,
+                IsPoll = meetingDTO.IsPoll
             });
 
             string shortURL = ShortId.Generate();
@@ -123,6 +127,19 @@ namespace Whale.Shared.Services
             meetingSettings.IsAudioAllowed = mediaDTO.IsAudioAllowed;
 
             await _redisService.SetAsync($"{meetingSettingsPrefix}{mediaDTO.MeetingId}", meetingSettings);
+        }
+
+        public async Task UpdateMeetingSettings(UpdateSettingsDTO updateSettingsDTO)
+        {
+            await _redisService.ConnectAsync();
+
+            var meetingSettings =
+                await _redisService.GetAsync<MeetingSettingsDTO>($"{meetingSettingsPrefix}{updateSettingsDTO.MeetingId}");
+
+            meetingSettings.IsWhiteboard = updateSettingsDTO.IsWhiteboard;
+            meetingSettings.IsPoll = updateSettingsDTO.IsPoll;
+
+            await _redisService.SetAsync($"{meetingSettingsPrefix}{updateSettingsDTO.MeetingId}", meetingSettings);
         }
 
         public async Task<MeetingMessageDTO> SendMessage(MeetingMessageCreateDTO msgDTO)

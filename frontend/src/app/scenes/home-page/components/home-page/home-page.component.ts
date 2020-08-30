@@ -21,6 +21,7 @@ import { ContactService } from 'app/core/services';
 import { MessageService } from 'app/core/services/message.service';
 import { ConfirmationModalComponent } from '@shared/components/confirmation-modal/confirmation-modal.component';
 import { group } from 'console';
+import { MeetingSettingsService } from '../../../../core/services/meeting-settings.service';
 
 @Component({
   selector: 'app-home-page',
@@ -60,7 +61,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
     private upstateService: UpstateService,
     private whaleSignalrService: WhaleSignalService,
     private contactService: ContactService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private meetingSettingsService: MeetingSettingsService
   ) {}
 
   ngOnDestroy(): void {
@@ -345,6 +347,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
         isRecurrent: false,
         isAudioAllowed: true,
         isVideoAllowed: true,
+        isWhiteboard: this.meetingSettingsService.settings.IsWhiteboard,
+        isPoll: this.meetingSettingsService.settings.IsPoll,
         creatorEmail: this.ownerEmail,
       } as MeetingCreate)
       .pipe(takeUntil(this.unsubscribe$))

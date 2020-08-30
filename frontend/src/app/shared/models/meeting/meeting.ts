@@ -10,6 +10,8 @@ export interface Meeting extends MediaPermissions {
   anonymousCount: number;
   isScheduled: boolean;
   isRecurrent: boolean;
+  isWhiteboard: boolean;
+  isPoll: boolean;
 
   participants: Participant[];
   pollResults: PollResultDto[];

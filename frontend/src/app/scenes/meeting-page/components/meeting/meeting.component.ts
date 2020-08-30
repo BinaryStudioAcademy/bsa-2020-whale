@@ -88,6 +88,24 @@ export class MeetingComponent
     batchUpdateTimeoutDuration: 250,
     drawButtonEnabled: false,
   };
+  public canvasOptionsDisable: CanvasWhiteboardOptions = {
+    clearButtonEnabled: false,
+    clearButtonText: 'Erase',
+    undoButtonText: 'Undo',
+    undoButtonEnabled: false,
+    colorPickerEnabled: false,
+    saveDataButtonEnabled: true,
+    saveDataButtonText: 'Save',
+    lineWidth: 5,
+    strokeColor: 'rgb(0,0,0)',
+    shouldDownloadDrawing: true,
+    drawingEnabled: false,
+    showShapeSelector: false,
+    shapeSelectorEnabled: false,
+    showFillColorPicker: false,
+    batchUpdateTimeoutDuration: 250,
+    drawButtonEnabled: false,
+  };
   public connectedPeers = new Map<string, MediaStream>();
   public connectedStreams: MediaStream[] = [];
   public connectionData: MeetingConnectionData;
@@ -104,6 +122,7 @@ export class MeetingComponent
   public isShowParticipants = false;
   public isShowStatistics = false;
   public isVideoSettings = false;
+  public isShowMeetingSettings = false;
   public isWaitingForRecord = false;
   public isAddParticipantDisabled = false;
   public mediaData: MediaData[] = [];
@@ -111,7 +130,7 @@ export class MeetingComponent
   public meetingStatistics: Statistics;
   public msgText = '';
   public msgReceiverEmail = '';
-  public whiteboardBlocked = '';
+  public whiteboardDisable = '';
   public messages: MeetingMessage[] = [];
   public selectedMessages: MeetingMessage[] = [];
   public newMsgFrom: string[] = [];
@@ -129,6 +148,8 @@ export class MeetingComponent
   public meter = new DecibelMeter('meter');
   public browserMediaDevice = new BrowserMediaDevice();
   public lastTrack: MediaStreamTrack;
+  public IsWhiteboard = false;
+  public IsPoll = false;
 
   @ViewChild('currentVideo') private currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
@@ -273,6 +294,9 @@ export class MeetingComponent
           );
           this.isHost = this.currentParticipant.role === ParticipantRole.Host;
           this.roomService.isUserHost = this.isHost;
+          this.meeting.isWhiteboard && !this.isHost
+            ? (this.whiteboardDisable = '(drawing is disabled by Host)')
+            : (this.whiteboardDisable = '');
           this.otherParticipants = participants.filter(
             (p) => p.id !== this.currentParticipant.id
           );
@@ -485,6 +509,29 @@ export class MeetingComponent
           };
         }
       });
+
+    this.meetingSignalrService.meetingSettingsChanged$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (setting) => {
+          this.meeting.isWhiteboard = setting.isWhiteboard;
+          this.meeting.isPoll = setting.isPoll;
+          this.meeting.isWhiteboard && !this.isHost
+            ? (this.whiteboardDisable = '(drawing is disabled by Host)')
+            : (this.whiteboardDisable = '');
+          this.savedStrokes.forEach((strokes) =>
+            this.meetingSignalrService.invoke(SignalMethods.OnDrawing, {
+              meetingId: this.meeting.id.toString(),
+              canvasEvent: strokes,
+            })
+          );
+        },
+        () => {
+          this.toastr.error(
+            'Error occurred during participants setting updating'
+          );
+        }
+      );
 
     this.meetingSignalrService.meetingEnded$
       .pipe(takeUntil(this.unsubscribe$))
@@ -805,11 +852,18 @@ export class MeetingComponent
 
   public onPollIconClick(): void {
     this.isShowStatistics = false;
+    this.isShowMeetingSettings = false;
     this.pollService.onPollIconClick();
+  }
+  public onMeetingSettingClick(): void {
+    this.isShowStatistics = false;
+    this.pollService.isShowPoll = false;
+    this.isShowMeetingSettings = !this.isShowMeetingSettings;
   }
 
   public onStatisticsIconClick(): void {
     this.pollService.isShowPoll = false;
+    this.isShowMeetingSettings = false;
     this.pollService.isPollCreating = false;
     this.pollService.isShowPollResults = false;
 
@@ -965,6 +1019,8 @@ export class MeetingComponent
         isRecurrent: false,
         isVideoAllowed: true,
         isAudioAllowed: true,
+        isWhiteboard: false,
+        isPoll: false,
         anonymousCount: 0,
         pollResults: [],
         participants: [],
@@ -1030,7 +1086,7 @@ export class MeetingComponent
   private invokeMediaStateChanged(receiverConnectionId = ''): void {
     this.meetingSignalrService.invoke(SignalMethods.OnMediaStateChanged, {
       streamId: this.currentUserStream.id,
-      receiverConnectionId: receiverConnectionId,
+      receiverConnectionId,
       isVideoAllowed: this.meeting.isVideoAllowed,
       isAudioAllowed: this.meeting.isAudioAllowed,
       isVideoActive: !this.isCameraMuted,
@@ -1047,7 +1103,7 @@ export class MeetingComponent
 
     const modalResult = await this.simpleModalService
       .addModal(EnterModalComponent, {
-        isCurrentParticipantHost: isCurrentParticipantHost,
+        isCurrentParticipantHost,
         isAllowedVideoOnStart: this.meeting.isVideoAllowed,
         isAllowedAudioOnStart: this.meeting.isAudioAllowed,
       })
@@ -1282,10 +1338,10 @@ export class MeetingComponent
       userFirstName: participant.user.firstName,
       userSecondName: participant.user.secondName,
       avatarUrl: participant.user.avatarUrl,
-      isVideoAllowed: isVideoAllowed,
-      isAudioAllowed: isAudioAllowed,
-      isVideoActive: isVideoActive,
-      isAudioActive: isAudioActive,
+      isVideoAllowed,
+      isAudioAllowed,
+      isVideoActive,
+      isAudioActive,
     });
   }
   //#endregion participant cards
@@ -1387,10 +1443,6 @@ export class MeetingComponent
   }
 
   public async showCanvas() {
-    if (this.meetingSettingsService.settings.IsWhiteboard) {
-      this.canvasIsDisplayed = false;
-      return;
-    }
     this.canvasIsDisplayed = !this.canvasIsDisplayed;
     this.receiveingDrawings = false;
 

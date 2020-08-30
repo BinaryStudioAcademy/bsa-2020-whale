@@ -64,5 +64,14 @@ namespace Whale.API.Controllers
             await _httpService.PutAsync("api/meeting/updateMedia", mediaOnStartDTO);
             return Ok();
         }
+
+        [Authorize]
+        [HttpPut("updateSettings")]
+        public async Task<ActionResult> UpdateMeetingSettings(UpdateSettingsDTO updateSettingsDTO)
+        {
+
+            await _httpService.PutAsync("api/meeting/updateSettings", updateSettingsDTO);
+            return Ok();
+        }
     }
 }

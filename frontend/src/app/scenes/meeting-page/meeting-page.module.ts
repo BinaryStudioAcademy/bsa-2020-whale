@@ -8,6 +8,7 @@ import { CanvasWhiteboardModule } from 'ng2-canvas-whiteboard';
 import { EnterModalComponent } from './components/enter-modal/enter-modal.component';
 import { DivisionByRoomsModalComponent } from './components/division-by-rooms-modal/division-by-rooms-modal.component';
 import { RecordModalComponent } from './components/record-modal/record-modal.component';
+import { SettingPageModule } from '../setting-page/setting-page.module';
 @NgModule({
   declarations: [
     MeetingComponent,
@@ -20,6 +21,7 @@ import { RecordModalComponent } from './components/record-modal/record-modal.com
     FormsModule,
     AngularDraggableModule,
     CanvasWhiteboardModule,
+    SettingPageModule,
   ],
 })
 export class MeetingPageModule {}

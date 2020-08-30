@@ -218,6 +218,17 @@
           </div>
 
           <div class="display-flex inner-block">
+            <span
+              *ngIf="isHost"
+              data-tooltip="Meeting settings"
+              data-position="top left"
+            >
+              <i
+                id="meeting-settings"
+                (click)="onMeetingSettingClick()"
+                class="big cogs icon"
+              ></i>
+            </span>
             <div class="participants-button-container">
               <div
                 class="relative-container"
@@ -350,7 +361,7 @@
               ></i>
             </span>
             <span
-              data-tooltip="Whiteboard{{ whiteboardBlocked }}"
+              data-tooltip="Whiteboard"
               data-position="top right"
               [ngClass]="{ pulse: checkDrawing() }"
             >
@@ -397,15 +408,24 @@
       </div>
       <div class="canvas" *ngIf="canvasIsDisplayed">
         <div class="whiteboard-header">
-          <div class="whiteboard-title">Whiteboard</div>
+          <div class="whiteboard-title">Whiteboard{{ whiteboardDisable }}</div>
           <div class="whiteboard-close">
             <i (click)="showCanvas()" class="large times icon"></i>
           </div>
         </div>
-        <div class="board">
+        <div class="board" *ngIf="!meeting.isWhiteboard || isHost">
           <canvas-whiteboard
             #canvasWhiteboard
             [options]="canvasOptions"
+            (onBatchUpdate)="onCanvasDraw($event)"
+            (onClear)="onCanvasClear()"
+          >
+          </canvas-whiteboard>
+        </div>
+        <div class="board" *ngIf="meeting.isWhiteboard && !isHost">
+          <canvas-whiteboard
+            #canvasWhiteboard
+            [options]="canvasOptionsDisable"
             (onBatchUpdate)="onCanvasDraw($event)"
             (onClear)="onCanvasClear()"
           >
@@ -578,13 +598,22 @@
   >
     <button
       id="meeting-poll-new"
-      *ngIf="isHost || isRoom"
+      *ngIf="!meeting.isPoll || isHost"
       (click)="pollService.onNewPollClick()"
       class="ui button"
       id="new-poll-btn"
     >
       New poll
     </button>
+    <div
+      data-tooltip="Disabled by Host"
+      data-position="bottom left"
+      *ngIf="meeting.isPoll && !isHost"
+    >
+      <div class="ui disabled button">
+        New poll
+      </div>
+    </div>
     <div class="ui segment">
       <!--POLLS CONTAINER -->
       <h3>Polls</h3>
@@ -623,5 +652,13 @@
         <app-poll-results [pollResult]="pollxResult"></app-poll-results>
       </div>
     </div>
+  </div>
+  <div
+    class="ui meeting-setting-container overflow-scroll segment"
+    *ngIf="isShowMeetingSettings"
+  >
+    <!--SETTINGS CONTAINER -->
+    <h3>Meeting settings</h3>
+    <app-setting-meeting [meeting]="meeting"> </app-setting-meeting>
   </div>
 </div>
