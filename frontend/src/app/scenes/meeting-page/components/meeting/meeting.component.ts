@@ -127,7 +127,9 @@ export class MeetingComponent
   public meter = new DecibelMeter('meter');
   public browserMediaDevice = new BrowserMediaDevice();
   public lastTrack: MediaStreamTrack;
+  public isWhiteboardFullScreen = false;
 
+  @ViewChild('whiteboard') private whiteboard: ElementRef;
   @ViewChild('currentVideo') private currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
     HTMLElement
@@ -1381,6 +1383,24 @@ export class MeetingComponent
       erase: true,
     });
     this.savedStrokes = new Array<CanvasWhiteboardUpdate[]>();
+  }
+
+  public whiteboardFullscreen(): void {
+    this.isWhiteboardFullScreen = !this.isWhiteboardFullScreen;
+
+    if (this.isWhiteboardFullScreen) {
+      if (this.whiteboard.nativeElement.requestFullscreen) {
+        this.whiteboard.nativeElement.requestFullscreen();
+      } else if (this.whiteboard.nativeElement.mozRequestFullScreen) {
+        this.whiteboard.nativeElement.mozRequestFullScreen();
+      } else if (this.whiteboard.nativeElement.webkitRequestFullscreen) {
+        this.whiteboard.nativeElement.webkitRequestFullscreen();
+      } else if (this.whiteboard.nativeElement.msRequestFullscreen) {
+        this.whiteboard.nativeElement.msRequestFullscreen();
+      }
+    } else {
+      this.closeFullscreen();
+    }
   }
 
   public async showCanvas(): Promise<void> {

@@ -395,12 +395,22 @@
           </div>
         </div>
       </div>
-      <div class="canvas" *ngIf="canvasIsDisplayed">
-        <div class="whiteboard-header">
+      <div
+        #whiteboard
+        class="canvas"
+        *ngIf="canvasIsDisplayed"
+        ngDraggable
+        [handle]="draggableHeader"
+      >
+        <div #draggableHeader class="whiteboard-header">
           <div class="whiteboard-title">Whiteboard</div>
-          <div class="whiteboard-close">
-            <i (click)="showCanvas()" class="large times icon"></i>
-          </div>
+        </div>
+        <div class="whiteboard-buttons">
+          <i
+            (click)="whiteboardFullscreen(); $event.stopPropagation()"
+            class="clone icon"
+          ></i>
+          <i (click)="showCanvas()" class="times icon"></i>
         </div>
         <div class="board">
           <canvas-whiteboard
