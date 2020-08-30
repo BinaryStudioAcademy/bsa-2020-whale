@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { createPopper } from '@popperjs/core';
 import flip from '@popperjs/core/lib/modifiers/flip.js';
-import { Subject } from 'rxjs';
+import { Subject, timer, Observable } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import {
@@ -45,11 +45,13 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
   public isMicrophoneHovered = false;
   public dynamicData: ParticipantDynamicData;
   public reaction: ReactionsEnum;
+  public reactionDelay: Observable<number>;
 
   private video: HTMLVideoElement;
   private participantContainer: HTMLElement;
   private participantName: HTMLElement;
   private unsubscribe$ = new Subject<void>();
+  private unsubscribeReaction$ = new Subject<void>();
 
   constructor(
     private elRef: ElementRef,
@@ -96,12 +98,14 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
     this.data.reactions
       .asObservable()
       .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(reaction => this.onReaction(reaction));
+      .subscribe((reaction) => this.onReaction(reaction));
   }
 
   ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
+    this.unsubscribeReaction$.next();
+    this.unsubscribeReaction$.complete();
   }
 
   public toggleMicrophone(): void {
@@ -210,9 +214,12 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
     }
   }
 
-  private async onReaction(reaction: ReactionsEnum): Promise<void> {
+  private onReaction(reaction: ReactionsEnum): void {
     this.reaction = reaction;
-    await new Promise(res => setTimeout(res, 5000));
-    this.reaction = undefined;
+    this.unsubscribeReaction$.next();
+    this.reactionDelay = timer(5000);
+    this.reactionDelay
+      .pipe(takeUntil(this.unsubscribeReaction$))
+      .subscribe(() => (this.reaction = undefined));
   }
 }
