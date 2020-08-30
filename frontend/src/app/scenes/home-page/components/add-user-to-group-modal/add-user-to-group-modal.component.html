@@ -33,6 +33,9 @@
           </div>
         </div>
       </div>
+      <div *ngIf="cachedContacts.length === 0" class="no-contacts">
+        No contacts
+      </div>
       <form
         class="email-form"
         [formGroup]="form"

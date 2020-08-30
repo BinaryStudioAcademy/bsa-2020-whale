@@ -11,10 +11,8 @@ using Whale.Shared.Models.Poll;
 using Whale.SignalR.Models.Drawing;
 using Whale.SignalR.Models.Media;
 using Whale.DAL.Models;
-using shortid;
 using Whale.Shared.Exceptions;
 using Whale.SignalR.Services;
-using Whale.DAL.Models.Poll;
 using Whale.SignalR.Models.Room;
 
 namespace Whale.SignalR.Hubs
@@ -176,33 +174,27 @@ namespace Whale.SignalR.Hubs
         }
 
         [HubMethodName("OnMediaStateRequested")]
-        public async Task ParticipantMediaStateRequested(string streamId)
+        public async Task ParticipantMediaStateRequested(string connectionId)
         {
-            var requestReceiver = _groupsParticipants
-            .FirstOrDefault(g => g.Value.Any(p => p.StreamId == streamId))
-            .Value
-            .FirstOrDefault(p => p.StreamId == streamId);
-
-            await Clients.Client(requestReceiver.ActiveConnectionId)
+            await Clients.Client(connectionId)
                 .SendAsync("OnMediaStateRequested", Context.ConnectionId);
         }
 
-        [HubMethodName("OnSwitchOffMediaByHost")]
-        public async Task SwitchOffMediaByHost(SwitchMediaDTO switchMedia)
+        [HubMethodName("OnMediaPermissionsChanged")]
+        public async Task MediaPermissionsChangeByHost(MediaPermissionsChangeDTO mediaPermissions)
         {
-            var isCallerHost = _groupsParticipants[switchMedia.MeetingId]
+            var participantInGroup = _groupsParticipants
+              .First(g => g.Value.Any(p => p.ActiveConnectionId == Context.ConnectionId));
+
+            var isCallerHost = participantInGroup
+                .Value
                 .Any(p => p.ActiveConnectionId == Context.ConnectionId
                     && p.Role == ParticipantRole.Host);
 
-            var switchCommandReceiver = _groupsParticipants
-                .FirstOrDefault(g => g.Value.Any(p => p.StreamId == switchMedia.MutedStreamId))
-                .Value
-                .FirstOrDefault(p => p.StreamId == switchMedia.MutedStreamId);
-            if (isCallerHost)
-            {
-                await Clients.Client(switchCommandReceiver.ActiveConnectionId)
-                    .SendAsync("OnSwitchOffMediaByHost", switchMedia.IsVideo);
-            }
+            if (!isCallerHost)
+                return;
+
+            await Clients.Group(participantInGroup.Key).SendAsync("OnMediaPermissionsChanged", mediaPermissions);
         }
 
         [HubMethodName("OnPollResults")]

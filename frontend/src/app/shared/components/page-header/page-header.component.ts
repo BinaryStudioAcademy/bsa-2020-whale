@@ -45,9 +45,15 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
       if (this.settingsMenuVisible) {
         this.settingsMenuVisible = false;
       }
+
+      window.onclick = null;
       this.isNotificationsVisible = !this.isNotificationsVisible;
-    } else {
-      this.isNotificationsVisible = false;
+
+      if (this.isNotificationsVisible) {
+        window.onclick = () => {
+          this.isNotificationsVisible = false;
+        };
+      }
     }
   }
 
@@ -55,7 +61,15 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
     if (this.isNotificationsVisible) {
       this.isNotificationsVisible = false;
     }
+
+    window.onclick = null;
     this.settingsMenuVisible = !this.settingsMenuVisible;
+
+    if (this.settingsMenuVisible) {
+      window.onclick = () => {
+        this.settingsMenuVisible = false;
+      };
+    }
   }
 
   ngOnInit(): void {
