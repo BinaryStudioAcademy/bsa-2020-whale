@@ -404,6 +404,14 @@
       >
         <div #draggableHeader class="whiteboard-header">
           <div class="whiteboard-title">Whiteboard</div>
+          <div *ngIf="isHost" class="ui checkbox">
+            <input
+              type="checkbox"
+              name="enableDrawing"
+              (click)="changeDrawingPermissions($event)"
+            />
+            <label>Enable drawing for others</label>
+          </div>
         </div>
         <div class="whiteboard-buttons">
           <i
@@ -412,7 +420,7 @@
           ></i>
           <i (click)="showCanvas()" class="times icon"></i>
         </div>
-        <div class="board">
+        <div class="board" #board>
           <canvas-whiteboard
             #canvasWhiteboard
             [options]="canvasOptions"

@@ -128,8 +128,10 @@ export class MeetingComponent
   public browserMediaDevice = new BrowserMediaDevice();
   public lastTrack: MediaStreamTrack;
   public isWhiteboardFullScreen = false;
+  private isDrawingEnabled = false;
 
   @ViewChild('whiteboard') private whiteboard: ElementRef;
+  @ViewChild('board') private canvasWhiteboard: ElementRef;
   @ViewChild('currentVideo') private currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
     HTMLElement
@@ -354,6 +356,17 @@ export class MeetingComponent
           this.toastr.error(
             'Error occured during participants media state updating'
           );
+        }
+      );
+
+    this.meetingSignalrService.onDrawingChangePermissions$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (enabled) => {
+          this.isDrawingEnabled = enabled;
+        },
+        () => {
+          this.toastr.error('Error occured during drawing change permissions');
         }
       );
 
@@ -670,6 +683,10 @@ export class MeetingComponent
   }
 
   ngAfterViewChecked(): void {
+    if (this.canvasWhiteboard !== undefined && this.isHost) {
+      this.canvasWhiteboard.nativeElement.style.pointerEvents = 'all';
+    }
+
     if (this.isShowChat) {
       this.chatElement = this.chatBlock.first?.nativeElement;
     }
@@ -1375,6 +1392,32 @@ export class MeetingComponent
       meetingId: this.meeting.id.toString(),
       canvasEvent: strokes,
     });
+  }
+
+  public changeDrawingPermissions(event): void {
+    const enabled = event.target.checked;
+
+    this.onDrawingChangePermissions(enabled).subscribe(() => {
+      // console.log('enabled: ' + enabled);
+      // console.log('others: ' + this.isDrawingEnabled);
+
+      if (this.isHost) {
+        this.canvasWhiteboard.nativeElement.style.pointerEvents = 'all';
+      } else {
+        if (!this.isDrawingEnabled) {
+          this.canvasWhiteboard.nativeElement.style.pointerEvents = 'none';
+        } else {
+          this.canvasWhiteboard.nativeElement.style.pointerEvents = 'all';
+        }
+      }
+    });
+  }
+
+  public onDrawingChangePermissions(enabled: boolean): Observable<void> {
+    return this.meetingSignalrService.invoke(
+      SignalMethods.OnDrawingChangePermissions,
+      enabled
+    );
   }
 
   public onCanvasClear(): void {
