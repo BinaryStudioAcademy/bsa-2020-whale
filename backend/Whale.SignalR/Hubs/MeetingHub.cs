@@ -345,8 +345,8 @@ namespace Whale.SignalR.Hubs
             return rooms;
         }
 
-        [HubMethodName("OnHostChangeRoom")]
-        public async Task OnHostChangeRoom(MeetingConnectDTO connectionData)
+        [HubMethodName("OnLeaveRoom")]
+        public async Task OnParticipantLeaveRoom(MeetingConnectDTO connectionData)
         {
             var disconnectedParticipant = _groupsParticipants[connectionData.MeetingId]?.FirstOrDefault(p => p.User.Email == connectionData.UserEmail);
 
