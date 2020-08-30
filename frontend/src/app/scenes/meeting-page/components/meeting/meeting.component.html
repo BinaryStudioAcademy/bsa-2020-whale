@@ -286,6 +286,16 @@
               >
               </i>
             </span>
+            <span
+              data-tooltip="Add Reactions"
+              data-position="top right"
+            >
+              <i
+                (click)="onReactionsIconClick()"
+                class="big smile outline large icon big-left-margin"
+              >
+              </i>
+            </span>
           </div>
           <div>
             <button
@@ -460,6 +470,12 @@
     <app-meeting-statistics
       [statistic]="meetingStatistics"
     ></app-meeting-statistics>
+  </div>
+
+  <div class="poll-create-container" *ngIf="isShowReactions">
+    <app-reactions
+    (reaction)="onReaction($event)"
+    ></app-reactions>
   </div>
 
   <div

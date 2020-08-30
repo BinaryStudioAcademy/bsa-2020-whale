@@ -10,3 +10,4 @@ export * from './poll';
 export * from './statistics';
 export * from './user';
 export * from './room';
+export * from './reaction';

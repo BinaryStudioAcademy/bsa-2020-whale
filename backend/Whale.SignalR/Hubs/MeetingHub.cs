@@ -16,6 +16,7 @@ using Whale.Shared.Exceptions;
 using Whale.SignalR.Services;
 using Whale.DAL.Models.Poll;
 using Whale.SignalR.Models.Room;
+using Whale.SignalR.Models.Reaction;
 
 namespace Whale.SignalR.Hubs
 {
@@ -376,6 +377,12 @@ namespace Whale.SignalR.Hubs
         public async Task OnStopShare(string meetingId)
         {
             await Clients.Group(meetingId).SendAsync("OnStopShareScreen");
+        }
+
+        [HubMethodName("OnReaction")]
+        public async Task SendReaction(ReactionDTO reaction)
+        {
+            await Clients.Group(reaction.MeetingId).SendAsync("OnReaction", reaction);
         }
     }
 }
