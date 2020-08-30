@@ -1398,8 +1398,8 @@ export class MeetingComponent
     const enabled = event.target.checked;
 
     this.onDrawingChangePermissions(enabled).subscribe(() => {
-      // console.log('enabled: ' + enabled);
-      // console.log('others: ' + this.isDrawingEnabled);
+      console.log('enabled: ' + enabled);
+      console.log('others: ' + this.isDrawingEnabled);
 
       if (this.isHost) {
         this.canvasWhiteboard.nativeElement.style.pointerEvents = 'all';
@@ -1408,6 +1408,8 @@ export class MeetingComponent
           this.canvasWhiteboard.nativeElement.style.pointerEvents = 'none';
         } else {
           this.canvasWhiteboard.nativeElement.style.pointerEvents = 'all';
+
+          this.toastr.info('Host enable drawing for everyone');
         }
       }
     });
