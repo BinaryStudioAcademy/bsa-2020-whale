@@ -238,7 +238,7 @@ export class MeetingComponent
     this.currentUserStream = await navigator.mediaDevices.getUserMedia(
         await this.mediaSettingsService.getMediaConstraints()
       ).catch(() => {
-        return undefined;
+        return null;
       });
     if (!this.currentUserStream || !this.currentUserStream?.active) {
       this.toastr.error('Cannot access the camera and microphone');

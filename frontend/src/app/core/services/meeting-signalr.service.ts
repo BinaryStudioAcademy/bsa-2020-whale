@@ -289,7 +289,6 @@ export enum SignalMethods {
   OnStartShareScreen,
   OnStopShareScreen,
   GetCreatedRooms,
-  OnHostChangeRoom,
   OnReaction,
   OnLeaveRoom,
   OnDrawingChangePermissions,
