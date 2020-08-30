@@ -207,20 +207,18 @@ export class MeetingComponent
     if (this.isRoom) {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     }
-    let isActive = false;
-    try {
-      this.currentUserStream = await navigator.mediaDevices.getUserMedia(
+
+    this.currentUserStream = await navigator.mediaDevices.getUserMedia(
         await this.mediaSettingsService.getMediaConstraints()
-      );
-      isActive = this.currentUserStream.active;
-    } catch {
-      isActive = false;
-    }
-    if (!isActive) {
+      ).catch(() => {
+        return undefined;
+      });
+    if (!this.currentUserStream || !this.currentUserStream?.active) {
       this.toastr.error('Cannot access the camera and microphone');
       this.leaveUnConnected();
       return;
     }
+
     const settings = this.currentUserStream.getVideoTracks()[0].getSettings();
     settings.frameRate = 20;
     settings.height = 480;
