@@ -15,7 +15,7 @@ import { Subject } from 'rxjs';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'division-by-rooms-modal',
+  selector: 'app-division-by-rooms-modal',
   templateUrl: './division-by-rooms-modal.component.html',
   styleUrls: ['./division-by-rooms-modal.component.sass'],
 })
@@ -26,8 +26,8 @@ export class DivisionByRoomsModalComponent
 
   public meetingLink: string;
   public meetingId: string;
-  public numberOfRooms: number = 2;
-  public duration: number = 10;
+  public numberOfRooms = 2;
+  public duration = 10;
   public onCanMoveIntoRoomEvent: EventEmitter<void>;
 
   constructor(private router: Router, public roomService: RoomService) {

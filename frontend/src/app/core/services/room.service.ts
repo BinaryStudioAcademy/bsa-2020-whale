@@ -73,16 +73,16 @@ export class RoomService {
   }
 
   public deleteParticipant(participantId: string): void {
-    this.participants = this.participants.filter((p) => p.id != participantId);
+    this.participants = this.participants.filter((p) => p.id !== participantId);
     const keys = Array.from(this.participantsInRooms.keys());
     for (const key of keys) {
       const participants = this.participantsInRooms
         .get(key)
-        .filter((p) => p.id != participantId);
+        .filter((p) => p.id !== participantId);
       this.participantsInRooms.set(key, participants);
     }
     this.previouslyDividedParticipants = this.previouslyDividedParticipants.map(
-      (participants) => participants.filter((p) => p.id != participantId)
+      (participants) => participants.filter((p) => p.id !== participantId)
     );
   }
 
@@ -112,7 +112,7 @@ export class RoomService {
   public randomlyDivide(numberOfRooms: number): void {
     this.previouslyDividedParticipants = [];
     const participants = this.participants.filter(
-      (p) => p.role != ParticipantRole.Host
+      (p) => p.role !== ParticipantRole.Host
     );
 
     this.previouslyDividedParticipants = this.randChunkSplit(
@@ -137,9 +137,9 @@ export class RoomService {
     this.participantsInRooms = new Map();
     this.previouslyDividedParticipants.forEach((participants) => {
       this.meetingSignalrService.invoke(SignalMethods.CreateRoom, {
-        meetingId: meetingId,
-        meetingLink: meetingLink,
-        duration: duration,
+        meetingId,
+        meetingLink,
+        duration,
         participantsIds: participants.map((p) => p.id),
       } as RoomCreate);
     });
@@ -169,7 +169,7 @@ export class RoomService {
     max: number = 1
   ): Array<Array<Participant>> {
     const arrCopy = arr.slice();
-    let arrs: Array<Array<Participant>> = [];
+    const arrs: Array<Array<Participant>> = [];
     let size = 1;
     max = max >= min ? max : min;
     while (arrCopy.length > 0) {

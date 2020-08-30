@@ -296,18 +296,12 @@ export class MeetingComponent
           this.connectedPeers.delete(connectionData.peerId);
         }
 
-        const disconectedMediaDataIndex = this.mediaData.findIndex(
-          (m) => m.currentStreamId === connectionData.participant.streamId
+        this.deleteParticipantMediaData(
+          connectionData.streamId,
+          connectionData.participant.user.firstName,
+          connectionData.participant.user.secondName,
+          'has left'
         );
-        if (disconectedMediaDataIndex >= 0) {
-          this.mediaData.splice(disconectedMediaDataIndex, 1);
-          const secondName = ` ${
-            connectionData.participant.user.secondName ?? ''
-          }`;
-          this.toastr.info(
-            `${connectionData.participant.user.firstName}${secondName} has left`
-          );
-        }
       });
 
     this.meetingSignalrService.signalParticipantDisconnected$
@@ -321,16 +315,12 @@ export class MeetingComponent
           )
         );
 
-        const disconectedMediaDataIndex = this.mediaData.findIndex(
-          (m) => m.currentStreamId === participant.streamId
+        this.deleteParticipantMediaData(
+          participant.streamId,
+          participant.user.firstName,
+          participant.user.secondName,
+          'disconnected'
         );
-        if (disconectedMediaDataIndex >= 0) {
-          this.mediaData.splice(disconectedMediaDataIndex, 1);
-          const secondName = ` ${participant.user.secondName ?? ''}`;
-          this.toastr.info(
-            `${participant.user.firstName}${secondName} disconnected`
-          );
-        }
       });
 
     this.meetingSignalrService.mediaStateRequested$
@@ -391,100 +381,102 @@ export class MeetingComponent
 
     this.meetingSignalrService.mediaPermissionsChanged$
       .pipe(takeUntil(this.unsubscribe$))
-      .subscribe((data) => {
-        if (!data.changedParticipantConnectionId) {
-          if (
-            this.meeting.isAudioAllowed !== data.isAudioAllowed &&
-            this.currentParticipant.role !== ParticipantRole.Host
-          ) {
-            this.toastr.info(
-              `Participants' audio ${
-                data.isAudioAllowed ? 'enabled' : 'disabled'
-              } by the host`
-            );
-          } else if (
-            this.meeting.isVideoAllowed !== data.isVideoAllowed &&
-            this.currentParticipant.role !== ParticipantRole.Host
-          ) {
-            this.toastr.info(
-              `Participants' video ${
-                data.isVideoAllowed ? 'enabled' : 'disabled'
-              } by the host`
-            );
-          }
-
-          this.meeting.isVideoAllowed = data.isVideoAllowed;
-          this.meeting.isAudioAllowed = data.isAudioAllowed;
-          this.meetingSignalrService.invoke<ChangedMediaState>(
-            SignalMethods.OnMediaStateChanged,
-            {
-              streamId: this.currentParticipant.streamId,
-              isVideoAllowed: this.meeting.isVideoAllowed,
-              isAudioAllowed: this.meeting.isAudioAllowed,
-              isVideoActive: !this.isCameraMuted,
-              isAudioActive: !this.isMicrophoneMuted,
+      .subscribe(
+        (data) => {
+          if (!data.changedParticipantConnectionId) {
+            if (
+              this.meeting.isAudioAllowed !== data.isAudioAllowed &&
+              this.currentParticipant.role !== ParticipantRole.Host
+            ) {
+              this.toastr.info(
+                `Participants' audio ${
+                  data.isAudioAllowed ? 'enabled' : 'disabled'
+                } by the host`
+              );
+            } else if (
+              this.meeting.isVideoAllowed !== data.isVideoAllowed &&
+              this.currentParticipant.role !== ParticipantRole.Host
+            ) {
+              this.toastr.info(
+                `Participants' video ${
+                  data.isVideoAllowed ? 'enabled' : 'disabled'
+                } by the host`
+              );
             }
-          );
-        } else if (
-          data.changedParticipantConnectionId ===
-          this.currentParticipant.activeConnectionId
-        ) {
-          if (
-            this.meeting.isAudioAllowed !== data.isAudioAllowed &&
-            this.currentParticipant.role !== ParticipantRole.Host
-          ) {
-            this.toastr.info(
-              `Your audio ${
-                data.isAudioAllowed ? 'enabled' : 'disabled'
-              } by the host`
+
+            this.meeting.isVideoAllowed = data.isVideoAllowed;
+            this.meeting.isAudioAllowed = data.isAudioAllowed;
+            this.meetingSignalrService.invoke<ChangedMediaState>(
+              SignalMethods.OnMediaStateChanged,
+              {
+                streamId: this.currentParticipant.streamId,
+                isVideoAllowed: this.meeting.isVideoAllowed,
+                isAudioAllowed: this.meeting.isAudioAllowed,
+                isVideoActive: !this.isCameraMuted,
+                isAudioActive: !this.isMicrophoneMuted,
+              }
             );
           } else if (
-            this.meeting.isVideoAllowed !== data.isVideoAllowed &&
-            this.currentParticipant.role !== ParticipantRole.Host
+            data.changedParticipantConnectionId ===
+            this.currentParticipant.activeConnectionId
           ) {
-            this.toastr.info(
-              `Your video ${
-                data.isVideoAllowed ? 'enabled' : 'disabled'
-              } by the host`
+            if (
+              this.meeting.isAudioAllowed !== data.isAudioAllowed &&
+              this.currentParticipant.role !== ParticipantRole.Host
+            ) {
+              this.toastr.info(
+                `Your audio ${
+                  data.isAudioAllowed ? 'enabled' : 'disabled'
+                } by the host`
+              );
+            } else if (
+              this.meeting.isVideoAllowed !== data.isVideoAllowed &&
+              this.currentParticipant.role !== ParticipantRole.Host
+            ) {
+              this.toastr.info(
+                `Your video ${
+                  data.isVideoAllowed ? 'enabled' : 'disabled'
+                } by the host`
+              );
+            }
+
+            this.meeting.isVideoAllowed = data.isVideoAllowed;
+            this.meeting.isAudioAllowed = data.isAudioAllowed;
+            this.updateCardDynamicData(
+              this.meeting.participants.find(
+                (p) =>
+                  p.activeConnectionId === data.changedParticipantConnectionId
+              )?.streamId,
+              data.isVideoAllowed,
+              data.isAudioAllowed,
+              !this.isCameraMuted,
+              !this.isMicrophoneMuted
+            );
+
+            if (!this.isMicrophoneMuted && !data.isAudioAllowed) {
+              this.toggleMicrophone();
+            }
+
+            if (!this.isCameraMuted && !data.isVideoAllowed) {
+              this.toggleCamera();
+            }
+          } else {
+            this.updateCardDynamicData(
+              this.meeting.participants.find(
+                (p) =>
+                  p.activeConnectionId === data.changedParticipantConnectionId
+              )?.streamId,
+              data.isVideoAllowed,
+              data.isAudioAllowed,
+              data.isVideoActive,
+              data.isAudioActive
             );
           }
-
-          this.meeting.isVideoAllowed = data.isVideoAllowed;
-          this.meeting.isAudioAllowed = data.isAudioAllowed;
-          this.updateCardDynamicData(
-            this.meeting.participants.find(
-              (p) =>
-                p.activeConnectionId === data.changedParticipantConnectionId
-            )?.streamId,
-            data.isVideoAllowed,
-            data.isAudioAllowed,
-            !this.isCameraMuted,
-            !this.isMicrophoneMuted
-          );
-
-          if (!this.isMicrophoneMuted && !data.isAudioAllowed) {
-            this.toggleMicrophone();
-          }
-
-          if (!this.isCameraMuted && !data.isVideoAllowed) {
-            this.toggleCamera();
-          }
-        } else {
-          this.updateCardDynamicData(
-            this.meeting.participants.find(
-              (p) =>
-                p.activeConnectionId === data.changedParticipantConnectionId
-            )?.streamId,
-            data.isVideoAllowed,
-            data.isAudioAllowed,
-            data.isVideoActive,
-            data.isAudioActive
-          );
-          (err) => {
-            this.toastr.error(err.message);
-          };
+        },
+        (err) => {
+          this.toastr.error(err.message);
         }
-      });
+      );
 
     this.meetingSignalrService.meetingEnded$
       .pipe(takeUntil(this.unsubscribe$))
@@ -604,18 +596,12 @@ export class MeetingComponent
           this.connectedPeers.delete(connectionData.peerId);
         }
 
-        const disconectedMediaDataIndex = this.mediaData.findIndex(
-          (m) => m.stream.id === connectionData.participant.streamId
+        this.deleteParticipantMediaData(
+          connectionData.streamId,
+          connectionData.participant.user.firstName,
+          connectionData.participant.user.secondName,
+          'moved into room'
         );
-        if (disconectedMediaDataIndex >= 0) {
-          this.mediaData.splice(disconectedMediaDataIndex, 1);
-          const secondName = ` ${
-            connectionData.participant.user.secondName ?? ''
-          }`;
-          this.toastr.info(
-            `${connectionData.participant.user.firstName}${secondName} moved into room`
-          );
-        }
       });
 
     // create new peer
@@ -705,13 +691,27 @@ export class MeetingComponent
     this.unsubscribe$.complete();
   }
 
+  private deleteParticipantMediaData(
+    streamId: string,
+    firstName: string,
+    lastName: string,
+    message: string
+  ): void {
+    const disconectedMediaDataIndex = this.mediaData.findIndex(
+      (m) => m.stream.id === streamId
+    );
+    if (disconectedMediaDataIndex >= 0) {
+      this.mediaData.splice(disconectedMediaDataIndex, 1);
+      this.toastr.info(`${firstName}${lastName ? lastName : ''} ${message}`);
+    }
+  }
   //#endregion hooks
 
   //#region options
   public toggleMicrophone(isMissSignaling: boolean = false): void {
     if (
       !this.meeting.isAudioAllowed &&
-      this.currentParticipant?.role != ParticipantRole.Host
+      this.currentParticipant?.role !== ParticipantRole.Host
     ) {
       this.switchTrack(false, false);
       this.isMicrophoneMuted = true;
@@ -731,7 +731,7 @@ export class MeetingComponent
   public toggleCamera(isMissSignaling: boolean = false): void {
     if (
       !this.meeting.isVideoAllowed &&
-      this.currentParticipant?.role != ParticipantRole.Host
+      this.currentParticipant?.role !== ParticipantRole.Host
     ) {
       this.switchTrack(false, true);
       this.isCameraMuted = true;
@@ -1033,7 +1033,7 @@ export class MeetingComponent
   private invokeMediaStateChanged(receiverConnectionId = ''): void {
     this.meetingSignalrService.invoke(SignalMethods.OnMediaStateChanged, {
       streamId: this.currentUserStream.id,
-      receiverConnectionId: receiverConnectionId,
+      receiverConnectionId,
       isVideoAllowed: this.meeting.isVideoAllowed,
       isAudioAllowed: this.meeting.isAudioAllowed,
       isVideoActive: !this.isCameraMuted,
@@ -1050,7 +1050,7 @@ export class MeetingComponent
 
     const modalResult = await this.simpleModalService
       .addModal(EnterModalComponent, {
-        isCurrentParticipantHost: isCurrentParticipantHost,
+        isCurrentParticipantHost,
         isAllowedVideoOnStart: this.meeting.isVideoAllowed,
         isAllowedAudioOnStart: this.meeting.isAudioAllowed,
       })
@@ -1074,8 +1074,8 @@ export class MeetingComponent
 
     if (
       isCurrentParticipantHost &&
-      (this.meeting.isVideoAllowed != modalResult.isAllowedVideoOnStart ||
-        this.meeting.isAudioAllowed != modalResult.isAllowedAudioOnStart)
+      (this.meeting.isVideoAllowed !== modalResult.isAllowedVideoOnStart ||
+        this.meeting.isAudioAllowed !== modalResult.isAllowedAudioOnStart)
     ) {
       this.meetingService
         .updateMediaOnStart({
@@ -1267,7 +1267,7 @@ export class MeetingComponent
     isAudioAllowed: boolean,
     isVideoActive?: boolean,
     isAudioActive?: boolean
-  ) {
+  ): void {
     const participant =
       this.currentParticipant.streamId === streamId
         ? this.currentParticipant
@@ -1285,10 +1285,10 @@ export class MeetingComponent
       userFirstName: participant.user.firstName,
       userSecondName: participant.user.secondName,
       avatarUrl: participant.user.avatarUrl,
-      isVideoAllowed: isVideoAllowed,
-      isAudioAllowed: isAudioAllowed,
-      isVideoActive: isVideoActive,
-      isAudioActive: isAudioActive,
+      isVideoAllowed,
+      isAudioAllowed,
+      isVideoActive,
+      isAudioActive,
     });
   }
   //#endregion participant cards
@@ -1441,7 +1441,7 @@ export class MeetingComponent
     this.isVideoSettings = false;
   }
 
-  handleSuccessVideo(stream: MediaStream) {
+  public handleSuccessVideo(stream: MediaStream): void {
     const video = document.querySelector('video') as HTMLVideoElement;
     // video.srcObject = stream;
     const keys = Object.keys(this.peer.connections);
