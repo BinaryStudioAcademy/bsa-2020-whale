@@ -12,6 +12,8 @@ import {
   ElementRef,
   AfterViewInit,
   AfterViewChecked,
+  ViewChildren,
+  QueryList,
 } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { GroupMessage } from '@shared/models/message/group-message';
@@ -22,7 +24,7 @@ import { environment } from '@env';
 import { Injectable } from '@angular/core';
 import { HubConnection } from '@aspnet/signalr';
 import { Subject, from, Observable } from 'rxjs';
-import { tap, takeUntil, take } from 'rxjs/operators';
+import { tap, takeUntil, take, first } from 'rxjs/operators';
 import { Message } from '@angular/compiler/src/i18n/i18n_ast';
 import { Console } from 'console';
 import { stringify } from 'querystring';
@@ -62,9 +64,7 @@ export class GroupChatComponent
   @Input() loggedInUser: User;
   @Output() chat: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() groupUpdated: EventEmitter<Group> = new EventEmitter<Group>();
-  @ViewChild('chatWindow', { static: false }) chatBlock: ElementRef<
-    HTMLElement
-  >;
+  @ViewChildren('chatWindow') chatBlock: QueryList<ElementRef<HTMLElement>>;
   chatElement: any;
   newUserInGroup: GroupUser = {
     userEmail: '',
@@ -96,7 +96,7 @@ export class GroupChatComponent
   ) {}
 
   ngAfterViewInit(): void {
-    this.chatElement = this.chatBlock.nativeElement;
+    this.chatElement = this.chatBlock.first.nativeElement;
   }
 
   ngAfterViewChecked(): void {
@@ -163,8 +163,10 @@ export class GroupChatComponent
       });
     this.receivedMsg$.pipe(takeUntil(this.unsubscribe$)).subscribe(
       (newMessage) => {
+        if (newMessage.authorId === this.loggedInUser.id) {
+          return;
+        }
         this.messages.push(newMessage);
-        console.log('received a messsage ', newMessage);
       },
       (err) => {
         console.log(err.message);
@@ -187,26 +189,35 @@ export class GroupChatComponent
     this.unsubscribe$.complete();
   }
   sendMessage(): void {
-    if (this.newMessage.message.trim().length !== 0) {
-      console.log('Send is called');
-      this.newMessage.groupId = this.groupSelected.id;
-      this.newMessage.authorId = this.currentUser.id;
-      this.newMessage.createdAt = new Date();
-      console.log(this.newMessage);
-      this.httpService
-        .postRequest<GroupMessage, HttpResponse<GroupMessage>>(
-          '/api/GroupChat/',
-          this.newMessage
-        )
-        .pipe(take(1))
-        .subscribe(
-          (response) => {
-            console.log(response.body);
-            this.newMessage.message = '';
-          },
-          (error) => this.toastr.error(error.Message)
-        );
+    if (this.newMessage.message.trim().length === 0) {
+      return;
     }
+
+    const newMessage: GroupMessage = {
+      groupId: this.groupSelected.id,
+      authorId: this.currentUser.id,
+      createdAt: new Date(),
+      message: this.newMessage.message,
+      attachment: false,
+      author: this.loggedInUser,
+    };
+
+    this.newMessage.message = '';
+    this.messages.push(newMessage);
+    this.chatBlock.changes.pipe(first()).subscribe(() => {
+      this.scrollDown();
+    });
+
+    this.httpService
+      .postRequest<GroupMessage, HttpResponse<GroupMessage>>(
+        '/api/GroupChat/',
+        newMessage
+      )
+      .pipe(take(1))
+      .subscribe(
+        () => {},
+        (error) => this.toastr.error(error.Message)
+      );
   }
   close(): void {
     this.chat.emit(false);

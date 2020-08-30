@@ -266,6 +266,23 @@ namespace Whale.SignalR.Hubs
                 .SendAsync("OnErasing", drawingDTO.Erase);
         }
 
+        [HubMethodName("OnDrawingChangePermissions")]
+        public async Task OnDrawingChangePermissions(bool enabled)
+        {
+            var participantInGroup = _groupsParticipants
+                .First(g => g.Value.Any(p => p.ActiveConnectionId == Context.ConnectionId));
+
+            var isCallerHost = participantInGroup
+                .Value
+                .Any(p => p.ActiveConnectionId == Context.ConnectionId
+                    && p.Role == ParticipantRole.Host);
+
+            if (!isCallerHost)
+                return;
+
+            await Clients.Group(participantInGroup.Key).SendAsync("OnDrawingChangePermissions", enabled);
+        }
+
         [HubMethodName("CreateRoom")]
         public async Task CreateRoom(RoomCreateDTO roomCreateData)
         {

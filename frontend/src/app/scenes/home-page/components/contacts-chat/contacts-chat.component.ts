@@ -44,7 +44,7 @@ import { MessageService } from 'app/core/services/message.service';
   styleUrls: ['./contacts-chat.component.sass'],
 })
 export class ContactsChatComponent
-  implements OnInit, OnChanges, OnDestroy, AfterViewInit, AfterViewChecked {
+  implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   @Input() contactSelected: Contact;
   @Input() loggedInUser: User;
   @Output() chat: EventEmitter<boolean> = new EventEmitter<boolean>();
@@ -53,9 +53,7 @@ export class ContactsChatComponent
   @ViewChildren('intersectionElement') intersectionElements: QueryList<
     ElementRef<HTMLDivElement>
   >;
-  @ViewChild('chatWindow', { static: false }) chatBlock: ElementRef<
-    HTMLElement
-  >;
+  @ViewChildren('chatWindow') chatBlock: QueryList<ElementRef<HTMLDivElement>>;
 
   public intersectionObserver: IntersectionObserver;
   chatElement: any;
@@ -93,24 +91,24 @@ export class ContactsChatComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (newMessage) => {
-          if (newMessage.contactId !== this.contactSelected.id) {
+          if (
+            newMessage.contactId !== this.contactSelected.id ||
+            newMessage.authorId === this.loggedInUser.id
+          ) {
             return;
           }
 
           this.messages.push(newMessage);
-          if (newMessage.authorId === this.contactSelected?.secondMember.id) {
-            this.intersectionElements.changes.pipe(first()).subscribe(() => {
-              this.intersectionObserver.observe(
-                this.intersectionElements.last.nativeElement
-              );
-              this.unreadMessages.push(newMessage);
-              const firstUnread = this.intersectionElements.find(
-                (el) => el.nativeElement.id === this.unreadMessages[0].id
-              );
-              firstUnread.nativeElement.scrollIntoView();
-            });
-          }
-          console.log('received a messsage ', newMessage);
+          this.intersectionElements.changes.pipe(first()).subscribe(() => {
+            this.intersectionObserver.observe(
+              this.intersectionElements.last.nativeElement
+            );
+            this.unreadMessages.push(newMessage);
+            const firstUnread = this.intersectionElements.find(
+              (el) => el.nativeElement.id === this.unreadMessages[0].id
+            );
+            firstUnread.nativeElement.scrollIntoView();
+          });
         },
         (err) => {
           console.log(err.message);
@@ -120,7 +118,7 @@ export class ContactsChatComponent
   }
 
   ngAfterViewInit(): void {
-    this.chatElement = this.chatBlock.nativeElement;
+    this.chatElement = this.chatBlock.first.nativeElement;
     this.intersectionElements.changes.pipe(first()).subscribe(() => {
       this.receivedMessages$.subscribe(() => {
         this.registerIntersectionObserve();
@@ -134,11 +132,6 @@ export class ContactsChatComponent
         }
       });
     });
-  }
-
-  ngAfterViewChecked(): void {
-    // console.log('after view checked');
-    // this.scrollDown();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -176,31 +169,39 @@ export class ContactsChatComponent
   }
 
   sendMessage(): void {
-    if (this.newMessage.message.trim().length !== 0) {
-      console.log('Send is called');
-      this.newMessage.contactId = this.contactSelected.id;
-      this.newMessage.authorId = this.contactSelected.firstMemberId;
-      this.newMessage.createdAt = new Date();
-      console.log(this.newMessage);
-      this.httpService
-        .postRequest<DirectMessage, HttpResponse<DirectMessage>>(
-          '/api/ContactChat/',
-          this.newMessage
-        )
-        .pipe(take(1))
-        .subscribe(
-          () => {
-            this.newMessage.message = '';
-            this.scrollDown();
-          },
-          (error) => this.toastr.error(error.Message)
-        );
+    if (this.newMessage.message.trim().length === 0) {
+      return;
     }
+
+    const newMessage: DirectMessage = {
+      contactId: this.contactSelected.id,
+      authorId: this.contactSelected.firstMemberId,
+      createdAt: new Date(),
+      message: this.newMessage.message,
+      attachment: false,
+      author: this.loggedInUser,
+    };
+
+    this.newMessage.message = '';
+    this.messages.push(newMessage);
+    this.chatBlock.changes.pipe(first()).subscribe(() => {
+      this.scrollDown();
+    });
+
+    this.httpService
+      .postRequest<DirectMessage, HttpResponse<DirectMessage>>(
+        '/api/ContactChat/',
+        newMessage
+      )
+      .pipe(take(1))
+      .subscribe(
+        () => {},
+        (error) => this.toastr.error(error.Message)
+      );
   }
 
   close(): void {
     this.chat.emit(false);
-    // this.messageService.hubConnection.invoke('Disconnect', this.contactSelected.id);
   }
 
   public call(): void {
