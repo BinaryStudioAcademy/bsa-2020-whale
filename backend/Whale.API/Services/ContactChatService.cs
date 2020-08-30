@@ -20,11 +20,14 @@ namespace Whale.API.Services
     {
         private readonly SignalrService _signalrService;
         private readonly BlobStorageSettings _blobStorageSettings;
+        private readonly NotificationsService _notificationsService;
 
-        public ContactChatService(WhaleDbContext context, IMapper mapper, SignalrService signalrService, BlobStorageSettings blobStorageSettings) : base(context, mapper)
+        public ContactChatService(WhaleDbContext context, IMapper mapper, SignalrService signalrService, BlobStorageSettings blobStorageSettings, NotificationsService notificationsService) 
+            : base(context, mapper)
         {
             _signalrService = signalrService;
             _blobStorageSettings = blobStorageSettings;
+            _notificationsService = notificationsService;
         }
         //var receivingMessages = messages.Where(m => m.ContactId != m.AuthorId);
 
@@ -76,29 +79,37 @@ namespace Whale.API.Services
             _context.DirectMessages.Add(messageEntity);
             await _context.SaveChangesAsync();
 
-
-            var contact = await _context.Contacts.FirstOrDefaultAsync(c => c.Id == directMessageDto.ContactId);
-            var receiverId = contact.FirstMemberId == directMessageDto.AuthorId ? contact.SecondMemberId : contact.FirstMemberId;
-            await _context.UnreadMessageIds.AddAsync(new UnreadMessageId
-            {
-                MessageId = messageEntity.Id,
-                ReceiverId = receiverId
-            });
-            await _context.SaveChangesAsync();
-            Console.WriteLine($"CreateMessage {messageEntity.Id}");
-
             var createdMessage = await _context.DirectMessages
                 .Include(msg => msg.Author)
                 .FirstAsync(msg => msg.Id == messageEntity.Id);
 
             await createdMessage.Author.LoadAvatarAsync(_blobStorageSettings);
-
             var createdMessageDTO = _mapper.Map<DirectMessage>(createdMessage);
+
+            await AddUnreadMessage(createdMessage);
 
             var connection = await _signalrService.ConnectHubAsync("chatHub");
             await connection.InvokeAsync("NewMessageReceived", createdMessageDTO);
 
             return createdMessageDTO;
+        }
+
+        public async Task AddUnreadMessage(DirectMessage message)
+        {
+            var contact = await _context.Contacts
+                .Include(c => c.FirstMember)
+                .Include(c => c.SecondMember)
+                .FirstOrDefaultAsync(c => c.Id == message.ContactId);
+
+            var receiver = contact.FirstMemberId == message.AuthorId ? contact.SecondMember : contact.FirstMember;
+            var entry = await _context.UnreadMessageIds.AddAsync(new UnreadMessageId
+            {
+                MessageId = message.Id,
+                ReceiverId = receiver.Id
+            });
+            await _context.SaveChangesAsync();
+         
+            await _notificationsService.AddUnreadMessageNotification(message, receiver.Email, entry.Entity);
         }
 
         public async Task MarkMessageAsRead(UnreadMessageIdDTO unreadMessageDto)
@@ -108,17 +119,10 @@ namespace Whale.API.Services
                 message.ReceiverId == unreadMessageDto.ReceiverId
             );
 
-            var message = await _context.DirectMessages.FirstOrDefaultAsync(
-                message => message.Id == unreadMessageDto.MessageId
-            );
-
-            Console.WriteLine($"MarkMessageRead {unreadMessageDto.MessageId}");
             _context.UnreadMessageIds.Remove(unreadMessage);
-            // message.IsRead = true;
-            // _context.DirectMessages.Update(message);
             await _context.SaveChangesAsync();
 
-            // signal to message author that message is read
+            await _notificationsService.DeleteUnreadMessageNotification(unreadMessage.ReceiverId, unreadMessage.Id);
         }
     }
 }
