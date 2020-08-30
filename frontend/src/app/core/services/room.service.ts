@@ -110,6 +110,7 @@ export class RoomService {
   }
 
   public randomlyDivide(numberOfRooms: number): void {
+    this.previouslyDividedParticipants = [];
     const participants = this.participants.filter(
       (p) => p.role != ParticipantRole.Host
     );
@@ -120,13 +121,9 @@ export class RoomService {
     );
 
     if (this.previouslyDividedParticipants.length < numberOfRooms) {
-      for (
-        let i = 0;
-        i <= numberOfRooms - this.previouslyDividedParticipants.length;
-        i++
-      ) {
-        this.previouslyDividedParticipants.push([]);
-      }
+      this.addEmptyRooms(
+        numberOfRooms - this.previouslyDividedParticipants.length
+      );
     }
   }
 
@@ -145,6 +142,23 @@ export class RoomService {
       } as RoomCreate);
     });
     this.isDividedIntoRooms = true;
+  }
+
+  public changeNumberofRooms(numberOfRooms: number): void {
+    if (this.previouslyDividedParticipants.length > numberOfRooms) {
+      this.randomlyDivide(numberOfRooms);
+      return;
+    }
+
+    this.addEmptyRooms(
+      numberOfRooms - this.previouslyDividedParticipants.length
+    );
+  }
+
+  private addEmptyRooms(numberOfRooms: number): void {
+    for (let i = 0; i < numberOfRooms; i++) {
+      this.previouslyDividedParticipants.push([]);
+    }
   }
 
   private randChunkSplit(

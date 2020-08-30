@@ -7,7 +7,7 @@
     </div>
     <div class="content" *ngIf="!roomService.isDividedIntoRooms">
       <div class="ui right labeled input">
-        <label for="duration" class="ui label">Duration</label>
+        <label for="duration" class="ui label duration-label">Duration</label>
         <input
           id="duration"
           type="number"
@@ -15,6 +15,22 @@
           [(ngModel)]="duration"
         />
         <div class="ui basic label">minutes</div>
+      </div>
+      <div class="ui action labeled input">
+        <label for="numberOfRooms" class="ui label">Number of rooms</label>
+        <input
+          id="numberOfRooms"
+          type="number"
+          placeholder="number of rooms"
+          [(ngModel)]="numberOfRooms"
+          (change)="numberOfRoomsChanged()"
+        />
+        <button
+          class="ui button number-of-rooms-action"
+          (click)="numberOfRoomsChanged()"
+        >
+          divide
+        </button>
       </div>
       <div
         class="ui divided list"

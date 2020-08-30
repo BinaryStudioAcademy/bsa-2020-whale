@@ -70,4 +70,8 @@ export class DivisionByRoomsModalComponent
       this.router.navigate([`/room/${roomId}`]);
     });
   }
+
+  public numberOfRoomsChanged(): void {
+    this.roomService.changeNumberofRooms(this.numberOfRooms);
+  }
 }

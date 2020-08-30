@@ -266,7 +266,7 @@ export class MeetingComponent
       .subscribe(
         (participants) => {
           this.meeting.participants = participants;
-          this.roomService.participants = participants;
+          this.roomService.participants = Array.from(participants);
           this.currentParticipant = participants.find(
             (p) => p.user.email === this.authService.currentUser.email
           );
@@ -916,8 +916,8 @@ export class MeetingComponent
     if (!this.meeting.participants.some((p) => p.id === participant.id)) {
       this.meeting.participants.push(participant);
       this.otherParticipants.push(participant);
+      this.roomService.addParticipant(participant);
     }
-    this.roomService.addParticipant(participant);
   }
 
   private removeParticipantFromMeeting(participant: Participant): void {
