@@ -355,6 +355,18 @@ export class MeetingComponent
       .subscribe(
         (enabled) => {
           this.isDrawingEnabled = enabled;
+
+          if (this.isHost) {
+            this.canvasWhiteboard.nativeElement.style.pointerEvents = 'all';
+          } else {
+            if (!this.isDrawingEnabled) {
+              this.canvasWhiteboard.nativeElement.style.pointerEvents = 'none';
+            } else {
+              this.canvasWhiteboard.nativeElement.style.pointerEvents = 'all';
+
+              this.toastr.info('Host enable drawing for everyone');
+            }
+          }
         },
         () => {
           this.toastr.error('Error occured during drawing change permissions');
@@ -1398,27 +1410,10 @@ export class MeetingComponent
     });
   }
 
-  public changeDrawingPermissions(event): void {
+  public onDrawingChangePermissions(event): void {
     const enabled = event.target.checked;
 
-    this.onDrawingChangePermissions(enabled).subscribe(() => {
-      // console.log('enabled: ' + enabled);
-      // console.log('others: ' + this.isDrawingEnabled);
-
-      if (this.isHost) {
-        this.canvasWhiteboard.nativeElement.style.pointerEvents = 'all';
-      } else {
-        if (!this.isDrawingEnabled) {
-          this.canvasWhiteboard.nativeElement.style.pointerEvents = 'none';
-        } else {
-          this.canvasWhiteboard.nativeElement.style.pointerEvents = 'all';
-        }
-      }
-    });
-  }
-
-  public onDrawingChangePermissions(enabled: boolean): Observable<void> {
-    return this.meetingSignalrService.invoke(
+    this.meetingSignalrService.invoke(
       SignalMethods.OnDrawingChangePermissions,
       enabled
     );
