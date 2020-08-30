@@ -924,7 +924,7 @@ export class MeetingComponent
     this.meeting.participants = this.meeting.participants.filter(
       (p) => p.id !== participant.id
     );
-    this.roomService.deleteParticipant(participant?.user?.email);
+    this.roomService.deleteParticipant(participant?.id);
     this.otherParticipants = this.otherParticipants.filter(
       (p) => p.id !== participant.id
     );
@@ -973,20 +973,23 @@ export class MeetingComponent
       this.connectionData.meetingPwd = '';
       this.connectionData.isRoom = true;
 
-      this.meetingSignalrService
-        .invoke(SignalMethods.OnUserConnect, this.connectionData)
-        .subscribe(
-          () => {},
-          (err) => {
-            this.toastr.error('Unable to connect to meeting');
-            this.router.navigate(['/home']);
-          }
-        );
+      this.createEnterModal().then(() => {
+        this.currentStreamLoaded.emit();
 
-      this.meetingSignalrService.invoke(SignalMethods.OnGetMessages, {
-        meetingId: this.meeting.id,
-        email: this.authService.currentUser.email,
-      } as GetMessages);
+        this.meetingSignalrService
+          .invoke(SignalMethods.OnUserConnect, this.connectionData)
+          .subscribe(
+            () => {},
+            (err) => {
+              this.toastr.error('Unable to connect to meeting');
+              this.router.navigate(['/home']);
+            }
+          );
+        this.meetingSignalrService.invoke(SignalMethods.OnGetMessages, {
+          meetingId: this.meeting.id,
+          email: this.authService.currentUser.email,
+        } as GetMessages);
+      });
 
       return;
     }
@@ -997,7 +1000,6 @@ export class MeetingComponent
       .subscribe(
         (resp) => {
           this.meeting = resp.body;
-          console.log('meeting1', this.meeting);
           this.createEnterModal().then(() => {
             this.currentStreamLoaded.emit();
             this.connectionData.meetingId = this.meeting.id;
@@ -1058,11 +1060,11 @@ export class MeetingComponent
     }
 
     if (modalResult.cameraOff) {
-      this.toggleCamera();
+      this.toggleCamera(true);
     }
 
     if (modalResult.microOff) {
-      this.toggleMicrophone();
+      this.toggleMicrophone(true);
     }
 
     this.isParticipantsVideoAllowed = modalResult.isAllowedVideoOnStart;
@@ -1516,7 +1518,6 @@ export class MeetingComponent
 
     this.simpleModalService
       .addModal(DivisionByRoomsModalComponent, {
-        participants: this.meeting.participants,
         meetingId: this.meeting.id,
         meetingLink: link,
         onCanMoveIntoRoomEvent: this.onCanMoveIntoRoomEvent,
@@ -1582,7 +1583,6 @@ export class MeetingComponent
   }
   public fullPage(streamId): void {
     const stream = this.connectedStreams.find((x) => x.id === streamId);
-    console.log(stream.getVideoTracks());
     const fullVideo = this.createPage();
     fullVideo.srcObject = stream;
     fullVideo.play();

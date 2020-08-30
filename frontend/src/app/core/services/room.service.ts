@@ -1,7 +1,12 @@
 import { Injectable, EventEmitter } from '@angular/core';
 import { MeetingSignalrService, SignalMethods } from '.';
 import { ToastrService } from 'ngx-toastr';
-import { Participant, RoomDTO } from '@shared/models';
+import {
+  Participant,
+  RoomDTO,
+  ParticipantRole,
+  RoomCreate,
+} from '@shared/models';
 
 @Injectable({
   providedIn: 'root',
@@ -9,6 +14,7 @@ import { Participant, RoomDTO } from '@shared/models';
 export class RoomService {
   public roomsIds: string[] = [];
   public participantsInRooms = new Map<string, Array<Participant>>();
+  public previouslyDividedParticipants: Array<Array<Participant>> = [];
   public isUserHost = false;
   public participants: Array<Participant> = [];
   public isDividedIntoRooms = false;
@@ -53,7 +59,7 @@ export class RoomService {
         this.isInRoom ? this.originalMeetingId : meetingId
       )
       .then((rooms: RoomDTO[]) => {
-        console.log(rooms);
+        this.participantsInRooms = new Map();
         rooms.forEach((room) => {
           this.participantsInRooms.set(room.roomId, room.participants);
         });
@@ -66,16 +72,58 @@ export class RoomService {
       .catch((err) => console.error(err));
   }
 
-  public deleteParticipant(participantEmail: string): void {
-    this.participants = this.participants.filter(
-      (p) => p?.user?.email !== participantEmail
-    );
+  public deleteParticipant(participantId: string): void {
+    this.participants = this.participants.filter((p) => p.id != participantId);
     const keys = Array.from(this.participantsInRooms.keys());
     for (const key of keys) {
       const participants = this.participantsInRooms
         .get(key)
-        .filter((p) => p.user.email !== participantEmail);
+        .filter((p) => p.id != participantId);
       this.participantsInRooms.set(key, participants);
     }
+  }
+
+  public randomlyDivide(numberOfRooms: number): void {
+    const participants = this.participants.filter(
+      (p) => p.role != ParticipantRole.Host
+    );
+
+    this.previouslyDividedParticipants = this.randChunkSplit(
+      participants,
+      Math.round(this.participants.length / numberOfRooms)
+    );
+  }
+
+  public createRooms(
+    meetingId: string,
+    meetingLink: string,
+    duration: number
+  ): void {
+    this.participantsInRooms = new Map();
+    this.previouslyDividedParticipants.forEach((participants) => {
+      this.meetingSignalrService.invoke(SignalMethods.CreateRoom, {
+        meetingId: meetingId,
+        meetingLink: meetingLink,
+        duration: duration,
+        participantsIds: participants.map((p) => p.id),
+      } as RoomCreate);
+    });
+    this.isDividedIntoRooms = true;
+  }
+
+  private randChunkSplit(
+    arr: Array<Participant>,
+    min: number = 1,
+    max: number = 1
+  ): Array<Array<Participant>> {
+    const arrCopy = arr.slice();
+    let arrs: Array<Array<Participant>> = [];
+    let size = 1;
+    max = max >= min ? max : min;
+    while (arrCopy.length > 0) {
+      size = Math.min(max, Math.floor(Math.random() * max + min));
+      arrs.push(arrCopy.splice(0, size));
+    }
+    return arrs;
   }
 }
