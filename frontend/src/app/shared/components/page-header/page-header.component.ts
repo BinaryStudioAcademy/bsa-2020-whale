@@ -1,4 +1,10 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  Output,
+  EventEmitter,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from 'app/core/auth/auth.service';
 import { Notification } from 'app/shared/models/notification/notification';
@@ -15,6 +21,8 @@ import { WhaleSignalService, WhaleSignalMethods } from 'app/core/services';
   styleUrls: ['./page-header.component.sass'],
 })
 export class PageHeaderComponent implements OnInit, OnDestroy {
+  @Output() openChatClicked = new EventEmitter<string>();
+
   public isUserLoadig = true;
   private unsubscribe$ = new Subject<void>();
 
@@ -138,5 +146,9 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
     if (!this.notificationsList.length) {
       this.showNotificationsMenu();
     }
+  }
+
+  onOpenChat(contactId: string): void {
+    this.openChatClicked.emit(contactId);
   }
 }

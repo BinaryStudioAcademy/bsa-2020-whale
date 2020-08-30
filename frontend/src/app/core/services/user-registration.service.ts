@@ -23,9 +23,7 @@ export class UserRegistrationService {
     private httpService: HttpService,
     private http: HttpClient,
     private router: Router
-  ) {
-    console.error('USER REGISTRATION SERVICE');
-  }
+  ) {}
 
   registerUser(currentUser: any): void {
     const fireUser: IFireBaseUser = {
@@ -44,34 +42,23 @@ export class UserRegistrationService {
       .pipe(first())
       .subscribe(
         (user) => {
-          console.log(user);
           if (!user.body) {
             this.httpService
               .postClearRequest<IFireBaseUser, User>(this.addUserUrl, fireUser)
               .pipe(first())
               .subscribe((createdUser) => {
-                console.log(createdUser);
                 this.userRegistered.next(createdUser);
                 this.router.navigate(['/home']);
               });
           } else {
             this.userRegistered.next(user.body);
-            if (this.router.url === '/' || 'landing') {
+            if (this.router.url === '/' || this.router.url === 'landing') {
               this.router.navigate(['/home']);
             }
           }
         },
         (error) => {
           console.log(error);
-          // if (error.status === 404) {
-          //   this.httpService
-          //     .postClearRequest<IFireBaseUser, User>(this.addUserUrl, user)
-          //     .pipe(first())
-          //     .subscribe((user) => {
-          //       this.userRegistered.next(user);
-          //       //this.router.navigate(['/home']);
-          //     });
-          // }
         }
       );
   }

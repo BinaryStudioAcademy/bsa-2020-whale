@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { User } from '@shared/models/user/user';
 import { Contact } from '@shared/models/contact/contact';
 import { HttpService } from 'app/core/services/http.service';
@@ -21,6 +21,7 @@ import { ContactService } from 'app/core/services';
 import { MessageService } from 'app/core/services/message.service';
 import { ConfirmationModalComponent } from '@shared/components/confirmation-modal/confirmation-modal.component';
 import { group } from 'console';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 
 @Component({
   selector: 'app-home-page',
@@ -28,6 +29,9 @@ import { group } from 'console';
   styleUrls: ['./home-page.component.sass'],
 })
 export class HomePageComponent implements OnInit, OnDestroy {
+  @ViewChild(PageHeaderComponent, { static: false })
+  pageHeader: PageHeaderComponent;
+
   contacts: Contact[];
   groups: Group[];
   loggedInUser: User;
@@ -506,6 +510,17 @@ export class HomePageComponent implements OnInit, OnDestroy {
     const updateItem = this.groups.find((x) => x.id === updatedGroup.id);
     const index = this.groups.indexOf(updateItem);
     this.groups[index] = updatedGroup;
+  }
+
+  public onOpenChat(contactId: string): void {
+    const contact = this.contacts.find((c) => (c.id = contactId));
+    this.onContactClick(contact);
+  }
+
+  public onMessageRead(event: string): void {
+    this.pageHeader.notificationsList = this.pageHeader.notificationsList.filter(
+      (n) => !n.options.includes(event)
+    );
   }
 }
 export interface UserModel {

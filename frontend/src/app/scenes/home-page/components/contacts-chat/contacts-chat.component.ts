@@ -48,6 +48,7 @@ export class ContactsChatComponent
   @Input() contactSelected: Contact;
   @Input() loggedInUser: User;
   @Output() chat: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() messageRead = new EventEmitter<string>();
 
   @ViewChildren('intersectionElement') intersectionElements: QueryList<
     ElementRef<HTMLDivElement>
@@ -279,7 +280,9 @@ export class ContactsChatComponent
     this.httpService
       .postRequest('/api/ContactChat/markRead', unreadMessageId)
       .subscribe(
-        () => {},
+        () => {
+          this.messageRead.emit(messageId);
+        },
         (error) => console.error(error)
       );
   }
