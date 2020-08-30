@@ -414,7 +414,7 @@
         [handle]="draggableHeader"
       >
         <div #draggableHeader class="whiteboard-header">
-          <div class="whiteboard-title">Whiteboard</div>
+          <div class="whiteboard-title">Whiteboard{{ whiteboardDisable }}</div>
           <div *ngIf="isHost" class="ui checkbox">
             <input
               type="checkbox"
@@ -431,7 +431,7 @@
           ></i>
           <i (click)="showCanvas()" class="times icon"></i>
         </div>
-        <div class="board" *ngIf="!meeting.isWhiteboard || isHost">
+        <div class="board" #board *ngIf="!meeting.isWhiteboard || isHost">
           <canvas-whiteboard
             #canvasWhiteboard
             [options]="canvasOptions"
@@ -440,7 +440,7 @@
           >
           </canvas-whiteboard>
         </div>
-        <div class="board" *ngIf="meeting.isWhiteboard && !isHost">
+        <div class="board" #board *ngIf="meeting.isWhiteboard && !isHost">
           <canvas-whiteboard
             #canvasWhiteboard
             [options]="canvasOptionsDisable"
@@ -616,7 +616,7 @@
   >
     <button
       id="meeting-poll-new"
-      *ngIf="!meeting.isPoll || isHost"
+      *ngIf="!meeting.isPoll || isHost || isRoom"
       (click)="pollService.onNewPollClick()"
       class="ui button"
       id="new-poll-btn"
