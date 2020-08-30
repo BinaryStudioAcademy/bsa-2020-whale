@@ -121,6 +121,7 @@ export class MeetingComponent
   public isHost = false;
   public isRoom = false;
   public isMoveToRoom = false;
+  public isMoveToMeeting = false;
   public onCanMoveIntoRoomEvent = new EventEmitter<void>();
   public isSharing = false;
   private sdpVideoBandwidth = 125;
@@ -591,6 +592,7 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((link) => {
         if (this.isRoom) {
+          this.isMoveToMeeting = true;
           this.router.navigate([`/meeting-page/${link}`]);
         }
       });
@@ -685,9 +687,9 @@ export class MeetingComponent
           SignalMethods.OnMoveIntoRoom,
           this.connectionData
         );
-      } else if (this.isMoveToRoom && this.isRoom && this.isHost) {
+      } else if (this.isRoom && (this.isMoveToRoom || this.isMoveToMeeting)) {
         this.meetingSignalrService.invoke(
-          SignalMethods.OnHostChangeRoom,
+          SignalMethods.OnLeaveRoom,
           this.connectionData
         );
       } else {
