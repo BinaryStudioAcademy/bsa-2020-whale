@@ -14,7 +14,7 @@ import {
 export class RoomService {
   public roomsIds: string[] = [];
   public participantsInRooms = new Map<string, Array<Participant>>();
-  public previouslyDividedParticipants: Array<Array<Participant>> = [];
+  public previouslyDividedParticipants: Array<Array<Participant>> = [[]];
   public isUserHost = false;
   public participants: Array<Participant> = [];
   public isDividedIntoRooms = false;
@@ -81,6 +81,32 @@ export class RoomService {
         .filter((p) => p.id != participantId);
       this.participantsInRooms.set(key, participants);
     }
+    this.previouslyDividedParticipants = this.previouslyDividedParticipants.map(
+      (participants) => participants.filter((p) => p.id != participantId)
+    );
+  }
+
+  public addParticipant(participant: Participant): void {
+    this.participants.push(participant);
+    this.previouslyDividedParticipants[0].push(participant);
+  }
+
+  public updateParticipant(participant: Participant): void {
+    const index = this.participants.findIndex((p) => p.id === participant.id);
+    if (index >= 0) {
+      this.participants[index] = participant;
+      this.previouslyDividedParticipants = this.previouslyDividedParticipants.map(
+        (participants) => {
+          const participantIndex = participants.findIndex(
+            (p) => p.id === participant.id
+          );
+          if (participantIndex >= 0) {
+            participants[participantIndex] = participant;
+          }
+          return participants;
+        }
+      );
+    }
   }
 
   public randomlyDivide(numberOfRooms: number): void {
@@ -92,6 +118,16 @@ export class RoomService {
       participants,
       Math.round(this.participants.length / numberOfRooms)
     );
+
+    if (this.previouslyDividedParticipants.length < numberOfRooms) {
+      for (
+        let i = 0;
+        i <= numberOfRooms - this.previouslyDividedParticipants.length;
+        i++
+      ) {
+        this.previouslyDividedParticipants.push([]);
+      }
+    }
   }
 
   public createRooms(

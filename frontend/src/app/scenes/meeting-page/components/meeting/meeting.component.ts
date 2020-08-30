@@ -245,7 +245,7 @@ export class MeetingComponent
           );
           if (index >= 0) {
             this.meeting.participants[index] = connectData.participant;
-            this.roomService.participants = this.meeting.participants;
+            this.roomService.updateParticipant(connectData.participant);
           } else {
             this.addParticipantToMeeting(connectData.participant);
           }
@@ -917,14 +917,14 @@ export class MeetingComponent
       this.meeting.participants.push(participant);
       this.otherParticipants.push(participant);
     }
-    this.roomService.participants = this.meeting.participants;
+    this.roomService.addParticipant(participant);
   }
 
   private removeParticipantFromMeeting(participant: Participant): void {
     this.meeting.participants = this.meeting.participants.filter(
       (p) => p.id !== participant.id
     );
-    this.roomService.deleteParticipant(participant?.id);
+    this.roomService.deleteParticipant(participant.id);
     this.otherParticipants = this.otherParticipants.filter(
       (p) => p.id !== participant.id
     );
