@@ -9,12 +9,15 @@ import { EnterModalComponent } from './components/enter-modal/enter-modal.compon
 import { DivisionByRoomsModalComponent } from './components/division-by-rooms-modal/division-by-rooms-modal.component';
 import { RecordModalComponent } from './components/record-modal/record-modal.component';
 import { SettingPageModule } from '../setting-page/setting-page.module';
+import { ReactionsComponent } from './components/reactions/reactions.component';
+
 @NgModule({
   declarations: [
     MeetingComponent,
     EnterModalComponent,
     RecordModalComponent,
     DivisionByRoomsModalComponent,
+    ReactionsComponent,
   ],
   imports: [
     SharedModule,

@@ -52,7 +52,9 @@ import {
   ParticipantRole,
   Statistics,
   MediaData,
-} from '../../../../shared/models';
+  ReactionsEnum,
+  Reaction,
+} from '@shared/models';
 import { EnterModalComponent } from '../enter-modal/enter-modal.component';
 import { DivisionByRoomsModalComponent } from '../division-by-rooms-modal/division-by-rooms-modal.component';
 import { MeetingInviteComponent } from '@shared/components/meeting-invite/meeting-invite.component';
@@ -125,6 +127,7 @@ export class MeetingComponent
   public isShowMeetingSettings = false;
   public isWaitingForRecord = false;
   public isAddParticipantDisabled = false;
+  public isShowReactions = false;
   public mediaData: MediaData[] = [];
   public meeting: Meeting;
   public meetingStatistics: Statistics;
@@ -231,20 +234,18 @@ export class MeetingComponent
     if (this.isRoom) {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     }
-    let isActive = false;
-    try {
-      this.currentUserStream = await navigator.mediaDevices.getUserMedia(
+
+    this.currentUserStream = await navigator.mediaDevices.getUserMedia(
         await this.mediaSettingsService.getMediaConstraints()
-      );
-      isActive = this.currentUserStream.active;
-    } catch {
-      isActive = false;
-    }
-    if (!isActive) {
+      ).catch(() => {
+        return undefined;
+      });
+    if (!this.currentUserStream || !this.currentUserStream?.active) {
       this.toastr.error('Cannot access the camera and microphone');
       this.leaveUnConnected();
       return;
     }
+
     const settings = this.currentUserStream.getVideoTracks()[0].getSettings();
     settings.frameRate = 20;
     settings.height = 480;
@@ -388,10 +389,10 @@ export class MeetingComponent
           } else {
             if (!this.isDrawingEnabled) {
               this.canvasWhiteboard.nativeElement.style.pointerEvents = 'none';
+              this.toastr.info('Host disabled drawing');
             } else {
               this.canvasWhiteboard.nativeElement.style.pointerEvents = 'all';
-
-              this.toastr.info('Host enable drawing for everyone');
+              this.toastr.info('Host enabled drawing for everyone');
             }
           }
         },
@@ -679,6 +680,18 @@ export class MeetingComponent
         );
       });
 
+    this.meetingSignalrService.reactionRecived$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (reaction) => {
+          this.mediaData.find(m => m.id === reaction.userId)
+          .reactions.next(reaction.reaction);
+        },
+        (error) => {
+          this.toastr.error(error);
+        }
+      );
+
     // create new peer
     this.peer = new Peer(environment.peerOptions);
 
@@ -886,6 +899,7 @@ export class MeetingComponent
   public onPollIconClick(): void {
     this.isShowStatistics = false;
     this.isShowMeetingSettings = false;
+    this.isShowReactions = false;
     this.pollService.onPollIconClick();
   }
   public onMeetingSettingClick(): void {
@@ -895,6 +909,7 @@ export class MeetingComponent
   }
 
   public onStatisticsIconClick(): void {
+    this.isShowReactions = false;
     this.pollService.isShowPoll = false;
     this.isShowMeetingSettings = false;
     this.pollService.isPollCreating = false;
@@ -914,6 +929,14 @@ export class MeetingComponent
     }
     this.isShowStatistics = !this.isShowStatistics;
   }
+  public onReactionsIconClick(): void {
+    this.pollService.isShowPoll = false;
+    this.pollService.isPollCreating = false;
+    this.pollService.isShowPollResults = false;
+    this.isShowStatistics = false;
+    this.isShowReactions = !this.isShowReactions;
+  }
+
 
   public onCopyIconClick(): void {
     const URL: string = this.document.location.href;
@@ -1252,8 +1275,9 @@ export class MeetingComponent
             ? this.currentUserStream.getAudioTracks().some((at) => at.enabled)
             : true,
       }),
+      reactions: new Subject<ReactionsEnum> (),
       volume: 0,
-    };
+    } as MediaData;
 
     if (participant.id !== this.currentParticipant.id) {
       const audioContext = new AudioContext();
@@ -1747,5 +1771,14 @@ export class MeetingComponent
     newLines.push('b=AS:' + bitrate);
     newLines = newLines.concat(lines.slice(line, lines.length));
     return newLines.join('\n');
+  }
+
+  onReaction(event: ReactionsEnum): void {
+    this.isShowReactions = false;
+    this.meetingSignalrService.invoke(SignalMethods.OnReaction, {
+      meetingId: this.meeting.id,
+      userId: this.currentParticipant.id,
+      reaction: event,
+    } as Reaction);
   }
 }
