@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Whale.Shared.Models.Meeting
 {
@@ -9,5 +7,7 @@ namespace Whale.Shared.Models.Meeting
         public Guid MeetingId { get; set; }
         public bool IsWhiteboard { get; set; }
         public bool IsPoll { get; set; }
+        public bool IsAudioDisabled { get; set; }
+        public bool IsVideoDisabled { get; set; }
     }
 }

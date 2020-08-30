@@ -6,6 +6,7 @@ export * from './http.service';
 export * from './media-settings.service';
 export * from './meeting-signalr.service';
 export * from './meeting.service';
+export * from './meeting-settings.service';
 export * from './notification.service';
 export * from './poll.service';
 export * from './signal-r.service';

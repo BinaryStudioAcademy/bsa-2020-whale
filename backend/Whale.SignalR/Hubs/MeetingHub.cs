@@ -154,16 +154,11 @@ namespace Whale.SignalR.Hubs
         [HubMethodName("OnParticipantStreamChanged")]
         public async Task ParticipantStreamChanged(StreamChangedDTO streamChangedData)
         {
-            KeyValuePair<string, List<ParticipantDTO>> participantInGroup;
-            try
-            {
-                participantInGroup = _groupsParticipants
-                    .First(g => g.Value.Any(p => p.ActiveConnectionId == Context.ConnectionId));
-            }
-            catch (Exception)
-            {
+            var participantInGroup = _groupsParticipants
+                    .FirstOrDefault(g => g.Value.Any(p => p.ActiveConnectionId == Context.ConnectionId));
+
+            if (EqualityComparer<KeyValuePair<string, List<ParticipantDTO>>>.Default.Equals(participantInGroup, default))
                 return;
-            }
           
             var currentParticipant = participantInGroup
                 .Value

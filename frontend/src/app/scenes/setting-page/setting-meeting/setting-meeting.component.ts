@@ -1,9 +1,16 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { MeetingSettingsService } from '../../../core/services/meeting-settings.service';
+import {
+  Component,
+  Input,
+  OnInit,
+  ViewChild,
+  ElementRef,
+  AfterViewInit,
+} from '@angular/core';
 import {
   MeetingService,
   MeetingSignalrService,
   SignalMethods,
+  MeetingSettingsService,
 } from '../../../core/services';
 import { takeUntil } from 'rxjs/operators';
 import { Meeting } from '@shared/models';
@@ -15,13 +22,18 @@ import { ToastrService } from 'ngx-toastr';
   templateUrl: './setting-meeting.component.html',
   styleUrls: ['./setting-meeting.component.sass'],
 })
-export class SettingMeetingComponent implements OnInit {
+export class SettingMeetingComponent implements OnInit, AfterViewInit {
   @Input() meeting: Meeting;
-  public isWhiteboard;
-  public isPoll;
-  public checkboxWhiteboard;
-  public checkboxPoll;
+  public isWhiteboard: boolean;
+  public isPoll: boolean;
+  public isAudioDisabled: boolean;
+  public isVideoDisabled: boolean;
+  public checkboxWhiteboard: HTMLInputElement;
+  public checkboxPoll: HTMLInputElement;
   private unsubscribe$ = new Subject<void>();
+
+  @ViewChild('audio') private checkboxIsAudioDisabled: ElementRef;
+  @ViewChild('video') private checkboxIsVideoDisabled: ElementRef;
 
   constructor(
     private meetingSettingsService: MeetingSettingsService,
@@ -31,15 +43,22 @@ export class SettingMeetingComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.isWhiteboard = this.meetingSettingsService.settings.IsWhiteboard;
-    this.isPoll = this.meetingSettingsService.settings.IsPoll;
+    this.isWhiteboard = this.meetingSettingsService.settings.isWhiteboard;
+    this.isPoll = this.meetingSettingsService.settings.isPoll;
+    this.isAudioDisabled = this.meetingSettingsService.settings.isAudioDisabled;
+    this.isVideoDisabled = this.meetingSettingsService.settings.isVideoDisabled;
     this.checkboxWhiteboard = document.getElementById('whiteboard') as any;
     this.checkboxPoll = document.getElementById('poll') as any;
     this.checkboxWhiteboard.checked = this.isWhiteboard;
     this.checkboxPoll.checked = this.isPoll;
   }
 
-  public changeWhiteboard(event): void {
+  ngAfterViewInit(): void {
+    this.checkboxIsAudioDisabled.nativeElement.checked = this.isAudioDisabled;
+    this.checkboxIsVideoDisabled.nativeElement.checked = this.isVideoDisabled;
+  }
+
+  public changeWhiteboard(event: any): void {
     if (event.target.checked) {
       this.isWhiteboard = true;
     } else {
@@ -53,7 +72,7 @@ export class SettingMeetingComponent implements OnInit {
     this.meetingSettingsService.changeWhiteboard(this.isWhiteboard);
   }
 
-  public changePoll(event): void {
+  public changePoll(event: any): void {
     if (event.target.checked) {
       this.isPoll = true;
     } else {
@@ -67,6 +86,48 @@ export class SettingMeetingComponent implements OnInit {
     this.meetingSettingsService.changePoll(this.isPoll);
   }
 
+  public changeAudioPermission(event: any): void {
+    this.isAudioDisabled = event.target.checked;
+
+    if (this.meeting) {
+      this.meeting.isAudioAllowed = !this.isAudioDisabled;
+      this.switchOtherParticipantsMediaAsHost(false);
+      return;
+    }
+
+    this.meetingSettingsService.changeIsAudioDisabled(this.isAudioDisabled);
+  }
+
+  public changeVideoPermission(event: any): void {
+    this.isVideoDisabled = event.target.checked;
+
+    if (this.meeting) {
+      this.meeting.isVideoAllowed = !this.isVideoDisabled;
+      this.switchOtherParticipantsMediaAsHost(true);
+      return;
+    }
+
+    this.meetingSettingsService.changeIsVideoDisabled(this.isVideoDisabled);
+  }
+
+  public switchOtherParticipantsMediaAsHost(isVideo: boolean): void {
+    this.meetingSignalrService.invoke(SignalMethods.OnMediaPermissionsChanged, {
+      changedParticipantConnectionId: null,
+      isVideoAllowed: isVideo
+        ? this.meeting.isVideoAllowed
+        : this.meeting.isVideoAllowed,
+      isAudioAllowed: isVideo
+        ? this.meeting.isAudioAllowed
+        : this.meeting.isAudioAllowed,
+    });
+
+    isVideo
+      ? (this.meeting.isVideoAllowed = !this.meeting.isVideoAllowed)
+      : (this.meeting.isAudioAllowed = !this.meeting.isAudioAllowed);
+
+    this.updateMeetingSettings();
+  }
+
   public switchMeetingSettingAsHost(meeting: Meeting): void {
     this.meetingSignalrService.invoke(
       SignalMethods.OnHostChangeMeetingSetting,
@@ -76,11 +137,17 @@ export class SettingMeetingComponent implements OnInit {
       }
     );
 
+    this.updateMeetingSettings();
+  }
+
+  private updateMeetingSettings(): void {
     this.meetingService
       .updateMeetingSettings({
         meetingId: this.meeting.id,
-        IsWhiteboard: this.meeting.isWhiteboard,
-        IsPoll: this.meeting.isPoll,
+        isWhiteboard: this.meeting.isWhiteboard,
+        isPoll: this.meeting.isPoll,
+        isAudioDisabled: this.isAudioDisabled,
+        isVideoDisabled: this.isVideoDisabled,
       })
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
