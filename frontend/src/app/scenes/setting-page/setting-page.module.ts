@@ -6,13 +6,16 @@ import { SettingAudioComponent } from './setting-audio/setting-audio.component';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { SharedModule } from '@shared/shared.module';
+import { SettingMeetingComponent } from './setting-meeting/setting-meeting.component';
 
 @NgModule({
   declarations: [
     SettingPageComponent,
     SettingVideoComponent,
     SettingAudioComponent,
+    SettingMeetingComponent,
   ],
   imports: [CommonModule, FormsModule, BrowserModule, SharedModule],
+  exports: [SettingMeetingComponent],
 })
 export class SettingPageModule {}

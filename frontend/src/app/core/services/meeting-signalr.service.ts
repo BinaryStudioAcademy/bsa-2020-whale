@@ -18,6 +18,7 @@ import {
   RoomWithParticipantsIds,
 } from '@shared/models';
 import { CanvasWhiteboardUpdate } from 'ng2-canvas-whiteboard';
+import { ChangedMeetingSettings } from '@shared/models/meeting/changed-meeting-settings';
 
 @Injectable({
   providedIn: 'root',
@@ -49,6 +50,9 @@ export class MeetingSignalrService {
 
   private mediaPermissionsChanged = new Subject<ChangedMediaPermissions>();
   public mediaPermissionsChanged$ = this.mediaPermissionsChanged.asObservable();
+
+  private meetingSettingsChanged = new Subject<ChangedMeetingSettings>();
+  public meetingSettingsChanged$ = this.meetingSettingsChanged.asObservable();
 
   private meetingEnded = new Subject<void>();
   public meetingEnded$ = this.meetingEnded.asObservable();
@@ -182,6 +186,12 @@ export class MeetingSignalrService {
             this.mediaPermissionsChanged.next(changedPermissions);
           }
         );
+        this.signalHub.on(
+          'OnHostChangeMeetingSetting',
+          (changedSetting: ChangedMeetingSettings) => {
+            this.meetingSettingsChanged.next(changedSetting);
+          }
+        );
 
         this.signalHub.on('OnSendMessage', (message: MeetingMessage) => {
           this.sendMessage.next(message);
@@ -283,4 +293,6 @@ export enum SignalMethods {
   OnReaction,
   OnLeaveRoom,
   OnDrawingChangePermissions,
+  OnHostChangeRoom,
+  OnHostChangeMeetingSetting,
 }
