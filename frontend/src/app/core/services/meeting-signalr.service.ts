@@ -98,6 +98,9 @@ export class MeetingSignalrService {
   private shareScreen = new Subject<string>();
   public readonly shareScreen$ = this.shareScreen.asObservable();
 
+  private onDrawingChangePermissions = new Subject<boolean>();
+  public readonly onDrawingChangePermissions$ = this.onDrawingChangePermissions.asObservable();
+
   private shareScreenStop = new Subject<string>();
   public readonly shareScreenStop$ = this.shareScreenStop.asObservable();
   constructor(private hubService: SignalRService) {
@@ -205,6 +208,10 @@ export class MeetingSignalrService {
           this.pollDeleted.next(pollId);
         });
 
+        this.signalHub.on('OnDrawingChangePermissions', (enabled: boolean) => {
+          this.onDrawingChangePermissions.next(enabled);
+        });
+
         this.signalHub.on('OnDrawing', (drawing: CanvasWhiteboardUpdate[]) => {
           this.canvasDraw.next(drawing);
         });
@@ -273,6 +280,8 @@ export enum SignalMethods {
   OnStartShareScreen,
   OnStopShareScreen,
   GetCreatedRooms,
+  OnLeaveRoom,
+  OnDrawingChangePermissions,
   OnHostChangeRoom,
   OnHostChangeMeetingSetting,
 }

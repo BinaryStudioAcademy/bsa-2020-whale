@@ -387,7 +387,8 @@ div:moz-full-screen
         width: 300px
 
 .board
-    height: 468px
+    pointer-events: none
+    height: calc(100% - 30px)
     width: 100%
     @media screen and (max-width: 1000px)
         height: 368px
@@ -396,18 +397,29 @@ div:moz-full-screen
         height: 268px
         width: 100%
 
+.ui.checkbox
+    padding-top: 6px
+    margin-left: 166px
+
 .whiteboard-header
     background-color: #f1f1f1
     height: 30px
+    cursor: move
 
 .whiteboard-title
     float: left
     padding-top: 6px
     padding-left: 10px
 
-.whiteboard-close
-    margin-left: 93%
-    padding-top: 4px
+.whiteboard-buttons 
+    padding-top: 5px
+    position: absolute
+    z-index: inherit
+    right: -1px
+    padding-left: 8px
+    padding-right: 4px
+    top: 0px
+    height: 30px
 
 .pulse
     animation: pulse 2s infinite

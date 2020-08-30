@@ -1,5 +1,5 @@
 <spiner *ngIf="isMeetingLoading" size="'massive'"></spiner>
-<app-page-header></app-page-header>
+<app-page-header (openChatClicked)="onOpenChat($event)"></app-page-header>
 <div class="home-panel">
   <div class="left-col">
     <div class="ui left vertical menu bar">
@@ -146,6 +146,7 @@
         [contactSelected]="contactSelected"
         [loggedInUser]="loggedInUser"
         (chat)="contactVisibilityChange($event)"
+        (messageRead)="onMessageRead($event)"
       ></app-contacts-chat>
       <app-group-chat
         *ngIf="groupChatVisibility"

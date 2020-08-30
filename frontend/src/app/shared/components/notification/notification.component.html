@@ -35,4 +35,9 @@
       Reject
     </button>
   </div>
+  <div *ngIf="unreadMessageOptions">
+    <button class="ui button" (click)="onOpenChat(); $event.stopPropagation()">
+      Open chat
+    </button>
+  </div>
 </div>

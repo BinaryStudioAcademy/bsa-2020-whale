@@ -406,12 +406,30 @@
           </div>
         </div>
       </div>
-      <div class="canvas" *ngIf="canvasIsDisplayed">
-        <div class="whiteboard-header">
-          <div class="whiteboard-title">Whiteboard{{ whiteboardDisable }}</div>
-          <div class="whiteboard-close">
-            <i (click)="showCanvas()" class="large times icon"></i>
+      <div
+        #whiteboard
+        class="canvas"
+        *ngIf="canvasIsDisplayed"
+        ngDraggable
+        [handle]="draggableHeader"
+      >
+        <div #draggableHeader class="whiteboard-header">
+          <div class="whiteboard-title">Whiteboard</div>
+          <div *ngIf="isHost" class="ui checkbox">
+            <input
+              type="checkbox"
+              name="enableDrawing"
+              (click)="onDrawingChangePermissions($event)"
+            />
+            <label>Enable drawing for others</label>
           </div>
+        </div>
+        <div class="whiteboard-buttons">
+          <i
+            (click)="whiteboardFullscreen(); $event.stopPropagation()"
+            class="clone icon"
+          ></i>
+          <i (click)="showCanvas()" class="times icon"></i>
         </div>
         <div class="board" *ngIf="!meeting.isWhiteboard || isHost">
           <canvas-whiteboard

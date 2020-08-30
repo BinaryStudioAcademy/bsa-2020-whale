@@ -142,15 +142,20 @@ export class MeetingComponent
   public isHost = false;
   public isRoom = false;
   public isMoveToRoom = false;
+  public isMoveToMeeting = false;
   public onCanMoveIntoRoomEvent = new EventEmitter<void>();
   public isSharing = false;
   private sdpVideoBandwidth = 125;
   public meter = new DecibelMeter('meter');
   public browserMediaDevice = new BrowserMediaDevice();
   public lastTrack: MediaStreamTrack;
+  public isWhiteboardFullScreen = false;
+  private isDrawingEnabled = false;
   public IsWhiteboard = false;
   public IsPoll = false;
 
+  @ViewChild('whiteboard') private whiteboard: ElementRef;
+  @ViewChild('board') private canvasWhiteboard: ElementRef;
   @ViewChild('currentVideo') private currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
     HTMLElement
@@ -267,7 +272,7 @@ export class MeetingComponent
           );
           if (index >= 0) {
             this.meeting.participants[index] = connectData.participant;
-            this.roomService.participants = this.meeting.participants;
+            this.roomService.updateParticipant(connectData.participant);
           } else {
             this.addParticipantToMeeting(connectData.participant);
           }
@@ -288,7 +293,7 @@ export class MeetingComponent
       .subscribe(
         (participants) => {
           this.meeting.participants = participants;
-          this.roomService.participants = participants;
+          this.roomService.participants = Array.from(participants);
           this.currentParticipant = participants.find(
             (p) => p.user.email === this.authService.currentUser.email
           );
@@ -320,18 +325,12 @@ export class MeetingComponent
           this.connectedPeers.delete(connectionData.peerId);
         }
 
-        const disconectedMediaDataIndex = this.mediaData.findIndex(
-          (m) => m.currentStreamId === connectionData.participant.streamId
+        this.deleteParticipantMediaData(
+          connectionData.streamId,
+          connectionData.participant.user.firstName,
+          connectionData.participant.user.secondName,
+          'has left'
         );
-        if (disconectedMediaDataIndex >= 0) {
-          this.mediaData.splice(disconectedMediaDataIndex, 1);
-          const secondName = ` ${
-            connectionData.participant.user.secondName ?? ''
-          }`;
-          this.toastr.info(
-            `${connectionData.participant.user.firstName}${secondName} has left`
-          );
-        }
       });
 
     this.meetingSignalrService.signalParticipantDisconnected$
@@ -345,16 +344,12 @@ export class MeetingComponent
           )
         );
 
-        const disconectedMediaDataIndex = this.mediaData.findIndex(
-          (m) => m.currentStreamId === participant.streamId
+        this.deleteParticipantMediaData(
+          participant.streamId,
+          participant.user.firstName,
+          participant.user.secondName,
+          'disconnected'
         );
-        if (disconectedMediaDataIndex >= 0) {
-          this.mediaData.splice(disconectedMediaDataIndex, 1);
-          const secondName = ` ${participant.user.secondName ?? ''}`;
-          this.toastr.info(
-            `${participant.user.firstName}${secondName} disconnected`
-          );
-        }
       });
 
     this.meetingSignalrService.mediaStateRequested$
@@ -379,6 +374,29 @@ export class MeetingComponent
           this.toastr.error(
             'Error occured during participants media state updating'
           );
+        }
+      );
+
+    this.meetingSignalrService.onDrawingChangePermissions$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (enabled) => {
+          this.isDrawingEnabled = enabled;
+
+          if (this.isHost) {
+            this.canvasWhiteboard.nativeElement.style.pointerEvents = 'all';
+          } else {
+            if (!this.isDrawingEnabled) {
+              this.canvasWhiteboard.nativeElement.style.pointerEvents = 'none';
+            } else {
+              this.canvasWhiteboard.nativeElement.style.pointerEvents = 'all';
+
+              this.toastr.info('Host enable drawing for everyone');
+            }
+          }
+        },
+        () => {
+          this.toastr.error('Error occured during drawing change permissions');
         }
       );
 
@@ -415,100 +433,102 @@ export class MeetingComponent
 
     this.meetingSignalrService.mediaPermissionsChanged$
       .pipe(takeUntil(this.unsubscribe$))
-      .subscribe((data) => {
-        if (!data.changedParticipantConnectionId) {
-          if (
-            this.meeting.isAudioAllowed !== data.isAudioAllowed &&
-            this.currentParticipant.role !== ParticipantRole.Host
-          ) {
-            this.toastr.info(
-              `Participants' audio ${
-                data.isAudioAllowed ? 'enabled' : 'disabled'
-              } by the host`
-            );
-          } else if (
-            this.meeting.isVideoAllowed !== data.isVideoAllowed &&
-            this.currentParticipant.role !== ParticipantRole.Host
-          ) {
-            this.toastr.info(
-              `Participants' video ${
-                data.isVideoAllowed ? 'enabled' : 'disabled'
-              } by the host`
-            );
-          }
-
-          this.meeting.isVideoAllowed = data.isVideoAllowed;
-          this.meeting.isAudioAllowed = data.isAudioAllowed;
-          this.meetingSignalrService.invoke<ChangedMediaState>(
-            SignalMethods.OnMediaStateChanged,
-            {
-              streamId: this.currentParticipant.streamId,
-              isVideoAllowed: this.meeting.isVideoAllowed,
-              isAudioAllowed: this.meeting.isAudioAllowed,
-              isVideoActive: !this.isCameraMuted,
-              isAudioActive: !this.isMicrophoneMuted,
+      .subscribe(
+        (data) => {
+          if (!data.changedParticipantConnectionId) {
+            if (
+              this.meeting.isAudioAllowed !== data.isAudioAllowed &&
+              this.currentParticipant.role !== ParticipantRole.Host
+            ) {
+              this.toastr.info(
+                `Participants' audio ${
+                  data.isAudioAllowed ? 'enabled' : 'disabled'
+                } by the host`
+              );
+            } else if (
+              this.meeting.isVideoAllowed !== data.isVideoAllowed &&
+              this.currentParticipant.role !== ParticipantRole.Host
+            ) {
+              this.toastr.info(
+                `Participants' video ${
+                  data.isVideoAllowed ? 'enabled' : 'disabled'
+                } by the host`
+              );
             }
-          );
-        } else if (
-          data.changedParticipantConnectionId ===
-          this.currentParticipant.activeConnectionId
-        ) {
-          if (
-            this.meeting.isAudioAllowed !== data.isAudioAllowed &&
-            this.currentParticipant.role !== ParticipantRole.Host
-          ) {
-            this.toastr.info(
-              `Your audio ${
-                data.isAudioAllowed ? 'enabled' : 'disabled'
-              } by the host`
+
+            this.meeting.isVideoAllowed = data.isVideoAllowed;
+            this.meeting.isAudioAllowed = data.isAudioAllowed;
+            this.meetingSignalrService.invoke<ChangedMediaState>(
+              SignalMethods.OnMediaStateChanged,
+              {
+                streamId: this.currentParticipant.streamId,
+                isVideoAllowed: this.meeting.isVideoAllowed,
+                isAudioAllowed: this.meeting.isAudioAllowed,
+                isVideoActive: !this.isCameraMuted,
+                isAudioActive: !this.isMicrophoneMuted,
+              }
             );
           } else if (
-            this.meeting.isVideoAllowed !== data.isVideoAllowed &&
-            this.currentParticipant.role !== ParticipantRole.Host
+            data.changedParticipantConnectionId ===
+            this.currentParticipant.activeConnectionId
           ) {
-            this.toastr.info(
-              `Your video ${
-                data.isVideoAllowed ? 'enabled' : 'disabled'
-              } by the host`
+            if (
+              this.meeting.isAudioAllowed !== data.isAudioAllowed &&
+              this.currentParticipant.role !== ParticipantRole.Host
+            ) {
+              this.toastr.info(
+                `Your audio ${
+                  data.isAudioAllowed ? 'enabled' : 'disabled'
+                } by the host`
+              );
+            } else if (
+              this.meeting.isVideoAllowed !== data.isVideoAllowed &&
+              this.currentParticipant.role !== ParticipantRole.Host
+            ) {
+              this.toastr.info(
+                `Your video ${
+                  data.isVideoAllowed ? 'enabled' : 'disabled'
+                } by the host`
+              );
+            }
+
+            this.meeting.isVideoAllowed = data.isVideoAllowed;
+            this.meeting.isAudioAllowed = data.isAudioAllowed;
+            this.updateCardDynamicData(
+              this.meeting.participants.find(
+                (p) =>
+                  p.activeConnectionId === data.changedParticipantConnectionId
+              )?.streamId,
+              data.isVideoAllowed,
+              data.isAudioAllowed,
+              !this.isCameraMuted,
+              !this.isMicrophoneMuted
+            );
+
+            if (!this.isMicrophoneMuted && !data.isAudioAllowed) {
+              this.toggleMicrophone();
+            }
+
+            if (!this.isCameraMuted && !data.isVideoAllowed) {
+              this.toggleCamera();
+            }
+          } else {
+            this.updateCardDynamicData(
+              this.meeting.participants.find(
+                (p) =>
+                  p.activeConnectionId === data.changedParticipantConnectionId
+              )?.streamId,
+              data.isVideoAllowed,
+              data.isAudioAllowed,
+              data.isVideoActive,
+              data.isAudioActive
             );
           }
-
-          this.meeting.isVideoAllowed = data.isVideoAllowed;
-          this.meeting.isAudioAllowed = data.isAudioAllowed;
-          this.updateCardDynamicData(
-            this.meeting.participants.find(
-              (p) =>
-                p.activeConnectionId === data.changedParticipantConnectionId
-            )?.streamId,
-            data.isVideoAllowed,
-            data.isAudioAllowed,
-            !this.isCameraMuted,
-            !this.isMicrophoneMuted
-          );
-
-          if (!this.isMicrophoneMuted && !data.isAudioAllowed) {
-            this.toggleMicrophone();
-          }
-
-          if (!this.isCameraMuted && !data.isVideoAllowed) {
-            this.toggleCamera();
-          }
-        } else {
-          this.updateCardDynamicData(
-            this.meeting.participants.find(
-              (p) =>
-                p.activeConnectionId === data.changedParticipantConnectionId
-            )?.streamId,
-            data.isVideoAllowed,
-            data.isAudioAllowed,
-            data.isVideoActive,
-            data.isAudioActive
-          );
-          (err) => {
-            this.toastr.error(err.message);
-          };
+        },
+        (err) => {
+          this.toastr.error(err.message);
         }
-      });
+      );
 
     this.meetingSignalrService.meetingSettingsChanged$
       .pipe(takeUntil(this.unsubscribe$))
@@ -639,6 +659,7 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((link) => {
         if (this.isRoom) {
+          this.isMoveToMeeting = true;
           this.router.navigate([`/meeting-page/${link}`]);
         }
       });
@@ -650,18 +671,12 @@ export class MeetingComponent
           this.connectedPeers.delete(connectionData.peerId);
         }
 
-        const disconectedMediaDataIndex = this.mediaData.findIndex(
-          (m) => m.stream.id === connectionData.participant.streamId
+        this.deleteParticipantMediaData(
+          connectionData.streamId,
+          connectionData.participant.user.firstName,
+          connectionData.participant.user.secondName,
+          'moved into room'
         );
-        if (disconectedMediaDataIndex >= 0) {
-          this.mediaData.splice(disconectedMediaDataIndex, 1);
-          const secondName = ` ${
-            connectionData.participant.user.secondName ?? ''
-          }`;
-          this.toastr.info(
-            `${connectionData.participant.user.firstName}${secondName} moved into room`
-          );
-        }
       });
 
     // create new peer
@@ -718,6 +733,10 @@ export class MeetingComponent
   }
 
   ngAfterViewChecked(): void {
+    if (this.canvasWhiteboard !== undefined && this.isHost) {
+      this.canvasWhiteboard.nativeElement.style.pointerEvents = 'all';
+    }
+
     if (this.isShowChat) {
       this.chatElement = this.chatBlock.first?.nativeElement;
     }
@@ -733,9 +752,9 @@ export class MeetingComponent
           SignalMethods.OnMoveIntoRoom,
           this.connectionData
         );
-      } else if (this.isMoveToRoom && this.isRoom && this.isHost) {
+      } else if (this.isRoom && (this.isMoveToRoom || this.isMoveToMeeting)) {
         this.meetingSignalrService.invoke(
-          SignalMethods.OnHostChangeRoom,
+          SignalMethods.OnLeaveRoom,
           this.connectionData
         );
       } else {
@@ -751,13 +770,27 @@ export class MeetingComponent
     this.unsubscribe$.complete();
   }
 
+  private deleteParticipantMediaData(
+    streamId: string,
+    firstName: string,
+    lastName: string,
+    message: string
+  ): void {
+    const disconectedMediaDataIndex = this.mediaData.findIndex(
+      (m) => m.stream.id === streamId
+    );
+    if (disconectedMediaDataIndex >= 0) {
+      this.mediaData.splice(disconectedMediaDataIndex, 1);
+      this.toastr.info(`${firstName}${lastName ? lastName : ''} ${message}`);
+    }
+  }
   //#endregion hooks
 
   //#region options
   public toggleMicrophone(isMissSignaling: boolean = false): void {
     if (
       !this.meeting.isAudioAllowed &&
-      this.currentParticipant?.role != ParticipantRole.Host
+      this.currentParticipant?.role !== ParticipantRole.Host
     ) {
       this.switchTrack(false, false);
       this.isMicrophoneMuted = true;
@@ -777,7 +810,7 @@ export class MeetingComponent
   public toggleCamera(isMissSignaling: boolean = false): void {
     if (
       !this.meeting.isVideoAllowed &&
-      this.currentParticipant?.role != ParticipantRole.Host
+      this.currentParticipant?.role !== ParticipantRole.Host
     ) {
       this.switchTrack(false, true);
       this.isCameraMuted = true;
@@ -971,15 +1004,15 @@ export class MeetingComponent
     if (!this.meeting.participants.some((p) => p.id === participant.id)) {
       this.meeting.participants.push(participant);
       this.otherParticipants.push(participant);
+      this.roomService.addParticipant(participant);
     }
-    this.roomService.participants = this.meeting.participants;
   }
 
   private removeParticipantFromMeeting(participant: Participant): void {
     this.meeting.participants = this.meeting.participants.filter(
       (p) => p.id !== participant.id
     );
-    this.roomService.deleteParticipant(participant?.user?.email);
+    this.roomService.deleteParticipant(participant.id);
     this.otherParticipants = this.otherParticipants.filter(
       (p) => p.id !== participant.id
     );
@@ -1030,20 +1063,23 @@ export class MeetingComponent
       this.connectionData.meetingPwd = '';
       this.connectionData.isRoom = true;
 
-      this.meetingSignalrService
-        .invoke(SignalMethods.OnUserConnect, this.connectionData)
-        .subscribe(
-          () => {},
-          (err) => {
-            this.toastr.error('Unable to connect to meeting');
-            this.router.navigate(['/home']);
-          }
-        );
+      this.createEnterModal().then(() => {
+        this.currentStreamLoaded.emit();
 
-      this.meetingSignalrService.invoke(SignalMethods.OnGetMessages, {
-        meetingId: this.meeting.id,
-        email: this.authService.currentUser.email,
-      } as GetMessages);
+        this.meetingSignalrService
+          .invoke(SignalMethods.OnUserConnect, this.connectionData)
+          .subscribe(
+            () => {},
+            (err) => {
+              this.toastr.error('Unable to connect to meeting');
+              this.router.navigate(['/home']);
+            }
+          );
+        this.meetingSignalrService.invoke(SignalMethods.OnGetMessages, {
+          meetingId: this.meeting.id,
+          email: this.authService.currentUser.email,
+        } as GetMessages);
+      });
 
       return;
     }
@@ -1054,7 +1090,6 @@ export class MeetingComponent
       .subscribe(
         (resp) => {
           this.meeting = resp.body;
-          console.log('meeting1', this.meeting);
           this.createEnterModal().then(() => {
             this.currentStreamLoaded.emit();
             this.connectionData.meetingId = this.meeting.id;
@@ -1115,11 +1150,11 @@ export class MeetingComponent
     }
 
     if (modalResult.cameraOff) {
-      this.toggleCamera();
+      this.toggleCamera(true);
     }
 
     if (modalResult.microOff) {
-      this.toggleMicrophone();
+      this.toggleMicrophone(true);
     }
 
     this.isParticipantsVideoAllowed = modalResult.isAllowedVideoOnStart;
@@ -1127,8 +1162,8 @@ export class MeetingComponent
 
     if (
       isCurrentParticipantHost &&
-      (this.meeting.isVideoAllowed != modalResult.isAllowedVideoOnStart ||
-        this.meeting.isAudioAllowed != modalResult.isAllowedAudioOnStart)
+      (this.meeting.isVideoAllowed !== modalResult.isAllowedVideoOnStart ||
+        this.meeting.isAudioAllowed !== modalResult.isAllowedAudioOnStart)
     ) {
       this.meetingService
         .updateMediaOnStart({
@@ -1320,7 +1355,7 @@ export class MeetingComponent
     isAudioAllowed: boolean,
     isVideoActive?: boolean,
     isAudioActive?: boolean
-  ) {
+  ): void {
     const participant =
       this.currentParticipant.streamId === streamId
         ? this.currentParticipant
@@ -1434,6 +1469,15 @@ export class MeetingComponent
     });
   }
 
+  public onDrawingChangePermissions(event): void {
+    const enabled = event.target.checked;
+
+    this.meetingSignalrService.invoke(
+      SignalMethods.OnDrawingChangePermissions,
+      enabled
+    );
+  }
+
   public onCanvasClear(): void {
     this.meetingSignalrService.invoke(SignalMethods.OnErasing, {
       meetingId: this.meeting.id.toString(),
@@ -1442,7 +1486,25 @@ export class MeetingComponent
     this.savedStrokes = new Array<CanvasWhiteboardUpdate[]>();
   }
 
-  public async showCanvas() {
+  public whiteboardFullscreen(): void {
+    this.isWhiteboardFullScreen = !this.isWhiteboardFullScreen;
+
+    if (this.isWhiteboardFullScreen) {
+      if (this.whiteboard.nativeElement.requestFullscreen) {
+        this.whiteboard.nativeElement.requestFullscreen();
+      } else if (this.whiteboard.nativeElement.mozRequestFullScreen) {
+        this.whiteboard.nativeElement.mozRequestFullScreen();
+      } else if (this.whiteboard.nativeElement.webkitRequestFullscreen) {
+        this.whiteboard.nativeElement.webkitRequestFullscreen();
+      } else if (this.whiteboard.nativeElement.msRequestFullscreen) {
+        this.whiteboard.nativeElement.msRequestFullscreen();
+      }
+    } else {
+      this.closeFullscreen();
+    }
+  }
+
+  public async showCanvas(): Promise<void> {
     this.canvasIsDisplayed = !this.canvasIsDisplayed;
     this.receiveingDrawings = false;
 
@@ -1476,7 +1538,7 @@ export class MeetingComponent
     this.isVideoSettings = false;
   }
 
-  handleSuccessVideo(stream: MediaStream) {
+  public handleSuccessVideo(stream: MediaStream): void {
     const video = document.querySelector('video') as HTMLVideoElement;
     // video.srcObject = stream;
     const keys = Object.keys(this.peer.connections);
@@ -1555,7 +1617,6 @@ export class MeetingComponent
 
     this.simpleModalService
       .addModal(DivisionByRoomsModalComponent, {
-        participants: this.meeting.participants,
         meetingId: this.meeting.id,
         meetingLink: link,
         onCanMoveIntoRoomEvent: this.onCanMoveIntoRoomEvent,
@@ -1621,7 +1682,6 @@ export class MeetingComponent
   }
   public fullPage(streamId): void {
     const stream = this.connectedStreams.find((x) => x.id === streamId);
-    console.log(stream.getVideoTracks());
     const fullVideo = this.createPage();
     fullVideo.srcObject = stream;
     fullVideo.play();

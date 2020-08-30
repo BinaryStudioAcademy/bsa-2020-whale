@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Whale.API.Models.Notification;
 using Whale.DAL;
 using Whale.DAL.Models;
+using Whale.DAL.Models.Messages;
 using Whale.Shared.Exceptions;
 using Whale.Shared.Models.Notification;
 using Whale.Shared.Services.Abstract;
@@ -179,6 +180,36 @@ namespace Whale.Shared.Services
                     await UpdateNotificationAsync(unpdatedNotification);
                  }
             }
+        }
+
+        public Task<NotificationDTO> AddUnreadMessageNotification(DirectMessage message, string receiverEmail, UnreadMessageId unreadMessageId)
+        {
+            var options = new UnreadMessageOptions
+            {
+                UnreadMessageId = unreadMessageId,
+                ContactId = message.ContactId,
+                SenderName = $"{message.Author.FirstName} {message.Author.SecondName}"
+            };
+
+            var optionsJson = JsonConvert.SerializeObject(options, camelSettings);
+
+            return AddNotification(receiverEmail, optionsJson, NotificationTypeEnum.UnreadMessage);
+        }
+
+        public async Task DeleteUnreadMessageNotification(Guid userId, Guid unreadMessageId)
+        {
+            var notification = await _context.Notifications.FirstOrDefaultAsync(
+                n => n.NotificationType == NotificationTypeEnum.UnreadMessage &&
+                     n.UserId == userId &&
+                     n.Options.Contains(unreadMessageId.ToString()));
+
+            if(notification == null)
+            {
+                return;
+            }
+
+            _context.Notifications.Remove(notification);
+            await _context.SaveChangesAsync();
         }
     }
 }

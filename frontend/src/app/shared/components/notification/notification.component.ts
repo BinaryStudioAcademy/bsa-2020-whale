@@ -7,6 +7,7 @@ import { ContactService } from 'app/core/services/contact.service';
 import { ToastrService } from 'ngx-toastr';
 import { OptionsInviteMeeting } from '@shared/models';
 import { Router } from '@angular/router';
+import { UnreadMessageOptions } from '@shared/models/notification/unread-message-options';
 
 @Component({
   selector: 'app-notification',
@@ -16,6 +17,7 @@ import { Router } from '@angular/router';
 export class NotificationComponent implements OnInit {
   @Input() notification: Notification;
   @Output() delete: EventEmitter<string> = new EventEmitter<string>();
+  @Output() openChatClicked = new EventEmitter<string>();
   public message = '';
   public contactEmail = '';
   public isPendingContact = false;
@@ -23,6 +25,7 @@ export class NotificationComponent implements OnInit {
   public isMeetingInvite = false;
   public show = true;
   public link = '';
+  public unreadMessageOptions: UnreadMessageOptions;
   constructor(
     private contactService: ContactService,
     private toastr: ToastrService,
@@ -65,6 +68,12 @@ export class NotificationComponent implements OnInit {
       this.isMeetingInvite = true;
       return;
     }
+    if (
+      this.notification.notificationType === NotificationTypeEnum.UnreadMessage
+    ) {
+      this.unreadMessageOptions = JSON.parse(this.notification.options);
+      this.message = `Unread message from ${this.unreadMessageOptions.senderName}.`;
+    }
   }
 
   onRejectContact(): void {
@@ -93,5 +102,9 @@ export class NotificationComponent implements OnInit {
   onClose(): void {
     this.delete.emit(this.notification.id);
     this.show = false;
+  }
+
+  onOpenChat(): void {
+    this.openChatClicked.emit(this.unreadMessageOptions.contactId);
   }
 }
