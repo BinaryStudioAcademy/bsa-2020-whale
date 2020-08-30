@@ -4,15 +4,16 @@ import { HubConnection } from '@aspnet/signalr';
 import { environment } from '../../../environments/environment';
 import { Subject, from, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { MeetingConnectionData } from '@shared/models/meeting/meeting-connect';
-import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
-import { Participant } from '@shared/models/participant/participant';
-import { PollDto } from '@shared/models/poll/poll-dto';
-import { PollResultDto } from '@shared/models/poll/poll-result-dto';
 import {
   ChangedMediaState,
   StreamChangedData,
   RoomDTO,
+  MeetingConnectionData,
+  MeetingMessage,
+  Participant,
+  PollDto,
+  PollResultDto,
+  Reaction,
   ChangedMediaPermissions,
   RoomWithParticipantsIds,
 } from '@shared/models';
@@ -99,6 +100,10 @@ export class MeetingSignalrService {
 
   private shareScreenStop = new Subject<string>();
   public readonly shareScreenStop$ = this.shareScreenStop.asObservable();
+
+  private reactionRecived = new Subject<Reaction>();
+  public readonly reactionRecived$ = this.reactionRecived.asObservable();
+
   constructor(private hubService: SignalRService) {
     from(hubService.registerHub(environment.signalrUrl, 'meeting'))
       .pipe(
@@ -236,6 +241,10 @@ export class MeetingSignalrService {
         this.signalHub.on('OnStopShareScreen', () => {
           this.shareScreenStop.next();
         });
+
+        this.signalHub.on('OnReaction', (reaction: Reaction) => {
+          this.reactionRecived.next(reaction);
+        });
       });
   }
 
@@ -270,6 +279,8 @@ export enum SignalMethods {
   OnStartShareScreen,
   OnStopShareScreen,
   GetCreatedRooms,
+  OnHostChangeRoom,
+  OnReaction,
   OnLeaveRoom,
   OnDrawingChangePermissions,
 }

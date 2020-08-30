@@ -52,7 +52,9 @@ import {
   ParticipantRole,
   Statistics,
   MediaData,
-} from '../../../../shared/models';
+  ReactionsEnum,
+  Reaction,
+} from '@shared/models';
 import { EnterModalComponent } from '../enter-modal/enter-modal.component';
 import { DivisionByRoomsModalComponent } from '../division-by-rooms-modal/division-by-rooms-modal.component';
 import { MeetingInviteComponent } from '@shared/components/meeting-invite/meeting-invite.component';
@@ -105,6 +107,7 @@ export class MeetingComponent
   public isVideoSettings = false;
   public isWaitingForRecord = false;
   public isAddParticipantDisabled = false;
+  public isShowReactions = false;
   public mediaData: MediaData[] = [];
   public meeting: Meeting;
   public meetingStatistics: Statistics;
@@ -629,6 +632,18 @@ export class MeetingComponent
         );
       });
 
+    this.meetingSignalrService.reactionRecived$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (reaction) => {
+          this.mediaData.find(m => m.id === reaction.userId)
+          .reactions.next(reaction.reaction);
+        },
+        (error) => {
+          this.toastr.error(error);
+        }
+      );
+
     // create new peer
     this.peer = new Peer(environment.peerOptions);
 
@@ -835,10 +850,12 @@ export class MeetingComponent
 
   public onPollIconClick(): void {
     this.isShowStatistics = false;
+    this.isShowReactions = false;
     this.pollService.onPollIconClick();
   }
 
   public onStatisticsIconClick(): void {
+    this.isShowReactions = false;
     this.pollService.isShowPoll = false;
     this.pollService.isPollCreating = false;
     this.pollService.isShowPollResults = false;
@@ -857,6 +874,14 @@ export class MeetingComponent
     }
     this.isShowStatistics = !this.isShowStatistics;
   }
+  public onReactionsIconClick(): void {
+    this.pollService.isShowPoll = false;
+    this.pollService.isPollCreating = false;
+    this.pollService.isShowPollResults = false;
+    this.isShowStatistics = false;
+    this.isShowReactions = !this.isShowReactions;
+  }
+
 
   public onCopyIconClick(): void {
     const URL: string = this.document.location.href;
@@ -1193,8 +1218,9 @@ export class MeetingComponent
             ? this.currentUserStream.getAudioTracks().some((at) => at.enabled)
             : true,
       }),
+      reactions: new Subject<ReactionsEnum> (),
       volume: 0,
-    };
+    } as MediaData;
 
     if (participant.id !== this.currentParticipant.id) {
       const audioContext = new AudioContext();
@@ -1688,5 +1714,14 @@ export class MeetingComponent
     newLines.push('b=AS:' + bitrate);
     newLines = newLines.concat(lines.slice(line, lines.length));
     return newLines.join('\n');
+  }
+
+  onReaction(event: ReactionsEnum): void {
+    this.isShowReactions = false;
+    this.meetingSignalrService.invoke(SignalMethods.OnReaction, {
+      meetingId: this.meeting.id,
+      userId: this.currentParticipant.id,
+      reaction: event,
+    } as Reaction);
   }
 }
