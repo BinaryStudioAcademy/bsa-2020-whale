@@ -361,10 +361,10 @@ export class MeetingComponent
           } else {
             if (!this.isDrawingEnabled) {
               this.canvasWhiteboard.nativeElement.style.pointerEvents = 'none';
+              this.toastr.info('Host disabled drawing');
             } else {
               this.canvasWhiteboard.nativeElement.style.pointerEvents = 'all';
-
-              this.toastr.info('Host enable drawing for everyone');
+              this.toastr.info('Host enabled drawing for everyone');
             }
           }
         },
