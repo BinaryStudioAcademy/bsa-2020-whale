@@ -39,6 +39,7 @@
             {{
               areParticipantsVisible ? "Hide participants" : "Show participants"
             }}
+            ({{ meeting.participants?.length }})
           </button>
           <div class="ui list" *ngIf="areParticipantsVisible">
             <div class="item" *ngFor="let participant of meeting.participants">

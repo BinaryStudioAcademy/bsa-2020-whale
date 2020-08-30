@@ -1,4 +1,10 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  Output,
+  EventEmitter,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from 'app/core/auth/auth.service';
 import { Notification } from 'app/shared/models/notification/notification';
@@ -15,6 +21,8 @@ import { WhaleSignalService, WhaleSignalMethods } from 'app/core/services';
   styleUrls: ['./page-header.component.sass'],
 })
 export class PageHeaderComponent implements OnInit, OnDestroy {
+  @Output() openChatClicked = new EventEmitter<string>();
+
   public isUserLoadig = true;
   private unsubscribe$ = new Subject<void>();
 
@@ -37,9 +45,15 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
       if (this.settingsMenuVisible) {
         this.settingsMenuVisible = false;
       }
+
+      window.onclick = null;
       this.isNotificationsVisible = !this.isNotificationsVisible;
-    } else {
-      this.isNotificationsVisible = false;
+
+      if (this.isNotificationsVisible) {
+        window.onclick = () => {
+          this.isNotificationsVisible = false;
+        };
+      }
     }
   }
 
@@ -47,7 +61,15 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
     if (this.isNotificationsVisible) {
       this.isNotificationsVisible = false;
     }
+
+    window.onclick = null;
     this.settingsMenuVisible = !this.settingsMenuVisible;
+
+    if (this.settingsMenuVisible) {
+      window.onclick = () => {
+        this.settingsMenuVisible = false;
+      };
+    }
   }
 
   ngOnInit(): void {
@@ -87,6 +109,22 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
         }
       );
 
+    this.whaleSignalrService.updateNotify$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (updateNotification) => {
+          const index = this.notificationsList.findIndex(
+            (n) => n.id === updateNotification.id
+          );
+          if (index >= 0) {
+            this.notificationsList[index] = updateNotification;
+          }
+        },
+        (err) => {
+          console.log(err.message);
+        }
+      );
+
     this.whaleSignalrService.removeNotify$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
@@ -113,7 +151,7 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
       WhaleSignalMethods.OnUserDisconnect,
       this.loggedInUser.email
     );
-    this.auth.logout().subscribe(() => this.router.navigate(['/']));
+    this.auth.logout().subscribe(() => this.router.navigate(['landing']));
   }
 
   onNotificationDelete(id: string): void {
@@ -122,5 +160,9 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
     if (!this.notificationsList.length) {
       this.showNotificationsMenu();
     }
+  }
+
+  onOpenChat(contactId: string): void {
+    this.openChatClicked.emit(contactId);
   }
 }

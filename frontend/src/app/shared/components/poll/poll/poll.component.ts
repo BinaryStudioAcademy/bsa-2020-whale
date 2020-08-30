@@ -44,18 +44,18 @@ export class PollComponent implements OnInit {
     }
   }
 
-  get answers() {
+  get answers(): FormArray {
     return this.form.get('answers') as FormArray;
   }
 
-  onSubmit() {
+  onSubmit(): void {
     this.isLoading = true;
-    let choosedOptions = this.poll.isSingleChoice
+    const choosedOptions = this.poll.isSingleChoice
       ? [this.poll.options[Number(this.form.controls.answers.value)]]
       : this.getMuptipleAnswers();
 
     console.log(choosedOptions);
-    if (choosedOptions.length == 0 || choosedOptions[0] === undefined) {
+    if (choosedOptions.length === 0 || choosedOptions[0] === undefined) {
       this.toastr.error('No options were selected!');
       this.isLoading = false;
       return;
@@ -75,7 +75,7 @@ export class PollComponent implements OnInit {
       pollId: this.poll.id,
       meetingId: this.poll.meetingId,
       user: voter,
-      choosedOptions: choosedOptions,
+      choosedOptions,
     };
 
     this.httpService

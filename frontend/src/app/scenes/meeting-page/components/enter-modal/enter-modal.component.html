@@ -9,6 +9,7 @@
       <div class="ui form">
         <div class="inline field">
           <div
+            *ngIf="isAllowedAudioOnStart || isCurrentParticipantHost"
             id="enter-modal-microphone"
             class="ui toggle checkbox"
             (click)="microphone = !microphone"
@@ -21,9 +22,25 @@
             />
             <label>Microphone</label>
           </div>
+          <div
+            *ngIf="!isCurrentParticipantHost && !isAllowedAudioOnStart"
+            data-tooltip="Disabled by the Host"
+            data-position="top left"
+            id="enter-modal-microphone-disabled"
+            class="ui toggle checkbox disabled"
+          >
+            <input
+              type="checkbox"
+              [checked]="false"
+              tabindex="0"
+              class="hidden"
+            />
+            <label>Microphone</label>
+          </div>
         </div>
         <div class="inline field">
           <div
+            *ngIf="isAllowedVideoOnStart || isCurrentParticipantHost"
             id="enter-modal-webcam"
             class="ui toggle checkbox"
             (click)="webcam = !webcam"
@@ -35,6 +52,57 @@
               class="hidden"
             />
             <label>Webcam</label>
+          </div>
+          <div
+            *ngIf="!isCurrentParticipantHost && !isAllowedVideoOnStart"
+            data-tooltip="Disabled by the Host"
+            data-position="top left"
+            id="enter-modal-webcam"
+            class="ui toggle checkbox disabled"
+          >
+            <input
+              type="checkbox"
+              [checked]="false"
+              tabindex="0"
+              class="hidden"
+            />
+            <label>Webcam</label>
+          </div>
+        </div>
+        <div *ngIf="isCurrentParticipantHost">
+          <div class="ui divider"></div>
+          <div class="ui header">
+            <h4>Host Options</h4>
+          </div>
+          <div class="inline field">
+            <div
+              id="enter-modal-webcam"
+              class="ui toggle checkbox"
+              (click)="isAllowedAudioOnStart = !isAllowedAudioOnStart"
+            >
+              <input
+                type="checkbox"
+                [checked]="isAllowedAudioOnStart"
+                tabindex="0"
+                class="hidden"
+              />
+              <label>Allow participants audio upon entry</label>
+            </div>
+          </div>
+          <div class="inline field">
+            <div
+              id="enter-modal-webcam"
+              class="ui toggle checkbox"
+              (click)="isAllowedVideoOnStart = !isAllowedVideoOnStart"
+            >
+              <input
+                type="checkbox"
+                [checked]="isAllowedVideoOnStart"
+                tabindex="0"
+                class="hidden"
+              />
+              <label>Allow participants video upon entry</label>
+            </div>
           </div>
         </div>
       </div>

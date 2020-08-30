@@ -9,6 +9,7 @@ export class MediaSettingsService {
     VideoDeviceId: null,
     InputDeviceId: null,
     OutputDeviceId: null,
+    IsMirrorVideo: false,
   } as MediaSettings;
 
   public get settings(): MediaSettings {
@@ -48,9 +49,7 @@ export class MediaSettingsService {
     if (navigator.userAgent.search(/Firefox/) <= 0) {
       element
         .setSinkId(sinkId)
-        .then(() => {
-          console.log(`Success, audio output device attached: ${sinkId}`);
-        })
+        .then(() => {})
         .catch((error) => {
           let errorMessage = error;
           if (error.name === 'SecurityError') {
@@ -70,5 +69,10 @@ export class MediaSettingsService {
         deviceId: this._settings.InputDeviceId,
       },
     };
+  }
+
+  public changeMirror(isMirror: boolean): void {
+    this._settings.IsMirrorVideo = isMirror;
+    this.saveSettingsInLocalStorage();
   }
 }

@@ -22,4 +22,22 @@
       Close
     </button>
   </div>
+  <div *ngIf="isMeetingInvite" class="mini ui buttons">
+    <button
+      *ngIf="isMeetingInvite"
+      class="ui teal button"
+      (click)="onAcceptInvite(); $event.stopPropagation()"
+    >
+      Join
+    </button>
+    <div class="or"></div>
+    <button class="ui button" (click)="onClose(); $event.stopPropagation()">
+      Reject
+    </button>
+  </div>
+  <div *ngIf="unreadMessageOptions">
+    <button class="ui button" (click)="onOpenChat(); $event.stopPropagation()">
+      Open chat
+    </button>
+  </div>
 </div>

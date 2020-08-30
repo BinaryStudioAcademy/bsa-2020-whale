@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { MeetingLink } from '../../shared/models/meeting/meeting-link';
 import { Meeting } from '../../shared/models/meeting/meeting';
+import { MediaOnStart } from '@shared/models';
 
 @Injectable({
   providedIn: 'root',
@@ -27,6 +28,15 @@ export class MeetingService {
   public connectMeeting(link: string): Observable<HttpResponse<Meeting>> {
     return this.httpService.getFullRequest<Meeting>(
       `${this.routePrefix}${link}`
+    );
+  }
+
+  public updateMediaOnStart(
+    mediaOnStart: MediaOnStart
+  ): Observable<HttpResponse<void>> {
+    return this.httpService.putFullRequest(
+      `${this.routePrefix}/updateMedia`,
+      mediaOnStart
     );
   }
 }

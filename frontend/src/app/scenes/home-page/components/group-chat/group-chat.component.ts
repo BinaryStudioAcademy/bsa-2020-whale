@@ -12,6 +12,8 @@ import {
   ElementRef,
   AfterViewInit,
   AfterViewChecked,
+  ViewChildren,
+  QueryList,
 } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { GroupMessage } from '@shared/models/message/group-message';
@@ -22,7 +24,7 @@ import { environment } from '@env';
 import { Injectable } from '@angular/core';
 import { HubConnection } from '@aspnet/signalr';
 import { Subject, from, Observable } from 'rxjs';
-import { tap, takeUntil, take } from 'rxjs/operators';
+import { tap, takeUntil, take, first } from 'rxjs/operators';
 import { Message } from '@angular/compiler/src/i18n/i18n_ast';
 import { Console } from 'console';
 import { stringify } from 'querystring';
@@ -62,9 +64,7 @@ export class GroupChatComponent
   @Input() loggedInUser: User;
   @Output() chat: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() groupUpdated: EventEmitter<Group> = new EventEmitter<Group>();
-  @ViewChild('chatWindow', { static: false }) chatBlock: ElementRef<
-    HTMLElement
-  >;
+  @ViewChildren('chatWindow') chatBlock: QueryList<ElementRef<HTMLElement>>;
   chatElement: any;
   newUserInGroup: GroupUser = {
     userEmail: '',
@@ -96,7 +96,7 @@ export class GroupChatComponent
   ) {}
 
   ngAfterViewInit(): void {
-    this.chatElement = this.chatBlock.nativeElement;
+    this.chatElement = this.chatBlock.first.nativeElement;
   }
 
   ngAfterViewChecked(): void {
@@ -108,8 +108,9 @@ export class GroupChatComponent
     const isScrolledToBottom =
       chatHtml.scrollHeight - chatHtml.clientHeight > chatHtml.scrollTop;
 
-    if (isScrolledToBottom)
+    if (isScrolledToBottom) {
       chatHtml.scrollTop = chatHtml.scrollHeight - chatHtml.clientHeight;
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -162,36 +163,59 @@ export class GroupChatComponent
       });
     this.receivedMsg$.pipe(takeUntil(this.unsubscribe$)).subscribe(
       (newMessage) => {
+        if (newMessage.authorId === this.loggedInUser.id) {
+          return;
+        }
         this.messages.push(newMessage);
-        console.log('received a messsage ', newMessage);
       },
       (err) => {
         console.log(err.message);
         this.toastr.error(err.Message);
       }
     );
+    this.whaleSignalrService.updatedGroup$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (group) => {
+          this.groupSelected = group;
+        },
+        (err) => {
+          console.log(err.message);
+        }
+      );
   }
   ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
   }
   sendMessage(): void {
-    console.log('Send is called');
-    this.newMessage.groupId = this.groupSelected.id;
-    this.newMessage.authorId = this.currentUser.id;
-    this.newMessage.createdAt = new Date();
-    console.log(this.newMessage);
+    if (this.newMessage.message.trim().length === 0) {
+      return;
+    }
+
+    const newMessage: GroupMessage = {
+      groupId: this.groupSelected.id,
+      authorId: this.currentUser.id,
+      createdAt: new Date(),
+      message: this.newMessage.message,
+      attachment: false,
+      author: this.loggedInUser,
+    };
+
+    this.newMessage.message = '';
+    this.messages.push(newMessage);
+    this.chatBlock.changes.pipe(first()).subscribe(() => {
+      this.scrollDown();
+    });
+
     this.httpService
       .postRequest<GroupMessage, HttpResponse<GroupMessage>>(
         '/api/GroupChat/',
-        this.newMessage
+        newMessage
       )
       .pipe(take(1))
       .subscribe(
-        (response) => {
-          console.log(response.body);
-          this.newMessage.message = '';
-        },
+        () => {},
         (error) => this.toastr.error(error.Message)
       );
   }
@@ -201,9 +225,11 @@ export class GroupChatComponent
   }
 
   public changeImage(): void {
-    this.simpleModalService.addModal(UpdateGroupImageModalComponent, {
-      group: this.groupSelected,
-    });
+    if (this.groupSelected.creatorEmail === this.currentUser.email) {
+      this.simpleModalService.addModal(UpdateGroupImageModalComponent, {
+        group: this.groupSelected,
+      });
+    }
   }
 
   public call(): void {
@@ -257,6 +283,7 @@ export class GroupChatComponent
         id: this.groupSelected.id,
         label: this.groupSelected.label,
         description: this.groupSelected.description,
+        participantsEmails: this.groupMembers.map((u) => u.email),
       })
       .subscribe((user) => {
         if (user !== undefined) {
@@ -290,7 +317,7 @@ export class GroupChatComponent
         }
       });
   }
-  removeUser(userId: string) {
+  removeUser(userId: string): void {
     this.groupMembers = this.groupMembers.filter((c) => c.id !== userId);
   }
   returnCorrectLink(user: User): string {
@@ -299,7 +326,7 @@ export class GroupChatComponent
       ? user?.avatarUrl
       : '';
   }
-  public splitMessage(message: string) {
+  public splitMessage(message: string): string[] {
     return message.split(/\n/gi);
   }
 
@@ -311,15 +338,19 @@ export class GroupChatComponent
     );
   }
 
-  public editGroupInfo() {
+  public editGroupInfo(): void {
     this.simpleModalService
       .addModal(EditGroupInfoModalComponent, this.groupSelected)
       .subscribe(
         (group) => {
           if (group !== undefined) {
             this.groupSelected = group;
-            this.groupUpdated.emit(this.groupSelected);
-            console.log(this.groupSelected);
+            // this.groupUpdated.emit(this.groupSelected);
+            // console.log(this.groupSelected);
+            this.whaleSignalrService.invoke(
+              WhaleSignalMethods.OnGroupUpdate,
+              this.groupSelected
+            );
           }
         },
         (error) => this.toastr.error(error)

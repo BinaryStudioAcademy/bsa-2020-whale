@@ -32,8 +32,8 @@ export class MeetingNoteComponent implements OnInit {
     minutes = Math.round(durationMinutes % 60);
 
     return {
-      hours: hours,
-      minutes: minutes,
+      hours,
+      minutes,
     };
   }
 
@@ -41,9 +41,9 @@ export class MeetingNoteComponent implements OnInit {
     if (!duration) {
       return 'N/A';
     }
-    const hourString = duration.hours == 0 ? '' : `${duration.hours} hours `;
+    const hourString = duration.hours === 0 ? '' : `${duration.hours} hours `;
     const minuteString =
-      duration.minutes == 0 && duration.hours != 0
+      duration.minutes === 0 && duration.hours !== 0
         ? ''
         : `${duration.minutes} minutes`;
 

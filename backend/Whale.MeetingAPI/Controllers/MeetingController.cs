@@ -70,5 +70,12 @@ namespace Whale.API.Controllers
             await _meetingService.EndMeeting(meetingId);
             return Ok();
         }
+
+        [HttpPut("updateMedia")]
+        public async Task<ActionResult> UpdateMeetingMediaOnStart(MediaOnStartDTO mediaOnStartDTO)
+        {
+            await _meetingService.UpdateMeetingMediaOnStart(mediaOnStartDTO);
+            return Ok();
+        }
     }
 }

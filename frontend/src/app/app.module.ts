@@ -36,12 +36,14 @@ import { CanvasWhiteboardModule } from 'ng2-canvas-whiteboard';
     SharedModule,
     CanvasWhiteboardModule,
     ToastrModule.forRoot({
+      tapToDismiss: true,
       timeOut: 5000,
       positionClass: 'toast-bottom-right',
-      toastClass: 'ui message toast-container',
+      toastClass: 'ngx-toastr ui message toast-container',
       iconClasses: {
         error: 'negative',
         info: 'info',
+        show: 'info',
         success: 'positive',
         warning: 'warning',
       },

@@ -26,6 +26,7 @@ namespace Whale.API.Controllers.Slack
         [Produces("application/json")]
         public async Task StartMeeting(SlackCommand userData)
         {
+            await _slackService.SendSlackReplyAsync("", userData.channel_id);
 
             var user = await _slackService.GetUserProfileAsync(userData.user_id);
 
@@ -44,7 +45,7 @@ namespace Whale.API.Controllers.Slack
 
                 await _slackService.SendSlackReplyAsync("", userData.channel_id, link);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 await _slackService.SendSlackReplyAsync("Some troubles happened", userData.channel_id);
             }

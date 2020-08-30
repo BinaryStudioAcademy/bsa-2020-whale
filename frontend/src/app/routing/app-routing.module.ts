@@ -35,7 +35,7 @@ const routes: Routes = [
   {
     path: 'meeting-page/:link',
     component: MeetingComponent,
-    canActivate: [AngularFireAuthGuard],
+    canActivate: [AngularFireAuthGuard /*CheckAccessToMediaGuard*/],
     canDeactivate: [LastParticipantGuard],
     data: { authGuardPipe: redirectUnauthorizedToLogin },
   },
@@ -43,7 +43,12 @@ const routes: Routes = [
     path: 'redirection/:link',
     component: RedirectionComponent,
   },
-  // { path: 'meeting-page', component: MeetingComponent },
+  {
+    path: 'room/:id',
+    component: MeetingComponent,
+    canActivate: [AngularFireAuthGuard],
+    data: { authGuardPipe: redirectUnauthorizedToLogin },
+  },
   {
     path: 'profile-page',
     component: ProfilePageComponent,

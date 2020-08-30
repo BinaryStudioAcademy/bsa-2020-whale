@@ -38,13 +38,21 @@ export class UpdateGroupImageModalComponent
   }
 
   public uploadFile(event): void {
+    this.isFileUploaded = false;
     this.imageChangedEvent = event;
-    this.fileToUpload = event.target.files[0];
-    if (!this.fileToUpload) {
+
+    const image = event.target.files[0];
+    if (!image) {
       event.target.value = '';
       return;
     }
-    this.isFileUploaded = true;
+
+    if (image.size / 1024 / 1024 < 5) {
+      this.fileToUpload = event.target.files[0];
+      this.isFileUploaded = true;
+    } else {
+      this.toastr.error(`File can't be heavier than ~5MB`);
+    }
   }
 
   public imageCroppedUpload(event: ImageCroppedEvent): void {

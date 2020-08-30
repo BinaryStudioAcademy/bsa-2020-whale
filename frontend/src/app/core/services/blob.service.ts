@@ -32,7 +32,7 @@ export class BlobService {
             subscriber.next(false);
           };
           this.recorder.onstop = (e: Event) => {
-            const blob = new Blob(chunks, { type: chunks[0].type });
+            const blob = new Blob(chunks, { type: 'video/webm' });
 
             this.postBlob(blob).subscribe((resp) => {
               subscriber.complete();

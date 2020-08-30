@@ -10,7 +10,7 @@
 
   <a
     id="header-show-notifications"
-    (click)="showNotificationsMenu()"
+    (click)="showNotificationsMenu(); $event.stopPropagation()"
     class="notify-pic-item item"
   >
     <i class="bell outline icon"></i>
@@ -19,17 +19,20 @@
     }}</a>
 
     <div *ngIf="isNotificationsVisible" class="dropdown-menu notify">
-      <app-notification
-        *ngFor="let notification of notificationsList"
-        [notification]="notification"
-        (delete)="onNotificationDelete($event)"
-      >
-      </app-notification>
+      <div style="overflow-y: scroll;">
+        <app-notification
+          *ngFor="let notification of notificationsList"
+          [notification]="notification"
+          (delete)="onNotificationDelete($event)"
+          (openChatClicked)="onOpenChat($event)"
+        >
+        </app-notification>
+      </div>
     </div>
   </a>
   <a
     id="header-show-settings"
-    (click)="showSettingsMenu()"
+    (click)="showSettingsMenu(); $event.stopPropagation()"
     class="user-pic-item item message shared"
   >
     <spiner *ngIf="isUserLoadig" [size]="'small'"></spiner>

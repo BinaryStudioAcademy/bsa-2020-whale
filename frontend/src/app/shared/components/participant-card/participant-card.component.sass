@@ -1,11 +1,3 @@
-.action-buttons
-    display: none
-    position: absolute
-    top: 5px
-    right: 0
-    &:hover
-        display: block
-
 .micro-pulse
     animation: micro-pulse 2s infinite
 
@@ -20,6 +12,9 @@
 
 .ui.card:hover .participant-name-wrapper
     padding-right: 20px
+
+.ui.card:hover .small.ellipsis.vertical.icon
+    display: block
 
 video
     width: 100%
@@ -51,7 +46,7 @@ video
     overflow: hidden
     text-overflow: ellipsis
     white-space: nowrap
-    cursor: auto
+    cursor: default !important
 
 .content
     position: relative
@@ -103,3 +98,6 @@ video
 
 .visible
     visibility: visible
+
+.cursor-pointer
+    cursor: pointer !important

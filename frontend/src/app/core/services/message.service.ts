@@ -36,13 +36,17 @@ export class MessageService implements OnDestroy {
     );
   }
 
-  public registerNewMessageReceived() {
+  public registerNewMessageReceived(): void {
     this.hubConnection.on('NewMessageReceived', (message: DirectMessage) => {
       this.receivedMessage.next(message);
     });
   }
 
-  public joinGroup(contactId) {
+  public joinGroup(contactId: string): void {
     this.hubConnection.invoke('JoinGroup', contactId);
+  }
+
+  public leaveGroup(contactId: string): void {
+    this.hubConnection.invoke('LeaveGroup', contactId);
   }
 }

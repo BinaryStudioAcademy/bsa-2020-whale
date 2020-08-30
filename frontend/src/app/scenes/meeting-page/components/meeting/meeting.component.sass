@@ -61,6 +61,9 @@
     .icon
         margin-right: 10px
 
+.invite-tooltip[data-tooltip]:after
+    font-size: .8em
+
 .users
     padding: 5px
     background-color: #ffffff
@@ -102,7 +105,6 @@ app-participant-card
 .message
     word-break: break-word
     overflow-wrap: break-word
-    
 
 //options
 .options
@@ -129,6 +131,18 @@ app-participant-card
     margin-top: 24px
     float: right
 
+.item.participant
+    display: flex !important
+    align-items: center !important
+    flex-wrap: nowrap !important
+    width: 180px
+    word-break: break-word
+    overflow-wrap: break-word
+    width: 100%
+    cursor: default !important
+    margin-left: 1px !important
+    
+
 i.big.icon:hover
     opacity: 1
     cursor: pointer
@@ -139,16 +153,13 @@ i.big.icon.clipboard, i.big.icon.chart, i.big.copy.icon, .big.paint.brush.icon
 i.big.icon.wechat
     margin-left: 2px
 
-.big.share.square.icon:hover,
-.big.microphone.icon:hover,
-.big.video.icon:hover,
-.big.wechat.icon:hover,
-.big.users.icon:hover,
-.big.desktop.icon:hover,
-.big.clipboard.icon:hover,
-.big.chart.icon:hover,
-.angle.up.icon:hover
-.big.share.square.icon:hover, .big.microphone.icon:hover, .big.video.icon:hover, .big.wechat.icon:hover, .big.users.icon:hover, .big.desktop.icon:hover, .big.paint.brush.icon:hover
+.angle.up.icon:hover,
+.big.share.square.icon:hover, 
+.big.microphone.icon:hover, 
+.big.wechat.icon:hover, 
+.big.users.icon:hover, 
+.big.desktop.icon:hover, 
+.big.paint.brush.icon:hover
     opacity: 1 !important
     cursor: pointer
 
@@ -184,7 +195,6 @@ i.big.icon.wechat
     -webkit-box-shadow: 1px 1px 5px 0px #4e4e4ebf
     -moz-box-shadow: 1px 1px 5px 0px #4e4e4ebf
     box-shadow: 1px 1px 5px 0px #4e4e4ebf
-    padding-left: 3px
     z-index: 2
     position: relative
     display: flex
@@ -219,8 +229,20 @@ div div.participant:hover
 
 .participants-wrapper
     height: 100%
-    overflow-x: auto
     margin-right: 3px
+
+.description.user
+    display: inline-block
+    margin-left: 7px
+    white-space: nowrap
+    word-break: break-word
+    overflow-wrap: break-word
+    
+.user-label
+    margin-left: 10px
+    margin-top: auto
+    margin-bottom: auto
+    font-weight: 400
 
 .users-icon-fix
     display: inline
@@ -358,7 +380,7 @@ div:moz-full-screen
         width: 300px
 
 .board
-    height: 468px
+    height: calc(100% - 30px)
     width: 100%
     @media screen and (max-width: 1000px)
         height: 368px
@@ -370,15 +392,22 @@ div:moz-full-screen
 .whiteboard-header
     background-color: #f1f1f1
     height: 30px
+    cursor: move
 
 .whiteboard-title
     float: left
     padding-top: 6px
     padding-left: 10px
 
-.whiteboard-close
-    margin-left: 93%
-    padding-top: 4px
+.whiteboard-buttons 
+    padding-top: 5px
+    position: absolute
+    z-index: inherit
+    right: -1px
+    padding-left: 8px
+    padding-right: 4px
+    top: 0px
+    height: 30px
 
 .pulse
     animation: pulse 2s infinite

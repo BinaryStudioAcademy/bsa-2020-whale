@@ -9,7 +9,11 @@
         <i class="ellipsis vertical icon"></i>
         <i class="ellipsis vertical icon"></i>
       </div>
-      <span data-tooltip="Toggle Microphone" data-position="top left">
+      <span
+        *ngIf="meeting?.isAudioAllowed || currentParticipant?.role === 1"
+        data-tooltip="Toggle Microphone"
+        data-position="top left"
+      >
         <i
           id="meeting-draggable-mute"
           *ngIf="!isMicrophoneMuted"
@@ -23,7 +27,18 @@
           (click)="toggleMicrophone()"
         ></i>
       </span>
-      <span data-tooltip="Toggle Webcam" data-position="top left">
+      <span
+        *ngIf="!meeting?.isAudioAllowed && currentParticipant?.role !== 1"
+        data-tooltip="Disabled by the Host"
+        data-position="top left"
+      >
+        <i class="big slash microphone icon"></i>
+      </span>
+      <span
+        *ngIf="meeting?.isVideoAllowed || currentParticipant?.role === 1"
+        data-tooltip="Toggle Webcam"
+        data-position="top left"
+      >
         <i
           id="meeting-draggable-camera"
           *ngIf="!isCameraMuted"
@@ -36,6 +51,13 @@
           class="big eye slash icon big-left-margin"
           (click)="toggleCamera()"
         ></i>
+      </span>
+      <span
+        *ngIf="!meeting?.isVideoAllowed && currentParticipant?.role !== 1"
+        data-tooltip="Disabled by the Host"
+        data-position="top left"
+      >
+        <i class="big eye slash icon big-left-margin"></i>
       </span>
       <span data-tooltip="Participants" data-position="top left">
         <i
@@ -88,29 +110,35 @@
     </div>
     <div *ngIf="isShowParticipants" class="ui participants-container">
       <div class="invite-icon-container">
-        <i
-          class="user plus icon"
-          [disabled]="isAddParticipantDisabled"
-          (click)="openInviteUsersModal()"
-        ></i>
+        <span
+          class="invite-tooltip"
+          data-tooltip="Invite users"
+          data-position="left center"
+        >
+          <i
+            class="user plus icon"
+            [disabled]="isAddParticipantDisabled"
+            (click)="openInviteUsersModal()"
+          ></i>
+        </span>
       </div>
       <div class="participants-wrapper">
-        <div class="ui divided list">
-          <div
+        <div class="ui middle aligned selection list">
+          <a
             *ngFor="let participant of meeting?.participants"
-            class="ui item participant"
+            class="item participant"
           >
             <img
               class="ui avatar image"
               src="{{ participant.user.avatarUrl }}"
             />
-            <span>
+            <div class="user-label">
               {{ participant.user.firstName }}
               {{
                 participant.user.secondName ? participant.user.secondName : ""
               }}
-            </span>
-          </div>
+            </div>
+          </a>
         </div>
       </div>
     </div>
@@ -119,7 +147,10 @@
         <div class="ui options__buttons">
           <div class="inner-block">
             <span
-              *ngIf="!isScreenRecording"
+              *ngIf="
+                !isScreenRecording &&
+                (meeting?.isAudioAllowed || currentParticipant?.role === 1)
+              "
               data-tooltip="Toggle Microphone"
               data-position="top left"
             >
@@ -136,6 +167,13 @@
                 (click)="toggleMicrophone()"
               ></i>
             </span>
+            <span
+              *ngIf="!meeting?.isAudioAllowed && currentParticipant?.role !== 1"
+              data-tooltip="Disabled by the Host"
+              data-position="top left"
+            >
+              <i class="big slash microphone icon"></i>
+            </span>
             <span data-tooltip="Settings">
               <i
                 class="angle up icon"
@@ -143,7 +181,13 @@
                 (click)="showAudioSettings()"
               ></i>
             </span>
-            <span *ngIf="!isScreenRecording" data-tooltip="Toggle Webcam">
+            <span
+              *ngIf="
+                !isScreenRecording &&
+                (meeting?.isVideoAllowed || currentParticipant?.role === 1)
+              "
+              data-tooltip="Toggle Webcam"
+            >
               <i
                 id="meeting-options-camera"
                 *ngIf="!isCameraMuted"
@@ -156,6 +200,13 @@
                 class="big eye slash icon big-left-margin"
                 (click)="toggleCamera()"
               ></i>
+            </span>
+            <span
+              *ngIf="!meeting?.isVideoAllowed && currentParticipant?.role !== 1"
+              data-tooltip="Disabled by the Host"
+              data-position="top left"
+            >
+              <i class="big eye slash icon big-left-margin"></i>
             </span>
             <span data-tooltip="Settings">
               <i
@@ -192,6 +243,58 @@
               ></i>
             </span>
             <span
+              *ngIf="
+                !isParticipantsAudioAllowed && currentParticipant?.role === 1
+              "
+              data-tooltip="Enable Participants' Audio"
+              data-position="top left"
+            >
+              <i
+                id="meeting-options-allow-participants-audio"
+                (click)="switchOtherParticipantsMediaAsHost(false)"
+                class="big file audio outline icon"
+              ></i>
+            </span>
+            <span
+              *ngIf="
+                isParticipantsAudioAllowed && currentParticipant?.role === 1
+              "
+              data-tooltip="Disable Participants` Audio"
+              data-position="top left"
+            >
+              <i
+                id="meeting-options-ban-participants-audio"
+                (click)="switchOtherParticipantsMediaAsHost(false)"
+                class="big file audio icon"
+              ></i>
+            </span>
+            <span
+              *ngIf="
+                !isParticipantsVideoAllowed && currentParticipant?.role === 1
+              "
+              data-tooltip="Enable Participants' Video"
+              data-position="top left"
+            >
+              <i
+                id="meeting-options-allow-participants-video"
+                (click)="switchOtherParticipantsMediaAsHost(true)"
+                class="big file video outline icon"
+              ></i>
+            </span>
+            <span
+              *ngIf="
+                isParticipantsVideoAllowed && currentParticipant?.role === 1
+              "
+              data-tooltip="Disable Participants' Video"
+              data-position="top left"
+            >
+              <i
+                id="meeting-options-ban-participants-video"
+                (click)="switchOtherParticipantsMediaAsHost(true)"
+                class="big file video icon"
+              ></i>
+            </span>
+            <span
               *ngIf="isScreenRecording"
               data-tooltip="Stop Recording"
               data-position="top left"
@@ -224,7 +327,7 @@
                 class="big clipboard list icon"
               ></i
             ></span>
-            <span data-tooltip="Statistics">
+            <span data-tooltip="Statistics" *ngIf="!isRoom">
               <i
                 id="meeting-options-statistics"
                 (click)="onStatisticsIconClick()"
@@ -252,6 +355,17 @@
               [ngClass]="{ pulse: checkDrawing() }"
             >
               <i (click)="showCanvas()" class="big paint brush icon"></i>
+            </span>
+            <span
+              data-tooltip="Divide participants into rooms"
+              data-position="top right"
+              *ngIf="isHost"
+            >
+              <i
+                (click)="openRoomsModal()"
+                class="big user th large icon big-left-margin"
+              >
+              </i>
             </span>
             <span data-tooltip="Fullscreen" data-position="top right">
               <i
@@ -281,12 +395,22 @@
           </div>
         </div>
       </div>
-      <div class="canvas" *ngIf="canvasIsDisplayed">
-        <div class="whiteboard-header">
+      <div
+        #whiteboard
+        class="canvas"
+        *ngIf="canvasIsDisplayed"
+        ngDraggable
+        [handle]="draggableHeader"
+      >
+        <div #draggableHeader class="whiteboard-header">
           <div class="whiteboard-title">Whiteboard</div>
-          <div class="whiteboard-close">
-            <i (click)="showCanvas()" class="large times icon"></i>
-          </div>
+        </div>
+        <div class="whiteboard-buttons">
+          <i
+            (click)="whiteboardFullscreen(); $event.stopPropagation()"
+            class="clone icon"
+          ></i>
+          <i (click)="showCanvas()" class="times icon"></i>
         </div>
         <div class="board">
           <canvas-whiteboard
@@ -315,11 +439,8 @@
           (toggleCameraEvent)="
             currentParticipant.id === $event ? toggleCamera() : ''
           "
-          (switchOffCameraAsHostEvent)="
-            toggleOtherParticipantMediaAsHost($event, true)
-          "
-          (switchOffMicrophoneAsHostEvent)="
-            toggleOtherParticipantMediaAsHost($event, false)
+          (switchMediaPermissionAsHostEvent)="
+            switchParticipantMediaAsHost($event)
           "
           [data]="data"
           [meetingHolder]="currentParticipant"
@@ -372,7 +493,7 @@
           </div>
           <div class="chat-content">
             <div class="summary">
-              <a class="user">
+              <a class="user message">
                 {{ message?.author?.firstName }}
                 {{ message?.author?.secondName }}
               </a>
@@ -467,7 +588,7 @@
   >
     <button
       id="meeting-poll-new"
-      *ngIf="currentParticipant && currentParticipant.role == 1"
+      *ngIf="isHost || isRoom"
       (click)="pollService.onNewPollClick()"
       class="ui button"
       id="new-poll-btn"
@@ -481,7 +602,7 @@
         <hr class="poll-divider" />
         <span
           id="meeting-poll-delete"
-          *ngIf="currentParticipant.role == 1"
+          *ngIf="isHost"
           class="delete-poll-icon"
           (click)="pollService.onDeletePollIconClick(pollx)"
         >

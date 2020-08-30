@@ -12,6 +12,8 @@ import {
   UserOnline,
   GroupCall,
   Group,
+  CallDecline,
+  GroupCallDecline,
 } from '@shared/models';
 
 @Injectable({
@@ -47,7 +49,7 @@ export class WhaleSignalService {
   private declineCall = new Subject<void>();
   public declineCall$ = this.declineCall.asObservable();
 
-  private declineGroupCall = new Subject<void>();
+  private declineGroupCall = new Subject<GroupCallDecline>();
   public declineGroupCall$ = this.declineGroupCall.asObservable();
 
   private receiveContact = new Subject<Contact>();
@@ -62,6 +64,9 @@ export class WhaleSignalService {
   private removeNotify = new Subject<string>();
   public removeNotify$ = this.removeNotify.asObservable();
 
+  private updateNotify = new Subject<Notification>();
+  public updateNotify$ = this.updateNotify.asObservable();
+
   private receiveGroup = new Subject<Group>();
   public receiveGroup$ = this.receiveGroup.asObservable();
 
@@ -70,6 +75,9 @@ export class WhaleSignalService {
 
   private removedFromGroup = new Subject<string>();
   public removedFromGroup$ = this.removedFromGroup.asObservable();
+
+  private updatedGroup = new Subject<Group>();
+  public updatedGroup$ = this.updatedGroup.asObservable();
 
   constructor(hubService: SignalRService) {
     from(hubService.registerHub(environment.signalrUrl, 'whale'))
@@ -119,9 +127,12 @@ export class WhaleSignalService {
           this.declineCall.next();
         });
 
-        this.signalHub.on('OnDeclineGroupCall', () => {
-          this.declineGroupCall.next();
-        });
+        this.signalHub.on(
+          'OnDeclineGroupCall',
+          (groupCall: GroupCallDecline) => {
+            this.declineGroupCall.next(groupCall);
+          }
+        );
 
         this.signalHub.on('onNewContact', (contact: Contact) => {
           this.receiveContact.next(contact);
@@ -139,6 +150,13 @@ export class WhaleSignalService {
           this.removeNotify.next(notificationId);
         });
 
+        this.signalHub.on(
+          'onUpdateNotification',
+          (notification: Notification) => {
+            this.updateNotify.next(notification);
+          }
+        );
+
         this.signalHub.on('OnNewGroup', (group: Group) => {
           this.receiveGroup.next(group);
         });
@@ -149,6 +167,10 @@ export class WhaleSignalService {
 
         this.signalHub.on('OnRemovedFromGroup', (groupId: string) => {
           this.removedFromGroup.next(groupId);
+        });
+
+        this.signalHub.on('OnGroupUpdate', (group: Group) => {
+          this.updatedGroup.next(group);
         });
       });
   }
@@ -186,4 +208,5 @@ export enum WhaleSignalMethods {
   OnNewGroup,
   OnDeleteGroup,
   OnRemovedFromGroup,
+  OnGroupUpdate,
 }

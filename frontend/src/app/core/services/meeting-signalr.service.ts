@@ -9,7 +9,13 @@ import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
 import { Participant } from '@shared/models/participant/participant';
 import { PollDto } from '@shared/models/poll/poll-dto';
 import { PollResultDto } from '@shared/models/poll/poll-result-dto';
-import { ChangedMediaState, StreamChangedData } from '@shared/models';
+import {
+  ChangedMediaState,
+  StreamChangedData,
+  RoomDTO,
+  ChangedMediaPermissions,
+  RoomWithParticipantsIds,
+} from '@shared/models';
 import { CanvasWhiteboardUpdate } from 'ng2-canvas-whiteboard';
 
 @Injectable({
@@ -40,8 +46,8 @@ export class MeetingSignalrService {
   private participantStreamChanged = new Subject<StreamChangedData>();
   public participantStreamChanged$ = this.participantStreamChanged.asObservable();
 
-  private switchOffMediaByHost = new Subject<boolean>();
-  public switchOffMediaByHost$ = this.switchOffMediaByHost.asObservable();
+  private mediaPermissionsChanged = new Subject<ChangedMediaPermissions>();
+  public mediaPermissionsChanged$ = this.mediaPermissionsChanged.asObservable();
 
   private meetingEnded = new Subject<void>();
   public meetingEnded$ = this.meetingEnded.asObservable();
@@ -72,6 +78,18 @@ export class MeetingSignalrService {
 
   private canvasErase = new Subject<boolean>();
   public readonly canvasErase$ = this.canvasErase.asObservable();
+
+  private onRoomCreated = new Subject<string>();
+  public readonly onRoomCreated$ = this.onRoomCreated.asObservable();
+
+  private onRoomCreatedToHost = new Subject<RoomWithParticipantsIds>();
+  public readonly onRoomCreatedToHost$ = this.onRoomCreatedToHost.asObservable();
+
+  private onRoomClosed = new Subject<string>();
+  public readonly onRoomClosed$ = this.onRoomClosed.asObservable();
+
+  private onParticipentMoveIntoRoom = new Subject<MeetingConnectionData>();
+  public readonly onParticipentMoveIntoRoom$ = this.onParticipentMoveIntoRoom.asObservable();
 
   private shareScreen = new Subject<string>();
   public readonly shareScreen$ = this.shareScreen.asObservable();
@@ -150,9 +168,12 @@ export class MeetingSignalrService {
           }
         );
 
-        this.signalHub.on('OnSwitchOffMediaByHost', (isVideo: boolean) => {
-          this.switchOffMediaByHost.next(isVideo);
-        });
+        this.signalHub.on(
+          'OnMediaPermissionsChanged',
+          (changedPermissions: ChangedMediaPermissions) => {
+            this.mediaPermissionsChanged.next(changedPermissions);
+          }
+        );
 
         this.signalHub.on('OnSendMessage', (message: MeetingMessage) => {
           this.sendMessage.next(message);
@@ -182,17 +203,36 @@ export class MeetingSignalrService {
           this.canvasErase.next(erase);
         });
 
+        this.signalHub.on('OnRoomCreated', (roomId: string) => {
+          this.onRoomCreated.next(roomId);
+        });
+
+        this.signalHub.on(
+          'OnRoomCreatedToHost',
+          (roomData: RoomWithParticipantsIds) => {
+            this.onRoomCreatedToHost.next(roomData);
+          }
+        );
+
+        this.signalHub.on('OnRoomClosed', (meetingLink: string) => {
+          this.onRoomClosed.next(meetingLink);
+        });
+
+        this.signalHub.on('onParticipentMoveIntoRoom', (connectionData) => {
+          this.onParticipentMoveIntoRoom.next(connectionData);
+        });
+
         this.signalHub.on('OnStartShareScreen', (streamId: string) => {
-          console.log(streamId);
           this.shareScreen.next(streamId);
         });
+
         this.signalHub.on('OnStopShareScreen', () => {
           this.shareScreenStop.next();
         });
       });
   }
 
-  public invoke(method: SignalMethods, arg: any): Observable<void> {
+  public invoke<T>(method: SignalMethods, arg: T): Observable<void> {
     return from(this.signalHub.invoke(SignalMethods[method].toString(), arg));
   }
 }
@@ -205,6 +245,7 @@ export interface SignalData {
 export enum SignalMethods {
   OnUserConnect,
   OnParticipantLeft,
+  OnMediaPermissionsChanged,
   OnMediaStateChanged,
   OnMediaStateRequested,
   OnSwitchOffMediaByHost,
@@ -217,6 +258,10 @@ export enum SignalMethods {
   OnPollCreated,
   OnDrawing,
   OnErasing,
+  CreateRoom,
+  OnMoveIntoRoom,
   OnStartShareScreen,
   OnStopShareScreen,
+  GetCreatedRooms,
+  OnHostChangeRoom,
 }

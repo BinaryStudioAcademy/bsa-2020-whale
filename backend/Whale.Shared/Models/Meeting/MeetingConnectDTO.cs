@@ -9,6 +9,9 @@ namespace Whale.Shared.Models.Meeting
         public string StreamId { get; set; }
         public string MeetingId { get; set; }
         public string MeetingPwd { get; set; }
+        public bool IsRoom { get; set; }
+        public bool IsVideoAllowed { get; set; }
+        public bool IsAudioAllowed { get; set; }
         public ParticipantDTO Participant { get; set; }
     }
 }
