@@ -349,10 +349,10 @@ export class HomePageComponent implements OnInit, OnDestroy {
         anonymousCount: 0,
         isScheduled: false,
         isRecurrent: false,
-        isAudioAllowed: true,
-        isVideoAllowed: true,
-        isWhiteboard: this.meetingSettingsService.settings.IsWhiteboard,
-        isPoll: this.meetingSettingsService.settings.IsPoll,
+        isAudioAllowed: !this.meetingSettingsService.settings.isAudioDisabled,
+        isVideoAllowed: !this.meetingSettingsService.settings.isVideoDisabled,
+        isWhiteboard: this.meetingSettingsService.settings.isWhiteboard,
+        isPoll: this.meetingSettingsService.settings.isPoll,
         creatorEmail: this.ownerEmail,
       } as MeetingCreate)
       .pipe(takeUntil(this.unsubscribe$))

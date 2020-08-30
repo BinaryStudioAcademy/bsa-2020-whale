@@ -106,10 +106,7 @@
           class="big user plus icon big-left-margin"
         ></i>
       </span>
-      <span
-        data-tooltip="Add Reactions"
-        data-position="top right"
-      >
+      <span data-tooltip="Add Reactions" data-position="top right">
         <i
           (click)="onReactionsIconClick()"
           class="big smile outline large icon big-left-margin"
@@ -263,58 +260,6 @@
               ></i>
             </span>
             <span
-              *ngIf="
-                !isParticipantsAudioAllowed && currentParticipant?.role === 1
-              "
-              data-tooltip="Enable Participants' Audio"
-              data-position="top left"
-            >
-              <i
-                id="meeting-options-allow-participants-audio"
-                (click)="switchOtherParticipantsMediaAsHost(false)"
-                class="big file audio outline icon"
-              ></i>
-            </span>
-            <span
-              *ngIf="
-                isParticipantsAudioAllowed && currentParticipant?.role === 1
-              "
-              data-tooltip="Disable Participants` Audio"
-              data-position="top left"
-            >
-              <i
-                id="meeting-options-ban-participants-audio"
-                (click)="switchOtherParticipantsMediaAsHost(false)"
-                class="big file audio icon"
-              ></i>
-            </span>
-            <span
-              *ngIf="
-                !isParticipantsVideoAllowed && currentParticipant?.role === 1
-              "
-              data-tooltip="Enable Participants' Video"
-              data-position="top left"
-            >
-              <i
-                id="meeting-options-allow-participants-video"
-                (click)="switchOtherParticipantsMediaAsHost(true)"
-                class="big file video outline icon"
-              ></i>
-            </span>
-            <span
-              *ngIf="
-                isParticipantsVideoAllowed && currentParticipant?.role === 1
-              "
-              data-tooltip="Disable Participants' Video"
-              data-position="top left"
-            >
-              <i
-                id="meeting-options-ban-participants-video"
-                (click)="switchOtherParticipantsMediaAsHost(true)"
-                class="big file video icon"
-              ></i>
-            </span>
-            <span
               *ngIf="isScreenRecording"
               data-tooltip="Stop Recording"
               data-position="top left"
@@ -403,10 +348,7 @@
                 class="big user plus icon big-left-margin"
               ></i>
             </span>
-            <span
-              data-tooltip="Add Reactions"
-              data-position="top right"
-            >
+            <span data-tooltip="Add Reactions" data-position="top right">
               <i
                 (click)="onReactionsIconClick()"
                 class="big smile outline large icon big-left-margin"
@@ -617,9 +559,7 @@
   </div>
 
   <div class="poll-create-container" *ngIf="isShowReactions">
-    <app-reactions
-    (reaction)="onReaction($event)"
-    ></app-reactions>
+    <app-reactions (reaction)="onReaction($event)"></app-reactions>
   </div>
 
   <div
