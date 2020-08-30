@@ -117,8 +117,10 @@ export class RoomService {
 
     this.previouslyDividedParticipants = this.randChunkSplit(
       participants,
-      Math.round(this.participants.length / numberOfRooms)
+      Math.round(participants.length / numberOfRooms)
     );
+
+    console.log('randomlyDivide', this.previouslyDividedParticipants);
 
     if (this.previouslyDividedParticipants.length < numberOfRooms) {
       this.addEmptyRooms(
