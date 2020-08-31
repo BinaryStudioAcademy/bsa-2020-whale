@@ -58,7 +58,11 @@ namespace Whale.Shared.Services
             if (meeting == null)
                 throw new NotFoundException("Meeting");
 
-            if ((await _participantService.GetMeetingParticipantByEmail(meeting.Id, userEmail)) == null)
+            try
+            {
+                await _participantService.GetMeetingParticipantByEmail(meeting.Id, userEmail);
+            }
+            catch (NotFoundException)
             {
                 await _participantService.CreateParticipantAsync(new ParticipantCreateDTO
                 {
