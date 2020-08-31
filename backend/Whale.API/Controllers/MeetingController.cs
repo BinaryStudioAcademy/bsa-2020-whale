@@ -58,6 +58,9 @@ namespace Whale.API.Controllers
         [HttpPut("updateSettings")]
         public async Task<ActionResult> UpdateMeetingSettings(UpdateSettingsDTO updateSettingsDTO)
         {
+            updateSettingsDTO.ApplicantEmail = 
+                HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+
             await _httpService.PutAsync("api/meeting/updateSettings", updateSettingsDTO);
             return Ok();
         }
