@@ -413,7 +413,7 @@ export class MeetingComponent
           if (!data.changedParticipantConnectionId) {
             if (
               this.meeting.isAudioAllowed !== data.isAudioAllowed &&
-              this.currentParticipant.role !== ParticipantRole.Host
+              this.isHost
             ) {
               this.toastr.info(
                 `Participants' audio ${
@@ -422,7 +422,7 @@ export class MeetingComponent
               );
             } else if (
               this.meeting.isVideoAllowed !== data.isVideoAllowed &&
-              this.currentParticipant.role !== ParticipantRole.Host
+              this.isHost
             ) {
               this.toastr.info(
                 `Participants' video ${
@@ -433,6 +433,11 @@ export class MeetingComponent
 
             this.meeting.isAudioAllowed = data.isAudioAllowed;
             this.meeting.isVideoAllowed = data.isVideoAllowed;
+            if (!this.isHost) {
+              this.toggleMicrophone();
+              this.toggleCamera();
+            }
+
             this.meetingSignalrService.invoke<ChangedMediaState>(
               SignalMethods.OnMediaStateChanged,
               {
@@ -449,7 +454,7 @@ export class MeetingComponent
           ) {
             if (
               this.meeting.isAudioAllowed !== data.isAudioAllowed &&
-              this.currentParticipant.role !== ParticipantRole.Host
+              this.isHost
             ) {
               this.toastr.info(
                 `Your audio ${
@@ -458,7 +463,7 @@ export class MeetingComponent
               );
             } else if (
               this.meeting.isVideoAllowed !== data.isVideoAllowed &&
-              this.currentParticipant.role !== ParticipantRole.Host
+              this.isHost
             ) {
               this.toastr.info(
                 `Your video ${
@@ -1364,6 +1369,12 @@ export class MeetingComponent
       isAudioActive,
       isVideoActive,
     });
+  }
+
+  public pinCard(mediaDataId: string): void {
+    this.currentVideo.nativeElement.srcObject = this.mediaData.find(
+      (m) => m.id === mediaDataId
+    );
   }
   //#endregion participant cards
 
