@@ -9,6 +9,7 @@ using Whale.DAL;
 using Whale.DAL.Models;
 using Whale.DAL.Models.Messages;
 using Whale.DAL.Settings;
+using Whale.Shared.Exceptions;
 using Whale.Shared.Extentions;
 using Whale.Shared.Models.DirectMessage;
 using Whale.Shared.Services;
@@ -32,8 +33,10 @@ namespace Whale.API.Services
         //var receivingMessages = messages.Where(m => m.ContactId != m.AuthorId);
 
         //var unreadMessages = _context.UnreadMessages.Where(um => um.ReceiverId == contactId);
-        public async Task<ICollection<DirectMessage>> GetAllContactsMessagesAsync(Guid contactId)
+        public async Task<ICollection<DirectMessage>> GetAllContactsMessagesAsync(Guid contactId, string userEmail)
         {
+            await CheckUserInContact(contactId, userEmail);
+
             var messages = await _context.DirectMessages
                 .Include(msg => msg.Author)
                 .OrderBy(msg => msg.CreatedAt)
@@ -44,8 +47,10 @@ namespace Whale.API.Services
             return _mapper.Map<ICollection<DirectMessage>>(await messages.LoadAvatarsAsync(_blobStorageSettings, msg => msg.Author));
         }
 
-        public async Task<ReadAndUnreadMessagesDTO> GetReadAndUnreadAsync(Guid contactId, Guid userId)
+        public async Task<ReadAndUnreadMessagesDTO> GetReadAndUnreadAsync(Guid contactId, Guid userId, string userEmail)
         {
+            await CheckUserInContact(contactId, userEmail);
+
             var messagesWithoutAvatars = await _context.DirectMessages
                 .Include(msg => msg.Author)
                 .OrderBy(msg => msg.CreatedAt)
@@ -72,8 +77,10 @@ namespace Whale.API.Services
             return readAndUnreadMessages;
         }
 
-        public async Task<DirectMessage> CreateDirectMessage(DirectMessageCreateDTO directMessageDto)
+        public async Task<DirectMessage> CreateDirectMessage(DirectMessageCreateDTO directMessageDto, string userEmail)
         {
+            await CheckUserInContact(directMessageDto.ContactId, userEmail);
+
             var messageEntity = _mapper.Map<DirectMessage>(directMessageDto);
             messageEntity.CreatedAt = DateTimeOffset.UtcNow;
             _context.DirectMessages.Add(messageEntity);
@@ -86,7 +93,7 @@ namespace Whale.API.Services
             await createdMessage.Author.LoadAvatarAsync(_blobStorageSettings);
             var createdMessageDTO = _mapper.Map<DirectMessage>(createdMessage);
 
-            await AddUnreadMessage(createdMessage);
+            await AddUnreadMessage(createdMessage, userEmail);
 
             var connection = await _signalrService.ConnectHubAsync("chatHub");
             await connection.InvokeAsync("NewMessageReceived", createdMessageDTO);
@@ -94,8 +101,10 @@ namespace Whale.API.Services
             return createdMessageDTO;
         }
 
-        public async Task AddUnreadMessage(DirectMessage message)
+        public async Task AddUnreadMessage(DirectMessage message, string userEmail)
         {
+            await CheckUserInContact(message.ContactId, userEmail);
+
             var contact = await _context.Contacts
                 .Include(c => c.FirstMember)
                 .Include(c => c.SecondMember)
@@ -112,17 +121,31 @@ namespace Whale.API.Services
             await _notificationsService.AddUnreadMessageNotification(message, receiver.Email, entry.Entity);
         }
 
-        public async Task MarkMessageAsRead(UnreadMessageIdDTO unreadMessageDto)
+        public async Task MarkMessageAsRead(UnreadMessageIdDTO unreadMessageDto, string userEmail)
         {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+            if (user is null || user.Id != unreadMessageDto.ReceiverId)
+                throw new InvalidCredentials();
             var unreadMessage = await _context.UnreadMessageIds.FirstOrDefaultAsync(
                 message => message.MessageId == unreadMessageDto.MessageId &&
                 message.ReceiverId == unreadMessageDto.ReceiverId
             );
-
             _context.UnreadMessageIds.Remove(unreadMessage);
             await _context.SaveChangesAsync();
 
             await _notificationsService.DeleteUnreadMessageNotification(unreadMessage.ReceiverId, unreadMessage.Id);
+        }
+
+        private async Task CheckUserInContact(Guid contactId, string userEmail)
+        {
+            var contact = await _context.Contacts
+                .Include(c => c.FirstMember)
+                .Include(c => c.SecondMember)
+                .FirstOrDefaultAsync(c => c.Id == contactId);
+            if (contact is null)
+                throw new NotFoundException("Contact", contactId.ToString());
+            if (contact.FirstMember.Email != userEmail && contact.SecondMember.Email != userEmail)
+                throw new InvalidCredentials();
         }
     }
 }

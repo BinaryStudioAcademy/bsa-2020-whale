@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +12,7 @@ namespace Whale.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ContactChatController : ControllerBase
     {
         private readonly ContactChatService _chatService;
@@ -21,31 +24,33 @@ namespace Whale.API.Controllers
         }
 
         [HttpGet("{contactDTOId}")]
-        [AllowAnonymous]
         public async Task<ActionResult<ICollection<DirectMessageDTO>>> Get(Guid contactDTOId)
         {
-            var messages = await _chatService.GetAllContactsMessagesAsync(contactDTOId);
+            var email = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var messages = await _chatService.GetAllContactsMessagesAsync(contactDTOId, email);
             return Ok(messages);
         }
 
         [HttpGet("withUnread/{contactDTOId}")]
-        [AllowAnonymous]
         public async Task<ActionResult<ICollection<DirectMessageDTO>>> Get(Guid contactDTOId, Guid userId)
         {
-            var messages = await _chatService.GetReadAndUnreadAsync(contactDTOId, userId);
+            var email = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var messages = await _chatService.GetReadAndUnreadAsync(contactDTOId, userId, email);
             return Ok(messages);
         }
 
         [HttpPost]
         public async Task<ActionResult<DirectMessageDTO>> CreateDirectMessage([FromBody] DirectMessageCreateDTO dto)
         {
-            return Ok(await _chatService.CreateDirectMessage(dto));
+            var email = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            return Ok(await _chatService.CreateDirectMessage(dto, email));
         }
 
         [HttpPost("markRead")]
         public async Task<OkResult> MarkMessageAsRead([FromBody] UnreadMessageIdDTO unreadMessageIdDto)
         {
-            await _chatService.MarkMessageAsRead(unreadMessageIdDto);
+            var email = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            await _chatService.MarkMessageAsRead(unreadMessageIdDto, email);
             return Ok();
         }
     }
