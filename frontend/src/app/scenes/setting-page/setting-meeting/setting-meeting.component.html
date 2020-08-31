@@ -1,0 +1,65 @@
+<div class="ui segment">
+  <div class="field">
+    <div class="inline field">
+      <div class="ui checkbox">
+        <input
+          type="checkbox"
+          tabindex="0"
+          id="whiteboard"
+          (change)="changeWhiteboard($event)"
+        />
+        <label for="whiteboard" class="default-cursor"
+          >Disable whiteboard to all participants during the meeting time.
+        </label>
+      </div>
+    </div>
+  </div>
+  <div class="field">
+    <div class="inline field">
+      <div class="ui checkbox">
+        <input
+          type="checkbox"
+          tabindex="0"
+          id="poll"
+          (change)="changePoll($event)"
+        />
+        <label for="poll" class="default-cursor"
+          >Disable poll ability to all participants during the meeting
+          time.</label
+        >
+      </div>
+    </div>
+  </div>
+  <div class="field">
+    <div class="inline field">
+      <div class="ui checkbox">
+        <input
+          #audio
+          type="checkbox"
+          tabindex="0"
+          id="audio"
+          (change)="changeAudioPermission($event)"
+        />
+        <label for="audio" class="default-cursor"
+          >Disable participants' microphones.
+        </label>
+      </div>
+    </div>
+  </div>
+  <div class="field">
+    <div class="inline field">
+      <div class="ui checkbox">
+        <input
+          #video
+          type="checkbox"
+          tabindex="0"
+          id="video"
+          (change)="changeVideoPermission($event)"
+        />
+        <label for="video" class="default-cursor"
+          >Disable participants' cameras.
+        </label>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,4 +1,4 @@
-.waiting-for-record-modal 
+.waiting-for-record-modal
     width: 213px
     height: 42px
     background-color: #8b8b8b
@@ -12,7 +12,7 @@
     padding-top: 8px
     color: white
     z-index: 1
-    
+
 .bg-white
     background-color: white
 
@@ -27,8 +27,8 @@
     width: 100%
     height: 100%
     overflow: hidden
-    
-@media screen and (max-width: 600px) 
+
+@media screen and (max-width: 600px)
     .users__user
         display: none
 
@@ -73,7 +73,7 @@
     align-items: center
     overflow-y: scroll
     height: 100%
-    
+
 app-participant-card
     width: 50%
     max-width: 560px
@@ -96,10 +96,10 @@ app-participant-card
     width: 100%
     height: 100%
 
-.users__user 
+.users__user
     margin: 10px
 
-.users__user:hover .users__user__info 
+.users__user:hover .users__user__info
     opacity: 0.9
 
 .message
@@ -126,7 +126,7 @@ app-participant-card
         padding: 5px 10px
         border-radius: 10px
         background-color: gainsboro
-    
+
 .options__leave-button
     margin-top: 24px
     float: right
@@ -141,7 +141,7 @@ app-participant-card
     width: 100%
     cursor: default !important
     margin-left: 1px !important
-    
+
 
 i.big.icon:hover
     opacity: 1
@@ -154,29 +154,29 @@ i.big.icon.wechat
     margin-left: 2px
 
 .angle.up.icon:hover,
-.big.share.square.icon:hover, 
-.big.microphone.icon:hover, 
-.big.wechat.icon:hover, 
-.big.users.icon:hover, 
-.big.desktop.icon:hover, 
+.big.share.square.icon:hover,
+.big.microphone.icon:hover,
+.big.wechat.icon:hover,
+.big.users.icon:hover,
+.big.desktop.icon:hover,
 .big.paint.brush.icon:hover
     opacity: 1 !important
     cursor: pointer
 
 //scrollbar
-::-webkit-scrollbar 
+::-webkit-scrollbar
     width: 10px
 
-::-webkit-scrollbar-track 
-    background: #f1f1f1 
- 
-::-webkit-scrollbar-thumb 
-    background: #888 
+::-webkit-scrollbar-track
+    background: #f1f1f1
 
-::-webkit-scrollbar-thumb:hover 
+::-webkit-scrollbar-thumb
+    background: #888
+
+::-webkit-scrollbar-thumb:hover
     background: #555
 
-.participants-button-container 
+.participants-button-container
     display: inline-block
 
 .relative-container
@@ -237,7 +237,7 @@ div div.participant:hover
     white-space: nowrap
     word-break: break-word
     overflow-wrap: break-word
-    
+
 .user-label
     margin-left: 10px
     margin-top: auto
@@ -254,7 +254,14 @@ div div.participant:hover
 .poll-create-container
     position: absolute
     bottom: 11%
-    left: calc(50% - 175px) 
+    left: calc(50% - 175px)
+    max-height: 80%
+    width: 350px
+    z-index: 0
+.meeting-setting-container
+    position: absolute
+    bottom: 11%
+    left: calc(38% - 175px)
     max-height: 80%
     width: 350px
     z-index: 0
@@ -262,7 +269,7 @@ div div.participant:hover
 .overflow-scroll
     overflow-y: scroll
 
-i.icon 
+i.icon
     opacity: 0.8
 
 i.icon:hover
@@ -318,7 +325,7 @@ div:moz-full-screen
         display: none
     .tools
         display: block
-  
+
 .ui.placeholder.segment.field
         max-width: 20rem
 
@@ -380,6 +387,7 @@ div:moz-full-screen
         width: 300px
 
 .board
+    pointer-events: none
     height: calc(100% - 30px)
     width: 100%
     @media screen and (max-width: 1000px)
@@ -388,6 +396,17 @@ div:moz-full-screen
     @media screen and (max-width: 600px)
         height: 268px
         width: 100%
+
+.drawing-disabled
+    padding-top: 6px
+    float: right
+    margin-right: 55px
+    color: #ff8a8a
+
+.ui.checkbox
+    padding-top: 6px
+    float: right
+    margin-right: 55px
 
 .whiteboard-header
     background-color: #f1f1f1
@@ -444,7 +463,7 @@ div:moz-full-screen
     object-fit: contain
     height: calc(100% - 60px)
     padding: 10%
-    
+
 .message-event
     .chat-content
         margin-left: 10px
@@ -452,7 +471,7 @@ div:moz-full-screen
             font-size: .85714286em
             color: rgba(0,0,0,.4)
             display: inline-block
-.message 
+.message
     outline: none
     resize: none
     border: none
@@ -481,4 +500,4 @@ div:moz-full-screen
     i
         cursor: grabbing
         opacity: 1
-    
+

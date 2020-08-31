@@ -55,13 +55,11 @@ namespace Whale.API.Controllers
         }
 
         [Authorize]
-        [HttpPut("updateMedia")]
-        public async Task<ActionResult> UpdateMeetingMediaOnStart(MediaOnStartDTO mediaOnStartDTO)
+        [HttpPut("updateSettings")]
+        public async Task<ActionResult> UpdateMeetingSettings(UpdateSettingsDTO updateSettingsDTO)
         {
-            mediaOnStartDTO.RequestingUserEmail =
-                (HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value);
 
-            await _httpService.PutAsync("api/meeting/updateMedia", mediaOnStartDTO);
+            await _httpService.PutAsync("api/meeting/updateSettings", updateSettingsDTO);
             return Ok();
         }
     }

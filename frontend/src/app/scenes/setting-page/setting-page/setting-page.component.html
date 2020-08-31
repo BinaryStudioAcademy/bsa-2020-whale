@@ -18,9 +18,22 @@
         </div>
       </div>
     </div>
+    <div class="item" id="meetingHeader">
+      <i class="small info icon"></i>
+      <div class="content">
+        <div
+          id="setting-changemeeting"
+          class="header"
+          (click)="changeMeeting()"
+        >
+          Meeting
+        </div>
+      </div>
+    </div>
   </div>
   <div class="ui actions ten wide column action">
     <app-setting-video *ngIf="isVideo"></app-setting-video>
     <app-setting-audio *ngIf="isAudio"></app-setting-audio>
+    <app-setting-meeting *ngIf="isMeeting"></app-setting-meeting>
   </div>
 </div>
