@@ -16,8 +16,9 @@ import {
   MediaData,
   ParticipantDynamicData,
   Participant,
+  ReactionsEnum,
   CardMediaData,
-} from '../../../shared/models';
+} from '@shared/models';
 import { MediaSettingsService } from 'app/core/services';
 
 @Component({
@@ -43,6 +44,7 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
   public shouldShowActions = false;
   public isMicrophoneHovered = false;
   public dynamicData: ParticipantDynamicData;
+  public reaction: ReactionsEnum;
 
   private video: HTMLVideoElement;
   private participantContainer: HTMLElement;
@@ -91,6 +93,10 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
 
         this.updateData();
       });
+    this.data.reactions
+      .asObservable()
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe((reaction) => this.onReaction(reaction));
   }
 
   ngOnDestroy(): void {
@@ -202,5 +208,11 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
       this.actionsPopupContent.style.display = 'none';
       this.actionsPopup?.destroy();
     }
+  }
+
+  private async onReaction(reaction: ReactionsEnum): Promise<void> {
+    this.reaction = reaction;
+    await new Promise((res) => setTimeout(res, 5000));
+    this.reaction = undefined;
   }
 }
