@@ -126,6 +126,8 @@ export class MeetingComponent
   public isWaitingForRecord = false;
   public isAddParticipantDisabled = false;
   public isShowReactions = false;
+  public isShowRecordingOptins = false;
+  public isHighlightRecording = false;
   public mediaData: MediaData[] = [];
   public meeting: Meeting;
   public meetingStatistics: Statistics;
@@ -841,8 +843,10 @@ export class MeetingComponent
     });
   }
 
-  public startRecording(): void {
+  public startRecording(isHighlight: boolean): void {
     this.isScreenRecording = true;
+    this.isShowRecordingOptins = false;
+    this.isHighlightRecording = false;
 
     this.blobService.startRecording().subscribe({
       complete: () => (this.isWaitingForRecord = false),
@@ -866,6 +870,9 @@ export class MeetingComponent
                 console.error(err.message);
               }
             );
+          if (isHighlight) {
+            this.highlightRecording();
+          }
         } else {
           this.isScreenRecording = false;
         }
@@ -874,6 +881,9 @@ export class MeetingComponent
   }
 
   public stopRecording(): void {
+    if (!this.isScreenRecording) {
+      return;
+    }
     this.isWaitingForRecord = true;
 
     this.isScreenRecording = false;
@@ -885,6 +895,12 @@ export class MeetingComponent
       'Conference stop recording'
     );
     this.toastr.info('Stop recording a conference');
+  }
+
+  private async highlightRecording(): Promise<void> {
+    this.isHighlightRecording = true;
+    await new Promise(r => setTimeout(r, 30000));
+    this.stopRecording();
   }
 
   public onPollIconClick(): void {

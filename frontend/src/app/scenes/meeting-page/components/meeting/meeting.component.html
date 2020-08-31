@@ -245,19 +245,30 @@
                 ></i>
               </div>
             </div>
-            <span
-              *ngIf="!isScreenRecording"
-              data-tooltip="Start Recording"
-              data-position="top left"
-            >
               <i
                 id="meeting-options-recording"
-                (click)="startRecording()"
+                *ngIf="!isScreenRecording"
+                (mouseover)="isShowRecordingOptins = true;"
+                (mouseleave)="isShowRecordingOptins = false;"
+                (click)="startRecording(isHighlightRecording)"
                 class="big circle icon"
-              ></i>
-            </span>
+              >
+              <div class="hover-helper" *ngIf="isShowRecordingOptins"></div>
+              <div class="record-container" *ngIf="isShowRecordingOptins">
+                <div class="ui vertical labeled icon buttons">
+                  <button class="ui button left-align" (click)="startRecording(false)">
+                    <i [className]="isHighlightRecording ? 'caret right icon medium-icon' : 'caret square right icon medium-icon'"></i>
+                    Start Recording
+                  </button>
+                  <button class="ui button left-align" (click)="startRecording(true)">
+                    <i [className]="isHighlightRecording ? 'caret square right icon medium-icon' : 'caret right icon medium-icon'"></i>
+                    Highlight
+                  </button>
+                </div>
+              </div>
+            </i>
             <span
-              *ngIf="isScreenRecording"
+              *ngIf="isScreenRecording && !isHighlightRecording"
               data-tooltip="Stop Recording"
               data-position="top left"
             >
@@ -265,6 +276,16 @@
                 id="meeting-options-recording"
                 (click)="stopRecording()"
                 class="big stop circle icon"
+              ></i>
+            </span>
+            <span
+              *ngIf="isScreenRecording && isHighlightRecording"
+              data-tooltip="Recording will stop automatically"
+              data-position="top left"
+            >
+              <i
+                id="meeting-options-recording"
+                class="big stop circle icon waiting-icon"
               ></i>
             </span>
             <span data-tooltip="Share Screen" data-position="top left">
@@ -458,6 +479,7 @@
           (onClick)="changeOutputDevice($event)"
         ></app-output-settings>
       </div>
+
     </div>
 
     <div *ngIf="isShowChat" class="ui chat card">
