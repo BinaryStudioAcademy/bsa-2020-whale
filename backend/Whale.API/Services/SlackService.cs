@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Whale.API.Models.Slack;
 using Whale.Shared.Services;
 using SlackUser = SlackAPI.User;
 
@@ -94,6 +95,17 @@ namespace Whale.API.Services
         {
             var users = await _userService.GetAllUsers();
             return users.Where(x => x.Email.Equals(userEmail, StringComparison.InvariantCultureIgnoreCase)).Count() > 0;
+        }
+
+        public ExternalResponse GetExternalMessage(string text, string url)
+        {
+            var response = new ExternalResponse
+            {
+                Text = text,
+                Url = url
+            };
+
+            return response;
         }
     }
 }
