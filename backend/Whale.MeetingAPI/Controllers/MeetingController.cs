@@ -29,7 +29,6 @@ namespace Whale.API.Controllers
             return Ok(await _meetingService.CreateMeeting(meetingDto));
         }
 
-        [AllowAnonymous]
         [HttpPost("scheduled")]
         public async Task<ActionResult<MeetingLinkDTO>> CreateMeetingScheduled(MeetingCreateDTO meetingDto)
         {
