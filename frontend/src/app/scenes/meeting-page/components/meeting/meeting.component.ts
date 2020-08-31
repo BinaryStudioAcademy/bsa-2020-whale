@@ -130,6 +130,7 @@ export class MeetingComponent
   public isShowReactions = false;
   public isShowRecordingOptins = false;
   public isHighlightRecording = false;
+  public isMeetingLoading = true;
   public mediaData: MediaData[] = [];
   public meeting: Meeting;
   public meetingStatistics: Statistics;
@@ -258,7 +259,6 @@ export class MeetingComponent
       this.leaveUnConnected();
       return;
     }
-
     const settings = this.currentUserStream.getVideoTracks()[0].getSettings();
     settings.frameRate = 20;
     settings.height = 480;
@@ -1232,6 +1232,7 @@ export class MeetingComponent
           );
         });
     }
+    this.isMeetingLoading = false;
   }
 
   //#endregion options
