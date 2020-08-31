@@ -13,6 +13,7 @@ import {
 } from 'app/core/services';
 import { Subject } from 'rxjs';
 import { Router } from '@angular/router';
+import { DndDropEvent } from 'ngx-drag-drop';
 
 @Component({
   selector: 'app-division-by-rooms-modal',
@@ -29,6 +30,7 @@ export class DivisionByRoomsModalComponent
   public numberOfRooms = 2;
   public duration = 10;
   public onCanMoveIntoRoomEvent: EventEmitter<void>;
+  public selectedParticipant: Participant;
 
   constructor(private router: Router, public roomService: RoomService) {
     super();
@@ -73,5 +75,34 @@ export class DivisionByRoomsModalComponent
 
   public numberOfRoomsChanged(): void {
     this.roomService.changeNumberofRooms(this.numberOfRooms);
+  }
+
+  public onDragEnd(event: DragEvent): void {
+    this.selectedParticipant = null;
+  }
+
+  public onDrop(event: DndDropEvent, participants: Participant[]): void {
+    let index = event.index;
+    if (typeof index === 'undefined') {
+      index = participants.length;
+    }
+    participants.splice(index, 0, event.data);
+  }
+
+  public onDragStart(event: DragEvent, participant: Participant): void {
+    this.selectedParticipant = participant;
+  }
+
+  public onDragged(item: any, participants: Participant[]): void {
+    const index = participants.indexOf(item);
+    participants.splice(index, 1);
+  }
+
+  public checkIfSelectedParticipantIsInCurrentList(
+    participants: Participant[]
+  ): boolean {
+    return Boolean(
+      participants.find((p) => p.id === this.selectedParticipant?.id)
+    );
   }
 }
