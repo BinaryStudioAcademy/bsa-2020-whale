@@ -522,12 +522,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
     const contact = this.contacts.find((c) => (c.id = contactId));
     this.onContactClick(contact);
   }
-
-  public onMessageRead(event: string): void {
-    this.pageHeader.notificationsList = this.pageHeader.notificationsList.filter(
-      (n) => !n.options.includes(event)
-    );
-  }
 }
 export interface UserModel {
   id: number;
