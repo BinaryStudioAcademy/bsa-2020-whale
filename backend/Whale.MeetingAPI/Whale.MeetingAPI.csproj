@@ -5,6 +5,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="MappingProfiles\**" />
+    <Compile Remove="Models\**" />
+    <Content Remove="MappingProfiles\**" />
+    <Content Remove="Models\**" />
+    <EmbeddedResource Remove="MappingProfiles\**" />
+    <EmbeddedResource Remove="Models\**" />
+    <None Remove="MappingProfiles\**" />
+    <None Remove="Models\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AspNetCore.HealthChecks.Network" Version="3.1.1" />
     <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="3.1.2" />
     <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="3.1.1" />
@@ -24,11 +35,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Whale.Shared\Whale.Shared.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="MappingProfiles\" />
-    <Folder Include="Models\" />
   </ItemGroup>
 
 
