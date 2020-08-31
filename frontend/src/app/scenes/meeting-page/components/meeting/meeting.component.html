@@ -397,8 +397,14 @@
         </div>
         <div class="whiteboard-buttons">
           <i
+            *ngIf="!isWhiteboardFullScreen"
             (click)="whiteboardFullscreen(); $event.stopPropagation()"
-            class="clone icon"
+            class="expand icon"
+          ></i>
+          <i
+            *ngIf="isWhiteboardFullScreen"
+            (click)="whiteboardFullscreen(); $event.stopPropagation()"
+            class="compress icon"
           ></i>
           <i (click)="showCanvas()" class="times icon"></i>
         </div>
@@ -441,6 +447,7 @@
           (switchMediaPermissionAsHostEvent)="
             switchParticipantMediaAsHost($event)
           "
+          (pinVideoEvent)="pinCard($event)"
           [data]="data"
           [meetingHolder]="currentParticipant"
         >
