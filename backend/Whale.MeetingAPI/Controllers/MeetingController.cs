@@ -30,7 +30,7 @@ namespace Whale.API.Controllers
         }
 
         [HttpPost("scheduled")]
-        public async Task<ActionResult<MeetingLinkDTO>> CreateMeetingScheduled(MeetingCreateDTO meetingDto)
+        public async Task<ActionResult> CreateMeetingScheduled(MeetingCreateDTO meetingDto)
         {
             var meeting = await _meetingService.RegisterScheduledMeeting(meetingDto);
 

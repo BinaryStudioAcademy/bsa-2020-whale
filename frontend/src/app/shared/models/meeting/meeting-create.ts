@@ -5,4 +5,5 @@ export interface MeetingCreate {
   isScheduled: boolean;
   isRecurrent: boolean;
   creatorEmail: string;
+  participantsEmails: string[];
 }

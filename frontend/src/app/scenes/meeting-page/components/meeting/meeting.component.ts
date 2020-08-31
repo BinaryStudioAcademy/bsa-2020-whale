@@ -63,6 +63,7 @@ import { RecordModalComponent } from '../record-modal/record-modal.component';
 import * as DecibelMeter from 'decibel-meter';
 import { BrowserMediaDevice } from '@shared/browser-media-device';
 import { MeetingSettingsService } from '../../../../core/services/meeting-settings.service';
+import { MeetingInviteModalData } from '@shared/models/email/meeting-invite-modal-data';
 
 @Component({
   selector: 'app-meeting',
@@ -1646,10 +1647,11 @@ export class MeetingComponent
             meetingId: this.meeting.id,
             senderId: this.currentParticipant.user.id,
             participants: this.meeting.participants,
-          })
+            isScheduled: false,
+          } as MeetingInviteModalData)
           .toPromise()
           .then((isShowParticipants) => {
-            this.isShowParticipants = isShowParticipants;
+            this.isShowParticipants = isShowParticipants as boolean;
           });
         this.isAddParticipantDisabled = false;
       },

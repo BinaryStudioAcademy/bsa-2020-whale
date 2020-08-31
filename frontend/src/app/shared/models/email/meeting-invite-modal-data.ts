@@ -5,4 +5,5 @@ export interface MeetingInviteModalData {
   senderId: string;
   inviteLink: string;
   participants: Participant[];
+  isScheduled: boolean;
 }
