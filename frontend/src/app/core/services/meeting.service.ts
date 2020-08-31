@@ -13,7 +13,7 @@ import { UpdateSettings } from '@shared/models/meeting/update-settings';
   providedIn: 'root',
 })
 export class MeetingService {
-  public routePrefix = `${environment.meetingApiUrl}/api/meeting`;
+  public routePrefix = `${environment.apiUrl}/api/meeting`;
 
   constructor(private httpService: HttpService) {}
 
