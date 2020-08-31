@@ -1,4 +1,4 @@
-import { MeetingSettings } from './MeetingSettings';
+import { MeetingSettings } from './meeting-settings';
 
 export interface UpdateSettings extends MeetingSettings {
   meetingId: string;

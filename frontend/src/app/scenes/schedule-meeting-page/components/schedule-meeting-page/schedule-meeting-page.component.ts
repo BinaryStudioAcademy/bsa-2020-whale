@@ -7,6 +7,7 @@ import { GoogleCalendarService } from 'app/core/services/google-calendar.service
 import moment from 'moment';
 import { AuthService } from 'app/core/auth/auth.service';
 import { Router } from '@angular/router';
+import { MeetingSettingsService } from 'app/core/services';
 
 @Component({
   selector: 'app-schedule-meeting-page',
@@ -36,7 +37,8 @@ export class ScheduleMeetingPageComponent implements OnInit {
     private toastr: ToastrService,
     private calendarService: GoogleCalendarService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    meetingSettingsService: MeetingSettingsService
   ) {
     const today: Date = new Date();
 
@@ -50,8 +52,12 @@ export class ScheduleMeetingPageComponent implements OnInit {
       isGeneratedMeetingID: new FormControl('true'),
       isPasswordEnabled: new FormControl(''),
       password: new FormControl(''),
-      isDisableVideo: new FormControl(''),
-      isDisableAudio: new FormControl(''),
+      isDisableAudio: new FormControl(
+        meetingSettingsService.settings.isAudioDisabled
+      ),
+      isDisableVideo: new FormControl(
+        meetingSettingsService.settings.isVideoDisabled
+      ),
       saveIntoCalendar: new FormControl(false),
     });
   }

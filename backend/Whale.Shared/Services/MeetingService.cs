@@ -116,19 +116,6 @@ namespace Whale.Shared.Services
             return new MeetingLinkDTO { Id = meeting.Id, Password = pwd };
         }
 
-        public async Task UpdateMeetingMediaOnStart(MediaOnStartDTO mediaDTO)
-        {
-            await _redisService.ConnectAsync();
-
-            var meetingSettings = 
-                await _redisService.GetAsync<MeetingSettingsDTO>($"{meetingSettingsPrefix}{mediaDTO.MeetingId}");
-
-            meetingSettings.IsVideoAllowed = mediaDTO.IsVideoAllowed;
-            meetingSettings.IsAudioAllowed = mediaDTO.IsAudioAllowed;
-
-            await _redisService.SetAsync($"{meetingSettingsPrefix}{mediaDTO.MeetingId}", meetingSettings);
-        }
-
         public async Task UpdateMeetingSettings(UpdateSettingsDTO updateSettingsDTO)
         {
             await _redisService.ConnectAsync();
@@ -136,8 +123,12 @@ namespace Whale.Shared.Services
             var meetingSettings =
                 await _redisService.GetAsync<MeetingSettingsDTO>($"{meetingSettingsPrefix}{updateSettingsDTO.MeetingId}");
 
+            if (meetingSettings == null)
+
             meetingSettings.IsWhiteboard = updateSettingsDTO.IsWhiteboard;
             meetingSettings.IsPoll = updateSettingsDTO.IsPoll;
+            meetingSettings.IsAudioAllowed = !updateSettingsDTO.IsAudioDisabled;
+            meetingSettings.IsVideoAllowed = !updateSettingsDTO.IsVideoDisabled;
 
             await _redisService.SetAsync($"{meetingSettingsPrefix}{updateSettingsDTO.MeetingId}", meetingSettings);
         }

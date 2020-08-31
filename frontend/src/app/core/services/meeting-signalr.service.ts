@@ -7,7 +7,6 @@ import { tap } from 'rxjs/operators';
 import {
   ChangedMediaState,
   StreamChangedData,
-  RoomDTO,
   MeetingConnectionData,
   MeetingMessage,
   Participant,
@@ -289,7 +288,6 @@ export enum SignalMethods {
   OnStartShareScreen,
   OnStopShareScreen,
   GetCreatedRooms,
-  OnHostChangeRoom,
   OnReaction,
   OnLeaveRoom,
   OnDrawingChangePermissions,

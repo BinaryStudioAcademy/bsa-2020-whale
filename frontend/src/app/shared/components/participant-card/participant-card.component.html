@@ -54,10 +54,16 @@
 </div>
 <div class="current-user-actions">
   <ul>
-    <li (click)="toggleMicrophone()">
+    <li
+      (click)="toggleMicrophone()"
+      *ngIf="dynamicData.isAudioAllowed || meetingHolder.role === 1"
+    >
       {{ dynamicData.isAudioActive ? "Mute My Audio" : "Unmute My Audio" }}
     </li>
-    <li (click)="toggleCamera()">
+    <li
+      (click)="toggleCamera()"
+      *ngIf="dynamicData.isVideoAllowed || meetingHolder.role === 1"
+    >
       {{ dynamicData.isVideoActive ? "Stop Video" : "Start Video" }}
     </li>
     <li (click)="pinVideo()">Pin Video</li>

@@ -260,58 +260,6 @@
               ></i>
             </span>
             <span
-              *ngIf="
-                !isParticipantsAudioAllowed && currentParticipant?.role === 1
-              "
-              data-tooltip="Enable Participants' Audio"
-              data-position="top left"
-            >
-              <i
-                id="meeting-options-allow-participants-audio"
-                (click)="switchOtherParticipantsMediaAsHost(false)"
-                class="big file audio outline icon"
-              ></i>
-            </span>
-            <span
-              *ngIf="
-                isParticipantsAudioAllowed && currentParticipant?.role === 1
-              "
-              data-tooltip="Disable Participants` Audio"
-              data-position="top left"
-            >
-              <i
-                id="meeting-options-ban-participants-audio"
-                (click)="switchOtherParticipantsMediaAsHost(false)"
-                class="big file audio icon"
-              ></i>
-            </span>
-            <span
-              *ngIf="
-                !isParticipantsVideoAllowed && currentParticipant?.role === 1
-              "
-              data-tooltip="Enable Participants' Video"
-              data-position="top left"
-            >
-              <i
-                id="meeting-options-allow-participants-video"
-                (click)="switchOtherParticipantsMediaAsHost(true)"
-                class="big file video outline icon"
-              ></i>
-            </span>
-            <span
-              *ngIf="
-                isParticipantsVideoAllowed && currentParticipant?.role === 1
-              "
-              data-tooltip="Disable Participants' Video"
-              data-position="top left"
-            >
-              <i
-                id="meeting-options-ban-participants-video"
-                (click)="switchOtherParticipantsMediaAsHost(true)"
-                class="big file video icon"
-              ></i>
-            </span>
-            <span
               *ngIf="isScreenRecording"
               data-tooltip="Stop Recording"
               data-position="top left"
@@ -546,22 +494,19 @@
         <div class="ui right labeled input">
           <label for="receiver" class="ui label">Send To:</label>
           <select
-            [ngClass]="
-              newMsgFrom.length > 0
-                ? 'ui compact selection dropdown pulse'
-                : 'ui compact selection dropdown'
-            "
+            class="ui compact selection dropdown"
+            [class.border-pulse]="newMsgFrom.length > 0"
             id="receiver"
             [(ngModel)]="msgReceiverEmail"
             (change)="receiverChanged()"
           >
-            <option value="" [ngClass]="{ pulse: newMsgFrom.includes('') }"
-              >Everyone</option
-            >
+            <option value="" [class.pulse]="newMsgFrom.includes('')"
+              >Everyone
+            </option>
             <option
               *ngFor="let p of otherParticipants"
               [value]="p.user.email"
-              [ngClass]="{ pulse: newMsgFrom.includes(p?.user?.email) }"
+              [class.pulse]="newMsgFrom.includes(p.user.email)"
               >{{ p.user.firstName }} {{ p.user.secondName }}</option
             >
           </select>
