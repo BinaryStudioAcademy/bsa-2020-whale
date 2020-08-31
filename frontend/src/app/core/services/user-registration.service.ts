@@ -52,7 +52,7 @@ export class UserRegistrationService {
               });
           } else {
             this.userRegistered.next(user.body);
-            if (this.router.url === '/' || this.router.url === 'landing') {
+            if (this.router.url === '/' || this.router.url === '/landing') {
               this.router.navigate(['/home']);
             }
           }
