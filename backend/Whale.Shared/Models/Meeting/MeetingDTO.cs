@@ -18,6 +18,7 @@ namespace Whale.Shared.Models.Meeting
         public bool IsAudioAllowed { get; set; }
         public bool IsWhiteboard { get; set; }
         public bool IsPoll { get; set; }
+        public bool IsAllowedToChooseRoom { get; set; }
 
         public IEnumerable<ParticipantDTO> Participants { get; set; }
         public IEnumerable<PollResultDTO> PollResults { get; set; }
