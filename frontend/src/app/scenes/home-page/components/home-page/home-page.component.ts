@@ -354,6 +354,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
         isWhiteboard: this.meetingSettingsService.settings.isWhiteboard,
         isPoll: this.meetingSettingsService.settings.isPoll,
         creatorEmail: this.ownerEmail,
+        participantsEmails: [],
       } as MeetingCreate)
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(

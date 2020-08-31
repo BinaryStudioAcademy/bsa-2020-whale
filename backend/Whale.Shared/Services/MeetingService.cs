@@ -125,7 +125,8 @@ namespace Whale.Shared.Services
             meeting.Settings = JsonConvert.SerializeObject(new { meetingDTO.IsAudioAllowed, meetingDTO.IsVideoAllowed });
             await _context.Meetings.AddAsync(meeting);
             var user = await _context.Users.FirstOrDefaultAsync(e => e.Email == meetingDTO.CreatorEmail);
-            await _context.ScheduledMeetings.AddAsync(new ScheduledMeeting { CreatorId = user.Id, MeetingId = meeting.Id,  ParticipantsEmails = JsonConvert.SerializeObject(meetingDTO.ParticipantsEmails)});
+            var scheduledMeeting = new ScheduledMeeting { CreatorId = user.Id, MeetingId = meeting.Id, ParticipantsEmails = JsonConvert.SerializeObject(meetingDTO.ParticipantsEmails) };
+            await _context.ScheduledMeetings.AddAsync(scheduledMeeting);
             await _context.SaveChangesAsync();
 
             return meeting;
