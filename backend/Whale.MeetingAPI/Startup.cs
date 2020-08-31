@@ -18,6 +18,10 @@ using Whale.Shared.Helpers;
 using Whale.DAL.Settings;
 using Whale.Shared.Exceptions;
 using System;
+using Quartz;
+using Quartz.Impl;
+using Quartz.Spi;
+using Whale.Shared.Jobs;
 
 namespace Whale.MeetingAPI
 {
@@ -83,6 +87,26 @@ namespace Whale.MeetingAPI
             });
             services.AddScoped(x => new EncryptHelper(Configuration.GetValue<string>("EncryptSettings:key")));
 
+            //---Jobs---
+            services.AddSingleton<IJobFactory, JobFactory>();
+            services.AddSingleton<ScheduledMeetingJob>();
+            services.AddTransient<ISchedulerFactory, StdSchedulerFactory>();
+            services.AddTransient<MeetingScheduleService>();
+            services.AddQuartz(q =>
+            {
+                q.SchedulerName = "Quartz Scheduler";
+                q.UseSimpleTypeLoader();
+                q.UseInMemoryStore();
+                q.UseDefaultThreadPool(tp =>
+                {
+                    tp.MaxConcurrency = 10;
+                });
+            });
+            services.AddQuartzServer(opt =>
+            {
+                opt.WaitForJobsToComplete = true;
+            });
+            services.AddHostedService<MeetingHostedService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

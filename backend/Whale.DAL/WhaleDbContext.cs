@@ -26,6 +26,7 @@ namespace Whale.DAL
         public DbSet<Setting> Settings { get; set; }
         public DbSet<UserAchivement> UserAchivements { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<ScheduledMeeting> ScheduledMeetings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

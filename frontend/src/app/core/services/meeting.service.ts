@@ -13,7 +13,7 @@ import { UpdateSettings } from '@shared/models/meeting/update-settings';
   providedIn: 'root',
 })
 export class MeetingService {
-  public routePrefix = `${environment.apiUrl}/api/meeting`;
+  public routePrefix = `${environment.meetingApiUrl}/api/meeting`;
 
   constructor(private httpService: HttpService) {}
 
@@ -22,6 +22,15 @@ export class MeetingService {
   ): Observable<HttpResponse<MeetingLink>> {
     return this.httpService.postFullRequest<MeetingCreate, MeetingLink>(
       `${this.routePrefix}`,
+      meeting
+    );
+  }
+
+  public createScheduledMeeting(
+    meeting: MeetingCreate
+  ): Observable<HttpResponse<MeetingLink>> {
+    return this.httpService.postFullRequest<MeetingCreate, MeetingLink>(
+      `${this.routePrefix}/scheduled`,
       meeting
     );
   }
