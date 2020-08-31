@@ -4,14 +4,16 @@ import { ReactionsEnum } from '@shared/models';
 @Component({
   selector: 'app-reactions',
   templateUrl: './reactions.component.html',
-  styleUrls: ['./reactions.component.sass']
+  styleUrls: ['./reactions.component.sass'],
 })
 export class ReactionsComponent {
-  @Output() reaction: EventEmitter<ReactionsEnum> = new EventEmitter<ReactionsEnum>();
+  @Output() reaction: EventEmitter<ReactionsEnum> = new EventEmitter<
+    ReactionsEnum
+  >();
   public userTimeUnix: number;
   public meetingTimeUnix: number;
   public reactionsEnum = ReactionsEnum;
-  constructor() { }
+  constructor() {}
 
   public onReactionClick(reaction: ReactionsEnum): void {
     this.reaction.emit(reaction);

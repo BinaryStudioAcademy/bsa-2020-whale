@@ -156,7 +156,6 @@ export class MeetingComponent
   public IsPoll = false;
 
   @ViewChild('whiteboard') private whiteboard: ElementRef;
-  @ViewChild('board') private canvasWhiteboard: ElementRef;
   @ViewChild('currentVideo') private currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
     HTMLElement
@@ -376,29 +375,6 @@ export class MeetingComponent
         }
       );
 
-    this.meetingSignalrService.onDrawingChangePermissions$
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(
-        (enabled) => {
-          this.isDrawingEnabled = enabled;
-
-          if (this.isHost) {
-            this.canvasWhiteboard.nativeElement.style.pointerEvents = 'all';
-          } else {
-            if (!this.isDrawingEnabled) {
-              this.canvasWhiteboard.nativeElement.style.pointerEvents = 'none';
-              this.toastr.info('Host disabled drawing');
-            } else {
-              this.canvasWhiteboard.nativeElement.style.pointerEvents = 'all';
-              this.toastr.info('Host enabled drawing for everyone');
-            }
-          }
-        },
-        () => {
-          this.toastr.error('Error occured during drawing change permissions');
-        }
-      );
-
     this.meetingSignalrService.participantStreamChanged$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
@@ -533,6 +509,26 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (setting) => {
+          if (
+            !this.meeting.isWhiteboard &&
+            setting.isWhiteboard &&
+            !this.isHost
+          ) {
+            this.toastr.info('Host has forbidden a whiteboard.');
+          }
+          if (
+            this.meeting.isWhiteboard &&
+            !setting.isWhiteboard &&
+            !this.isHost
+          ) {
+            this.toastr.info('Host has allowed a whiteboard.');
+          }
+          if (!this.meeting.isPoll && setting.isPoll && !this.isHost) {
+            this.toastr.info('Host has forbidden to create polls.');
+          }
+          if (this.meeting.isPoll && !setting.isWhiteboard && !this.isHost) {
+            this.toastr.info('Host has allowed polls');
+          }
           this.meeting.isWhiteboard = setting.isWhiteboard;
           this.meeting.isPoll = setting.isPoll;
           this.meeting.isWhiteboard && !this.isHost
@@ -745,10 +741,6 @@ export class MeetingComponent
   }
 
   ngAfterViewChecked(): void {
-    if (this.canvasWhiteboard !== undefined && this.isHost) {
-      this.canvasWhiteboard.nativeElement.style.pointerEvents = 'all';
-    }
-
     if (this.isShowChat) {
       this.chatElement = this.chatBlock.first?.nativeElement;
     }
@@ -1461,15 +1453,6 @@ export class MeetingComponent
       meetingId: this.meeting.id.toString(),
       canvasEvent: strokes,
     });
-  }
-
-  public onDrawingChangePermissions(event): void {
-    const enabled = event.target.checked;
-
-    this.meetingSignalrService.invoke(
-      SignalMethods.OnDrawingChangePermissions,
-      enabled
-    );
   }
 
   public onCanvasClear(): void {
