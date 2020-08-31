@@ -10,6 +10,7 @@ import {
   AfterViewChecked,
   ViewChildren,
   QueryList,
+  HostListener,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
@@ -198,6 +199,18 @@ export class MeetingComponent
       this.toastr,
       this.unsubscribe$
     );
+  }
+
+  @HostListener('fullscreenchange', ['$event'])
+  @HostListener('webkitfullscreenchange', ['$event'])
+  @HostListener('mozfullscreenchange', ['$event'])
+  @HostListener('MSFullscreenChange', ['$event'])
+  public screenChange(): void {
+    const element = document.fullscreenElement;
+
+    if (element?.classList[0] === undefined) {
+      this.isWhiteboardFullScreen = false;
+    }
   }
 
   //#region accessors
@@ -984,6 +997,8 @@ export class MeetingComponent
     } else if (this.elem.msRequestFullscreen) {
       this.elem.msRequestFullscreen();
     }
+
+    this.canvasIsDisplayed = false;
   }
 
   public closeFullscreen(): void {
