@@ -509,6 +509,7 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (setting) => {
+          console.log('meetingSettingsChanged', setting);
           if (
             !this.meeting.isWhiteboard &&
             setting.isWhiteboard &&
@@ -534,6 +535,7 @@ export class MeetingComponent
           this.meeting.isWhiteboard && !this.isHost
             ? (this.whiteboardDisable = '(drawing is disabled by Host)')
             : (this.whiteboardDisable = '');
+          this.meeting.isAllowedToChooseRoom = setting.isAllowedToChooseRoom;
           this.savedStrokes.forEach((strokes) =>
             this.meetingSignalrService.invoke(SignalMethods.OnDrawing, {
               meetingId: this.meeting.id.toString(),

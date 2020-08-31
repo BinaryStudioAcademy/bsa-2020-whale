@@ -55,8 +55,6 @@ export class SettingMeetingComponent implements OnInit, AfterViewInit {
     this.checkboxPoll = document.getElementById('poll') as any;
     this.checkboxWhiteboard.checked = this.isWhiteboard;
     this.checkboxPoll.checked = this.isPoll;
-    this.checkboxIsAudioDisabled.nativeElement.checked = this.isAudioDisabled;
-    this.checkboxIsVideoDisabled.nativeElement.checked = this.isVideoDisabled;
   }
 
   ngAfterViewInit(): void {
@@ -114,6 +112,20 @@ export class SettingMeetingComponent implements OnInit, AfterViewInit {
     }
 
     this.meetingSettingsService.changeIsVideoDisabled(this.isVideoDisabled);
+  }
+
+  public switchIsAllowedToChooseRoom(event: any): void {
+    this.isAllowedToChooseRoom = event.target.checked;
+
+    if (this.meeting) {
+      this.meeting.isAllowedToChooseRoom = this.isAllowedToChooseRoom;
+      this.switchMeetingSettingAsHost(this.meeting);
+      return;
+    }
+
+    this.meetingSettingsService.changeisAllowedToChooseRoom(
+      this.isAllowedToChooseRoom
+    );
   }
 
   public switchOtherParticipantsMediaAsHost(): void {
