@@ -9,20 +9,17 @@ namespace Whale.Shared.Jobs
 {
     public class JobFactory : IJobFactory
     {
-        //private readonly IServiceScopeFactory _serviceScopeFactory;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
 
-        public JobFactory(IServiceProvider serviceProvider)
+        public JobFactory(IServiceScopeFactory serviceScopeFactory)
         {
-            //_serviceScopeFactory = serviceScopeFactory;
-            _serviceProvider = serviceProvider;
+            _serviceScopeFactory = serviceScopeFactory;
         }
 
         public IJob NewJob(TriggerFiredBundle bundle, IScheduler scheduler)
         {
-            //using (var scope = _serviceScopeFactory.CreateScope())
-            //    return scope.ServiceProvider.GetService(bundle.JobDetail.JobType) as IJob;
-            return _serviceProvider.GetRequiredService(bundle.JobDetail.JobType) as IJob;
+            using (var scope = _serviceScopeFactory.CreateScope())
+                return scope.ServiceProvider.GetService(bundle.JobDetail.JobType) as IJob;
         }
 
         public void ReturnJob(IJob job) { }

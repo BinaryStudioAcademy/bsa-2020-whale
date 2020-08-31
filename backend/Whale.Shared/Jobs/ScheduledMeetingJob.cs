@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Whale.DAL.Models;
 using Whale.Shared.Models.Meeting;
 using Whale.Shared.Services;
 
@@ -12,7 +13,6 @@ namespace Whale.Shared.Jobs
 {
     public class ScheduledMeetingJob : IJob
     {
-        //private readonly MeetingService _meetingService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
 
         public ScheduledMeetingJob(IServiceScopeFactory serviceScopeFactory)
@@ -23,12 +23,12 @@ namespace Whale.Shared.Jobs
         public async Task Execute(IJobExecutionContext context)
         {
             var dataMap = context.JobDetail.JobDataMap;
-            var meetingDTO = JsonConvert.DeserializeObject<MeetingCreateDTO>(dataMap.GetString("JobData"));
+            var meeting = JsonConvert.DeserializeObject<Meeting>(dataMap.GetString("JobData"));
 
             using (var scope = _serviceScopeFactory.CreateScope())
             {
                 var meetingService = scope.ServiceProvider.GetService<MeetingService>();
-                await meetingService.CreateMeeting(meetingDTO);
+                await meetingService.StartScheduledMeeting(meeting);
             }
         }
     }

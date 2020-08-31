@@ -88,9 +88,8 @@ namespace Whale.MeetingAPI
             services.AddScoped(x => new EncryptHelper(Configuration.GetValue<string>("EncryptSettings:key")));
 
             //---Jobs---
-            //2 transient
             services.AddSingleton<IJobFactory, JobFactory>();
-            services.AddSingleton<ScheduledMeetingJob>();//can be deleted
+            services.AddSingleton<ScheduledMeetingJob>();
             services.AddTransient<ISchedulerFactory, StdSchedulerFactory>();
             services.AddTransient<MeetingScheduleService>();
             services.AddQuartz(q =>
@@ -102,12 +101,12 @@ namespace Whale.MeetingAPI
                 {
                     tp.MaxConcurrency = 10;
                 });
-                //add here
             });
             services.AddQuartzServer(opt =>
             {
                 opt.WaitForJobsToComplete = true;
             });
+            services.AddHostedService<MeetingHostedService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

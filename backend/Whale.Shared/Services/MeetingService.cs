@@ -13,6 +13,8 @@ using Whale.Shared.Models.Meeting;
 using Whale.Shared.Models.Participant;
 using Whale.Shared.Models.Meeting.MeetingMessage;
 using shortid;
+using System.Diagnostics;
+using Newtonsoft.Json;
 
 namespace Whale.Shared.Services
 {
@@ -110,6 +112,55 @@ namespace Whale.Shared.Services
             });
 
             return new MeetingLinkDTO { Id = meeting.Id, Password = pwd };
+        }
+
+        public async Task<Meeting> RegisterScheduledMeeting(MeetingCreateDTO meetingDTO)
+        {
+            var meeting = _mapper.Map<Meeting>(meetingDTO);
+            meeting.Settings = JsonConvert.SerializeObject(new { meetingDTO.IsAudioAllowed, meetingDTO.IsVideoAllowed });
+            await _context.Meetings.AddAsync(meeting);
+            var user = await _context.Users.FirstOrDefaultAsync(e => e.Email == meetingDTO.CreatorEmail);
+            await _context.ScheduledMeetings.AddAsync(new ScheduledMeeting { CreatorId = user.Id, MeetingId = meeting.Id });
+            await _context.SaveChangesAsync();
+
+            return meeting;
+        }
+
+        public async Task<MeetingLinkDTO> StartScheduledMeeting(Meeting meeting)
+        {
+            var meetingSettings = JsonConvert.DeserializeObject(meeting.Settings);
+            var pwd = _encryptService.EncryptString(Guid.NewGuid().ToString());
+            await _redisService.ConnectAsync();
+            await _redisService.SetAsync(meeting.Id.ToString(), new MeetingMessagesAndPasswordDTO { Password = pwd });
+            await _redisService.SetAsync($"{meetingSettingsPrefix}{meeting.Id}", new MeetingSettingsDTO
+            {
+                IsAudioAllowed = ((dynamic)meetingSettings).IsAudioAllowed,
+                IsVideoAllowed = ((dynamic)meetingSettings).IsVideoAllowed
+            });
+
+            string shortURL = ShortId.Generate();
+            string fullURL = $"?id={meeting.Id}&pwd={pwd}";
+
+            await _redisService.SetAsync(fullURL, shortURL);
+            await _redisService.SetAsync(shortURL, fullURL);
+
+            var scheduledMeeting = await _context.ScheduledMeetings.FirstOrDefaultAsync(e => e.MeetingId == meeting.Id);
+            var user = await _context.Users.FirstOrDefaultAsync(e => e.Id == scheduledMeeting.CreatorId);
+            await _participantService.CreateParticipantAsync(new ParticipantCreateDTO
+            {
+                Role = ParticipantRole.Host,
+                UserEmail = user.Email,
+                MeetingId = meeting.Id
+            });
+
+            return new MeetingLinkDTO { Id = meeting.Id, Password = pwd };
+        }
+
+        public async Task<IEnumerable<Meeting>> GetScheduledMeetins()
+        {
+            return await _context.Meetings
+                .Where(e => e.IsScheduled && e.EndTime == null && e.StartTime >= DateTimeOffset.Now)
+                .ToListAsync();
         }
 
         public async Task UpdateMeetingMediaOnStart(MediaOnStartDTO mediaDTO)

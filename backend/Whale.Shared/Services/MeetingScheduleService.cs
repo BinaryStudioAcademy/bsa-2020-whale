@@ -15,19 +15,21 @@ namespace Whale.Shared.Services
         private readonly IJobFactory _jobFactory;
         private readonly ISchedulerFactory _schedulerFactory;
         private IScheduler scheduler;
+        private Guid id;
 
         public MeetingScheduleService(IJobFactory jobFactory, ISchedulerFactory schedulerFactory)
         {
             _jobFactory = jobFactory;
             _schedulerFactory = schedulerFactory;
+            id = Guid.NewGuid();
         }
 
         private IJobDetail CreateJob(JobInfo jobInfo, string obj)
         {
             return JobBuilder
                 .Create(jobInfo.JobType)
-                .WithIdentity("test")//change
-                .UsingJobData("JobData", obj)
+                .WithIdentity($"{id}-job")
+                .UsingJobData($"JobData", obj)
                 .Build();
         }
 
@@ -35,16 +37,15 @@ namespace Whale.Shared.Services
         {
             return TriggerBuilder
                 .Create()
-                .WithIdentity("test.trigger")//change
+                .WithIdentity("test.trigger")
                 .StartAt(jobInfo.JobTime)
-                .ForJob("test")//chabge
+                .ForJob($"{id}-job")
                 .Build();
         }
 
         public async Task Start(JobInfo jobInfo, string obj)
         {
             scheduler = await _schedulerFactory.GetScheduler();
-            //scheduler = await StdSchedulerFactory.GetDefaultScheduler();
             scheduler.JobFactory = _jobFactory;
             var job = CreateJob(jobInfo, obj);
             var trigger = CreateTrigger(jobInfo);

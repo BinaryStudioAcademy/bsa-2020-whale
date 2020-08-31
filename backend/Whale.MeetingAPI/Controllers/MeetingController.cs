@@ -33,9 +33,10 @@ namespace Whale.API.Controllers
         [HttpPost("scheduled")]
         public async Task<ActionResult<MeetingLinkDTO>> CreateMeetingScheduled(MeetingCreateDTO meetingDto)
         {
-            //var jobInfo = new JobInfo(typeof(ScheduledMeetingJob), meetingDto.StartTime);
-            var jobInfo = new JobInfo(typeof(ScheduledMeetingJob), new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(30)));
-            var obj = JsonConvert.SerializeObject(meetingDto);
+            var meeting = await _meetingService.RegisterScheduledMeeting(meetingDto);
+
+            var jobInfo = new JobInfo(typeof(ScheduledMeetingJob), meetingDto.StartTime);
+            var obj = JsonConvert.SerializeObject(meeting);
             await _meetingScheduleService.Start(jobInfo, obj);
 
             return Ok();
@@ -68,13 +69,6 @@ namespace Whale.API.Controllers
         public async Task<OkResult> SaveMeetingEndTime(Guid meetingId)
         {
             await _meetingService.EndMeeting(meetingId);
-            return Ok();
-        }
-
-        [HttpPut("updateMedia")]
-        public async Task<ActionResult> UpdateMeetingMediaOnStart(MediaOnStartDTO mediaOnStartDTO)
-        {
-            await _meetingService.UpdateMeetingMediaOnStart(mediaOnStartDTO);
             return Ok();
         }
     }
