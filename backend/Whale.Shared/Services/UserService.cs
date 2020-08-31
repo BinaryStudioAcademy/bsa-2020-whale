@@ -121,12 +121,14 @@ namespace Whale.Shared.Services
             return await GetUserAsync(entity.Id);
         }
 
-        public async Task<bool> DeleteUserAsync(Guid userId)
+        public async Task<bool> DeleteUserAsync(Guid userId, string userEmail)
         {
             var user = _context.Users.FirstOrDefault(c => c.Id == userId);
 
-            if (user == null) throw new NotFoundException("User", userId.ToString());
-
+            if (user == null)
+                throw new NotFoundException("User", userId.ToString());
+            if (user.Email != userEmail)
+                throw new InvalidCredentials();
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
             return true;
