@@ -95,6 +95,7 @@ namespace Whale.Shared.Services
             await _redisService.SetAsync(meeting.Id.ToString(), new MeetingMessagesAndPasswordDTO { Password = pwd });
             await _redisService.SetAsync($"{meetingSettingsPrefix}{meeting.Id}", new MeetingSettingsDTO
             {
+                MeetingHostEmail = meetingDTO.CreatorEmail,
                 IsAudioAllowed = meetingDTO.IsAudioAllowed,
                 IsVideoAllowed = meetingDTO.IsVideoAllowed,
                 IsWhiteboard = meetingDTO.IsWhiteboard,
@@ -124,6 +125,10 @@ namespace Whale.Shared.Services
                 await _redisService.GetAsync<MeetingSettingsDTO>($"{meetingSettingsPrefix}{updateSettingsDTO.MeetingId}");
 
             if (meetingSettings == null)
+                throw new NotFoundException("meeting settings");
+
+            if (updateSettingsDTO.ApplicantEmail != meetingSettings.MeetingHostEmail)
+                throw new NotAllowedException(updateSettingsDTO.ApplicantEmail);
 
             meetingSettings.IsWhiteboard = updateSettingsDTO.IsWhiteboard;
             meetingSettings.IsPoll = updateSettingsDTO.IsPoll;
