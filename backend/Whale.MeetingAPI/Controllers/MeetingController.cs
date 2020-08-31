@@ -71,5 +71,16 @@ namespace Whale.API.Controllers
             await _meetingService.EndMeeting(meetingId);
             return Ok();
         }
+<<<<<<< HEAD
+=======
+
+
+        [HttpPut("updateSettings")]
+        public async Task<ActionResult> UpdateMeetingSettings(UpdateSettingsDTO updateSettingsDTO)
+        {
+            await _meetingService.UpdateMeetingSettings(updateSettingsDTO);
+            return Ok();
+        }
+>>>>>>> 1cb87dac71025201c3b545f6da8ed5b106391a5d
     }
 }

@@ -8,10 +8,11 @@ import moment from 'moment';
 import { AuthService } from 'app/core/auth/auth.service';
 import { Router } from '@angular/router';
 import { MeetingService, UpstateService } from 'app/core/services';
-import { takeUntil, tap } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 import { MeetingCreate } from '@shared/models';
 import { Subject } from 'rxjs';
 import { User } from '@shared/models/user';
+import { MeetingSettingsService } from 'app/core/services';
 
 @Component({
   selector: 'app-schedule-meeting-page',
@@ -45,7 +46,8 @@ export class ScheduleMeetingPageComponent implements OnInit {
     private authService: AuthService,
     private router: Router,
     private meetingService: MeetingService,
-    private upstateService: UpstateService
+    private upstateService: UpstateService,
+    meetingSettingsService: MeetingSettingsService
   ) {
     const today: Date = new Date();
 
@@ -59,8 +61,12 @@ export class ScheduleMeetingPageComponent implements OnInit {
       isGeneratedMeetingID: new FormControl('true'),
       isPasswordEnabled: new FormControl(''),
       password: new FormControl(''),
-      isDisableVideo: new FormControl(false),
-      isDisableAudio: new FormControl(false),
+      isDisableAudio: new FormControl(
+        meetingSettingsService.settings.isAudioDisabled
+      ),
+      isDisableVideo: new FormControl(
+        meetingSettingsService.settings.isVideoDisabled
+      ),
       saveIntoCalendar: new FormControl(false),
     });
   }

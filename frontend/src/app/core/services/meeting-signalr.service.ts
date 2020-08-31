@@ -4,19 +4,20 @@ import { HubConnection } from '@aspnet/signalr';
 import { environment } from '../../../environments/environment';
 import { Subject, from, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { MeetingConnectionData } from '@shared/models/meeting/meeting-connect';
-import { MeetingMessage } from '@shared/models/meeting/message/meeting-message';
-import { Participant } from '@shared/models/participant/participant';
-import { PollDto } from '@shared/models/poll/poll-dto';
-import { PollResultDto } from '@shared/models/poll/poll-result-dto';
 import {
   ChangedMediaState,
   StreamChangedData,
-  RoomDTO,
+  MeetingConnectionData,
+  MeetingMessage,
+  Participant,
+  PollDto,
+  PollResultDto,
+  Reaction,
   ChangedMediaPermissions,
   RoomWithParticipantsIds,
 } from '@shared/models';
 import { CanvasWhiteboardUpdate } from 'ng2-canvas-whiteboard';
+import { ChangedMeetingSettings } from '@shared/models/meeting/changed-meeting-settings';
 
 @Injectable({
   providedIn: 'root',
@@ -48,6 +49,9 @@ export class MeetingSignalrService {
 
   private mediaPermissionsChanged = new Subject<ChangedMediaPermissions>();
   public mediaPermissionsChanged$ = this.mediaPermissionsChanged.asObservable();
+
+  private meetingSettingsChanged = new Subject<ChangedMeetingSettings>();
+  public meetingSettingsChanged$ = this.meetingSettingsChanged.asObservable();
 
   private meetingEnded = new Subject<void>();
   public meetingEnded$ = this.meetingEnded.asObservable();
@@ -94,8 +98,15 @@ export class MeetingSignalrService {
   private shareScreen = new Subject<string>();
   public readonly shareScreen$ = this.shareScreen.asObservable();
 
+  private onDrawingChangePermissions = new Subject<boolean>();
+  public readonly onDrawingChangePermissions$ = this.onDrawingChangePermissions.asObservable();
+
   private shareScreenStop = new Subject<string>();
   public readonly shareScreenStop$ = this.shareScreenStop.asObservable();
+
+  private reactionRecived = new Subject<Reaction>();
+  public readonly reactionRecived$ = this.reactionRecived.asObservable();
+
   constructor(private hubService: SignalRService) {
     from(hubService.registerHub(environment.signalrUrl, 'meeting'))
       .pipe(
@@ -174,6 +185,12 @@ export class MeetingSignalrService {
             this.mediaPermissionsChanged.next(changedPermissions);
           }
         );
+        this.signalHub.on(
+          'OnHostChangeMeetingSetting',
+          (changedSetting: ChangedMeetingSettings) => {
+            this.meetingSettingsChanged.next(changedSetting);
+          }
+        );
 
         this.signalHub.on('OnSendMessage', (message: MeetingMessage) => {
           this.sendMessage.next(message);
@@ -193,6 +210,10 @@ export class MeetingSignalrService {
 
         this.signalHub.on('OnPollDeleted', (pollId: string) => {
           this.pollDeleted.next(pollId);
+        });
+
+        this.signalHub.on('OnDrawingChangePermissions', (enabled: boolean) => {
+          this.onDrawingChangePermissions.next(enabled);
         });
 
         this.signalHub.on('OnDrawing', (drawing: CanvasWhiteboardUpdate[]) => {
@@ -229,6 +250,10 @@ export class MeetingSignalrService {
         this.signalHub.on('OnStopShareScreen', () => {
           this.shareScreenStop.next();
         });
+
+        this.signalHub.on('OnReaction', (reaction: Reaction) => {
+          this.reactionRecived.next(reaction);
+        });
       });
   }
 
@@ -263,5 +288,9 @@ export enum SignalMethods {
   OnStartShareScreen,
   OnStopShareScreen,
   GetCreatedRooms,
+  OnReaction,
+  OnLeaveRoom,
+  OnDrawingChangePermissions,
   OnHostChangeRoom,
+  OnHostChangeMeetingSetting,
 }

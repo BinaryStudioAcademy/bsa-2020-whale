@@ -14,6 +14,7 @@ using Whale.DAL.Models;
 using Whale.Shared.Exceptions;
 using Whale.SignalR.Services;
 using Whale.SignalR.Models.Room;
+using Whale.SignalR.Models.Reaction;
 
 namespace Whale.SignalR.Hubs
 {
@@ -153,16 +154,11 @@ namespace Whale.SignalR.Hubs
         [HubMethodName("OnParticipantStreamChanged")]
         public async Task ParticipantStreamChanged(StreamChangedDTO streamChangedData)
         {
-            KeyValuePair<string, List<ParticipantDTO>> participantInGroup;
-            try
-            {
-                participantInGroup = _groupsParticipants
-                    .First(g => g.Value.Any(p => p.ActiveConnectionId == Context.ConnectionId));
-            }
-            catch (Exception)
-            {
+            var participantInGroup = _groupsParticipants
+                    .FirstOrDefault(g => g.Value.Any(p => p.ActiveConnectionId == Context.ConnectionId));
+
+            if (EqualityComparer<KeyValuePair<string, List<ParticipantDTO>>>.Default.Equals(participantInGroup, default))
                 return;
-            }
           
             var currentParticipant = participantInGroup
                 .Value
@@ -195,6 +191,23 @@ namespace Whale.SignalR.Hubs
                 return;
 
             await Clients.Group(participantInGroup.Key).SendAsync("OnMediaPermissionsChanged", mediaPermissions);
+        }
+
+        [HubMethodName("OnHostChangeMeetingSetting")]
+        public async Task MeetingSettingChangeByHost(UpdateSettingsDTO updateSettings)
+        {
+            var participantInGroup = _groupsParticipants
+              .First(g => g.Value.Any(p => p.ActiveConnectionId == Context.ConnectionId));
+
+            var isCallerHost = participantInGroup
+                .Value
+                .Any(p => p.ActiveConnectionId == Context.ConnectionId
+                    && p.Role == ParticipantRole.Host);
+
+            if (!isCallerHost)
+                return;
+
+            await Clients.Group(participantInGroup.Key).SendAsync("OnHostChangeMeetingSetting", updateSettings);
         }
 
         [HubMethodName("OnPollResults")]
@@ -266,6 +279,23 @@ namespace Whale.SignalR.Hubs
                 .SendAsync("OnErasing", drawingDTO.Erase);
         }
 
+        [HubMethodName("OnDrawingChangePermissions")]
+        public async Task OnDrawingChangePermissions(bool enabled)
+        {
+            var participantInGroup = _groupsParticipants
+                .First(g => g.Value.Any(p => p.ActiveConnectionId == Context.ConnectionId));
+
+            var isCallerHost = participantInGroup
+                .Value
+                .Any(p => p.ActiveConnectionId == Context.ConnectionId
+                    && p.Role == ParticipantRole.Host);
+
+            if (!isCallerHost)
+                return;
+
+            await Clients.Group(participantInGroup.Key).SendAsync("OnDrawingChangePermissions", enabled);
+        }
+
         [HubMethodName("CreateRoom")]
         public async Task CreateRoom(RoomCreateDTO roomCreateData)
         {
@@ -328,8 +358,8 @@ namespace Whale.SignalR.Hubs
             return rooms;
         }
 
-        [HubMethodName("OnHostChangeRoom")]
-        public async Task OnHostChangeRoom(MeetingConnectDTO connectionData)
+        [HubMethodName("OnLeaveRoom")]
+        public async Task OnParticipantLeaveRoom(MeetingConnectDTO connectionData)
         {
             var disconnectedParticipant = _groupsParticipants[connectionData.MeetingId]?.FirstOrDefault(p => p.User.Email == connectionData.UserEmail);
 
@@ -361,6 +391,12 @@ namespace Whale.SignalR.Hubs
         public async Task OnStopShare(string meetingId)
         {
             await Clients.Group(meetingId).SendAsync("OnStopShareScreen");
+        }
+
+        [HubMethodName("OnReaction")]
+        public async Task SendReaction(ReactionDTO reaction)
+        {
+            await Clients.Group(reaction.MeetingId).SendAsync("OnReaction", reaction);
         }
     }
 }
