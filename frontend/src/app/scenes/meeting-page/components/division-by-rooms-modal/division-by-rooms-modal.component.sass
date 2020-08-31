@@ -26,8 +26,26 @@
 
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button
-  -webkit-appearance: none
-  margin: 0
+    -webkit-appearance: none
+    margin: 0
 
 input[type=number]
-  -moz-appearance: textfield
+    -moz-appearance: textfield
+
+.dndPlaceholder 
+    min-height: 58px
+
+.participant
+    display: flex
+    align-items: center
+
+.emptyPlace
+    min-height: 58px
+
+.ui.divided.list.dndDragover
+    .emptyPlace
+        display: none
+
+.rooms
+    max-height: 80%
+    overflow-y: auto

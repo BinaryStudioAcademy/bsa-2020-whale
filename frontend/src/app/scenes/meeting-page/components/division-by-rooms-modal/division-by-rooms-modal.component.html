@@ -32,28 +32,52 @@
           divide
         </button>
       </div>
-      <div
-        class="ui divided list"
-        *ngFor="
-          let participantsOfRoom of roomService.previouslyDividedParticipants
-        "
-      >
-        <div class="ui header">
-          Room:
-        </div>
+
+      <div class="rooms">
         <div
-          class="ui item participant"
-          *ngFor="let participant of participantsOfRoom"
+          *ngFor="
+            let participantsOfRoom of roomService.previouslyDividedParticipants
+          "
+          class="ui vertical segment"
         >
-          <img
-            class="ui avatar image"
-            src="{{ participant?.user.avatarUrl }}"
-          />
-          <div>
-            {{ participant?.user.firstName }} {{ participant?.user.secondName }}
+          <div class="ui header">
+            Room:
+          </div>
+          <div
+            class="ui divided list"
+            dndDropzone
+            dndEffectAllowed="move"
+            [dndDisableIf]="
+              checkIfSelectedParticipantIsInCurrentList(participantsOfRoom)
+            "
+            (dndDrop)="onDrop($event, participantsOfRoom)"
+          >
+            <div
+              *ngIf="participantsOfRoom.length === 0"
+              class="ui segment emptyPlace"
+            ></div>
+            <div
+              class="ui segment participant"
+              *ngFor="let participant of participantsOfRoom"
+              [dndDraggable]="participant"
+              [dndType]="participant"
+              dndEffectAllowed="move"
+              (dndStart)="onDragStart($event, participant)"
+              (dndMoved)="onDragged(participant, participantsOfRoom)"
+              (dndEnd)="onDragEnd($event)"
+            >
+              <img
+                class="ui avatar image"
+                src="{{ participant?.user.avatarUrl }}"
+              />
+              <div>
+                {{ participant?.user.firstName }}
+                {{ participant?.user.secondName }}
+              </div>
+            </div>
+            <div dndPlaceholderRef class="ui segment dndPlaceholder"></div>
           </div>
         </div>
-        <div class="ui fitted divider"></div>
       </div>
     </div>
     <div class="content" *ngIf="roomService.isDividedIntoRooms">

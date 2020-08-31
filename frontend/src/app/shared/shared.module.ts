@@ -23,6 +23,7 @@ import { MeetingInviteComponent } from './components/meeting-invite/meeting-invi
 import { TagComponent } from './components/meeting-invite/tag/tag.component';
 import { ConfirmationModalComponent } from './components/confirmation-modal/confirmation-modal.component';
 import { ContactComponent } from './components/contacts/contact/contact.component';
+import { DndModule } from 'ngx-drag-drop';
 
 @NgModule({
   declarations: [
@@ -52,6 +53,7 @@ import { ContactComponent } from './components/contacts/contact/contact.componen
     FormsModule,
     ReactiveFormsModule,
     AngularDraggableModule,
+    DndModule,
   ],
   exports: [
     CommonModule,
@@ -69,6 +71,7 @@ import { ContactComponent } from './components/contacts/contact/contact.componen
     VideoSettingsComponent,
     OutputSettingsComponent,
     TagComponent,
+    DndModule,
   ],
 })
 export class SharedModule {}
