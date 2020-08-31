@@ -127,7 +127,7 @@
         id="profile-editname"
         (click)="editName = !editName"
         *ngIf="!editName"
-        class="edit-button"
+        class="edit-button name"
       >
         <button class="small ui basic button">
           <a> <i class="cog icon"></i> Edit </a>
@@ -135,7 +135,7 @@
       </div>
       <form
         *ngIf="editName"
-        class="ui form"
+        class="ui form name"
         #nameForm="ngForm"
         (ngSubmit)="saveEditedUsername()"
       >
@@ -181,7 +181,7 @@
       <span>{{ loggedInUser?.email }}</span>
     </div>
     <div class="ui section divider"></div>
-    <div class="personal-container">
+    <div class="personal-container phone">
       <div class="settings-item">
         <h4>Phone number:</h4>
       </div>
