@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Whale.API.Models.ScheduledMeeting;
 
 namespace Whale.Shared.Models.Meeting
 {

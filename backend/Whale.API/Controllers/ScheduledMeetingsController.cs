@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Whale.API.Models.ScheduledMeeting;
 using Whale.API.Services;
@@ -21,6 +24,14 @@ namespace Whale.API.Controllers
         public async Task<ActionResult<ScheduledMeetingDTO>> GetAsync(Guid Id)
         {
             return Ok(await _scheduledMeetingService.GetAsync(Id));
+        }
+
+        [Authorize]
+        [HttpGet("all")]
+        public async Task<ActionResult<IEnumerable<ScheduledDTO>>> GetAllAsync(int skip, int take)
+        {
+            var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+            return Ok(await _scheduledMeetingService.GetAllScheduledAsync(ownerEmail, skip, take));
         }
 
         [HttpPost]

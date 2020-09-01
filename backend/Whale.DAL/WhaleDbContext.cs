@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Whale.DAL.Models;
 using Whale.DAL.Models.Messages;
 using Whale.DAL.Models.Poll;
+using Whale.DAL.Models.Question;
 
 namespace Whale.DAL
 {
@@ -27,6 +28,7 @@ namespace Whale.DAL
         public DbSet<Setting> Settings { get; set; }
         public DbSet<UserAchivement> UserAchivements { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Question> Questions { get; set; }
         public DbSet<ScheduledMeeting> ScheduledMeetings { get; set; }
         public DbSet<AgendaPoint> AgendaPoints { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -67,6 +69,12 @@ namespace Whale.DAL
             //  .HasOne(um => um.Receiver)
             //  .WithMany()
             //  .HasForeignKey(da => da.ReceiverId);
+            modelBuilder.Entity<Question>()
+                .Property(q => q.Asker)
+                .HasConversion(
+                    v => Newtonsoft.Json.JsonConvert.SerializeObject(v),
+                    v => Newtonsoft.Json.JsonConvert.DeserializeObject<UserData>(v)
+                );
 
             base.OnModelCreating(modelBuilder);
         }

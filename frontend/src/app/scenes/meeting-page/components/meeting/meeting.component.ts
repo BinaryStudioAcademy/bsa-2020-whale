@@ -38,6 +38,7 @@ import {
   SignalMethods,
   SignalRService,
   RoomService,
+  QuestionService,
 } from 'app/core/services';
 import {
   ChangedMediaPermissions,
@@ -62,8 +63,10 @@ import { MeetingInviteComponent } from '@shared/components/meeting-invite/meetin
 import { RecordModalComponent } from '../record-modal/record-modal.component';
 import * as DecibelMeter from 'decibel-meter';
 import { BrowserMediaDevice } from '@shared/browser-media-device';
+import { Question } from '@shared/models/question/question';
 import { MeetingSettingsService } from '../../../../core/services/meeting-settings.service';
 import { MeetingInviteModalData } from '@shared/models/email/meeting-invite-modal-data';
+
 
 @Component({
   selector: 'app-meeting',
@@ -120,6 +123,7 @@ export class MeetingComponent
   public isNewMsg = false;
   public isScreenRecording = false;
   public isShowChat = false;
+  public isChat = true; // shows chat in chat bar
   public isShowCurrentParticipantCard = true;
   public isShowParticipants = false;
   public isShowStatistics = false;
@@ -195,7 +199,8 @@ export class MeetingComponent
     private simpleModalService: SimpleModalService,
     private toastr: ToastrService,
     private meetingSignalrService: MeetingSignalrService,
-    public roomService: RoomService
+    public roomService: RoomService,
+    public questionService: QuestionService
   ) {
     this.pollService = new PollService(
       this.meetingSignalrService,
@@ -582,6 +587,22 @@ export class MeetingComponent
         }
       );
 
+    this.meetingSignalrService.conferenceStartRecording$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        () => {
+          this.toastr.info('Conference start recording');
+        }
+      );
+
+    this.meetingSignalrService.conferenceStopRecording$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        () => {
+          this.toastr.info('Conference stop recording');
+        }
+      );
+
     this.meetingSignalrService.getMessages$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
@@ -874,9 +895,8 @@ export class MeetingComponent
         if (permited) {
           this.meetingSignalrService.invoke(
             SignalMethods.OnConferenceStartRecording,
-            'Conference start recording'
+            this.meeting.id
           );
-          this.toastr.info('Start recording a conference');
           this.blobService.recordReady$
             .pipe(takeUntil(this.unsubscribe$))
             .pipe(first())
@@ -907,9 +927,8 @@ export class MeetingComponent
 
     this.meetingSignalrService.invoke(
       SignalMethods.OnConferenceStopRecording,
-      'Conference stop recording'
+      this.meeting.id
     );
-    this.toastr.info('Stop recording a conference');
   }
 
   private async highlightRecording(): Promise<void> {
@@ -1148,6 +1167,8 @@ export class MeetingComponent
               meetingId: this.meeting.id,
               email: this.authService.currentUser.email,
             } as GetMessages);
+
+            this.questionService.getQuestionsByMeeting(this.meeting.id);
           });
         },
         (error) => {
@@ -1205,6 +1226,7 @@ export class MeetingComponent
 
     this.meeting.isAudioAllowed = modalResult.isAllowedAudioOnStart;
     this.meeting.isVideoAllowed = modalResult.isAllowedVideoOnStart;
+
 
     if (isCurrentParticipantHost) {
       this.meetingService
@@ -1411,7 +1433,7 @@ export class MeetingComponent
   //#region chat
   public showChat(): void {
     this.isShowChat = !this.isShowChat;
-    if (this.isShowChat) {
+    if (this.isShowChat && this.isChat) {
       this.receiverChanged();
       this.chatBlock.changes.pipe(first()).subscribe(() => {
         this.chatBlock.first.nativeElement.scrollTo(
@@ -1419,21 +1441,30 @@ export class MeetingComponent
           this.chatBlock.first.nativeElement.scrollHeight
         );
       });
+      this.isNewMsg = false;
     }
-    this.isNewMsg = !this.isShowChat && this.newMsgFrom.length > 0;
+
+    // this.isNewMsg = !(this.isShowChat && this.isChat);
+    // console.log(this.isNewMsg);
   }
 
   public sendMessage(): void {
-    if (this.msgText.trim().length !== 0) {
+    if (this.msgText.trim().length === 0) {
+      return;
+    }
+
+    if (!this.questionService.areQuestionsOpened) {
       this.meetingSignalrService.invoke(SignalMethods.OnSendMessage, {
         authorEmail: this.authService.currentUser.email,
         meetingId: this.meeting.id,
         message: this.msgText,
         receiverEmail: this.msgReceiverEmail,
       } as MeetingMessageCreate);
-
-      this.msgText = '';
+    } else {
+      this.questionService.sendQuestionCreate(this.meeting.id, this.msgText);
     }
+
+    this.msgText = '';
   }
 
   public onEnterKeyPress(event: KeyboardEvent): void {
@@ -1468,22 +1499,24 @@ export class MeetingComponent
   }
 
   public notifyNewMsg(msg: MeetingMessage): void {
-    if (msg.author.email !== this.authService.currentUser.email) {
-      this.isNewMsg = !this.isShowChat;
-      if (msg.receiver == null && this.msgReceiverEmail !== '') {
-        this.newMsgFrom.push('');
-      }
-      if (
-        msg.receiver != null &&
-        this.msgReceiverEmail !== msg.author.email &&
-        this.otherParticipants.findIndex(
-          (p) => p.user.email === msg.author.email
-        ) >= 0
-      ) {
-        this.newMsgFrom.push(msg.author.email);
-      }
+    if (msg.author.email === this.authService.currentUser.email) {
+      return;
+    }
+    this.isNewMsg = !(this.isShowChat && this.isChat);
+    if (msg.receiver == null && this.msgReceiverEmail !== '') {
+      this.newMsgFrom.push('');
+    }
+    if (
+      msg.receiver != null &&
+      this.msgReceiverEmail !== msg.author.email &&
+      this.otherParticipants.findIndex(
+        (p) => p.user.email === msg.author.email
+      ) >= 0
+    ) {
+      this.newMsgFrom.push(msg.author.email);
     }
   }
+
   //#endregion chat
 
   //#region whiteboard
@@ -1765,6 +1798,18 @@ export class MeetingComponent
     newLines.push('b=AS:' + bitrate);
     newLines = newLines.concat(lines.slice(line, lines.length));
     return newLines.join('\n');
+  }
+
+  public switchToChat(): void {
+    this.questionService.areQuestionsOpened = false;
+    this.isNewMsg = false;
+    this.isChat = true;
+  }
+
+  public switchToQuestions(): void {
+    this.isChat = false;
+    this.questionService.isNewQuestion = false;
+    this.questionService.areQuestionsOpened = true;
   }
 
   onReaction(event: ReactionsEnum): void {

@@ -13,5 +13,8 @@ namespace Whale.DAL.Models
         public string ParticipantsEmails { get; set; }
         [NotMapped]
         public IEnumerable<AgendaPoint> AgendaPoints { get; set; }
+        public string FullURL { get; set; }
+        public string ShortURL { get; set; }
+        public string Password { get; set; }
     }
 }

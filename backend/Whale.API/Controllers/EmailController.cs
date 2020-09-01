@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +25,13 @@ namespace Whale.API.Controllers
 		public async Task<OkResult> SendEmail([FromBody] MeetingInviteDTO inviteDto)
 		{
 			await _emailServcice.SendMeetingInvites(inviteDto);
+			return Ok();
+		}
+
+		[HttpPost("scheduled")]
+		public async Task<OkResult> SendScheduledEmail([FromBody] ScheduledMeetingInvite invite)
+		{
+			await _emailServcice.SendMeetingInviteToHost(invite);
 			return Ok();
 		}
 	}

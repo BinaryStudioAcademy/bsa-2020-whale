@@ -33,7 +33,6 @@ namespace Whale.API.Controllers
         public async Task<ActionResult<string>> CreateMeetingScheduled(MeetingCreateDTO meetingDto)
         {
             var meetingAndLink = await _meetingService.RegisterScheduledMeeting(meetingDto);
-
             var jobInfo = new JobInfo(typeof(ScheduledMeetingJob), meetingDto.StartTime);
             var obj = JsonConvert.SerializeObject(meetingAndLink.Meeting);
             await _meetingScheduleService.Start(jobInfo, obj);
