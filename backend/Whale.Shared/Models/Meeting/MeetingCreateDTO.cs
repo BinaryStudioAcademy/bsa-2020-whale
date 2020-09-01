@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Whale.Shared.Models.Meeting
 {
@@ -15,5 +16,6 @@ namespace Whale.Shared.Models.Meeting
         public bool IsPoll { get; set; }
         public bool IsAllowedToChooseRoom { get; set; }
         public string CreatorEmail { get; set; }
+        public List<string> ParticipantsEmails { get; set; }
     }
 }

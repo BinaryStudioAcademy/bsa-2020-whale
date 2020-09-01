@@ -10,6 +10,7 @@ import {
   AfterViewChecked,
   ViewChildren,
   QueryList,
+  HostListener,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
@@ -62,6 +63,7 @@ import { RecordModalComponent } from '../record-modal/record-modal.component';
 import * as DecibelMeter from 'decibel-meter';
 import { BrowserMediaDevice } from '@shared/browser-media-device';
 import { MeetingSettingsService } from '../../../../core/services/meeting-settings.service';
+import { MeetingInviteModalData } from '@shared/models/email/meeting-invite-modal-data';
 
 @Component({
   selector: 'app-meeting',
@@ -126,6 +128,9 @@ export class MeetingComponent
   public isWaitingForRecord = false;
   public isAddParticipantDisabled = false;
   public isShowReactions = false;
+  public isShowRecordingOptins = false;
+  public isHighlightRecording = false;
+  public isMeetingLoading = true;
   public mediaData: MediaData[] = [];
   public meeting: Meeting;
   public meetingStatistics: Statistics;
@@ -200,6 +205,18 @@ export class MeetingComponent
     );
   }
 
+  @HostListener('fullscreenchange', ['$event'])
+  @HostListener('webkitfullscreenchange', ['$event'])
+  @HostListener('mozfullscreenchange', ['$event'])
+  @HostListener('MSFullscreenChange', ['$event'])
+  public screenChange(): void {
+    const element = document.fullscreenElement;
+
+    if (element?.classList[0] === undefined) {
+      this.isWhiteboardFullScreen = false;
+    }
+  }
+
   //#region accessors
   private set currentUserStream(value: MediaStream) {
     if (this.userStream) {
@@ -242,7 +259,6 @@ export class MeetingComponent
       this.leaveUnConnected();
       return;
     }
-
     const settings = this.currentUserStream.getVideoTracks()[0].getSettings();
     settings.frameRate = 20;
     settings.height = 480;
@@ -413,7 +429,7 @@ export class MeetingComponent
           if (!data.changedParticipantConnectionId) {
             if (
               this.meeting.isAudioAllowed !== data.isAudioAllowed &&
-              this.currentParticipant.role !== ParticipantRole.Host
+              this.isHost
             ) {
               this.toastr.info(
                 `Participants' audio ${
@@ -422,7 +438,7 @@ export class MeetingComponent
               );
             } else if (
               this.meeting.isVideoAllowed !== data.isVideoAllowed &&
-              this.currentParticipant.role !== ParticipantRole.Host
+              this.isHost
             ) {
               this.toastr.info(
                 `Participants' video ${
@@ -433,6 +449,11 @@ export class MeetingComponent
 
             this.meeting.isAudioAllowed = data.isAudioAllowed;
             this.meeting.isVideoAllowed = data.isVideoAllowed;
+            if (!this.isHost) {
+              this.toggleMicrophone();
+              this.toggleCamera();
+            }
+
             this.meetingSignalrService.invoke<ChangedMediaState>(
               SignalMethods.OnMediaStateChanged,
               {
@@ -449,7 +470,7 @@ export class MeetingComponent
           ) {
             if (
               this.meeting.isAudioAllowed !== data.isAudioAllowed &&
-              this.currentParticipant.role !== ParticipantRole.Host
+              this.isHost
             ) {
               this.toastr.info(
                 `Your audio ${
@@ -458,7 +479,7 @@ export class MeetingComponent
               );
             } else if (
               this.meeting.isVideoAllowed !== data.isVideoAllowed &&
-              this.currentParticipant.role !== ParticipantRole.Host
+              this.isHost
             ) {
               this.toastr.info(
                 `Your video ${
@@ -843,8 +864,10 @@ export class MeetingComponent
     });
   }
 
-  public startRecording(): void {
+  public startRecording(isHighlight: boolean): void {
     this.isScreenRecording = true;
+    this.isShowRecordingOptins = false;
+    this.isHighlightRecording = false;
 
     this.blobService.startRecording().subscribe({
       complete: () => (this.isWaitingForRecord = false),
@@ -868,6 +891,9 @@ export class MeetingComponent
                 console.error(err.message);
               }
             );
+          if (isHighlight) {
+            this.highlightRecording();
+          }
         } else {
           this.isScreenRecording = false;
         }
@@ -876,6 +902,9 @@ export class MeetingComponent
   }
 
   public stopRecording(): void {
+    if (!this.isScreenRecording) {
+      return;
+    }
     this.isWaitingForRecord = true;
 
     this.isScreenRecording = false;
@@ -887,6 +916,12 @@ export class MeetingComponent
       'Conference stop recording'
     );
     this.toastr.info('Stop recording a conference');
+  }
+
+  private async highlightRecording(): Promise<void> {
+    this.isHighlightRecording = true;
+    await new Promise(r => setTimeout(r, 30000));
+    this.stopRecording();
   }
 
   public onPollIconClick(): void {
@@ -981,6 +1016,8 @@ export class MeetingComponent
     } else if (this.elem.msRequestFullscreen) {
       this.elem.msRequestFullscreen();
     }
+
+    this.canvasIsDisplayed = false;
   }
 
   public closeFullscreen(): void {
@@ -1199,6 +1236,7 @@ export class MeetingComponent
           );
         });
     }
+    this.isMeetingLoading = false;
   }
 
   //#endregion options
@@ -1368,6 +1406,12 @@ export class MeetingComponent
       isAudioActive,
       isVideoActive,
     });
+  }
+
+  public pinCard(mediaDataId: string): void {
+    this.currentVideo.nativeElement.srcObject = this.mediaData.find(
+      (m) => m.id === mediaDataId
+    );
   }
   //#endregion participant cards
 
@@ -1624,10 +1668,11 @@ export class MeetingComponent
             meetingId: this.meeting.id,
             senderId: this.currentParticipant.user.id,
             participants: this.meeting.participants,
-          })
+            isScheduled: false,
+          } as MeetingInviteModalData)
           .toPromise()
           .then((isShowParticipants) => {
-            this.isShowParticipants = isShowParticipants;
+            this.isShowParticipants = isShowParticipants as boolean;
           });
         this.isAddParticipantDisabled = false;
       },

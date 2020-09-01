@@ -31,12 +31,12 @@ export class SettingMeetingComponent implements OnInit, AfterViewInit {
   public isAudioDisabled: boolean;
   public isVideoDisabled: boolean;
   public isAllowedToChooseRoom: boolean;
-  public checkboxWhiteboard: HTMLInputElement;
-  public checkboxPoll: HTMLInputElement;
   private unsubscribe$ = new Subject<void>();
 
   @ViewChild('audio') private checkboxIsAudioDisabled: ElementRef;
   @ViewChild('video') private checkboxIsVideoDisabled: ElementRef;
+  @ViewChild('whiteboard') private checkboxWhiteboard: ElementRef;
+  @ViewChild('poll') private checkboxPoll: ElementRef;
 
   constructor(
     private meetingSettingsService: MeetingSettingsService,
@@ -49,17 +49,16 @@ export class SettingMeetingComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.isWhiteboard = this.meetingSettingsService.settings.isWhiteboard;
     this.isPoll = this.meetingSettingsService.settings.isPoll;
+    this.isAllowedToChooseRoom = this.meetingSettingsService.settings.isAllowedToChooseRoom;
     this.isAudioDisabled = !this.meeting.isAudioAllowed;
     this.isVideoDisabled = !this.meeting.isVideoAllowed;
-    this.checkboxWhiteboard = document.getElementById('whiteboard') as any;
-    this.checkboxPoll = document.getElementById('poll') as any;
-    this.checkboxWhiteboard.checked = this.isWhiteboard;
-    this.checkboxPoll.checked = this.isPoll;
   }
 
   ngAfterViewInit(): void {
     this.checkboxIsAudioDisabled.nativeElement.checked = this.isAudioDisabled;
     this.checkboxIsVideoDisabled.nativeElement.checked = this.isVideoDisabled;
+    this.checkboxWhiteboard.nativeElement.checked = this.isWhiteboard;
+    this.checkboxPoll.nativeElement.checked = this.isPoll;
   }
 
   public changeWhiteboard(event: any): void {

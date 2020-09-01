@@ -44,15 +44,33 @@ namespace Whale.Shared.Services
                 .Include(g => g.User)
                 .Include(g => g.Group)
                     .ThenInclude(g => g.PinnedMessage)
-                .Where(g => g.UserId == user.Id)
-                .Select(g => g.Group)
-                 .OrderBy(c => c.Label)
-                .ToListAsync();
+                .Where(g => g.UserId == user.Id).ToListAsync();
+
+            var groupsWithMessageAmount = userGroups.Select(c =>
+             {
+                 var group = new GroupDTO()
+                 {
+                     Id = c.Group.Id,
+                     CreatorEmail = c.Group.CreatorEmail,
+                     Description = c.Group.Description,
+                     Label = c.Group.Label,
+                     PhotoUrl = c.Group.PhotoUrl,
+                     PinnedMessageId = c.Group.PinnedMessageId,
+                 };
+
+                 int unreadMessageCount = _context.UnreadGroupMessages
+                 .Where(um => um.ReceiverId == c.UserId && _context.GroupMessages
+                     .Any(gm => gm.Id == um.MessageId && gm.AuthorId != user.Id && gm.GroupId == group.Id))
+                 .Count();
+                 group.UnreadMessageCount = unreadMessageCount;
+
+                 return group;
+             });
 
             if (userGroups is null)
                 throw new Exception("No groups");
 
-            return _mapper.Map<IEnumerable<GroupDTO>>(userGroups);
+            return _mapper.Map<IEnumerable<GroupDTO>>(groupsWithMessageAmount);
         }
         public async Task<GroupDTO> GetGroupAsync(Guid groupId, string userEmail)
         {
@@ -170,7 +188,7 @@ namespace Whale.Shared.Services
             var user = _context.Users.FirstOrDefault(c => c.Email == userEmail);
             if (user is null) return false;
 
-            if (group.CreatorEmail == userEmail) 
+            if (group.CreatorEmail == userEmail)
                 throw new Exception("You cannot leave the group because you are administrator. Please, assign someone else.");
 
             var userInGroup = await _context.GroupUsers
