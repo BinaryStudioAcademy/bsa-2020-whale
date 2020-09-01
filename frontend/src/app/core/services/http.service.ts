@@ -47,7 +47,6 @@ export class HttpService {
     url: string,
     httpParams?: any
   ): Observable<HttpResponse<T>> {
-    console.log(this.buildUrl(url));
     return this.http
       .get<T>(this.buildUrl(url), {
         observe: 'response',
@@ -154,17 +153,9 @@ export class HttpService {
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {
-    console.log(error);
     if (error.error instanceof ErrorEvent) {
       // A client-side or network error occurred
-      console.error('An error occurred:', error.error.message);
     } else {
-      // The backend returned an unsuccessful response code.
-      // The response body may contain clues as to what went wrong.
-      console.error(
-        `Backend returned code ${error.error.status}, ` +
-          `body was: ${error.error.Detailed}`
-      );
       return throwError({
         statusCode: error.error.StatusCode,
         Message: error.error.Message,

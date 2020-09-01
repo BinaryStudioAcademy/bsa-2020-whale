@@ -15,6 +15,11 @@ using Whale.Shared.Models.Meeting.MeetingMessage;
 using shortid;
 using System.Diagnostics;
 using Newtonsoft.Json;
+using System.Net.Http;
+using System.Text;
+using Whale.DAL.Models.Email;
+using Whale.Shared.Models.Email;
+using System.Net.Http.Headers;
 
 namespace Whale.Shared.Services
 {
@@ -76,6 +81,7 @@ namespace Whale.Shared.Services
             meetingDTO.IsVideoAllowed = meetingSettings.IsVideoAllowed;
             meetingDTO.IsPoll = meetingSettings.IsPoll;
             meetingDTO.IsWhiteboard = meetingSettings.IsWhiteboard;
+            meetingDTO.IsAllowedToChooseRoom = meetingSettings.IsAllowedToChooseRoom;
 
             return meetingDTO;
         }
@@ -101,6 +107,7 @@ namespace Whale.Shared.Services
                 IsAudioAllowed = meetingDTO.IsAudioAllowed,
                 IsVideoAllowed = meetingDTO.IsVideoAllowed,
                 IsWhiteboard = meetingDTO.IsWhiteboard,
+                IsAllowedToChooseRoom = meetingDTO.IsAllowedToChooseRoom,
                 IsPoll = meetingDTO.IsPoll
             });
 
@@ -119,35 +126,64 @@ namespace Whale.Shared.Services
             return new MeetingLinkDTO { Id = meeting.Id, Password = pwd };
         }
 
-        public async Task<Meeting> RegisterScheduledMeeting(MeetingCreateDTO meetingDTO)
+        public async Task<MeetingAndLink> RegisterScheduledMeeting(MeetingCreateDTO meetingDTO)
         {
             var meeting = _mapper.Map<Meeting>(meetingDTO);
-            meeting.Settings = JsonConvert.SerializeObject(new { meetingDTO.IsAudioAllowed, meetingDTO.IsVideoAllowed });
+            meeting.Settings = JsonConvert.SerializeObject(new 
+            { 
+                meetingDTO.IsAudioAllowed,
+                meetingDTO.IsVideoAllowed,
+                meetingDTO.IsAllowedToChooseRoom,
+                meetingDTO.IsPoll,
+                meetingDTO.IsWhiteboard
+            });
             await _context.Meetings.AddAsync(meeting);
             var user = await _context.Users.FirstOrDefaultAsync(e => e.Email == meetingDTO.CreatorEmail);
-            await _context.ScheduledMeetings.AddAsync(new ScheduledMeeting { CreatorId = user.Id, MeetingId = meeting.Id });
+            var pwd = _encryptService.EncryptString(Guid.NewGuid().ToString());
+            var shortURL = ShortId.Generate();
+            var fullURL = $"?id={meeting.Id}&pwd={pwd}";
+            var scheduledMeeting = new ScheduledMeeting
+            {
+                CreatorId = user.Id, 
+                MeetingId = meeting.Id, 
+                ParticipantsEmails = JsonConvert.SerializeObject(meetingDTO.ParticipantsEmails),
+                Password = pwd,
+                ShortURL = shortURL,
+                FullURL = fullURL
+            };
+            await _context.ScheduledMeetings.AddAsync(scheduledMeeting);
             await _context.SaveChangesAsync();
 
-            return meeting;
+            using (var client = new HttpClient())
+            {
+                var meetingInvite = new ScheduledMeetingInvite
+                {
+                    MeetingLink = fullURL,
+                    MeetingId = meeting.Id,
+                    ReceiverEmails = meetingDTO.ParticipantsEmails
+                };
+                client.PostAsync("http://localhost:4201/api/email/scheduled", new StringContent(JsonConvert.SerializeObject(meetingInvite), Encoding.UTF8, "application/json"));
+            }
+            await _redisService.ConnectAsync();
+            await _redisService.SetAsync(shortURL, "not-active");
+
+            return new MeetingAndLink { Meeting = meeting , Link = shortURL };
         }
 
         public async Task<MeetingLinkDTO> StartScheduledMeeting(Meeting meeting)
         {
             var meetingSettings = JsonConvert.DeserializeObject(meeting.Settings);
-            var pwd = _encryptService.EncryptString(Guid.NewGuid().ToString());
+            var scheduledMeeing = await _context.ScheduledMeetings.FirstOrDefaultAsync(e => e.MeetingId == meeting.Id);
             await _redisService.ConnectAsync();
-            await _redisService.SetAsync(meeting.Id.ToString(), new MeetingMessagesAndPasswordDTO { Password = pwd });
+            await _redisService.SetAsync(meeting.Id.ToString(), new MeetingMessagesAndPasswordDTO { Password = scheduledMeeing.Password });
             await _redisService.SetAsync($"{meetingSettingsPrefix}{meeting.Id}", new MeetingSettingsDTO
             {
                 IsAudioAllowed = ((dynamic)meetingSettings).IsAudioAllowed,
                 IsVideoAllowed = ((dynamic)meetingSettings).IsVideoAllowed
             });
 
-            string shortURL = ShortId.Generate();
-            string fullURL = $"?id={meeting.Id}&pwd={pwd}";
-
-            await _redisService.SetAsync(fullURL, shortURL);
-            await _redisService.SetAsync(shortURL, fullURL);
+            await _redisService.SetAsync(scheduledMeeing.FullURL, scheduledMeeing.ShortURL);
+            await _redisService.SetAsync(scheduledMeeing.ShortURL, scheduledMeeing.FullURL);
 
             var scheduledMeeting = await _context.ScheduledMeetings.FirstOrDefaultAsync(e => e.MeetingId == meeting.Id);
             var user = await _context.Users.FirstOrDefaultAsync(e => e.Id == scheduledMeeting.CreatorId);
@@ -158,7 +194,22 @@ namespace Whale.Shared.Services
                 MeetingId = meeting.Id
             });
 
-            return new MeetingLinkDTO { Id = meeting.Id, Password = pwd };
+            var participantEmails = JsonConvert.DeserializeObject<List<string>>(scheduledMeeting.ParticipantsEmails);
+
+            foreach(var email in participantEmails)
+            {
+                var userParticipant = await _userService.GetUserByEmail(email);
+                if (userParticipant == null)
+                    continue;
+                await _participantService.CreateParticipantAsync(new ParticipantCreateDTO
+                {
+                    Role = ParticipantRole.Participant,
+                    UserEmail = email,
+                    MeetingId = meeting.Id
+                });
+            }
+
+            return new MeetingLinkDTO { Id = meeting.Id, Password = scheduledMeeing.Password };
         }
 
         public async Task<IEnumerable<Meeting>> GetScheduledMeetins()

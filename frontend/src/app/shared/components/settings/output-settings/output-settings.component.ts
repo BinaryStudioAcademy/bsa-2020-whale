@@ -10,7 +10,7 @@ import { MediaSettingsService } from 'app/core/services/media-settings.service';
 export class OutputSettingsComponent implements OnInit {
   public browserMediaDevice = new BrowserMediaDevice();
   public outputAudioDevices: MediaDeviceInfo[];
-  @Output() onClick = new EventEmitter();
+  @Output() clickEmited = new EventEmitter();
 
   constructor(private mediaService: MediaSettingsService) {}
 
@@ -20,6 +20,6 @@ export class OutputSettingsComponent implements OnInit {
       .then((res) => (this.outputAudioDevices = res));
   }
   isActive(event: MediaDeviceInfo): boolean {
-    return this.mediaService.settings.OutputDeviceId === event.deviceId;
+    return this.mediaService.getSettings().OutputDeviceId === event.deviceId;
   }
 }

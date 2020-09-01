@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, AfterViewInit } from '@angular/core';
 
 @Component({
-  selector: 'spiner',
+  selector: 'app-spiner',
   templateUrl: './spiner.component.html',
   styleUrls: ['./spiner.component.sass'],
 })

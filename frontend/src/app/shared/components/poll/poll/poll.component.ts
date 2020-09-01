@@ -54,7 +54,6 @@ export class PollComponent implements OnInit {
       ? [this.poll.options[Number(this.form.controls.answers.value)]]
       : this.getMuptipleAnswers();
 
-    console.log(choosedOptions);
     if (choosedOptions.length === 0 || choosedOptions[0] === undefined) {
       this.toastr.error('No options were selected!');
       this.isLoading = false;

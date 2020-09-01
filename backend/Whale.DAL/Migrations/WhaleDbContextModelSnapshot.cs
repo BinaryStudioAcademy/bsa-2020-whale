@@ -205,6 +205,26 @@ namespace Whale.DAL.Migrations
                     b.ToTable("Meetings");
                 });
 
+            modelBuilder.Entity("Whale.DAL.Models.Messages.UnreadGroupMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("GroupId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("MessageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ReceiverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UnreadGroupMessages");
+                });
+
             modelBuilder.Entity("Whale.DAL.Models.Messages.UnreadMessageId", b =>
                 {
                     b.Property<Guid>("Id")
@@ -305,6 +325,32 @@ namespace Whale.DAL.Migrations
                     b.ToTable("PollResults");
                 });
 
+            modelBuilder.Entity("Whale.DAL.Models.Question.Question", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("AskedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Asker")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("MeetingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("QuestionStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Text")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Questions");
+                });
+
             modelBuilder.Entity("Whale.DAL.Models.Record", b =>
                 {
                     b.Property<Guid>("Id")
@@ -325,6 +371,35 @@ namespace Whale.DAL.Migrations
                     b.HasIndex("MeetingId");
 
                     b.ToTable("Records");
+                });
+
+            modelBuilder.Entity("Whale.DAL.Models.ScheduledMeeting", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FullURL")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("MeetingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ParticipantsEmails")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Password")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ShortURL")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ScheduledMeetings");
                 });
 
             modelBuilder.Entity("Whale.DAL.Models.Setting", b =>
@@ -400,23 +475,6 @@ namespace Whale.DAL.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("UserAchivements");
-                });
-
-            modelBuilder.Entity("Whale.DAL.ScheduledMeeting", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("MeetingId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ScheduledMeetings");
                 });
 
             modelBuilder.Entity("Whale.DAL.Models.Contact", b =>

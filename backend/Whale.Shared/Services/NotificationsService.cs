@@ -215,8 +215,39 @@ namespace Whale.Shared.Services
 
                 await UpdateNotificationAsync(unpdatedNotification);
             }
+        }
 
+        public async Task AddUpdateUnreadGroupMessageNotification(GroupMessage message, string receiverEmail, UnreadGroupMessage unreadGroupMessage)
+        {
+            var notification = await _context.Notifications.FirstOrDefaultAsync(
+                n => n.NotificationType == NotificationTypeEnum.UnreadGroupMessage &&
+                     n.User.Email == receiverEmail &&
+                     n.Options.Contains(message.GroupId.ToString()));
 
+            if (notification == null)
+            {
+                var options = new UnreadGroupMessageOptions
+                {
+                    GroupId = message.GroupId,
+                    UnreadGroupMessages = new List<UnreadGroupMessage> { unreadGroupMessage },
+                    GroupName = $"{message.Group.Label}"
+                };
+
+                var optionsJson = JsonConvert.SerializeObject(options, camelSettings);
+
+                await AddNotification(receiverEmail, optionsJson, NotificationTypeEnum.UnreadGroupMessage);
+            }
+            else
+            {
+                var unpdatedNotification = _mapper.Map<NotificationDTO>(notification);
+
+                var options = JsonConvert.DeserializeObject<UnreadGroupMessageOptions>(notification.Options, camelSettings);
+                options.UnreadGroupMessages.Add(unreadGroupMessage);
+                var optionsJson = JsonConvert.SerializeObject(options, camelSettings);
+                unpdatedNotification.Options = optionsJson;
+
+                await UpdateNotificationAsync(unpdatedNotification);
+            }
         }
 
         public async Task DeleteUpdateUnreadMessageNotification(Guid userId, Guid unreadMessageId)
@@ -243,6 +274,42 @@ namespace Whale.Shared.Services
             var readMsgIndex = options.UnreadMessageIds.FindIndex(m => m.Id == unreadMessageId);
             options.UnreadMessageIds.RemoveRange(0, readMsgIndex + 1);
             if (options.UnreadMessageIds.Count == 0)
+            {
+                await DeleteNotificationByEntity(notification);
+                return;
+            }
+
+            var optionsJson = JsonConvert.SerializeObject(options, camelSettings);
+            unpdatedNotification.Options = optionsJson;
+
+            await UpdateNotificationAsync(unpdatedNotification);
+
+        }
+
+        public async Task DeleteUpdateUnreadGroupMessageNotification(Guid userId, Guid unreadGroupMessage)
+        {
+            var notification = await _context.Notifications.FirstOrDefaultAsync(
+                n => n.NotificationType == NotificationTypeEnum.UnreadGroupMessage &&
+                     n.UserId == userId &&
+                     n.Options.Contains(unreadGroupMessage.ToString()));
+
+            if (notification == null)
+            {
+                return;
+            }
+
+            var options = JsonConvert.DeserializeObject<UnreadGroupMessageOptions>(notification.Options, camelSettings);
+
+            if (options.UnreadGroupMessages.Count == 1)
+            {
+                await DeleteNotificationByEntity(notification);
+                return;
+            }
+
+            var unpdatedNotification = _mapper.Map<NotificationDTO>(notification);
+            var readMsgIndex = options.UnreadGroupMessages.FindIndex(m => m.Id == unreadGroupMessage);
+            options.UnreadGroupMessages.RemoveRange(0, readMsgIndex + 1);
+            if (options.UnreadGroupMessages.Count == 0)
             {
                 await DeleteNotificationByEntity(notification);
                 return;

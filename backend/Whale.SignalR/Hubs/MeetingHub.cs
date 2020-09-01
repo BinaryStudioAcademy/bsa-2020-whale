@@ -14,7 +14,9 @@ using Whale.DAL.Models;
 using Whale.Shared.Exceptions;
 using Whale.SignalR.Services;
 using Whale.SignalR.Models.Room;
+using Whale.Shared.Models.Question;
 using Whale.SignalR.Models.Reaction;
+
 
 namespace Whale.SignalR.Hubs
 {
@@ -248,15 +250,15 @@ namespace Whale.SignalR.Hubs
         }
 
         [HubMethodName("OnConferenceStartRecording")]
-        public async Task OnConferenceStartRecording(string message)
+        public async Task OnConferenceStartRecording(string meetingId)
         {
-            await Clients.All.SendAsync("OnConferenceStartRecording", message);
+            await Clients.Group(meetingId).SendAsync("OnConferenceStartRecording");
         }
 
         [HubMethodName("OnConferenceStopRecording")]
-        public async Task OnConferenceStopRecording(string message)
+        public async Task OnConferenceStopRecording(string meetingId)
         {
-            await Clients.All.SendAsync("OnConferenceStopRecording", message);
+            await Clients.Group(meetingId).SendAsync("OnConferenceStopRecording");
         }
 
         [HubMethodName("OnPollCreated")]
@@ -391,6 +393,26 @@ namespace Whale.SignalR.Hubs
         public async Task OnStopShare(string meetingId)
         {
             await Clients.Group(meetingId).SendAsync("OnStopShareScreen");
+        }
+
+        [HubMethodName("QuestionCreate")]
+        public async Task SendCreatedQuestion(QuestionDTO questionDto)
+        {
+            await Clients.Group(questionDto.MeetingId.ToString()).SendAsync("QuestionCreate", questionDto);
+        }
+
+        [HubMethodName("QuestionStatusUpdate")]
+        public async Task SendQuestionStatusUpdate(QuestionStatusUpdateDTO questionStatusUpdate)
+        {
+            await Clients.Group(questionStatusUpdate.MeetingId.ToString())
+                .SendAsync("QuestionStatusUpdate", questionStatusUpdate);
+        }
+
+        [HubMethodName("QuestionDelete")]
+        public async Task SendDeletedQuestionId(QuestionDeleteDTO questionDelete)
+        {
+            await Clients.Group(questionDelete.MeetingId.ToString())
+                .SendAsync("QuestionDelete", questionDelete);
         }
 
         [HubMethodName("OnReaction")]

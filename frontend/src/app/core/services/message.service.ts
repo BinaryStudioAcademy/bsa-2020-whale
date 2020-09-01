@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { Contact, DirectMessage } from '@shared/models';
+import { Contact, DirectMessage, GroupMessage } from '@shared/models';
 import { User } from 'firebase';
 import { Subject, from, Observable, ReplaySubject } from 'rxjs';
 import { HubConnection } from '@aspnet/signalr';
@@ -15,6 +15,9 @@ export class MessageService implements OnDestroy {
 
   public receivedMessage = new Subject<DirectMessage>();
   public receivedMessage$ = this.receivedMessage.asObservable();
+
+  public receivedGroupMessage = new Subject<GroupMessage>();
+  public receivedGroupMessage$ = this.receivedGroupMessage.asObservable();
 
   private unsubscribe$ = new Subject<void>();
 
@@ -32,6 +35,7 @@ export class MessageService implements OnDestroy {
       tap((hub) => {
         this.hubConnection = hub;
         this.registerNewMessageReceived();
+        this.registerNewGroupMessageReceived();
       })
     );
   }
@@ -40,6 +44,15 @@ export class MessageService implements OnDestroy {
     this.hubConnection.on('NewMessageReceived', (message: DirectMessage) => {
       this.receivedMessage.next(message);
     });
+  }
+
+  public registerNewGroupMessageReceived(): void {
+    this.hubConnection.on(
+      'NewGroupMessageReceived',
+      (message: GroupMessage) => {
+        this.receivedGroupMessage.next(message);
+      }
+    );
   }
 
   public joinGroup(contactId: string): void {

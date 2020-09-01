@@ -19,12 +19,13 @@
     }}</a>
 
     <div *ngIf="isNotificationsVisible" class="dropdown-menu notify">
-      <div style="overflow-y: scroll;">
+      <div class="scroll-wrapper">
         <app-notification
           *ngFor="let notification of notificationsList"
           [notification]="notification"
           (delete)="onNotificationDelete($event)"
           (openChatClicked)="onOpenChat($event)"
+          (openGroupChatClicked)="onOpenGroupChat($event)"
         >
         </app-notification>
       </div>
@@ -35,7 +36,7 @@
     (click)="showSettingsMenu(); $event.stopPropagation()"
     class="user-pic-item item message shared"
   >
-    <spiner *ngIf="isUserLoadig" [size]="'small'"></spiner>
+    <app-spiner *ngIf="isUserLoadig" [size]="'small'"></app-spiner>
     <img
       class="ui tiny avatar image user-pic"
       src="{{ loggedInUser?.avatarUrl }}"

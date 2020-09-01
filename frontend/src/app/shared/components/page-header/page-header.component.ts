@@ -22,6 +22,7 @@ import { WhaleSignalService, WhaleSignalMethods } from 'app/core/services';
 })
 export class PageHeaderComponent implements OnInit, OnDestroy {
   @Output() openChatClicked = new EventEmitter<string>();
+  @Output() openGroupChatClicked = new EventEmitter<string>();
 
   public isUserLoadig = true;
   private unsubscribe$ = new Subject<void>();
@@ -100,46 +101,31 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
   subscribeNotifications(): void {
     this.whaleSignalrService.receiveNotify$
       .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(
-        (newNotification) => {
-          this.notificationsList.push(newNotification);
-        },
-        (err) => {
-          console.log(err.message);
-        }
-      );
+      .subscribe((newNotification) => {
+        this.notificationsList.push(newNotification);
+      });
 
     this.whaleSignalrService.updateNotify$
       .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(
-        (updateNotification) => {
-          const index = this.notificationsList.findIndex(
-            (n) => n.id === updateNotification.id
-          );
-          if (index >= 0) {
-            this.notificationsList[index] = updateNotification;
-          }
-        },
-        (err) => {
-          console.log(err.message);
+      .subscribe((updateNotification) => {
+        const index = this.notificationsList.findIndex(
+          (n) => n.id === updateNotification.id
+        );
+        if (index >= 0) {
+          this.notificationsList[index] = updateNotification;
         }
-      );
+      });
 
     this.whaleSignalrService.removeNotify$
       .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(
-        (notificationId) => {
-          this.notificationsList = this.notificationsList.filter(
-            (n) => n.id !== notificationId
-          );
-          if (!this.notificationsList.length) {
-            this.showNotificationsMenu();
-          }
-        },
-        (err) => {
-          console.log(err.message);
+      .subscribe((notificationId) => {
+        this.notificationsList = this.notificationsList.filter(
+          (n) => n.id !== notificationId
+        );
+        if (!this.notificationsList.length) {
+          this.isNotificationsVisible = false;
         }
-      );
+      });
   }
 
   goToPage(pageName: string): void {
@@ -158,11 +144,15 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
     this.notificationsList = this.notificationsList.filter((n) => n.id !== id);
     this.notificationService.DeleteNotification(id);
     if (!this.notificationsList.length) {
-      this.showNotificationsMenu();
+      this.isNotificationsVisible = false;
     }
   }
 
   onOpenChat(contactId: string): void {
     this.openChatClicked.emit(contactId);
+  }
+
+  onOpenGroupChat(groupId: string): void {
+    this.openGroupChatClicked.emit(groupId);
   }
 }

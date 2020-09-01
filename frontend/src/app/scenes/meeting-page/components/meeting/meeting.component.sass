@@ -35,7 +35,7 @@
 //chat
 .chat
     width: 400px
-    min-width: 250px
+    min-width: 400px
     height: 100%
     background-color: #ffffff
     margin: 0
@@ -43,7 +43,7 @@
 .chat-inner
     width: 100%
     height: 100%
-    padding-top: 2em
+    padding-top: 0.5em
     padding-left: 2em
     padding-right: 2em
     margin-bottom: 0
@@ -283,6 +283,17 @@ div div.participant:hover
     width: 350px
     z-index: 0
 
+.record-container
+    position: absolute
+    bottom: 100%
+    z-index: 0
+
+.hover-helper
+    position: absolute
+    width: 1.75em
+    height: 3em
+    bottom: 1em
+
 .overflow-scroll
     overflow-y: scroll
 
@@ -454,6 +465,15 @@ div:moz-full-screen
     100%
         -color: #4e4b4b
 
+.bluePulse
+    animation: bluePulse 2s infinite
+
+@keyframes bluePulse
+    0%
+        color: #1e11da
+    100%
+        -color: #4e4b4b
+
 .border-pulse
     animation: border-pulse 2s infinite
 
@@ -462,7 +482,6 @@ div:moz-full-screen
         border: 1px solid #da0909
     100%
         -border: 1px solid rgba(34,36,38,.15)
-        
 
 // media settings
 .settings
@@ -498,6 +517,7 @@ div:moz-full-screen
             font-size: .85714286em
             color: rgba(0,0,0,.4)
             display: inline-block
+            
 .message
     outline: none
     resize: none
@@ -519,7 +539,6 @@ div:moz-full-screen
     height: 100%
     vertical-align: middle
     i:nth-child(2)
-
         margin-left: -13px !important
 
 .drag-icon:hover
@@ -552,3 +571,17 @@ div:moz-full-screen
 
 .cards-small-wrapper:hover .cards-position-icons
     display: flex
+
+.left-align
+    text-align: left
+
+i.icon.waiting-icon:hover
+    opacity: 0.8
+    cursor: progress
+
+.medium-icon
+    font-size: 1.5em
+    width: 2em !important
+
+.ui.meeting-setting-container.overflow-scroll
+    overflow-y: hidden
