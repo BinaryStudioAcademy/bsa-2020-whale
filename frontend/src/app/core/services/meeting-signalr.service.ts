@@ -130,12 +130,12 @@ export class MeetingSignalrService {
         })
       )
       .subscribe(() => {
-        this.signalHub.on('OnConferenceStartRecording', (message: string) => {
-          this.conferenceStartRecording.next(message);
+        this.signalHub.on('OnConferenceStartRecording', (meetingId: string) => {
+          this.conferenceStartRecording.next(meetingId);
         });
 
-        this.signalHub.on('OnConferenceStopRecording', (message: string) => {
-          this.conferenceStopRecording.next(message);
+        this.signalHub.on('OnConferenceStopRecording', (meetingId: string) => {
+          this.conferenceStopRecording.next(meetingId);
         });
 
         this.signalHub.on(
