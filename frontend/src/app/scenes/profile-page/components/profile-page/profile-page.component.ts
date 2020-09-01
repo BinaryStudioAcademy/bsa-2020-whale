@@ -220,7 +220,7 @@ export class ProfilePageComponent implements OnInit {
       initial_fg: '#ffffff',
       initial_size: 30,
       initial_bg: '#49A0AE',
-      initial_font_family: "'Lato', 'Lato-Regular', 'Helvetica Neue'",
+      initial_font_family: "'Lato, 'Lato-Regular', 'Helvetica Neue'",
     });
   }
 
