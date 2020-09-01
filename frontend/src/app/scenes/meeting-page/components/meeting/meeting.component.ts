@@ -12,7 +12,7 @@ import {
   QueryList,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { environment } from '@env';
 import {
@@ -24,7 +24,7 @@ import { SimpleModalService } from 'ngx-simple-modal';
 import { ToastrService } from 'ngx-toastr';
 import Peer from 'peerjs';
 import { Subject, Observable, BehaviorSubject } from 'rxjs';
-import { takeUntil, filter, first } from 'rxjs/operators';
+import { takeUntil, first } from 'rxjs/operators';
 
 import { AuthService } from 'app/core/auth/auth.service';
 import {
@@ -35,7 +35,6 @@ import {
   MeetingSignalrService,
   PollService,
   SignalMethods,
-  SignalRService,
   RoomService,
 } from 'app/core/services';
 import {
@@ -112,6 +111,7 @@ export class MeetingComponent
   public connectedStreams: MediaStream[] = [];
   public connectionData: MeetingConnectionData;
   public currentParticipant: Participant;
+  public pinModeHorizontal = true;
   public isAudioSettings = false;
   public isCameraMuted = false;
   public isMicrophoneMuted = false;
@@ -126,6 +126,10 @@ export class MeetingComponent
   public isWaitingForRecord = false;
   public isAddParticipantDisabled = false;
   public isShowReactions = false;
+  public isPinnedAudioAllowed = false;
+  public isPinnedVideoAllowed = false;
+  public isPinnedAudioActive = false;
+  public isPinnedVideoActive = false;
   public mediaData: MediaData[] = [];
   public meeting: Meeting;
   public meetingStatistics: Statistics;
@@ -163,11 +167,14 @@ export class MeetingComponent
   @ViewChildren('meetingChat') private chatBlock: QueryList<
     ElementRef<HTMLElement>
   >;
+  @ViewChild('bigAvatar') private bigAvatar: ElementRef<HTMLImageElement>;
 
   private chatElement: any;
   private currentStreamLoaded = new EventEmitter<void>();
   private contectedAt = new Date();
   private elem: any;
+  private isCardPinnedInner = false;
+  private pinnedParticipant: Participant;
   private savedStrokes: CanvasWhiteboardUpdate[][] = new Array<
     CanvasWhiteboardUpdate[]
   >();
@@ -221,6 +228,16 @@ export class MeetingComponent
 
   private get currentUserStream(): MediaStream {
     return this.userStream;
+  }
+
+  public set isCardPinned(value: boolean) {
+    this.isCardPinnedInner = value;
+    this.mediaData.forEach((m) => (m.isSmallCard = value));
+    this.isCardPinnedInner = value;
+  }
+
+  public get isCardPinned() {
+    return this.isCardPinnedInner;
   }
   //#endregion accessors
 
@@ -781,16 +798,18 @@ export class MeetingComponent
 
   private deleteParticipantMediaData(
     streamId: string,
-    firstName: string,
-    lastName: string,
-    message: string
+    firstName?: string,
+    lastName?: string,
+    message?: string
   ): void {
     const disconectedMediaDataIndex = this.mediaData.findIndex(
       (m) => m.stream.id === streamId
     );
     if (disconectedMediaDataIndex >= 0) {
       this.mediaData.splice(disconectedMediaDataIndex, 1);
-      this.toastr.info(`${firstName}${lastName ? lastName : ''} ${message}`);
+      if (message) {
+        this.toastr.info(`${firstName}${lastName ? lastName : ''} ${message}`);
+      }
     }
   }
   //#endregion hooks
@@ -1246,6 +1265,7 @@ export class MeetingComponent
     const newMediaData = {
       id: participant.id,
       isCurrentUser: participant.id === this.currentParticipant.id,
+      isSmallCard: this.isCardPinned,
       currentStreamId: stream.id,
       stream,
       dynamicData: new BehaviorSubject<ParticipantDynamicData>({
@@ -1372,9 +1392,40 @@ export class MeetingComponent
   }
 
   public pinCard(mediaDataId: string): void {
-    this.currentVideo.nativeElement.srcObject = this.mediaData.find(
-      (m) => m.id === mediaDataId
-    );
+    const mediaData = this.mediaData.find((m) => m.id === mediaDataId);
+
+    if (!mediaData || !mediaData.stream) {
+      return;
+    }
+
+    if (this.pinnedParticipant) {
+      this.createParticipantCard(this.pinnedParticipant, true);
+    }
+
+    mediaData.dynamicData.subscribe((data) => {
+      this.isPinnedAudioAllowed = data.isAudioAllowed;
+      this.isPinnedVideoAllowed = data.isVideoAllowed;
+      this.isPinnedAudioActive = data.isAudioActive;
+      this.isPinnedVideoActive = data.isVideoActive;
+      this.pinnedParticipant = this.meeting.participants.find(
+        (p) => p.streamId === mediaData.stream.id
+      );
+      this.currentVideo.nativeElement.srcObject = mediaData.stream;
+      this.deleteParticipantMediaData(mediaData.stream.id);
+      this.bigAvatar.nativeElement.src = data.avatarUrl;
+      this.isCardPinned = true;
+    });
+  }
+
+  public unpinCard() {
+    this.createParticipantCard(this.pinnedParticipant, true);
+    this.isCardPinned = false;
+    this.pinnedParticipant = null;
+    this.bigAvatar.nativeElement.src = this.currentParticipant.user.avatarUrl;
+    this.isPinnedAudioAllowed = false;
+    this.isPinnedVideoAllowed = false;
+    this.isPinnedAudioActive = false;
+    this.isPinnedVideoActive = false;
   }
   //#endregion participant cards
 
