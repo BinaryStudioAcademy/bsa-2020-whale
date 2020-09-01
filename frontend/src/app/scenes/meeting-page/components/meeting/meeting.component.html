@@ -447,15 +447,15 @@
 
       <div class="settings" *ngIf="isVideoSettings && !isCameraMuted">
         <app-video-settings
-          (onClick)="changeStateVideo($event)"
+          (clickEmited)="changeStateVideo($event)"
         ></app-video-settings>
       </div>
       <div class="settings" *ngIf="isAudioSettings && !isMicrophoneMuted">
         <app-audio-settings
-          (onClick)="changeInputDevice($event)"
+          (clickEmited)="changeInputDevice($event)"
         ></app-audio-settings>
         <app-output-settings
-          (onClick)="changeOutputDevice($event)"
+          (clickEmited)="changeOutputDevice($event)"
         ></app-output-settings>
       </div>
     </div>

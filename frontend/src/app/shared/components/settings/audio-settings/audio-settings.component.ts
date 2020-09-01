@@ -11,7 +11,7 @@ export class AudioSettingsComponent implements OnInit {
   public browserMediaDevice = new BrowserMediaDevice();
   public inputAudioDevices: MediaDeviceInfo[];
   @Input() inputAudioDeviceId: string;
-  @Output() onClick = new EventEmitter();
+  @Output() clickEmited = new EventEmitter();
 
   constructor(private mediaService: MediaSettingsService) {}
 
@@ -21,6 +21,6 @@ export class AudioSettingsComponent implements OnInit {
       .then((res) => (this.inputAudioDevices = res));
   }
   isActive(event: MediaDeviceInfo): boolean {
-    return this.mediaService.settings.InputDeviceId === event.deviceId;
+    return this.mediaService.getSettings().InputDeviceId === event.deviceId;
   }
 }

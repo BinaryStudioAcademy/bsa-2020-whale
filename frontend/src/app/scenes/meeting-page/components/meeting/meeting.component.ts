@@ -716,13 +716,13 @@ export class MeetingComponent
       });
     });
 
-    if (this.mediaSettingsService.settings.IsMirrorVideo) {
+    if (this.mediaSettingsService.getSettings().IsMirrorVideo) {
       this.currentVideo.nativeElement.style.transform = 'scale(-1,1)';
     }
     // show a warning dialog if close current tab or window
     window.onbeforeunload = (ev: BeforeUnloadEvent) => {
       ev.preventDefault();
-      ev = ev || window.event;
+      ev = ev;
       ev.returnValue = '';
       return '';
     };
@@ -732,7 +732,7 @@ export class MeetingComponent
     this.elem = this.mainArea.nativeElement;
     this.currentStreamLoaded.subscribe(() => {
       this.currentVideo.nativeElement.srcObject = this.currentUserStream;
-      if (this.mediaSettingsService.settings.IsMirrorVideo) {
+      if (this.mediaSettingsService.getSettings().IsMirrorVideo) {
         this.currentVideo.nativeElement.style.transform = 'scale(-1,1)';
         document.querySelector('video').style.transform = 'scale(-1,1)';
       }
@@ -1275,6 +1275,7 @@ export class MeetingComponent
       const processor = audioContext.createScriptProcessor(256, 1, 1);
       mediaStreamSource.connect(processor);
       processor.connect(audioContext.destination);
+      // tslint:disable-next-line: deprecation
       processor.onaudioprocess = (e) => {
         const inputData = e.inputBuffer.getChannelData(0);
         const inputDataLength = inputData.length;
@@ -1580,7 +1581,7 @@ export class MeetingComponent
     videoElements.forEach((elem) => {
       this.mediaSettingsService.attachSinkId(
         elem,
-        this.mediaSettingsService.settings.OutputDeviceId
+        this.mediaSettingsService.getSettings().OutputDeviceId
       );
     });
   }

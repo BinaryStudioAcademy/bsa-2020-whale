@@ -62,10 +62,10 @@ export class ScheduleMeetingPageComponent implements OnInit {
       isPasswordEnabled: new FormControl(''),
       password: new FormControl(''),
       isDisableAudio: new FormControl(
-        meetingSettingsService.settings.isAudioDisabled
+        meetingSettingsService.getSettings().isAudioDisabled
       ),
       isDisableVideo: new FormControl(
-        meetingSettingsService.settings.isVideoDisabled
+        meetingSettingsService.getSettings().isVideoDisabled
       ),
       saveIntoCalendar: new FormControl(false),
     });
@@ -81,12 +81,12 @@ export class ScheduleMeetingPageComponent implements OnInit {
     }
 
     const dateParts = this.form.controls.date.value.split('/');
-    let date = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
+    const date = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
     const time = this.form.controls.time.value.match(
       /(\d+)(?::(\d\d))?\s*(p?)/
     );
-    date.setHours(parseInt(time[1]) + (time[3] ? 12 : 0));
-    date.setMinutes(parseInt(time[2]) || 0);
+    date.setHours(parseInt(time[1], 10) + (time[3] ? 12 : 0));
+    date.setMinutes(parseInt(time[2], 10) || 0);
 
     this.meetingService
       .createScheduledMeeting({

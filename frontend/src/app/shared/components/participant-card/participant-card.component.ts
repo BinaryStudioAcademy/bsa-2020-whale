@@ -64,7 +64,7 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
 
     this.video.srcObject = this.data.stream;
     if (
-      this.mediaSettingsService.settings.IsMirrorVideo &&
+      this.mediaSettingsService.getSettings().IsMirrorVideo &&
       this.data.isCurrentUser
     ) {
       document.querySelector('video').style.transform = 'scale(-1,1)';

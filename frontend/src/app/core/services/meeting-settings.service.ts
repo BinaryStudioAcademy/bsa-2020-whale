@@ -5,48 +5,48 @@ import { MeetingSettings } from '../../shared/models';
   providedIn: 'root',
 })
 export class MeetingSettingsService {
-  private _settings = {
+  private settings = {
     isWhiteboard: false,
     isPoll: false,
     isVideoDisabled: false,
     isAudioDisabled: false,
   } as MeetingSettings;
 
-  public get settings(): MeetingSettings {
-    return this._settings;
+  public getSettings(): MeetingSettings {
+    return this.settings;
   }
 
   constructor() {
     const jsonString = window.localStorage.getItem('meeting-settings');
     if (jsonString) {
-      this._settings = JSON.parse(jsonString);
+      this.settings = JSON.parse(jsonString);
     }
   }
 
   private saveMeetingSettingsInLocalStorage(): void {
     window.localStorage.setItem(
       'meeting-settings',
-      JSON.stringify(this._settings)
+      JSON.stringify(this.settings)
     );
   }
 
   public changeWhiteboard(IsWhiteboard: boolean): void {
-    this._settings.isWhiteboard = IsWhiteboard;
+    this.settings.isWhiteboard = IsWhiteboard;
     this.saveMeetingSettingsInLocalStorage();
   }
 
   public changePoll(isPoll: boolean): void {
-    this._settings.isPoll = isPoll;
+    this.settings.isPoll = isPoll;
     this.saveMeetingSettingsInLocalStorage();
   }
 
   public changeIsAudioDisabled(isAudioDisabled: boolean): void {
-    this._settings.isAudioDisabled = isAudioDisabled;
+    this.settings.isAudioDisabled = isAudioDisabled;
     this.saveMeetingSettingsInLocalStorage();
   }
 
   public changeIsVideoDisabled(isVideoDisabled: boolean): void {
-    this._settings.isVideoDisabled = isVideoDisabled;
+    this.settings.isVideoDisabled = isVideoDisabled;
     this.saveMeetingSettingsInLocalStorage();
   }
 }
