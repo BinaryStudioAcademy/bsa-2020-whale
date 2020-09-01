@@ -26,6 +26,15 @@ export class MeetingService {
     );
   }
 
+  public createScheduledMeeting(
+    meeting: MeetingCreate
+  ): Observable<HttpResponse<MeetingLink>> {
+    return this.httpService.postFullRequest<MeetingCreate, MeetingLink>(
+      `${this.routePrefix}/scheduled`,
+      meeting
+    );
+  }
+
   public connectMeeting(link: string): Observable<HttpResponse<Meeting>> {
     return this.httpService.getFullRequest<Meeting>(
       `${this.routePrefix}${link}`

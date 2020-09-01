@@ -1,13 +1,15 @@
 import { Injectable } from '@angular/core';
-import { MeetingSettings } from '../../shared/models/meeting/MeetingSettings';
+import { MeetingSettings } from '../../shared/models';
 
 @Injectable({
   providedIn: 'root',
 })
 export class MeetingSettingsService {
   private _settings = {
-    IsWhiteboard: false,
-    IsPoll: false,
+    isWhiteboard: false,
+    isPoll: false,
+    isVideoDisabled: false,
+    isAudioDisabled: false,
   } as MeetingSettings;
 
   public get settings(): MeetingSettings {
@@ -29,12 +31,22 @@ export class MeetingSettingsService {
   }
 
   public changeWhiteboard(IsWhiteboard: boolean): void {
-    this._settings.IsWhiteboard = IsWhiteboard;
+    this._settings.isWhiteboard = IsWhiteboard;
     this.saveMeetingSettingsInLocalStorage();
   }
 
-  public changePoll(IsPoll: boolean): void {
-    this._settings.IsPoll = IsPoll;
+  public changePoll(isPoll: boolean): void {
+    this._settings.isPoll = isPoll;
+    this.saveMeetingSettingsInLocalStorage();
+  }
+
+  public changeIsAudioDisabled(isAudioDisabled: boolean): void {
+    this._settings.isAudioDisabled = isAudioDisabled;
+    this.saveMeetingSettingsInLocalStorage();
+  }
+
+  public changeIsVideoDisabled(isVideoDisabled: boolean): void {
+    this._settings.isVideoDisabled = isVideoDisabled;
     this.saveMeetingSettingsInLocalStorage();
   }
 }

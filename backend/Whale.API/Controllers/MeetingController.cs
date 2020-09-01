@@ -27,6 +27,15 @@ namespace Whale.API.Controllers
             return Ok(await _httpService.PostAsync<MeetingCreateDTO, MeetingLinkDTO>("api/meeting", meetingDto));
         }
 
+        [HttpPost("scheduled")]
+        public async Task<ActionResult> CreateMeetingScheduled(MeetingCreateDTO meetingDto)
+        {
+            var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+            meetingDto.CreatorEmail = ownerEmail;
+            await _httpService.PostAsync("api/meeting/scheduled", meetingDto);
+            return Ok();
+        }
+
         [HttpGet]
         public async Task<ActionResult<MeetingDTO>> ConnectMeeting(Guid id, string pwd)
         {
@@ -55,20 +64,11 @@ namespace Whale.API.Controllers
         }
 
         [Authorize]
-        [HttpPut("updateMedia")]
-        public async Task<ActionResult> UpdateMeetingMediaOnStart(MediaOnStartDTO mediaOnStartDTO)
-        {
-            mediaOnStartDTO.RequestingUserEmail =
-                (HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value);
-
-            await _httpService.PutAsync("api/meeting/updateMedia", mediaOnStartDTO);
-            return Ok();
-        }
-
-        [Authorize]
         [HttpPut("updateSettings")]
         public async Task<ActionResult> UpdateMeetingSettings(UpdateSettingsDTO updateSettingsDTO)
         {
+            updateSettingsDTO.ApplicantEmail = 
+                HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
 
             await _httpService.PutAsync("api/meeting/updateSettings", updateSettingsDTO);
             return Ok();

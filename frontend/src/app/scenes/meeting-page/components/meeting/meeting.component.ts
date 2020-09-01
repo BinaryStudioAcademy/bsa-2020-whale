@@ -10,6 +10,7 @@ import {
   AfterViewChecked,
   ViewChildren,
   QueryList,
+  HostListener,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
@@ -62,6 +63,7 @@ import { RecordModalComponent } from '../record-modal/record-modal.component';
 import * as DecibelMeter from 'decibel-meter';
 import { BrowserMediaDevice } from '@shared/browser-media-device';
 import { MeetingSettingsService } from '../../../../core/services/meeting-settings.service';
+import { MeetingInviteModalData } from '@shared/models/email/meeting-invite-modal-data';
 
 @Component({
   selector: 'app-meeting',
@@ -116,8 +118,6 @@ export class MeetingComponent
   public isCameraMuted = false;
   public isMicrophoneMuted = false;
   public isNewMsg = false;
-  public isParticipantsVideoAllowed: boolean;
-  public isParticipantsAudioAllowed: boolean;
   public isScreenRecording = false;
   public isShowChat = false;
   public isShowCurrentParticipantCard = true;
@@ -128,6 +128,9 @@ export class MeetingComponent
   public isWaitingForRecord = false;
   public isAddParticipantDisabled = false;
   public isShowReactions = false;
+  public isShowRecordingOptins = false;
+  public isHighlightRecording = false;
+  public isMeetingLoading = true;
   public mediaData: MediaData[] = [];
   public meeting: Meeting;
   public meetingStatistics: Statistics;
@@ -158,7 +161,6 @@ export class MeetingComponent
   public IsPoll = false;
 
   @ViewChild('whiteboard') private whiteboard: ElementRef;
-  @ViewChild('board') private canvasWhiteboard: ElementRef;
   @ViewChild('currentVideo') private currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
     HTMLElement
@@ -203,6 +205,18 @@ export class MeetingComponent
     );
   }
 
+  @HostListener('fullscreenchange', ['$event'])
+  @HostListener('webkitfullscreenchange', ['$event'])
+  @HostListener('mozfullscreenchange', ['$event'])
+  @HostListener('MSFullscreenChange', ['$event'])
+  public screenChange(): void {
+    const element = document.fullscreenElement;
+
+    if (element?.classList[0] === undefined) {
+      this.isWhiteboardFullScreen = false;
+    }
+  }
+
   //#region accessors
   private set currentUserStream(value: MediaStream) {
     if (this.userStream) {
@@ -211,10 +225,10 @@ export class MeetingComponent
         {
           oldStreamId: this.userStream?.id,
           newStreamId: value.id,
-          isVideoAllowed: this.meeting.isVideoAllowed,
           isAudioAllowed: this.meeting.isAudioAllowed,
-          isVideoActive: value.getVideoTracks().some((vt) => vt.enabled),
+          isVideoAllowed: this.meeting.isVideoAllowed,
           isAudioActive: value.getAudioTracks().some((at) => at.enabled),
+          isVideoActive: value.getVideoTracks().some((vt) => vt.enabled),
         }
       );
     }
@@ -235,9 +249,9 @@ export class MeetingComponent
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     }
 
-    this.currentUserStream = await navigator.mediaDevices.getUserMedia(
-        await this.mediaSettingsService.getMediaConstraints()
-      ).catch(() => {
+    this.currentUserStream = await navigator.mediaDevices
+      .getUserMedia(await this.mediaSettingsService.getMediaConstraints())
+      .catch(() => {
         return null;
       });
     if (!this.currentUserStream || !this.currentUserStream?.active) {
@@ -245,7 +259,6 @@ export class MeetingComponent
       this.leaveUnConnected();
       return;
     }
-
     const settings = this.currentUserStream.getVideoTracks()[0].getSettings();
     settings.frameRate = 20;
     settings.height = 480;
@@ -365,39 +378,16 @@ export class MeetingComponent
         (mediaData) => {
           this.updateCardDynamicData(
             mediaData.streamId,
-            mediaData.isVideoAllowed,
             mediaData.isAudioAllowed,
-            mediaData.isVideoActive,
-            mediaData.isAudioActive
+            mediaData.isVideoAllowed,
+            mediaData.isAudioActive,
+            mediaData.isVideoActive
           );
         },
         () => {
           this.toastr.error(
             'Error occured during participants media state updating'
           );
-        }
-      );
-
-    this.meetingSignalrService.onDrawingChangePermissions$
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(
-        (enabled) => {
-          this.isDrawingEnabled = enabled;
-
-          if (this.isHost) {
-            this.canvasWhiteboard.nativeElement.style.pointerEvents = 'all';
-          } else {
-            if (!this.isDrawingEnabled) {
-              this.canvasWhiteboard.nativeElement.style.pointerEvents = 'none';
-              this.toastr.info('Host disabled drawing');
-            } else {
-              this.canvasWhiteboard.nativeElement.style.pointerEvents = 'all';
-              this.toastr.info('Host enabled drawing for everyone');
-            }
-          }
-        },
-        () => {
-          this.toastr.error('Error occured during drawing change permissions');
         }
       );
 
@@ -418,10 +408,10 @@ export class MeetingComponent
             changedMediaData.currentStreamId = streamChangedData.newStreamId;
             this.updateCardDynamicData(
               streamChangedData.newStreamId,
-              streamChangedData.isVideoAllowed,
               streamChangedData.isAudioAllowed,
-              streamChangedData.isVideoActive,
-              streamChangedData.isAudioActive
+              streamChangedData.isVideoAllowed,
+              streamChangedData.isAudioActive,
+              streamChangedData.isVideoActive
             );
           }
         },
@@ -439,7 +429,7 @@ export class MeetingComponent
           if (!data.changedParticipantConnectionId) {
             if (
               this.meeting.isAudioAllowed !== data.isAudioAllowed &&
-              this.currentParticipant.role !== ParticipantRole.Host
+              this.isHost
             ) {
               this.toastr.info(
                 `Participants' audio ${
@@ -448,7 +438,7 @@ export class MeetingComponent
               );
             } else if (
               this.meeting.isVideoAllowed !== data.isVideoAllowed &&
-              this.currentParticipant.role !== ParticipantRole.Host
+              this.isHost
             ) {
               this.toastr.info(
                 `Participants' video ${
@@ -457,16 +447,21 @@ export class MeetingComponent
               );
             }
 
-            this.meeting.isVideoAllowed = data.isVideoAllowed;
             this.meeting.isAudioAllowed = data.isAudioAllowed;
+            this.meeting.isVideoAllowed = data.isVideoAllowed;
+            if (!this.isHost) {
+              this.toggleMicrophone();
+              this.toggleCamera();
+            }
+
             this.meetingSignalrService.invoke<ChangedMediaState>(
               SignalMethods.OnMediaStateChanged,
               {
                 streamId: this.currentParticipant.streamId,
-                isVideoAllowed: this.meeting.isVideoAllowed,
                 isAudioAllowed: this.meeting.isAudioAllowed,
-                isVideoActive: !this.isCameraMuted,
+                isVideoAllowed: this.meeting.isVideoAllowed,
                 isAudioActive: !this.isMicrophoneMuted,
+                isVideoActive: !this.isCameraMuted,
               }
             );
           } else if (
@@ -475,7 +470,7 @@ export class MeetingComponent
           ) {
             if (
               this.meeting.isAudioAllowed !== data.isAudioAllowed &&
-              this.currentParticipant.role !== ParticipantRole.Host
+              this.isHost
             ) {
               this.toastr.info(
                 `Your audio ${
@@ -484,7 +479,7 @@ export class MeetingComponent
               );
             } else if (
               this.meeting.isVideoAllowed !== data.isVideoAllowed &&
-              this.currentParticipant.role !== ParticipantRole.Host
+              this.isHost
             ) {
               this.toastr.info(
                 `Your video ${
@@ -493,15 +488,15 @@ export class MeetingComponent
               );
             }
 
-            this.meeting.isVideoAllowed = data.isVideoAllowed;
             this.meeting.isAudioAllowed = data.isAudioAllowed;
+            this.meeting.isVideoAllowed = data.isVideoAllowed;
             this.updateCardDynamicData(
               this.meeting.participants.find(
                 (p) =>
                   p.activeConnectionId === data.changedParticipantConnectionId
               )?.streamId,
-              data.isVideoAllowed,
               data.isAudioAllowed,
+              data.isVideoAllowed,
               !this.isCameraMuted,
               !this.isMicrophoneMuted
             );
@@ -519,10 +514,10 @@ export class MeetingComponent
                 (p) =>
                   p.activeConnectionId === data.changedParticipantConnectionId
               )?.streamId,
-              data.isVideoAllowed,
               data.isAudioAllowed,
-              data.isVideoActive,
-              data.isAudioActive
+              data.isVideoAllowed,
+              data.isAudioActive,
+              data.isVideoActive
             );
           }
         },
@@ -535,6 +530,26 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (setting) => {
+          if (
+            !this.meeting.isWhiteboard &&
+            setting.isWhiteboard &&
+            !this.isHost
+          ) {
+            this.toastr.info('Host has forbidden a whiteboard.');
+          }
+          if (
+            this.meeting.isWhiteboard &&
+            !setting.isWhiteboard &&
+            !this.isHost
+          ) {
+            this.toastr.info('Host has allowed a whiteboard.');
+          }
+          if (!this.meeting.isPoll && setting.isPoll && !this.isHost) {
+            this.toastr.info('Host has forbidden to create polls.');
+          }
+          if (this.meeting.isPoll && !setting.isWhiteboard && !this.isHost) {
+            this.toastr.info('Host has allowed polls');
+          }
           this.meeting.isWhiteboard = setting.isWhiteboard;
           this.meeting.isPoll = setting.isPoll;
           this.meeting.isWhiteboard && !this.isHost
@@ -684,8 +699,9 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (reaction) => {
-          this.mediaData.find(m => m.id === reaction.userId)
-          .reactions.next(reaction.reaction);
+          this.mediaData
+            .find((m) => m.id === reaction.userId)
+            .reactions.next(reaction.reaction);
         },
         (error) => {
           this.toastr.error(error);
@@ -746,10 +762,6 @@ export class MeetingComponent
   }
 
   ngAfterViewChecked(): void {
-    if (this.canvasWhiteboard !== undefined && this.isHost) {
-      this.canvasWhiteboard.nativeElement.style.pointerEvents = 'all';
-    }
-
     if (this.isShowChat) {
       this.chatElement = this.chatBlock.first?.nativeElement;
     }
@@ -850,8 +862,10 @@ export class MeetingComponent
     });
   }
 
-  public startRecording(): void {
+  public startRecording(isHighlight: boolean): void {
     this.isScreenRecording = true;
+    this.isShowRecordingOptins = false;
+    this.isHighlightRecording = false;
 
     this.blobService.startRecording().subscribe({
       complete: () => (this.isWaitingForRecord = false),
@@ -875,6 +889,9 @@ export class MeetingComponent
                 console.error(err.message);
               }
             );
+          if (isHighlight) {
+            this.highlightRecording();
+          }
         } else {
           this.isScreenRecording = false;
         }
@@ -883,6 +900,9 @@ export class MeetingComponent
   }
 
   public stopRecording(): void {
+    if (!this.isScreenRecording) {
+      return;
+    }
     this.isWaitingForRecord = true;
 
     this.isScreenRecording = false;
@@ -894,6 +914,12 @@ export class MeetingComponent
       'Conference stop recording'
     );
     this.toastr.info('Stop recording a conference');
+  }
+
+  private async highlightRecording(): Promise<void> {
+    this.isHighlightRecording = true;
+    await new Promise(r => setTimeout(r, 30000));
+    this.stopRecording();
   }
 
   public onPollIconClick(): void {
@@ -936,7 +962,6 @@ export class MeetingComponent
     this.isShowStatistics = false;
     this.isShowReactions = !this.isShowReactions;
   }
-
 
   public onCopyIconClick(): void {
     const URL: string = this.document.location.href;
@@ -989,6 +1014,8 @@ export class MeetingComponent
     } else if (this.elem.msRequestFullscreen) {
       this.elem.msRequestFullscreen();
     }
+
+    this.canvasIsDisplayed = false;
   }
 
   public closeFullscreen(): void {
@@ -1073,8 +1100,8 @@ export class MeetingComponent
         startTime: new Date(),
         isScheduled: false,
         isRecurrent: false,
-        isVideoAllowed: true,
         isAudioAllowed: true,
+        isVideoAllowed: true,
         isWhiteboard: false,
         isPoll: false,
         anonymousCount: 0,
@@ -1145,10 +1172,10 @@ export class MeetingComponent
     this.meetingSignalrService.invoke(SignalMethods.OnMediaStateChanged, {
       streamId: this.currentUserStream.id,
       receiverConnectionId,
-      isVideoAllowed: this.meeting.isVideoAllowed,
       isAudioAllowed: this.meeting.isAudioAllowed,
-      isVideoActive: !this.isCameraMuted,
+      isVideoAllowed: this.meeting.isVideoAllowed,
       isAudioActive: !this.isMicrophoneMuted,
+      isVideoActive: !this.isCameraMuted,
     });
   }
 
@@ -1162,8 +1189,8 @@ export class MeetingComponent
     const modalResult = await this.simpleModalService
       .addModal(EnterModalComponent, {
         isCurrentParticipantHost,
-        isAllowedVideoOnStart: this.meeting.isVideoAllowed,
         isAllowedAudioOnStart: this.meeting.isAudioAllowed,
+        isAllowedVideoOnStart: this.meeting.isVideoAllowed,
       })
       .toPromise();
 
@@ -1180,8 +1207,8 @@ export class MeetingComponent
       this.toggleMicrophone(true);
     }
 
-    this.isParticipantsVideoAllowed = modalResult.isAllowedVideoOnStart;
-    this.isParticipantsAudioAllowed = modalResult.isAllowedAudioOnStart;
+    this.meeting.isAudioAllowed = modalResult.isAllowedAudioOnStart;
+    this.meeting.isVideoAllowed = modalResult.isAllowedVideoOnStart;
 
     if (
       isCurrentParticipantHost &&
@@ -1191,20 +1218,21 @@ export class MeetingComponent
       this.meetingService
         .updateMediaOnStart({
           meetingId: this.meeting.id,
-          isVideoAllowed: modalResult.isAllowedVideoOnStart,
           isAudioAllowed: modalResult.isAllowedAudioOnStart,
+          isVideoAllowed: modalResult.isAllowedVideoOnStart,
         })
         .pipe(takeUntil(this.unsubscribe$))
         .subscribe(() => {
           this.meetingSignalrService.invoke(
             SignalMethods.OnMediaPermissionsChanged,
             {
-              isVideoAllowed: modalResult.isAllowedVideoOnStart,
               isAudioAllowed: modalResult.isAllowedAudioOnStart,
+              isVideoAllowed: modalResult.isAllowedVideoOnStart,
             }
           );
         });
     }
+    this.isMeetingLoading = false;
   }
 
   //#endregion options
@@ -1275,7 +1303,7 @@ export class MeetingComponent
             ? this.currentUserStream.getAudioTracks().some((at) => at.enabled)
             : true,
       }),
-      reactions: new Subject<ReactionsEnum> (),
+      reactions: new Subject<ReactionsEnum>(),
       volume: 0,
     } as MediaData;
 
@@ -1332,40 +1360,12 @@ export class MeetingComponent
       SignalMethods.OnMediaPermissionsChanged,
       {
         changedParticipantConnectionId: participantConnectionId,
-        isVideoAllowed: data.isVideoAllowed,
         isAudioAllowed: data.isAudioAllowed,
-        isVideoActive: data.isVideoActive,
+        isVideoAllowed: data.isVideoAllowed,
         isAudioActive: data.isAudioActive,
+        isVideoActive: data.isVideoActive,
       }
     );
-  }
-
-  public switchOtherParticipantsMediaAsHost(isVideo: boolean): void {
-    this.meetingSignalrService.invoke(SignalMethods.OnMediaPermissionsChanged, {
-      changedParticipantConnectionId: null,
-      isVideoAllowed: isVideo
-        ? !this.isParticipantsVideoAllowed
-        : this.isParticipantsVideoAllowed,
-      isAudioAllowed: isVideo
-        ? this.isParticipantsAudioAllowed
-        : !this.isParticipantsAudioAllowed,
-    });
-
-    isVideo
-      ? (this.isParticipantsVideoAllowed = !this.isParticipantsVideoAllowed)
-      : (this.isParticipantsAudioAllowed = !this.isParticipantsAudioAllowed);
-
-    this.meetingService
-      .updateMediaOnStart({
-        meetingId: this.meeting.id,
-        isAudioAllowed: this.isParticipantsAudioAllowed,
-        isVideoAllowed: this.isParticipantsVideoAllowed,
-      })
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(
-        () => {},
-        () => this.toastr.error("Media settings upon start wasn't saved")
-      );
   }
 
   public hideViewEventHandler(mediaDataId: string): void {
@@ -1375,10 +1375,10 @@ export class MeetingComponent
 
   private updateCardDynamicData(
     streamId: string,
-    isVideoAllowed: boolean,
     isAudioAllowed: boolean,
-    isVideoActive?: boolean,
-    isAudioActive?: boolean
+    isVideoAllowed: boolean,
+    isAudioActive?: boolean,
+    isVideoActive?: boolean
   ): void {
     const participant =
       this.currentParticipant.streamId === streamId
@@ -1397,11 +1397,17 @@ export class MeetingComponent
       userFirstName: participant.user.firstName,
       userSecondName: participant.user.secondName,
       avatarUrl: participant.user.avatarUrl,
-      isVideoAllowed,
       isAudioAllowed,
-      isVideoActive,
+      isVideoAllowed,
       isAudioActive,
+      isVideoActive,
     });
+  }
+
+  public pinCard(mediaDataId: string): void {
+    this.currentVideo.nativeElement.srcObject = this.mediaData.find(
+      (m) => m.id === mediaDataId
+    );
   }
   //#endregion participant cards
 
@@ -1491,15 +1497,6 @@ export class MeetingComponent
       meetingId: this.meeting.id.toString(),
       canvasEvent: strokes,
     });
-  }
-
-  public onDrawingChangePermissions(event): void {
-    const enabled = event.target.checked;
-
-    this.meetingSignalrService.invoke(
-      SignalMethods.OnDrawingChangePermissions,
-      enabled
-    );
   }
 
   public onCanvasClear(): void {
@@ -1613,8 +1610,8 @@ export class MeetingComponent
   }
 
   public showAudioSettings(): void {
-    this.isVideoSettings = false;
     this.isAudioSettings = !this.isAudioSettings;
+    this.isVideoSettings = false;
   }
 
   public showVideoSettings(): void {
@@ -1667,10 +1664,11 @@ export class MeetingComponent
             meetingId: this.meeting.id,
             senderId: this.currentParticipant.user.id,
             participants: this.meeting.participants,
-          })
+            isScheduled: false,
+          } as MeetingInviteModalData)
           .toPromise()
           .then((isShowParticipants) => {
-            this.isShowParticipants = isShowParticipants;
+            this.isShowParticipants = isShowParticipants as boolean;
           });
         this.isAddParticipantDisabled = false;
       },

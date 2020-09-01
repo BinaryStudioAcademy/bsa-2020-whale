@@ -370,11 +370,12 @@ export class HomePageComponent implements OnInit, OnDestroy {
         anonymousCount: 0,
         isScheduled: false,
         isRecurrent: false,
-        isAudioAllowed: true,
-        isVideoAllowed: true,
-        isWhiteboard: this.meetingSettingsService.settings.IsWhiteboard,
-        isPoll: this.meetingSettingsService.settings.IsPoll,
+        isAudioAllowed: !this.meetingSettingsService.settings.isAudioDisabled,
+        isVideoAllowed: !this.meetingSettingsService.settings.isVideoDisabled,
+        isWhiteboard: this.meetingSettingsService.settings.isWhiteboard,
+        isPoll: this.meetingSettingsService.settings.isPoll,
         creatorEmail: this.ownerEmail,
+        participantsEmails: [],
       } as MeetingCreate)
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
@@ -542,12 +543,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
   public onOpenChat(contactId: string): void {
     const contact = this.contacts.find((c) => (c.id = contactId));
     this.onContactClick(contact);
-  }
-
-  public onMessageRead(event: string): void {
-    this.pageHeader.notificationsList = this.pageHeader.notificationsList.filter(
-      (n) => !n.options.includes(event)
-    );
   }
 }
 export interface UserModel {

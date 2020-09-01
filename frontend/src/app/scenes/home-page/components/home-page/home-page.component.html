@@ -157,7 +157,6 @@
         [contactSelected]="contactSelected"
         [loggedInUser]="loggedInUser"
         (chat)="contactVisibilityChange($event)"
-        (messageRead)="onMessageRead($event)"
       ></app-contacts-chat>
       <app-group-chat
         *ngIf="groupChatVisibility"

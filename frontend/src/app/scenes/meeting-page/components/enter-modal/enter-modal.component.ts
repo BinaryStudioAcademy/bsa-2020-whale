@@ -25,8 +25,12 @@ export class EnterModalComponent
   }
 
   public ngOnInit(): void {
-    this.webcam = this.isAllowedVideoOnStart;
-    this.microphone = this.isAllowedAudioOnStart;
+    this.webcam = this.isCurrentParticipantHost
+      ? true
+      : this.isAllowedVideoOnStart;
+    this.microphone = this.isCurrentParticipantHost
+      ? true
+      : this.isAllowedAudioOnStart;
   }
 
   public onProceed(): void {

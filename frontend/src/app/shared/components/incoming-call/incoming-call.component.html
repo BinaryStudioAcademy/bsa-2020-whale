@@ -1,5 +1,10 @@
 <div class="ui card" ngDraggable>
-  <div class="ui header">
+  <div
+    class="ui header"
+    title="{{ call?.contact?.firstMember?.firstName }} {{
+      call?.contact?.firstMember?.secondName
+    }}"
+  >
     {{ call?.contact?.firstMember?.firstName }}
     {{ call?.contact?.firstMember?.secondName }}
   </div>

@@ -266,6 +266,17 @@ div div.participant:hover
     width: 350px
     z-index: 0
 
+.record-container
+    position: absolute
+    bottom: 100%
+    z-index: 0
+
+.hover-helper
+    position: absolute
+    width: 1.75em
+    height: 3em
+    bottom: 1em
+
 .overflow-scroll
     overflow-y: scroll
 
@@ -387,7 +398,7 @@ div:moz-full-screen
         width: 300px
 
 .board
-    pointer-events: none
+    pointer-events: all
     height: calc(100% - 30px)
     width: 100%
     @media screen and (max-width: 1000px)
@@ -418,7 +429,7 @@ div:moz-full-screen
     padding-top: 6px
     padding-left: 10px
 
-.whiteboard-buttons 
+.whiteboard-buttons
     padding-top: 5px
     position: absolute
     z-index: inherit
@@ -436,6 +447,16 @@ div:moz-full-screen
         color: #da0909
     100%
         -color: #4e4b4b
+
+.border-pulse
+    animation: border-pulse 2s infinite
+
+@keyframes border-pulse
+    0%
+        border: 1px solid #da0909
+    100%
+        -border: 1px solid rgba(34,36,38,.15)
+
 
 // media settings
 .settings
@@ -501,3 +522,16 @@ div:moz-full-screen
         cursor: grabbing
         opacity: 1
 
+.left-align
+    text-align: left
+
+i.icon.waiting-icon:hover
+    opacity: 0.8
+    cursor: progress
+
+.medium-icon
+    font-size: 1.5em
+    width: 2em !important
+
+.ui.meeting-setting-container.overflow-scroll
+  overflow-y: hidden

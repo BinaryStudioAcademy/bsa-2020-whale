@@ -133,7 +133,7 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
             (n) => n.id !== notificationId
           );
           if (!this.notificationsList.length) {
-            this.showNotificationsMenu();
+            this.isNotificationsVisible = false;
           }
         },
         (err) => {
@@ -147,18 +147,18 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
   }
 
   logOut(): void {
-    this.whaleSignalrService.invoke(
-      WhaleSignalMethods.OnUserDisconnect,
-      this.loggedInUser.email
-    );
-    this.auth.logout().subscribe(() => this.router.navigate(['landing']));
+    this.whaleSignalrService
+      .invoke(WhaleSignalMethods.OnUserDisconnect, this.loggedInUser.email)
+      .subscribe(() =>
+        this.auth.logout().subscribe(() => this.router.navigate(['landing']))
+      );
   }
 
   onNotificationDelete(id: string): void {
     this.notificationsList = this.notificationsList.filter((n) => n.id !== id);
     this.notificationService.DeleteNotification(id);
     if (!this.notificationsList.length) {
-      this.showNotificationsMenu();
+      this.isNotificationsVisible = false;
     }
   }
 

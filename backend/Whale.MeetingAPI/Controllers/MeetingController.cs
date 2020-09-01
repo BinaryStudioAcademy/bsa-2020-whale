@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Whale.Shared.Jobs;
 using Whale.Shared.Models.Meeting;
 using Whale.Shared.Services;
 
@@ -12,16 +15,30 @@ namespace Whale.API.Controllers
     public class MeetingController : ControllerBase
     {
         private readonly MeetingService _meetingService;
+        private readonly MeetingScheduleService _meetingScheduleService;
 
-        public MeetingController(MeetingService meetingService)
+        public MeetingController(MeetingService meetingService, MeetingScheduleService meetingScheduleService)
         {
             _meetingService = meetingService;
+            _meetingScheduleService = meetingScheduleService;
         }
 
         [HttpPost]
         public async Task<ActionResult<MeetingLinkDTO>> CreateMeeting(MeetingCreateDTO meetingDto)
         {
             return Ok(await _meetingService.CreateMeeting(meetingDto));
+        }
+
+        [HttpPost("scheduled")]
+        public async Task<ActionResult> CreateMeetingScheduled(MeetingCreateDTO meetingDto)
+        {
+            var meeting = await _meetingService.RegisterScheduledMeeting(meetingDto);
+
+            var jobInfo = new JobInfo(typeof(ScheduledMeetingJob), meetingDto.StartTime);
+            var obj = JsonConvert.SerializeObject(meeting);
+            await _meetingScheduleService.Start(jobInfo, obj);
+
+            return Ok();
         }
 
         [HttpGet]
@@ -51,13 +68,6 @@ namespace Whale.API.Controllers
         public async Task<OkResult> SaveMeetingEndTime(Guid meetingId)
         {
             await _meetingService.EndMeeting(meetingId);
-            return Ok();
-        }
-
-        [HttpPut("updateMedia")]
-        public async Task<ActionResult> UpdateMeetingMediaOnStart(MediaOnStartDTO mediaOnStartDTO)
-        {
-            await _meetingService.UpdateMeetingMediaOnStart(mediaOnStartDTO);
             return Ok();
         }
 

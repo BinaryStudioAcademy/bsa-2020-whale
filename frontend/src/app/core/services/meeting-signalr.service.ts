@@ -7,7 +7,6 @@ import { tap } from 'rxjs/operators';
 import {
   ChangedMediaState,
   StreamChangedData,
-  RoomDTO,
   MeetingConnectionData,
   MeetingMessage,
   Participant,
