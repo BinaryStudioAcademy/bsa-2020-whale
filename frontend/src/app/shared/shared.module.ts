@@ -25,6 +25,7 @@ import { ConfirmationModalComponent } from './components/confirmation-modal/conf
 import { ContactComponent } from './components/contacts/contact/contact.component';
 import { QuestionComponent } from './components/question/question/question.component';
 import { QuestionStatusDirective } from './directives/question-status.directive';
+import { DndModule } from 'ngx-drag-drop';
 
 @NgModule({
   declarations: [
@@ -56,6 +57,7 @@ import { QuestionStatusDirective } from './directives/question-status.directive'
     FormsModule,
     ReactiveFormsModule,
     AngularDraggableModule,
+    DndModule,
   ],
   exports: [
     CommonModule,
@@ -74,6 +76,7 @@ import { QuestionStatusDirective } from './directives/question-status.directive'
     OutputSettingsComponent,
     TagComponent,
     QuestionComponent,
+    DndModule,
   ],
 })
 export class SharedModule {}

@@ -1,3 +1,4 @@
+<spiner *ngIf="isMeetingLoading" size="'massive'"></spiner>
 <div *ngIf="isWaitingForRecord" class="waiting-for-record-modal">
   <p>Waiting record...</p>
 </div>
@@ -66,9 +67,6 @@
           (click)="isShowParticipants = !isShowParticipants"
         ></i>
       </span>
-      <span data-tooltip="Share Screen">
-        <i class="big share square icon block"></i>
-      </span>
       <span data-tooltip="Polls">
         <i
           id="meeting-draggable-poll"
@@ -88,6 +86,12 @@
           id="meeting-draggable-chat"
           (click)="showChat()"
           class="big wechat icon block"
+        ></i>
+      </span>
+      <span data-tooltip="Add Reactions" data-position="top right">
+        <i
+          (click)="onReactionsIconClick()"
+          class="big thumbs up large icon"
         ></i>
       </span>
       <span data-tooltip="Quit fullscreen" data-position="top right">
@@ -218,6 +222,17 @@
           </div>
 
           <div class="display-flex inner-block">
+            <span
+              *ngIf="isHost"
+              data-tooltip="Meeting settings"
+              data-position="top left"
+            >
+              <i
+                id="meeting-settings"
+                (click)="onMeetingSettingClick()"
+                class="big cogs icon"
+              ></i>
+            </span>
             <div class="participants-button-container">
               <div
                 class="relative-container"
@@ -231,71 +246,48 @@
                 ></i>
               </div>
             </div>
-            <span
+            <i
+              id="meeting-options-recording"
               *ngIf="!isScreenRecording"
-              data-tooltip="Start Recording"
-              data-position="top left"
+              (mouseover)="isShowRecordingOptins = true"
+              (mouseleave)="isShowRecordingOptins = false"
+              (click)="startRecording(isHighlightRecording)"
+              class="big circle icon"
             >
-              <i
-                id="meeting-options-recording"
-                (click)="startRecording()"
-                class="big circle icon"
-              ></i>
-            </span>
+              <div class="hover-helper" *ngIf="isShowRecordingOptins"></div>
+              <div class="record-container" *ngIf="isShowRecordingOptins">
+                <div class="ui vertical labeled icon buttons">
+                  <button
+                    class="ui button left-align"
+                    (click)="startRecording(false)"
+                  >
+                    <i
+                      [className]="
+                        isHighlightRecording
+                          ? 'caret right icon medium-icon'
+                          : 'caret square right icon medium-icon'
+                      "
+                    ></i>
+                    Start Recording
+                  </button>
+                  <button
+                    class="ui button left-align"
+                    (click)="startRecording(true)"
+                  >
+                    <i
+                      [className]="
+                        isHighlightRecording
+                          ? 'caret square right icon medium-icon'
+                          : 'caret right icon medium-icon'
+                      "
+                    ></i>
+                    Highlight
+                  </button>
+                </div>
+              </div>
+            </i>
             <span
-              *ngIf="
-                !isParticipantsAudioAllowed && currentParticipant?.role === 1
-              "
-              data-tooltip="Enable Participants' Audio"
-              data-position="top left"
-            >
-              <i
-                id="meeting-options-allow-participants-audio"
-                (click)="switchOtherParticipantsMediaAsHost(false)"
-                class="big file audio outline icon"
-              ></i>
-            </span>
-            <span
-              *ngIf="
-                isParticipantsAudioAllowed && currentParticipant?.role === 1
-              "
-              data-tooltip="Disable Participants` Audio"
-              data-position="top left"
-            >
-              <i
-                id="meeting-options-ban-participants-audio"
-                (click)="switchOtherParticipantsMediaAsHost(false)"
-                class="big file audio icon"
-              ></i>
-            </span>
-            <span
-              *ngIf="
-                !isParticipantsVideoAllowed && currentParticipant?.role === 1
-              "
-              data-tooltip="Enable Participants' Video"
-              data-position="top left"
-            >
-              <i
-                id="meeting-options-allow-participants-video"
-                (click)="switchOtherParticipantsMediaAsHost(true)"
-                class="big file video outline icon"
-              ></i>
-            </span>
-            <span
-              *ngIf="
-                isParticipantsVideoAllowed && currentParticipant?.role === 1
-              "
-              data-tooltip="Disable Participants' Video"
-              data-position="top left"
-            >
-              <i
-                id="meeting-options-ban-participants-video"
-                (click)="switchOtherParticipantsMediaAsHost(true)"
-                class="big file video icon"
-              ></i>
-            </span>
-            <span
-              *ngIf="isScreenRecording"
+              *ngIf="isScreenRecording && !isHighlightRecording"
               data-tooltip="Stop Recording"
               data-position="top left"
             >
@@ -303,6 +295,16 @@
                 id="meeting-options-recording"
                 (click)="stopRecording()"
                 class="big stop circle icon"
+              ></i>
+            </span>
+            <span
+              *ngIf="isScreenRecording && isHighlightRecording"
+              data-tooltip="Recording will stop automatically"
+              data-position="top left"
+            >
+              <i
+                id="meeting-options-recording"
+                class="big stop circle icon waiting-icon"
               ></i>
             </span>
             <span data-tooltip="Share Screen" data-position="top left">
@@ -359,10 +361,17 @@
             >
               <i (click)="showCanvas()" class="big paint brush icon"></i>
             </span>
+            <span data-tooltip="Add Reactions" data-position="top right">
+              <i
+                (click)="onReactionsIconClick()"
+                class="big thumbs up large icon"
+              >
+              </i>
+            </span>
             <span
               data-tooltip="Divide participants into rooms"
               data-position="top right"
-              *ngIf="isHost"
+              *ngIf="isHost || meeting?.isAllowedToChooseRoom"
             >
               <i
                 (click)="openRoomsModal()"
@@ -406,19 +415,34 @@
         [handle]="draggableHeader"
       >
         <div #draggableHeader class="whiteboard-header">
-          <div class="whiteboard-title">Whiteboard</div>
+          <div class="whiteboard-title">Whiteboard {{ whiteboardDisable }}</div>
         </div>
         <div class="whiteboard-buttons">
           <i
+            *ngIf="!isWhiteboardFullScreen"
             (click)="whiteboardFullscreen(); $event.stopPropagation()"
-            class="clone icon"
+            class="expand icon"
+          ></i>
+          <i
+            *ngIf="isWhiteboardFullScreen"
+            (click)="whiteboardFullscreen(); $event.stopPropagation()"
+            class="compress icon"
           ></i>
           <i (click)="showCanvas()" class="times icon"></i>
         </div>
-        <div class="board">
+        <div class="board" *ngIf="!meeting.isWhiteboard || isHost">
           <canvas-whiteboard
             #canvasWhiteboard
             [options]="canvasOptions"
+            (onBatchUpdate)="onCanvasDraw($event)"
+            (onClear)="onCanvasClear()"
+          >
+          </canvas-whiteboard>
+        </div>
+        <div class="board" *ngIf="meeting.isWhiteboard && !isHost">
+          <canvas-whiteboard
+            #canvasWhiteboard
+            [options]="canvasOptionsDisable"
             (onBatchUpdate)="onCanvasDraw($event)"
             (onClear)="onCanvasClear()"
           >
@@ -445,6 +469,7 @@
           (switchMediaPermissionAsHostEvent)="
             switchParticipantMediaAsHost($event)
           "
+          (pinVideoEvent)="pinCard($event)"
           [data]="data"
           [meetingHolder]="currentParticipant"
         >
@@ -472,15 +497,15 @@
 
       <div class="settings" *ngIf="isVideoSettings && !isCameraMuted">
         <app-video-settings
-          (onClick)="changeStateVideo($event)"
+          (clickEmited)="changeStateVideo($event)"
         ></app-video-settings>
       </div>
       <div class="settings" *ngIf="isAudioSettings && !isMicrophoneMuted">
         <app-audio-settings
-          (onClick)="changeInputDevice($event)"
+          (clickEmited)="changeInputDevice($event)"
         ></app-audio-settings>
         <app-output-settings
-          (onClick)="changeOutputDevice($event)"
+          (clickEmited)="changeOutputDevice($event)"
         ></app-output-settings>
       </div>
     </div>
@@ -552,22 +577,19 @@
         <div *ngIf="isChat" class="ui right labeled input">
           <label for="receiver" class="ui label">Send To:</label>
           <select
-            [ngClass]="
-              newMsgFrom.length > 0
-                ? 'ui compact selection dropdown pulse'
-                : 'ui compact selection dropdown'
-            "
+            class="ui compact selection dropdown"
+            [class.border-pulse]="newMsgFrom.length > 0"
             id="receiver"
             [(ngModel)]="msgReceiverEmail"
             (change)="receiverChanged()"
           >
-            <option value="" [ngClass]="{ pulse: newMsgFrom.includes('') }"
-              >Everyone</option
-            >
+            <option value="" [class.pulse]="newMsgFrom.includes('')"
+              >Everyone
+            </option>
             <option
               *ngFor="let p of otherParticipants"
               [value]="p.user.email"
-              [ngClass]="{ pulse: newMsgFrom.includes(p?.user?.email) }"
+              [class.pulse]="newMsgFrom.includes(p.user.email)"
               >{{ p.user.firstName }} {{ p.user.secondName }}</option
             >
           </select>
@@ -605,6 +627,10 @@
     ></app-meeting-statistics>
   </div>
 
+  <div class="poll-create-container" *ngIf="isShowReactions">
+    <app-reactions (reaction)="onReaction($event)"></app-reactions>
+  </div>
+
   <div
     class="ui poll-create-container overflow-scroll segment"
     *ngIf="pollService.isPollCreating"
@@ -627,13 +653,22 @@
   >
     <button
       id="meeting-poll-new"
-      *ngIf="isHost || isRoom"
+      *ngIf="!meeting.isPoll || isHost || isRoom"
       (click)="pollService.onNewPollClick()"
       class="ui button"
       id="new-poll-btn"
     >
       New poll
     </button>
+    <div
+      data-tooltip="Disabled by Host"
+      data-position="bottom left"
+      *ngIf="meeting.isPoll && !isHost"
+    >
+      <div class="ui disabled button">
+        New poll
+      </div>
+    </div>
     <div class="ui segment">
       <!--POLLS CONTAINER -->
       <h3>Polls</h3>
@@ -672,5 +707,13 @@
         <app-poll-results [pollResult]="pollxResult"></app-poll-results>
       </div>
     </div>
+  </div>
+  <div
+    class="ui meeting-setting-container overflow-scroll segment"
+    *ngIf="isShowMeetingSettings"
+  >
+    <!--SETTINGS CONTAINER -->
+    <h3>Meeting settings</h3>
+    <app-setting-meeting [meeting]="meeting"> </app-setting-meeting>
   </div>
 </div>

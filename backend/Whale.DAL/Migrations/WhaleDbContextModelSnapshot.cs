@@ -205,6 +205,26 @@ namespace Whale.DAL.Migrations
                     b.ToTable("Meetings");
                 });
 
+            modelBuilder.Entity("Whale.DAL.Models.Messages.UnreadGroupMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("GroupId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("MessageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ReceiverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UnreadGroupMessages");
+                });
+
             modelBuilder.Entity("Whale.DAL.Models.Messages.UnreadMessageId", b =>
                 {
                     b.Property<Guid>("Id")
@@ -351,6 +371,26 @@ namespace Whale.DAL.Migrations
                     b.HasIndex("MeetingId");
 
                     b.ToTable("Records");
+                });
+
+            modelBuilder.Entity("Whale.DAL.Models.ScheduledMeeting", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("MeetingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ParticipantsEmails")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ScheduledMeetings");
                 });
 
             modelBuilder.Entity("Whale.DAL.Models.Setting", b =>

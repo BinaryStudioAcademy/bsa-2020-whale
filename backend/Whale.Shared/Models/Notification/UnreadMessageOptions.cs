@@ -7,7 +7,7 @@ namespace Whale.Shared.Models.Notification
 {
 	class UnreadMessageOptions
 	{
-		public UnreadMessageId UnreadMessageId { get; set; }
+		public List<UnreadMessageId> UnreadMessageIds { get; set; }
 		public Guid ContactId { get; set; }
 		public string SenderName { get; set; }
 	}

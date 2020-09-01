@@ -100,46 +100,31 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
   subscribeNotifications(): void {
     this.whaleSignalrService.receiveNotify$
       .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(
-        (newNotification) => {
-          this.notificationsList.push(newNotification);
-        },
-        (err) => {
-          console.log(err.message);
-        }
-      );
+      .subscribe((newNotification) => {
+        this.notificationsList.push(newNotification);
+      });
 
     this.whaleSignalrService.updateNotify$
       .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(
-        (updateNotification) => {
-          const index = this.notificationsList.findIndex(
-            (n) => n.id === updateNotification.id
-          );
-          if (index >= 0) {
-            this.notificationsList[index] = updateNotification;
-          }
-        },
-        (err) => {
-          console.log(err.message);
+      .subscribe((updateNotification) => {
+        const index = this.notificationsList.findIndex(
+          (n) => n.id === updateNotification.id
+        );
+        if (index >= 0) {
+          this.notificationsList[index] = updateNotification;
         }
-      );
+      });
 
     this.whaleSignalrService.removeNotify$
       .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(
-        (notificationId) => {
-          this.notificationsList = this.notificationsList.filter(
-            (n) => n.id !== notificationId
-          );
-          if (!this.notificationsList.length) {
-            this.showNotificationsMenu();
-          }
-        },
-        (err) => {
-          console.log(err.message);
+      .subscribe((notificationId) => {
+        this.notificationsList = this.notificationsList.filter(
+          (n) => n.id !== notificationId
+        );
+        if (!this.notificationsList.length) {
+          this.isNotificationsVisible = false;
         }
-      );
+      });
   }
 
   goToPage(pageName: string): void {
@@ -147,18 +132,18 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
   }
 
   logOut(): void {
-    this.whaleSignalrService.invoke(
-      WhaleSignalMethods.OnUserDisconnect,
-      this.loggedInUser.email
-    );
-    this.auth.logout().subscribe(() => this.router.navigate(['landing']));
+    this.whaleSignalrService
+      .invoke(WhaleSignalMethods.OnUserDisconnect, this.loggedInUser.email)
+      .subscribe(() =>
+        this.auth.logout().subscribe(() => this.router.navigate(['landing']))
+      );
   }
 
   onNotificationDelete(id: string): void {
     this.notificationsList = this.notificationsList.filter((n) => n.id !== id);
     this.notificationService.DeleteNotification(id);
     if (!this.notificationsList.length) {
-      this.showNotificationsMenu();
+      this.isNotificationsVisible = false;
     }
   }
 

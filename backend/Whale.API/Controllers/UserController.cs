@@ -87,7 +87,8 @@ namespace Whale.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            await _userService.DeleteUserAsync(id);
+            var email = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            await _userService.DeleteUserAsync(id, email);
             return NoContent();
         }
     }

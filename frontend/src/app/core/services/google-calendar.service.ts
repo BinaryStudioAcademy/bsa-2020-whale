@@ -39,7 +39,6 @@ export class GoogleCalendarService {
         return insert.status === 200 || insert.status === 201;
       })
       .catch((err) => {
-        console.error(err);
         return false;
       });
   }

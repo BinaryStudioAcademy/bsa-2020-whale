@@ -24,10 +24,16 @@ namespace Whale.API.Controllers
         }
 
         [HttpGet("{groupDTOId}")]
-        [AllowAnonymous]
         public async Task<ActionResult<ICollection<GroupMessageDTO>>> Get(Guid groupDTOId)
         {
             var messages = await _chatService.GetAllGroupsMessagesAsync(groupDTOId);
+            return Ok(messages);
+        }
+
+        [HttpGet("withUnread/{groupDTOId}")]
+        public async Task<ActionResult<ICollection<GroupMessageDTO>>> Get(Guid groupDTOId, Guid userId)
+        {
+            var messages = await _chatService.GetReadAndUnreadAsync(groupDTOId, userId);
             return Ok(messages);
         }
 
@@ -35,6 +41,13 @@ namespace Whale.API.Controllers
         public async Task<ActionResult<GroupMessageDTO>> CreateDirectMessage([FromBody] GroupMessageCreateDTO dto)
         {
             return Ok(await _chatService.CreateGroupMessage(dto));
+        }
+
+        [HttpPost("markRead")]
+        public async Task<OkResult> MarkMessageAsRead([FromBody] UnreadGroupMessageDTO unreadMessageIdDto)
+        {
+            await _chatService.MarkMessageAsRead(unreadMessageIdDto);
+            return Ok();
         }
     }
 }

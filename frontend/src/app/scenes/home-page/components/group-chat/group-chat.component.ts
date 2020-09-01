@@ -12,28 +12,23 @@ import {
   ElementRef,
   AfterViewInit,
   AfterViewChecked,
+  ViewChildren,
+  QueryList,
 } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { GroupMessage } from '@shared/models/message/group-message';
 import { User } from '@shared/models/user/user';
-import { SignalRService } from 'app/core/services/signal-r.service';
 import { HttpService } from 'app/core/services/http.service';
-import { environment } from '@env';
-import { Injectable } from '@angular/core';
 import { HubConnection } from '@aspnet/signalr';
-import { Subject, from, Observable } from 'rxjs';
-import { tap, takeUntil, take } from 'rxjs/operators';
-import { Message } from '@angular/compiler/src/i18n/i18n_ast';
-import { Console } from 'console';
-import { stringify } from 'querystring';
-import { HttpResponse } from '@angular/common/http';
+import { Subject, ReplaySubject } from 'rxjs';
+import { takeUntil, take, first } from 'rxjs/operators';
+import { HttpResponse, HttpParams } from '@angular/common/http';
 import { SimpleModalService } from 'ngx-simple-modal';
 import { Group } from '@shared/models/group/group';
 import { GroupService } from 'app/core/services/group.service';
 import { GroupUser } from '@shared/models/group/groupuser';
 import { AddUserToGroupModalComponent } from '../add-user-to-group-modal/add-user-to-group-modal.component';
 import { UpstateService } from 'app/core/services/upstate.service';
-import { AuthService } from 'app/core/auth/auth.service';
 import { GroupCallModalComponent } from '../group-call-modal/group-call-modal.component';
 import { HomePageComponent } from '../home-page/home-page.component';
 import { ConfirmationModalComponent } from '@shared/components/confirmation-modal/confirmation-modal.component';
@@ -44,6 +39,9 @@ import {
   UpdateGroupImageModalComponent,
   UpdateGroupImageModal,
 } from '../update-group-image-modal/update-group-image-modal.component';
+import { UnreadGroupMessage } from '@shared/models';
+import { MessageService } from 'app/core/services/message.service';
+import { ReadAndUnreadGroupMessages } from '@shared/models/message/read-and-unread-group-messages';
 
 @Component({
   selector: 'app-group-chat',
@@ -54,28 +52,35 @@ export class GroupChatComponent
   implements OnInit, OnChanges, OnDestroy, AfterViewInit, AfterViewChecked {
   private hubConnection: HubConnection;
   counter = 0;
-  private receivedMsg = new Subject<GroupMessage>();
-  public receivedMsg$ = this.receivedMsg.asObservable();
+  private receivedMessages = new ReplaySubject<void>();
+  public receivedMessages$ = this.receivedMessages.asObservable();
 
   private unsubscribe$ = new Subject<void>();
   @Input() groupSelected: Group;
   @Input() loggedInUser: User;
   @Output() chat: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() groupUpdated: EventEmitter<Group> = new EventEmitter<Group>();
-  @ViewChild('chatWindow', { static: false }) chatBlock: ElementRef<
-    HTMLElement
+  @ViewChildren('chatWindow') chatBlock: QueryList<ElementRef<HTMLElement>>;
+
+  @Output() messageRead = new EventEmitter<string>();
+
+  @ViewChildren('intersectionElement') intersectionElements: QueryList<
+    ElementRef<HTMLDivElement>
   >;
+  public intersectionObserver: IntersectionObserver;
   chatElement: any;
+  groupMessageRecieved = new EventEmitter<GroupMessage>();
+  messages: GroupMessage[] = [];
+  unreadMessages: GroupMessage[] = [];
+
   newUserInGroup: GroupUser = {
     userEmail: '',
     groupId: this.groupSelected?.id,
   };
   groupMembers: User[] = [];
-  currentUser: User;
   isMessagesLoading = true;
   isMembersVisible = false;
-  groupMessageRecieved = new EventEmitter<GroupMessage>();
-  messages: GroupMessage[] = [];
+
   newMessage: GroupMessage = {
     groupId: '',
     message: '',
@@ -84,7 +89,6 @@ export class GroupChatComponent
     attachment: false,
   };
   constructor(
-    private signalRService: SignalRService,
     private whaleSignalrService: WhaleSignalService,
     private httpService: HttpService,
     private toastr: ToastrService,
@@ -92,15 +96,95 @@ export class GroupChatComponent
     private groupService: GroupService,
     private upstateSevice: UpstateService,
     private homePageComponent: HomePageComponent,
-    private blobService: BlobService
+    private blobService: BlobService,
+    private messageService: MessageService
   ) {}
 
   ngAfterViewInit(): void {
-    this.chatElement = this.chatBlock.nativeElement;
+    this.chatElement = this.chatBlock.first.nativeElement;
+    this.intersectionElements.changes.pipe(first()).subscribe(() => {
+      this.receivedMessages$.subscribe(() => {
+        this.registerIntersectionObserve();
+        if (this.unreadMessages.length === 0) {
+          this.scrollDown();
+        } else {
+          const firstUnread = this.intersectionElements.find(
+            (el) => el.nativeElement.id === this.unreadMessages[0].id
+          );
+          firstUnread.nativeElement.scrollIntoView();
+        }
+      });
+    });
   }
 
   ngAfterViewChecked(): void {
     this.scrollDown();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    this.isMembersVisible = false;
+    this.httpService
+      .getRequest<ReadAndUnreadGroupMessages>(
+        '/api/GroupChat/withUnread/' + this.groupSelected.id,
+        new HttpParams().set('userId', this.loggedInUser.id)
+      )
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe((data: ReadAndUnreadGroupMessages) => {
+        this.messages = data.readMessages.concat(data.unreadMessages);
+        this.unreadMessages = data.unreadMessages;
+        this.receivedMessages.next();
+        this.isMessagesLoading = false;
+      });
+    this.groupService
+      .getAllGroupUsers(this.groupSelected.id)
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (users) => {
+          this.groupMembers = users;
+        },
+        (err) => {
+          this.toastr.error(err.Message);
+        }
+      );
+  }
+
+  ngOnInit(): void {
+    this.messageService.receivedGroupMessage$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (newMessage) => {
+          if (
+            newMessage.groupId !== this.groupSelected.id ||
+            newMessage.authorId === this.loggedInUser.id
+          ) {
+            return;
+          }
+
+          this.messages.push(newMessage);
+          this.intersectionElements.changes.pipe(first()).subscribe(() => {
+            this.intersectionObserver.observe(
+              this.intersectionElements.last.nativeElement
+            );
+            this.unreadMessages.push(newMessage);
+            const firstUnread = this.intersectionElements.find(
+              (el) => el.nativeElement.id === this.unreadMessages[0].id
+            );
+            firstUnread.nativeElement.scrollIntoView();
+          });
+        },
+        (err) => {
+          this.toastr.error(err.Message);
+        }
+      );
+    this.whaleSignalrService.updatedGroup$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe((group) => {
+        this.groupSelected = group;
+      });
+  }
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
 
   scrollDown(): void {
@@ -113,108 +197,43 @@ export class GroupChatComponent
     }
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    this.isMembersVisible = false;
-    this.upstateSevice
-      .getLoggedInUser()
-      .pipe(tap())
-      .subscribe((userFromDB: User) => {
-        this.currentUser = userFromDB;
-      });
-    this.httpService
-      .getRequest<GroupMessage[]>('/api/GroupChat/' + this.groupSelected.id)
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(
-        (data: GroupMessage[]) => {
-          this.messages = data;
-          this.isMessagesLoading = false;
-        },
-        (error) => console.log(error)
-      );
-    this.hubConnection?.invoke('JoinGroup', this.groupSelected.id);
-    this.groupService
-      .getAllGroupUsers(this.groupSelected.id)
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(
-        (users) => {
-          this.groupMembers = users;
-        },
-        (err) => {
-          console.log(err.message);
-          this.toastr.error(err.Message);
-        }
-      );
-  }
-  ngOnInit(): void {
-    from(this.signalRService.registerHub(environment.signalrUrl, 'chatHub'))
-      .pipe(
-        tap((hub) => {
-          this.hubConnection = hub;
-        })
-      )
-      .subscribe(() => {
-        this.hubConnection.on(
-          'NewGroupMessageReceived',
-          (message: GroupMessage) => {
-            this.receivedMsg.next(message);
-          }
-        );
-        this.hubConnection.invoke('JoinGroup', this.groupSelected.id);
-      });
-    this.receivedMsg$.pipe(takeUntil(this.unsubscribe$)).subscribe(
-      (newMessage) => {
-        this.messages.push(newMessage);
-        console.log('received a messsage ', newMessage);
-      },
-      (err) => {
-        console.log(err.message);
-        this.toastr.error(err.Message);
-      }
-    );
-    this.whaleSignalrService.updatedGroup$
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(
-        (group) => {
-          this.groupSelected = group;
-        },
-        (err) => {
-          console.log(err.message);
-        }
-      );
-  }
-  ngOnDestroy(): void {
-    this.unsubscribe$.next();
-    this.unsubscribe$.complete();
-  }
   sendMessage(): void {
-    if (this.newMessage.message.trim().length !== 0) {
-      console.log('Send is called');
-      this.newMessage.groupId = this.groupSelected.id;
-      this.newMessage.authorId = this.currentUser.id;
-      this.newMessage.createdAt = new Date();
-      console.log(this.newMessage);
-      this.httpService
-        .postRequest<GroupMessage, HttpResponse<GroupMessage>>(
-          '/api/GroupChat/',
-          this.newMessage
-        )
-        .pipe(take(1))
-        .subscribe(
-          (response) => {
-            console.log(response.body);
-            this.newMessage.message = '';
-          },
-          (error) => this.toastr.error(error.Message)
-        );
+    if (this.newMessage.message.trim().length === 0) {
+      return;
     }
+
+    const newMessage: GroupMessage = {
+      groupId: this.groupSelected.id,
+      authorId: this.loggedInUser.id,
+      createdAt: new Date(),
+      message: this.newMessage.message,
+      attachment: false,
+      author: this.loggedInUser,
+    };
+
+    this.newMessage.message = '';
+    this.messages.push(newMessage);
+    this.chatBlock.changes.pipe(first()).subscribe(() => {
+      this.scrollDown();
+    });
+
+    this.httpService
+      .postRequest<GroupMessage, HttpResponse<GroupMessage>>(
+        '/api/GroupChat/',
+        newMessage
+      )
+      .pipe(take(1))
+      .subscribe(
+        () => {},
+        (error) => this.toastr.error(error.Message)
+      );
   }
   close(): void {
     this.chat.emit(false);
-    this.hubConnection.invoke('Disconnect', this.groupSelected.id);
   }
 
   public changeImage(): void {
-    if (this.groupSelected.creatorEmail === this.currentUser.email) {
+    if (this.groupSelected.creatorEmail === this.loggedInUser.email) {
       this.simpleModalService.addModal(UpdateGroupImageModalComponent, {
         group: this.groupSelected,
       });
@@ -222,7 +241,6 @@ export class GroupChatComponent
   }
 
   public call(): void {
-    console.log(this.groupSelected);
     this.simpleModalService.addModal(
       GroupCallModalComponent,
       this.groupSelected
@@ -230,7 +248,7 @@ export class GroupChatComponent
   }
 
   public leaveGroup(): void {
-    if (this.groupSelected.creatorEmail === this.currentUser.email) {
+    if (this.groupSelected.creatorEmail === this.loggedInUser.email) {
       this.toastr.error(
         'You cannot leave the group because you are administrator. Please, assign someone else to this role.'
       );
@@ -242,7 +260,7 @@ export class GroupChatComponent
         .subscribe((isConfirm) => {
           if (isConfirm) {
             this.groupService
-              .leaveGroup(this.groupSelected.id, this.currentUser.email)
+              .leaveGroup(this.groupSelected.id, this.loggedInUser.email)
               .subscribe(
                 () => {
                   this.toastr.success(
@@ -334,8 +352,6 @@ export class GroupChatComponent
         (group) => {
           if (group !== undefined) {
             this.groupSelected = group;
-            // this.groupUpdated.emit(this.groupSelected);
-            // console.log(this.groupSelected);
             this.whaleSignalrService.invoke(
               WhaleSignalMethods.OnGroupUpdate,
               this.groupSelected
@@ -344,5 +360,52 @@ export class GroupChatComponent
         },
         (error) => this.toastr.error(error)
       );
+  }
+
+  public registerIntersectionObserve(): void {
+    const options = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.0,
+    };
+
+    this.intersectionObserver = new IntersectionObserver(
+      this.onIntersection.bind(this),
+      options
+    );
+
+    this.unreadMessages.forEach((message) => {
+      const element = this.intersectionElements.find(
+        (el) => el.nativeElement.id === message.id
+      );
+      this.intersectionObserver.observe(element.nativeElement);
+    });
+  }
+
+  public onIntersection(entries: IntersectionObserverEntry[]): void {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        this.intersectionObserver.unobserve(entry.target);
+        this.unreadMessages.splice(
+          this.unreadMessages.findIndex((um) => um.id === entry.target.id),
+          1
+        );
+        this.groupSelected.unreadMessageCount -= 1;
+        this.sendMarkReadRequest(entry.target.id, this.loggedInUser.id);
+      }
+    });
+  }
+
+  public sendMarkReadRequest(msgId: string, userId: string): void {
+    const unreadMessageId: UnreadGroupMessage = {
+      messageId: msgId,
+      receiverId: userId,
+      groupId: this.groupSelected.id,
+    };
+    this.httpService
+      .postRequest('/api/GroupChat/markRead', unreadMessageId)
+      .subscribe(() => {
+        this.messageRead.emit(msgId);
+      });
   }
 }

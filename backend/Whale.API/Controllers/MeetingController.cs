@@ -3,7 +3,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Whale.API.Models.ScheduledMeeting;
 using Whale.API.Services;
+using Whale.Shared.Exceptions;
 using Whale.Shared.Models.Meeting;
 
 namespace Whale.API.Controllers
@@ -13,10 +15,12 @@ namespace Whale.API.Controllers
     public class MeetingController : ControllerBase
     {
         private readonly HttpService _httpService;
+        private readonly ExternalScheduledMeetingService _externalScheduledMeetingService;
 
-        public MeetingController(HttpService httpService)
+        public MeetingController(HttpService httpService, ExternalScheduledMeetingService externalScheduledMeetingService)
         {
             _httpService = httpService;
+            _externalScheduledMeetingService = externalScheduledMeetingService;
         }
 
         [HttpPost]
@@ -25,6 +29,29 @@ namespace Whale.API.Controllers
             var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
             meetingDto.CreatorEmail = ownerEmail;
             return Ok(await _httpService.PostAsync<MeetingCreateDTO, MeetingLinkDTO>("api/meeting", meetingDto));
+        }
+
+        [HttpPost("scheduled")]
+        public async Task<ActionResult<string>> CreateMeetingScheduled(MeetingCreateDTO meetingDto)
+        {
+            var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+            meetingDto.CreatorEmail = ownerEmail;
+            return Ok(await _httpService.PostStringAsync("api/meeting/scheduled", meetingDto));
+        }
+
+        [Route("external/schedule")]
+        [HttpPost]
+        [Produces("application/json")]
+        public async Task<ActionResult<string>> ExternalScheduleMeeting(ScheduledMeetingExternal data)
+        {
+            try
+            {
+                return Ok(await _externalScheduledMeetingService.StartScheduledMeeting(data));
+            }
+            catch(NotFoundException e)
+            {
+                return Unauthorized($"{e.Message} Please sign up using the link:'{ExternalScheduledMeetingService.BaseUrl}'");
+            }
         }
 
         [HttpGet]
@@ -55,13 +82,13 @@ namespace Whale.API.Controllers
         }
 
         [Authorize]
-        [HttpPut("updateMedia")]
-        public async Task<ActionResult> UpdateMeetingMediaOnStart(MediaOnStartDTO mediaOnStartDTO)
+        [HttpPut("updateSettings")]
+        public async Task<ActionResult> UpdateMeetingSettings(UpdateSettingsDTO updateSettingsDTO)
         {
-            mediaOnStartDTO.RequestingUserEmail =
-                (HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value);
+            updateSettingsDTO.ApplicantEmail = 
+                HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
 
-            await _httpService.PutAsync("api/meeting/updateMedia", mediaOnStartDTO);
+            await _httpService.PutAsync("api/meeting/updateSettings", updateSettingsDTO);
             return Ok();
         }
     }

@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Whale.Shared.Jobs;
 using Whale.Shared.Models.Meeting;
 using Whale.Shared.Services;
 
@@ -12,16 +15,30 @@ namespace Whale.API.Controllers
     public class MeetingController : ControllerBase
     {
         private readonly MeetingService _meetingService;
+        private readonly MeetingScheduleService _meetingScheduleService;
 
-        public MeetingController(MeetingService meetingService)
+        public MeetingController(MeetingService meetingService, MeetingScheduleService meetingScheduleService)
         {
             _meetingService = meetingService;
+            _meetingScheduleService = meetingScheduleService;
         }
 
         [HttpPost]
         public async Task<ActionResult<MeetingLinkDTO>> CreateMeeting(MeetingCreateDTO meetingDto)
         {
             return Ok(await _meetingService.CreateMeeting(meetingDto));
+        }
+
+        [HttpPost("scheduled")]
+        public async Task<ActionResult<string>> CreateMeetingScheduled(MeetingCreateDTO meetingDto)
+        {
+            var meetingAndLink = await _meetingService.RegisterScheduledMeeting(meetingDto);
+
+            var jobInfo = new JobInfo(typeof(ScheduledMeetingJob), meetingDto.StartTime);
+            var obj = JsonConvert.SerializeObject(meetingAndLink.Meeting);
+            await _meetingScheduleService.Start(jobInfo, obj);
+
+            return Ok(meetingAndLink.Link);
         }
 
         [HttpGet]
@@ -33,8 +50,6 @@ namespace Whale.API.Controllers
         [HttpGet("shortInvite/{inviteLink}")]
         public async Task<ActionResult<string>> GetFullMeetingLink(string inviteLink)
         {
-            var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
-
             var meetingLink = await _meetingService.GetFullInviteLink(inviteLink);
 
             return Ok(meetingLink);
@@ -54,10 +69,10 @@ namespace Whale.API.Controllers
             return Ok();
         }
 
-        [HttpPut("updateMedia")]
-        public async Task<ActionResult> UpdateMeetingMediaOnStart(MediaOnStartDTO mediaOnStartDTO)
+        [HttpPut("updateSettings")]
+        public async Task<ActionResult> UpdateMeetingSettings(UpdateSettingsDTO updateSettingsDTO)
         {
-            await _meetingService.UpdateMeetingMediaOnStart(mediaOnStartDTO);
+            await _meetingService.UpdateMeetingSettings(updateSettingsDTO);
             return Ok();
         }
     }

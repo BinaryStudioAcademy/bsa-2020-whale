@@ -22,6 +22,7 @@ import { MessageService } from 'app/core/services/message.service';
 import { ConfirmationModalComponent } from '@shared/components/confirmation-modal/confirmation-modal.component';
 import { group } from 'console';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { MeetingSettingsService } from '../../../../core/services/meeting-settings.service';
 
 @Component({
   selector: 'app-home-page',
@@ -64,7 +65,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
     private upstateService: UpstateService,
     private whaleSignalrService: WhaleSignalService,
     private contactService: ContactService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private meetingSettingsService: MeetingSettingsService
   ) {}
 
   ngOnDestroy(): void {
@@ -111,25 +113,53 @@ export class HomePageComponent implements OnInit, OnDestroy {
                         );
                         contact.unreadMessageCount += 1;
                       });
+
+                    this.groupService
+                      .getAllGroups()
+                      .pipe(tap(() => (this.isGroupsLoading = false)))
+                      .subscribe(
+                        (groups: Group[]) => {
+                          this.groups = groups;
+                          this.groupsVisibility =
+                            this.groups.length === 0 ? false : true;
+                          groups.forEach((groupElemnt) => {
+                            this.messageService.joinGroup(groupElemnt.id);
+                          });
+                          this.isChatHubLoading = false;
+                          this.messageService.receivedGroupMessage$
+                            .pipe(takeUntil(this.unsubscribe$))
+                            .subscribe((newMessage) => {
+                              if (
+                                this.loggedInUser.id === newMessage.authorId
+                              ) {
+                                return;
+                              }
+                              const groupOfMessage = this.groups.find(
+                                (messageGroup) =>
+                                  messageGroup.id === newMessage.group.id
+                              );
+                              groupOfMessage.unreadMessageCount += 1;
+                            });
+                        },
+                        (error) => {
+                          this.toastr.error(error.Message);
+                        }
+                      );
                   },
                   (error) => {
-                    console.error(error);
                     this.isChatHubLoading = false;
                   }
                 );
 
-                console.log(data);
                 this.onContactsClick();
 
                 this.whaleSignalrService.signalUserConected$
                   .pipe(takeUntil(this.unsubscribe$))
                   .subscribe(
                     (onlineUser) => {
-                      console.log('whalesignalr user connected:', onlineUser);
                       this.userConnected(onlineUser);
                     },
                     (err) => {
-                      console.log(err);
                       this.toastr.error(err.Message);
                     }
                   );
@@ -141,7 +171,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
                       this.userDisconnected(userEmail);
                     },
                     (err) => {
-                      console.log(err);
                       this.toastr.error(err.Message);
                     }
                   );
@@ -153,103 +182,55 @@ export class HomePageComponent implements OnInit, OnDestroy {
                       this.userDisconnectedError(userId);
                     },
                     (err) => {
-                      console.log(err);
                       this.toastr.error(err.Message);
                     }
                   );
 
                 this.whaleSignalrService.receiveContact$
                   .pipe(takeUntil(this.unsubscribe$))
-                  .subscribe(
-                    (contact) => {
-                      this.contactAdd(contact);
-                      this.messageService.joinGroup(contact.id);
-                    },
-                    (err) => {
-                      console.log(err);
-                      console.log(err.message);
-                    }
-                  );
+                  .subscribe((contact) => {
+                    this.contactAdd(contact);
+                    this.messageService.joinGroup(contact.id);
+                  });
 
                 this.whaleSignalrService.removeContact$
                   .pipe(takeUntil(this.unsubscribe$))
-                  .subscribe(
-                    (contactId) => {
-                      this.removeContact(contactId);
-                    },
-                    (err) => {
-                      console.log(err);
-                      console.log(err.message);
-                    }
-                  );
+                  .subscribe((contactId) => {
+                    this.removeContact(contactId);
+                  });
 
                 this.whaleSignalrService.receiveGroup$
                   .pipe(takeUntil(this.unsubscribe$))
-                  .subscribe(
-                    (newGroup) => {
-                      this.toastr.success(
-                        'You were added to ' + newGroup.label + ' group'
-                      );
-                      this.addGroup(newGroup);
-                    },
-                    (err) => {
-                      console.log(err.message);
-                    }
-                  );
+                  .subscribe((newGroup) => {
+                    this.toastr.success(
+                      'You were added to ' + newGroup.label + ' group'
+                    );
+                    this.addGroup(newGroup);
+                  });
 
                 this.whaleSignalrService.removeGroup$
                   .pipe(takeUntil(this.unsubscribe$))
-                  .subscribe(
-                    (groupId) => {
-                      this.removeGroup(groupId);
-                    },
-                    (err) => {
-                      console.log(err.message);
-                    }
-                  );
+                  .subscribe((groupId) => {
+                    this.removeGroup(groupId);
+                  });
                 this.whaleSignalrService.removedFromGroup$
                   .pipe(takeUntil(this.unsubscribe$))
-                  .subscribe(
-                    (groupId) => {
-                      this.removeGroup(groupId);
-                    },
-                    (err) => {
-                      console.log(err.message);
-                    }
-                  );
+                  .subscribe((groupId) => {
+                    this.removeGroup(groupId);
+                  });
 
                 this.whaleSignalrService.updatedGroup$
                   .pipe(takeUntil(this.unsubscribe$))
-                  .subscribe(
-                    (updatedGroup) => {
-                      this.updateGroup(updatedGroup);
-                    },
-                    (err) => {
-                      console.log(err.message);
-                    }
-                  );
+                  .subscribe((updatedGroup) => {
+                    this.updateGroup(updatedGroup);
+                  });
               },
               (error) => {
-                console.log(error);
-                this.toastr.error(error.Message);
-              }
-            );
-          this.groupService
-            .getAllGroups()
-            .pipe(tap(() => (this.isGroupsLoading = false)))
-            .subscribe(
-              (data: Group[]) => {
-                this.groups = data;
-                this.groupsVisibility = this.groups.length === 0 ? false : true;
-              },
-              (error) => {
-                console.log(error);
                 this.toastr.error(error.Message);
               }
             );
         },
         (error) => {
-          console.log(error);
           this.toastr.error(error.Message);
         }
       );
@@ -317,7 +298,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
               }
             },
             (error) => {
-              console.log(error);
               this.toastr.error(error.Message);
             }
           );
@@ -347,21 +327,23 @@ export class HomePageComponent implements OnInit, OnDestroy {
         anonymousCount: 0,
         isScheduled: false,
         isRecurrent: false,
-        isAudioAllowed: true,
-        isVideoAllowed: true,
+        isAudioAllowed: !this.meetingSettingsService.getSettings()
+          .isAudioDisabled,
+        isVideoAllowed: !this.meetingSettingsService.getSettings()
+          .isVideoDisabled,
+        isWhiteboard: this.meetingSettingsService.getSettings().isWhiteboard,
+        isPoll: this.meetingSettingsService.getSettings().isPoll,
         creatorEmail: this.ownerEmail,
+        participantsEmails: [],
       } as MeetingCreate)
       .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(
-        (resp) => {
-          const meetingLink = resp.body;
-          this.router.navigate([
-            '/meeting-page',
-            `?id=${meetingLink.id}&pwd=${meetingLink.password}`,
-          ]);
-        },
-        (error) => console.log(error.message)
-      );
+      .subscribe((resp) => {
+        const meetingLink = resp.body;
+        this.router.navigate([
+          '/meeting-page',
+          `?id=${meetingLink.id}&pwd=${meetingLink.password}`,
+        ]);
+      });
   }
 
   goToPage(pageName: string): void {
@@ -401,7 +383,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
                   this.toastr.success('Canceled');
                 },
                 (error) => {
-                  console.log(error);
                   this.toastr.error(error.Message);
                 }
               );
@@ -491,7 +472,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   public onContactsClick(): void {
-    console.log('open/close');
     if (this.contacts.length) {
       this.contactsVisibility = !this.contactsVisibility;
     }
@@ -517,12 +497,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
   public onOpenChat(contactId: string): void {
     const contact = this.contacts.find((c) => (c.id = contactId));
     this.onContactClick(contact);
-  }
-
-  public onMessageRead(event: string): void {
-    this.pageHeader.notificationsList = this.pageHeader.notificationsList.filter(
-      (n) => !n.options.includes(event)
-    );
   }
 }
 export interface UserModel {

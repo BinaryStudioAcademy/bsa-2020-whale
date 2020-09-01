@@ -7,6 +7,17 @@ import { GoogleCalendarService } from 'app/core/services/google-calendar.service
 import moment from 'moment';
 import { AuthService } from 'app/core/auth/auth.service';
 import { Router } from '@angular/router';
+import { MeetingService, UpstateService } from 'app/core/services';
+import { takeUntil } from 'rxjs/operators';
+import { MeetingCreate } from '@shared/models';
+import { Subject } from 'rxjs';
+import { User } from '@shared/models/user';
+import { MeetingSettingsService } from 'app/core/services';
+import {
+  MeetingInviteComponent,
+  ScheduleMeetingInviteModalData,
+} from '@shared/components/meeting-invite/meeting-invite.component';
+import { SimpleModalService } from 'ngx-simple-modal';
 
 @Component({
   selector: 'app-schedule-meeting-page',
@@ -31,12 +42,18 @@ export class ScheduleMeetingPageComponent implements OnInit {
 
   public isPasswordCheckboxChecked = true;
   public form: FormGroup;
+  private unsubscribe$ = new Subject<void>();
+  private loggedInUser: User;
 
   constructor(
     private toastr: ToastrService,
     private calendarService: GoogleCalendarService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private meetingService: MeetingService,
+    private upstateService: UpstateService,
+    private simpleModalService: SimpleModalService,
+    meetingSettingsService: MeetingSettingsService
   ) {
     const today: Date = new Date();
 
@@ -50,21 +67,64 @@ export class ScheduleMeetingPageComponent implements OnInit {
       isGeneratedMeetingID: new FormControl('true'),
       isPasswordEnabled: new FormControl(''),
       password: new FormControl(''),
-      isDisableVideo: new FormControl(''),
-      isDisableAudio: new FormControl(''),
+      isDisableAudio: new FormControl(
+        meetingSettingsService.getSettings().isAudioDisabled
+      ),
+      isDisableVideo: new FormControl(
+        meetingSettingsService.getSettings().isVideoDisabled
+      ),
       saveIntoCalendar: new FormControl(false),
     });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.getUser();
+  }
 
   public async onSubmit(): Promise<void> {
     if (this.form.controls.saveIntoCalendar.value) {
       await this.addEventToCalendar();
     }
 
-    this.toastr.success('Meeting scheduled!');
-    this.router.navigate(['/home']);
+    const dateParts = this.form.controls.date.value.split('/');
+    const date = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
+    const time = this.form.controls.time.value.match(
+      /(\d+)(?::(\d\d))?\s*(p?)/
+    );
+    date.setHours(parseInt(time[1], 10) + (time[3] ? 12 : 0));
+    date.setMinutes(parseInt(time[2], 10) || 0);
+
+    this.simpleModalService
+      .addModal(MeetingInviteComponent, {
+        participantEmails: [this.loggedInUser.email],
+        isScheduled: true,
+      } as ScheduleMeetingInviteModalData)
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe((participantEmails) => {
+        this.meetingService
+          .createScheduledMeeting({
+            settings: '',
+            startTime: date,
+            anonymousCount: 0,
+            isScheduled: true,
+            isRecurrent: false,
+            isAudioAllowed: this.form.controls.isDisableAudio.value,
+            isVideoAllowed: this.form.controls.isDisableVideo.value,
+            creatorEmail: this.loggedInUser.email,
+            participantsEmails: participantEmails as string[],
+          } as MeetingCreate)
+          .pipe(takeUntil(this.unsubscribe$))
+          .subscribe((resp) => {
+            this.toastr.success('Meeting scheduled!');
+            this.router.navigate(['/home']);
+          });
+      });
+  }
+
+  getUser(): void {
+    this.upstateService.getLoggedInUser().subscribe((userFromDB: User) => {
+      this.loggedInUser = userFromDB;
+    });
   }
 
   public cancelSchedule(): void {

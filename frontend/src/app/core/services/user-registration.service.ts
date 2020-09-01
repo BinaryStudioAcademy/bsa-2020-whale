@@ -40,26 +40,21 @@ export class UserRegistrationService {
         observe: 'response',
       })
       .pipe(first())
-      .subscribe(
-        (user) => {
-          if (!user.body) {
-            this.httpService
-              .postClearRequest<IFireBaseUser, User>(this.addUserUrl, fireUser)
-              .pipe(first())
-              .subscribe((createdUser) => {
-                this.userRegistered.next(createdUser);
-                this.router.navigate(['/home']);
-              });
-          } else {
-            this.userRegistered.next(user.body);
-            if (this.router.url === '/' || this.router.url === 'landing') {
+      .subscribe((user) => {
+        if (!user.body) {
+          this.httpService
+            .postClearRequest<IFireBaseUser, User>(this.addUserUrl, fireUser)
+            .pipe(first())
+            .subscribe((createdUser) => {
+              this.userRegistered.next(createdUser);
               this.router.navigate(['/home']);
-            }
+            });
+        } else {
+          this.userRegistered.next(user.body);
+          if (this.router.url === '/' || this.router.url === '/landing') {
+            this.router.navigate(['/home']);
           }
-        },
-        (error) => {
-          console.log(error);
         }
-      );
+      });
   }
 }

@@ -1,10 +1,10 @@
-<spiner *ngIf="isMeetingLoading" size="'massive'"></spiner>
+<app-spiner *ngIf="isMeetingLoading" size="'massive'"></app-spiner>
 <app-page-header (openChatClicked)="onOpenChat($event)"></app-page-header>
 <div class="home-panel">
   <div class="left-col">
     <div class="ui left vertical menu bar">
       <a class="item">
-        <spiner *ngIf="isUserLoadig" size="'small'"></spiner>
+        <app-spiner *ngIf="isUserLoadig" size="'small'"></app-spiner>
         <div (click)="goToPage('profile-page')" class="main-user">
           <img
             class="ui circular image avatar-pic"
@@ -33,10 +33,10 @@
           Enter the meeting
         </a>
       </a>
-      <spiner
+      <app-spiner
         *ngIf="isContactsLoading || isChatHubLoading"
         [size]="'medium'"
-      ></spiner>
+      ></app-spiner>
       <a
         id="home-toggle-contacts"
         (click)="onContactsClick()"
@@ -90,7 +90,7 @@
           </div>
         </div>
       </div>
-      <spiner *ngIf="isGroupsLoading" [size]="'medium'"></spiner>
+      <app-spiner *ngIf="isGroupsLoading" [size]="'medium'"></app-spiner>
       <a id="home-toggle-groups" (click)="onGroupsClick()" class="item header"
         >Groups
         <button
@@ -102,13 +102,15 @@
         </button>
       </a>
       <div
-        class="contacts-container groups user-list ui selection list"
+        class="contacts-container groups user-list ui middle selection list"
         [hidden]="!groupsVisibility"
       >
         <div *ngFor="let group of groups">
           <a
             id="home-group"
-            [ngClass]="isGroupActive(group) ? 'active item' : 'item'"
+            [ngClass]="
+              isGroupActive(group) ? 'active item group' : 'item group'
+            "
             (click)="onGroupClick(group)"
           >
             <img
@@ -121,6 +123,7 @@
               class="ui avatar image"
               src="assets/img/user-group-icon.png"
             />
+
             <div
               data-tooltip="Delete group"
               data-position="left center"
@@ -132,7 +135,15 @@
                 (click)="deleteGroup(group); $event.stopPropagation()"
               ></i>
             </div>
-            {{ group.label }}
+            <div class="description group-description">
+              {{ group.label }}
+            </div>
+            <div
+              *ngIf="group?.unreadMessageCount > 0"
+              class="ui circular label group"
+            >
+              {{ group?.unreadMessageCount }}
+            </div>
           </a>
         </div>
       </div>
@@ -146,7 +157,6 @@
         [contactSelected]="contactSelected"
         [loggedInUser]="loggedInUser"
         (chat)="contactVisibilityChange($event)"
-        (messageRead)="onMessageRead($event)"
       ></app-contacts-chat>
       <app-group-chat
         *ngIf="groupChatVisibility"

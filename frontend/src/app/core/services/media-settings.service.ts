@@ -5,43 +5,43 @@ import { MediaSettings } from '../../shared/models/media/media-settings';
   providedIn: 'root',
 })
 export class MediaSettingsService {
-  private _settings = {
+  private settings = {
     VideoDeviceId: null,
     InputDeviceId: null,
     OutputDeviceId: null,
     IsMirrorVideo: false,
   } as MediaSettings;
 
-  public get settings(): MediaSettings {
-    return this._settings;
+  public getSettings(): MediaSettings {
+    return this.settings;
   }
 
   constructor() {
     const jsonString = window.localStorage.getItem('media-settings');
     if (jsonString) {
-      this._settings = JSON.parse(jsonString);
+      this.settings = JSON.parse(jsonString);
     }
   }
 
   public changeVideoDevice(diviceId: string): void {
-    this._settings.VideoDeviceId = diviceId;
+    this.settings.VideoDeviceId = diviceId;
     this.saveSettingsInLocalStorage();
   }
 
   public changeInputDevice(deviceId: string): void {
-    this._settings.InputDeviceId = deviceId;
+    this.settings.InputDeviceId = deviceId;
     this.saveSettingsInLocalStorage();
   }
 
   public changeOutputDevice(deviceId: string): void {
-    this._settings.OutputDeviceId = deviceId;
+    this.settings.OutputDeviceId = deviceId;
     this.saveSettingsInLocalStorage();
   }
 
   private saveSettingsInLocalStorage(): void {
     window.localStorage.setItem(
       'media-settings',
-      JSON.stringify(this._settings)
+      JSON.stringify(this.settings)
     );
   }
 
@@ -55,7 +55,6 @@ export class MediaSettingsService {
           if (error.name === 'SecurityError') {
             errorMessage = `You need to use HTTPS for selecting audio output device: ${error}`;
           }
-          console.error(errorMessage);
         });
     }
   }
@@ -63,16 +62,16 @@ export class MediaSettingsService {
   public async getMediaConstraints(): Promise<MediaStreamConstraints> {
     return {
       video: {
-        deviceId: this._settings.VideoDeviceId,
+        deviceId: this.settings.VideoDeviceId,
       },
       audio: {
-        deviceId: this._settings.InputDeviceId,
+        deviceId: this.settings.InputDeviceId,
       },
     };
   }
 
   public changeMirror(isMirror: boolean): void {
-    this._settings.IsMirrorVideo = isMirror;
+    this.settings.IsMirrorVideo = isMirror;
     this.saveSettingsInLocalStorage();
   }
 }

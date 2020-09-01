@@ -6,6 +6,7 @@ namespace Whale.Shared.Models.GroupMessage
 {
     public class GroupMessageDTO
     {
+        public Guid Id { get; set; }
         public Guid GroupId { get; set; }
         public GroupDTO Group { get; set; }
         public Guid AuthorId { get; set; }

@@ -8,19 +8,29 @@ import { MeetingInviteModalData } from '@shared/models/email/meeting-invite-moda
 import { MeetingInvite } from '@shared/models/email/meeting-invite';
 import { Contact, User, Participant } from '@shared/models';
 
+export interface ScheduleMeetingInviteModalData {
+  isScheduled: boolean;
+  participantEmails: string[];
+}
+
 @Component({
   selector: 'app-meeting-invite',
   templateUrl: './meeting-invite.component.html',
   styleUrls: ['./meeting-invite.component.sass'],
 })
 export class MeetingInviteComponent
-  extends SimpleModalComponent<MeetingInviteModalData, boolean>
-  implements OnInit, MeetingInviteModalData {
+  extends SimpleModalComponent<
+    MeetingInviteModalData | ScheduleMeetingInviteModalData,
+    boolean | string[]
+  >
+  implements OnInit, MeetingInviteModalData, ScheduleMeetingInviteModalData {
   public emails: string[] = [];
   public contacts: Contact[];
   public cachedContacts: Contact[];
   public selectedContacts: Contact[] = [];
   participants: Participant[];
+  isScheduled: boolean;
+  participantEmails: string[];
 
   public form: FormGroup;
   public formSearch: FormGroup;
@@ -53,19 +63,25 @@ export class MeetingInviteComponent
       .getRequest<Contact[]>(environment.apiUrl + '/api/Contacts/accepted')
       .subscribe(
         (response) => {
-          console.log(response);
-          const filteredContacts = response.filter(
-            (c) =>
-              !this.participants.find(
-                (p) => p.user.email === c.secondMember.email
-              )
-          );
+          let filteredContacts: Contact[];
+          if (this.isScheduled) {
+            filteredContacts = response.filter(
+              (c) =>
+                !this.participantEmails.find((e) => e === c.secondMember.email)
+            );
+          } else {
+            filteredContacts = response.filter(
+              (c) =>
+                !this.participants.find(
+                  (p) => p.user.email === c.secondMember.email
+                )
+            );
+          }
           this.contacts = Array.from(filteredContacts);
           this.cachedContacts = Array.from(filteredContacts);
           this.isContactsLoading = false;
         },
         (error) => {
-          console.error(error);
           this.isContactsLoading = false;
         }
       );
@@ -114,38 +130,41 @@ export class MeetingInviteComponent
   }
 
   public sendInvites(): void {
-    this.isLoading = true;
-    const inviteData: MeetingInvite = {
-      meetingLink: this.inviteLink,
-      meetingId: this.meetingId,
-      senderId: this.senderId,
-      receiverEmails: this.emails,
-    };
+    if (this.isScheduled) {
+      this.result = this.emails;
+      this.close();
+    } else {
+      this.isLoading = true;
+      const inviteData: MeetingInvite = {
+        meetingLink: this.inviteLink,
+        meetingId: this.meetingId,
+        senderId: this.senderId,
+        receiverEmails: this.emails,
+      };
 
-    this.httpService
-      .postRequest<MeetingInvite, null>(
-        environment.apiUrl + '/api/email',
-        inviteData
-      )
-      .subscribe(
-        () => {
-          this.toastr.success('Invites have been sent.', 'Success');
-          this.toastr.info(
-            'Only members of Whale will receive invites',
-            'Info'
-          );
-          setTimeout(() => this.closeModal(false), 1000);
-        },
-        (error) => {
-          this.toastr.error(error.Message);
-          console.error(error);
-          this.isLoading = false;
-        }
-      );
+      this.httpService
+        .postRequest<MeetingInvite, null>(
+          environment.apiUrl + '/api/email',
+          inviteData
+        )
+        .subscribe(
+          () => {
+            this.toastr.success('Invites have been sent.', 'Success');
+            this.toastr.info(
+              'Only members of Whale will receive invites',
+              'Info'
+            );
+            setTimeout(() => this.closeModal(false), 1000);
+          },
+          (error) => {
+            this.toastr.error(error.Message);
+            this.isLoading = false;
+          }
+        );
+    }
   }
 
   public filterContacts(value: string): void {
-    console.log(this.contacts);
     this.cachedContacts = this.contacts.filter((contact) => {
       return `${contact.secondMember.firstName} ${contact.secondMember.secondName}`.includes(
         value

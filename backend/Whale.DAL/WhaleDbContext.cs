@@ -16,6 +16,7 @@ namespace Whale.DAL
         public DbSet<Achivement> Achivements { get; set; }
         public DbSet<Contact> Contacts { get; set; }
         public DbSet<UnreadMessageId> UnreadMessageIds { get; set; }
+        public DbSet<UnreadGroupMessage> UnreadGroupMessages { get; set; }
         public DbSet<DirectMessage> DirectMessages { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<GroupMessage> GroupMessages { get; set; }
@@ -28,6 +29,7 @@ namespace Whale.DAL
         public DbSet<UserAchivement> UserAchivements { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Question> Questions { get; set; }
+        public DbSet<ScheduledMeeting> ScheduledMeetings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

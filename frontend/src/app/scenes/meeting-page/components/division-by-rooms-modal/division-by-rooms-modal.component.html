@@ -6,30 +6,84 @@
       </div>
     </div>
     <div class="content" *ngIf="!roomService.isDividedIntoRooms">
-      <div class="ui input">
-        <label>Duration</label>
-        <input type="number" placeholder="Minutes" [(ngModel)]="duration" />
+      <div class="ui right labeled input">
+        <label for="duration" class="ui label duration-label">Duration</label>
+        <input
+          id="duration"
+          type="number"
+          placeholder="Minutes"
+          [(ngModel)]="duration"
+        />
+        <div class="ui basic label">minutes</div>
       </div>
-      <div
-        class="ui divided list"
-        *ngFor="let participantsOfRoom of devidedParticipants"
-      >
-        <div class="ui header">
-          Room:
-        </div>
-        <div
-          class="ui item participant"
-          *ngFor="let participant of participantsOfRoom"
+      <div class="ui action labeled input">
+        <label for="numberOfRooms" class="ui label">Number of rooms</label>
+        <input
+          id="numberOfRooms"
+          type="number"
+          placeholder="number of rooms"
+          [(ngModel)]="numberOfRooms"
+          (change)="numberOfRoomsChanged()"
+        />
+        <button
+          class="ui button number-of-rooms-action"
+          (click)="numberOfRoomsChanged()"
         >
-          <img
-            class="ui avatar image"
-            src="{{ participant?.user.avatarUrl }}"
-          />
-          <div>
-            {{ participant?.user.firstName }} {{ participant?.user.secondName }}
+          divide
+        </button>
+      </div>
+
+      <div class="rooms">
+        <div
+          *ngFor="
+            let participantsOfRoom of roomService.previouslyDividedParticipants
+          "
+          class="ui vertical segment"
+        >
+          <div class="ui header">
+            Room:
+          </div>
+          <div
+            class="ui divided list"
+            dndDropzone
+            dndEffectAllowed="move"
+            [dndDisableIf]="
+              checkIfSelectedParticipantIsInCurrentList(participantsOfRoom)
+            "
+            (dndDrop)="onDrop($event, participantsOfRoom)"
+          >
+            <div
+              *ngIf="participantsOfRoom.length === 0"
+              class="ui segment emptyPlace"
+            ></div>
+            <div
+              class="ui segment participant"
+              *ngFor="let participant of participantsOfRoom"
+              [dndDraggable]="participant"
+              [dndType]="participant"
+              dndEffectAllowed="move"
+              (dndStart)="onDragStart($event, participant)"
+              (dndMoved)="onDragged(participant, participantsOfRoom)"
+              (dndEnd)="onDragEnd($event)"
+            >
+              <div class="participant-data">
+                <img
+                  class="ui avatar image"
+                  src="{{ participant?.user.avatarUrl }}"
+                />
+                <div>
+                  {{ participant?.user.firstName }}
+                  {{ participant?.user.secondName }}
+                </div>
+              </div>
+              <div class="drag-icon">
+                <i class="ellipsis vertical icon"></i>
+                <i class="ellipsis vertical icon"></i>
+              </div>
+            </div>
+            <div dndPlaceholderRef class="ui segment dndPlaceholder"></div>
           </div>
         </div>
-        <div class="ui fitted divider"></div>
       </div>
     </div>
     <div class="content" *ngIf="roomService.isDividedIntoRooms">

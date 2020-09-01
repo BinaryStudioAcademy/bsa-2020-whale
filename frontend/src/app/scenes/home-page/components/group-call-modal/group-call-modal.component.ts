@@ -73,7 +73,6 @@ export class GroupCallModalComponent extends SimpleModalComponent<Group, null>
       });
     this.groupService.getAllGroupUsers(this.id).subscribe((t) => {
       this.membersAmount = t.length;
-      console.log(t.length);
     });
 
     this.whaleSignalrService.startCallCaller$

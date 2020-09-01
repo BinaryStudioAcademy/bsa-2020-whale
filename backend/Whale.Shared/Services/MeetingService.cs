@@ -13,6 +13,8 @@ using Whale.Shared.Models.Meeting;
 using Whale.Shared.Models.Participant;
 using Whale.Shared.Models.Meeting.MeetingMessage;
 using shortid;
+using System.Diagnostics;
+using Newtonsoft.Json;
 
 namespace Whale.Shared.Services
 {
@@ -72,6 +74,9 @@ namespace Whale.Shared.Services
             meetingDTO.Participants = (await _participantService.GetMeetingParticipantsAsync(meeting.Id)).ToList();
             meetingDTO.IsAudioAllowed = meetingSettings.IsAudioAllowed;
             meetingDTO.IsVideoAllowed = meetingSettings.IsVideoAllowed;
+            meetingDTO.IsPoll = meetingSettings.IsPoll;
+            meetingDTO.IsWhiteboard = meetingSettings.IsWhiteboard;
+            meetingDTO.IsAllowedToChooseRoom = meetingSettings.IsAllowedToChooseRoom;
 
             return meetingDTO;
         }
@@ -93,8 +98,12 @@ namespace Whale.Shared.Services
             await _redisService.SetAsync(meeting.Id.ToString(), new MeetingMessagesAndPasswordDTO { Password = pwd });
             await _redisService.SetAsync($"{meetingSettingsPrefix}{meeting.Id}", new MeetingSettingsDTO
             {
+                MeetingHostEmail = meetingDTO.CreatorEmail,
                 IsAudioAllowed = meetingDTO.IsAudioAllowed,
-                IsVideoAllowed = meetingDTO.IsVideoAllowed
+                IsVideoAllowed = meetingDTO.IsVideoAllowed,
+                IsWhiteboard = meetingDTO.IsWhiteboard,
+                IsAllowedToChooseRoom = meetingDTO.IsAllowedToChooseRoom,
+                IsPoll = meetingDTO.IsPoll
             });
 
             string shortURL = ShortId.Generate();
@@ -112,17 +121,97 @@ namespace Whale.Shared.Services
             return new MeetingLinkDTO { Id = meeting.Id, Password = pwd };
         }
 
-        public async Task UpdateMeetingMediaOnStart(MediaOnStartDTO mediaDTO)
+        public async Task<MeetingAndLink> RegisterScheduledMeeting(MeetingCreateDTO meetingDTO)
+        {
+            var meeting = _mapper.Map<Meeting>(meetingDTO);
+            meeting.Settings = JsonConvert.SerializeObject(new { meetingDTO.IsAudioAllowed, meetingDTO.IsVideoAllowed });
+            await _context.Meetings.AddAsync(meeting);
+            var user = await _context.Users.FirstOrDefaultAsync(e => e.Email == meetingDTO.CreatorEmail);
+            var scheduledMeeting = new ScheduledMeeting { CreatorId = user.Id, MeetingId = meeting.Id, ParticipantsEmails = JsonConvert.SerializeObject(meetingDTO.ParticipantsEmails) };
+            await _context.ScheduledMeetings.AddAsync(scheduledMeeting);
+            await _context.SaveChangesAsync();
+
+            await _redisService.ConnectAsync();
+            var pwd = _encryptService.EncryptString(Guid.NewGuid().ToString());
+            await _redisService.SetAsync(meeting.Id.ToString(), new MeetingMessagesAndPasswordDTO { Password = pwd });
+            string shortURL = ShortId.Generate();
+            string fullURL = $"?id={meeting.Id}&pwd={pwd}";
+            await _redisService.SetAsync(shortURL, "not-active");
+            await _redisService.SetAsync(fullURL, shortURL);
+
+            return new MeetingAndLink { Meeting = meeting , Link = shortURL };
+        }
+
+        public async Task<MeetingLinkDTO> StartScheduledMeeting(Meeting meeting)
+        {
+            var meetingSettings = JsonConvert.DeserializeObject(meeting.Settings);
+
+            await _redisService.ConnectAsync();
+            var redisMeetingData = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(meeting.Id.ToString());
+            await _redisService.SetAsync($"{meetingSettingsPrefix}{meeting.Id}", new MeetingSettingsDTO
+            {
+                IsAudioAllowed = ((dynamic)meetingSettings).IsAudioAllowed,
+                IsVideoAllowed = ((dynamic)meetingSettings).IsVideoAllowed
+            });
+
+            string fullURL = $"?id={meeting.Id}&pwd={redisMeetingData.Password}";
+
+            var shortUrl = await _redisService.GetAsync<string>(fullURL);
+            await _redisService.SetAsync(shortUrl, fullURL);
+
+            var scheduledMeeting = await _context.ScheduledMeetings.FirstOrDefaultAsync(e => e.MeetingId == meeting.Id);
+            var user = await _context.Users.FirstOrDefaultAsync(e => e.Id == scheduledMeeting.CreatorId);
+            await _participantService.CreateParticipantAsync(new ParticipantCreateDTO
+            {
+                Role = ParticipantRole.Host,
+                UserEmail = user.Email,
+                MeetingId = meeting.Id
+            });
+
+            var participantEmails = JsonConvert.DeserializeObject<List<string>>(scheduledMeeting.ParticipantsEmails);
+
+            foreach(var email in participantEmails)
+            {
+                var userParticipant = await _userService.GetUserByEmail(email);
+                if (userParticipant == null)
+                    continue;
+                await _participantService.CreateParticipantAsync(new ParticipantCreateDTO
+                {
+                    Role = ParticipantRole.Participant,
+                    UserEmail = email,
+                    MeetingId = meeting.Id
+                });
+            }
+
+            return new MeetingLinkDTO { Id = meeting.Id, Password = redisMeetingData.Password };
+        }
+
+        public async Task<IEnumerable<Meeting>> GetScheduledMeetins()
+        {
+            return await _context.Meetings
+                .Where(e => e.IsScheduled && e.EndTime == null && e.StartTime >= DateTimeOffset.Now)
+                .ToListAsync();
+        }
+
+        public async Task UpdateMeetingSettings(UpdateSettingsDTO updateSettingsDTO)
         {
             await _redisService.ConnectAsync();
 
-            var meetingSettings = 
-                await _redisService.GetAsync<MeetingSettingsDTO>($"{meetingSettingsPrefix}{mediaDTO.MeetingId}");
+            var meetingSettings =
+                await _redisService.GetAsync<MeetingSettingsDTO>($"{meetingSettingsPrefix}{updateSettingsDTO.MeetingId}");
 
-            meetingSettings.IsVideoAllowed = mediaDTO.IsVideoAllowed;
-            meetingSettings.IsAudioAllowed = mediaDTO.IsAudioAllowed;
+            if (meetingSettings == null)
+                throw new NotFoundException("meeting settings");
 
-            await _redisService.SetAsync($"{meetingSettingsPrefix}{mediaDTO.MeetingId}", meetingSettings);
+            if (updateSettingsDTO.ApplicantEmail != meetingSettings.MeetingHostEmail)
+                throw new NotAllowedException(updateSettingsDTO.ApplicantEmail);
+
+            meetingSettings.IsWhiteboard = updateSettingsDTO.IsWhiteboard;
+            meetingSettings.IsPoll = updateSettingsDTO.IsPoll;
+            meetingSettings.IsAudioAllowed = !updateSettingsDTO.IsAudioDisabled;
+            meetingSettings.IsVideoAllowed = !updateSettingsDTO.IsVideoDisabled;
+
+            await _redisService.SetAsync($"{meetingSettingsPrefix}{updateSettingsDTO.MeetingId}", meetingSettings);
         }
 
         public async Task<MeetingMessageDTO> SendMessage(MeetingMessageCreateDTO msgDTO)

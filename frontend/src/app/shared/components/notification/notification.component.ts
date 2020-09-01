@@ -72,7 +72,11 @@ export class NotificationComponent implements OnInit {
       this.notification.notificationType === NotificationTypeEnum.UnreadMessage
     ) {
       this.unreadMessageOptions = JSON.parse(this.notification.options);
-      this.message = `Unread message from ${this.unreadMessageOptions.senderName}.`;
+      const count = this.unreadMessageOptions.unreadMessageIds.length;
+      this.message =
+        count <= 1
+          ? `Unread message from ${this.unreadMessageOptions.senderName}.`
+          : `${count} unread messages from ${this.unreadMessageOptions.senderName}.`;
     }
   }
 
