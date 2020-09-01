@@ -64,7 +64,6 @@ export class CallModalComponent extends SimpleModalComponent<Contact, null>
         this.close();
       });
 
-    console.log(this.firstMember);
     this.whaleSignalrService.invoke(WhaleSignalMethods.OnStartCall, {
       contactId: this?.id,
       meeting: {

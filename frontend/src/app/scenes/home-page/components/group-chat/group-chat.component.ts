@@ -18,16 +18,10 @@ import {
 import { ToastrService } from 'ngx-toastr';
 import { GroupMessage } from '@shared/models/message/group-message';
 import { User } from '@shared/models/user/user';
-import { SignalRService } from 'app/core/services/signal-r.service';
 import { HttpService } from 'app/core/services/http.service';
-import { environment } from '@env';
-import { Injectable } from '@angular/core';
 import { HubConnection } from '@aspnet/signalr';
-import { Subject, from, Observable, ReplaySubject } from 'rxjs';
-import { tap, takeUntil, take, first } from 'rxjs/operators';
-import { Message } from '@angular/compiler/src/i18n/i18n_ast';
-import { Console } from 'console';
-import { stringify } from 'querystring';
+import { Subject, ReplaySubject } from 'rxjs';
+import { takeUntil, take, first } from 'rxjs/operators';
 import { HttpResponse, HttpParams } from '@angular/common/http';
 import { SimpleModalService } from 'ngx-simple-modal';
 import { Group } from '@shared/models/group/group';
@@ -35,7 +29,6 @@ import { GroupService } from 'app/core/services/group.service';
 import { GroupUser } from '@shared/models/group/groupuser';
 import { AddUserToGroupModalComponent } from '../add-user-to-group-modal/add-user-to-group-modal.component';
 import { UpstateService } from 'app/core/services/upstate.service';
-import { AuthService } from 'app/core/auth/auth.service';
 import { GroupCallModalComponent } from '../group-call-modal/group-call-modal.component';
 import { HomePageComponent } from '../home-page/home-page.component';
 import { ConfirmationModalComponent } from '@shared/components/confirmation-modal/confirmation-modal.component';
@@ -136,16 +129,12 @@ export class GroupChatComponent
         new HttpParams().set('userId', this.loggedInUser.id)
       )
       .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(
-        (data: ReadAndUnreadGroupMessages) => {
-          this.messages = data.readMessages.concat(data.unreadMessages);
-          this.unreadMessages = data.unreadMessages;
-          this.receivedMessages.next();
-          console.log('messages new', data);
-          this.isMessagesLoading = false;
-        },
-        (error) => console.log(error)
-      );
+      .subscribe((data: ReadAndUnreadGroupMessages) => {
+        this.messages = data.readMessages.concat(data.unreadMessages);
+        this.unreadMessages = data.unreadMessages;
+        this.receivedMessages.next();
+        this.isMessagesLoading = false;
+      });
     this.groupService
       .getAllGroupUsers(this.groupSelected.id)
       .pipe(takeUntil(this.unsubscribe$))
@@ -154,7 +143,6 @@ export class GroupChatComponent
           this.groupMembers = users;
         },
         (err) => {
-          console.log(err.message);
           this.toastr.error(err.Message);
         }
       );
@@ -185,20 +173,14 @@ export class GroupChatComponent
           });
         },
         (err) => {
-          console.log(err.message);
           this.toastr.error(err.Message);
         }
       );
     this.whaleSignalrService.updatedGroup$
       .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(
-        (group) => {
-          this.groupSelected = group;
-        },
-        (err) => {
-          console.log(err.message);
-        }
-      );
+      .subscribe((group) => {
+        this.groupSelected = group;
+      });
   }
   ngOnDestroy(): void {
     this.unsubscribe$.next();
@@ -370,8 +352,6 @@ export class GroupChatComponent
         (group) => {
           if (group !== undefined) {
             this.groupSelected = group;
-            // this.groupUpdated.emit(this.groupSelected);
-            // console.log(this.groupSelected);
             this.whaleSignalrService.invoke(
               WhaleSignalMethods.OnGroupUpdate,
               this.groupSelected
@@ -424,11 +404,8 @@ export class GroupChatComponent
     };
     this.httpService
       .postRequest('/api/GroupChat/markRead', unreadMessageId)
-      .subscribe(
-        () => {
-          this.messageRead.emit(msgId);
-        },
-        (error) => console.error(error)
-      );
+      .subscribe(() => {
+        this.messageRead.emit(msgId);
+      });
   }
 }

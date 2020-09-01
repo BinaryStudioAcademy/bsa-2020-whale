@@ -68,10 +68,10 @@ export class ScheduleMeetingPageComponent implements OnInit {
       isPasswordEnabled: new FormControl(''),
       password: new FormControl(''),
       isDisableAudio: new FormControl(
-        meetingSettingsService.settings.isAudioDisabled
+        meetingSettingsService.getSettings().isAudioDisabled
       ),
       isDisableVideo: new FormControl(
-        meetingSettingsService.settings.isVideoDisabled
+        meetingSettingsService.getSettings().isVideoDisabled
       ),
       saveIntoCalendar: new FormControl(false),
     });
@@ -91,8 +91,9 @@ export class ScheduleMeetingPageComponent implements OnInit {
     const time = this.form.controls.time.value.match(
       /(\d+)(?::(\d\d))?\s*(p?)/
     );
-    date.setHours(parseInt(time[1]) + (time[3] ? 12 : 0));
-    date.setMinutes(parseInt(time[2]) || 0);
+    date.setHours(parseInt(time[1], 10) + (time[3] ? 12 : 0));
+    date.setMinutes(parseInt(time[2], 10) || 0);
+
     this.simpleModalService
       .addModal(MeetingInviteComponent, {
         participantEmails: [this.loggedInUser.email],
@@ -113,13 +114,10 @@ export class ScheduleMeetingPageComponent implements OnInit {
             participantsEmails: participantEmails as string[],
           } as MeetingCreate)
           .pipe(takeUntil(this.unsubscribe$))
-          .subscribe(
-            (resp) => {
-              this.toastr.success('Meeting scheduled!');
-              this.router.navigate(['/home']);
-            },
-            (error) => console.log(error.message)
-          );
+          .subscribe((resp) => {
+            this.toastr.success('Meeting scheduled!');
+            this.router.navigate(['/home']);
+          });
       });
   }
 

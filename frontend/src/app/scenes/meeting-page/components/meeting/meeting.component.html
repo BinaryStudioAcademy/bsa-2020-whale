@@ -246,23 +246,41 @@
                 ></i>
               </div>
             </div>
-              <i
-                id="meeting-options-recording"
-                *ngIf="!isScreenRecording"
-                (mouseover)="isShowRecordingOptins = true;"
-                (mouseleave)="isShowRecordingOptins = false;"
-                (click)="startRecording(isHighlightRecording)"
-                class="big circle icon"
-              >
+            <i
+              id="meeting-options-recording"
+              *ngIf="!isScreenRecording"
+              (mouseover)="isShowRecordingOptins = true"
+              (mouseleave)="isShowRecordingOptins = false"
+              (click)="startRecording(isHighlightRecording)"
+              class="big circle icon"
+            >
               <div class="hover-helper" *ngIf="isShowRecordingOptins"></div>
               <div class="record-container" *ngIf="isShowRecordingOptins">
                 <div class="ui vertical labeled icon buttons">
-                  <button class="ui button left-align" (click)="startRecording(false)">
-                    <i [className]="isHighlightRecording ? 'caret right icon medium-icon' : 'caret square right icon medium-icon'"></i>
+                  <button
+                    class="ui button left-align"
+                    (click)="startRecording(false)"
+                  >
+                    <i
+                      [className]="
+                        isHighlightRecording
+                          ? 'caret right icon medium-icon'
+                          : 'caret square right icon medium-icon'
+                      "
+                    ></i>
                     Start Recording
                   </button>
-                  <button class="ui button left-align" (click)="startRecording(true)">
-                    <i [className]="isHighlightRecording ? 'caret square right icon medium-icon' : 'caret right icon medium-icon'"></i>
+                  <button
+                    class="ui button left-align"
+                    (click)="startRecording(true)"
+                  >
+                    <i
+                      [className]="
+                        isHighlightRecording
+                          ? 'caret square right icon medium-icon'
+                          : 'caret right icon medium-icon'
+                      "
+                    ></i>
                     Highlight
                   </button>
                 </div>
@@ -476,18 +494,17 @@
 
       <div class="settings" *ngIf="isVideoSettings && !isCameraMuted">
         <app-video-settings
-          (onClick)="changeStateVideo($event)"
+          (clickEmited)="changeStateVideo($event)"
         ></app-video-settings>
       </div>
       <div class="settings" *ngIf="isAudioSettings && !isMicrophoneMuted">
         <app-audio-settings
-          (onClick)="changeInputDevice($event)"
+          (clickEmited)="changeInputDevice($event)"
         ></app-audio-settings>
         <app-output-settings
-          (onClick)="changeOutputDevice($event)"
+          (clickEmited)="changeOutputDevice($event)"
         ></app-output-settings>
       </div>
-
     </div>
 
     <div *ngIf="isShowChat" class="ui chat card">

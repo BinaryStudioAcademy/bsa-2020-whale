@@ -74,7 +74,6 @@ export class AddUserToGroupModalComponent
           this.isContactsLoading = false;
         },
         (error) => {
-          console.error(error);
           this.isContactsLoading = false;
         }
       );
@@ -140,7 +139,6 @@ export class AddUserToGroupModalComponent
   }
 
   public filterContacts(value: string): void {
-    console.log(this.contacts);
     this.cachedContacts = this.contacts.filter((contact) => {
       return `${contact.secondMember.firstName} ${contact.secondMember.secondName}`.includes(
         value
@@ -152,7 +150,6 @@ export class AddUserToGroupModalComponent
     const contact = this.selectedContacts.find(
       (c) => c.secondMember.email === email
     );
-    console.log(contact);
     if (contact) {
       return this.getName(contact.secondMember);
     } else {

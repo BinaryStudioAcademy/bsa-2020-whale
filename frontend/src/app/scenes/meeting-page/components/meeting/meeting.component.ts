@@ -739,13 +739,13 @@ export class MeetingComponent
       });
     });
 
-    if (this.mediaSettingsService.settings.IsMirrorVideo) {
+    if (this.mediaSettingsService.getSettings().IsMirrorVideo) {
       this.currentVideo.nativeElement.style.transform = 'scale(-1,1)';
     }
     // show a warning dialog if close current tab or window
     window.onbeforeunload = (ev: BeforeUnloadEvent) => {
       ev.preventDefault();
-      ev = ev || window.event;
+      ev = ev;
       ev.returnValue = '';
       return '';
     };
@@ -755,7 +755,7 @@ export class MeetingComponent
     this.elem = this.mainArea.nativeElement;
     this.currentStreamLoaded.subscribe(() => {
       this.currentVideo.nativeElement.srcObject = this.currentUserStream;
-      if (this.mediaSettingsService.settings.IsMirrorVideo) {
+      if (this.mediaSettingsService.getSettings().IsMirrorVideo) {
         this.currentVideo.nativeElement.style.transform = 'scale(-1,1)';
         document.querySelector('video').style.transform = 'scale(-1,1)';
       }
@@ -881,16 +881,11 @@ export class MeetingComponent
           this.blobService.recordReady$
             .pipe(takeUntil(this.unsubscribe$))
             .pipe(first())
-            .subscribe(
-              (resp) => {
-                this.simpleModalService.addModal(RecordModalComponent, {
-                  link: resp,
-                });
-              },
-              (err) => {
-                console.error(err.message);
-              }
-            );
+            .subscribe((resp) => {
+              this.simpleModalService.addModal(RecordModalComponent, {
+                link: resp,
+              });
+            });
           if (isHighlight) {
             this.highlightRecording();
           }
@@ -920,7 +915,7 @@ export class MeetingComponent
 
   private async highlightRecording(): Promise<void> {
     this.isHighlightRecording = true;
-    await new Promise(r => setTimeout(r, 30000));
+    await new Promise((r) => setTimeout(r, 30000));
     this.stopRecording();
   }
 
@@ -1158,7 +1153,6 @@ export class MeetingComponent
           });
         },
         (error) => {
-          console.error(error.message);
           this.leaveUnConnected();
         }
       );
@@ -1317,6 +1311,7 @@ export class MeetingComponent
       const processor = audioContext.createScriptProcessor(256, 1, 1);
       mediaStreamSource.connect(processor);
       processor.connect(audioContext.destination);
+      // tslint:disable-next-line: deprecation
       processor.onaudioprocess = (e) => {
         const inputData = e.inputBuffer.getChannelData(0);
         const inputDataLength = inputData.length;
@@ -1628,7 +1623,7 @@ export class MeetingComponent
     videoElements.forEach((elem) => {
       this.mediaSettingsService.attachSinkId(
         elem,
-        this.mediaSettingsService.settings.OutputDeviceId
+        this.mediaSettingsService.getSettings().OutputDeviceId
       );
     });
   }
@@ -1677,7 +1672,6 @@ export class MeetingComponent
         this.isAddParticipantDisabled = false;
       },
       (error) => {
-        console.error(error);
         this.isAddParticipantDisabled = false;
       }
     );
