@@ -1,5 +1,5 @@
 <div class="ui segment">
-  <spiner *ngIf="isLoading" [size]="'medium'"></spiner>
+  <app-spiner *ngIf="isLoading" [size]="'medium'"></app-spiner>
   <h3>Poll</h3>
   <form class="ui form" [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="field">

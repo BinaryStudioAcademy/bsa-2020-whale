@@ -47,9 +47,9 @@ export class SettingMeetingComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
-    this.isWhiteboard = this.meetingSettingsService.settings.isWhiteboard;
-    this.isPoll = this.meetingSettingsService.settings.isPoll;
-    this.isAllowedToChooseRoom = this.meetingSettingsService.settings.isAllowedToChooseRoom;
+    this.isWhiteboard = this.meetingSettingsService.getSettings().isWhiteboard;
+    this.isPoll = this.meetingSettingsService.getSettings().isPoll;
+    this.isAllowedToChooseRoom = this.meetingSettingsService.getSettings().isAllowedToChooseRoom;
     this.isAudioDisabled = !this.meeting.isAudioAllowed;
     this.isVideoDisabled = !this.meeting.isVideoAllowed;
   }
