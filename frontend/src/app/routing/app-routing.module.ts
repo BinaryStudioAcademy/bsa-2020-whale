@@ -16,6 +16,7 @@ import {
   redirectLoggedInTo,
   AngularFireAuthGuard,
 } from '@angular/fire/auth-guard';
+import { AgendaComponent } from 'app/scenes/meeting-page/components/agenda/agenda.component';
 
 const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['/']);
 const redirectLoggedToHome = () => redirectLoggedInTo(['home']);
@@ -26,6 +27,9 @@ const routes: Routes = [
     component: HomePageComponent,
     ...canActivate(redirectUnauthorizedToLogin),
   },
+  
+  {path:'agenda',
+component:AgendaComponent},
   {
     path: 'setting-page',
     component: SettingPageComponent,

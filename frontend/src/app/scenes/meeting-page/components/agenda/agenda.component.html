@@ -1,5 +1,7 @@
-<form class="ui form">
+<div class="ui segment">
   <div *ngFor="let a of agenda">
-    {{ a.name }}
+    <div class="point">
+      <input class="ui checkbox" type="checkbox" (change)="finishedPoint($event,a)">
+      Name:  {{ a.name }}.  Start time: {{a.time}}</div>
   </div>
-</form>
+</div>

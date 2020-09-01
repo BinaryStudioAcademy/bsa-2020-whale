@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, EventEmitter } from '@angular/core';
+import { ToastrService } from 'ngx-toastr';
+import { PointAgenda } from '@shared/models/agenda/agenda';
 
 @Component({
   selector: 'app-agenda',
@@ -7,32 +9,22 @@ import { Component, OnInit } from '@angular/core';
 })
 export class AgendaComponent implements OnInit {
   public agenda = [
-    { name: 'introduction in Silver Age', time: '9:30' },
+    { name: 'Introduction in Silver Age', time: '10:20' },
     {
-      name: 'creativity of Anna Akhmatova',
-      time: '10:10',
+      name: 'Creativity of Anna Akhmatova',
+      time: '10:40',
     },
-    { name: 'poetry of Marina Tsvetaeva', time: '10:40' },
+    { name: 'Poetry by Marina Tsvetaeva', time: '11:50' },
   ];
-  constructor() {
-    this.agenda = [
-      { name: 'introduction in Silver Age', time: '9:30' },
-      {
-        name: 'creativity of Anna Akhmatova',
-        time: '10:10',
-      },
-      { name: 'poetry of Marina Tsvetaeva', time: '10:40' },
-    ];
+  toastRef;
+  constructor(private toastr: ToastrService) {
   }
 
   ngOnInit(): void {
-    this.agenda = [
-      { name: 'introduction in Silver Age', time: '9:30' },
-      {
-        name: 'creativity of Anna Akhmatova',
-        time: '10:10',
-      },
-      { name: 'poetry of Marina Tsvetaeva', time: '10:40' },
-    ];
+  }
+  finishedPoint(event, a: PointAgenda){
+    if (event.target.checked){
+      this.toastr.info(a.name + " was finished");
+    }
   }
 }
