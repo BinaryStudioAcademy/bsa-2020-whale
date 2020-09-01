@@ -43,10 +43,12 @@ export class AppComponent implements OnInit, OnDestroy {
   }
   @HostListener('window:beforeunload')
   beforeunload(): void {
-    this.whaleSignalrService.invoke(
-      WhaleSignalMethods.OnUserDisconnect,
-      this.authService.currentUser.email
-    );
+    if (this.authService.currentUser !== null){
+      this.whaleSignalrService.invoke(
+        WhaleSignalMethods.OnUserDisconnect,
+        this.authService.currentUser.email
+      );
+    }
   }
 
   ngOnDestroy(): void {
