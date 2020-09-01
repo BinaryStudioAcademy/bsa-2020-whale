@@ -28,7 +28,6 @@ namespace Whale.API.Controllers
 			return Ok();
 		}
 
-		[AllowAnonymous]
 		[HttpPost("scheduled")]
 		public async Task<OkResult> SendScheduledEmail([FromBody] ScheduledMeetingInvite invite)
 		{

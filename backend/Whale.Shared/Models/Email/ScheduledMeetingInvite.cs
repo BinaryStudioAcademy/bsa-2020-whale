@@ -8,7 +8,6 @@ namespace Whale.Shared.Models.Email
     {
         public string MeetingLink { get; set; }
         public Guid MeetingId { get; set; }
-        public string ReceiverEmail { get; set; }
-        public string ReceiverName { get; set; }
+        public IEnumerable<string> ReceiverEmails { get; set; }
     }
 }

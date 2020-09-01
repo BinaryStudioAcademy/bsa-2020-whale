@@ -10,5 +10,8 @@ namespace Whale.DAL.Models
         public Guid MeetingId { get; set; }
         public Guid CreatorId { get; set; }
         public string ParticipantsEmails { get; set; }
+        public string FullURL { get; set; }
+        public string ShortURL { get; set; }
+        public string Password { get; set; }
     }
 }

@@ -69,16 +69,17 @@ namespace Whale.API.Services
         public async Task SendMeetingInviteToHost(ScheduledMeetingInvite meetingInvite)
         {
             var meeting = await _context.Meetings.FirstOrDefaultAsync(meeting => meeting.Id == meetingInvite.MeetingId);
-            var to = new EmailAddress(meetingInvite.ReceiverEmail);
+            var tos = meetingInvite.ReceiverEmails
+                .Select(e => new EmailAddress(e))
+                .ToList();
 
             var templateData = new Dictionary<string, string>
             {
-                { "receiverName", meetingInvite.ReceiverName },
                 { "startTime", meeting.StartTime.ToString("f", new CultureInfo("us-EN")) },
                 { "meetingLink", meetingInvite.MeetingLink }
             };
 
-            var mail = MailHelper.CreateSingleTemplateEmail(From, to, "d-790722851c484caca8da3722f011212d", templateData);
+            var mail = MailHelper.CreateSingleTemplateEmailToMultipleRecipients(From, tos, "d-790722851c484caca8da3722f011212d", templateData);
 
             var apiKey = _sendGridSettings.Value.ApiKey;
             var client = new SendGridClient(apiKey);
