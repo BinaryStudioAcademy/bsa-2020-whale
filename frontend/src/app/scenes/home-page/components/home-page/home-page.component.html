@@ -23,6 +23,10 @@
           <i class="clock outline icon"></i>
           Meetings history
         </a>
+        <a id="home-go-upcoming" class="item" (click)="onUpcomingMeetingsClick()">
+          <i class="clock icon"></i>
+          Upcoming meetings
+        </a>
         <a
           id="home-go-schedule"
           class="item"
@@ -173,6 +177,10 @@
         [user]="loggedInUser"
         (historyClose)="closeHistory()"
       ></app-history>
+      <app-upcoming-meetings 
+        *ngIf="upcomingVisibility"
+        (upcomingClose)="closeUpcomig()">
+      </app-upcoming-meetings>
       <div *ngIf="actionsVisibility" class="vertically-aligned chat ui segment">
         <div
           id="home-chat-go-shedule"

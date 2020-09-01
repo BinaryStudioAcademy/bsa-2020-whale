@@ -31,6 +31,7 @@ namespace Whale.API.Controllers
             return Ok(await _httpService.PostAsync<MeetingCreateDTO, MeetingLinkDTO>("api/meeting", meetingDto));
         }
 
+        [Authorize]
         [HttpPost("scheduled")]
         public async Task<ActionResult<string>> CreateMeetingScheduled(MeetingCreateDTO meetingDto)
         {

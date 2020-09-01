@@ -41,6 +41,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
   groupsVisibility = false;
   contactChatVisibility = false;
   historyVisibility = false;
+  upcomingVisibility = false;
   groupChatVisibility = false;
 
   ownerEmail: string;
@@ -355,6 +356,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.groupChatVisibility = false;
     this.actionsVisibility = false;
     this.historyVisibility = false;
+    this.upcomingVisibility = false;
   }
 
   contactVisibilityChange(event): void {
@@ -422,15 +424,35 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.actionsVisibility = true;
   }
 
+  public closeUpcoming(): void {
+    this.upcomingVisibility = false;
+    this.actionsVisibility = true;
+  }
+
   public onMeetingHistoryClick(): void {
     this.contactChatVisibility = false;
     this.actionsVisibility = false;
     this.groupChatVisibility = false;
+    this.upcomingVisibility = false;
     this.contactSelected = undefined;
     this.groupSelected = undefined;
     this.historyVisibility = !this.historyVisibility;
 
     if (!this.historyVisibility) {
+      this.actionsVisibility = true;
+    }
+  }
+
+  public onUpcomingMeetingsClick(): void {
+    this.contactChatVisibility = false;
+    this.actionsVisibility = false;
+    this.groupChatVisibility = false;
+    this.historyVisibility = false;
+    this.contactSelected = undefined;
+    this.groupSelected = undefined;
+    this.upcomingVisibility = !this.upcomingVisibility;
+
+    if (!this.upcomingVisibility) {
       this.actionsVisibility = true;
     }
   }

@@ -126,7 +126,7 @@ namespace Whale.Shared.Services
             return new MeetingLinkDTO { Id = meeting.Id, Password = pwd };
         }
 
-        public async Task<Meeting> RegisterScheduledMeeting(MeetingCreateDTO meetingDTO)
+        public async Task<MeetingAndLink> RegisterScheduledMeeting(MeetingCreateDTO meetingDTO)
         {
             var meeting = _mapper.Map<Meeting>(meetingDTO);
             meeting.Settings = JsonConvert.SerializeObject(new 
@@ -164,8 +164,10 @@ namespace Whale.Shared.Services
                 };
                 client.PostAsync("http://localhost:4201/api/email/scheduled", new StringContent(JsonConvert.SerializeObject(meetingInvite), Encoding.UTF8, "application/json"));
             }
+            await _redisService.ConnectAsync();
+            await _redisService.SetAsync(shortURL, "not-active");
 
-            return meeting;
+            return new MeetingAndLink { Meeting = meeting , Link = shortURL };
         }
 
         public async Task<MeetingLinkDTO> StartScheduledMeeting(Meeting meeting)
