@@ -74,8 +74,8 @@
                 </div>
                 <div
                   *ngIf="
-                    groupSelected.creatorEmail == currentUser?.email &&
-                    user.email !== currentUser?.email
+                    groupSelected.creatorEmail == loggedInUser?.email &&
+                    user.email !== loggedInUser?.email
                   "
                   data-tooltip="Delete user"
                   data-position="left center"
@@ -99,7 +99,7 @@
             ></i>
           </span>
           <span
-            *ngIf="groupSelected.creatorEmail == currentUser?.email"
+            *ngIf="groupSelected.creatorEmail == loggedInUser?.email"
             data-tooltip="Edit group info"
             data-position="bottom center"
           >
@@ -124,19 +124,24 @@
     >
       There is still no messages yet!
     </div>
-    <div *ngFor="let message of messages" class="event message-event">
+    <div
+      *ngFor="let message of messages"
+      class="event message-event"
+      #intersectionElement
+      id="{{ message.id }}"
+    >
       <div class="label">
         <img src="{{ message.author?.avatarUrl }}" />
       </div>
       <div class="content">
         <div class="summary">
           <a
-            *ngIf="message.author?.email === currentUser?.email"
+            *ngIf="message.author?.email === loggedInUser?.email"
             class="user current-user-message"
           >
             You
           </a>
-          <a *ngIf="message.author?.email !== currentUser?.email" class="user">
+          <a *ngIf="message.author?.email !== loggedInUser?.email" class="user">
             {{ message.author?.firstName }}
             {{ message.author?.secondName }}
           </a>

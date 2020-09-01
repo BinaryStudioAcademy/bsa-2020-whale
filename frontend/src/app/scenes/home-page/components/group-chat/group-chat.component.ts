@@ -23,12 +23,12 @@ import { HttpService } from 'app/core/services/http.service';
 import { environment } from '@env';
 import { Injectable } from '@angular/core';
 import { HubConnection } from '@aspnet/signalr';
-import { Subject, from, Observable } from 'rxjs';
+import { Subject, from, Observable, ReplaySubject } from 'rxjs';
 import { tap, takeUntil, take, first } from 'rxjs/operators';
 import { Message } from '@angular/compiler/src/i18n/i18n_ast';
 import { Console } from 'console';
 import { stringify } from 'querystring';
-import { HttpResponse } from '@angular/common/http';
+import { HttpResponse, HttpParams } from '@angular/common/http';
 import { SimpleModalService } from 'ngx-simple-modal';
 import { Group } from '@shared/models/group/group';
 import { GroupService } from 'app/core/services/group.service';
@@ -46,6 +46,9 @@ import {
   UpdateGroupImageModalComponent,
   UpdateGroupImageModal,
 } from '../update-group-image-modal/update-group-image-modal.component';
+import { UnreadGroupMessage } from '@shared/models';
+import { MessageService } from 'app/core/services/message.service';
+import { ReadAndUnreadGroupMessages } from '@shared/models/message/read-and-unread-group-messages';
 
 @Component({
   selector: 'app-group-chat',
@@ -56,8 +59,8 @@ export class GroupChatComponent
   implements OnInit, OnChanges, OnDestroy, AfterViewInit, AfterViewChecked {
   private hubConnection: HubConnection;
   counter = 0;
-  private receivedMsg = new Subject<GroupMessage>();
-  public receivedMsg$ = this.receivedMsg.asObservable();
+  private receivedMessages = new ReplaySubject<void>();
+  public receivedMessages$ = this.receivedMessages.asObservable();
 
   private unsubscribe$ = new Subject<void>();
   @Input() groupSelected: Group;
@@ -65,17 +68,26 @@ export class GroupChatComponent
   @Output() chat: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() groupUpdated: EventEmitter<Group> = new EventEmitter<Group>();
   @ViewChildren('chatWindow') chatBlock: QueryList<ElementRef<HTMLElement>>;
+
+  @Output() messageRead = new EventEmitter<string>();
+
+  @ViewChildren('intersectionElement') intersectionElements: QueryList<
+    ElementRef<HTMLDivElement>
+  >;
+  public intersectionObserver: IntersectionObserver;
   chatElement: any;
+  groupMessageRecieved = new EventEmitter<GroupMessage>();
+  messages: GroupMessage[] = [];
+  unreadMessages: GroupMessage[] = [];
+
   newUserInGroup: GroupUser = {
     userEmail: '',
     groupId: this.groupSelected?.id,
   };
   groupMembers: User[] = [];
-  currentUser: User;
   isMessagesLoading = true;
   isMembersVisible = false;
-  groupMessageRecieved = new EventEmitter<GroupMessage>();
-  messages: GroupMessage[] = [];
+
   newMessage: GroupMessage = {
     groupId: '',
     message: '',
@@ -84,7 +96,6 @@ export class GroupChatComponent
     attachment: false,
   };
   constructor(
-    private signalRService: SignalRService,
     private whaleSignalrService: WhaleSignalService,
     private httpService: HttpService,
     private toastr: ToastrService,
@@ -92,46 +103,49 @@ export class GroupChatComponent
     private groupService: GroupService,
     private upstateSevice: UpstateService,
     private homePageComponent: HomePageComponent,
-    private blobService: BlobService
+    private blobService: BlobService,
+    private messageService: MessageService
   ) {}
 
   ngAfterViewInit(): void {
     this.chatElement = this.chatBlock.first.nativeElement;
+    this.intersectionElements.changes.pipe(first()).subscribe(() => {
+      this.receivedMessages$.subscribe(() => {
+        this.registerIntersectionObserve();
+        if (this.unreadMessages.length === 0) {
+          this.scrollDown();
+        } else {
+          const firstUnread = this.intersectionElements.find(
+            (el) => el.nativeElement.id === this.unreadMessages[0].id
+          );
+          firstUnread.nativeElement.scrollIntoView();
+        }
+      });
+    });
   }
 
   ngAfterViewChecked(): void {
     this.scrollDown();
   }
 
-  scrollDown(): void {
-    const chatHtml = this.chatElement as HTMLElement;
-    const isScrolledToBottom =
-      chatHtml.scrollHeight - chatHtml.clientHeight > chatHtml.scrollTop;
-
-    if (isScrolledToBottom) {
-      chatHtml.scrollTop = chatHtml.scrollHeight - chatHtml.clientHeight;
-    }
-  }
-
   ngOnChanges(changes: SimpleChanges): void {
     this.isMembersVisible = false;
-    this.upstateSevice
-      .getLoggedInUser()
-      .pipe(tap())
-      .subscribe((userFromDB: User) => {
-        this.currentUser = userFromDB;
-      });
     this.httpService
-      .getRequest<GroupMessage[]>('/api/GroupChat/' + this.groupSelected.id)
+      .getRequest<ReadAndUnreadGroupMessages>(
+        '/api/GroupChat/withUnread/' + this.groupSelected.id,
+        new HttpParams().set('userId', this.loggedInUser.id)
+      )
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
-        (data: GroupMessage[]) => {
-          this.messages = data;
+        (data: ReadAndUnreadGroupMessages) => {
+          this.messages = data.readMessages.concat(data.unreadMessages);
+          this.unreadMessages = data.unreadMessages;
+          this.receivedMessages.next();
+          console.log('messages new', data);
           this.isMessagesLoading = false;
         },
         (error) => console.log(error)
       );
-    this.hubConnection?.invoke('JoinGroup', this.groupSelected.id);
     this.groupService
       .getAllGroupUsers(this.groupSelected.id)
       .pipe(takeUntil(this.unsubscribe$))
@@ -145,34 +159,36 @@ export class GroupChatComponent
         }
       );
   }
+
   ngOnInit(): void {
-    from(this.signalRService.registerHub(environment.signalrUrl, 'chatHub'))
-      .pipe(
-        tap((hub) => {
-          this.hubConnection = hub;
-        })
-      )
-      .subscribe(() => {
-        this.hubConnection.on(
-          'NewGroupMessageReceived',
-          (message: GroupMessage) => {
-            this.receivedMsg.next(message);
+    this.messageService.receivedGroupMessage$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (newMessage) => {
+          if (
+            newMessage.groupId !== this.groupSelected.id ||
+            newMessage.authorId === this.loggedInUser.id
+          ) {
+            return;
           }
-        );
-        this.hubConnection.invoke('JoinGroup', this.groupSelected.id);
-      });
-    this.receivedMsg$.pipe(takeUntil(this.unsubscribe$)).subscribe(
-      (newMessage) => {
-        if (newMessage.authorId === this.loggedInUser.id) {
-          return;
+
+          this.messages.push(newMessage);
+          this.intersectionElements.changes.pipe(first()).subscribe(() => {
+            this.intersectionObserver.observe(
+              this.intersectionElements.last.nativeElement
+            );
+            this.unreadMessages.push(newMessage);
+            const firstUnread = this.intersectionElements.find(
+              (el) => el.nativeElement.id === this.unreadMessages[0].id
+            );
+            firstUnread.nativeElement.scrollIntoView();
+          });
+        },
+        (err) => {
+          console.log(err.message);
+          this.toastr.error(err.Message);
         }
-        this.messages.push(newMessage);
-      },
-      (err) => {
-        console.log(err.message);
-        this.toastr.error(err.Message);
-      }
-    );
+      );
     this.whaleSignalrService.updatedGroup$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
@@ -188,6 +204,17 @@ export class GroupChatComponent
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
   }
+
+  scrollDown(): void {
+    const chatHtml = this.chatElement as HTMLElement;
+    const isScrolledToBottom =
+      chatHtml.scrollHeight - chatHtml.clientHeight > chatHtml.scrollTop;
+
+    if (isScrolledToBottom) {
+      chatHtml.scrollTop = chatHtml.scrollHeight - chatHtml.clientHeight;
+    }
+  }
+
   sendMessage(): void {
     if (this.newMessage.message.trim().length === 0) {
       return;
@@ -195,7 +222,7 @@ export class GroupChatComponent
 
     const newMessage: GroupMessage = {
       groupId: this.groupSelected.id,
-      authorId: this.currentUser.id,
+      authorId: this.loggedInUser.id,
       createdAt: new Date(),
       message: this.newMessage.message,
       attachment: false,
@@ -221,11 +248,10 @@ export class GroupChatComponent
   }
   close(): void {
     this.chat.emit(false);
-    this.hubConnection.invoke('Disconnect', this.groupSelected.id);
   }
 
   public changeImage(): void {
-    if (this.groupSelected.creatorEmail === this.currentUser.email) {
+    if (this.groupSelected.creatorEmail === this.loggedInUser.email) {
       this.simpleModalService.addModal(UpdateGroupImageModalComponent, {
         group: this.groupSelected,
       });
@@ -233,7 +259,6 @@ export class GroupChatComponent
   }
 
   public call(): void {
-    console.log(this.groupSelected);
     this.simpleModalService.addModal(
       GroupCallModalComponent,
       this.groupSelected
@@ -241,7 +266,7 @@ export class GroupChatComponent
   }
 
   public leaveGroup(): void {
-    if (this.groupSelected.creatorEmail === this.currentUser.email) {
+    if (this.groupSelected.creatorEmail === this.loggedInUser.email) {
       this.toastr.error(
         'You cannot leave the group because you are administrator. Please, assign someone else to this role.'
       );
@@ -253,7 +278,7 @@ export class GroupChatComponent
         .subscribe((isConfirm) => {
           if (isConfirm) {
             this.groupService
-              .leaveGroup(this.groupSelected.id, this.currentUser.email)
+              .leaveGroup(this.groupSelected.id, this.loggedInUser.email)
               .subscribe(
                 () => {
                   this.toastr.success(
@@ -354,6 +379,56 @@ export class GroupChatComponent
           }
         },
         (error) => this.toastr.error(error)
+      );
+  }
+
+  public registerIntersectionObserve(): void {
+    const options = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.0,
+    };
+
+    this.intersectionObserver = new IntersectionObserver(
+      this.onIntersection.bind(this),
+      options
+    );
+
+    this.unreadMessages.forEach((message) => {
+      const element = this.intersectionElements.find(
+        (el) => el.nativeElement.id === message.id
+      );
+      this.intersectionObserver.observe(element.nativeElement);
+    });
+  }
+
+  public onIntersection(entries: IntersectionObserverEntry[]): void {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        this.intersectionObserver.unobserve(entry.target);
+        this.unreadMessages.splice(
+          this.unreadMessages.findIndex((um) => um.id === entry.target.id),
+          1
+        );
+        this.groupSelected.unreadMessageCount -= 1;
+        this.sendMarkReadRequest(entry.target.id, this.loggedInUser.id);
+      }
+    });
+  }
+
+  public sendMarkReadRequest(msgId: string, userId: string): void {
+    const unreadMessageId: UnreadGroupMessage = {
+      messageId: msgId,
+      receiverId: userId,
+      groupId: this.groupSelected.id,
+    };
+    this.httpService
+      .postRequest('/api/GroupChat/markRead', unreadMessageId)
+      .subscribe(
+        () => {
+          this.messageRead.emit(msgId);
+        },
+        (error) => console.error(error)
       );
   }
 }
