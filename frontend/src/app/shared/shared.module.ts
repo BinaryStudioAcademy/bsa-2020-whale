@@ -23,6 +23,8 @@ import { MeetingInviteComponent } from './components/meeting-invite/meeting-invi
 import { TagComponent } from './components/meeting-invite/tag/tag.component';
 import { ConfirmationModalComponent } from './components/confirmation-modal/confirmation-modal.component';
 import { ContactComponent } from './components/contacts/contact/contact.component';
+import { QuestionComponent } from './components/question/question/question.component';
+import { QuestionStatusDirective } from './directives/question-status.directive';
 import { DndModule } from 'ngx-drag-drop';
 
 @NgModule({
@@ -47,6 +49,8 @@ import { DndModule } from 'ngx-drag-drop';
     TagComponent,
     ConfirmationModalComponent,
     ContactComponent,
+    QuestionComponent,
+    QuestionStatusDirective,
   ],
   imports: [
     CommonModule,
@@ -71,6 +75,7 @@ import { DndModule } from 'ngx-drag-drop';
     VideoSettingsComponent,
     OutputSettingsComponent,
     TagComponent,
+    QuestionComponent,
     DndModule,
   ],
 })

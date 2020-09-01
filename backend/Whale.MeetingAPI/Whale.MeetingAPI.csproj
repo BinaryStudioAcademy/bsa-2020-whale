@@ -5,13 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="MappingProfiles\**" />
+   
     <Compile Remove="Models\**" />
-    <Content Remove="MappingProfiles\**" />
+
     <Content Remove="Models\**" />
-    <EmbeddedResource Remove="MappingProfiles\**" />
+
     <EmbeddedResource Remove="Models\**" />
-    <None Remove="MappingProfiles\**" />
+
     <None Remove="Models\**" />
   </ItemGroup>
 
@@ -38,6 +38,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Whale.Shared\Whale.Shared.csproj" />
   </ItemGroup>
-
-
+  <ItemGroup>
+    <Folder Include="Models\" />
+  </ItemGroup>
 </Project>
