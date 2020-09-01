@@ -5,6 +5,7 @@
         TextNotification,
         AddContactNotification,
         MeetingInviteNotification,
-        UnreadMessage
+        UnreadMessage,
+        UnreadGroupMessage
     }
 }

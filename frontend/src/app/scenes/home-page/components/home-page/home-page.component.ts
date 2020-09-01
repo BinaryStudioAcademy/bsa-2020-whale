@@ -519,9 +519,14 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.groups[index] = updatedGroup;
   }
 
-  public onOpenChat(contactId: string): void {
-    const contact = this.contacts.find((c) => (c.id = contactId));
-    this.onContactClick(contact);
+  public onOpenChat(id: string): void {
+    const contact = this.contacts.find((c) => (c.id = id));
+    if (contact !== null && contact !== undefined) {
+      this.onContactClick(contact);
+    } else {
+      const group = this.groups.find((g) => (g.id = id));
+      this.onGroupClick(group);
+    }
   }
 }
 export interface UserModel {

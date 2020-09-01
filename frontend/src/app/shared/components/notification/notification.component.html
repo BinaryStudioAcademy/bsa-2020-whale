@@ -40,4 +40,12 @@
       Open chat
     </button>
   </div>
+  <div *ngIf="unreadGroupMessageOptions">
+    <button
+      class="ui button"
+      (click)="onOpenGroupChat(); $event.stopPropagation()"
+    >
+      Open chat
+    </button>
+  </div>
 </div>
