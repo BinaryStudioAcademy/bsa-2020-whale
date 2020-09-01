@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Whale.DAL;
 
 namespace Whale.DAL.Migrations
 {
     [DbContext(typeof(WhaleDbContext))]
-    partial class WhaleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200901091414_AddColumnsToScheduledMeetingsTable")]
+    partial class AddColumnsToScheduledMeetingsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -323,32 +325,6 @@ namespace Whale.DAL.Migrations
                     b.HasIndex("MeetingId");
 
                     b.ToTable("PollResults");
-                });
-
-            modelBuilder.Entity("Whale.DAL.Models.Question.Question", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("AskedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Asker")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("MeetingId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("QuestionStatus")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Text")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Questions");
                 });
 
             modelBuilder.Entity("Whale.DAL.Models.Record", b =>
