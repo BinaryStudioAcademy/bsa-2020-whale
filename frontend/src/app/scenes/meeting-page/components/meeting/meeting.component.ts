@@ -67,6 +67,7 @@ import { Question } from '@shared/models/question/question';
 import { MeetingSettingsService } from '../../../../core/services/meeting-settings.service';
 import { MeetingInviteModalData } from '@shared/models/email/meeting-invite-modal-data';
 
+declare var webkitSpeechRecognition: any;
 
 @Component({
   selector: 'app-meeting',
@@ -76,6 +77,7 @@ import { MeetingInviteModalData } from '@shared/models/email/meeting-invite-moda
 export class MeetingComponent
   implements OnInit, AfterViewInit, OnDestroy, AfterViewChecked {
   //#region fields
+  public recognition: any;
   public canvasIsDisplayed = false;
   public canvasOptions: CanvasWhiteboardOptions = {
     clearButtonEnabled: true,
@@ -936,7 +938,21 @@ export class MeetingComponent
   }
 
   public onStatisticsIconClick(): void {
-    this.isShowReactions = false;
+    this.recognition = new webkitSpeechRecognition();
+    this.recognition.continuous = true;
+    this.recognition.lang = 'ru';
+    this.recognition.interimResults = false;
+    this.recognition.maxAlternatives = 1;
+
+    if (!this.recognition.onresult) {
+      this.recognition.onresult = (event) => { this.handleResultEvent(event); };
+    }
+
+    if (!this.recognition.onend) {
+      this.recognition.onend = (event) => { this.handleEndEvent(event); };
+    }
+    this.recognition.start();
+    /*this.isShowReactions = false;
     this.pollService.isShowPoll = false;
     this.isShowMeetingSettings = false;
     this.pollService.isPollCreating = false;
@@ -954,8 +970,18 @@ export class MeetingComponent
         userJoinTime: this.contectedAt,
       };
     }
-    this.isShowStatistics = !this.isShowStatistics;
+    this.isShowStatistics = !this.isShowStatistics;*/
   }
+  private handleResultEvent(event: any): void {
+    console.info('Event.');
+    console.info(event.results);
+  }
+
+  private handleEndEvent(event: any): void {
+    console.info('End.');
+    console.info(event);
+  }
+
   public onReactionsIconClick(): void {
     this.pollService.isShowPoll = false;
     this.pollService.isPollCreating = false;
