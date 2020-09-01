@@ -250,15 +250,15 @@ namespace Whale.SignalR.Hubs
         }
 
         [HubMethodName("OnConferenceStartRecording")]
-        public async Task OnConferenceStartRecording(string message)
+        public async Task OnConferenceStartRecording(string meetingId)
         {
-            await Clients.All.SendAsync("OnConferenceStartRecording", message);
+            await Clients.Group(meetingId).SendAsync("OnConferenceStartRecording");
         }
 
         [HubMethodName("OnConferenceStopRecording")]
-        public async Task OnConferenceStopRecording(string message)
+        public async Task OnConferenceStopRecording(string meetingId)
         {
-            await Clients.All.SendAsync("OnConferenceStopRecording", message);
+            await Clients.Group(meetingId).SendAsync("OnConferenceStopRecording");
         }
 
         [HubMethodName("OnPollCreated")]

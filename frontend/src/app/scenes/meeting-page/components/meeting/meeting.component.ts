@@ -587,6 +587,22 @@ export class MeetingComponent
         }
       );
 
+    this.meetingSignalrService.conferenceStartRecording$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        () => {
+          this.toastr.info('Conference start recording');
+        }
+      );
+
+    this.meetingSignalrService.conferenceStopRecording$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        () => {
+          this.toastr.info('Conference stop recording');
+        }
+      );
+
     this.meetingSignalrService.getMessages$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
@@ -879,9 +895,8 @@ export class MeetingComponent
         if (permited) {
           this.meetingSignalrService.invoke(
             SignalMethods.OnConferenceStartRecording,
-            'Conference start recording'
+            this.meeting.id
           );
-          this.toastr.info('Start recording a conference');
           this.blobService.recordReady$
             .pipe(takeUntil(this.unsubscribe$))
             .pipe(first())
@@ -912,9 +927,8 @@ export class MeetingComponent
 
     this.meetingSignalrService.invoke(
       SignalMethods.OnConferenceStopRecording,
-      'Conference stop recording'
+      this.meeting.id
     );
-    this.toastr.info('Stop recording a conference');
   }
 
   private async highlightRecording(): Promise<void> {
