@@ -19,12 +19,10 @@ namespace Whale.API.Services
     public class ScheduledMeetingsService: BaseService
     {
         private readonly UserService _userService;
-        private readonly RedisService _redisService;
 
-        public ScheduledMeetingsService(WhaleDbContext context, IMapper mapper, UserService userService, RedisService redisService)
+        public ScheduledMeetingsService(WhaleDbContext context, IMapper mapper, UserService userService)
             : base(context, mapper) {
             _userService = userService;
-            _redisService = redisService;
         }
 
         public async Task<ScheduledMeetingDTO> GetAsync(Guid uid)
@@ -39,7 +37,7 @@ namespace Whale.API.Services
         }
 
         
-        public async Task<IEnumerable<ScheduledDTO>> GetAllScheduledAsync(string email)
+        public async Task<IEnumerable<ScheduledDTO>> GetAllScheduledAsync(string email, int skip, int take)
         {
             var user = await _userService.GetUserByEmail(email);
             if (user == null)
@@ -47,14 +45,12 @@ namespace Whale.API.Services
 
             var scheduledList = _context.ScheduledMeetings.Where(s => s.CreatorId == user.Id || s.ParticipantsEmails.Contains(user.Email)).ToList();
             var scheduledDTOList = new List<ScheduledDTO>();
-            await _redisService.ConnectAsync();
             foreach (var scheduled in scheduledList)
             {
                 var creator = scheduled.CreatorId == user.Id ? user : await _userService.GetUserAsync(scheduled.CreatorId);
                 var meeting = await _context.Meetings.FirstOrDefaultAsync(m => m.Id == scheduled.MeetingId);
-                var redisMeetingData = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(meeting.Id.ToString());
-                string fullURL = $"?id={meeting.Id.ToString()}&pwd={redisMeetingData.Password}";
-                var shortUrl = await _redisService.GetAsync<string>(fullURL);
+                if (meeting.EndTime != null)
+                    continue;
                 var participantEmails = JsonConvert.DeserializeObject<List<string>>(scheduled.ParticipantsEmails);
                 var userParticipants = (await _userService.GetAllUsers()).Where(u => participantEmails.Contains(u.Email));
                 scheduledDTOList.Add(new ScheduledDTO
@@ -63,10 +59,13 @@ namespace Whale.API.Services
                     Meeting = _mapper.Map<MeetingDTO>(meeting),
                     Creator = creator,
                     Participants = userParticipants.ToList(),
-                    Link = shortUrl
+                    Link = scheduled.ShortURL
                 });
             }
-            return scheduledDTOList;
+            return scheduledDTOList
+                .OrderBy(s => s.Meeting.StartTime)
+                .Skip(skip)
+                .Take(take); ;
         }
 
         public async Task<ScheduledMeetingDTO> PostAsync(ScheduledMeetingCreateDTO scheduledMeeting)

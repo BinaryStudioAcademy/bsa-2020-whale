@@ -164,6 +164,8 @@ namespace Whale.Shared.Services
                 };
                 client.PostAsync("http://localhost:4201/api/email/scheduled", new StringContent(JsonConvert.SerializeObject(meetingInvite), Encoding.UTF8, "application/json"));
             }
+            await _redisService.ConnectAsync();
+            await _redisService.SetAsync(shortURL, "not-active");
 
             return new MeetingAndLink { Meeting = meeting , Link = shortURL };
         }

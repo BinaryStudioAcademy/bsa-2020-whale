@@ -28,10 +28,10 @@ namespace Whale.API.Controllers
 
         [Authorize]
         [HttpGet("all")]
-        public async Task<ActionResult<IEnumerable<ScheduledDTO>>> GetAllAsync()
+        public async Task<ActionResult<IEnumerable<ScheduledDTO>>> GetAllAsync(int skip, int take)
         {
             var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
-            return Ok(await _scheduledMeetingService.GetAllScheduledAsync(ownerEmail));
+            return Ok(await _scheduledMeetingService.GetAllScheduledAsync(ownerEmail, skip, take));
         }
 
         [HttpPost]
