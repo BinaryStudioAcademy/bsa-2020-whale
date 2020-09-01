@@ -121,7 +121,7 @@ namespace Whale.Shared.Services
             return new MeetingLinkDTO { Id = meeting.Id, Password = pwd };
         }
 
-        public async Task<Meeting> RegisterScheduledMeeting(MeetingCreateDTO meetingDTO)
+        public async Task<MeetingAndLink> RegisterScheduledMeeting(MeetingCreateDTO meetingDTO)
         {
             var meeting = _mapper.Map<Meeting>(meetingDTO);
             meeting.Settings = JsonConvert.SerializeObject(new { meetingDTO.IsAudioAllowed, meetingDTO.IsVideoAllowed });
@@ -131,26 +131,33 @@ namespace Whale.Shared.Services
             await _context.ScheduledMeetings.AddAsync(scheduledMeeting);
             await _context.SaveChangesAsync();
 
-            return meeting;
+            await _redisService.ConnectAsync();
+            var pwd = _encryptService.EncryptString(Guid.NewGuid().ToString());
+            await _redisService.SetAsync(meeting.Id.ToString(), new MeetingMessagesAndPasswordDTO { Password = pwd });
+            string shortURL = ShortId.Generate();
+            string fullURL = $"?id={meeting.Id}&pwd={pwd}";
+            await _redisService.SetAsync(shortURL, "not-active");
+            await _redisService.SetAsync(fullURL, shortURL);
+
+            return new MeetingAndLink { Meeting = meeting , Link = shortURL };
         }
 
         public async Task<MeetingLinkDTO> StartScheduledMeeting(Meeting meeting)
         {
             var meetingSettings = JsonConvert.DeserializeObject(meeting.Settings);
-            var pwd = _encryptService.EncryptString(Guid.NewGuid().ToString());
+
             await _redisService.ConnectAsync();
-            await _redisService.SetAsync(meeting.Id.ToString(), new MeetingMessagesAndPasswordDTO { Password = pwd });
+            var redisMeetingData = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(meeting.Id.ToString());
             await _redisService.SetAsync($"{meetingSettingsPrefix}{meeting.Id}", new MeetingSettingsDTO
             {
                 IsAudioAllowed = ((dynamic)meetingSettings).IsAudioAllowed,
                 IsVideoAllowed = ((dynamic)meetingSettings).IsVideoAllowed
             });
 
-            string shortURL = ShortId.Generate();
-            string fullURL = $"?id={meeting.Id}&pwd={pwd}";
+            string fullURL = $"?id={meeting.Id}&pwd={redisMeetingData.Password}";
 
-            await _redisService.SetAsync(fullURL, shortURL);
-            await _redisService.SetAsync(shortURL, fullURL);
+            var shortUrl = await _redisService.GetAsync<string>(fullURL);
+            await _redisService.SetAsync(shortUrl, fullURL);
 
             var scheduledMeeting = await _context.ScheduledMeetings.FirstOrDefaultAsync(e => e.MeetingId == meeting.Id);
             var user = await _context.Users.FirstOrDefaultAsync(e => e.Id == scheduledMeeting.CreatorId);
@@ -176,7 +183,7 @@ namespace Whale.Shared.Services
                 });
             }
 
-            return new MeetingLinkDTO { Id = meeting.Id, Password = pwd };
+            return new MeetingLinkDTO { Id = meeting.Id, Password = redisMeetingData.Password };
         }
 
         public async Task<IEnumerable<Meeting>> GetScheduledMeetins()
