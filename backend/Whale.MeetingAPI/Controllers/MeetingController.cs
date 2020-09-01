@@ -30,11 +30,11 @@ namespace Whale.API.Controllers
         }
 
         [HttpPost("scheduled")]
-        public async Task<ActionResult> CreateMeetingScheduled(MeetingCreateDTO meetingDto)
+        public async Task<ActionResult<string>> CreateMeetingScheduled(MeetingCreateDTO meetingDto)
         {
             var meeting = await _meetingService.RegisterScheduledMeeting(meetingDto);
-
-            var jobInfo = new JobInfo(typeof(ScheduledMeetingJob), meetingDto.StartTime);
+            //var jobInfo = new JobInfo(typeof(ScheduledMeetingJob), meetingDto.StartTime);
+            var jobInfo = new JobInfo(typeof(ScheduledMeetingJob), DateTimeOffset.Now + TimeSpan.FromSeconds(5));
             var obj = JsonConvert.SerializeObject(meeting);
             await _meetingScheduleService.Start(jobInfo, obj);
 
@@ -50,8 +50,6 @@ namespace Whale.API.Controllers
         [HttpGet("shortInvite/{inviteLink}")]
         public async Task<ActionResult<string>> GetFullMeetingLink(string inviteLink)
         {
-            var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
-
             var meetingLink = await _meetingService.GetFullInviteLink(inviteLink);
 
             return Ok(meetingLink);

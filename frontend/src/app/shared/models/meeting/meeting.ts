@@ -12,6 +12,7 @@ export interface Meeting extends MediaPermissions {
   isRecurrent: boolean;
   isWhiteboard: boolean;
   isPoll: boolean;
+  isAllowedToChooseRoom: boolean;
 
   participants: Participant[];
   pollResults: PollResultDto[];

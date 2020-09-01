@@ -64,7 +64,6 @@ export class AppComponent implements OnInit, OnDestroy {
           }
         },
         (err) => {
-          console.log(err.Message);
           this.toastr.error(err.Message);
         }
       );
@@ -75,11 +74,9 @@ export class AppComponent implements OnInit, OnDestroy {
         (call) => {
           if (this.user.email !== call.caller.email) {
             this.groupCall = call;
-            console.log(call);
           }
         },
         (err) => {
-          console.log(err);
           this.toastr.error(err.Message);
         }
       );
@@ -94,16 +91,15 @@ export class AppComponent implements OnInit, OnDestroy {
           this.registrationService.userRegistered$.subscribe(
             (userFromDb) => {
               this.user = Object.assign({}, user);
-              console.log('before invoke');
               this.whaleSignalrService.invoke(
                 WhaleSignalMethods.OnUserConnect,
                 this.authService.currentUser.email
               );
             },
-            (error) => console.log(error)
+            (error) => {}
           );
         },
-        (error) => console.log(error)
+        (error) => {}
       );
   }
 

@@ -17,25 +17,22 @@ export class SettingVideoComponent implements OnInit, OnDestroy {
   constructor(public mediaSettingsService: MediaSettingsService) {}
 
   ngOnInit(): void {
-    this.browserMediaDevice
-      .getVideoInputList()
-      .then((res) => {
-        this.videoDevices = res;
-        if (!this.mediaSettingsService.settings.VideoDeviceId) {
-          this.mediaSettingsService.changeVideoDevice(
-            this.videoDevices[0]?.deviceId
-          );
-        }
-        this.deviceId = this.mediaSettingsService.settings.VideoDeviceId;
-        this.isMirror = this.mediaSettingsService.settings.IsMirrorVideo;
-        this.checkbox = document.getElementById('mirror') as any;
-        this.checkbox.checked = this.isMirror;
-        if (this.checkbox.checked) {
-          document.querySelector('video').style.transform = 'scale(-1,1)';
-        }
-        this.showVideo();
-      })
-      .catch((error) => console.log(error));
+    this.browserMediaDevice.getVideoInputList().then((res) => {
+      this.videoDevices = res;
+      if (!this.mediaSettingsService.getSettings().VideoDeviceId) {
+        this.mediaSettingsService.changeVideoDevice(
+          this.videoDevices[0]?.deviceId
+        );
+      }
+      this.deviceId = this.mediaSettingsService.getSettings().VideoDeviceId;
+      this.isMirror = this.mediaSettingsService.getSettings().IsMirrorVideo;
+      this.checkbox = document.getElementById('mirror') as any;
+      this.checkbox.checked = this.isMirror;
+      if (this.checkbox.checked) {
+        document.querySelector('video').style.transform = 'scale(-1,1)';
+      }
+      this.showVideo();
+    });
   }
 
   ngOnDestroy(): void {
@@ -47,7 +44,7 @@ export class SettingVideoComponent implements OnInit, OnDestroy {
     await navigator.mediaDevices
       .getUserMedia({
         video: {
-          deviceId: this.mediaSettingsService.settings.VideoDeviceId,
+          deviceId: this.mediaSettingsService.getSettings().VideoDeviceId,
         },
         audio: false,
       })

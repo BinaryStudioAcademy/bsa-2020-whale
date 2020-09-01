@@ -3,4 +3,5 @@ export interface MeetingSettings {
   isPoll: boolean;
   isAudioDisabled: boolean;
   isVideoDisabled: boolean;
+  isAllowedToChooseRoom: boolean;
 }

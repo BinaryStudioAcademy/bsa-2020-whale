@@ -68,8 +68,7 @@ export class RoomService {
         } else {
           this.isDividedIntoRooms = false;
         }
-      })
-      .catch((err) => console.error(err));
+      });
   }
 
   public deleteParticipant(participantId: string): void {
@@ -119,8 +118,6 @@ export class RoomService {
       participants,
       Math.round(participants.length / numberOfRooms)
     );
-
-    console.log('randomlyDivide', this.previouslyDividedParticipants);
 
     if (this.previouslyDividedParticipants.length < numberOfRooms) {
       this.addEmptyRooms(

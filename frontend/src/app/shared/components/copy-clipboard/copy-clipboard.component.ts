@@ -20,7 +20,6 @@ export class CopyClipboardComponent
   }
 
   onCopy(inputElement: HTMLInputElement): void {
-    console.log(inputElement);
     inputElement.select();
     document.execCommand('copy');
     inputElement.setSelectionRange(0, -1);

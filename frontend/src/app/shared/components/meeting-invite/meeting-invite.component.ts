@@ -63,7 +63,6 @@ export class MeetingInviteComponent
       .getRequest<Contact[]>(environment.apiUrl + '/api/Contacts/accepted')
       .subscribe(
         (response) => {
-          console.log(response);
           let filteredContacts: Contact[];
           if (this.isScheduled) {
             filteredContacts = response.filter(
@@ -83,7 +82,6 @@ export class MeetingInviteComponent
           this.isContactsLoading = false;
         },
         (error) => {
-          console.error(error);
           this.isContactsLoading = false;
         }
       );
@@ -160,7 +158,6 @@ export class MeetingInviteComponent
           },
           (error) => {
             this.toastr.error(error.Message);
-            console.error(error);
             this.isLoading = false;
           }
         );
@@ -168,7 +165,6 @@ export class MeetingInviteComponent
   }
 
   public filterContacts(value: string): void {
-    console.log(this.contacts);
     this.cachedContacts = this.contacts.filter((contact) => {
       return `${contact.secondMember.firstName} ${contact.secondMember.secondName}`.includes(
         value
