@@ -215,8 +215,6 @@ namespace Whale.Shared.Services
 
                 await UpdateNotificationAsync(unpdatedNotification);
             }
-
-
         }
 
         public async Task AddUpdateUnreadGroupMessageNotification(GroupMessage message, string receiverEmail, UnreadGroupMessage unreadGroupMessage)
@@ -237,7 +235,7 @@ namespace Whale.Shared.Services
 
                 var optionsJson = JsonConvert.SerializeObject(options, camelSettings);
 
-                await AddNotification(receiverEmail, optionsJson, NotificationTypeEnum.UnreadMessage);
+                await AddNotification(receiverEmail, optionsJson, NotificationTypeEnum.UnreadGroupMessage);
             }
             else
             {

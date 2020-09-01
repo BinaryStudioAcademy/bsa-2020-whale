@@ -1,5 +1,8 @@
 <spiner *ngIf="isMeetingLoading" size="'massive'"></spiner>
-<app-page-header (openChatClicked)="onOpenChat($event)"></app-page-header>
+<app-page-header
+  (openChatClicked)="onOpenChat($event)"
+  (openGroupChatClicked)="onOpenGroupChat($event)"
+></app-page-header>
 <div class="home-panel">
   <div class="left-col">
     <div class="ui left vertical menu bar">

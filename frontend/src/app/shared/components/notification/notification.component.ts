@@ -21,6 +21,7 @@ export class NotificationComponent implements OnInit {
   @Input() notification: Notification;
   @Output() delete: EventEmitter<string> = new EventEmitter<string>();
   @Output() openChatClicked = new EventEmitter<string>();
+  @Output() openGroupChatClicked = new EventEmitter<string>();
 
   public message = '';
   public contactEmail = '';
@@ -78,7 +79,6 @@ export class NotificationComponent implements OnInit {
       this.notification.notificationType === NotificationTypeEnum.UnreadMessage
     ) {
       this.unreadMessageOptions = JSON.parse(this.notification.options);
-      console.log('options', this.unreadMessageOptions);
       const count = this.unreadMessageOptions.unreadMessageIds.length;
       this.message =
         count <= 1
@@ -90,7 +90,6 @@ export class NotificationComponent implements OnInit {
       NotificationTypeEnum.UnreadGroupMessage
     ) {
       this.unreadGroupMessageOptions = JSON.parse(this.notification.options);
-      console.log('options', this.unreadGroupMessageOptions);
       const count = this.unreadGroupMessageOptions.unreadGroupMessages.length;
       this.message =
         count <= 1
@@ -132,6 +131,6 @@ export class NotificationComponent implements OnInit {
   }
 
   onOpenGroupChat(): void {
-    this.openChatClicked.emit(this.unreadGroupMessageOptions.groupId);
+    this.openGroupChatClicked.emit(this.unreadGroupMessageOptions.groupId);
   }
 }

@@ -119,7 +119,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
                       .pipe(tap(() => (this.isGroupsLoading = false)))
                       .subscribe(
                         (data: Group[]) => {
-                          console.log(data);
                           this.groups = data;
                           this.groupsVisibility =
                             this.groups.length === 0 ? false : true;
@@ -154,7 +153,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
                   }
                 );
 
-                console.log(data);
                 this.onContactsClick();
 
                 this.whaleSignalrService.signalUserConected$
@@ -449,10 +447,16 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   onGroupClick(selectedGroup: Group): void {
+    if (selectedGroup === this.groupSelected) {
+      return;
+    }
     this.falseAllBooleans();
     this.groupChatVisibility = true;
     this.contactSelected = undefined;
     this.groupSelected = selectedGroup;
+    setTimeout(() => {
+      this.groupChatVisibility = true;
+    }, 1);
   }
 
   public closeHistory(): void {
@@ -517,7 +521,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   public onContactsClick(): void {
-    console.log('open/close');
     if (this.contacts.length) {
       this.contactsVisibility = !this.contactsVisibility;
     }
@@ -542,12 +545,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
   public onOpenChat(id: string): void {
     const contact = this.contacts.find((c) => (c.id = id));
-    if (contact !== null && contact !== undefined) {
-      this.onContactClick(contact);
-    } else {
-      const group = this.groups.find((g) => (g.id = id));
-      this.onGroupClick(group);
-    }
+    this.onContactClick(contact);
+  }
+  public onOpenGroupChat(id: string): void {
+    const groupa = this.groups.find((g) => g.id === id);
+    this.onGroupClick(groupa);
   }
 }
 export interface UserModel {
