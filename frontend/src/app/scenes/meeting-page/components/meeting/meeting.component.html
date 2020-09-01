@@ -345,7 +345,10 @@
               <i
                 id="meeting-options-chat"
                 (click)="showChat()"
-                [ngClass]="{ pulse: isNewMsg }"
+                [ngClass]="{
+                  pulse: isNewMsg,
+                  bluePulse: questionService.isNewQuestion
+                }"
                 class="big wechat icon big-left-margin"
               ></i>
             </span>
@@ -483,7 +486,29 @@
     </div>
 
     <div *ngIf="isShowChat" class="ui chat card">
-      <div class="ui chat-inner feed" #meetingChat>
+      <div class="ui buttons">
+        <button
+          class="ui button"
+          [ngClass]="{
+            pulse: isNewMsg || newMsgFrom.includes('') || newMsgFrom.length > 0,
+            active: isChat
+          }"
+          (click)="switchToChat()"
+        >
+          Chat
+        </button>
+        <button
+          class="ui button"
+          [ngClass]="{
+            bluePulse: questionService.isNewQuestion,
+            active: questionService.areQuestionsOpened
+          }"
+          (click)="switchToQuestions()"
+        >
+          Q<small>&</small>A
+        </button>
+      </div>
+      <div *ngIf="isChat" class="ui chat-inner feed" #meetingChat>
         <div
           *ngFor="let message of selectedMessages"
           class="event message-event"
@@ -509,8 +534,22 @@
           </div>
         </div>
       </div>
+      <div
+        *ngIf="questionService.areQuestionsOpened"
+        class="ui chat-inner feed"
+      >
+        <div *ngFor="let question of questionService.questions">
+          <app-question
+            [question]="question"
+            [isHost]="currentParticipant.role"
+            (statusChanged)="questionService.sendQuestionStatusUpdate($event)"
+            (questionDeleted)="questionService.sendQuestionDelete($event)"
+          >
+          </app-question>
+        </div>
+      </div>
       <div class="ui form vertically-aligned">
-        <div class="ui right labeled input">
+        <div *ngIf="isChat" class="ui right labeled input">
           <label for="receiver" class="ui label">Send To:</label>
           <select
             [ngClass]="

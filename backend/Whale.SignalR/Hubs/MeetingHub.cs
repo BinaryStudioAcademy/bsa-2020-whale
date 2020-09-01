@@ -14,6 +14,7 @@ using Whale.DAL.Models;
 using Whale.Shared.Exceptions;
 using Whale.SignalR.Services;
 using Whale.SignalR.Models.Room;
+using Whale.Shared.Models.Question;
 
 namespace Whale.SignalR.Hubs
 {
@@ -361,6 +362,26 @@ namespace Whale.SignalR.Hubs
         public async Task OnStopShare(string meetingId)
         {
             await Clients.Group(meetingId).SendAsync("OnStopShareScreen");
+        }
+
+        [HubMethodName("QuestionCreate")]
+        public async Task SendCreatedQuestion(QuestionDTO questionDto)
+        {
+            await Clients.Group(questionDto.MeetingId.ToString()).SendAsync("QuestionCreate", questionDto);
+        }
+
+        [HubMethodName("QuestionStatusUpdate")]
+        public async Task SendQuestionStatusUpdate(QuestionStatusUpdateDTO questionStatusUpdate)
+        {
+            await Clients.Group(questionStatusUpdate.MeetingId.ToString())
+                .SendAsync("QuestionStatusUpdate", questionStatusUpdate);
+        }
+
+        [HubMethodName("QuestionDelete")]
+        public async Task SendDeletedQuestionId(QuestionDeleteDTO questionDelete)
+        {
+            await Clients.Group(questionDelete.MeetingId.ToString())
+                .SendAsync("QuestionDelete", questionDelete);
         }
     }
 }

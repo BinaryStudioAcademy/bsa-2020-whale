@@ -37,6 +37,7 @@ import {
   SignalMethods,
   SignalRService,
   RoomService,
+  QuestionService,
 } from 'app/core/services';
 import {
   ChangedMediaPermissions,
@@ -59,6 +60,7 @@ import { MeetingInviteComponent } from '@shared/components/meeting-invite/meetin
 import { RecordModalComponent } from '../record-modal/record-modal.component';
 import * as DecibelMeter from 'decibel-meter';
 import { BrowserMediaDevice } from '@shared/browser-media-device';
+import { Question } from '@shared/models/question/question';
 
 @Component({
   selector: 'app-meeting',
@@ -99,6 +101,7 @@ export class MeetingComponent
   public isParticipantsAudioAllowed: boolean;
   public isScreenRecording = false;
   public isShowChat = false;
+  public isChat = true; // shows chat in chat bar
   public isShowCurrentParticipantCard = true;
   public isShowParticipants = false;
   public isShowStatistics = false;
@@ -163,7 +166,8 @@ export class MeetingComponent
     private simpleModalService: SimpleModalService,
     private toastr: ToastrService,
     private meetingSignalrService: MeetingSignalrService,
-    public roomService: RoomService
+    public roomService: RoomService,
+    public questionService: QuestionService
   ) {
     this.pollService = new PollService(
       this.meetingSignalrService,
@@ -709,7 +713,7 @@ export class MeetingComponent
   public toggleMicrophone(isMissSignaling: boolean = false): void {
     if (
       !this.meeting.isAudioAllowed &&
-      this.currentParticipant?.role != ParticipantRole.Host
+      this.currentParticipant?.role !== ParticipantRole.Host
     ) {
       this.switchTrack(false, false);
       this.isMicrophoneMuted = true;
@@ -729,7 +733,7 @@ export class MeetingComponent
   public toggleCamera(isMissSignaling: boolean = false): void {
     if (
       !this.meeting.isVideoAllowed &&
-      this.currentParticipant?.role != ParticipantRole.Host
+      this.currentParticipant?.role !== ParticipantRole.Host
     ) {
       this.switchTrack(false, true);
       this.isCameraMuted = true;
@@ -1009,6 +1013,8 @@ export class MeetingComponent
               meetingId: this.meeting.id,
               email: this.authService.currentUser.email,
             } as GetMessages);
+
+            this.questionService.getQuestionsByMeeting(this.meeting.id);
           });
         },
         (error) => {
@@ -1029,7 +1035,7 @@ export class MeetingComponent
   private invokeMediaStateChanged(receiverConnectionId = ''): void {
     this.meetingSignalrService.invoke(SignalMethods.OnMediaStateChanged, {
       streamId: this.currentUserStream.id,
-      receiverConnectionId: receiverConnectionId,
+      receiverConnectionId,
       isVideoAllowed: this.meeting.isVideoAllowed,
       isAudioAllowed: this.meeting.isAudioAllowed,
       isVideoActive: !this.isCameraMuted,
@@ -1046,7 +1052,7 @@ export class MeetingComponent
 
     const modalResult = await this.simpleModalService
       .addModal(EnterModalComponent, {
-        isCurrentParticipantHost: isCurrentParticipantHost,
+        isCurrentParticipantHost,
         isAllowedVideoOnStart: this.meeting.isVideoAllowed,
         isAllowedAudioOnStart: this.meeting.isAudioAllowed,
       })
@@ -1070,8 +1076,8 @@ export class MeetingComponent
 
     if (
       isCurrentParticipantHost &&
-      (this.meeting.isVideoAllowed != modalResult.isAllowedVideoOnStart ||
-        this.meeting.isAudioAllowed != modalResult.isAllowedAudioOnStart)
+      (this.meeting.isVideoAllowed !== modalResult.isAllowedVideoOnStart ||
+        this.meeting.isAudioAllowed !== modalResult.isAllowedAudioOnStart)
     ) {
       this.meetingService
         .updateMediaOnStart({
@@ -1263,7 +1269,7 @@ export class MeetingComponent
     isAudioAllowed: boolean,
     isVideoActive?: boolean,
     isAudioActive?: boolean
-  ) {
+  ): void {
     const participant =
       this.currentParticipant.streamId === streamId
         ? this.currentParticipant
@@ -1281,10 +1287,10 @@ export class MeetingComponent
       userFirstName: participant.user.firstName,
       userSecondName: participant.user.secondName,
       avatarUrl: participant.user.avatarUrl,
-      isVideoAllowed: isVideoAllowed,
-      isAudioAllowed: isAudioAllowed,
-      isVideoActive: isVideoActive,
-      isAudioActive: isAudioActive,
+      isVideoAllowed,
+      isAudioAllowed,
+      isVideoActive,
+      isAudioActive,
     });
   }
   //#endregion participant cards
@@ -1292,7 +1298,8 @@ export class MeetingComponent
   //#region chat
   public showChat(): void {
     this.isShowChat = !this.isShowChat;
-    if (this.isShowChat) {
+    console.log(this.newMsgFrom.length);
+    if (this.isShowChat && this.isChat) {
       this.receiverChanged();
       this.chatBlock.changes.pipe(first()).subscribe(() => {
         this.chatBlock.first.nativeElement.scrollTo(
@@ -1300,21 +1307,30 @@ export class MeetingComponent
           this.chatBlock.first.nativeElement.scrollHeight
         );
       });
+      this.isNewMsg = false;
     }
-    this.isNewMsg = !this.isShowChat && this.newMsgFrom.length > 0;
+
+    // this.isNewMsg = !(this.isShowChat && this.isChat);
+    // console.log(this.isNewMsg);
   }
 
   public sendMessage(): void {
-    if (this.msgText.trim().length !== 0) {
+    if (this.msgText.trim().length === 0) {
+      return;
+    }
+
+    if (!this.questionService.areQuestionsOpened) {
       this.meetingSignalrService.invoke(SignalMethods.OnSendMessage, {
         authorEmail: this.authService.currentUser.email,
         meetingId: this.meeting.id,
         message: this.msgText,
         receiverEmail: this.msgReceiverEmail,
       } as MeetingMessageCreate);
-
-      this.msgText = '';
+    } else {
+      this.questionService.sendQuestionCreate(this.meeting.id, this.msgText);
     }
+
+    this.msgText = '';
   }
 
   public onEnterKeyPress(event: KeyboardEvent): void {
@@ -1349,22 +1365,24 @@ export class MeetingComponent
   }
 
   public notifyNewMsg(msg: MeetingMessage): void {
-    if (msg.author.email !== this.authService.currentUser.email) {
-      this.isNewMsg = !this.isShowChat;
-      if (msg.receiver == null && this.msgReceiverEmail !== '') {
-        this.newMsgFrom.push('');
-      }
-      if (
-        msg.receiver != null &&
-        this.msgReceiverEmail !== msg.author.email &&
-        this.otherParticipants.findIndex(
-          (p) => p.user.email === msg.author.email
-        ) >= 0
-      ) {
-        this.newMsgFrom.push(msg.author.email);
-      }
+    if (msg.author.email === this.authService.currentUser.email) {
+      return;
+    }
+    this.isNewMsg = !(this.isShowChat && this.isChat);
+    if (msg.receiver == null && this.msgReceiverEmail !== '') {
+      this.newMsgFrom.push('');
+    }
+    if (
+      msg.receiver != null &&
+      this.msgReceiverEmail !== msg.author.email &&
+      this.otherParticipants.findIndex(
+        (p) => p.user.email === msg.author.email
+      ) >= 0
+    ) {
+      this.newMsgFrom.push(msg.author.email);
     }
   }
+
   //#endregion chat
 
   //#region whiteboard
@@ -1437,7 +1455,7 @@ export class MeetingComponent
     this.isVideoSettings = false;
   }
 
-  handleSuccessVideo(stream: MediaStream) {
+  handleSuccessVideo(stream: MediaStream): void {
     const video = document.querySelector('video') as HTMLVideoElement;
     // video.srcObject = stream;
     const keys = Object.keys(this.peer.connections);
@@ -1648,5 +1666,17 @@ export class MeetingComponent
     newLines.push('b=AS:' + bitrate);
     newLines = newLines.concat(lines.slice(line, lines.length));
     return newLines.join('\n');
+  }
+
+  public switchToChat(): void {
+    this.questionService.areQuestionsOpened = false;
+    this.isNewMsg = false;
+    this.isChat = true;
+  }
+
+  public switchToQuestions(): void {
+    this.isChat = false;
+    this.questionService.isNewQuestion = false;
+    this.questionService.areQuestionsOpened = true;
   }
 }

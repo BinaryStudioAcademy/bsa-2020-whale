@@ -23,6 +23,8 @@ import { MeetingInviteComponent } from './components/meeting-invite/meeting-invi
 import { TagComponent } from './components/meeting-invite/tag/tag.component';
 import { ConfirmationModalComponent } from './components/confirmation-modal/confirmation-modal.component';
 import { ContactComponent } from './components/contacts/contact/contact.component';
+import { QuestionComponent } from './components/question/question/question.component';
+import { QuestionStatusDirective } from './directives/question-status.directive';
 
 @NgModule({
   declarations: [
@@ -46,6 +48,8 @@ import { ContactComponent } from './components/contacts/contact/contact.componen
     TagComponent,
     ConfirmationModalComponent,
     ContactComponent,
+    QuestionComponent,
+    QuestionStatusDirective,
   ],
   imports: [
     CommonModule,
@@ -69,6 +73,7 @@ import { ContactComponent } from './components/contacts/contact/contact.componen
     VideoSettingsComponent,
     OutputSettingsComponent,
     TagComponent,
+    QuestionComponent,
   ],
 })
 export class SharedModule {}
