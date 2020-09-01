@@ -90,7 +90,7 @@ export class ProfilePageComponent implements OnInit {
       this.fileToUpload = event.target.files[0];
       this.isShowUploadFile = true;
     } else {
-      this.toastr.error('File can\'t be heavier than ~5MB');
+      this.toastr.error("File can't be heavier than ~5MB");
     }
   }
 
@@ -223,7 +223,7 @@ export class ProfilePageComponent implements OnInit {
       initial_fg: '#ffffff',
       initial_size: 30,
       initial_bg: '#49A0AE',
-      initial_font_family: '\'Lato\', \'Lato-Regular\', \'Helvetica Neue\'',
+      initial_font_family: "'Lato', 'Lato-Regular', 'Helvetica Neue'",
     });
   }
 

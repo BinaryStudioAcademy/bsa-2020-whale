@@ -21,16 +21,16 @@ export class SignalRService {
     return new signalR.HubConnectionBuilder()
       .withUrl(`${apiUrl}/${hubName}`)
       .build();
-  }
+  };
 
   private startConnection = (hub: signalR.HubConnection): Promise<void> => {
     return hub.start().catch((err) => {
       console.log(`Error while starting connection:${err}`);
-      setTimeout(function(): void {
+      setTimeout(function (): void {
         this.startConnection();
       }, 3000);
     });
-  }
+  };
 
   public registerEvent<T>(
     hub: signalR.HubConnection,

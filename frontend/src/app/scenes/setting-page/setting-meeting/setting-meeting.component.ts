@@ -167,7 +167,7 @@ export class SettingMeetingComponent implements OnInit, AfterViewInit {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         () => {},
-        () => this.toastr.error('Meeting settings wasn\'t saved')
+        () => this.toastr.error("Meeting settings wasn't saved")
       );
   }
 }
