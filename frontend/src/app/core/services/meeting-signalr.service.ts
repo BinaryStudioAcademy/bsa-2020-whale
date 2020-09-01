@@ -18,7 +18,12 @@ import {
   MeetingSettings,
 } from '@shared/models';
 import { CanvasWhiteboardUpdate } from 'ng2-canvas-whiteboard';
+import { Question } from '@shared/models/question/question';
+import { QuestionStatus } from '@shared/models/question/question-status';
+import { QuestionStatusUpdate } from '@shared/models/question/question-status-update';
+import { QuestionDelete } from '@shared/models/question/question-delete';
 import { ChangedMeetingSettings } from '@shared/models/meeting/changed-meeting-settings';
+
 
 @Injectable({
   providedIn: 'root',
@@ -104,6 +109,15 @@ export class MeetingSignalrService {
 
   private shareScreenStop = new Subject<string>();
   public readonly shareScreenStop$ = this.shareScreenStop.asObservable();
+
+  private questionCreated = new Subject<Question>();
+  public readonly questionCreated$ = this.questionCreated.asObservable();
+
+  private questionStatusUpdated = new Subject<QuestionStatusUpdate>();
+  public readonly questionStatusUpdated$ = this.questionStatusUpdated.asObservable();
+
+  private questionDeleted = new Subject<QuestionDelete>();
+  public readonly questionDeleted$ = this.questionDeleted.asObservable();
 
   private reactionRecived = new Subject<Reaction>();
   public readonly reactionRecived$ = this.reactionRecived.asObservable();
@@ -251,6 +265,24 @@ export class MeetingSignalrService {
         this.signalHub.on('OnStopShareScreen', () => {
           this.shareScreenStop.next();
         });
+
+        this.signalHub.on('QuestionCreate', (question: Question) => {
+          this.questionCreated.next(question);
+        });
+
+        this.signalHub.on(
+          'QuestionStatusUpdate',
+          (questionStatusUpdate: QuestionStatusUpdate) => {
+            this.questionStatusUpdated.next(questionStatusUpdate);
+          }
+        );
+
+        this.signalHub.on(
+          'QuestionDelete',
+          (questionDelete: QuestionDelete) => {
+            this.questionDeleted.next(questionDelete);
+          }
+        );
 
         this.signalHub.on('OnReaction', (reaction: Reaction) => {
           this.reactionRecived.next(reaction);

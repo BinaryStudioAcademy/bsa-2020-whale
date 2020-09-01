@@ -24,12 +24,9 @@ export class UpstateService {
   public getLoggedInUser(): Observable<User> {
     return this.authService.user$.pipe(
       filter((user) => Boolean(user)),
-      switchMap(
-        (user) => {
-          return this.registrationService.userRegistered$;
-        }
-        // this.httpService.getRequest<User>(`${this.routePrefix}/${user.email}`)
-      ),
+      switchMap((user) => {
+        return this.registrationService.userRegistered$;
+      }),
       first()
     );
   }

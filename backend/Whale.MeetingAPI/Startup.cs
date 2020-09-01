@@ -18,10 +18,12 @@ using Whale.Shared.Helpers;
 using Whale.DAL.Settings;
 using Whale.Shared.Exceptions;
 using System;
+using Whale.MeetingAPI.MappingProfiles;
 using Quartz;
 using Quartz.Impl;
 using Quartz.Spi;
 using Whale.Shared.Jobs;
+
 
 namespace Whale.MeetingAPI
 {
@@ -49,6 +51,7 @@ namespace Whale.MeetingAPI
             services.AddTransient<UserService>();
             services.AddTransient<ParticipantService>();
             services.AddTransient<NotificationsService>();
+            services.AddTransient<QuestionService>();
             services.AddTransient(p => new SignalrService(Configuration.GetValue<string>("SignalR")));
 
             services.AddControllers()
@@ -74,6 +77,7 @@ namespace Whale.MeetingAPI
                 cfg.AddProfile<MeetingMessage>();
                 cfg.AddProfile<UserProfile>();
                 cfg.AddProfile<ParticipantProfile>();
+                cfg.AddProfile<QuestionProfile>();
             },
             Assembly.GetExecutingAssembly());
 

@@ -37,7 +37,7 @@ namespace Whale.Shared.Services
         {
             return TriggerBuilder
                 .Create()
-                .WithIdentity("test.trigger")
+                .WithIdentity($"{id}-trigger")
                 .StartAt(jobInfo.JobTime)
                 .ForJob($"{id}-job")
                 .Build();
