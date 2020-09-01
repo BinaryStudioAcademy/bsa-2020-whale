@@ -30,7 +30,6 @@ namespace Whale.API.Controllers
             return Ok(messages);
         }
 
-        [AllowAnonymous]
         [HttpGet("withUnread/{groupDTOId}")]
         public async Task<ActionResult<ICollection<GroupMessageDTO>>> Get(Guid groupDTOId, Guid userId)
         {
