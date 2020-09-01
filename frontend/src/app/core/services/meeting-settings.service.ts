@@ -52,7 +52,7 @@ export class MeetingSettingsService {
   }
 
   public changeisAllowedToChooseRoom(isAllowedToChooseRoom: boolean): void {
-    this._settings.isAllowedToChooseRoom = isAllowedToChooseRoom;
+    this.settings.isAllowedToChooseRoom = isAllowedToChooseRoom;
     this.saveMeetingSettingsInLocalStorage();
   }
 }

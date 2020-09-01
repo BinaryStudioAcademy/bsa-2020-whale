@@ -118,13 +118,13 @@ export class HomePageComponent implements OnInit, OnDestroy {
                       .getAllGroups()
                       .pipe(tap(() => (this.isGroupsLoading = false)))
                       .subscribe(
-                        (data: Group[]) => {
-                          console.log(data);
-                          this.groups = data;
+                        (groups: Group[]) => {
+                          console.log(groups);
+                          this.groups = groups;
                           this.groupsVisibility =
                             this.groups.length === 0 ? false : true;
-                          data.forEach((group) => {
-                            this.messageService.joinGroup(group.id);
+                          groups.forEach((groupElemnt) => {
+                            this.messageService.joinGroup(groupElemnt.id);
                           });
                           this.isChatHubLoading = false;
                           this.messageService.receivedGroupMessage$
@@ -135,11 +135,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
                               ) {
                                 return;
                               }
-                              const group = this.groups.find(
+                              const groupOfMessage = this.groups.find(
                                 (messageGroup) =>
                                   messageGroup.id === newMessage.group.id
                               );
-                              group.unreadMessageCount += 1;
+                              groupOfMessage.unreadMessageCount += 1;
                             });
                         },
                         (error) => {
