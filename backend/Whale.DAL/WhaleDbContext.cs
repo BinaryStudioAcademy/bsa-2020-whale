@@ -28,7 +28,7 @@ namespace Whale.DAL
         public DbSet<UserAchivement> UserAchivements { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<ScheduledMeeting> ScheduledMeetings { get; set; }
-
+        public DbSet<AgendaPoint> AgendaPoints { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Contact>()
@@ -53,7 +53,6 @@ namespace Whale.DAL
                     v => Newtonsoft.Json.JsonConvert.SerializeObject(v),
                     v => Newtonsoft.Json.JsonConvert.DeserializeObject<IEnumerable<Voter>>(v)
                 );
-
             //modelBuilder.Entity<UnreadMessageId>()
             //    .HasOne(um => um.DirectMessage)
             //    .WithMany()

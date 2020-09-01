@@ -30,6 +30,11 @@ namespace Whale.API.Services
         {
             var newMeeting = _mapper.Map<Meeting>(scheduledMeeting);
             _context.Meetings.Add(newMeeting);
+            /*var agendaPoints = scheduledMeeting.AgendaPoints;
+            foreach(var a in agendaPoints)
+            {
+                _context.AgendaPoints.Add(a);
+            }*/
             await _context.SaveChangesAsync();
 
             return await GetAsync(newMeeting.Id);

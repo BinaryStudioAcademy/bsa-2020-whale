@@ -1,3 +1,5 @@
+import { PointAgenda } from '../agenda/agenda';
+
 export interface MeetingCreate {
   settings: string;
   startTime: Date;
@@ -6,4 +8,5 @@ export interface MeetingCreate {
   isRecurrent: boolean;
   creatorEmail: string;
   participantsEmails: string[];
+  agendaPoints?: PointAgenda[];
 }

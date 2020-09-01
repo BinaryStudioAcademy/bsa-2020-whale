@@ -29,6 +29,7 @@ export class MeetingService {
   public createScheduledMeeting(
     meeting: MeetingCreate
   ): Observable<HttpResponse<MeetingLink>> {
+    debugger;
     return this.httpService.postFullRequest<MeetingCreate, MeetingLink>(
       `${this.routePrefix}/scheduled`,
       meeting

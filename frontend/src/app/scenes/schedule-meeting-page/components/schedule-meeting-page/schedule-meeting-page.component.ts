@@ -13,6 +13,8 @@ import { MeetingCreate } from '@shared/models';
 import { Subject } from 'rxjs';
 import { User } from '@shared/models/user';
 import { MeetingSettingsService } from 'app/core/services';
+import { PointAgenda } from '@shared/models/agenda/agenda';
+import { AgendaComponent } from '../agenda/agenda.component';
 import {
   MeetingInviteComponent,
   ScheduleMeetingInviteModalData,
@@ -39,12 +41,13 @@ export class ScheduleMeetingPageComponent implements OnInit {
     showTwentyFourHours: true,
     minutesInterval: 10,
   };
-
+  public pointList: PointAgenda[] = [{ name: '', startTime: '' }];
   public isPasswordCheckboxChecked = true;
   public form: FormGroup;
   private unsubscribe$ = new Subject<void>();
   private loggedInUser: User;
-
+  public isAgenda = true;
+  point: PointAgenda;
   constructor(
     private toastr: ToastrService,
     private calendarService: GoogleCalendarService,
@@ -79,9 +82,10 @@ export class ScheduleMeetingPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.getUser();
+    this.point = this.pointList[0];
   }
 
-  public async onSubmit(): Promise<void> {
+  public async sendMeeting(): Promise<void> {
     if (this.form.controls.saveIntoCalendar.value) {
       await this.addEventToCalendar();
     }
@@ -112,6 +116,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
             isVideoAllowed: this.form.controls.isDisableVideo.value,
             creatorEmail: this.loggedInUser.email,
             participantsEmails: participantEmails as string[],
+            agendaPoints: this.pointList,
           } as MeetingCreate)
           .pipe(takeUntil(this.unsubscribe$))
           .subscribe((resp) => {
@@ -211,5 +216,13 @@ export class ScheduleMeetingPageComponent implements OnInit {
       .add(durationHours, 'h')
       .add(durationMinutes, 'm')
       .toDate();
+  }
+  public addNewPoint() {
+    this.pointList.push(this.point);
+    //this.point = this.pointList[this.pointList.length - 1];
+    console.log(this.pointList);
+  }
+  public removeTag(event) {
+    this.pointList.splice(this.pointList.indexOf(event), 1);
   }
 }
