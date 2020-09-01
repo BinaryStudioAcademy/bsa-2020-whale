@@ -102,13 +102,15 @@
         </button>
       </a>
       <div
-        class="contacts-container groups user-list ui selection list"
+        class="contacts-container groups user-list ui middle selection list"
         [hidden]="!groupsVisibility"
       >
         <div *ngFor="let group of groups">
           <a
             id="home-group"
-            [ngClass]="isGroupActive(group) ? 'active item' : 'item'"
+            [ngClass]="
+              isGroupActive(group) ? 'active item group' : 'item group'
+            "
             (click)="onGroupClick(group)"
           >
             <img
@@ -121,6 +123,7 @@
               class="ui avatar image"
               src="assets/img/user-group-icon.png"
             />
+
             <div
               data-tooltip="Delete group"
               data-position="left center"
@@ -132,7 +135,15 @@
                 (click)="deleteGroup(group); $event.stopPropagation()"
               ></i>
             </div>
-            {{ group.label }}
+            <div class="description group-description">
+              {{ group.label }}
+            </div>
+            <div
+              *ngIf="group?.unreadMessageCount > 0"
+              class="ui circular label group"
+            >
+              {{ group?.unreadMessageCount }}
+            </div>
           </a>
         </div>
       </div>

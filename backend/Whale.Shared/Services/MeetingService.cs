@@ -76,6 +76,7 @@ namespace Whale.Shared.Services
             meetingDTO.IsVideoAllowed = meetingSettings.IsVideoAllowed;
             meetingDTO.IsPoll = meetingSettings.IsPoll;
             meetingDTO.IsWhiteboard = meetingSettings.IsWhiteboard;
+            meetingDTO.IsAllowedToChooseRoom = meetingSettings.IsAllowedToChooseRoom;
 
             return meetingDTO;
         }
@@ -101,6 +102,7 @@ namespace Whale.Shared.Services
                 IsAudioAllowed = meetingDTO.IsAudioAllowed,
                 IsVideoAllowed = meetingDTO.IsVideoAllowed,
                 IsWhiteboard = meetingDTO.IsWhiteboard,
+                IsAllowedToChooseRoom = meetingDTO.IsAllowedToChooseRoom,
                 IsPoll = meetingDTO.IsPoll
             });
 
@@ -125,7 +127,8 @@ namespace Whale.Shared.Services
             meeting.Settings = JsonConvert.SerializeObject(new { meetingDTO.IsAudioAllowed, meetingDTO.IsVideoAllowed });
             await _context.Meetings.AddAsync(meeting);
             var user = await _context.Users.FirstOrDefaultAsync(e => e.Email == meetingDTO.CreatorEmail);
-            await _context.ScheduledMeetings.AddAsync(new ScheduledMeeting { CreatorId = user.Id, MeetingId = meeting.Id });
+            var scheduledMeeting = new ScheduledMeeting { CreatorId = user.Id, MeetingId = meeting.Id, ParticipantsEmails = JsonConvert.SerializeObject(meetingDTO.ParticipantsEmails) };
+            await _context.ScheduledMeetings.AddAsync(scheduledMeeting);
             await _context.SaveChangesAsync();
 
             return meeting;
@@ -157,6 +160,21 @@ namespace Whale.Shared.Services
                 UserEmail = user.Email,
                 MeetingId = meeting.Id
             });
+
+            var participantEmails = JsonConvert.DeserializeObject<List<string>>(scheduledMeeting.ParticipantsEmails);
+
+            foreach(var email in participantEmails)
+            {
+                var userParticipant = await _userService.GetUserByEmail(email);
+                if (userParticipant == null)
+                    continue;
+                await _participantService.CreateParticipantAsync(new ParticipantCreateDTO
+                {
+                    Role = ParticipantRole.Participant,
+                    UserEmail = email,
+                    MeetingId = meeting.Id
+                });
+            }
 
             return new MeetingLinkDTO { Id = meeting.Id, Password = pwd };
         }

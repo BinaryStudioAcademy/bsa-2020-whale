@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Whale.DAL;
 
 namespace Whale.DAL.Migrations
 {
     [DbContext(typeof(WhaleDbContext))]
-    partial class WhaleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200831113312_UnreadGroupMessages")]
+    partial class UnreadGroupMessages
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -345,26 +347,6 @@ namespace Whale.DAL.Migrations
                     b.HasIndex("MeetingId");
 
                     b.ToTable("Records");
-                });
-
-            modelBuilder.Entity("Whale.DAL.Models.ScheduledMeeting", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("MeetingId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ParticipantsEmails")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ScheduledMeetings");
                 });
 
             modelBuilder.Entity("Whale.DAL.Models.Setting", b =>

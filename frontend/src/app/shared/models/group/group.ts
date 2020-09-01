@@ -5,4 +5,5 @@ export interface Group {
   pinnedMessageId?: string;
   creatorEmail?: string;
   photoUrl?: string;
+  unreadMessageCount?: number;
 }

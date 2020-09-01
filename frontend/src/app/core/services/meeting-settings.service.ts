@@ -9,6 +9,7 @@ export class MeetingSettingsService {
     isWhiteboard: false,
     isPoll: false,
     isVideoDisabled: false,
+    isAllowedToChooseRoom: false,
     isAudioDisabled: false,
   } as MeetingSettings;
 
@@ -47,6 +48,11 @@ export class MeetingSettingsService {
 
   public changeIsVideoDisabled(isVideoDisabled: boolean): void {
     this.settings.isVideoDisabled = isVideoDisabled;
+    this.saveMeetingSettingsInLocalStorage();
+  }
+
+  public changeisAllowedToChooseRoom(isAllowedToChooseRoom: boolean): void {
+    this._settings.isAllowedToChooseRoom = isAllowedToChooseRoom;
     this.saveMeetingSettingsInLocalStorage();
   }
 }

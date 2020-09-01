@@ -13,6 +13,11 @@ import { MeetingCreate } from '@shared/models';
 import { Subject } from 'rxjs';
 import { User } from '@shared/models/user';
 import { MeetingSettingsService } from 'app/core/services';
+import {
+  MeetingInviteComponent,
+  ScheduleMeetingInviteModalData,
+} from '@shared/components/meeting-invite/meeting-invite.component';
+import { SimpleModalService } from 'ngx-simple-modal';
 
 @Component({
   selector: 'app-schedule-meeting-page',
@@ -47,6 +52,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
     private router: Router,
     private meetingService: MeetingService,
     private upstateService: UpstateService,
+    private simpleModalService: SimpleModalService,
     meetingSettingsService: MeetingSettingsService
   ) {
     const today: Date = new Date();
@@ -88,25 +94,34 @@ export class ScheduleMeetingPageComponent implements OnInit {
     date.setHours(parseInt(time[1], 10) + (time[3] ? 12 : 0));
     date.setMinutes(parseInt(time[2], 10) || 0);
 
-    this.meetingService
-      .createScheduledMeeting({
-        settings: '',
-        startTime: date,
-        anonymousCount: 0,
+    this.simpleModalService
+      .addModal(MeetingInviteComponent, {
+        participantEmails: [this.loggedInUser.email],
         isScheduled: true,
-        isRecurrent: false,
-        isAudioAllowed: this.form.controls.isDisableAudio.value,
-        isVideoAllowed: this.form.controls.isDisableVideo.value,
-        creatorEmail: this.loggedInUser.email,
-      } as MeetingCreate)
+      } as ScheduleMeetingInviteModalData)
       .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(
-        (resp) => {
-          this.toastr.success('Meeting scheduled!');
-          this.router.navigate(['/home']);
-        },
-        (error) => console.log(error.message)
-      );
+      .subscribe((participantEmails) => {
+        this.meetingService
+          .createScheduledMeeting({
+            settings: '',
+            startTime: date,
+            anonymousCount: 0,
+            isScheduled: true,
+            isRecurrent: false,
+            isAudioAllowed: this.form.controls.isDisableAudio.value,
+            isVideoAllowed: this.form.controls.isDisableVideo.value,
+            creatorEmail: this.loggedInUser.email,
+            participantsEmails: participantEmails as string[],
+          } as MeetingCreate)
+          .pipe(takeUntil(this.unsubscribe$))
+          .subscribe(
+            (resp) => {
+              this.toastr.success('Meeting scheduled!');
+              this.router.navigate(['/home']);
+            },
+            (error) => console.log(error.message)
+          );
+      });
   }
 
   getUser(): void {

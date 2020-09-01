@@ -113,6 +113,40 @@ export class HomePageComponent implements OnInit, OnDestroy {
                         );
                         contact.unreadMessageCount += 1;
                       });
+
+                    this.groupService
+                      .getAllGroups()
+                      .pipe(tap(() => (this.isGroupsLoading = false)))
+                      .subscribe(
+                        (data: Group[]) => {
+                          console.log(data);
+                          this.groups = data;
+                          this.groupsVisibility =
+                            this.groups.length === 0 ? false : true;
+                          data.forEach((group) => {
+                            this.messageService.joinGroup(group.id);
+                          });
+                          this.isChatHubLoading = false;
+                          this.messageService.receivedGroupMessage$
+                            .pipe(takeUntil(this.unsubscribe$))
+                            .subscribe((newMessage) => {
+                              if (
+                                this.loggedInUser.id === newMessage.authorId
+                              ) {
+                                return;
+                              }
+                              const group = this.groups.find(
+                                (messageGroup) =>
+                                  messageGroup.id === newMessage.group.id
+                              );
+                              group.unreadMessageCount += 1;
+                            });
+                        },
+                        (error) => {
+                          console.log(error);
+                          this.toastr.error(error.Message);
+                        }
+                      );
                   },
                   (error) => {
                     console.error(error);
@@ -236,19 +270,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
                 this.toastr.error(error.Message);
               }
             );
-          this.groupService
-            .getAllGroups()
-            .pipe(tap(() => (this.isGroupsLoading = false)))
-            .subscribe(
-              (data: Group[]) => {
-                this.groups = data;
-                this.groupsVisibility = this.groups.length === 0 ? false : true;
-              },
-              (error) => {
-                console.log(error);
-                this.toastr.error(error.Message);
-              }
-            );
         },
         (error) => {
           console.log(error);
@@ -356,6 +377,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
         isWhiteboard: this.meetingSettingsService.getSettings().isWhiteboard,
         isPoll: this.meetingSettingsService.getSettings().isPoll,
         creatorEmail: this.ownerEmail,
+        participantsEmails: [],
       } as MeetingCreate)
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(

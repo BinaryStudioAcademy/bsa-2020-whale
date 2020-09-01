@@ -19,7 +19,7 @@
     }}</a>
 
     <div *ngIf="isNotificationsVisible" class="dropdown-menu notify">
-      <div style="overflow-y: scroll;">
+      <div class="scroll-wrapper">
         <app-notification
           *ngFor="let notification of notificationsList"
           [notification]="notification"

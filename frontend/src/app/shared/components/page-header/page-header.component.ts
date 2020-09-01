@@ -133,7 +133,7 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
             (n) => n.id !== notificationId
           );
           if (!this.notificationsList.length) {
-            this.showNotificationsMenu();
+            this.isNotificationsVisible = false;
           }
         },
         (err) => {
@@ -158,7 +158,7 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
     this.notificationsList = this.notificationsList.filter((n) => n.id !== id);
     this.notificationService.DeleteNotification(id);
     if (!this.notificationsList.length) {
-      this.showNotificationsMenu();
+      this.isNotificationsVisible = false;
     }
   }
 
