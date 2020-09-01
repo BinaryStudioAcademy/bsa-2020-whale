@@ -28,9 +28,12 @@ namespace Whale.API.Services
             _userService = userService;
         }
 
-        public async Task SendSlackReplyAsync(string text, string channel, string url = null)
+        public async Task SendSlackReplyAsync(string text, string channel, string url = null, string meetingName = null)
         {
             var listBlock = new List<Block>();
+            var innerMeetingName = string.Empty;
+
+            _ = string.IsNullOrEmpty(meetingName) ? innerMeetingName = "Join a Meeting" : innerMeetingName = "Join a " + meetingName;
 
             if (url != null)
             {
@@ -39,7 +42,7 @@ namespace Whale.API.Services
                     type = "actions",
                     elements = new Element[] { new Element() {
                     type = "button",
-                    text = new Text() {type = "plain_text", text = "Join a Meeting"},
+                    text = new Text() {type = "plain_text", text = innerMeetingName},
                     style = "primary",
                     url = url
                     } }
