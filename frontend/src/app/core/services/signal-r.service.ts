@@ -14,22 +14,22 @@ export class SignalRService {
     return this.startConnection(hubConnection).then(() => hubConnection);
   }
 
-  private buildConnection = (
+  private buildConnection(
     apiUrl: string,
     hubName: string
-  ): signalR.HubConnection => {
+  ): signalR.HubConnection {
     return new signalR.HubConnectionBuilder()
       .withUrl(`${apiUrl}/${hubName}`)
       .build();
-  };
+  }
 
-  private startConnection = (hub: signalR.HubConnection): Promise<void> => {
+  private startConnection(hub: signalR.HubConnection): Promise<void> {
     return hub.start().catch((err) => {
-      setTimeout(function (): void {
+      setTimeout(function(): void {
         this.startConnection();
       }, 3000);
     });
-  };
+  }
 
   public registerEvent<T>(
     hub: signalR.HubConnection,
