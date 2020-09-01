@@ -397,6 +397,6 @@ namespace Whale.SignalR.Hubs
         public async Task SendReaction(ReactionDTO reaction)
         {
             await Clients.Group(reaction.MeetingId).SendAsync("OnReaction", reaction);
-        }
+        }   
     }
 }

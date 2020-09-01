@@ -530,6 +530,7 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (setting) => {
+          console.log('meetingSettingsChanged', setting);
           if (
             !this.meeting.isWhiteboard &&
             setting.isWhiteboard &&
@@ -555,6 +556,7 @@ export class MeetingComponent
           this.meeting.isWhiteboard && !this.isHost
             ? (this.whiteboardDisable = '(drawing is disabled by Host)')
             : (this.whiteboardDisable = '');
+          this.meeting.isAllowedToChooseRoom = setting.isAllowedToChooseRoom;
           this.savedStrokes.forEach((strokes) =>
             this.meetingSignalrService.invoke(SignalMethods.OnDrawing, {
               meetingId: this.meeting.id.toString(),
@@ -1103,6 +1105,7 @@ export class MeetingComponent
         isAudioAllowed: true,
         isVideoAllowed: true,
         isWhiteboard: false,
+        isAllowedToChooseRoom: false,
         isPoll: false,
         anonymousCount: 0,
         pollResults: [],
@@ -1140,6 +1143,7 @@ export class MeetingComponent
       .subscribe(
         (resp) => {
           this.meeting = resp.body;
+          console.log('meeting: ', this.meeting);
           this.createEnterModal().then(() => {
             this.currentStreamLoaded.emit();
             this.connectionData.meetingId = this.meeting.id;
@@ -1210,16 +1214,16 @@ export class MeetingComponent
     this.meeting.isAudioAllowed = modalResult.isAllowedAudioOnStart;
     this.meeting.isVideoAllowed = modalResult.isAllowedVideoOnStart;
 
-    if (
-      isCurrentParticipantHost &&
-      (this.meeting.isVideoAllowed !== modalResult.isAllowedVideoOnStart ||
-        this.meeting.isAudioAllowed !== modalResult.isAllowedAudioOnStart)
-    ) {
+    if (isCurrentParticipantHost) {
       this.meetingService
-        .updateMediaOnStart({
+        .updateMeetingSettings({
           meetingId: this.meeting.id,
-          isAudioAllowed: modalResult.isAllowedAudioOnStart,
-          isVideoAllowed: modalResult.isAllowedVideoOnStart,
+          applicantEmail: this.authService.currentUser.email,
+          isWhiteboard: this.meeting.isWhiteboard,
+          isAudioDisabled: !this.meeting.isAudioAllowed,
+          isVideoDisabled: !this.meeting.isVideoAllowed,
+          isPoll: this.meeting.isPoll,
+          isAllowedToChooseRoom: this.meeting.isAllowedToChooseRoom,
         })
         .pipe(takeUntil(this.unsubscribe$))
         .subscribe(() => {

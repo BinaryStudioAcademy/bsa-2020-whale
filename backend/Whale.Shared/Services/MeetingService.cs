@@ -76,6 +76,7 @@ namespace Whale.Shared.Services
             meetingDTO.IsVideoAllowed = meetingSettings.IsVideoAllowed;
             meetingDTO.IsPoll = meetingSettings.IsPoll;
             meetingDTO.IsWhiteboard = meetingSettings.IsWhiteboard;
+            meetingDTO.IsAllowedToChooseRoom = meetingSettings.IsAllowedToChooseRoom;
 
             return meetingDTO;
         }
@@ -101,6 +102,7 @@ namespace Whale.Shared.Services
                 IsAudioAllowed = meetingDTO.IsAudioAllowed,
                 IsVideoAllowed = meetingDTO.IsVideoAllowed,
                 IsWhiteboard = meetingDTO.IsWhiteboard,
+                IsAllowedToChooseRoom = meetingDTO.IsAllowedToChooseRoom,
                 IsPoll = meetingDTO.IsPoll
             });
 
