@@ -50,7 +50,7 @@ namespace Whale.API.Controllers
             }
             catch(NotFoundException e)
             {
-                return BadRequest($"{e.Message}. Please sign up using the link:'{ExternalScheduledMeetingService.BaseUrl}'");
+                return Unauthorized($"{e.Message} Please sign up using the link:'{ExternalScheduledMeetingService.BaseUrl}'");
             }
         }
 
