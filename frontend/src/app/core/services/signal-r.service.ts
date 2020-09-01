@@ -13,6 +13,7 @@ export class SignalRService {
     const hubConnection = this.buildConnection(apiUrl, hubName);
     return this.startConnection(hubConnection).then(() => hubConnection);
   }
+
   private buildConnection = (
     apiUrl: string,
     hubName: string
@@ -21,6 +22,7 @@ export class SignalRService {
       .withUrl(`${apiUrl}/${hubName}`)
       .build();
   };
+
   private startConnection = (hub: signalR.HubConnection): Promise<void> => {
     return hub.start().catch((err) => {
       console.log(`Error while starting connection:${err}`);
@@ -29,6 +31,7 @@ export class SignalRService {
       }, 3000);
     });
   };
+
   public registerEvent<T>(
     hub: signalR.HubConnection,
     eventName: string

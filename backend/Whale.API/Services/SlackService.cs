@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Whale.API.Models.Slack;
 using Whale.Shared.Services;
 using SlackUser = SlackAPI.User;
 
@@ -27,9 +28,12 @@ namespace Whale.API.Services
             _userService = userService;
         }
 
-        public async Task SendSlackReplyAsync(string text, string channel, string url = null)
+        public async Task SendSlackReplyAsync(string text, string channel, string url = null, string meetingName = null)
         {
             var listBlock = new List<Block>();
+            var innerMeetingName = string.Empty;
+
+            _ = string.IsNullOrEmpty(meetingName) ? innerMeetingName = "Join a Meeting" : innerMeetingName = "Join a " + meetingName;
 
             if (url != null)
             {
@@ -38,7 +42,7 @@ namespace Whale.API.Services
                     type = "actions",
                     elements = new Element[] { new Element() {
                     type = "button",
-                    text = new Text() {type = "plain_text", text = "Join a Meeting"},
+                    text = new Text() {type = "plain_text", text = innerMeetingName},
                     style = "primary",
                     url = url
                     } }
@@ -94,6 +98,17 @@ namespace Whale.API.Services
         {
             var users = await _userService.GetAllUsers();
             return users.Where(x => x.Email.Equals(userEmail, StringComparison.InvariantCultureIgnoreCase)).Count() > 0;
+        }
+
+        public ExternalResponse GetExternalMessage(string text, string url)
+        {
+            var response = new ExternalResponse
+            {
+                Text = text,
+                Url = url
+            };
+
+            return response;
         }
     }
 }

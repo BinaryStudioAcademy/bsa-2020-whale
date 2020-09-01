@@ -1,3 +1,4 @@
+<spiner *ngIf="isMeetingLoading" size="'massive'"></spiner>
 <div *ngIf="isWaitingForRecord" class="waiting-for-record-modal">
   <p>Waiting record...</p>
 </div>
@@ -245,19 +246,48 @@
                 ></i>
               </div>
             </div>
-            <span
+            <i
+              id="meeting-options-recording"
               *ngIf="!isScreenRecording"
-              data-tooltip="Start Recording"
-              data-position="top left"
+              (mouseover)="isShowRecordingOptins = true"
+              (mouseleave)="isShowRecordingOptins = false"
+              (click)="startRecording(isHighlightRecording)"
+              class="big circle icon"
             >
-              <i
-                id="meeting-options-recording"
-                (click)="startRecording()"
-                class="big circle icon"
-              ></i>
-            </span>
+              <div class="hover-helper" *ngIf="isShowRecordingOptins"></div>
+              <div class="record-container" *ngIf="isShowRecordingOptins">
+                <div class="ui vertical labeled icon buttons">
+                  <button
+                    class="ui button left-align"
+                    (click)="startRecording(false)"
+                  >
+                    <i
+                      [className]="
+                        isHighlightRecording
+                          ? 'caret right icon medium-icon'
+                          : 'caret square right icon medium-icon'
+                      "
+                    ></i>
+                    Start Recording
+                  </button>
+                  <button
+                    class="ui button left-align"
+                    (click)="startRecording(true)"
+                  >
+                    <i
+                      [className]="
+                        isHighlightRecording
+                          ? 'caret square right icon medium-icon'
+                          : 'caret right icon medium-icon'
+                      "
+                    ></i>
+                    Highlight
+                  </button>
+                </div>
+              </div>
+            </i>
             <span
-              *ngIf="isScreenRecording"
+              *ngIf="isScreenRecording && !isHighlightRecording"
               data-tooltip="Stop Recording"
               data-position="top left"
             >
@@ -265,6 +295,16 @@
                 id="meeting-options-recording"
                 (click)="stopRecording()"
                 class="big stop circle icon"
+              ></i>
+            </span>
+            <span
+              *ngIf="isScreenRecording && isHighlightRecording"
+              data-tooltip="Recording will stop automatically"
+              data-position="top left"
+            >
+              <i
+                id="meeting-options-recording"
+                class="big stop circle icon waiting-icon"
               ></i>
             </span>
             <span data-tooltip="Share Screen" data-position="top left">
@@ -328,7 +368,7 @@
             <span
               data-tooltip="Divide participants into rooms"
               data-position="top right"
-              *ngIf="isHost"
+              *ngIf="isHost || meeting?.isAllowedToChooseRoom"
             >
               <i
                 (click)="openRoomsModal()"
@@ -376,8 +416,14 @@
         </div>
         <div class="whiteboard-buttons">
           <i
+            *ngIf="!isWhiteboardFullScreen"
             (click)="whiteboardFullscreen(); $event.stopPropagation()"
-            class="clone icon"
+            class="expand icon"
+          ></i>
+          <i
+            *ngIf="isWhiteboardFullScreen"
+            (click)="whiteboardFullscreen(); $event.stopPropagation()"
+            class="compress icon"
           ></i>
           <i (click)="showCanvas()" class="times icon"></i>
         </div>
@@ -420,6 +466,7 @@
           (switchMediaPermissionAsHostEvent)="
             switchParticipantMediaAsHost($event)
           "
+          (pinVideoEvent)="pinCard($event)"
           [data]="data"
           [meetingHolder]="currentParticipant"
         >
@@ -447,15 +494,15 @@
 
       <div class="settings" *ngIf="isVideoSettings && !isCameraMuted">
         <app-video-settings
-          (onClick)="changeStateVideo($event)"
+          (clickEmited)="changeStateVideo($event)"
         ></app-video-settings>
       </div>
       <div class="settings" *ngIf="isAudioSettings && !isMicrophoneMuted">
         <app-audio-settings
-          (onClick)="changeInputDevice($event)"
+          (clickEmited)="changeInputDevice($event)"
         ></app-audio-settings>
         <app-output-settings
-          (onClick)="changeOutputDevice($event)"
+          (clickEmited)="changeOutputDevice($event)"
         ></app-output-settings>
       </div>
     </div>

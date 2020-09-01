@@ -11,7 +11,7 @@ export class VideoSettingsComponent implements OnInit {
   public browserMediaDevice = new BrowserMediaDevice();
   public videoDevices: MediaDeviceInfo[];
   @Input() videoDeviceId: string;
-  @Output() onClick = new EventEmitter();
+  @Output() clickEmited = new EventEmitter();
   constructor(private mediaService: MediaSettingsService) {}
 
   ngOnInit(): void {
@@ -20,6 +20,6 @@ export class VideoSettingsComponent implements OnInit {
       .then((res) => (this.videoDevices = res));
   }
   isActive(event: MediaDeviceInfo): boolean {
-    return this.mediaService.settings.VideoDeviceId === event.deviceId;
+    return this.mediaService.getSettings().VideoDeviceId === event.deviceId;
   }
 }

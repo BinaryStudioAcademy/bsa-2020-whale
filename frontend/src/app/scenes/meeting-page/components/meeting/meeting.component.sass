@@ -266,6 +266,17 @@ div div.participant:hover
     width: 350px
     z-index: 0
 
+.record-container
+    position: absolute
+    bottom: 100%
+    z-index: 0
+
+.hover-helper
+    position: absolute
+    width: 1.75em
+    height: 3em
+    bottom: 1em
+
 .overflow-scroll
     overflow-y: scroll
 
@@ -445,7 +456,7 @@ div:moz-full-screen
         border: 1px solid #da0909
     100%
         -border: 1px solid rgba(34,36,38,.15)
-        
+
 
 // media settings
 .settings
@@ -511,3 +522,16 @@ div:moz-full-screen
         cursor: grabbing
         opacity: 1
 
+.left-align
+    text-align: left
+
+i.icon.waiting-icon:hover
+    opacity: 0.8
+    cursor: progress
+
+.medium-icon
+    font-size: 1.5em
+    width: 2em !important
+
+.ui.meeting-setting-container.overflow-scroll
+  overflow-y: hidden

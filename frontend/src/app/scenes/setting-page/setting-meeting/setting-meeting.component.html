@@ -3,13 +3,14 @@
     <div class="inline field">
       <div class="ui checkbox">
         <input
+          #whiteboard
           type="checkbox"
           tabindex="0"
           id="whiteboard"
           (change)="changeWhiteboard($event)"
         />
         <label for="whiteboard" class="default-cursor"
-          >Disable whiteboard to all participants during the meeting time.
+          >Disable whiteboard to all participants
         </label>
       </div>
     </div>
@@ -18,15 +19,15 @@
     <div class="inline field">
       <div class="ui checkbox">
         <input
+          #poll
           type="checkbox"
           tabindex="0"
           id="poll"
           (change)="changePoll($event)"
         />
         <label for="poll" class="default-cursor"
-          >Disable poll ability to all participants during the meeting
-          time.</label
-        >
+          >Disable poll ability to all participants
+        </label>
       </div>
     </div>
   </div>
@@ -58,6 +59,22 @@
         />
         <label for="video" class="default-cursor"
           >Disable video of others
+        </label>
+      </div>
+    </div>
+  </div>
+  <div class="field">
+    <div class="inline field">
+      <div class="ui checkbox">
+        <input
+          #allowToChooseRoom
+          type="checkbox"
+          tabindex="0"
+          id="allow-to-choose-room"
+          (change)="switchIsAllowedToChooseRoom($event)"
+        />
+        <label for="allow-to-choose-room" class="default-cursor"
+          >Allow participants to choose room
         </label>
       </div>
     </div>

@@ -15,6 +15,7 @@ namespace Whale.DAL
         public DbSet<Achivement> Achivements { get; set; }
         public DbSet<Contact> Contacts { get; set; }
         public DbSet<UnreadMessageId> UnreadMessageIds { get; set; }
+        public DbSet<UnreadGroupMessage> UnreadGroupMessages { get; set; }
         public DbSet<DirectMessage> DirectMessages { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<GroupMessage> GroupMessages { get; set; }

@@ -29,7 +29,7 @@ import { MediaSettingsService } from 'app/core/services';
 export class ParticipantCardComponent implements OnInit, OnDestroy {
   @Input() data: MediaData;
   @Input() meetingHolder: Participant;
-  @Output() pinVideEvent = new EventEmitter<string>();
+  @Output() pinVideoEvent = new EventEmitter<string>();
   @Output() hideViewEvent = new EventEmitter<string>();
   @Output() stopVideoEvent = new EventEmitter<string>();
   @Output() toggleCameraEvent = new EventEmitter<string>();
@@ -64,7 +64,7 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
 
     this.video.srcObject = this.data.stream;
     if (
-      this.mediaSettingsService.settings.IsMirrorVideo &&
+      this.mediaSettingsService.getSettings().IsMirrorVideo &&
       this.data.isCurrentUser
     ) {
       document.querySelector('video').style.transform = 'scale(-1,1)';
@@ -117,7 +117,7 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
   }
 
   public pinVideo(): void {
-    this.pinVideEvent.emit(this.data.id);
+    this.pinVideoEvent.emit(this.data.id);
   }
 
   public hideCurrentCard(): void {

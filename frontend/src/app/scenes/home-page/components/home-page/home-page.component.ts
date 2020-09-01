@@ -113,6 +113,40 @@ export class HomePageComponent implements OnInit, OnDestroy {
                         );
                         contact.unreadMessageCount += 1;
                       });
+
+                    this.groupService
+                      .getAllGroups()
+                      .pipe(tap(() => (this.isGroupsLoading = false)))
+                      .subscribe(
+                        (groups: Group[]) => {
+                          console.log(groups);
+                          this.groups = groups;
+                          this.groupsVisibility =
+                            this.groups.length === 0 ? false : true;
+                          groups.forEach((groupElemnt) => {
+                            this.messageService.joinGroup(groupElemnt.id);
+                          });
+                          this.isChatHubLoading = false;
+                          this.messageService.receivedGroupMessage$
+                            .pipe(takeUntil(this.unsubscribe$))
+                            .subscribe((newMessage) => {
+                              if (
+                                this.loggedInUser.id === newMessage.authorId
+                              ) {
+                                return;
+                              }
+                              const groupOfMessage = this.groups.find(
+                                (messageGroup) =>
+                                  messageGroup.id === newMessage.group.id
+                              );
+                              groupOfMessage.unreadMessageCount += 1;
+                            });
+                        },
+                        (error) => {
+                          console.log(error);
+                          this.toastr.error(error.Message);
+                        }
+                      );
                   },
                   (error) => {
                     console.error(error);
@@ -236,19 +270,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
                 this.toastr.error(error.Message);
               }
             );
-          this.groupService
-            .getAllGroups()
-            .pipe(tap(() => (this.isGroupsLoading = false)))
-            .subscribe(
-              (data: Group[]) => {
-                this.groups = data;
-                this.groupsVisibility = this.groups.length === 0 ? false : true;
-              },
-              (error) => {
-                console.log(error);
-                this.toastr.error(error.Message);
-              }
-            );
         },
         (error) => {
           console.log(error);
@@ -349,11 +370,14 @@ export class HomePageComponent implements OnInit, OnDestroy {
         anonymousCount: 0,
         isScheduled: false,
         isRecurrent: false,
-        isAudioAllowed: !this.meetingSettingsService.settings.isAudioDisabled,
-        isVideoAllowed: !this.meetingSettingsService.settings.isVideoDisabled,
-        isWhiteboard: this.meetingSettingsService.settings.isWhiteboard,
-        isPoll: this.meetingSettingsService.settings.isPoll,
+        isAudioAllowed: !this.meetingSettingsService.getSettings()
+          .isAudioDisabled,
+        isVideoAllowed: !this.meetingSettingsService.getSettings()
+          .isVideoDisabled,
+        isWhiteboard: this.meetingSettingsService.getSettings().isWhiteboard,
+        isPoll: this.meetingSettingsService.getSettings().isPoll,
         creatorEmail: this.ownerEmail,
+        participantsEmails: [],
       } as MeetingCreate)
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
@@ -521,12 +545,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
   public onOpenChat(contactId: string): void {
     const contact = this.contacts.find((c) => (c.id = contactId));
     this.onContactClick(contact);
-  }
-
-  public onMessageRead(event: string): void {
-    this.pageHeader.notificationsList = this.pageHeader.notificationsList.filter(
-      (n) => !n.options.includes(event)
-    );
   }
 }
 export interface UserModel {

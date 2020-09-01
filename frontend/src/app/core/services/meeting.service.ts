@@ -13,7 +13,7 @@ import { UpdateSettings } from '@shared/models/meeting/update-settings';
   providedIn: 'root',
 })
 export class MeetingService {
-  public routePrefix = `${environment.meetingApiUrl}/api/meeting`;
+  public routePrefix = `${environment.apiUrl}/api/meeting`;
 
   constructor(private httpService: HttpService) {}
 
@@ -41,14 +41,14 @@ export class MeetingService {
     );
   }
 
-  public updateMediaOnStart(
-    mediaOnStart: MediaOnStart
-  ): Observable<HttpResponse<void>> {
-    return this.httpService.putFullRequest(
-      `${this.routePrefix}/updateMedia`,
-      mediaOnStart
-    );
-  }
+  // public updateMediaOnStart(
+  //   mediaOnStart: MediaOnStart
+  // ): Observable<HttpResponse<void>> {
+  //   return this.httpService.putFullRequest(
+  //     `${this.routePrefix}/updateMedia`,
+  //     mediaOnStart
+  //   );
+  // }
 
   public updateMeetingSettings(
     updateSettings: UpdateSettings

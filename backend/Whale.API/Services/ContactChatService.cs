@@ -118,7 +118,7 @@ namespace Whale.API.Services
             });
             await _context.SaveChangesAsync();
          
-            await _notificationsService.AddUnreadMessageNotification(message, receiver.Email, entry.Entity);
+            await _notificationsService.AddUpdateUnreadMessageNotification(message, receiver.Email, entry.Entity);
         }
 
         public async Task MarkMessageAsRead(UnreadMessageIdDTO unreadMessageDto, string userEmail)
@@ -133,7 +133,7 @@ namespace Whale.API.Services
             _context.UnreadMessageIds.Remove(unreadMessage);
             await _context.SaveChangesAsync();
 
-            await _notificationsService.DeleteUnreadMessageNotification(unreadMessage.ReceiverId, unreadMessage.Id);
+            await _notificationsService.DeleteUpdateUnreadMessageNotification(unreadMessage.ReceiverId, unreadMessage.Id);
         }
 
         private async Task CheckUserInContact(Guid contactId, string userEmail)

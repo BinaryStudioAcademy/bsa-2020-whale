@@ -1,7 +1,7 @@
 import { UnreadMessageId } from '../message/unread-message-id';
 
 export interface UnreadMessageOptions {
-  unreadMessageId: UnreadMessageId;
+  unreadMessageIds: UnreadMessageId[];
   contactId: string;
   senderName: string;
 }
