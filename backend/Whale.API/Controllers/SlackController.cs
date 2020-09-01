@@ -71,7 +71,7 @@ namespace Whale.API.Controllers.Slack
             {
                 var result = _slackService.GetExternalMessage("Hello, unfortunately, we could not identify your credentials in the Whale application." +
                                                               "Please sign up using the link below:", _baseURL);
-                return Ok(result);
+                return Unauthorized(result);
             }
 
             var meetingDTO = new MeetingCreateDTO() { CreatorEmail = data.email, IsScheduled = false };

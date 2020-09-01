@@ -5,15 +5,12 @@ import {
   Input,
   Output,
   OnDestroy,
-  AfterContentInit,
   OnChanges,
   SimpleChanges,
   ViewChildren,
   AfterViewInit,
-  ViewChild,
   QueryList,
   ElementRef,
-  AfterViewChecked,
 } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { DirectMessage } from '@shared/models/message/direct-message';
@@ -23,14 +20,8 @@ import { User } from '@shared/models/user/user';
 import { Contact } from '@shared/models/contact/contact';
 import { SignalRService } from 'app/core/services/signal-r.service';
 import { HttpService } from 'app/core/services/http.service';
-import { environment } from '@env';
-import { Injectable } from '@angular/core';
-import { HubConnection } from '@aspnet/signalr';
-import { Subject, from, Observable, ReplaySubject } from 'rxjs';
-import { tap, takeUntil, take, first } from 'rxjs/operators';
-import { Message } from '@angular/compiler/src/i18n/i18n_ast';
-import { Console } from 'console';
-import { stringify } from 'querystring';
+import { Subject, ReplaySubject } from 'rxjs';
+import { takeUntil, take, first } from 'rxjs/operators';
 import { HttpResponse, HttpParams } from '@angular/common/http';
 import { SimpleModalService } from 'ngx-simple-modal';
 import { CallModalComponent } from '../call-modal/call-modal.component';
@@ -111,7 +102,6 @@ export class ContactsChatComponent
           });
         },
         (err) => {
-          console.log(err.message);
           this.toastr.error(err.Message);
         }
       );
@@ -141,16 +131,12 @@ export class ContactsChatComponent
         new HttpParams().set('userId', this.loggedInUser.id)
       )
       .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(
-        (data: ReadAndUnreadMessages) => {
-          this.messages = data.readMessages.concat(data.unreadMessages);
-          this.unreadMessages = data.unreadMessages;
-          this.receivedMessages.next();
-          console.log('messages new', data);
-          this.isMessagesLoading = false;
-        },
-        (error) => console.log(error)
-      );
+      .subscribe((data: ReadAndUnreadMessages) => {
+        this.messages = data.readMessages.concat(data.unreadMessages);
+        this.unreadMessages = data.unreadMessages;
+        this.receivedMessages.next();
+        this.isMessagesLoading = false;
+      });
   }
 
   ngOnDestroy(): void {
@@ -205,7 +191,6 @@ export class ContactsChatComponent
   }
 
   public call(): void {
-    console.log(this.contactSelected);
     this.simpleModalService.addModal(CallModalComponent, this.contactSelected);
   }
 
@@ -280,11 +265,8 @@ export class ContactsChatComponent
 
     this.httpService
       .postRequest('/api/ContactChat/markRead', unreadMessageId)
-      .subscribe(
-        () => {
-          this.messageRead.emit(messageId);
-        },
-        (error) => console.error(error)
-      );
+      .subscribe(() => {
+        this.messageRead.emit(messageId);
+      });
   }
 }

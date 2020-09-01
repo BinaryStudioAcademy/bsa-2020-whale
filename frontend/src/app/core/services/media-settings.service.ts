@@ -55,7 +55,6 @@ export class MediaSettingsService {
           if (error.name === 'SecurityError') {
             errorMessage = `You need to use HTTPS for selecting audio output device: ${error}`;
           }
-          console.error(errorMessage);
         });
     }
   }

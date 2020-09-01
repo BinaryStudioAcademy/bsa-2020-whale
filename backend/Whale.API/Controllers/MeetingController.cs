@@ -3,7 +3,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Whale.API.Models.ScheduledMeeting;
 using Whale.API.Services;
+using Whale.Shared.Exceptions;
 using Whale.Shared.Models.Meeting;
 
 namespace Whale.API.Controllers
@@ -13,10 +15,12 @@ namespace Whale.API.Controllers
     public class MeetingController : ControllerBase
     {
         private readonly HttpService _httpService;
+        private readonly ExternalScheduledMeetingService _externalScheduledMeetingService;
 
-        public MeetingController(HttpService httpService)
+        public MeetingController(HttpService httpService, ExternalScheduledMeetingService externalScheduledMeetingService)
         {
             _httpService = httpService;
+            _externalScheduledMeetingService = externalScheduledMeetingService;
         }
 
         [HttpPost]
@@ -28,12 +32,26 @@ namespace Whale.API.Controllers
         }
 
         [HttpPost("scheduled")]
-        public async Task<ActionResult> CreateMeetingScheduled(MeetingCreateDTO meetingDto)
+        public async Task<ActionResult<string>> CreateMeetingScheduled(MeetingCreateDTO meetingDto)
         {
             var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
             meetingDto.CreatorEmail = ownerEmail;
-            await _httpService.PostAsync("api/meeting/scheduled", meetingDto);
-            return Ok();
+            return Ok(await _httpService.PostStringAsync("api/meeting/scheduled", meetingDto));
+        }
+
+        [Route("external/schedule")]
+        [HttpPost]
+        [Produces("application/json")]
+        public async Task<ActionResult<string>> ExternalScheduleMeeting(ScheduledMeetingExternal data)
+        {
+            try
+            {
+                return Ok(await _externalScheduledMeetingService.StartScheduledMeeting(data));
+            }
+            catch(NotFoundException e)
+            {
+                return Unauthorized($"{e.Message} Please sign up using the link:'{ExternalScheduledMeetingService.BaseUrl}'");
+            }
         }
 
         [HttpGet]

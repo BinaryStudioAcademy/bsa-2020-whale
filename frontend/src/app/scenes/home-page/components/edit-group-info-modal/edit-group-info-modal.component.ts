@@ -55,7 +55,6 @@ export class EditGroupInfoModalComponent
           this.groupMembers = users;
         },
         (err) => {
-          console.log(err.message);
           this.toastr.error(err.Message);
         }
       );
@@ -93,7 +92,6 @@ export class EditGroupInfoModalComponent
     const blob = this.dataURLtoBlob(this.croppedImage);
     this.blobService.postBlobUploadImage(blob).subscribe((resp) => {
       this.photoUrl = resp;
-      console.log(`image: ${resp}`);
     });
 
     this.isImageCropped = false;
@@ -180,6 +178,5 @@ export class EditGroupInfoModalComponent
 
   changeGroupAdmin(userEmail: string): void {
     this.creatorEmail = userEmail;
-    console.log(this.creatorEmail);
   }
 }
