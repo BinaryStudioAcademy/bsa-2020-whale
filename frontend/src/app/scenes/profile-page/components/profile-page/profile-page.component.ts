@@ -102,7 +102,6 @@ export class ProfilePageComponent implements OnInit {
   public SendImage(): void {
     const blob = this.dataURLtoBlob(this.croppedImage);
     this.blobService.postBlobUploadImage(blob).subscribe((resp) => {
-      console.log(`image: ${resp}`);
       this.avatarURL = resp;
       if (this.avatarURL !== '') {
         this.loggedInUser.avatarUrl = this.avatarURL;
@@ -116,8 +115,6 @@ export class ProfilePageComponent implements OnInit {
             this.updatedUserDB
           )
           .subscribe((response) => {
-            console.log(`image: ${response.body}`);
-
             this.closeModal();
           });
       }
@@ -244,7 +241,6 @@ export class ProfilePageComponent implements OnInit {
               this.loggedInUser
             )
             .subscribe((response) => {
-              console.log(`image: ${response.body}`);
               this.header.getUser();
             });
         }

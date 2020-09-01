@@ -114,13 +114,10 @@ export class ScheduleMeetingPageComponent implements OnInit {
             participantsEmails: participantEmails as string[],
           } as MeetingCreate)
           .pipe(takeUntil(this.unsubscribe$))
-          .subscribe(
-            (resp) => {
-              this.toastr.success('Meeting scheduled!');
-              this.router.navigate(['/home']);
-            },
-            (error) => console.log(error.message)
-          );
+          .subscribe((resp) => {
+            this.toastr.success('Meeting scheduled!');
+            this.router.navigate(['/home']);
+          });
       });
   }
 

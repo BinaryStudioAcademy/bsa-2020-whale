@@ -148,7 +148,6 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
       const participantInitials = this.elRef.nativeElement.querySelector(
         '.participant-initials'
       );
-      console.log('dd', this.dynamicData);
       participantInitials.textContent = `${this.dynamicData.userFirstName.slice(
         0,
         1

@@ -530,7 +530,6 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (setting) => {
-          console.log('meetingSettingsChanged', setting);
           if (
             !this.meeting.isWhiteboard &&
             setting.isWhiteboard &&
@@ -881,16 +880,11 @@ export class MeetingComponent
           this.blobService.recordReady$
             .pipe(takeUntil(this.unsubscribe$))
             .pipe(first())
-            .subscribe(
-              (resp) => {
-                this.simpleModalService.addModal(RecordModalComponent, {
-                  link: resp,
-                });
-              },
-              (err) => {
-                console.error(err.message);
-              }
-            );
+            .subscribe((resp) => {
+              this.simpleModalService.addModal(RecordModalComponent, {
+                link: resp,
+              });
+            });
           if (isHighlight) {
             this.highlightRecording();
           }
@@ -1143,7 +1137,6 @@ export class MeetingComponent
       .subscribe(
         (resp) => {
           this.meeting = resp.body;
-          console.log('meeting: ', this.meeting);
           this.createEnterModal().then(() => {
             this.currentStreamLoaded.emit();
             this.connectionData.meetingId = this.meeting.id;
@@ -1158,7 +1151,6 @@ export class MeetingComponent
           });
         },
         (error) => {
-          console.error(error.message);
           this.leaveUnConnected();
         }
       );
@@ -1678,7 +1670,6 @@ export class MeetingComponent
         this.isAddParticipantDisabled = false;
       },
       (error) => {
-        console.error(error);
         this.isAddParticipantDisabled = false;
       }
     );

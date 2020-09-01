@@ -31,30 +31,24 @@ export class SettingAudioComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.browserMediaDevice
-      .getAudioInputList()
-      .then((res) => {
-        this.inputDevices = res;
-        if (!this.mediaSettingsService.getSettings().InputDeviceId) {
-          this.mediaSettingsService.changeInputDevice(
-            this.inputDevices[0]?.deviceId
-          );
-        }
-        this.inputDeviceId = this.mediaSettingsService.getSettings().InputDeviceId;
-      })
-      .catch((error) => console.log(error));
-    this.browserMediaDevice
-      .getAudioOutputList()
-      .then((res) => {
-        this.outputDevices = res;
-        if (!this.mediaSettingsService.getSettings().OutputDeviceId) {
-          this.mediaSettingsService.changeOutputDevice(
-            this.outputDevices[0]?.deviceId
-          );
-        }
-        this.outputDeviceId = this.mediaSettingsService.getSettings().OutputDeviceId;
-      })
-      .catch((error) => console.log(error));
+    this.browserMediaDevice.getAudioInputList().then((res) => {
+      this.inputDevices = res;
+      if (!this.mediaSettingsService.getSettings().InputDeviceId) {
+        this.mediaSettingsService.changeInputDevice(
+          this.inputDevices[0]?.deviceId
+        );
+      }
+      this.inputDeviceId = this.mediaSettingsService.getSettings().InputDeviceId;
+    });
+    this.browserMediaDevice.getAudioOutputList().then((res) => {
+      this.outputDevices = res;
+      if (!this.mediaSettingsService.getSettings().OutputDeviceId) {
+        this.mediaSettingsService.changeOutputDevice(
+          this.outputDevices[0]?.deviceId
+        );
+      }
+      this.outputDeviceId = this.mediaSettingsService.getSettings().OutputDeviceId;
+    });
     this.audio = document.getElementById('audio') as HTMLMediaElement;
 
     if (navigator.userAgent.search(/Firefox/) > 0) {
