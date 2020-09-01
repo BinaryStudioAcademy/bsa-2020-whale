@@ -19,12 +19,10 @@ export class QuestionComponent implements OnInit {
   constructor() {}
 
   ngOnInit(): void {
-    console.log(this.question);
     this.textRows = this.splitMessage(this.question.text);
   }
 
   public markAnswering(): void {
-    console.log('markAnswering');
     this.question.questionStatus = QuestionStatus.Answering;
     this.statusChanged.emit(this.question);
   }
