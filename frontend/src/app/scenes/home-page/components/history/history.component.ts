@@ -85,7 +85,6 @@ export class HistoryComponent implements OnInit {
         this.requestSent = false;
       },
       (error) => {
-        console.error(error);
         this.ishistoryLoading = false;
         this.requestSent = false;
       }

@@ -126,15 +126,10 @@ export class PollService {
   }
 
   public savePollResults(meetindId: string): void {
-    this.httpService
-      .getRequest(
-        this.route + '/saveResults',
-        new HttpParams().set('meetingId', meetindId)
-      )
-      .subscribe(
-        () => {},
-        (error) => console.error(error)
-      );
+    this.httpService.getRequest(
+      this.route + '/saveResults',
+      new HttpParams().set('meetingId', meetindId)
+    );
   }
 
   public onPollIconClick(): void {

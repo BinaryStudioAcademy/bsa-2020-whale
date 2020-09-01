@@ -25,7 +25,6 @@ export class SignalRService {
 
   private startConnection = (hub: signalR.HubConnection): Promise<void> => {
     return hub.start().catch((err) => {
-      console.log(`Error while starting connection:${err}`);
       setTimeout(function (): void {
         this.startConnection();
       }, 3000);

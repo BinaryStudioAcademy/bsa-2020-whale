@@ -83,7 +83,6 @@ export class WhaleSignalService {
     from(hubService.registerHub(environment.signalrUrl, 'whale'))
       .pipe(
         tap((hub) => {
-          console.log('whale hub connected');
           this.signalHub = hub;
         })
       )
