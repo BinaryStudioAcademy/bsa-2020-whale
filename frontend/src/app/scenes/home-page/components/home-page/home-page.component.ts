@@ -404,10 +404,16 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   onGroupClick(selectedGroup: Group): void {
+    if (selectedGroup === this.groupSelected) {
+      return;
+    }
     this.falseAllBooleans();
     this.groupChatVisibility = true;
     this.contactSelected = undefined;
     this.groupSelected = selectedGroup;
+    setTimeout(() => {
+      this.groupChatVisibility = true;
+    }, 1);
   }
 
   public closeHistory(): void {
@@ -494,9 +500,13 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.groups[index] = updatedGroup;
   }
 
-  public onOpenChat(contactId: string): void {
-    const contact = this.contacts.find((c) => (c.id = contactId));
+  public onOpenChat(id: string): void {
+    const contact = this.contacts.find((c) => (c.id = id));
     this.onContactClick(contact);
+  }
+  public onOpenGroupChat(id: string): void {
+    const groupa = this.groups.find((g) => g.id === id);
+    this.onGroupClick(groupa);
   }
 }
 export interface UserModel {

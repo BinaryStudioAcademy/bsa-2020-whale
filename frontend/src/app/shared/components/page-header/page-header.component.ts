@@ -22,6 +22,7 @@ import { WhaleSignalService, WhaleSignalMethods } from 'app/core/services';
 })
 export class PageHeaderComponent implements OnInit, OnDestroy {
   @Output() openChatClicked = new EventEmitter<string>();
+  @Output() openGroupChatClicked = new EventEmitter<string>();
 
   public isUserLoadig = true;
   private unsubscribe$ = new Subject<void>();
@@ -149,5 +150,9 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
 
   onOpenChat(contactId: string): void {
     this.openChatClicked.emit(contactId);
+  }
+
+  onOpenGroupChat(groupId: string): void {
+    this.openGroupChatClicked.emit(groupId);
   }
 }
