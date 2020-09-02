@@ -193,7 +193,7 @@ export class MeetingComponent
   private unsubscribe$ = new Subject<void>();
   private userStream: MediaStream;
   //#endregion fields
-
+  public isPlanning = false;
   constructor(
     @Inject(DOCUMENT) private document: any,
     private authService: AuthService,

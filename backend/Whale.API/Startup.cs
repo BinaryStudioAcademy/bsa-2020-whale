@@ -19,6 +19,7 @@ using Whale.Shared.Exceptions;
 using Whale.Shared.Helpers;
 using Whale.Shared.MappingProfiles;
 using Whale.Shared.Services;
+using Whale.DAL.Models;
 
 namespace Whale.API
 {

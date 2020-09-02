@@ -19,7 +19,7 @@ namespace Whale.DAL.Models
         public IEnumerable<Participant> Participants { get; set; }
 
         public IEnumerable<Polls.Poll> PollResults { get; set; }
-
+        public IEnumerable<AgendaPoint> AgendaPoints { get; set; }
         public Meeting() { }
 
         public Meeting(Meeting meeting)
