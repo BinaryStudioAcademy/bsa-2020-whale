@@ -134,11 +134,11 @@
     <div class="actions">
       <button 
         class="ui button"
-        *ngIf="roomService.isUserHost"
-        (click)="close()">Close</button>
+        (click)="close()">Close
+      </button>
       <button
         class="ui primary button"
-        *ngIf="!roomService.isDividedIntoRooms"
+        *ngIf="!roomService.isDividedIntoRooms && roomService.isUserHost"
         (click)="divide()"
       >
         Divide
@@ -152,7 +152,7 @@
       </button>
       <butto
        class="ui primary button"
-       *ngIf="meeting.isAllowedToChooseRoom && !roomService.isUserHost"
+       *ngIf="meeting.isAllowedToChooseRoom && !roomService.isUserHost && roomService.isDividedIntoRooms"
        (click)="joinRandomRoom()"
       >
         Join random

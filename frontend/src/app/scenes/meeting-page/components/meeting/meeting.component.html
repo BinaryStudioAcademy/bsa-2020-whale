@@ -371,7 +371,7 @@
             <span
               data-tooltip="Divide participants into rooms"
               data-position="top right"
-              *ngIf="isHost"
+              *ngIf="isHost || meeting?.isAllowedToChooseRoom"
             >
               <i
                 (click)="openRoomsModal()"

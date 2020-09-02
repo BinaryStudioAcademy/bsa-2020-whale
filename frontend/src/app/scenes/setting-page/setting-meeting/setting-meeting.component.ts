@@ -30,7 +30,6 @@ export class SettingMeetingComponent implements OnInit, AfterViewInit {
   public isPoll: boolean;
   public isAudioDisabled: boolean;
   public isVideoDisabled: boolean;
-  public isAllowedToChooseRoom: boolean;
   private unsubscribe$ = new Subject<void>();
 
   @ViewChild('audio') private checkboxIsAudioDisabled: ElementRef;
@@ -47,11 +46,10 @@ export class SettingMeetingComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
-    this.isWhiteboard = this.meetingSettingsService.getSettings().isWhiteboard;
-    this.isPoll = this.meetingSettingsService.getSettings().isPoll;
-    this.isAllowedToChooseRoom = this.meetingSettingsService.getSettings().isAllowedToChooseRoom;
-    this.isAudioDisabled = !this.meeting.isAudioAllowed;
-    this.isVideoDisabled = !this.meeting.isVideoAllowed;
+    this.isWhiteboard = this.meeting?.isWhiteboard || this.meetingSettingsService.getSettings().isWhiteboard;
+    this.isPoll = this.meeting?.isPoll || this.meetingSettingsService.getSettings().isPoll;
+    this.isAudioDisabled = !this.meeting?.isAudioAllowed || this.meetingSettingsService.getSettings().isAudioDisabled;
+    this.isVideoDisabled = !this.meeting?.isVideoAllowed || this.meetingSettingsService.getSettings().isVideoDisabled;
   }
 
   ngAfterViewInit(): void {
@@ -111,20 +109,6 @@ export class SettingMeetingComponent implements OnInit, AfterViewInit {
     }
 
     this.meetingSettingsService.changeIsVideoDisabled(this.isVideoDisabled);
-  }
-
-  public switchIsAllowedToChooseRoom(event: any): void {
-    this.isAllowedToChooseRoom = event.target.checked;
-
-    if (this.meeting) {
-      this.meeting.isAllowedToChooseRoom = this.isAllowedToChooseRoom;
-      this.meetingSettingsService.switchMeetingSettingAsHost(this.meeting);
-      return;
-    }
-
-    this.meetingSettingsService.changeisAllowedToChooseRoom(
-      this.isAllowedToChooseRoom
-    );
   }
 
   public switchOtherParticipantsMediaAsHost(): void {
