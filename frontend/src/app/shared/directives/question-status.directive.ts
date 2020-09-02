@@ -18,7 +18,7 @@ export class QuestionStatusDirective implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     let iconClass: string;
     switch (this.questionStatus) {
-      case QuestionStatus.Created:
+      case QuestionStatus.Pending:
         iconClass = 'grey pen square';
         break;
 

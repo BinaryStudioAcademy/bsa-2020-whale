@@ -23,7 +23,7 @@ using Quartz;
 using Quartz.Impl;
 using Quartz.Spi;
 using Whale.Shared.Jobs;
-
+using Whale.DAL.Models;
 
 namespace Whale.MeetingAPI
 {
@@ -78,6 +78,8 @@ namespace Whale.MeetingAPI
                 cfg.AddProfile<UserProfile>();
                 cfg.AddProfile<ParticipantProfile>();
                 cfg.AddProfile<QuestionProfile>();
+                cfg.AddProfile<AgendaProfile>();
+                cfg.AddProfile<NotificationProfile>();
             },
             Assembly.GetExecutingAssembly());
 

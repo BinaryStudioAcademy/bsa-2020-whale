@@ -1,13 +1,16 @@
 <div class="event message-event">
   <div class="message-header">
-    <div class="label">
+    <div *ngIf="!question.isAnonymous" class="label">
       <img class="ui avatar image" src="{{ question.asker.avatarUrl }}" />
     </div>
     <div class="chat-content">
       <div class="message-data">
-        <a class="user name">
+        <a *ngIf="!question.isAnonymous" class="user name">
           {{ question.asker.firstName }}
           {{ question.asker.secondName }}
+        </a>
+        <a *ngIf="question.isAnonymous" class="user name">
+          Anonymous question
         </a>
         <div class="date">
           {{ question.askedAt | date: "H:mm" }}

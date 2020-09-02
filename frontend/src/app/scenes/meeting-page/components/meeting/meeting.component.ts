@@ -190,7 +190,7 @@ export class MeetingComponent
   private unsubscribe$ = new Subject<void>();
   private userStream: MediaStream;
   //#endregion fields
-
+  public isPlanning = false;
   constructor(
     @Inject(DOCUMENT) private document: any,
     private authService: AuthService,
@@ -1459,8 +1459,8 @@ export class MeetingComponent
     });
   }
 
-  public pinCard(mediaDataId: string): void {
-    const mediaData = this.mediaData.find((m) => m.id === mediaDataId);
+  public pinCard(streamId: string): void {
+    const mediaData = this.mediaData.find((m) => m.currentStreamId === streamId);
 
     if (!mediaData || !mediaData.stream) {
       return;
@@ -1471,13 +1471,12 @@ export class MeetingComponent
     }
 
     mediaData.dynamicData.subscribe((data) => {
-      debugger
       this.isPinnedAudioAllowed = data.isAudioAllowed;
       this.isPinnedVideoAllowed = data.isVideoAllowed;
       this.isPinnedAudioActive = data.isAudioActive;
       this.isPinnedVideoActive = data.isVideoActive;
       this.pinnedParticipant = this.meeting.participants.find(
-        (p) => p.streamId === mediaData.stream.id
+        (p) => p.streamId === mediaData.currentStreamId
       );
       this.currentVideo.nativeElement.srcObject = mediaData.stream;
       this.deleteParticipantMediaData(mediaData.stream.id);
@@ -1509,9 +1508,6 @@ export class MeetingComponent
       });
       this.isNewMsg = false;
     }
-
-    // this.isNewMsg = !(this.isShowChat && this.isChat);
-    // console.log(this.isNewMsg);
   }
 
   public sendMessage(): void {

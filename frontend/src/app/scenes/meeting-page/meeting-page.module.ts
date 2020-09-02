@@ -10,6 +10,7 @@ import { DivisionByRoomsModalComponent } from './components/division-by-rooms-mo
 import { RecordModalComponent } from './components/record-modal/record-modal.component';
 import { SettingPageModule } from '../setting-page/setting-page.module';
 import { ReactionsComponent } from './components/reactions/reactions.component';
+import { AgendaComponent } from './components/agenda/agenda.component';
 
 @NgModule({
   declarations: [
@@ -18,6 +19,7 @@ import { ReactionsComponent } from './components/reactions/reactions.component';
     RecordModalComponent,
     DivisionByRoomsModalComponent,
     ReactionsComponent,
+    AgendaComponent,
   ],
   imports: [
     SharedModule,

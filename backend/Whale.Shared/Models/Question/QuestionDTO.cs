@@ -9,6 +9,7 @@ namespace Whale.Shared.Models.Question
 	{
 		public Guid Id { get; set; }
 		public Guid MeetingId { get; set; }
+		public bool IsAnonymous { get; set; }
 		public DateTimeOffset AskedAt { get; set; }
 		public UserDataDTO Asker { get; set; }
 		public string Text { get; set; }

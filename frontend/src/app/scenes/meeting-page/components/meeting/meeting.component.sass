@@ -505,14 +505,19 @@ div:moz-full-screen
     margin-right: 5px
 
 .big-avatar
-    width: 100vw
-    height: 100vh
+    width: 70%
+    height: 70%
     object-fit: contain
-    position: fixed
-    top: 120
-    bottom: 120
-    left: 0
-    right: 0
+    position: absolute
+    left: 15%
+    top: 15%
+    padding: 5%
+
+.big-avatar-pinned
+    width: 50%
+    max-height: calc(100% - 250px)
+    top: 180px
+    left: 25%
 
 .message-event
     .chat-content
@@ -589,3 +594,19 @@ i.icon.waiting-icon:hover
 
 .ui.meeting-setting-container.overflow-scroll
   overflow-y: hidden
+
+.agenda-container
+    position: absolute
+    bottom: 11%
+    right: 20%
+    max-height: 80%
+    z-index: 0
+.qa-anonymous-checkbox
+    margin-left: 16px
+    margin-right: auto
+
+    margin-top: 10px
+    margin-bottom: 5px
+
+.default-cursor
+    cursor: default !important
