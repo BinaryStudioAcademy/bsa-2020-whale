@@ -1891,7 +1891,7 @@ export class MeetingComponent
         (event: SpeechRecognitionEvent) => {
           this.meetingSignalrService.invoke(SignalMethods.OnSpeechRecognition, {
             meetingId: this.meeting.id,
-            userId: this.currentParticipant.id,
+            userId: this.currentParticipant.user.id,
             message: event.results[event.results.length - 1][0].transcript,
           } as MeetingSpeechCreate);
         }
