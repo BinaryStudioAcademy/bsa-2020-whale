@@ -21,31 +21,33 @@
           </div>
         </div>
       </div>
-      <div *ngIf="isHost" class="status-button-container">
+      <div class="status-container">
         <div [appQuestionStatus]="question.questionStatus" class="status-icon">
           <i></i>
           <span></span>
         </div>
-        <div
+        <div *ngIf="isHost" class="status-button-container">
+          <div
           *ngIf="question.questionStatus == 0"
           (click)="markAnswering()"
           class="status-button"
-        >
-          Answer
-        </div>
-        <div
-          *ngIf="question.questionStatus == 1"
-          (click)="markAnswered()"
-          class="status-button"
-        >
-          Mark answered
-        </div>
-        <div
-          *ngIf="question.questionStatus < 2"
-          (click)="markDismissed()"
-          class="status-button"
-        >
-          Dismiss
+          >
+            Answer
+          </div>
+          <div
+            *ngIf="question.questionStatus == 1"
+            (click)="markAnswered()"
+            class="status-button"
+          >
+            Mark answered
+          </div>
+          <div
+            *ngIf="question.questionStatus < 2"
+            (click)="markDismissed()"
+            class="status-button"
+          >
+            Dismiss
+          </div>
         </div>
       </div>
     </div>
