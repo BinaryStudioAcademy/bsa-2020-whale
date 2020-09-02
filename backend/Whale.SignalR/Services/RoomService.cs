@@ -24,7 +24,12 @@ namespace Whale.SignalR.Services
             _meetingHub = meetingHub;
         }
 
-        public async void CloseRoomAfterTimeExpire(int roomExpiry, string meetingLink, string roomId, string meetingId, Dictionary<string, List<ParticipantDTO>> groupParticipants)
+        public async void CloseRoomAfterTimeExpire(
+            int roomExpiry, 
+            string meetingLink, 
+            string roomId, 
+            string meetingId, 
+            Dictionary<string, List<ParticipantDTO>> groupParticipants)
         {
             var timer = new Timer(roomExpiry * 60 * 1000);
 
@@ -42,8 +47,11 @@ namespace Whale.SignalR.Services
                 await _redisService.DeleteKey(meetingSettingsPrefix + roomId);
 
                 var meetingdata = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(meetingId);
-                meetingdata.RoomsIds = new List<string>();
-                await _redisService.SetAsync(meetingId, meetingdata);
+                if (meetingdata != null)
+                {
+                    meetingdata.RoomsIds = new List<string>();
+                    await _redisService.SetAsync(meetingId, meetingdata);
+                }
             };
 
             timer.Start();
