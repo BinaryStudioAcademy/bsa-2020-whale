@@ -55,6 +55,7 @@ import {
   MediaData,
   ReactionsEnum,
   Reaction,
+  CardsLayout,
   MediaPermissions,
   MediaState,
 } from '@shared/models';
@@ -118,7 +119,6 @@ export class MeetingComponent
   public connectedStreams: MediaStream[] = [];
   public connectionData: MeetingConnectionData;
   public currentParticipant: Participant;
-  public pinModeHorizontal = true;
   public isAudioSettings = false;
   public isCameraMuted = false;
   public isMicrophoneMuted = false;
@@ -153,6 +153,8 @@ export class MeetingComponent
   public otherParticipants: Participant[] = [];
   public pattern = new RegExp(/^\S+.*/);
   public peer: Peer;
+  public pinnedCardsLayout: CardsLayout;
+  public pinnedParticipant: Participant;
   public pollService: PollService;
   public receiveingDrawings = false;
   public isHost = false;
@@ -179,14 +181,12 @@ export class MeetingComponent
   @ViewChildren('meetingChat') private chatBlock: QueryList<
     ElementRef<HTMLElement>
   >;
-  @ViewChild('bigAvatar') private bigAvatar: ElementRef<HTMLImageElement>;
 
   private chatElement: any;
   private currentStreamLoaded = new EventEmitter<void>();
   private contectedAt = new Date();
   private elem: any;
   private isCardPinnedInner = false;
-  private pinnedParticipant: Participant;
   private savedStrokes: CanvasWhiteboardUpdate[][] = new Array<
     CanvasWhiteboardUpdate[]
   >();
@@ -420,9 +420,14 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (streamChangedData) => {
+          if (streamChangedData.oldStreamId === this.pinnedParticipant?.streamId) {
+              this.pinnedParticipant.streamId = streamChangedData.newStreamId
+          } 
+
           const changedMediaData = this.mediaData.find(
             (md) => md.currentStreamId === streamChangedData.oldStreamId
           );
+
           if (changedMediaData) {
             const changedParticipant = this.meeting.participants.find(
               (p) => p.streamId === streamChangedData.oldStreamId
@@ -430,7 +435,7 @@ export class MeetingComponent
             if (changedParticipant) {
               changedParticipant.streamId = streamChangedData.newStreamId;
             }
-            changedMediaData.currentStreamId = streamChangedData.newStreamId;
+            changedMediaData.currentStreamId = streamChangedData.newStreamId;          
             this.updateCardDynamicData(
               streamChangedData.newStreamId,
               streamChangedData.isAudioAllowed,
@@ -474,6 +479,11 @@ export class MeetingComponent
 
             this.meeting.isAudioAllowed = data.isAudioAllowed;
             this.meeting.isVideoAllowed = data.isVideoAllowed;
+
+            if (!this.isHost) {
+              this.toggleMicrophone();
+              this.toggleCamera();
+            }
 
             this.meetingSignalrService.invoke<ChangedMediaState>(
               SignalMethods.OnMediaStateChanged,
@@ -798,6 +808,9 @@ export class MeetingComponent
       }
       this.setOutputDevice();
     });
+    
+    this.pinnedCardsLayout = +localStorage.getItem('pinned-cards-layout') ?? CardsLayout.TopRow;
+    console.log(this.pinnedCardsLayout);
   }
 
   ngAfterViewChecked(): void {
@@ -1412,6 +1425,14 @@ export class MeetingComponent
     isAudioActive?: boolean,
     isVideoActive?: boolean
   ): void {
+    if (streamId === this.pinnedParticipant?.streamId) {
+      this.isPinnedAudioAllowed = isAudioAllowed;
+      this.isPinnedVideoAllowed = isVideoAllowed;
+      this.isPinnedAudioActive = isAudioActive;
+      this.isPinnedVideoActive = isVideoActive;
+      return;
+    }
+    
     const participant =
       this.currentParticipant.streamId === streamId
         ? this.currentParticipant
@@ -1437,8 +1458,8 @@ export class MeetingComponent
     });
   }
 
-  public pinCard(mediaDataId: string): void {
-    const mediaData = this.mediaData.find((m) => m.id === mediaDataId);
+  public pinCard(streamId: string): void {
+    const mediaData = this.mediaData.find((m) => m.currentStreamId === streamId);
 
     if (!mediaData || !mediaData.stream) {
       return;
@@ -1454,24 +1475,27 @@ export class MeetingComponent
       this.isPinnedAudioActive = data.isAudioActive;
       this.isPinnedVideoActive = data.isVideoActive;
       this.pinnedParticipant = this.meeting.participants.find(
-        (p) => p.streamId === mediaData.stream.id
+        (p) => p.streamId === mediaData.currentStreamId
       );
       this.currentVideo.nativeElement.srcObject = mediaData.stream;
       this.deleteParticipantMediaData(mediaData.stream.id);
-      this.bigAvatar.nativeElement.src = data.avatarUrl;
       this.isCardPinned = true;
     });
   }
 
-  public unpinCard() {
+  public unpinCard(): void {
     this.createParticipantCard(this.pinnedParticipant, true);
     this.isCardPinned = false;
     this.pinnedParticipant = null;
-    this.bigAvatar.nativeElement.src = this.currentParticipant.user.avatarUrl;
     this.isPinnedAudioAllowed = false;
     this.isPinnedVideoAllowed = false;
     this.isPinnedAudioActive = false;
     this.isPinnedVideoActive = false;
+  }
+
+  public setPinnedCardsLayout(layout: CardsLayout): void {
+    localStorage.setItem("pinned-cards-layout", layout.toString());
+    this.pinnedCardsLayout = layout;
   }
   //#endregion participant cards
 
