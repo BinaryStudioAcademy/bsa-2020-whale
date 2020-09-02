@@ -55,6 +55,7 @@ import {
   MediaData,
   ReactionsEnum,
   Reaction,
+  CardsLayout,
 } from '@shared/models';
 import { EnterModalComponent } from '../enter-modal/enter-modal.component';
 import { DivisionByRoomsModalComponent } from '../division-by-rooms-modal/division-by-rooms-modal.component';
@@ -116,7 +117,6 @@ export class MeetingComponent
   public connectedStreams: MediaStream[] = [];
   public connectionData: MeetingConnectionData;
   public currentParticipant: Participant;
-  public pinModeHorizontal = true;
   public isAudioSettings = false;
   public isCameraMuted = false;
   public isMicrophoneMuted = false;
@@ -151,6 +151,7 @@ export class MeetingComponent
   public otherParticipants: Participant[] = [];
   public pattern = new RegExp(/^\S+.*/);
   public peer: Peer;
+  public pinnedCardsLayout: CardsLayout;
   public pinnedParticipant: Participant;
   public pollService: PollService;
   public receiveingDrawings = false;
@@ -804,6 +805,9 @@ export class MeetingComponent
       }
       this.setOutputDevice();
     });
+    
+    this.pinnedCardsLayout = +localStorage.getItem('pinned-cards-layout') ?? CardsLayout.TopRow;
+    console.log(this.pinnedCardsLayout);
   }
 
   ngAfterViewChecked(): void {
@@ -1484,7 +1488,7 @@ export class MeetingComponent
     });
   }
 
-  public unpinCard() {
+  public unpinCard(): void {
     this.createParticipantCard(this.pinnedParticipant, true);
     this.isCardPinned = false;
     this.pinnedParticipant = null;
@@ -1492,6 +1496,11 @@ export class MeetingComponent
     this.isPinnedVideoAllowed = false;
     this.isPinnedAudioActive = false;
     this.isPinnedVideoActive = false;
+  }
+
+  public setPinnedCardsLayout(layout: CardsLayout): void {
+    localStorage.setItem("pinned-cards-layout", layout.toString());
+    this.pinnedCardsLayout = layout;
   }
   //#endregion participant cards
 
