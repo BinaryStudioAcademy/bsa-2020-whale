@@ -778,10 +778,6 @@ export class MeetingComponent
           this.setMediaBitrate(sdp, 'video', this.sdpVideoBandwidth),
       });
     });
-
-    if (this.mediaSettingsService.getSettings().IsMirrorVideo) {
-      this.currentVideo.nativeElement.style.transform = 'scale(-1,1)';
-    }
     // // show a warning dialog if close current tab or window
     // window.onbeforeunload = (ev: BeforeUnloadEvent) => {
     //   ev.preventDefault();
@@ -797,7 +793,6 @@ export class MeetingComponent
       this.currentVideo.nativeElement.srcObject = this.currentUserStream;
       if (this.mediaSettingsService.getSettings().IsMirrorVideo) {
         this.currentVideo.nativeElement.style.transform = 'scale(-1,1)';
-        document.querySelector('video').style.transform = 'scale(-1,1)';
       }
       this.setOutputDevice();
     });

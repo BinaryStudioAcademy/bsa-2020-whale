@@ -459,15 +459,6 @@
           (mediaData.length === 1 && isCardPinned)
         "
       >
-      <div
-        [ngClass]="isCardPinned ? 'users-slider' : 'users'"
-        *ngIf="
-          mediaData.length > 1 ||
-          (mediaData.length === 1 &&
-            mediaData[0].id !== currentParticipant.id) ||
-          (mediaData.length === 1 && isCardPinned)
-        "
-      >
         <div [ngClass]="isCardPinned ? 'cards-small-wrapper' : 'cards-wrapper'">
           <app-participant-card
             [ngClass]="
@@ -553,7 +544,6 @@
           (clickEmited)="changeOutputDevice($event)"
         ></app-output-settings>
       </div>
-    </div>
 
     <div *ngIf="isShowChat" class="ui chat card">
       <div class="ui buttons">
