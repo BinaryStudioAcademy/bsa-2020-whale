@@ -168,6 +168,7 @@ export class MeetingComponent
   private isDrawingEnabled = false;
   public IsWhiteboard = false;
   public IsPoll = false;
+  public isSomeoneRecordingScreen = false;
 
   @ViewChild('whiteboard') private whiteboard: ElementRef;
   @ViewChild('currentVideo') private currentVideo: ElementRef;
@@ -613,7 +614,7 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         () => {
-          this.toastr.info('Conference start recording');
+          this.isSomeoneRecordingScreen = true;
         }
       );
 
@@ -621,7 +622,7 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         () => {
-          this.toastr.info('Conference stop recording');
+          this.isSomeoneRecordingScreen = false;
         }
       );
 
@@ -921,6 +922,7 @@ export class MeetingComponent
             SignalMethods.OnConferenceStartRecording,
             this.meeting.id
           );
+          this.toastr.info('Start recording a conference');
           this.blobService.recordReady$
             .pipe(takeUntil(this.unsubscribe$))
             .pipe(first())
@@ -953,6 +955,7 @@ export class MeetingComponent
       SignalMethods.OnConferenceStopRecording,
       this.meeting.id
     );
+    this.toastr.info('Stop recording a conference');
   }
 
   private async highlightRecording(): Promise<void> {
