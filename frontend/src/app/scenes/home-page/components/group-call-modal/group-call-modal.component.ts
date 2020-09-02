@@ -4,7 +4,7 @@ import {
   WhaleSignalService,
   WhaleSignalMethods,
   UpstateService,
-  GroupService,
+  GroupService, MeetingSettingsService,
 } from 'app/core/services';
 import { Group } from '@shared/models/group/group';
 import { Router } from '@angular/router';
@@ -42,7 +42,8 @@ export class GroupCallModalComponent extends SimpleModalComponent<Group, null>
     private whaleSignalrService: WhaleSignalService,
     private router: Router,
     private upstateService: UpstateService,
-    private groupService: GroupService
+    private groupService: GroupService,
+    private meetingSettingsService: MeetingSettingsService
   ) {
     super();
   }
@@ -68,6 +69,8 @@ export class GroupCallModalComponent extends SimpleModalComponent<Group, null>
             isScheduled: false,
             isRecurrent: false,
             creatorEmail: this.callCreator.email,
+            isWhiteboard: this.meetingSettingsService.getSettings().isWhiteboard,
+            isPoll: this.meetingSettingsService.getSettings().isPoll,
           } as MeetingCreate,
         } as GroupCallStart);
       });
