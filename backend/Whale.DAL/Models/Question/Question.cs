@@ -9,6 +9,7 @@ namespace Whale.DAL.Models.Question
 	{
 		public Guid MeetingId { get; set; }
 		public DateTimeOffset AskedAt { get; set; }
+		public bool IsAnonymous { get; set; }
 		public UserData Asker { get; set; }
 		public string Text { get; set; }
 		public QuestionStatus QuestionStatus { get; set; }
