@@ -27,9 +27,6 @@ const routes: Routes = [
     component: HomePageComponent,
     ...canActivate(redirectUnauthorizedToLogin),
   },
-  
-  {path:'agenda',
-component:AgendaComponent},
   {
     path: 'setting-page',
     component: SettingPageComponent,
