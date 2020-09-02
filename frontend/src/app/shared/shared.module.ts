@@ -26,6 +26,7 @@ import { ContactComponent } from './components/contacts/contact/contact.componen
 import { QuestionComponent } from './components/question/question/question.component';
 import { QuestionStatusDirective } from './directives/question-status.directive';
 import { DndModule } from 'ngx-drag-drop';
+import { ToastrWithButtonComponent } from './components/toastr-with-button/toastr-with-button.component';
 
 @NgModule({
   declarations: [
@@ -51,6 +52,7 @@ import { DndModule } from 'ngx-drag-drop';
     ContactComponent,
     QuestionComponent,
     QuestionStatusDirective,
+    ToastrWithButtonComponent,
   ],
   imports: [
     CommonModule,

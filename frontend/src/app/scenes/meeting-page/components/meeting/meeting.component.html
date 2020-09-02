@@ -383,6 +383,10 @@
               >
               </i>
             </span>
+            <span data-tooltip="Plan Meeting">
+              <i class="big list alternate icon"
+              (click)="isPlanning=!isPlanning"></i>
+            </span>
             <span data-tooltip="Fullscreen" data-position="top right">
               <i
                 id="meeting-options-fullscreen"
@@ -746,6 +750,9 @@
         <app-poll-results [pollResult]="pollxResult"></app-poll-results>
       </div>
     </div>
+  </div>
+  <div class="agenda-container">
+    <app-agenda *ngIf="isPlanning" [meetingId]="meeting.id"></app-agenda>
   </div>
   <div
     class="ui meeting-setting-container overflow-scroll segment"

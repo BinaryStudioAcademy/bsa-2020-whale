@@ -1,0 +1,18 @@
+<form class="ui labels" [formGroup]="form" (ngSubmit)="onSubmit()">
+  <div class="ui label" (click)="onSubmit()">
+    <div class="ui input">
+      <input type="text" placeholder="Name" mode="name" formControlName="name" />
+    </div>
+
+    <div class="field start-input">
+      <div>Start time</div>
+      <dp-date-picker
+        mode="time"
+        theme="dp-material"
+        [config]="timeConfig"
+        formControlName="time"
+      ></dp-date-picker>
+      <i class="icon close" (click)="removeTag($event)"></i>
+    </div>
+  </div>
+</form>
