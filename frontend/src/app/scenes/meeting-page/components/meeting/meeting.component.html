@@ -633,6 +633,12 @@
             >
           </select>
         </div>
+        <div *ngIf="questionService.areQuestionsOpened" class="qa-anonymous-checkbox">
+          <div class="ui checkbox">
+            <input id="questions-anonymous-checkbox" type="checkbox" name="example" [(ngModel)]="questionService.createAnonymously">
+            <label for="questions-anonymous-checkbox" class="default-cursor">Send anonymously</label>
+          </div>
+        </div>
 
         <div class="ui icon input">
           <textarea
