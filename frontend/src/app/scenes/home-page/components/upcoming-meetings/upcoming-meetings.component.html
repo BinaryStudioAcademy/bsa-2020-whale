@@ -1,0 +1,38 @@
+<div
+  class="ui container segment scrollable"
+  infiniteScroll
+  [infiniteScrollDistance]="2"
+  [infiniteScrollThrottle]="500"
+  (scroll)="onScroll()"
+  #scrollable
+>
+  <div class="ui header">
+    <h2 class="center aligned header">Upcoming Meetings</h2>
+    <div
+      class="close-icon-container"
+      data-tooltip="Close"
+      data-position="left center"
+    >
+      <i id="history-close" class="large close icon" (click)="close()"></i>
+    </div>
+  </div>
+
+  <div *ngIf="isUpcomingMeetingEmpty" class="meeting-list-empty">
+    <p>You don't have any upcoming meetings yet</p>
+  </div>
+
+  <div>
+    <div *ngFor="let meeting of meetings" class="meeting-container">
+      <app-schedule-meeting-note [scheduled]="meeting"></app-schedule-meeting-note>
+    </div>
+    <div *ngIf="isUpcomingLoading" class="relative">
+      <app-spiner size="huge"></app-spiner>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="isScrolled" class="scroll-to-top-button">
+  <button (click)="scrollToTop()" class="circular ui icon button">
+    <i class="big angle double up icon"></i>
+  </button>
+</div>

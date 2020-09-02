@@ -1,6 +1,10 @@
 <spiner *ngIf="isMeetingLoading" size="'massive'"></spiner>
-<div *ngIf="isWaitingForRecord" class="waiting-for-record-modal">
+<div *ngIf="isWaitingForRecord" class="notification">
   <p>Waiting record...</p>
+</div>
+
+<div *ngIf="isSomeoneRecordingScreen" class="notification">
+  <p>Conference is recording</p>
 </div>
 
 <div #mainArea class="bg-white">
@@ -118,6 +122,7 @@
           class="invite-tooltip"
           data-tooltip="Invite users"
           data-position="left center"
+          *ngIf="!isRoom"
         >
           <i
             class="user plus icon"
@@ -379,6 +384,10 @@
               >
               </i>
             </span>
+            <span data-tooltip="Plan Meeting">
+              <i class="big list alternate icon"
+              (click)="isPlanning=!isPlanning"></i>
+            </span>
             <span data-tooltip="Fullscreen" data-position="top right">
               <i
                 id="meeting-options-fullscreen"
@@ -451,48 +460,84 @@
       </div>
 
       <div
-        class="users"
+        [ngClass]="isCardPinned ? 'users-slider' : 'users'"
         *ngIf="
           mediaData.length > 1 ||
-          (mediaData.length === 1 && mediaData[0].id !== currentParticipant.id)
+          (mediaData.length === 1 &&
+            mediaData[0].id !== currentParticipant.id) ||
+          (mediaData.length === 1 && isCardPinned)
         "
       >
-        <app-participant-card
-          *ngFor="let data of mediaData"
-          (hideViewEvent)="hideViewEventHandler($event)"
-          (toggleMicrophoneEvent)="
-            currentParticipant.id === $event ? toggleMicrophone() : ''
-          "
-          (toggleCameraEvent)="
-            currentParticipant.id === $event ? toggleCamera() : ''
-          "
-          (switchMediaPermissionAsHostEvent)="
-            switchParticipantMediaAsHost($event)
-          "
-          (pinVideoEvent)="pinCard($event)"
-          [data]="data"
-          [meetingHolder]="currentParticipant"
-        >
-        </app-participant-card>
+        <div [ngClass]="isCardPinned ? 'cards-small-wrapper' : 'cards-wrapper'">
+          <app-participant-card
+            [ngClass]="
+              isCardPinned ? 'participant-card-small' : 'participant-card'
+            "
+            *ngFor="let data of mediaData"
+            (hideViewEvent)="hideViewEventHandler($event)"
+            (toggleMicrophoneEvent)="
+              currentParticipant.id === $event ? toggleMicrophone() : ''
+            "
+            (toggleCameraEvent)="
+              currentParticipant.id === $event ? toggleCamera() : ''
+            "
+            (switchMediaPermissionAsHostEvent)="
+              switchParticipantMediaAsHost($event)
+            "
+            (pinVideoEvent)="pinCard($event)"
+            [data]="data"
+            [meetingHolder]="currentParticipant"
+            [meetingId]="meeting.id"
+          >
+          </app-participant-card>
+          <div class="cards-position-icons" *ngIf="isCardPinned">
+            <span
+              *ngIf="pinModeHorizontal"
+              data-tooltip="All to right"
+              data-position="bottom right"
+            >
+              <i class="arrows alternate vertical icon"></i>
+            </span>
+            <span
+              *ngIf="!pinModeHorizontal"
+              data-tooltip="All to top"
+              data-position="bottom right"
+            >
+              <i class="arrows alternate horizontal icon"></i>
+            </span>
+            <span data-tooltip="Unpin" data-position="bottom right">
+              <i class="table icon" (click)="unpinCard()"></i>
+            </span>
+          </div>
+        </div>
       </div>
 
       <img
+        #bigAvatar
         [src]="currentParticipant?.user?.avatarUrl"
-        [hidden]="!isCameraMuted || (isCameraMuted && mediaData.length > 1)"
+        [hidden]="
+          ((!isCameraMuted || (isCameraMuted && mediaData.length > 1)) &&
+            !isCardPinned) ||
+          (isCardPinned && (!isPinnedVideoAllowed || !isPinnedVideoActive))
+        "
         class="big-avatar"
       />
+
+      <!-- <app-cards-carousel [mediaData]></app-cards-carousel> -->
 
       <video
         #currentVideo
         autoplay="autoplay"
         class="participant-fullscreen"
         [hidden]="
-          mediaData.length > 1 ||
-          (mediaData.length === 1 &&
-            mediaData[0].id !== currentParticipant.id) ||
-          isCameraMuted
+          (mediaData.length > 1 ||
+            (mediaData.length === 1 &&
+              mediaData[0].id !== currentParticipant.id) ||
+            isCameraMuted) &&
+          !isCardPinned &&
+          !(isCardPinned && isPinnedVideoActive && isPinnedVideoAllowed)
         "
-        [muted]="'muted'"
+        [muted]="!isCardPinned"
       ></video>
 
       <div class="settings" *ngIf="isVideoSettings && !isCameraMuted">
@@ -508,7 +553,6 @@
           (clickEmited)="changeOutputDevice($event)"
         ></app-output-settings>
       </div>
-    </div>
 
     <div *ngIf="isShowChat" class="ui chat card">
       <div class="ui buttons">
@@ -594,6 +638,12 @@
             >
           </select>
         </div>
+        <div *ngIf="questionService.areQuestionsOpened" class="qa-anonymous-checkbox">
+          <div class="ui checkbox">
+            <input id="questions-anonymous-checkbox" type="checkbox" name="example" [(ngModel)]="questionService.createAnonymously">
+            <label for="questions-anonymous-checkbox" class="default-cursor">Send anonymously</label>
+          </div>
+        </div>
 
         <div class="ui icon input">
           <textarea
@@ -653,7 +703,7 @@
   >
     <button
       id="meeting-poll-new"
-      *ngIf="!meeting.isPoll || isHost || isRoom"
+      *ngIf="!meeting.isPoll || isHost"
       (click)="pollService.onNewPollClick()"
       class="ui button"
       id="new-poll-btn"
@@ -707,6 +757,9 @@
         <app-poll-results [pollResult]="pollxResult"></app-poll-results>
       </div>
     </div>
+  </div>
+  <div class="agenda-container">
+    <app-agenda *ngIf="isPlanning" [meetingId]="meeting.id"></app-agenda>
   </div>
   <div
     class="ui meeting-setting-container overflow-scroll segment"

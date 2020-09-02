@@ -1,7 +1,10 @@
-﻿namespace Whale.SignalR.Models.Media
+﻿using System;
+
+namespace Whale.SignalR.Models.Media
 {
     public class MediaStateDTO
     {
+        public Guid MeetingId { get; set; }
         public string StreamId { get; set; }
         public string ReceiverConnectionId {get; set; }
         public bool IsVideoAllowed { get; set; }

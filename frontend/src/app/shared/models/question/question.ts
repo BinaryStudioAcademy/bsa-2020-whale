@@ -5,6 +5,7 @@ export interface Question {
   id: string;
   meetingId: string;
   askedAt: Date;
+  isAnonymous: boolean;
   asker: UserData;
   text: string;
   questionStatus: QuestionStatus;

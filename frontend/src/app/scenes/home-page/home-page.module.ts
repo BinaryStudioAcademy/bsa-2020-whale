@@ -17,6 +17,8 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { ImageCropperModule } from 'ngx-image-cropper';
 import { EditGroupInfoModalComponent } from './components/edit-group-info-modal/edit-group-info-modal.component';
 import { UpdateGroupImageModalComponent } from './components/update-group-image-modal/update-group-image-modal.component';
+import { UpcomingMeetingsComponent } from './components/upcoming-meetings/upcoming-meetings.component';
+import { ScheduleMeetingNoteComponent } from './components/upcoming-meetings/schedule-meeting-note/schedule-meeting-note.component';
 
 @NgModule({
   declarations: [
@@ -32,6 +34,8 @@ import { UpdateGroupImageModalComponent } from './components/update-group-image-
     GroupCallModalComponent,
     EditGroupInfoModalComponent,
     UpdateGroupImageModalComponent,
+    UpcomingMeetingsComponent,
+    ScheduleMeetingNoteComponent,
   ],
   imports: [
     CommonModule,

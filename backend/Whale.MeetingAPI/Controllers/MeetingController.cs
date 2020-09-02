@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Globalization;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Whale.Shared.Jobs;
+using Whale.Shared.Models;
 using Whale.Shared.Models.Meeting;
 using Whale.Shared.Services;
 
@@ -16,11 +18,13 @@ namespace Whale.API.Controllers
     {
         private readonly MeetingService _meetingService;
         private readonly MeetingScheduleService _meetingScheduleService;
+        private readonly NotificationsService _notifications;
 
-        public MeetingController(MeetingService meetingService, MeetingScheduleService meetingScheduleService)
+        public MeetingController(MeetingService meetingService, MeetingScheduleService meetingScheduleService, NotificationsService notifications)
         {
             _meetingService = meetingService;
             _meetingScheduleService = meetingScheduleService;
+            _notifications = notifications;
         }
 
         [HttpPost]
@@ -32,13 +36,17 @@ namespace Whale.API.Controllers
         [HttpPost("scheduled")]
         public async Task<ActionResult<string>> CreateMeetingScheduled(MeetingCreateDTO meetingDto)
         {
-            var meeting = await _meetingService.RegisterScheduledMeeting(meetingDto);
-            //var jobInfo = new JobInfo(typeof(ScheduledMeetingJob), meetingDto.StartTime);
-            var jobInfo = new JobInfo(typeof(ScheduledMeetingJob), DateTimeOffset.Now + TimeSpan.FromSeconds(5));
-            var obj = JsonConvert.SerializeObject(meeting);
+            var meetingAndLink = await _meetingService.RegisterScheduledMeeting(meetingDto);
+            var jobInfo = new JobInfo(typeof(ScheduledMeetingJob), meetingDto.StartTime);
+            var obj = JsonConvert.SerializeObject(meetingAndLink.Meeting);
             await _meetingScheduleService.Start(jobInfo, obj);
 
-            return Ok();
+            foreach (var email in meetingDto.ParticipantsEmails)
+            {
+                await _notifications.AddTextNotification(email, $"{meetingDto.CreatorEmail} invites you to a meeting on {meetingDto.StartTime.ToString("f", new CultureInfo("us-EN"))}");
+            }
+
+            return Ok(meetingAndLink.Link);
         }
 
         [HttpGet]
@@ -74,6 +82,12 @@ namespace Whale.API.Controllers
         {
             await _meetingService.UpdateMeetingSettings(updateSettingsDTO);
             return Ok();
+        }
+        [HttpGet("agenda/{meetingId}")]
+        public async Task<ActionResult<List<AgendaPointDTO>>> GetAgenda(string meetingId)
+        {
+            List<AgendaPointDTO> agendaPoints = await _meetingService.GetAgendaPoints(meetingId);//_httpService.GetAsync<List<AgendaPointDTO>>($"api/meeting/agenda/{meetingId}");
+            return Ok(agendaPoints);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Whale.Shared.Models.Meeting
 {
-    class MeetingSettingsDTO
+    public class MeetingSettingsDTO
     { 
         public string MeetingHostEmail { get; set; }
         public bool IsVideoAllowed { get; set; }

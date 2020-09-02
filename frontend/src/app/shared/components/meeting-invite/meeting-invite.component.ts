@@ -191,6 +191,9 @@ export class MeetingInviteComponent
 
   public closeModal(result: boolean): void {
     this.result = result; // result = isShowParticipants after modal closing
+    if (this.isScheduled) {
+      this.result = this.emails;
+    }
     this.close();
   }
 }

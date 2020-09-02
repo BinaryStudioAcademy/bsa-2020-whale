@@ -4,6 +4,7 @@ import { ReactionsEnum } from '@shared/models';
 
 export interface MediaData {
   id: string;
+  isSmallCard?: boolean;
   isCurrentUser?: boolean;
   currentStreamId: string;
   stream: MediaStream;

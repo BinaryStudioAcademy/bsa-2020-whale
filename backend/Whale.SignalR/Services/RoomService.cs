@@ -14,6 +14,7 @@ namespace Whale.SignalR.Services
 {
     public class RoomService
     {
+        private const string meetingSettingsPrefix = "meeting-settings-";
         private readonly RedisService _redisService;
         private readonly IHubContext<MeetingHub> _meetingHub;
 
@@ -23,7 +24,12 @@ namespace Whale.SignalR.Services
             _meetingHub = meetingHub;
         }
 
-        public async void CloseRoomAfterTimeExpire(int roomExpiry, string meetingLink, string roomId, string meetingId, Dictionary<string, List<ParticipantDTO>> groupParticipants)
+        public async void CloseRoomAfterTimeExpire(
+            double roomExpiry, 
+            string meetingLink, 
+            string roomId, 
+            string meetingId, 
+            Dictionary<string, List<ParticipantDTO>> groupParticipants)
         {
             var timer = new Timer(roomExpiry * 60 * 1000);
 
@@ -38,10 +44,14 @@ namespace Whale.SignalR.Services
                 await _redisService.ConnectAsync();
                 await _redisService.DeleteKey(roomId);
                 await _redisService.DeleteKey(roomId + nameof(Poll));
+                await _redisService.DeleteKey(meetingSettingsPrefix + roomId);
 
                 var meetingdata = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(meetingId);
-                meetingdata.RoomsIds = new List<string>();
-                await _redisService.SetAsync(meetingId, meetingdata);
+                if (meetingdata != null)
+                {
+                    meetingdata.RoomsIds = new List<string>();
+                    await _redisService.SetAsync(meetingId, meetingdata);
+                }
             };
 
             timer.Start();
