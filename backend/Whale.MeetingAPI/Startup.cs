@@ -79,6 +79,7 @@ namespace Whale.MeetingAPI
                 cfg.AddProfile<ParticipantProfile>();
                 cfg.AddProfile<QuestionProfile>();
                 cfg.AddProfile<AgendaProfile>();
+                cfg.AddProfile<NotificationProfile>();
             },
             Assembly.GetExecutingAssembly());
 
