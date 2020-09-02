@@ -155,6 +155,7 @@ export class MeetingComponent
   public peer: Peer;
   public pinnedCardsLayout: CardsLayout;
   public pinnedParticipant: Participant;
+  public pinnedLayoutMenuSticky = false;
   public pollService: PollService;
   public receiveingDrawings = false;
   public isHost = false;
@@ -180,6 +181,9 @@ export class MeetingComponent
   >;
   @ViewChildren('meetingChat') private chatBlock: QueryList<
     ElementRef<HTMLElement>
+  >;
+  @ViewChild('cardsLayout') private cardsLayout: ElementRef<
+  HTMLElement
   >;
 
   private chatElement: any;
@@ -1495,6 +1499,14 @@ export class MeetingComponent
   public setPinnedCardsLayout(layout: CardsLayout): void {
     localStorage.setItem('pinned-cards-layout', layout.toString());
     this.pinnedCardsLayout = layout;
+  }
+
+  public onCardsLayoutMouseEnter(): void {
+    this.pinnedLayoutMenuSticky =
+      window.innerWidth <= this.cardsLayout.nativeElement.offsetWidth + 40;
+      console.log(window.innerWidth)
+      console.log(this.cardsLayout.nativeElement.offsetWidth)
+      console.log(this.pinnedLayoutMenuSticky)
   }
   //#endregion participant cards
 

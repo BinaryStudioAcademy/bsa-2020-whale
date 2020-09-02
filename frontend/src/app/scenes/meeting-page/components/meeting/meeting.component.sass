@@ -205,10 +205,13 @@ i.big.icon.wechat
     position: relative
 
 .participants-container
+    display: flex
+    flex-direction: column
+    position: relative
     height: 100%
+    width: 15%
     min-width: 180px
     max-width: 400px
-    width: 15%
     background-color: white
     overflow-y: auto
     float: left
@@ -218,9 +221,7 @@ i.big.icon.wechat
     -moz-box-shadow: 1px 1px 5px 0px #4e4e4ebf
     box-shadow: 1px 1px 5px 0px #4e4e4ebf
     z-index: 2
-    position: relative
-    display: flex
-    flex-direction: column
+    
 
 .ui.divided.list
     width: fit-content
@@ -581,38 +582,41 @@ div:moz-full-screen
         margin-top: 30px
    
 .small-cards-wrapper-row
-    padding: 3px
-    height: 170px
     display: inline-flex
     max-width: 100%
+    height: 170px
+    padding: 3px
     overflow-x: auto
     overflow-y: hidden
     z-index: 1
 
 .cards-position-icons-row
     display: none
-    flex-direction: column
     height: 151px
     padding: 4px 0 4px 4px
     margin: 3px 10px 3px 3px
-    overflow: visible
-    background-color: rgba(180, 180, 180, 0.4)
+    flex-direction: column
+    background-color: rgba(190, 190, 190, .6)
     border-radius: 5px
-    position: sticky
+    overflow: visible
+    
+.cards-position-icons-row-sticky
+    position: absolute
     top: 0
-    max-height: 100%
+    right: 0
+    margin: 6px 4px 3px 3px  
 
 .cards-position-icons-column
     display: none
+    position: absolute
+    top: 0
     flex-direction: row-reverse
-    padding: 4px
+    width: 250px
     margin: 3px
+    padding: 4px
     overflow: visible
     background-color: rgba(180, 180, 180, 0.4)
     border-radius: 5px
-    position: absolute
-    top: 0
-    width: 250px
 
 .small-cards-wrapper-row:hover .cards-position-icons-row,
 .small-cards-wrapper-column:hover .cards-position-icons-column

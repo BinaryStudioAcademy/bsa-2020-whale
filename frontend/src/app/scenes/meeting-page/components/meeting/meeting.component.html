@@ -471,6 +471,8 @@
         >
 
         <div 
+          #cardsLayout
+          (mouseenter)="onCardsLayoutMouseEnter()"
           [class.cards-wrapper]="!isCardPinned"
           [class.small-cards-wrapper-row]="isCardPinned && pinnedCardsLayout === 0"
           [class.small-cards-wrapper-column]="isCardPinned && pinnedCardsLayout === 1"
@@ -500,6 +502,7 @@
         <div
           #cardsLayoutMenu
           [ngClass]="pinnedCardsLayout === 0 ? 'cards-position-icons-row' : 'cards-position-icons-column'" 
+          [class.cards-position-icons-row-sticky]="pinnedCardsLayout === 0 && pinnedLayoutMenuSticky"
           *ngIf="isCardPinned">
           <span
             *ngIf="pinnedCardsLayout === 0"
