@@ -325,6 +325,32 @@ namespace Whale.DAL.Migrations
                     b.ToTable("PollResults");
                 });
 
+            modelBuilder.Entity("Whale.DAL.Models.Question.Question", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("AskedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Asker")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("MeetingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("QuestionStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Text")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Questions");
+                });
+
             modelBuilder.Entity("Whale.DAL.Models.Record", b =>
                 {
                     b.Property<Guid>("Id")
@@ -356,10 +382,19 @@ namespace Whale.DAL.Migrations
                     b.Property<Guid>("CreatorId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("FullURL")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid>("MeetingId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ParticipantsEmails")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Password")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ShortURL")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");

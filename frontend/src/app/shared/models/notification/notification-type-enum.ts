@@ -3,4 +3,5 @@ export enum NotificationTypeEnum {
   AddContactNotification,
   MeetingInviteNotification,
   UnreadMessage,
+  UnreadGroupMessage,
 }

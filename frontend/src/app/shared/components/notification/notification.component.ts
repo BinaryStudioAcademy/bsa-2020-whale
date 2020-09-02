@@ -5,7 +5,10 @@ import { OptionsAddContact } from '@shared/models/notification/options-add-conta
 import { NotificationTypeEnum } from '@shared/models/notification/notification-type-enum';
 import { ContactService } from 'app/core/services/contact.service';
 import { ToastrService } from 'ngx-toastr';
-import { OptionsInviteMeeting } from '@shared/models';
+import {
+  OptionsInviteMeeting,
+  UnreadGroupMessageOptions,
+} from '@shared/models';
 import { Router } from '@angular/router';
 import { UnreadMessageOptions } from '@shared/models/notification/unread-message-options';
 
@@ -18,6 +21,8 @@ export class NotificationComponent implements OnInit {
   @Input() notification: Notification;
   @Output() delete: EventEmitter<string> = new EventEmitter<string>();
   @Output() openChatClicked = new EventEmitter<string>();
+  @Output() openGroupChatClicked = new EventEmitter<string>();
+
   public message = '';
   public contactEmail = '';
   public isPendingContact = false;
@@ -26,6 +31,8 @@ export class NotificationComponent implements OnInit {
   public show = true;
   public link = '';
   public unreadMessageOptions: UnreadMessageOptions;
+  public unreadGroupMessageOptions: UnreadGroupMessageOptions;
+
   constructor(
     private contactService: ContactService,
     private toastr: ToastrService,
@@ -78,6 +85,17 @@ export class NotificationComponent implements OnInit {
           ? `Unread message from ${this.unreadMessageOptions.senderName}.`
           : `${count} unread messages from ${this.unreadMessageOptions.senderName}.`;
     }
+    if (
+      this.notification.notificationType ===
+      NotificationTypeEnum.UnreadGroupMessage
+    ) {
+      this.unreadGroupMessageOptions = JSON.parse(this.notification.options);
+      const count = this.unreadGroupMessageOptions.unreadGroupMessages.length;
+      this.message =
+        count <= 1
+          ? `Unread message from "${this.unreadGroupMessageOptions.groupName}" group.`
+          : `${count} unread messages from "${this.unreadGroupMessageOptions.groupName}".`;
+    }
   }
 
   onRejectContact(): void {
@@ -110,5 +128,9 @@ export class NotificationComponent implements OnInit {
 
   onOpenChat(): void {
     this.openChatClicked.emit(this.unreadMessageOptions.contactId);
+  }
+
+  onOpenGroupChat(): void {
+    this.openGroupChatClicked.emit(this.unreadGroupMessageOptions.groupId);
   }
 }

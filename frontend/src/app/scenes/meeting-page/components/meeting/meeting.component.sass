@@ -35,7 +35,7 @@
 //chat
 .chat
     width: 400px
-    min-width: 250px
+    min-width: 400px
     height: 100%
     background-color: #ffffff
     margin: 0
@@ -43,7 +43,7 @@
 .chat-inner
     width: 100%
     height: 100%
-    padding-top: 2em
+    padding-top: 0.5em
     padding-left: 2em
     padding-right: 2em
     margin-bottom: 0
@@ -71,13 +71,25 @@
     flex-wrap: wrap
     justify-content: center
     align-items: center
-    overflow-y: scroll
+    overflow: auto
     height: 100%
 
-app-participant-card
+.users-slider
+    height: 100%
+    display: flex
+    flex-wrap: no-wrap
+    background-color: transparent
+    justify-content: center
+    align-items: start
+    overflow: auto
+
+.participant-card
     width: 50%
     max-width: 560px
     padding: 5px
+
+.participant-card-small
+    padding: 3px
 
 .participant-fullscreen
     width: 100vw
@@ -176,6 +188,10 @@ i.big.icon.wechat
 ::-webkit-scrollbar-thumb:hover
     background: #555
 
+.cards-small-wrapper 
+    &::-webkit-scrollbar-track
+        background: rgba(0,0,0,.1)
+
 .participants-button-container
     display: inline-block
 
@@ -258,6 +274,7 @@ div div.participant:hover
     max-height: 80%
     width: 350px
     z-index: 0
+
 .meeting-setting-container
     position: absolute
     bottom: 11%
@@ -448,6 +465,15 @@ div:moz-full-screen
     100%
         -color: #4e4b4b
 
+.bluePulse
+    animation: bluePulse 2s infinite
+
+@keyframes bluePulse
+    0%
+        color: #1e11da
+    100%
+        -color: #4e4b4b
+
 .border-pulse
     animation: border-pulse 2s infinite
 
@@ -456,7 +482,6 @@ div:moz-full-screen
         border: 1px solid #da0909
     100%
         -border: 1px solid rgba(34,36,38,.15)
-
 
 // media settings
 .settings
@@ -492,6 +517,7 @@ div:moz-full-screen
             font-size: .85714286em
             color: rgba(0,0,0,.4)
             display: inline-block
+            
 .message
     outline: none
     resize: none
@@ -513,7 +539,6 @@ div:moz-full-screen
     height: 100%
     vertical-align: middle
     i:nth-child(2)
-
         margin-left: -13px !important
 
 .drag-icon:hover
@@ -521,6 +546,31 @@ div:moz-full-screen
     i
         cursor: grabbing
         opacity: 1
+
+.cards-wrapper
+    display: contents
+
+.cards-small-wrapper
+    padding: 3px
+    height: 170px
+    display: inline-flex
+    max-width: 100%
+    overflow-x: auto
+    overflow-y: hidden
+    z-index: 1
+
+.cards-position-icons
+    display: none
+    flex-direction: column
+    height: 151px
+    padding: 4px 0 4px 4px
+    margin: 3px 10px 3px 3px
+    overflow: visible
+    background-color: rgba(255, 255, 225, 0.4)
+    border-radius: 5px
+
+.cards-small-wrapper:hover .cards-position-icons
+    display: flex
 
 .left-align
     text-align: left
@@ -534,4 +584,4 @@ i.icon.waiting-icon:hover
     width: 2em !important
 
 .ui.meeting-setting-container.overflow-scroll
-  overflow-y: hidden
+    overflow-y: hidden

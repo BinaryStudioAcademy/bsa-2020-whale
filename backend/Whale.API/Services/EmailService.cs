@@ -5,6 +5,7 @@ using SendGrid;
 using SendGrid.Helpers.Mail;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Whale.API.Services.Abstract;
@@ -60,6 +61,27 @@ namespace Whale.API.Services
             );
 
             var apiKey = _sendGridSettings.Value.ApiKey; // Environment.GetEnvironmentVariable("SENDGRID_API_KEY", EnvironmentVariableTarget.Machine);
+            var client = new SendGridClient(apiKey);
+
+            await client.SendEmailAsync(mail);
+        }
+
+        public async Task SendMeetingInviteToHost(ScheduledMeetingInvite meetingInvite)
+        {
+            var meeting = await _context.Meetings.FirstOrDefaultAsync(meeting => meeting.Id == meetingInvite.MeetingId);
+            var tos = meetingInvite.ReceiverEmails
+                .Select(e => new EmailAddress(e))
+                .ToList();
+
+            var templateData = new Dictionary<string, string>
+            {
+                { "startTime", meeting.StartTime.ToString("f", new CultureInfo("us-EN")) },
+                { "meetingLink", meetingInvite.MeetingLink }
+            };
+
+            var mail = MailHelper.CreateSingleTemplateEmailToMultipleRecipients(From, tos, "d-790722851c484caca8da3722f011212d", templateData);
+
+            var apiKey = _sendGridSettings.Value.ApiKey;
             var client = new SendGridClient(apiKey);
 
             await client.SendEmailAsync(mail);

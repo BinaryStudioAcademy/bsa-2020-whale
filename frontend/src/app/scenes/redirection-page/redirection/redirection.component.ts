@@ -3,6 +3,7 @@ import { Params, ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '@env';
 import { Observable } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-redirection',
@@ -10,10 +11,13 @@ import { Observable } from 'rxjs';
   styleUrls: ['./redirection.component.sass'],
 })
 export class RedirectionComponent implements OnInit {
+  notActiveLink = 'not-active';
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private http: HttpClient
+    private http: HttpClient,
+    private toastr: ToastrService
   ) {}
 
   ngOnInit(): void {
@@ -33,8 +37,19 @@ export class RedirectionComponent implements OnInit {
   }
 
   private redirectToMeeting(invite: string): void {
-    this.findMeetingByShortLink(invite).subscribe((resp) => {
-      this.router.navigate(['/meeting-page', resp]);
-    });
+    this.findMeetingByShortLink(invite).subscribe(
+      (resp) => {
+        if (resp === this.notActiveLink) {
+          this.toastr.info(`Meeting isn't started yet`);
+          this.router.navigate(['/home']);
+        } else {
+          this.router.navigate(['/meeting-page', resp]);
+        }
+      },
+      (err) => {
+        this.toastr.error(err.Message);
+        this.router.navigate(['/home']);
+      }
+    );
   }
 }

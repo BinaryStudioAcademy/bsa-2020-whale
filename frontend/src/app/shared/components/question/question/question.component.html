@@ -1,0 +1,55 @@
+<div class="event message-event">
+  <div class="message-header">
+    <div class="label">
+      <img class="ui avatar image" src="{{ question.asker.avatarUrl }}" />
+    </div>
+    <div class="chat-content">
+      <div class="message-data">
+        <a class="user name">
+          {{ question.asker.firstName }}
+          {{ question.asker.secondName }}
+        </a>
+        <div class="date">
+          {{ question.askedAt | date: "H:mm" }}
+        </div>
+        <div *ngIf="isHost" class="close-icon" (click)="deleteQuestion()">&times;</div>
+      </div>
+      <div class="message-container">
+        <div disabled class="message">
+          <div *ngFor="let row of textRows">
+            {{ row }}
+          </div>
+        </div>
+      </div>
+      <div class="status-container">
+        <div [appQuestionStatus]="question.questionStatus" class="status-icon">
+          <i></i>
+          <span></span>
+        </div>
+        <div *ngIf="isHost" class="status-button-container">
+          <div
+          *ngIf="question.questionStatus == 0"
+          (click)="markAnswering()"
+          class="status-button"
+          >
+            Answer
+          </div>
+          <div
+            *ngIf="question.questionStatus == 1"
+            (click)="markAnswered()"
+            class="status-button"
+          >
+            Mark answered
+          </div>
+          <div
+            *ngIf="question.questionStatus < 2"
+            (click)="markDismissed()"
+            class="status-button"
+          >
+            Dismiss
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

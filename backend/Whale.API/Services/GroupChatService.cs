@@ -99,6 +99,8 @@ namespace Whale.API.Services
 
             return readAndUnreadMessages;
         }
+
+       
         public async Task AddUnreadGroupMessage(GroupMessage message)
         {
             var group = await _groupService.GetGroupAsync(message.GroupId);
@@ -107,17 +109,15 @@ namespace Whale.API.Services
             var receivers = groupUsers.Where(gu => gu.Email != message.Author.Email);
             foreach (UserDTO u in receivers)
             {
-                await _context.UnreadGroupMessages.AddAsync(new UnreadGroupMessage
+                var entry = await _context.UnreadGroupMessages.AddAsync(new UnreadGroupMessage
                 {
                     MessageId = message.Id,
                     ReceiverId = u.Id,
                     GroupId = message.GroupId
                 });
                 await _context.SaveChangesAsync();
-
+                await _notificationsService.AddUpdateUnreadGroupMessageNotification(message, u.Email, entry.Entity);
             }
-
-            //await _notificationsService.AddUnreadMessageNotification(message, receiver.Email, entry.Entity);
         }
 
         public async Task MarkMessageAsRead(UnreadGroupMessageDTO unreadGroupMessageDto)
@@ -131,7 +131,10 @@ namespace Whale.API.Services
             _context.UnreadGroupMessages.Remove(unreadMessage);
             await _context.SaveChangesAsync();
 
-            //await _notificationsService.DeleteUnreadMessageNotification(unreadMessage.ReceiverId, unreadMessage.Id);
+            await _notificationsService.DeleteUpdateUnreadGroupMessageNotification(unreadMessage.ReceiverId, unreadMessage.Id);
         }
+
+       
+       
     }
 }

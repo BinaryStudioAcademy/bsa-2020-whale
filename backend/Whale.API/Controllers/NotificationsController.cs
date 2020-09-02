@@ -24,7 +24,7 @@ namespace Whale.API.Controllers
             _notificationsService = notificationsService;
             
         }
-
+        
         [HttpGet]
         public async Task<ActionResult<IEnumerable<NotificationDTO>>> GetAll()
         {
