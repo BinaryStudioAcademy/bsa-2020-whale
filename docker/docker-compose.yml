@@ -44,6 +44,7 @@ services:
       ConnectionStrings:WhaleDatabase: ${WhaleDBConnectionString}
       BlobStorageSettings:ConnectionString: ${WhaleBlobStorageConnectionString}
       MeetingAPI: "http://meetingapi:4202"
+      ElasticConfiguration:Uri: "http://elasticsearch:9200"
       ConnectionStrings:RedisOptions: "redis:6379"
       ASPNETCORE_URLS: http://+:4203
 

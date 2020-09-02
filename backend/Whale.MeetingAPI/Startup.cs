@@ -24,6 +24,7 @@ using Quartz.Impl;
 using Quartz.Spi;
 using Whale.Shared.Jobs;
 using Whale.DAL.Models;
+using Whale.Shared.Models;
 
 namespace Whale.MeetingAPI
 {
@@ -58,6 +59,9 @@ namespace Whale.MeetingAPI
                     .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
             services.AddHealthChecks()
                     .AddDbContextCheck<WhaleDbContext>("DbContextHealthCheck");
+
+            services.AddSingleton(Configuration.GetSection("ElasticConfiguration").Get<ElasticConfiguration>());
+            services.AddScoped<CustomLogger>();
 
             //services.AddHealthChecksUI();
             services.AddSignalR();

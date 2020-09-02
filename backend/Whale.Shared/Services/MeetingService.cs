@@ -21,6 +21,7 @@ using Whale.DAL.Models.Email;
 using Whale.Shared.Models.Email;
 using System.Net.Http.Headers;
 using Whale.Shared.Models;
+using Whale.Shared.Models.Statistics;
 
 namespace Whale.Shared.Services
 {
@@ -33,6 +34,7 @@ namespace Whale.Shared.Services
         private readonly EncryptHelper _encryptService;
         private readonly SignalrService _signalrService;
         private readonly NotificationsService _notifications;
+        private readonly CustomLogger _customLogger;
 
         public static string BaseUrl { get; } = "http://bsa2020-whale.westeurope.cloudapp.azure.com";
 
@@ -44,7 +46,8 @@ namespace Whale.Shared.Services
             ParticipantService participantService,
             EncryptHelper encryptService,
             SignalrService signalrService,
-            NotificationsService notifications)
+            NotificationsService notifications,
+            CustomLogger customLogger)
             : base(context, mapper)
         {
             _redisService = redisService;
@@ -53,6 +56,7 @@ namespace Whale.Shared.Services
             _encryptService = encryptService;
             _signalrService = signalrService;
             _notifications = notifications;
+            _customLogger = customLogger;
         }
 
         public async Task<MeetingDTO> ConnectToMeeting(MeetingLinkDTO linkDTO, string userEmail)
@@ -308,6 +312,11 @@ namespace Whale.Shared.Services
 
             await _context.SaveChangesAsync();
             await _notifications.UpdateInviteMeetingNotifications(shortUrl);
+
+            var dateDiff = meeting.EndTime?.DateTime.Subtract(meeting.StartTime.DateTime);
+            var usersStats = _context.Participants.Where(p => p.MeetingId == meeting.Id).Select(p => new MeetingUserStatistics { UserId = p.UserId }).ToList();
+            var stats = new MeetingStatistics { MeetingId = meeting.Id, MeetingDuration = dateDiff, MeetingDurationNumber = dateDiff?.TotalSeconds, UsersStats = usersStats };
+            _customLogger.WriteMeetingStats(stats);
         }
 
         public async Task<string> GetShortInviteLink(string id, string pwd)

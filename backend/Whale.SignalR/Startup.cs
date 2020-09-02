@@ -11,6 +11,7 @@ using Whale.DAL.Settings;
 using Whale.Shared.Exceptions;
 using Whale.Shared.Helpers;
 using Whale.Shared.MappingProfiles;
+using Whale.Shared.Models;
 using Whale.Shared.Services;
 using Whale.SignalR.Hubs;
 using Whale.SignalR.Services;
@@ -49,6 +50,9 @@ namespace Whale.SignalR
             services.AddTransient(p => new SignalrService(Configuration.GetValue<string>("SignalR")));
             services.AddScoped(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
             services.AddScoped(x => new EncryptHelper(Configuration.GetValue<string>("EncryptSettings:key")));
+
+            services.AddSingleton(Configuration.GetSection("ElasticConfiguration").Get<ElasticConfiguration>());
+            services.AddScoped<CustomLogger>();
 
             services.AddSignalR();
             services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>

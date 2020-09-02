@@ -20,6 +20,7 @@ using Whale.Shared.Helpers;
 using Whale.Shared.MappingProfiles;
 using Whale.Shared.Services;
 using Whale.DAL.Models;
+using Whale.Shared.Models;
 
 namespace Whale.API
 {
@@ -96,6 +97,9 @@ namespace Whale.API
             services.AddScoped<FileStorageProvider>();
 
             services.AddScoped(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
+
+            services.AddSingleton(Configuration.GetSection("ElasticConfiguration").Get<ElasticConfiguration>());
+            services.AddScoped<CustomLogger>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(opt =>
