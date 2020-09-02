@@ -163,6 +163,7 @@ export class SettingMeetingComponent implements OnInit, AfterViewInit {
         isAudioDisabled: this.isAudioDisabled,
         isVideoDisabled: this.isVideoDisabled,
         isAllowedToChooseRoom: this.isAllowedToChooseRoom,
+        recognitionLanguage: this.meeting.recognitionLanguage,
       })
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(

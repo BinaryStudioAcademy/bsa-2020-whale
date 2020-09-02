@@ -13,6 +13,7 @@ export interface Meeting extends MediaPermissions {
   isWhiteboard: boolean;
   isPoll: boolean;
   isAllowedToChooseRoom: boolean;
+  recognitionLanguage: string;
 
   participants: Participant[];
   pollResults: PollResultDto[];

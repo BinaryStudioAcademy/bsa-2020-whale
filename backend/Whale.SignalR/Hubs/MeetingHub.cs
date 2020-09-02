@@ -420,5 +420,12 @@ namespace Whale.SignalR.Hubs
         {
             await Clients.Group(reaction.MeetingId).SendAsync("OnReaction", reaction);
         }
+
+        [HubMethodName("OnSpeechRecognition")]
+        public Task SpeechRecognition(MeetingSpeechCreateDTO speechDTO)
+        {
+            return _meetingService.SpeechRecognition(speechDTO);
+
+        }
     }
 }

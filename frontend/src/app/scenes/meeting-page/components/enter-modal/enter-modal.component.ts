@@ -18,6 +18,7 @@ export class EnterModalComponent
   public message: string;
   public webcam: boolean;
   public microphone: boolean;
+  public recognitionLanguage: string;
   private leave = false;
 
   constructor() {
@@ -40,6 +41,7 @@ export class EnterModalComponent
       leave: this.leave,
       isAllowedVideoOnStart: this.isAllowedVideoOnStart,
       isAllowedAudioOnStart: this.isAllowedAudioOnStart,
+      recognitionLanguage: this.recognitionLanguage,
     };
     this.close();
   }
@@ -62,4 +64,5 @@ export interface EnterMeetingModalOutputData {
   leave: boolean;
   isAllowedVideoOnStart: boolean;
   isAllowedAudioOnStart: boolean;
+  recognitionLanguage: string;
 }

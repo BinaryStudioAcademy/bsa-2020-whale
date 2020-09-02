@@ -8,5 +8,6 @@
         public bool IsWhiteboard { get; set; }
         public bool IsAllowedToChooseRoom { get; set; }
         public bool IsPoll { get; set; }
+        public string RecognitionLanguage { get; set; }
     }
 }

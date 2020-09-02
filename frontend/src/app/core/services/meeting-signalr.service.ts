@@ -326,4 +326,5 @@ export enum SignalMethods {
   OnDrawingChangePermissions,
   OnHostChangeRoom,
   OnHostChangeMeetingSetting,
+  OnSpeechRecognition,
 }
