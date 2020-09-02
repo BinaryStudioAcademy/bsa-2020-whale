@@ -152,7 +152,11 @@
       </button>
       <butto
        class="ui primary button"
-       *ngIf="meeting.isAllowedToChooseRoom && !roomService.isUserHost && roomService.isDividedIntoRooms"
+       *ngIf="
+       meeting.isAllowedToChooseRoom &&
+       !roomService.isUserHost &&
+       roomService.isDividedIntoRooms &&
+       !roomService.isInRoom"
        (click)="joinRandomRoom()"
       >
         Join random

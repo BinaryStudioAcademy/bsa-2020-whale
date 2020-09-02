@@ -14,7 +14,6 @@ import {
   PollResultDto,
   Reaction,
   ChangedMediaPermissions,
-  RoomWithParticipantsIds,
   MeetingSettings,
 } from '@shared/models';
 import { CanvasWhiteboardUpdate } from 'ng2-canvas-whiteboard';
@@ -92,7 +91,7 @@ export class MeetingSignalrService {
   private onRoomCreated = new Subject<string>();
   public readonly onRoomCreated$ = this.onRoomCreated.asObservable();
 
-  private onRoomCreatedToHost = new Subject<RoomWithParticipantsIds>();
+  private onRoomCreatedToHost = new Subject<string>();
   public readonly onRoomCreatedToHost$ = this.onRoomCreatedToHost.asObservable();
 
   private onRoomClosed = new Subject<string>();
@@ -248,8 +247,8 @@ export class MeetingSignalrService {
 
         this.signalHub.on(
           'OnRoomCreatedToHost',
-          (roomData: RoomWithParticipantsIds) => {
-            this.onRoomCreatedToHost.next(roomData);
+          (roomId: string) => {
+            this.onRoomCreatedToHost.next(roomId);
           }
         );
 
@@ -333,4 +332,5 @@ export enum SignalMethods {
   OnDrawingChangePermissions,
   OnHostChangeRoom,
   OnHostChangeMeetingSetting,
+  GetMeetingEntityForRoom,
 }

@@ -16,12 +16,13 @@ using Whale.SignalR.Services;
 using Whale.SignalR.Models.Room;
 using Whale.Shared.Models.Question;
 using Whale.SignalR.Models.Reaction;
-
+using Whale.DAL.Models.Poll;
 
 namespace Whale.SignalR.Hubs
 {
     public class MeetingHub : Hub
     {
+        private const string meetingSettingsPrefix = "meeting-settings-";
         private readonly MeetingService _meetingService;
         private readonly ParticipantService _participantService;
         private readonly RedisService _redisService;
@@ -301,7 +302,6 @@ namespace Whale.SignalR.Hubs
         [HubMethodName("CreateRoom")]
         public async Task CreateRoom(RoomCreateDTO roomCreateData)
         {
-            Console.WriteLine("CreateRoom");
             var participantHost = _groupsParticipants[roomCreateData.MeetingId]?.FirstOrDefault(p => p.ActiveConnectionId == Context.ConnectionId);
             if (participantHost?.Role == ParticipantRole.Participant) return;
 
@@ -311,10 +311,20 @@ namespace Whale.SignalR.Hubs
             var meeetingData = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(roomCreateData.MeetingId);
             meeetingData.RoomsIds.Add(roomId);
             await _redisService.SetAsync(roomCreateData.MeetingId, meeetingData);
+            var meetingSettings = await _redisService.GetAsync<MeetingSettingsDTO>($"{meetingSettingsPrefix}{roomCreateData.MeetingId}");
+            await _redisService.SetAsync($"{meetingSettingsPrefix}{roomId}", new MeetingSettingsDTO
+            {
+                MeetingHostEmail = participantHost.User.Email,
+                IsAudioAllowed = true,
+                IsVideoAllowed = true,
+                IsWhiteboard = false,
+                IsAllowedToChooseRoom = meetingSettings.IsAllowedToChooseRoom,
+                IsPoll = false
+            });
 
             _groupsParticipants.Add(roomId, new List<ParticipantDTO>());
 
-            await Clients.Caller.SendAsync("OnRoomCreatedToHost", new RoomWithParticipantsIds { RoomId = roomId, ParticipantsIds = roomCreateData.ParticipantsIds});
+            await Clients.Caller.SendAsync("OnRoomCreatedToHost", roomId);
 
             var participants = _groupsParticipants[roomCreateData.MeetingId]
                     .Where(p => roomCreateData.ParticipantsIds.Contains(p.Id.ToString()))
@@ -354,6 +364,28 @@ namespace Whale.SignalR.Hubs
             }
 
             return rooms;
+        }
+
+        [HubMethodName("GetMeetingEntityForRoom")]
+        public async Task<MeetingDTO> GetMeetingEntityForRoom(string roomId)
+        {
+            _redisService.Connect();
+            var roomData = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(roomId);
+            if (roomData is null) throw new NotFoundException("Room");
+
+            var roomSettings = await _redisService.GetAsync<MeetingSettingsDTO>(meetingSettingsPrefix + roomId);
+
+            return new MeetingDTO
+            {
+                Id = Guid.Parse(roomId),
+                IsVideoAllowed = roomSettings.IsVideoAllowed,
+                IsAudioAllowed = roomSettings.IsAudioAllowed,
+                IsWhiteboard = roomSettings.IsWhiteboard,
+                IsPoll = roomSettings.IsPoll,
+                IsAllowedToChooseRoom = roomSettings.IsAllowedToChooseRoom,
+                Participants = new List<ParticipantDTO>(),
+                PollResults = new List<PollResultDTO>()
+            };
         }
 
         [HubMethodName("OnLeaveRoom")]

@@ -1,11 +1,12 @@
 import { Injectable, EventEmitter } from '@angular/core';
-import { MeetingSignalrService, SignalMethods } from '.';
+import { MeetingSignalrService, SignalMethods } from './meeting-signalr.service';
 import { ToastrService } from 'ngx-toastr';
 import {
   Participant,
   RoomDTO,
   ParticipantRole,
   RoomCreate,
+  Meeting,
 } from '@shared/models';
 
 @Injectable({
@@ -27,10 +28,9 @@ export class RoomService {
     private toastr: ToastrService
   ) {
     this.meetingSignalrService.onRoomCreatedToHost$.subscribe(
-      (roomData) => {
-        this.roomsIds.push(roomData.roomId);
-        const participants: string[] = roomData.participantsIds;
-        this.configureParticipantsInRooms(roomData.roomId, []);
+      (roomId) => {
+        this.roomsIds.push(roomId);
+        this.participantsInRooms.set(roomId, []);
       },
       (err) => {
         this.toastr.error('Error occured while trying to create room');
@@ -42,17 +42,7 @@ export class RoomService {
     );
   }
 
-  private configureParticipantsInRooms(
-    roomId: string,
-    participantsIds: Array<string>
-  ): void {
-    this.participantsInRooms.set(
-      roomId,
-      this.participants.filter((p) => participantsIds.some((pp) => p.id === pp))
-    );
-  }
-
-  public getRoomsOfMeeting(meetingId: string, callback: () => void = () => {}): void {
+  public getRoomsOfMeeting(meetingId: string, callback: () => void = () => { }): void {
     this.meetingSignalrService.signalHub
       .invoke(
         SignalMethods[SignalMethods.GetCreatedRooms],
@@ -170,6 +160,16 @@ export class RoomService {
     this.addEmptyRooms(
       numberOfRooms - this.previouslyDividedParticipants.length
     );
+  }
+
+  public async getMeetingEntityForRoom(roomId: string): Promise<Meeting> {
+    const meetingEntity = await this.meetingSignalrService.signalHub.invoke(
+      SignalMethods[SignalMethods.GetMeetingEntityForRoom], roomId
+    );
+    if (meetingEntity) {
+      return meetingEntity;
+    }
+    this.toastr.error('Cannot connect to room');
   }
 
   private addEmptyRooms(numberOfRooms: number): void {

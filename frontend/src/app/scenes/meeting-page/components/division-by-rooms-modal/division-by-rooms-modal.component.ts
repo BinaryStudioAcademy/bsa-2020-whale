@@ -79,7 +79,7 @@ export class DivisionByRoomsModalComponent
 
   public leaveRoom(): void {
     this.result = false;
-    this.closeModal();
+    this.close();
     this.router.navigate([
       `/meeting-page/${this.roomService.originalMeetingUrl}`,
     ]);
@@ -87,7 +87,7 @@ export class DivisionByRoomsModalComponent
 
   public redirectIntoRoom(roomId: string): void {
     this.result = true;
-    this.closeModal(true);
+    this.close();
     this.onCanMoveIntoRoomEvent.subscribe(() => {
       if (!this.roomService.originalMeetingUrl) {
         this.roomService.originalMeetingUrl = this.meetingLink;
@@ -136,21 +136,9 @@ export class DivisionByRoomsModalComponent
     );
   }
 
-  public closeModal(isMoveToRoom: boolean = false): void {
-    if (
-      this.meeting.isAllowedToChooseRoom &&
-      !this.roomService.isUserHost &&
-      !isMoveToRoom
-      ){
-      this.toastr.warning('You should choose a room');
-    } else {
-      this.close();
-    }
-  }
-
   public joinRandomRoom(): void {
     this.result = true;
-    this.closeModal(true);
+    this.close();
     const allRoomsIds = Array.from(this.roomService.participantsInRooms.keys());
     const roomId = allRoomsIds[Math.floor(Math.random() * allRoomsIds.length)];
     this.onCanMoveIntoRoomEvent.subscribe(() => {

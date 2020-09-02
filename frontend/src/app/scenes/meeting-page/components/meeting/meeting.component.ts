@@ -978,8 +978,8 @@ export class MeetingComponent
     if (!this.meetingStatistics) {
       if (!this.meeting) {
         this.toastr.warning('Something went wrong. Try again later.');
-        this.route.params.subscribe((params: Params) => {
-          this.getMeeting(params[`link`]);
+        this.route.params.subscribe(async (params: Params) => {
+          await this.getMeeting(params[`link`]);
         });
       }
       this.meetingStatistics = {
@@ -1126,23 +1126,9 @@ export class MeetingComponent
     });
   }
 
-  private getMeeting(link: string): void {
+  private async getMeeting(link: string): Promise<void> {
     if (this.isRoom) {
-      this.meeting = {
-        id: this.route.snapshot.params.link,
-        settings: '',
-        startTime: new Date(),
-        isScheduled: false,
-        isRecurrent: false,
-        isAudioAllowed: true,
-        isVideoAllowed: true,
-        isWhiteboard: false,
-        isAllowedToChooseRoom: false,
-        isPoll: false,
-        anonymousCount: 0,
-        pollResults: [],
-        participants: [],
-      };
+      this.meeting = await this.roomService.getMeetingEntityForRoom(this.route.snapshot.params.link);
 
       this.connectionData.meetingId = this.route.snapshot.params.link;
       this.connectionData.meetingPwd = '';
@@ -1279,7 +1265,7 @@ export class MeetingComponent
   //#region peers
   // send message to all subscribers that added new user
   private onPeerOpen(id: string): void {
-    this.route.params.subscribe((params: Params) => {
+    this.route.params.subscribe(async (params: Params) => {
       const link: string = params[`link`];
       const urlParams = new URLSearchParams(link);
       const groupId = urlParams.get('id');
@@ -1295,7 +1281,7 @@ export class MeetingComponent
         isRoom: false,
       };
 
-      this.getMeeting(link);
+      await this.getMeeting(link);
     });
   }
 
