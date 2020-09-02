@@ -5,7 +5,10 @@
         <h2>Rooms</h2>
       </div>
     </div>
-    <div class="content" *ngIf="!roomService.isDividedIntoRooms">
+    <div class="content" *ngIf="!roomService.isDividedIntoRooms && !roomService.isUserHost">
+      <h1>No room available</h1>
+    </div>
+    <div class="content" *ngIf="!roomService.isDividedIntoRooms && roomService.isUserHost">
       <div class="ui right labeled input">
         <label for="duration" class="ui label duration-label">Duration</label>
         <input
@@ -29,8 +32,14 @@
           class="ui button number-of-rooms-action"
           (click)="numberOfRoomsChanged()"
         >
-          divide
+          Reasign
         </button>
+      </div>
+      <div class="allow-to-choose-room">
+        <div class="ui checkbox">
+          <input #allowToChooseRoom type="checkbox" name="example" (change)="changeRoomPermission($event)">
+          <label>Allow participants to choose room</label>
+        </div>
       </div>
 
       <div class="rooms">
@@ -44,6 +53,7 @@
             Room:
           </div>
           <div
+            *ngIf="!meeting.isAllowedToChooseRoom"
             class="ui divided list"
             dndDropzone
             dndEffectAllowed="move"
@@ -122,7 +132,10 @@
       </div>
     </div>
     <div class="actions">
-      <button class="ui button" (click)="close()">Close</button>
+      <button 
+        class="ui button"
+        *ngIf="roomService.isUserHost"
+        (click)="close()">Close</button>
       <button
         class="ui primary button"
         *ngIf="!roomService.isDividedIntoRooms"
@@ -137,6 +150,13 @@
       >
         Leave room
       </button>
+      <butto
+       class="ui primary button"
+       *ngIf="meeting.isAllowedToChooseRoom && !roomService.isUserHost"
+       (click)="joinRandomRoom()"
+      >
+        Join random
+      </butto>
     </div>
   </div>
 </div>

@@ -368,7 +368,7 @@
             <span
               data-tooltip="Divide participants into rooms"
               data-position="top right"
-              *ngIf="isHost || meeting?.isAllowedToChooseRoom"
+              *ngIf="isHost"
             >
               <i
                 (click)="openRoomsModal()"
@@ -469,6 +469,7 @@
           (pinVideoEvent)="pinCard($event)"
           [data]="data"
           [meetingHolder]="currentParticipant"
+          [meetingId]="meeting.id"
         >
         </app-participant-card>
       </div>
@@ -614,7 +615,7 @@
   >
     <button
       id="meeting-poll-new"
-      *ngIf="!meeting.isPoll || isHost || isRoom"
+      *ngIf="!meeting.isPoll || isHost"
       (click)="pollService.onNewPollClick()"
       class="ui button"
       id="new-poll-btn"

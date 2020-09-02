@@ -30,7 +30,7 @@ export class RoomService {
       (roomData) => {
         this.roomsIds.push(roomData.roomId);
         const participants: string[] = roomData.participantsIds;
-        this.configureParticipantsInRooms(roomData.roomId, participants);
+        this.configureParticipantsInRooms(roomData.roomId, []);
       },
       (err) => {
         this.toastr.error('Error occured while trying to create room');
@@ -140,6 +140,23 @@ export class RoomService {
         participantsIds: participants.map((p) => p.id),
       } as RoomCreate);
     });
+    this.isDividedIntoRooms = true;
+  }
+
+  public createEmptyRooms(
+    meetingId: string,
+    meetingLink: string,
+    duration: number,
+    numberOfRooms: number
+  ) {
+    for (let i = 0; i < numberOfRooms; i++) {
+      this.meetingSignalrService.invoke(SignalMethods.CreateRoom, {
+        meetingId,
+        meetingLink,
+        duration,
+        participantsIds: this.participants.filter(p => p.role !== ParticipantRole.Host).map(p => p.id),
+      });
+    }
     this.isDividedIntoRooms = true;
   }
 

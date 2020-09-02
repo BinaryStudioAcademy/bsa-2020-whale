@@ -55,6 +55,8 @@ import {
   MediaData,
   ReactionsEnum,
   Reaction,
+  MediaPermissions,
+  MediaState,
 } from '@shared/models';
 import { EnterModalComponent } from '../enter-modal/enter-modal.component';
 import { DivisionByRoomsModalComponent } from '../division-by-rooms-modal/division-by-rooms-modal.component';
@@ -321,9 +323,7 @@ export class MeetingComponent
           );
           this.createParticipantCard(this.currentParticipant);
 
-          if (this.isHost) {
-            this.roomService.getRoomsOfMeeting(this.meeting.id);
-          }
+          this.roomService.getRoomsOfMeeting(this.meeting.id);
         },
         (err) => {
           this.toastr.error(err.Message);
@@ -449,14 +449,11 @@ export class MeetingComponent
 
             this.meeting.isAudioAllowed = data.isAudioAllowed;
             this.meeting.isVideoAllowed = data.isVideoAllowed;
-            if (!this.isHost) {
-              this.toggleMicrophone();
-              this.toggleCamera();
-            }
 
             this.meetingSignalrService.invoke<ChangedMediaState>(
               SignalMethods.OnMediaStateChanged,
               {
+                meetingId: this.meeting.id,
                 streamId: this.currentParticipant.streamId,
                 isAudioAllowed: this.meeting.isAudioAllowed,
                 isVideoAllowed: this.meeting.isVideoAllowed,
@@ -663,7 +660,11 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (roomId) => {
-          if (!this.isHost) {
+          if (!this.isHost && this.meeting.isAllowedToChooseRoom){
+            this.simpleModalService.removeAll();
+            this.openRoomsModal();
+          }
+          else if (!this.isHost) {
             this.isMoveToRoom = true;
             this.router.navigate([`/room/${roomId}`]);
           }
@@ -676,6 +677,7 @@ export class MeetingComponent
     this.meetingSignalrService.onRoomClosed$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((link) => {
+        this.simpleModalService.removeAll();
         if (this.isRoom) {
           this.isMoveToMeeting = true;
           this.router.navigate([`/meeting-page/${link}`]);
@@ -742,13 +744,13 @@ export class MeetingComponent
     if (this.mediaSettingsService.getSettings().IsMirrorVideo) {
       this.currentVideo.nativeElement.style.transform = 'scale(-1,1)';
     }
-    // show a warning dialog if close current tab or window
-    window.onbeforeunload = (ev: BeforeUnloadEvent) => {
-      ev.preventDefault();
-      ev = ev;
-      ev.returnValue = '';
-      return '';
-    };
+    // // show a warning dialog if close current tab or window
+    // window.onbeforeunload = (ev: BeforeUnloadEvent) => {
+    //   ev.preventDefault();
+    //   ev = ev;
+    //   ev.returnValue = '';
+    //   return '';
+    // };
   }
 
   public ngAfterViewInit(): void {
@@ -770,6 +772,7 @@ export class MeetingComponent
   }
 
   public ngOnDestroy(): void {
+    this.simpleModalService.removeAll();
     this.destroyPeer();
     this.currentUserStream?.getTracks().forEach((track) => track.stop());
 
@@ -1138,7 +1141,6 @@ export class MeetingComponent
       .subscribe(
         (resp) => {
           this.meeting = resp.body;
-          console.log('meeting: ', this.meeting);
           this.createEnterModal().then(() => {
             this.currentStreamLoaded.emit();
             this.connectionData.meetingId = this.meeting.id;
@@ -1168,13 +1170,14 @@ export class MeetingComponent
 
   private invokeMediaStateChanged(receiverConnectionId = ''): void {
     this.meetingSignalrService.invoke(SignalMethods.OnMediaStateChanged, {
+      meetingId: this.meeting.id,
       streamId: this.currentUserStream.id,
       receiverConnectionId,
       isAudioAllowed: this.meeting.isAudioAllowed,
       isVideoAllowed: this.meeting.isVideoAllowed,
       isAudioActive: !this.isMicrophoneMuted,
       isVideoActive: !this.isCameraMuted,
-    });
+    } as MediaState);
   }
 
   private async createEnterModal(): Promise<void> {
@@ -1224,9 +1227,10 @@ export class MeetingComponent
           this.meetingSignalrService.invoke(
             SignalMethods.OnMediaPermissionsChanged,
             {
+              meetingId: this.meeting.id,
               isAudioAllowed: modalResult.isAllowedAudioOnStart,
               isVideoAllowed: modalResult.isAllowedVideoOnStart,
-            }
+            } as ChangedMediaPermissions
           );
         });
     }
@@ -1280,6 +1284,7 @@ export class MeetingComponent
       currentStreamId: stream.id,
       stream,
       dynamicData: new BehaviorSubject<ParticipantDynamicData>({
+        meetingId: this.meeting.id,
         isUserHost: participant.role === ParticipantRole.Host,
         userFirstName: participant.user.firstName,
         userSecondName: participant.user.secondName,
@@ -1358,12 +1363,13 @@ export class MeetingComponent
     this.meetingSignalrService.invoke<ChangedMediaPermissions>(
       SignalMethods.OnMediaPermissionsChanged,
       {
+        meetingId: this.meeting.id,
         changedParticipantConnectionId: participantConnectionId,
         isAudioAllowed: data.isAudioAllowed,
         isVideoAllowed: data.isVideoAllowed,
         isAudioActive: data.isAudioActive,
         isVideoActive: data.isVideoActive,
-      }
+      } as ChangedMediaPermissions
     );
   }
 
@@ -1392,6 +1398,7 @@ export class MeetingComponent
     }
 
     changedMediaData.dynamicData.next({
+      meetingId: this.meeting.id,
       isUserHost: participant.role === ParticipantRole.Host,
       userFirstName: participant.user.firstName,
       userSecondName: participant.user.secondName,
@@ -1637,6 +1644,7 @@ export class MeetingComponent
 
     this.simpleModalService
       .addModal(DivisionByRoomsModalComponent, {
+        meeting: this.meeting,
         meetingId: this.meeting.id,
         meetingLink: link,
         onCanMoveIntoRoomEvent: this.onCanMoveIntoRoomEvent,
