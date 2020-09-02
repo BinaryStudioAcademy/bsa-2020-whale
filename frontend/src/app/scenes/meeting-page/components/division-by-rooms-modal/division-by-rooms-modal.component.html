@@ -126,9 +126,16 @@
               data-tooltip="Join room"
               data-position="top right"
               class="ui inverted secondary button"
+              *ngIf="meeting.id !== participantsOfRoom.key"
               (click)="redirectIntoRoom(participantsOfRoom.key)"
             >
               Join
+            </div>
+            <div
+              class="ui inverted secondary disabled button"
+              *ngIf="meeting.id === participantsOfRoom.key && roomService.isInRoom"
+            >
+              You are here
             </div>
           </div>
           <div
