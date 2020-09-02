@@ -1,6 +1,8 @@
-import { Component, OnInit, EventEmitter } from '@angular/core';
+import { Component, OnInit, EventEmitter, Input } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { PointAgenda } from '@shared/models/agenda/agenda';
+import { HttpService } from 'app/core/services';
+import { environment } from '@env';
 
 @Component({
   selector: 'app-agenda',
@@ -8,23 +10,25 @@ import { PointAgenda } from '@shared/models/agenda/agenda';
   styleUrls: ['./agenda.component.sass'],
 })
 export class AgendaComponent implements OnInit {
-  public agenda = [
-    { name: 'Introduction in Silver Age', time: '10:20' },
-    {
-      name: 'Creativity of Anna Akhmatova',
-      time: '10:40',
-    },
-    { name: 'Poetry by Marina Tsvetaeva', time: '11:50' },
-  ];
+  public agenda: PointAgenda[] = [];
   toastRef;
-  constructor(private toastr: ToastrService) {
+  @Input() meetingId;
+  constructor(private toastr: ToastrService, private httpServie: HttpService) {
   }
 
+
   ngOnInit(): void {
+    this.httpServie.getRequest<PointAgenda[]>(`${environment.apiUrl}/api/meeting/agenda/${this.meetingId}`)
+    .subscribe((res) =>
+    {
+      this.agenda = res;
+
+    });
+
   }
   finishedPoint(event, a: PointAgenda){
     if (event.target.checked){
-      this.toastr.info(a.name + " was finished");
+      this.toastr.info(a.name + ' was finished');
     }
   }
 }

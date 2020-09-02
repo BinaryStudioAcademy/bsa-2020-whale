@@ -218,9 +218,9 @@ export class ScheduleMeetingPageComponent implements OnInit {
       .toDate();
   }
   public addNewPoint() {
-    this.pointList.push(this.point);
-    //this.point = this.pointList[this.pointList.length - 1];
-    console.log(this.pointList);
+    let newPoint ={name:this.point.name, startTime:this.point.startTime };
+    this.pointList.push(newPoint);
+    console.log(this.pointList)
   }
   public removeTag(event) {
     this.pointList.splice(this.pointList.indexOf(event), 1);

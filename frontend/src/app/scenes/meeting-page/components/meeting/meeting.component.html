@@ -379,6 +379,10 @@
               >
               </i>
             </span>
+            <span data-tooltip="Plan Meeting">
+              <i class="big list alternate icon"
+              (click)="isPlanning=!isPlanning"></i>
+            </span>
             <span data-tooltip="Fullscreen" data-position="top right">
               <i
                 id="meeting-options-fullscreen"
@@ -394,10 +398,6 @@
                 (click)="isShowCurrentParticipantCard = true"
                 class="big user plus icon big-left-margin"
               ></i>
-            </span>
-            <span data-tooltip="Plan Meeting">
-              <i class="big list alternate icon"
-              (click)="isPlanning=!isPlanning"></i>
             </span>
           </div>
           <div>
@@ -713,7 +713,7 @@
     </div>
   </div>
   <div class="agenda-container">
-    <app-agenda *ngIf="isPlanning"></app-agenda>
+    <app-agenda *ngIf="isPlanning" [meetingId]="meeting.id"></app-agenda>
   </div>
   <div
     class="ui meeting-setting-container overflow-scroll segment"

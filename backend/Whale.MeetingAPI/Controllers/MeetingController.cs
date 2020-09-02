@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Whale.Shared.Jobs;
+using Whale.Shared.Models;
 using Whale.Shared.Models.Meeting;
 using Whale.Shared.Services;
 
@@ -73,6 +75,12 @@ namespace Whale.API.Controllers
         {
             await _meetingService.UpdateMeetingSettings(updateSettingsDTO);
             return Ok();
+        }
+        [HttpGet("agenda/{meetingId}")]
+        public async Task<ActionResult<List<AgendaPointDTO>>> GetAgenda(string meetingId)
+        {
+            List<AgendaPointDTO> agendaPoints = await _meetingService.GetAgendaPoints(meetingId);//_httpService.GetAsync<List<AgendaPointDTO>>($"api/meeting/agenda/{meetingId}");
+            return Ok(agendaPoints);
         }
     }
 }

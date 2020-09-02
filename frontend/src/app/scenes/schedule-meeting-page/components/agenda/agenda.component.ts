@@ -17,22 +17,21 @@ export class AgendaComponent implements OnInit {
     minutesInterval: 10,
   };
   @Input() point: PointAgenda;
-  @Output() tagRemoved = new EventEmitter<string>();
-  @Output() newPoint = new EventEmitter<PointAgenda>();
+  @Output() tagRemoved = new EventEmitter<PointAgenda>();
   constructor() {
     const today: Date = new Date();
     this.form = new FormGroup({
       time: new FormControl(`${today.getHours() + 1}:30`),
-      name: new FormControl('Name'),
+      name: new FormControl(),
     });
   }
 
   ngOnInit(): void {}
   onSubmit() {
     this.point.name = this.form.controls.name.value;
-    this.point.startTime = this.form.controls.time.value; //} as PointAgenda;
-    console.log(this.point);
-    //this.newPoint.emit(this.point);
+    this.point.startTime = this.form.controls.time.value;
   }
-  removeTag(): void {}
+  removeTag(point): void {
+    this.tagRemoved.emit(point);
+  }
 }
