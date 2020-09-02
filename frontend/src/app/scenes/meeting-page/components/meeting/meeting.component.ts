@@ -1227,6 +1227,7 @@ export class MeetingComponent
         isCurrentParticipantHost,
         isAllowedAudioOnStart: this.meeting.isAudioAllowed,
         isAllowedVideoOnStart: this.meeting.isVideoAllowed,
+        recognitionLanguage: this.meeting.recognitionLanguage,
       })
       .toPromise();
 
@@ -1877,31 +1878,27 @@ export class MeetingComponent
   }
   //#region SpeechRecognition
   private configureRecognition() {
-    console.log('rec');
-    console.log(this.meeting.recognitionLanguage);
     try {
       this.recognition = new webkitSpeechRecognition();
       this.recognition.continuous = true;
-      this.recognition.lang = this.meeting.recognitionLanguage;
+      if (this.meeting.recognitionLanguage) {
+        this.recognition.lang = this.meeting.recognitionLanguage;
+      }
       this.recognition.interimResults = false;
       this.recognition.maxAlternatives = 1;
       fromEvent(this.recognition, 'result').pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (event: SpeechRecognitionEvent) => {
-          console.info('Event.');
           this.meetingSignalrService.invoke(SignalMethods.OnSpeechRecognition, {
             meetingId: this.meeting.id,
             userId: this.currentParticipant.id,
             message: event.results[event.results.length - 1][0].transcript,
           } as MeetingSpeechCreate);
-          console.info(event.results[event.results.length - 1][0].transcript);
-          this.toastr.info(event.results[event.results.length - 1][0].transcript);
         }
       );
       fromEvent(this.recognition, 'end').pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (event) => {
-          console.info(event);
           if (!this.isRecognitionStop) {
             this.recognition.start();
           }

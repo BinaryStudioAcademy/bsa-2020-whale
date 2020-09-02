@@ -86,6 +86,7 @@ namespace Whale.Shared.Services
             meetingDTO.IsPoll = meetingSettings.IsPoll;
             meetingDTO.IsWhiteboard = meetingSettings.IsWhiteboard;
             meetingDTO.IsAllowedToChooseRoom = meetingSettings.IsAllowedToChooseRoom;
+            meetingDTO.RecognitionLanguage = meetingSettings.RecognitionLanguage;
 
             return meetingDTO;
         }
@@ -246,6 +247,7 @@ namespace Whale.Shared.Services
             meetingSettings.IsAudioAllowed = !updateSettingsDTO.IsAudioDisabled;
             meetingSettings.IsVideoAllowed = !updateSettingsDTO.IsVideoDisabled;
             meetingSettings.IsAllowedToChooseRoom = updateSettingsDTO.IsAllowedToChooseRoom;
+            meetingSettings.RecognitionLanguage = updateSettingsDTO.RecognitionLanguage;
 
             await _redisService.SetAsync($"{meetingSettingsPrefix}{updateSettingsDTO.MeetingId}", meetingSettings);
         }

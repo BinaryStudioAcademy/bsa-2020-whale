@@ -383,6 +383,7 @@ namespace Whale.SignalR.Hubs
                 IsWhiteboard = roomSettings.IsWhiteboard,
                 IsPoll = roomSettings.IsPoll,
                 IsAllowedToChooseRoom = roomSettings.IsAllowedToChooseRoom,
+                RecognitionLanguage = roomSettings.RecognitionLanguage,
                 Participants = new List<ParticipantDTO>(),
                 PollResults = new List<PollResultDTO>()
             };

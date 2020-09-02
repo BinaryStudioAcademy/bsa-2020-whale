@@ -20,6 +20,7 @@ export class EnterModalComponent
   public microphone: boolean;
   public recognitionLanguage: string;
   private leave = false;
+  public dropDownValue = 'Choose Language';
 
   constructor() {
     super();
@@ -35,6 +36,18 @@ export class EnterModalComponent
   }
 
   public onProceed(): void {
+    if (this.isCurrentParticipantHost) {
+      switch (this.dropDownValue) {
+        case 'Russian':
+          this.recognitionLanguage = 'ru';
+          break;
+        case 'Ukrainian':
+          this.recognitionLanguage = 'ua';
+          break;
+        default:
+          this.recognitionLanguage = 'en-US';
+      }
+    }
     this.result = {
       microOff: !this.microphone,
       cameraOff: !this.webcam,
@@ -44,6 +57,10 @@ export class EnterModalComponent
       recognitionLanguage: this.recognitionLanguage,
     };
     this.close();
+  }
+
+  public onDropdownClick(value: string) {
+    this.dropDownValue = value;
   }
 
   public onLeave(): void {
@@ -56,6 +73,7 @@ export interface EnterMeetingModalInputData {
   isCurrentParticipantHost: boolean;
   isAllowedVideoOnStart: boolean;
   isAllowedAudioOnStart: boolean;
+  recognitionLanguage: string;
 }
 
 export interface EnterMeetingModalOutputData {
