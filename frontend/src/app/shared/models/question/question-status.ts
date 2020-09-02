@@ -1,5 +1,5 @@
 export enum QuestionStatus {
-  Created,
+  Pending,
   Answering,
   Answered,
   Dismissed,

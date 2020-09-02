@@ -6,7 +6,7 @@ namespace Whale.DAL.Models.Question
 {
 	public enum QuestionStatus
 	{
-		Created,
+		Pending,
 		Answering,
 		Answered,
 		Dismissed

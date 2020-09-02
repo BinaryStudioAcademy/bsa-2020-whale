@@ -20,6 +20,7 @@ using System.Text;
 using Whale.DAL.Models.Email;
 using Whale.Shared.Models.Email;
 using System.Net.Http.Headers;
+using Whale.Shared.Models;
 
 namespace Whale.Shared.Services
 {
@@ -321,5 +322,9 @@ namespace Whale.Shared.Services
             await _redisService.ConnectAsync();
             return await _redisService.GetAsync<string>(shortURL);
         }
+        public async Task<List<AgendaPointDTO>> GetAgendaPoints(string meetingId)
+        {
+            return _mapper.Map<List<AgendaPointDTO>>(_context.AgendaPoints.Where(x => x.MeetingId == Guid.Parse(meetingId)).ToList());
+        } 
     }
 }
