@@ -52,7 +52,7 @@ export class RoomService {
     );
   }
 
-  public getRoomsOfMeeting(meetingId: string): void {
+  public getRoomsOfMeeting(meetingId: string, callback: () => void = () => {}): void {
     this.meetingSignalrService.signalHub
       .invoke(
         SignalMethods[SignalMethods.GetCreatedRooms],
@@ -65,6 +65,7 @@ export class RoomService {
         });
         if (rooms.length > 0) {
           this.isDividedIntoRooms = true;
+          callback();
         } else {
           this.isDividedIntoRooms = false;
         }

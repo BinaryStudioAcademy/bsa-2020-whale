@@ -80,6 +80,6 @@ export class MeetingSettingsService {
     );
 
     this.meetingService
-      .updateMeetingSettings(updateSettingsEntity);
+      .updateMeetingSettings(updateSettingsEntity).subscribe();
   }
 }

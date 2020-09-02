@@ -241,6 +241,7 @@ namespace Whale.Shared.Services
             meetingSettings.IsPoll = updateSettingsDTO.IsPoll;
             meetingSettings.IsAudioAllowed = !updateSettingsDTO.IsAudioDisabled;
             meetingSettings.IsVideoAllowed = !updateSettingsDTO.IsVideoDisabled;
+            meetingSettings.IsAllowedToChooseRoom = updateSettingsDTO.IsAllowedToChooseRoom;
 
             await _redisService.SetAsync($"{meetingSettingsPrefix}{updateSettingsDTO.MeetingId}", meetingSettings);
         }

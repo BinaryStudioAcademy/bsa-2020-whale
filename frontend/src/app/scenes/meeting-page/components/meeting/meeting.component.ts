@@ -345,7 +345,9 @@ export class MeetingComponent
           );
           this.createParticipantCard(this.currentParticipant);
 
-          this.roomService.getRoomsOfMeeting(this.meeting.id);
+          if (this.meeting.isAllowedToChooseRoom && !this.isHost){
+            this.openRoomsModal();
+          }
         },
         (err) => {
           this.toastr.error(err.Message);
@@ -549,7 +551,6 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (setting) => {
-          console.log('meetingSettingsChanged', setting);
           if (
             !this.meeting.isWhiteboard &&
             setting.isWhiteboard &&
