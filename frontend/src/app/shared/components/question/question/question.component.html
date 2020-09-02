@@ -12,7 +12,7 @@
         <div class="date">
           {{ question.askedAt | date: "H:mm" }}
         </div>
-        <div class="close-icon" (click)="deleteQuestion()">&times;</div>
+        <div *ngIf="isHost" class="close-icon" (click)="deleteQuestion()">&times;</div>
       </div>
       <div class="message-container">
         <div disabled class="message">
