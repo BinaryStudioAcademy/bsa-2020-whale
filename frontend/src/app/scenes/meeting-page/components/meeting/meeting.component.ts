@@ -1494,9 +1494,6 @@ export class MeetingComponent
       });
       this.isNewMsg = false;
     }
-
-    // this.isNewMsg = !(this.isShowChat && this.isChat);
-    // console.log(this.isNewMsg);
   }
 
   public sendMessage(): void {
