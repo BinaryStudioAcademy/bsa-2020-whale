@@ -1,6 +1,10 @@
 <spiner *ngIf="isMeetingLoading" size="'massive'"></spiner>
-<div *ngIf="isWaitingForRecord" class="waiting-for-record-modal">
+<div *ngIf="isWaitingForRecord" class="notification">
   <p>Waiting record...</p>
+</div>
+
+<div *ngIf="isSomeoneRecordingScreen" class="notification">
+  <p>Conference is recording</p>
 </div>
 
 <div #mainArea class="bg-white">
