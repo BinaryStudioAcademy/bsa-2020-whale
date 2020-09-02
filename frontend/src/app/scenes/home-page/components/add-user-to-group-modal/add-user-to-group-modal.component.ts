@@ -88,6 +88,7 @@ export class AddUserToGroupModalComponent
     });
     this.cachedContacts.splice(this.cachedContacts.indexOf(contact), 1);
     this.contacts.splice(this.contacts.indexOf(contact), 1);
+    this.isLoading = false;
   }
 
   public addEmailTag(valid: boolean): void {
