@@ -3,5 +3,6 @@
     <div class="point item">
       <input class="ui checkbox" type="checkbox" (change)="finishedPoint($event,a)">
      <div class="text"> {{ a.name }} - {{a.startTime | date:'shortTime'}}</div></div>
-  </div>
+     <button class="ui button" *ngIf="isSneeze"(click)="sneezeTopic(a)">Sneeze</button>
+    </div>
 </div>

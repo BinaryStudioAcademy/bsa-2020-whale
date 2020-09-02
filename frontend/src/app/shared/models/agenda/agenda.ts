@@ -1,4 +1,4 @@
 export interface PointAgenda {
-  name: any;
-  startTime: any;
+  name: string;
+  startTime: Date;
 }

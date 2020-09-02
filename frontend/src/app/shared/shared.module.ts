@@ -27,6 +27,7 @@ import { QuestionComponent } from './components/question/question/question.compo
 import { QuestionStatusDirective } from './directives/question-status.directive';
 import { DndModule } from 'ngx-drag-drop';
 import { ToastrWithButtonComponent } from './components/toastr-with-button/toastr-with-button.component';
+import { CustomToastComponent } from './components/custom-toast/custom-toast.component';
 
 @NgModule({
   declarations: [
@@ -53,6 +54,7 @@ import { ToastrWithButtonComponent } from './components/toastr-with-button/toast
     QuestionComponent,
     QuestionStatusDirective,
     ToastrWithButtonComponent,
+    CustomToastComponent,
   ],
   imports: [
     CommonModule,
@@ -79,6 +81,7 @@ import { ToastrWithButtonComponent } from './components/toastr-with-button/toast
     TagComponent,
     QuestionComponent,
     DndModule,
+    CustomToastComponent,
   ],
 })
 export class SharedModule {}
