@@ -1504,9 +1504,6 @@ export class MeetingComponent
   public onCardsLayoutMouseEnter(): void {
     this.pinnedLayoutMenuSticky =
       window.innerWidth <= this.cardsLayout.nativeElement.offsetWidth + 40;
-      console.log(window.innerWidth)
-      console.log(this.cardsLayout.nativeElement.offsetWidth)
-      console.log(this.pinnedLayoutMenuSticky)
   }
   //#endregion participant cards
 
