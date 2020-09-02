@@ -23,6 +23,7 @@ import { ConfirmationModalComponent } from '@shared/components/confirmation-moda
 import { group } from 'console';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { MeetingSettingsService } from '../../../../core/services/meeting-settings.service';
+import { CurrentChatService } from 'app/core/services/currentChat.service';
 
 @Component({
   selector: 'app-home-page',
@@ -67,7 +68,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
     private whaleSignalrService: WhaleSignalService,
     private contactService: ContactService,
     private messageService: MessageService,
-    private meetingSettingsService: MeetingSettingsService
+    private meetingSettingsService: MeetingSettingsService,
+    private currentChat: CurrentChatService
   ) {}
 
   ngOnDestroy(): void {
@@ -79,6 +81,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.openCurrentChat();
+
     this.upstateService
       .getLoggedInUser()
       .pipe(tap(() => (this.isUserLoadig = false)))
@@ -270,6 +274,19 @@ export class HomePageComponent implements OnInit, OnDestroy {
           this.toastr.success('Group created successfuly');
         }
       });
+  }
+
+  async openCurrentChat(): Promise<void> {
+    await new Promise((r) => setTimeout(r, 2000));
+
+    if (this.currentChat.currentChatId !== undefined) {
+      this.onOpenChat(this.currentChat.currentChatId);
+    } else if (this.currentChat.currentGroupChatId !== undefined) {
+      this.onOpenGroupChat(this.currentChat.currentGroupChatId);
+    }
+
+    this.currentChat.currentChatId = undefined;
+    this.currentChat.currentGroupChatId = undefined;
   }
 
   public leftGroup(leftGroup: Group): void {
