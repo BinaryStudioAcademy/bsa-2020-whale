@@ -459,6 +459,8 @@
 
         <div
           [ngClass]="isCardPinned ? 'users-slider' : 'users'"
+          [class.users-slider-row]="isCardPinned && pinnedCardsLayout === 0"
+          [class.users-slider-column]="isCardPinned && pinnedCardsLayout === 1"
           *ngIf="
             mediaData.length > 1 ||
             (mediaData.length === 1 &&
@@ -467,7 +469,12 @@
           "
         >
 
-        <div [ngClass]="isCardPinned ? 'cards-small-wrapper' : 'cards-wrapper'">
+        <div 
+          [class.cards-wrapper]="!isCardPinned"
+          [class.small-cards-wrapper-row]="isCardPinned && pinnedCardsLayout === 0"
+          [class.small-cards-wrapper-column]="isCardPinned && pinnedCardsLayout === 1"
+        >
+          <div class="fake-margin"></div>
           <app-participant-card
             [ngClass]="
               isCardPinned ? 'participant-card-small' : 'participant-card'
@@ -488,23 +495,33 @@
             [meetingHolder]="currentParticipant"
           >
         </app-participant-card>
-        <div class="cards-position-icons" *ngIf="isCardPinned">
+        <div
+          #cardsLayoutMenu
+          [ngClass]="pinnedCardsLayout === 0 ? 'cards-position-icons-row' : 'cards-position-icons-column'" 
+          *ngIf="isCardPinned">
           <span
-            *ngIf="pinModeHorizontal"
+            *ngIf="pinnedCardsLayout === 0"
             data-tooltip="To Right Column"
             data-position="bottom right"
           >
-            <i class="arrows alternate vertical icon"></i>
+            <i class="arrows alternate vertical icon"
+              (click)="setPinnedCardsLayout(1)"
+            ></i>
           </span>
           <span
-            *ngIf="!pinModeHorizontal"
+            *ngIf="pinnedCardsLayout === 1"
             data-tooltip="To Top Row"
             data-position="bottom right"
           >
-            <i class="arrows alternate horizontal icon"></i>
+            <i class="arrows alternate horizontal icon small-left-margin"
+              (click)="setPinnedCardsLayout(0)"
+            ></i>
           </span>
           <span data-tooltip="Unpin" data-position="bottom right">
-            <i class="table icon" (click)="unpinCard()"></i>
+            <i 
+              class="table icon" 
+              [class.small-left-margin]="pinnedCardsLayout === 1"
+              (click)="unpinCard()"></i>
           </span>
         </div>
       </div>

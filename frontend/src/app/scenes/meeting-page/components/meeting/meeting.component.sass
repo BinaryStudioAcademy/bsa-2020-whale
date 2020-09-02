@@ -79,10 +79,15 @@
     display: flex
     flex-wrap: no-wrap
     background-color: transparent
-    justify-content: center
-    align-items: start
+    align-items: flex-start
     overflow: auto
 
+.users-slider-row
+    justify-content: center
+
+.users-slider-column
+    justify-content: flex-end
+    
 .participant-card
     width: 50%
     max-width: 560px
@@ -90,6 +95,7 @@
 
 .participant-card-small
     padding: 3px
+    margin-bottom: -15px
 
 .participant-fullscreen
     width: 100vw
@@ -188,7 +194,7 @@ i.big.icon.wechat
 ::-webkit-scrollbar-thumb:hover
     background: #555
 
-.cards-small-wrapper 
+.small-cards-wrapper-row
     &::-webkit-scrollbar-track
         background: rgba(0,0,0,.1)
 
@@ -385,6 +391,9 @@ div:moz-full-screen
 .big-left-margin
     margin-left: 10px
 
+.small-left-margin
+    margin-left: 5px
+
 // polls
 .delete-poll-icon
     float: right
@@ -526,6 +535,7 @@ div:moz-full-screen
             font-size: .85714286em
             color: rgba(0,0,0,.4)
             display: inline-block
+            
 .message
     outline: none
     resize: none
@@ -559,7 +569,18 @@ div:moz-full-screen
 .cards-wrapper
     display: contents
 
-.cards-small-wrapper
+.small-cards-wrapper-column
+    display: flex
+    flex-direction: column-reverse
+    padding: 3px
+    align-self: self-start
+    overflow-x: hidden
+    overflow-y: auto
+    z-index: 1
+    &:hover
+        margin-top: 30px
+   
+.small-cards-wrapper-row
     padding: 3px
     height: 170px
     display: inline-flex
@@ -568,17 +589,33 @@ div:moz-full-screen
     overflow-y: hidden
     z-index: 1
 
-.cards-position-icons
+.cards-position-icons-row
     display: none
     flex-direction: column
     height: 151px
     padding: 4px 0 4px 4px
     margin: 3px 10px 3px 3px
     overflow: visible
-    background-color: rgba(255, 255, 225, 0.4)
+    background-color: rgba(180, 180, 180, 0.4)
     border-radius: 5px
+    position: sticky
+    top: 0
+    max-height: 100%
 
-.cards-small-wrapper:hover .cards-position-icons
+.cards-position-icons-column
+    display: none
+    flex-direction: row-reverse
+    padding: 4px
+    margin: 3px
+    overflow: visible
+    background-color: rgba(180, 180, 180, 0.4)
+    border-radius: 5px
+    position: absolute
+    top: 0
+    width: 250px
+
+.small-cards-wrapper-row:hover .cards-position-icons-row,
+.small-cards-wrapper-column:hover .cards-position-icons-column
     display: flex
     
 .left-align
@@ -604,9 +641,11 @@ i.icon.waiting-icon:hover
 .qa-anonymous-checkbox
     margin-left: 16px
     margin-right: auto
-
     margin-top: 10px
     margin-bottom: 5px
 
 .default-cursor
     cursor: default !important
+
+.fake-margin
+    height: 15px
