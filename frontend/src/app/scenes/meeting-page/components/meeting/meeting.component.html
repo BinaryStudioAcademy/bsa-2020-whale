@@ -121,6 +121,7 @@
           class="invite-tooltip"
           data-tooltip="Invite users"
           data-position="left center"
+          *ngIf="!isRoom"
         >
           <i
             class="user plus icon"
@@ -493,6 +494,7 @@
             (pinVideoEvent)="pinCard($event)"
             [data]="data"
             [meetingHolder]="currentParticipant"
+            [meetingId]="meeting.id"
           >
         </app-participant-card>
         <div
@@ -562,7 +564,6 @@
           (clickEmited)="changeOutputDevice($event)"
         ></app-output-settings>
       </div>
-    </div>
 
     <div *ngIf="isShowChat" class="ui chat card">
       <div class="ui buttons">
@@ -713,7 +714,7 @@
   >
     <button
       id="meeting-poll-new"
-      *ngIf="!meeting.isPoll || isHost || isRoom"
+      *ngIf="!meeting.isPoll || isHost"
       (click)="pollService.onNewPollClick()"
       class="ui button"
       id="new-poll-btn"

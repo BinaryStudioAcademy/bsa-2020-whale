@@ -5,7 +5,16 @@
         <h2>Rooms</h2>
       </div>
     </div>
-    <div class="content" *ngIf="!roomService.isDividedIntoRooms">
+    <div
+      class="content"
+      *ngIf="!roomService.isDividedIntoRooms && !roomService.isUserHost"
+    >
+      <h1>No room available</h1>
+    </div>
+    <div
+      class="content"
+      *ngIf="!roomService.isDividedIntoRooms && roomService.isUserHost"
+    >
       <div class="ui right labeled input">
         <label for="duration" class="ui label duration-label">Duration</label>
         <input
@@ -13,6 +22,8 @@
           type="number"
           placeholder="Minutes"
           [(ngModel)]="duration"
+          (change)="durationChanged()"
+          required
         />
         <div class="ui basic label">minutes</div>
       </div>
@@ -24,13 +35,25 @@
           placeholder="number of rooms"
           [(ngModel)]="numberOfRooms"
           (change)="numberOfRoomsChanged()"
+          required
         />
         <button
           class="ui button number-of-rooms-action"
           (click)="numberOfRoomsChanged()"
         >
-          divide
+          Reasign
         </button>
+      </div>
+      <div class="allow-to-choose-room">
+        <div class="ui checkbox">
+          <input
+            #allowToChooseRoom
+            type="checkbox"
+            name="example"
+            (change)="changeRoomPermission($event)"
+          />
+          <label>Allow participants to choose room</label>
+        </div>
       </div>
 
       <div class="rooms">
@@ -44,6 +67,7 @@
             Room:
           </div>
           <div
+            *ngIf="!meeting.isAllowedToChooseRoom"
             class="ui divided list"
             dndDropzone
             dndEffectAllowed="move"
@@ -87,45 +111,50 @@
       </div>
     </div>
     <div class="content" *ngIf="roomService.isDividedIntoRooms">
-      <div
-        class="ui divided list"
-        *ngFor="
-          let participantsOfRoom of roomService.participantsInRooms | keyvalue
-        "
-      >
-        <div class="ui header">
-          <div>
-            Room:
+      <div class="rooms">
+        <div
+          class="ui divided list"
+          *ngFor="
+            let participantsOfRoom of roomService.participantsInRooms | keyvalue
+          "
+        >
+          <div class="ui header">
+            <div>
+              Room:
+            </div>
+            <div
+              data-tooltip="Join room"
+              data-position="top right"
+              class="ui inverted secondary button"
+              (click)="redirectIntoRoom(participantsOfRoom.key)"
+            >
+              Join
+            </div>
           </div>
           <div
-            data-tooltip="Join room"
-            data-position="top right"
-            class="ui inverted secondary button"
-            (click)="redirectIntoRoom(participantsOfRoom.key)"
+            class="ui item participant"
+            *ngFor="let participant of participantsOfRoom.value"
           >
-            Join
+            <div class="participant-data">
+              <img
+                class="ui avatar image"
+                src="{{ participant?.user.avatarUrl }}"
+              />
+              <div>
+                {{ participant?.user.firstName }}
+                {{ participant?.user.secondName }}
+              </div>
+            </div>
           </div>
+          <div class="ui fitted divider"></div>
         </div>
-        <div
-          class="ui item participant"
-          *ngFor="let participant of participantsOfRoom.value"
-        >
-          <img
-            class="ui avatar image"
-            src="{{ participant?.user.avatarUrl }}"
-          />
-          <div>
-            {{ participant?.user.firstName }} {{ participant?.user.secondName }}
-          </div>
-        </div>
-        <div class="ui fitted divider"></div>
       </div>
     </div>
     <div class="actions">
       <button class="ui button" (click)="close()">Close</button>
       <button
         class="ui primary button"
-        *ngIf="!roomService.isDividedIntoRooms"
+        *ngIf="!roomService.isDividedIntoRooms && roomService.isUserHost"
         (click)="divide()"
       >
         Divide
@@ -137,6 +166,18 @@
       >
         Leave room
       </button>
+      <butto
+        class="ui primary button"
+        *ngIf="
+          meeting.isAllowedToChooseRoom &&
+          !roomService.isUserHost &&
+          roomService.isDividedIntoRooms &&
+          !roomService.isInRoom
+        "
+        (click)="joinRandomRoom()"
+      >
+        Join random
+      </butto>
     </div>
   </div>
 </div>

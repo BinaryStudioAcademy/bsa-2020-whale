@@ -61,7 +61,13 @@ namespace Whale.Shared.Services
 
             _context.Notifications.Add(notification);
             await _context.SaveChangesAsync();
-            var createdNotificationDTO = _mapper.Map<NotificationDTO>(notification);
+            var createdNotificationDTO = new NotificationDTO()
+            {
+                Id = notification.Id,
+                CreatedAt = notification.CreatedAt,
+                NotificationType = notification.NotificationType,
+                Options = notification.Options
+            };
 
             var connection = await _signalrService.ConnectHubAsync("whale");
             await connection.InvokeAsync("onNewNotification", userEmail, createdNotificationDTO);

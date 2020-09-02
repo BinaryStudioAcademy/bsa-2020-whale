@@ -57,7 +57,7 @@ namespace Whale.Shared.Services
         public async Task<UserDTO> GetUserByEmail(string email)
         {
             var user = await _context.Users.FirstOrDefaultAsync(e => e.Email == email);
-            if (user == null) return null; //throw new NotFoundException("User", email);
+            if (user == null) throw new NotFoundException("User", email);
 
             await user.LoadAvatarAsync(_blobStorageSettings);
 

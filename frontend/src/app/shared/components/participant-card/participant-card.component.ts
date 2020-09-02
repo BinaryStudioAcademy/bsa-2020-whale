@@ -29,6 +29,7 @@ import { MediaSettingsService } from 'app/core/services';
 export class ParticipantCardComponent implements OnInit, OnDestroy {
   @Input() data: MediaData;
   @Input() meetingHolder: Participant;
+  @Input() meetingId: string;
   @Output() pinVideoEvent = new EventEmitter<string>();
   @Output() hideViewEvent = new EventEmitter<string>();
   @Output() stopVideoEvent = new EventEmitter<string>();
@@ -126,6 +127,7 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
 
   public switchMediaPermissionAsHost(isVideo: boolean): void {
     this.switchMediaPermissionAsHostEvent.emit({
+      meetingId: this.meetingId,
       cardStreamId: this.data.stream.id,
       isVideoAllowed: isVideo
         ? !this.dynamicData.isVideoAllowed

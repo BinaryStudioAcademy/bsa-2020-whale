@@ -13,7 +13,7 @@ import {
   MeetingSettingsService,
 } from '../../../core/services';
 import { takeUntil } from 'rxjs/operators';
-import { Meeting } from '@shared/models';
+import { Meeting, ChangedMediaPermissions } from '@shared/models';
 import { Subject } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { UpdateSettings } from '@shared/models/meeting/update-settings';
@@ -30,7 +30,6 @@ export class SettingMeetingComponent implements OnInit, AfterViewInit {
   public isPoll: boolean;
   public isAudioDisabled: boolean;
   public isVideoDisabled: boolean;
-  public isAllowedToChooseRoom: boolean;
   private unsubscribe$ = new Subject<void>();
 
   @ViewChild('audio') private checkboxIsAudioDisabled: ElementRef;
@@ -47,11 +46,10 @@ export class SettingMeetingComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
-    this.isWhiteboard = this.meetingSettingsService.getSettings().isWhiteboard;
-    this.isPoll = this.meetingSettingsService.getSettings().isPoll;
-    this.isAllowedToChooseRoom = this.meetingSettingsService.getSettings().isAllowedToChooseRoom;
-    this.isAudioDisabled = !this.meeting.isAudioAllowed;
-    this.isVideoDisabled = !this.meeting.isVideoAllowed;
+    this.isWhiteboard = this.meeting?.isWhiteboard || this.meetingSettingsService.getSettings().isWhiteboard;
+    this.isPoll = this.meeting?.isPoll || this.meetingSettingsService.getSettings().isPoll;
+    this.isAudioDisabled = !this.meeting?.isAudioAllowed || this.meetingSettingsService.getSettings().isAudioDisabled;
+    this.isVideoDisabled = !this.meeting?.isVideoAllowed || this.meetingSettingsService.getSettings().isVideoDisabled;
   }
 
   ngAfterViewInit(): void {
@@ -69,7 +67,7 @@ export class SettingMeetingComponent implements OnInit, AfterViewInit {
     }
     if (this.meeting) {
       this.meeting.isWhiteboard = this.isWhiteboard;
-      this.switchMeetingSettingAsHost(this.meeting);
+      this.meetingSettingsService.switchMeetingSettingAsHost(this.meeting);
       return;
     }
     this.meetingSettingsService.changeWhiteboard(this.isWhiteboard);
@@ -83,7 +81,7 @@ export class SettingMeetingComponent implements OnInit, AfterViewInit {
     }
     if (this.meeting) {
       this.meeting.isPoll = this.isPoll;
-      this.switchMeetingSettingAsHost(this.meeting);
+      this.meetingSettingsService.switchMeetingSettingAsHost(this.meeting);
       return;
     }
     this.meetingSettingsService.changePoll(this.isPoll);
@@ -113,61 +111,13 @@ export class SettingMeetingComponent implements OnInit, AfterViewInit {
     this.meetingSettingsService.changeIsVideoDisabled(this.isVideoDisabled);
   }
 
-  public switchIsAllowedToChooseRoom(event: any): void {
-    this.isAllowedToChooseRoom = event.target.checked;
-
-    if (this.meeting) {
-      this.meeting.isAllowedToChooseRoom = this.isAllowedToChooseRoom;
-      this.switchMeetingSettingAsHost(this.meeting);
-      return;
-    }
-
-    this.meetingSettingsService.changeisAllowedToChooseRoom(
-      this.isAllowedToChooseRoom
-    );
-  }
-
   public switchOtherParticipantsMediaAsHost(): void {
     this.meetingSignalrService.invoke(SignalMethods.OnMediaPermissionsChanged, {
+      meetingId: this.meeting.id,
       changedParticipantConnectionId: null,
       isVideoAllowed: this.meeting.isVideoAllowed,
       isAudioAllowed: this.meeting.isAudioAllowed,
-    });
-    this.updateMeetingSettings();
-  }
-
-  public switchMeetingSettingAsHost(meeting: Meeting): void {
-    this.meetingSignalrService.invoke(
-      SignalMethods.OnHostChangeMeetingSetting,
-      {
-        meetingId: this.meeting.id,
-        applicantEmail: this.authService.currentUser.email,
-        isWhiteboard: this.meeting.isWhiteboard,
-        isPoll: this.meeting.isPoll,
-        isAudioDisabled: this.isAudioDisabled,
-        isVideoDisabled: this.isVideoDisabled,
-        isAllowedToChooseRoom: this.isAllowedToChooseRoom,
-      } as UpdateSettings
-    );
-
-    this.updateMeetingSettings();
-  }
-
-  private updateMeetingSettings(): void {
-    this.meetingService
-      .updateMeetingSettings({
-        meetingId: this.meeting.id,
-        applicantEmail: this.authService.currentUser.email,
-        isWhiteboard: this.meeting.isWhiteboard,
-        isPoll: this.meeting.isPoll,
-        isAudioDisabled: this.isAudioDisabled,
-        isVideoDisabled: this.isVideoDisabled,
-        isAllowedToChooseRoom: this.isAllowedToChooseRoom,
-      })
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(
-        () => {},
-        () => this.toastr.error('Meeting settings wasn\'t saved')
-      );
+    } as ChangedMediaPermissions);
+    this.meetingSettingsService.switchMeetingSettingAsHost(this.meeting);
   }
 }
