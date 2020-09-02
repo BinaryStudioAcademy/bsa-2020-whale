@@ -33,6 +33,8 @@ namespace Whale.Shared.Services
         private readonly SignalrService _signalrService;
         private readonly NotificationsService _notifications;
 
+        public static string BaseUrl { get; } = "http://bsa2020-whale.westeurope.cloudapp.azure.com";
+
         public MeetingService(
             WhaleDbContext context,
             IMapper mapper,
@@ -196,7 +198,9 @@ namespace Whale.Shared.Services
 
             var participantEmails = JsonConvert.DeserializeObject<List<string>>(scheduledMeeting.ParticipantsEmails);
 
-            foreach(var email in participantEmails)
+            var link = $"{BaseUrl}/redirection/{scheduledMeeing.ShortURL}";
+
+            foreach (var email in participantEmails)
             {
                 var userParticipant = await _userService.GetUserByEmail(email);
                 if (userParticipant == null)
@@ -207,6 +211,7 @@ namespace Whale.Shared.Services
                     UserEmail = email,
                     MeetingId = meeting.Id
                 });
+                await _notifications.InviteMeetingNotification(user.Email, email, link);
             }
 
             return new MeetingLinkDTO { Id = meeting.Id, Password = scheduledMeeing.Password };
