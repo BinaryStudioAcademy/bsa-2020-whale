@@ -505,10 +505,14 @@ div:moz-full-screen
     margin-right: 5px
 
 .big-avatar
-    width: auto
+    width: 100vw
+    height: 100vh
     object-fit: contain
-    height: calc(100% - 60px)
-    padding: 10%
+    position: fixed
+    top: 120
+    bottom: 120
+    left: 0
+    right: 0
 
 .message-event
     .chat-content
@@ -517,7 +521,6 @@ div:moz-full-screen
             font-size: .85714286em
             color: rgba(0,0,0,.4)
             display: inline-block
-            
 .message
     outline: none
     resize: none
@@ -539,6 +542,7 @@ div:moz-full-screen
     height: 100%
     vertical-align: middle
     i:nth-child(2)
+
         margin-left: -13px !important
 
 .drag-icon:hover
@@ -571,7 +575,7 @@ div:moz-full-screen
 
 .cards-small-wrapper:hover .cards-position-icons
     display: flex
-
+    
 .left-align
     text-align: left
 
@@ -584,4 +588,4 @@ i.icon.waiting-icon:hover
     width: 2em !important
 
 .ui.meeting-setting-container.overflow-scroll
-    overflow-y: hidden
+  overflow-y: hidden

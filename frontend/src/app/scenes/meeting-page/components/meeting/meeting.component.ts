@@ -151,6 +151,7 @@ export class MeetingComponent
   public otherParticipants: Participant[] = [];
   public pattern = new RegExp(/^\S+.*/);
   public peer: Peer;
+  public pinnedParticipant: Participant;
   public pollService: PollService;
   public receiveingDrawings = false;
   public isHost = false;
@@ -176,14 +177,12 @@ export class MeetingComponent
   @ViewChildren('meetingChat') private chatBlock: QueryList<
     ElementRef<HTMLElement>
   >;
-  @ViewChild('bigAvatar') private bigAvatar: ElementRef<HTMLImageElement>;
 
   private chatElement: any;
   private currentStreamLoaded = new EventEmitter<void>();
   private contectedAt = new Date();
   private elem: any;
   private isCardPinnedInner = false;
-  private pinnedParticipant: Participant;
   private savedStrokes: CanvasWhiteboardUpdate[][] = new Array<
     CanvasWhiteboardUpdate[]
   >();
@@ -417,9 +416,14 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (streamChangedData) => {
+          if (streamChangedData.oldStreamId === this.pinnedParticipant?.streamId) {
+              this.pinnedParticipant.streamId = streamChangedData.newStreamId
+          } 
+
           const changedMediaData = this.mediaData.find(
             (md) => md.currentStreamId === streamChangedData.oldStreamId
           );
+
           if (changedMediaData) {
             const changedParticipant = this.meeting.participants.find(
               (p) => p.streamId === streamChangedData.oldStreamId
@@ -427,7 +431,7 @@ export class MeetingComponent
             if (changedParticipant) {
               changedParticipant.streamId = streamChangedData.newStreamId;
             }
-            changedMediaData.currentStreamId = streamChangedData.newStreamId;
+            changedMediaData.currentStreamId = streamChangedData.newStreamId;          
             this.updateCardDynamicData(
               streamChangedData.newStreamId,
               streamChangedData.isAudioAllowed,
@@ -471,6 +475,7 @@ export class MeetingComponent
 
             this.meeting.isAudioAllowed = data.isAudioAllowed;
             this.meeting.isVideoAllowed = data.isVideoAllowed;
+
             if (!this.isHost) {
               this.toggleMicrophone();
               this.toggleCamera();
@@ -1419,6 +1424,14 @@ export class MeetingComponent
     isAudioActive?: boolean,
     isVideoActive?: boolean
   ): void {
+    if (streamId === this.pinnedParticipant?.streamId) {
+      this.isPinnedAudioAllowed = isAudioAllowed;
+      this.isPinnedVideoAllowed = isVideoAllowed;
+      this.isPinnedAudioActive = isAudioActive;
+      this.isPinnedVideoActive = isVideoActive;
+      return;
+    }
+    
     const participant =
       this.currentParticipant.streamId === streamId
         ? this.currentParticipant
@@ -1455,6 +1468,7 @@ export class MeetingComponent
     }
 
     mediaData.dynamicData.subscribe((data) => {
+      debugger
       this.isPinnedAudioAllowed = data.isAudioAllowed;
       this.isPinnedVideoAllowed = data.isVideoAllowed;
       this.isPinnedAudioActive = data.isAudioActive;
@@ -1464,7 +1478,6 @@ export class MeetingComponent
       );
       this.currentVideo.nativeElement.srcObject = mediaData.stream;
       this.deleteParticipantMediaData(mediaData.stream.id);
-      this.bigAvatar.nativeElement.src = data.avatarUrl;
       this.isCardPinned = true;
     });
   }
@@ -1473,7 +1486,6 @@ export class MeetingComponent
     this.createParticipantCard(this.pinnedParticipant, true);
     this.isCardPinned = false;
     this.pinnedParticipant = null;
-    this.bigAvatar.nativeElement.src = this.currentParticipant.user.avatarUrl;
     this.isPinnedAudioAllowed = false;
     this.isPinnedVideoAllowed = false;
     this.isPinnedAudioActive = false;

@@ -502,30 +502,23 @@
         </div>
       </div>
 
-      <img
-        #bigAvatar
-        [src]="currentParticipant?.user?.avatarUrl"
-        [hidden]="
-          ((!isCameraMuted || (isCameraMuted && mediaData.length > 1)) &&
-            !isCardPinned) ||
-          (isCardPinned && (!isPinnedVideoAllowed || !isPinnedVideoActive))
-        "
-        class="big-avatar"
-      />
-
-      <!-- <app-cards-carousel [mediaData]></app-cards-carousel> -->
+      <!-- <img
+      *ngIf="(isCameraMuted && mediaData.length <= 1 && !isCardPinned) ||
+        (isCardPinned && !isPinnedVideoActive)"
+      [src]="isCardPinned ? pinnedParticipant?.user?.avatarUrl : currentParticipant?.user?.avatarUrl"
+      class="big-avatar"
+    /> -->
 
       <video
         #currentVideo
         autoplay="autoplay"
         class="participant-fullscreen"
         [hidden]="
-          (mediaData.length > 1 ||
+          ((mediaData.length > 1 ||
             (mediaData.length === 1 &&
               mediaData[0].id !== currentParticipant.id) ||
             isCameraMuted) &&
-          !isCardPinned &&
-          !(isCardPinned && isPinnedVideoActive && isPinnedVideoAllowed)
+          !isCardPinned) 
         "
         [muted]="!isCardPinned"
       ></video>
