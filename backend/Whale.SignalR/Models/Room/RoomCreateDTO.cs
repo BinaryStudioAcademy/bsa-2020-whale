@@ -9,7 +9,7 @@ namespace Whale.SignalR.Models.Room
     {
         public string MeetingId { get; set; }
         public string MeetingLink { get; set; }
-        public int Duration { get; set; } = 10;
+        public double Duration { get; set; } = 10;
         public ICollection<string> ParticipantsIds { get; set; }
     }
 }

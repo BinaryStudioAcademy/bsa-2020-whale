@@ -25,7 +25,7 @@ namespace Whale.SignalR.Services
         }
 
         public async void CloseRoomAfterTimeExpire(
-            int roomExpiry, 
+            double roomExpiry, 
             string meetingLink, 
             string roomId, 
             string meetingId, 

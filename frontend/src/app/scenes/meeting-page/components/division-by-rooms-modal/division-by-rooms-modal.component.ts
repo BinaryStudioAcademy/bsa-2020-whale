@@ -26,7 +26,6 @@ export class DivisionByRoomsModalComponent
   public duration = 10;
   public onCanMoveIntoRoomEvent: EventEmitter<void>;
   public selectedParticipant: Participant;
-  // public isAllowedToChooseRoom: boolean;
   public meeting: Meeting;
 
   constructor(
@@ -98,7 +97,19 @@ export class DivisionByRoomsModalComponent
   }
 
   public numberOfRoomsChanged(): void {
+    this.numberOfRooms = Math.ceil(this.numberOfRooms);
+    if (this.numberOfRooms <= 0) {
+      this.numberOfRooms = 1;
+      this.toastr.warning('You cannot create less than one room');
+    }
     this.roomService.changeNumberofRooms(this.numberOfRooms);
+  }
+
+  public durationChanged(): void {
+    if (this.duration < 1) {
+      this.duration =  1;
+      this.toastr.warning('Duration of the room can not be less than one');
+    }
   }
 
   public changeRoomPermission(event: any): void {
