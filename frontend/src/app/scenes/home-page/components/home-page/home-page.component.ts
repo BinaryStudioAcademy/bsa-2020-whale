@@ -333,6 +333,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
         isVideoAllowed: !this.meetingSettingsService.getSettings()
           .isVideoDisabled,
         isWhiteboard: this.meetingSettingsService.getSettings().isWhiteboard,
+        isAllowedToChooseRoom: this.meetingSettingsService.getSettings().isAllowedToChooseRoom,
         isPoll: this.meetingSettingsService.getSettings().isPoll,
         creatorEmail: this.ownerEmail,
         participantsEmails: [],
