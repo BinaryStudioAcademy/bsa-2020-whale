@@ -11,6 +11,7 @@ import {
 } from '@shared/models';
 import { Router } from '@angular/router';
 import { UnreadMessageOptions } from '@shared/models/notification/unread-message-options';
+import { CurrentChatService } from 'app/core/services/currentChat.service';
 
 @Component({
   selector: 'app-notification',
@@ -36,7 +37,8 @@ export class NotificationComponent implements OnInit {
   constructor(
     private contactService: ContactService,
     private toastr: ToastrService,
-    private router: Router
+    private router: Router,
+    private currentChat: CurrentChatService
   ) {}
 
   ngOnInit(): void {
@@ -127,10 +129,20 @@ export class NotificationComponent implements OnInit {
   }
 
   onOpenChat(): void {
-    this.openChatClicked.emit(this.unreadMessageOptions.contactId);
+    if (this.router.url === '/home') {
+      this.openChatClicked.emit(this.unreadMessageOptions.contactId);
+    } else {
+      this.currentChat.currentChatId = this.unreadMessageOptions.contactId;
+      this.router.navigate([`/home`]);
+    }
   }
 
   onOpenGroupChat(): void {
-    this.openGroupChatClicked.emit(this.unreadGroupMessageOptions.groupId);
+    if (this.router.url === '/home') {
+      this.openGroupChatClicked.emit(this.unreadGroupMessageOptions.groupId);
+    } else {
+      this.currentChat.currentGroupChatId = this.unreadGroupMessageOptions.groupId;
+      this.router.navigate([`/home`]);
+    }
   }
 }
