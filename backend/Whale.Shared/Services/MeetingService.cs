@@ -177,7 +177,7 @@ namespace Whale.Shared.Services
             var meetingSettings = JsonConvert.DeserializeObject(meeting.Settings);
             var scheduledMeeing = await _context.ScheduledMeetings.FirstOrDefaultAsync(e => e.MeetingId == meeting.Id);
             await _redisService.ConnectAsync();
-            await _redisService.SetAsync(meeting.Id.ToString(), new MeetingMessagesAndPasswordDTO { Password = pwd, MeetingId = meeting.Id.ToString() });
+            await _redisService.SetAsync(meeting.Id.ToString(), new MeetingMessagesAndPasswordDTO { Password = scheduledMeeing.Password, MeetingId = meeting.Id.ToString() });
             await _redisService.SetAsync($"{meetingSettingsPrefix}{meeting.Id}", new MeetingSettingsDTO
             {
                 IsAudioAllowed = ((dynamic)meetingSettings).IsAudioAllowed,
