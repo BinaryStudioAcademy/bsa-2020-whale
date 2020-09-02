@@ -421,8 +421,8 @@ export class MeetingComponent
       .subscribe(
         (streamChangedData) => {
           if (streamChangedData.oldStreamId === this.pinnedParticipant?.streamId) {
-              this.pinnedParticipant.streamId = streamChangedData.newStreamId
-          } 
+              this.pinnedParticipant.streamId = streamChangedData.newStreamId;
+          }
 
           const changedMediaData = this.mediaData.find(
             (md) => md.currentStreamId === streamChangedData.oldStreamId
@@ -435,7 +435,7 @@ export class MeetingComponent
             if (changedParticipant) {
               changedParticipant.streamId = streamChangedData.newStreamId;
             }
-            changedMediaData.currentStreamId = streamChangedData.newStreamId;          
+            changedMediaData.currentStreamId = streamChangedData.newStreamId;
             this.updateCardDynamicData(
               streamChangedData.newStreamId,
               streamChangedData.isAudioAllowed,
@@ -808,9 +808,8 @@ export class MeetingComponent
       }
       this.setOutputDevice();
     });
-    
+
     this.pinnedCardsLayout = +localStorage.getItem('pinned-cards-layout') ?? CardsLayout.TopRow;
-    console.log(this.pinnedCardsLayout);
   }
 
   ngAfterViewChecked(): void {
@@ -1432,7 +1431,7 @@ export class MeetingComponent
       this.isPinnedVideoActive = isVideoActive;
       return;
     }
-    
+
     const participant =
       this.currentParticipant.streamId === streamId
         ? this.currentParticipant
@@ -1494,7 +1493,7 @@ export class MeetingComponent
   }
 
   public setPinnedCardsLayout(layout: CardsLayout): void {
-    localStorage.setItem("pinned-cards-layout", layout.toString());
+    localStorage.setItem('pinned-cards-layout', layout.toString());
     this.pinnedCardsLayout = layout;
   }
   //#endregion participant cards
