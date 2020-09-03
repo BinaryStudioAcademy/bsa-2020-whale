@@ -50,7 +50,7 @@
               *ngIf="isMembersVisible"
               class="left menu ui middle aligned selection list lol"
             >
-              <div *ngFor="let user of groupMembers" class="item">
+              <div *ngFor="let user of groupMembers|groupHostOnTop:[groupSelected.creatorEmail]" class="item">
                 <img
                   class="ui avatar image"
                   src="{{ returnCorrectLink(user) }}"
