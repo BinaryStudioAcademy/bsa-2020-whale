@@ -549,6 +549,18 @@ export class HomePageComponent implements OnInit, OnDestroy {
     const groupa = this.groups.find((g) => g.id === id);
     this.onGroupClick(groupa);
   }
+  public renderClass(array: any[]): string {
+    switch (array.length){
+      case 0:
+        return '';
+      case 1:
+        return 'one-height';
+      case 2:
+        return 'two-height';
+      default:
+        return 'three-height';
+    }
+  }
 }
 export interface UserModel {
   id: number;
