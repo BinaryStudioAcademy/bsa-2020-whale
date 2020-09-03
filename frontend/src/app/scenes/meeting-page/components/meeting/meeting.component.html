@@ -386,7 +386,8 @@
             <span data-tooltip="Plan Meeting">
               <i
                 class="big list alternate icon"
-                (click)="isPlanning = !isPlanning"
+                (click)="onAgendaClick()"
+                [ngClass]="{pulse: isTopicEnd}"
               ></i>
             </span>
             <span data-tooltip="Fullscreen" data-position="top right">
@@ -551,9 +552,9 @@
             (mediaData.length === 1 &&
               mediaData[0].id !== currentParticipant.id) ||
             isCameraMuted) &&
-          !isCardPinned) || (isCardPinned && !isPinnedVideoActive)
+          !isCardPinned) || (isCardPinned && (!isPinnedVideoAllowed || !isPinnedVideoActive))
         "
-        [muted]="!isCardPinned || pinnedParticipant.streamId === currentParticipant.streamId"
+        [muted]="!isCardPinned"
       ></video>
 
       <div class="settings" *ngIf="isVideoSettings && !isCameraMuted">
@@ -785,7 +786,7 @@ Enter+Shift for new line."
       </div>
     </div>
     <div class="agenda-container">
-      <app-agenda *ngIf="isPlanning" [meetingId]="meeting.id"></app-agenda>
+      <app-agenda (topicEnd)="topicEnd($event)" *ngIf="isPlanning" [meetingId]="meeting.id"></app-agenda>
     </div>
     <div
       class="ui meeting-setting-container overflow-scroll segment"

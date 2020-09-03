@@ -1,8 +1,7 @@
-<div class="ui segment ui middle aligned selection list">
+<div class="ui card">
   <div class="ui header">Agenda</div>
   <div *ngFor="let a of agenda">
     <div class="point item">
-      <input #myCheck class="ui checkbox" type="checkbox" (change)="finishedPoint($event,a)">
-     <div class="text"> {{ a.name }} - {{a.startTime | date:'shortTime'}}</div></div>
+     <div> {{ a.name }} - {{a.startTime | date:'shortTime'}}</div></div>
     </div>
 </div>

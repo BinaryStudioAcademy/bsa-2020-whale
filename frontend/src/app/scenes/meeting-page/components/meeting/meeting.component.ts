@@ -192,6 +192,8 @@ export class MeetingComponent
   @ViewChild('cardsLayout') private cardsLayout: ElementRef<
   HTMLElement
   >;
+  @ViewChild('checkTopic') checkTopic: ElementRef<HTMLInputElement>;
+
 
   private chatElement: any;
   private currentStreamLoaded = new EventEmitter<void>();
@@ -205,6 +207,7 @@ export class MeetingComponent
   private userStream: MediaStream;
   //#endregion fields
   public isPlanning = false;
+  public isTopicEnd = false;
   constructor(
     @Inject(DOCUMENT) private document: any,
     private authService: AuthService,
@@ -792,7 +795,27 @@ export class MeetingComponent
           this.toastr.error(error);
         }
       );
-
+    this.meetingSignalrService.onOutTime$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (point) => {
+          this.toastr.success(`Time for "${point.name}" finished`);
+        },
+        () => {
+          this.toastr.error('Error');
+        }
+      );
+    this.meetingSignalrService.onEndedTopic$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (point) => {
+          this.isTopicEnd = true;
+          this.toastr.success(`Topic ${point.name} finished`);
+        },
+        () => {
+          this.toastr.error('Error');
+        }
+      );
     // create new peer
     this.peer = new Peer(environment.peerOptions);
 
@@ -1986,4 +2009,12 @@ export class MeetingComponent
     }
   }
   //#endregion SpeechRecognition
+  onAgendaClick(){
+    this.isTopicEnd = false;
+    this.isPlanning = !this.isPlanning;
+  }
+  checkPoint()
+  {
+    this.checkTopic.nativeElement.checked = true;
+  }
 }
