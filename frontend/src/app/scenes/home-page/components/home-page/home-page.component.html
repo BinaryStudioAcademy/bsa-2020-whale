@@ -59,7 +59,7 @@
       </a>
       <div class="contacts-container" [hidden]="!contactsVisibility">
         <div
-          *ngFor="let contact of contacts"
+          *ngFor="let contact of contacts|sortContacts"
           class="user-list ui middle aligned selection list"
         >
           <div
