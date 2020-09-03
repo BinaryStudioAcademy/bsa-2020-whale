@@ -23,6 +23,7 @@ import { ConfirmationModalComponent } from '@shared/components/confirmation-moda
 import { group } from 'console';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { MeetingSettingsService } from '../../../../core/services/meeting-settings.service';
+import { CurrentChatService } from 'app/core/services/currentChat.service';
 
 @Component({
   selector: 'app-home-page',
@@ -41,6 +42,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
   groupsVisibility = false;
   contactChatVisibility = false;
   historyVisibility = false;
+  upcomingVisibility = false;
   groupChatVisibility = false;
 
   ownerEmail: string;
@@ -66,7 +68,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
     private whaleSignalrService: WhaleSignalService,
     private contactService: ContactService,
     private messageService: MessageService,
-    private meetingSettingsService: MeetingSettingsService
+    private meetingSettingsService: MeetingSettingsService,
+    private currentChat: CurrentChatService
   ) {}
 
   ngOnDestroy(): void {
@@ -78,6 +81,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.openCurrentChat();
+
     this.upstateService
       .getLoggedInUser()
       .pipe(tap(() => (this.isUserLoadig = false)))
@@ -271,6 +276,19 @@ export class HomePageComponent implements OnInit, OnDestroy {
       });
   }
 
+  async openCurrentChat(): Promise<void> {
+    await new Promise((r) => setTimeout(r, 2000));
+
+    if (this.currentChat.currentChatId !== undefined) {
+      this.onOpenChat(this.currentChat.currentChatId);
+    } else if (this.currentChat.currentGroupChatId !== undefined) {
+      this.onOpenGroupChat(this.currentChat.currentGroupChatId);
+    }
+
+    this.currentChat.currentChatId = undefined;
+    this.currentChat.currentGroupChatId = undefined;
+  }
+
   public leftGroup(leftGroup: Group): void {
     this.groups.splice(this.groups.indexOf(leftGroup), 1);
     if (!this.groups.length) {
@@ -332,6 +350,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
         isVideoAllowed: !this.meetingSettingsService.getSettings()
           .isVideoDisabled,
         isWhiteboard: this.meetingSettingsService.getSettings().isWhiteboard,
+        isAllowedToChooseRoom: this.meetingSettingsService.getSettings().isAllowedToChooseRoom,
         isPoll: this.meetingSettingsService.getSettings().isPoll,
         creatorEmail: this.ownerEmail,
         participantsEmails: [],
@@ -355,6 +374,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.groupChatVisibility = false;
     this.actionsVisibility = false;
     this.historyVisibility = false;
+    this.upcomingVisibility = false;
   }
 
   contactVisibilityChange(event): void {
@@ -404,10 +424,16 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   onGroupClick(selectedGroup: Group): void {
+    if (selectedGroup === this.groupSelected) {
+      return;
+    }
     this.falseAllBooleans();
     this.groupChatVisibility = true;
     this.contactSelected = undefined;
     this.groupSelected = selectedGroup;
+    setTimeout(() => {
+      this.groupChatVisibility = true;
+    }, 1);
   }
 
   public closeHistory(): void {
@@ -416,15 +442,36 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.actionsVisibility = true;
   }
 
+  public closeUpcoming(): void {
+    this.upcomingVisibility = false;
+    this.actionsVisibility = true;
+  }
+
   public onMeetingHistoryClick(): void {
+    if (!this.historyVisibility){
     this.contactChatVisibility = false;
     this.actionsVisibility = false;
     this.groupChatVisibility = false;
+    this.upcomingVisibility = false;
     this.contactSelected = undefined;
     this.groupSelected = undefined;
     this.historyVisibility = !this.historyVisibility;
-
     if (!this.historyVisibility) {
+      this.actionsVisibility = true;
+    }
+  }
+  }
+
+  public onUpcomingMeetingsClick(): void {
+    this.contactChatVisibility = false;
+    this.actionsVisibility = false;
+    this.groupChatVisibility = false;
+    this.historyVisibility = false;
+    this.contactSelected = undefined;
+    this.groupSelected = undefined;
+    this.upcomingVisibility = !this.upcomingVisibility;
+
+    if (!this.upcomingVisibility) {
       this.actionsVisibility = true;
     }
   }
@@ -494,9 +541,13 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.groups[index] = updatedGroup;
   }
 
-  public onOpenChat(contactId: string): void {
-    const contact = this.contacts.find((c) => (c.id = contactId));
+  public onOpenChat(id: string): void {
+    const contact = this.contacts.find((c) => (c.id = id));
     this.onContactClick(contact);
+  }
+  public onOpenGroupChat(id: string): void {
+    const groupa = this.groups.find((g) => g.id === id);
+    this.onGroupClick(groupa);
   }
 }
 export interface UserModel {

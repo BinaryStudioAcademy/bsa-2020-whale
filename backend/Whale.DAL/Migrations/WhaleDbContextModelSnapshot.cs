@@ -36,6 +36,26 @@ namespace Whale.DAL.Migrations
                     b.ToTable("Achivements");
                 });
 
+            modelBuilder.Entity("Whale.DAL.Models.AgendaPoint", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("MeetingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AgendaPoints");
+                });
+
             modelBuilder.Entity("Whale.DAL.Models.Contact", b =>
                 {
                     b.Property<Guid>("Id")

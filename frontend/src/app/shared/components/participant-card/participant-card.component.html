@@ -1,6 +1,7 @@
-<div class="ui card">
+<div class="ui card" [class.small-card]="data.isSmallCard">
   <div
     class="image"
+    [class.image-small-card]="data.isSmallCard"
     [ngClass]="dynamicData.isVideoActive ? 'without-background' : ''"
   >
     <video
@@ -14,7 +15,7 @@
       [ngClass]="dynamicData.isVideoActive ? 'hidden' : 'visible'"
     ></p>
   </div>
-  <div class="content">
+  <div class="content" [class.content-small-card]="data.isSmallCard">
     <div class="participant-name-wrapper">
       <i
         *ngIf="dynamicData.isAudioAllowed || dynamicData.isUserHost"
@@ -46,7 +47,7 @@
       >
         <i class="eye slash icon"></i>
       </span>
-      <a class="header"></a>
+      <a class="header" [class.header-small-card]="data.isSmallCard"></a>
     </div>
     <i class="small blue ellipsis vertical icon"></i>
   </div>

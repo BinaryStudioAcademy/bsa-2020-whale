@@ -1,5 +1,8 @@
-<app-spiner *ngIf="isMeetingLoading" size="'massive'"></app-spiner>
-<app-page-header (openChatClicked)="onOpenChat($event)"></app-page-header>
+<spiner *ngIf="isMeetingLoading" size="'massive'"></spiner>
+<app-page-header
+  (openChatClicked)="onOpenChat($event)"
+  (openGroupChatClicked)="onOpenGroupChat($event)"
+></app-page-header>
 <div class="home-panel">
   <div class="left-col">
     <div class="ui left vertical menu bar">
@@ -19,6 +22,10 @@
         <a id="home-go-history" class="item" (click)="onMeetingHistoryClick()">
           <i class="clock outline icon"></i>
           Meetings history
+        </a>
+        <a id="home-go-upcoming" class="item" (click)="onUpcomingMeetingsClick()">
+          <i class="clock icon"></i>
+          Upcoming meetings
         </a>
         <a
           id="home-go-schedule"
@@ -105,7 +112,7 @@
         class="contacts-container groups user-list ui middle selection list"
         [hidden]="!groupsVisibility"
       >
-        <div *ngFor="let group of groups">
+        <div *ngFor="let group of groups" >
           <a
             id="home-group"
             [ngClass]="
@@ -115,12 +122,12 @@
           >
             <img
               *ngIf="isImageHere(group)"
-              class="ui avatar image"
+              class="ui avatar image group"
               src="{{ group.photoUrl }}"
             />
             <img
               *ngIf="!isImageHere(group)"
-              class="ui avatar image"
+              class="ui avatar image group"
               src="assets/img/user-group-icon.png"
             />
 
@@ -170,6 +177,10 @@
         [user]="loggedInUser"
         (historyClose)="closeHistory()"
       ></app-history>
+      <app-upcoming-meetings 
+        *ngIf="upcomingVisibility"
+        (upcomingClose)="closeUpcomig()">
+      </app-upcoming-meetings>
       <div *ngIf="actionsVisibility" class="vertically-aligned chat ui segment">
         <div
           id="home-chat-go-shedule"

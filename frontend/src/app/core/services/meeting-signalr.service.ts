@@ -14,7 +14,6 @@ import {
   PollResultDto,
   Reaction,
   ChangedMediaPermissions,
-  RoomWithParticipantsIds,
   MeetingSettings,
 } from '@shared/models';
 import { CanvasWhiteboardUpdate } from 'ng2-canvas-whiteboard';
@@ -23,6 +22,7 @@ import { QuestionStatus } from '@shared/models/question/question-status';
 import { QuestionStatusUpdate } from '@shared/models/question/question-status-update';
 import { QuestionDelete } from '@shared/models/question/question-delete';
 import { ChangedMeetingSettings } from '@shared/models/meeting/changed-meeting-settings';
+import { PointAgenda } from '@shared/models/agenda/agenda';
 
 
 @Injectable({
@@ -92,7 +92,7 @@ export class MeetingSignalrService {
   private onRoomCreated = new Subject<string>();
   public readonly onRoomCreated$ = this.onRoomCreated.asObservable();
 
-  private onRoomCreatedToHost = new Subject<RoomWithParticipantsIds>();
+  private onRoomCreatedToHost = new Subject<string>();
   public readonly onRoomCreatedToHost$ = this.onRoomCreatedToHost.asObservable();
 
   private onRoomClosed = new Subject<string>();
@@ -122,6 +122,17 @@ export class MeetingSignalrService {
   private reactionRecived = new Subject<Reaction>();
   public readonly reactionRecived$ = this.reactionRecived.asObservable();
 
+  private onParticipantConnectRoom = new Subject<MeetingConnectionData>();
+  public readonly onParticipantConnectRoom$ = this.onParticipantConnectRoom.asObservable();
+
+  private onEndedTopic = new Subject<PointAgenda>();
+  public readonly onEndedTopic$ = this.onEndedTopic.asObservable();
+
+  private onOutTime = new Subject<PointAgenda>();
+  public readonly onOutTime$ = this.onOutTime.asObservable();
+
+  private onSnoozeTopic = new Subject<PointAgenda>();
+  public readonly onSnoozeTopic$ = this.onSnoozeTopic.asObservable();
   constructor(private hubService: SignalRService) {
     from(hubService.registerHub(environment.signalrUrl, 'meeting'))
       .pipe(
@@ -130,12 +141,12 @@ export class MeetingSignalrService {
         })
       )
       .subscribe(() => {
-        this.signalHub.on('OnConferenceStartRecording', (message: string) => {
-          this.conferenceStartRecording.next(message);
+        this.signalHub.on('OnConferenceStartRecording', (meetingId: string) => {
+          this.conferenceStartRecording.next(meetingId);
         });
 
-        this.signalHub.on('OnConferenceStopRecording', (message: string) => {
-          this.conferenceStopRecording.next(message);
+        this.signalHub.on('OnConferenceStopRecording', (meetingId: string) => {
+          this.conferenceStopRecording.next(meetingId);
         });
 
         this.signalHub.on(
@@ -245,8 +256,8 @@ export class MeetingSignalrService {
 
         this.signalHub.on(
           'OnRoomCreatedToHost',
-          (roomData: RoomWithParticipantsIds) => {
-            this.onRoomCreatedToHost.next(roomData);
+          (roomId: string) => {
+            this.onRoomCreatedToHost.next(roomId);
           }
         );
 
@@ -287,6 +298,19 @@ export class MeetingSignalrService {
         this.signalHub.on('OnReaction', (reaction: Reaction) => {
           this.reactionRecived.next(reaction);
         });
+
+        this.signalHub.on('OnParticipantConnectRoom', (connectionData: MeetingConnectionData) => {
+          this.onParticipantConnectRoom.next(connectionData);
+        });
+        this.signalHub.on('OnOutTime', (point: PointAgenda) => {
+           this.onOutTime.next(point);
+        });
+        this.signalHub.on('OnSnoozeTopic', (point: PointAgenda) => {
+          this.onSnoozeTopic.next(point);
+        });
+        this.signalHub.on('OnEndedTopic', (point: PointAgenda) => {
+         this.onEndedTopic.next(point);
+        });
       });
   }
 
@@ -326,4 +350,8 @@ export enum SignalMethods {
   OnDrawingChangePermissions,
   OnHostChangeRoom,
   OnHostChangeMeetingSetting,
+  GetMeetingEntityForRoom,
+  OnOutTime,
+  OnSnoozeTopic,
+  OnEndedTopic,
 }

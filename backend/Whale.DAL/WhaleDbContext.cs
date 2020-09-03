@@ -30,7 +30,7 @@ namespace Whale.DAL
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Question> Questions { get; set; }
         public DbSet<ScheduledMeeting> ScheduledMeetings { get; set; }
-
+        public DbSet<AgendaPoint> AgendaPoints { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Contact>()
@@ -55,7 +55,20 @@ namespace Whale.DAL
                     v => Newtonsoft.Json.JsonConvert.SerializeObject(v),
                     v => Newtonsoft.Json.JsonConvert.DeserializeObject<IEnumerable<Voter>>(v)
                 );
+            //modelBuilder.Entity<UnreadMessageId>()
+            //    .HasOne(um => um.DirectMessage)
+            //    .WithMany()
+            //    .HasForeignKey(da => da.MessageId);
 
+            //modelBuilder.Entity<UnreadMessageId>()
+            //   .HasOne(um => um.GroupMessage)
+            //   .WithMany()
+            //   .HasForeignKey(da => da.MessageId);
+
+            //modelBuilder.Entity<UnreadMessageId>()
+            //  .HasOne(um => um.Receiver)
+            //  .WithMany()
+            //  .HasForeignKey(da => da.ReceiverId);
             modelBuilder.Entity<Question>()
                 .Property(q => q.Asker)
                 .HasConversion(

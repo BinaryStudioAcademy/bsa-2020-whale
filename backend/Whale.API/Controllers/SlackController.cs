@@ -64,7 +64,7 @@ namespace Whale.API.Controllers.Slack
         [Route("/api/external/startMeeting")]
         [HttpPost]
         [Produces("application/json")]
-        public async Task<ActionResult<ExternalResponse>> ExternalStartMeeting(ExternalCommand data)
+        public async Task<ActionResult<ExternalResponse>> ExternalStartMeeting([FromBody] ExternalCommand data)
         {
 
             if (string.IsNullOrEmpty(data.email) || !await _slackService.ValidateUser(data.email))

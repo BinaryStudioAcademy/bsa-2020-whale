@@ -1,5 +1,5 @@
-.waiting-for-record-modal
-    width: 213px
+.notification
+    width: 235px
     height: 42px
     background-color: #8b8b8b
     position: absolute
@@ -71,13 +71,31 @@
     flex-wrap: wrap
     justify-content: center
     align-items: center
-    overflow-y: scroll
+    overflow: auto
     height: 100%
 
-app-participant-card
+.users-slider
+    height: 100%
+    display: flex
+    flex-wrap: no-wrap
+    background-color: transparent
+    align-items: flex-start
+    overflow: auto
+
+.users-slider-row
+    justify-content: center
+
+.users-slider-column
+    justify-content: flex-end
+    
+.participant-card
     width: 50%
     max-width: 560px
     padding: 5px
+
+.participant-card-small
+    padding: 3px
+    margin-bottom: -15px
 
 .participant-fullscreen
     width: 100vw
@@ -176,6 +194,10 @@ i.big.icon.wechat
 ::-webkit-scrollbar-thumb:hover
     background: #555
 
+.small-cards-wrapper-row
+    &::-webkit-scrollbar-track
+        background: rgba(0,0,0,.1)
+
 .participants-button-container
     display: inline-block
 
@@ -183,10 +205,13 @@ i.big.icon.wechat
     position: relative
 
 .participants-container
+    display: flex
+    flex-direction: column
+    position: relative
     height: 100%
+    width: 15%
     min-width: 180px
     max-width: 400px
-    width: 15%
     background-color: white
     overflow-y: auto
     float: left
@@ -196,9 +221,7 @@ i.big.icon.wechat
     -moz-box-shadow: 1px 1px 5px 0px #4e4e4ebf
     box-shadow: 1px 1px 5px 0px #4e4e4ebf
     z-index: 2
-    position: relative
-    display: flex
-    flex-direction: column
+    
 
 .ui.divided.list
     width: fit-content
@@ -258,6 +281,7 @@ div div.participant:hover
     max-height: 80%
     width: 350px
     z-index: 0
+
 .meeting-setting-container
     position: absolute
     bottom: 11%
@@ -367,6 +391,9 @@ div:moz-full-screen
 
 .big-left-margin
     margin-left: 10px
+
+.small-left-margin
+    margin-left: 5px
 
 // polls
 .delete-poll-icon
@@ -488,10 +515,19 @@ div:moz-full-screen
     margin-right: 5px
 
 .big-avatar
-    width: auto
+    width: 70%
+    height: 70%
     object-fit: contain
-    height: calc(100% - 60px)
-    padding: 10%
+    position: absolute
+    left: 15%
+    top: 15%
+    padding: 5%
+
+.big-avatar-pinned
+    width: 50%
+    max-height: calc(100% - 250px)
+    top: 180px
+    left: 25%
 
 .message-event
     .chat-content
@@ -500,6 +536,7 @@ div:moz-full-screen
             font-size: .85714286em
             color: rgba(0,0,0,.4)
             display: inline-block
+            
 .message
     outline: none
     resize: none
@@ -530,6 +567,61 @@ div:moz-full-screen
         cursor: grabbing
         opacity: 1
 
+.cards-wrapper
+    display: contents
+
+.small-cards-wrapper-column
+    display: flex
+    flex-direction: column-reverse
+    padding: 3px
+    align-self: self-start
+    overflow-x: hidden
+    overflow-y: auto
+    z-index: 1
+    &:hover
+        margin-top: 30px
+   
+.small-cards-wrapper-row
+    display: inline-flex
+    max-width: 100%
+    height: 170px
+    padding: 3px
+    overflow-x: auto
+    overflow-y: hidden
+    z-index: 1
+
+.cards-position-icons-row
+    display: none
+    height: 151px
+    padding: 4px 0 4px 4px
+    margin: 3px 10px 3px 3px
+    flex-direction: column
+    background-color: rgba(190, 190, 190, .6)
+    border-radius: 5px
+    overflow: visible
+    
+.cards-position-icons-row-sticky
+    position: absolute
+    top: 0
+    right: 0
+    margin: 6px 4px 3px 3px  
+
+.cards-position-icons-column
+    display: none
+    position: absolute
+    top: 0
+    flex-direction: row-reverse
+    width: 250px
+    margin: 3px
+    padding: 4px
+    overflow: visible
+    background-color: rgba(180, 180, 180, 0.4)
+    border-radius: 5px
+
+.small-cards-wrapper-row:hover .cards-position-icons-row,
+.small-cards-wrapper-column:hover .cards-position-icons-column
+    display: flex
+    
 .left-align
     text-align: left
 
@@ -543,3 +635,21 @@ i.icon.waiting-icon:hover
 
 .ui.meeting-setting-container.overflow-scroll
   overflow-y: hidden
+
+.agenda-container
+    position: absolute
+    bottom: 11%
+    right: 30%
+    max-height: 80%
+    z-index: 0
+.qa-anonymous-checkbox
+    margin-left: 16px
+    margin-right: auto
+    margin-top: 10px
+    margin-bottom: 5px
+
+.default-cursor
+    cursor: default !important
+
+.fake-margin
+    height: 15px

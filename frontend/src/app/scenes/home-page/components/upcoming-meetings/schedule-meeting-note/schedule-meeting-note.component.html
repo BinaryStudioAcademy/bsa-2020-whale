@@ -1,0 +1,104 @@
+<div class="ui card width-100">
+    <div class="content">
+      <div class="header" style="margin-left: 50px;">
+        Meeting {{ scheduled.meeting.id }}
+      </div>
+    </div>
+    <div class="content">
+      <div class="ui internally celled grid">
+        <div class="row">
+          <div class="column first">
+            Start at
+          </div>
+          <div class="ten wide column">
+            {{ scheduled.meeting.startTime | date: "dd/MM/yyyy" }}
+            at
+            {{ scheduled.meeting.startTime | date: "HH:mm" }}
+          </div>
+        </div>
+        <div class="row">
+            <div class="column first">
+              Creator
+            </div>
+            <div class="ten wide column">
+              <div class="ui list">
+                <div class="item">
+                    <img
+                      class="ui mini circular image"
+                      src="{{ scheduled.creator.avatarUrl }}"
+                    />
+                    <div class="content">
+                      <div class="ui sub header">
+                        {{
+                            scheduled.creator.secondName
+                            ? scheduled.creator.firstName +
+                              " " +
+                              scheduled.creator.secondName
+                            : scheduled.creator.firstName
+                        }}
+                      </div>
+                      {{ scheduled.creator.email }}
+                    </div>
+                  </div>
+                </div>
+            </div>
+          </div>
+        <div class="row" *ngIf="scheduled.participants?.length > 0">
+          <div
+            class="column first"
+          >
+            Participants
+          </div>
+          <div class="ten wide column">
+            <button
+              class="ui basic button"
+              (click)="areParticipantsVisible = !areParticipantsVisible"
+            >
+              {{
+                areParticipantsVisible ? "Hide participants" : "Show participants"
+              }}
+              ({{ scheduled.participants?.length }})
+            </button>
+            <div class="ui list" *ngIf="areParticipantsVisible">
+              <div class="item" *ngFor="let participant of scheduled.participants">
+                <img
+                  class="ui mini circular image"
+                  src="{{ participant.avatarUrl }}"
+                />
+                <div class="content">
+                  <div class="ui sub header">
+                    {{
+                      participant.secondName
+                        ? participant.firstName +
+                          " " +
+                          participant.secondName
+                        : participant.firstName
+                    }}
+                  </div>
+                  {{ participant.email }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="actions">
+                <button
+                class="ui primary button"
+                (click)="join()"
+                [disabled]="isDisabled"
+                >
+                Join Meeting
+                </button>
+                <button
+                class="ui basic button"
+                (click)="copyLink()"
+                >
+                Copy link
+                </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  

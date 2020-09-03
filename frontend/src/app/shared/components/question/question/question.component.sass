@@ -20,6 +20,8 @@
 
 .status-icon
     margin-right: auto
+    i
+        margin-left: -2px
     span
         font-size: .85714286em
         color: rgba(0,0,0,.4)
@@ -33,8 +35,13 @@
     word-break: break-word
     overflow-wrap: break-word
 
-.status-button-container
+.status-container
     width: 100%
+    display: flex
+    justify-content: flex-end
+    align-items: center
+
+.status-button-container
     display: flex
     justify-content: flex-end
     align-items: center
@@ -56,9 +63,10 @@ img.ui.avatar.image
 .message-data
     display: flex
     .close-icon
-        margin-left: auto
+        margin-left: auto !important
         margin-bottom: auto
         font-weight: bold
+        margin-left: 20px
 
 .close-icon:hover
     cursor: pointer

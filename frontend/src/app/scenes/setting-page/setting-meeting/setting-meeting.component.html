@@ -42,7 +42,7 @@
           (change)="changeAudioPermission($event)"
         />
         <label for="audio" class="default-cursor"
-          >Mute other participants
+          >Mute participants upon entry
         </label>
       </div>
     </div>
@@ -58,23 +58,7 @@
           (change)="changeVideoPermission($event)"
         />
         <label for="video" class="default-cursor"
-          >Disable video of others
-        </label>
-      </div>
-    </div>
-  </div>
-  <div class="field">
-    <div class="inline field">
-      <div class="ui checkbox">
-        <input
-          #allowToChooseRoom
-          type="checkbox"
-          tabindex="0"
-          id="allow-to-choose-room"
-          (change)="switchIsAllowedToChooseRoom($event)"
-        />
-        <label for="allow-to-choose-room" class="default-cursor"
-          >Allow participants to choose room
+          >Disable participants video upon entry
         </label>
       </div>
     </div>

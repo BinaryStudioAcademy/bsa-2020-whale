@@ -166,8 +166,8 @@ export class MeetingInviteComponent
 
   public filterContacts(value: string): void {
     this.cachedContacts = this.contacts.filter((contact) => {
-      return `${contact.secondMember.firstName} ${contact.secondMember.secondName}`.includes(
-        value
+      return `${contact.secondMember.firstName.toLowerCase()} ${contact.secondMember.secondName.toLowerCase()}`.includes(
+        value.toLowerCase()
       );
     });
   }
@@ -191,6 +191,9 @@ export class MeetingInviteComponent
 
   public closeModal(result: boolean): void {
     this.result = result; // result = isShowParticipants after modal closing
+    if (this.isScheduled) {
+      this.result = this.emails;
+    }
     this.close();
   }
 }

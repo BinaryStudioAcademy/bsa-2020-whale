@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Whale.API.Models.ScheduledMeeting;
 using Whale.API.Services;
 using Whale.Shared.Exceptions;
+using Whale.Shared.Models;
 using Whale.Shared.Models.Meeting;
 
 namespace Whale.API.Controllers
@@ -31,6 +33,7 @@ namespace Whale.API.Controllers
             return Ok(await _httpService.PostAsync<MeetingCreateDTO, MeetingLinkDTO>("api/meeting", meetingDto));
         }
 
+        [Authorize]
         [HttpPost("scheduled")]
         public async Task<ActionResult<string>> CreateMeetingScheduled(MeetingCreateDTO meetingDto)
         {
@@ -89,6 +92,18 @@ namespace Whale.API.Controllers
                 HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
 
             await _httpService.PutAsync("api/meeting/updateSettings", updateSettingsDTO);
+            return Ok();
+        }
+        [HttpGet("agenda/{meetingId}")]
+        public async Task<ActionResult<List<AgendaPointDTO>>> GetAgenda(string meetingId)
+        {
+            var agendaPoints = await _httpService.GetAsync<List<AgendaPointDTO>>($"api/meeting/agenda/{meetingId}");
+            return Ok(agendaPoints);
+        }
+        [HttpPut("agenda")]
+        public async Task<ActionResult> UpdateTopic(AgendaPointDTO point)
+        {
+            await _httpService.PutAsync<AgendaPointDTO, AgendaPointDTO>($"api/meeting/agenda",point);
             return Ok();
         }
     }
