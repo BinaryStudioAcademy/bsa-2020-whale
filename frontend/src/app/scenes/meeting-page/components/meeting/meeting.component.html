@@ -385,8 +385,10 @@
               </i>
             </span>
             <span data-tooltip="Plan Meeting">
-              <i class="big list alternate icon"
-              (click)="isPlanning=!isPlanning"></i>
+              <i
+                class="big list alternate icon"
+                (click)="isPlanning = !isPlanning"
+              ></i>
             </span>
             <span data-tooltip="Fullscreen" data-position="top right">
               <i
@@ -553,6 +555,7 @@
           (clickEmited)="changeOutputDevice($event)"
         ></app-output-settings>
       </div>
+    </div>
 
     <div *ngIf="isShowChat" class="ui chat card">
       <div class="ui buttons">
@@ -638,10 +641,20 @@
             >
           </select>
         </div>
-        <div *ngIf="questionService.areQuestionsOpened" class="qa-anonymous-checkbox">
+        <div
+          *ngIf="questionService.areQuestionsOpened"
+          class="qa-anonymous-checkbox"
+        >
           <div class="ui checkbox">
-            <input id="questions-anonymous-checkbox" type="checkbox" name="example" [(ngModel)]="questionService.createAnonymously">
-            <label for="questions-anonymous-checkbox" class="default-cursor">Send anonymously</label>
+            <input
+              id="questions-anonymous-checkbox"
+              type="checkbox"
+              name="example"
+              [(ngModel)]="questionService.createAnonymously"
+            />
+            <label for="questions-anonymous-checkbox" class="default-cursor"
+              >Send anonymously</label
+            >
           </div>
         </div>
 
@@ -650,7 +663,7 @@
             (keydown.enter)="onEnterKeyPress($event)"
             rows="1"
             placeholder="Enter to send.
-  Enter+Shift for new line."
+Enter+Shift for new line."
             [(ngModel)]="msgText"
             required
           >
@@ -669,104 +682,104 @@
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="poll-create-container" *ngIf="isShowStatistics">
-    <app-meeting-statistics
-      [statistic]="meetingStatistics"
-    ></app-meeting-statistics>
-  </div>
+    <div class="poll-create-container" *ngIf="isShowStatistics">
+      <app-meeting-statistics
+        [statistic]="meetingStatistics"
+      ></app-meeting-statistics>
+    </div>
 
-  <div class="poll-create-container" *ngIf="isShowReactions">
-    <app-reactions (reaction)="onReaction($event)"></app-reactions>
-  </div>
+    <div class="poll-create-container" *ngIf="isShowReactions">
+      <app-reactions (reaction)="onReaction($event)"></app-reactions>
+    </div>
 
-  <div
-    class="ui poll-create-container overflow-scroll segment"
-    *ngIf="pollService.isPollCreating"
-  >
-    <app-poll-create
-      [meetingId]="meeting.id"
-      (pollCreated)="
-        pollService.onPollCreated(
-          $event,
-          connectionData.meetingId,
-          connectionData.userEmail
-        )
-      "
-    ></app-poll-create>
-  </div>
-
-  <div
-    class="ui poll-create-container overflow-scroll segment"
-    *ngIf="pollService.isShowPoll"
-  >
-    <button
-      id="meeting-poll-new"
-      *ngIf="!meeting.isPoll || isHost"
-      (click)="pollService.onNewPollClick()"
-      class="ui button"
-      id="new-poll-btn"
-    >
-      New poll
-    </button>
     <div
-      data-tooltip="Disabled by Host"
-      data-position="bottom left"
-      *ngIf="meeting.isPoll && !isHost"
+      class="ui poll-create-container overflow-scroll segment"
+      *ngIf="pollService.isPollCreating"
     >
-      <div class="ui disabled button">
+      <app-poll-create
+        [meetingId]="meeting.id"
+        (pollCreated)="
+          pollService.onPollCreated(
+            $event,
+            connectionData.meetingId,
+            connectionData.userEmail
+          )
+        "
+      ></app-poll-create>
+    </div>
+
+    <div
+      class="ui poll-create-container overflow-scroll segment"
+      *ngIf="pollService.isShowPoll"
+    >
+      <button
+        id="meeting-poll-new"
+        *ngIf="!meeting.isPoll || isHost"
+        (click)="pollService.onNewPollClick()"
+        class="ui button"
+        id="new-poll-btn"
+      >
         New poll
+      </button>
+      <div
+        data-tooltip="Disabled by Host"
+        data-position="bottom left"
+        *ngIf="meeting.isPoll && !isHost"
+      >
+        <div class="ui disabled button">
+          New poll
+        </div>
+      </div>
+      <div class="ui segment">
+        <!--POLLS CONTAINER -->
+        <h3>Polls</h3>
+        <div *ngFor="let pollx of pollService.polls; let i = index">
+          <hr class="poll-divider" />
+          <span
+            id="meeting-poll-delete"
+            *ngIf="isHost"
+            class="delete-poll-icon"
+            (click)="pollService.onDeletePollIconClick(pollx)"
+          >
+            &times;
+          </span>
+          <app-poll
+            [poll]="pollx"
+            [user]="currentParticipant.user"
+            (pollAnswered)="pollService.onPollAnswered($event)"
+          >
+          </app-poll>
+        </div>
+      </div>
+      <div class="ui segment">
+        <h3>Results</h3>
+        <div *ngFor="let pollxResult of pollService.pollResults; let i = index">
+          <hr class="poll-divider" />
+          <span
+            id="meeting-poll-result"
+            *ngIf="currentParticipant.role == 1"
+            class="delete-poll-icon"
+            (click)="
+              pollService.onDeletePollResultIconClick(pollxResult, meeting.id)
+            "
+          >
+            &times;
+          </span>
+          <app-poll-results [pollResult]="pollxResult"></app-poll-results>
+        </div>
       </div>
     </div>
-    <div class="ui segment">
-      <!--POLLS CONTAINER -->
-      <h3>Polls</h3>
-      <div *ngFor="let pollx of pollService.polls; let i = index">
-        <hr class="poll-divider" />
-        <span
-          id="meeting-poll-delete"
-          *ngIf="isHost"
-          class="delete-poll-icon"
-          (click)="pollService.onDeletePollIconClick(pollx)"
-        >
-          &times;
-        </span>
-        <app-poll
-          [poll]="pollx"
-          [user]="currentParticipant.user"
-          (pollAnswered)="pollService.onPollAnswered($event)"
-        >
-        </app-poll>
-      </div>
+    <div class="agenda-container">
+      <app-agenda *ngIf="isPlanning" [meetingId]="meeting.id"></app-agenda>
     </div>
-    <div class="ui segment">
-      <h3>Results</h3>
-      <div *ngFor="let pollxResult of pollService.pollResults; let i = index">
-        <hr class="poll-divider" />
-        <span
-          id="meeting-poll-result"
-          *ngIf="currentParticipant.role == 1"
-          class="delete-poll-icon"
-          (click)="
-            pollService.onDeletePollResultIconClick(pollxResult, meeting.id)
-          "
-        >
-          &times;
-        </span>
-        <app-poll-results [pollResult]="pollxResult"></app-poll-results>
-      </div>
+    <div
+      class="ui meeting-setting-container overflow-scroll segment"
+      *ngIf="isShowMeetingSettings"
+    >
+      <!--SETTINGS CONTAINER -->
+      <h3>Meeting settings</h3>
+      <app-setting-meeting [meeting]="meeting"> </app-setting-meeting>
     </div>
-  </div>
-  <div class="agenda-container">
-    <app-agenda *ngIf="isPlanning" [meetingId]="meeting.id"></app-agenda>
-  </div>
-  <div
-    class="ui meeting-setting-container overflow-scroll segment"
-    *ngIf="isShowMeetingSettings"
-  >
-    <!--SETTINGS CONTAINER -->
-    <h3>Meeting settings</h3>
-    <app-setting-meeting [meeting]="meeting"> </app-setting-meeting>
   </div>
 </div>

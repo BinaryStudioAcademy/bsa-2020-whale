@@ -5,5 +5,5 @@ export interface RoomCreateModal {
   meeting: Meeting;
   meetingId: string;
   meetingLink: string;
-  onCanMoveIntoRoomEvent: EventEmitter<void>;
+  onCanLeaveEvent: EventEmitter<void>;
 }
