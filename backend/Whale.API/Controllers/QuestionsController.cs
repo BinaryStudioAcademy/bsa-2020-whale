@@ -22,28 +22,28 @@ namespace Whale.API.Controllers
 		[HttpGet]
 		public async Task<ActionResult<IEnumerable<QuestionDTO>>> GetQuestionsByMeeting(Guid meetingId)
 		{
-			var questions = await _httpService.GetAsync<IEnumerable<QuestionDTO>>($"api/questions?meetingId={meetingId}");
+			var questions = await _httpService.GetAsync<IEnumerable<QuestionDTO>>($"questions?meetingId={meetingId}");
 			return Ok(questions);
 		}
 
 		[HttpPost]
 		public async Task<OkResult> CreateQuestion([FromBody] QuestionCreateDTO questionCreate)
 		{
-			await _httpService.PostAsync<QuestionCreateDTO>("api/questions", questionCreate);
+			await _httpService.PostAsync<QuestionCreateDTO>("questions", questionCreate);
 			return Ok();
 		}
 
 		[HttpPut("status")]
 		public async Task<OkResult> UpdateQuestionStatus([FromBody] QuestionStatusUpdateDTO questionStatusUpdate)
 		{
-			await _httpService.PutAsync<QuestionStatusUpdateDTO>("api/questions/status", questionStatusUpdate);
+			await _httpService.PutAsync<QuestionStatusUpdateDTO>("questions/status", questionStatusUpdate);
 			return Ok();
 		}
 
 		[HttpDelete("{questionId}")]
 		public async Task<NoContentResult> DeleteQuestion(Guid questionId, Guid meetingId)
 		{
-			await _httpService.DeleteAsync($"api/questions/{questionId}?meetingId={meetingId}");
+			await _httpService.DeleteAsync($"questions/{questionId}?meetingId={meetingId}");
 			return NoContent();
 		}
 	}

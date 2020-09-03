@@ -175,7 +175,7 @@ namespace Whale.Shared.Services
                     ReceiverEmails = meetingDTO.ParticipantsEmails
                 };
                 (meetingInvite.ReceiverEmails as List<string>).Add(user.Email);
-                client.PostAsync(whaleAPIurl + "/api/email/scheduled", new StringContent(JsonConvert.SerializeObject(meetingInvite), Encoding.UTF8, "application/json"));
+                client.PostAsync(whaleAPIurl + "/email/scheduled", new StringContent(JsonConvert.SerializeObject(meetingInvite), Encoding.UTF8, "application/json"));
             }
             await _redisService.ConnectAsync();
             await _redisService.SetAsync(shortURL, "not-active");
