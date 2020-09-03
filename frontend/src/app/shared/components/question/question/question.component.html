@@ -3,8 +3,6 @@
     <div *ngIf="!question.isAnonymous" class="label">
       <img class="ui avatar image" src="{{ question.asker.avatarUrl }}" />
     </div>
-    <div *ngIf="question.isAnonymous" class="label fake-image">
-    </div>
     <div class="chat-content">
       <div class="message-data">
         <a *ngIf="!question.isAnonymous" class="user name">
