@@ -39,6 +39,10 @@
           <i class="share icon"></i>
           Enter the meeting
         </a>
+        <a id="home-go-statistics" class="item" (click)="onStatisticsClick()">
+          <i class="chart bar icon"></i>
+          Statistics
+        </a>
       </a>
       <app-spiner
         *ngIf="isContactsLoading || isChatHubLoading"
@@ -181,6 +185,10 @@
         *ngIf="upcomingVisibility"
         (upcomingClose)="closeUpcomig()">
       </app-upcoming-meetings>
+      <app-statistics
+        *ngIf="statisticsVisibility"
+        (statisticsClose)="closeStatistics()"
+      ></app-statistics>
       <div *ngIf="actionsVisibility" class="vertically-aligned chat ui segment">
         <div
           id="home-chat-go-shedule"

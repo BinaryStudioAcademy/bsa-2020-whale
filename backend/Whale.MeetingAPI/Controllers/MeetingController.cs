@@ -89,5 +89,12 @@ namespace Whale.API.Controllers
             List<AgendaPointDTO> agendaPoints = await _meetingService.GetAgendaPoints(meetingId);//_httpService.GetAsync<List<AgendaPointDTO>>($"api/meeting/agenda/{meetingId}");
             return Ok(agendaPoints);
         }
+
+        [HttpPost("elastic")]
+        public async Task<ActionResult> FillElastic()
+        {
+            await _meetingService.ElasticFill();
+            return Ok();
+        }
     }
 }

@@ -313,10 +313,31 @@ namespace Whale.Shared.Services
             await _context.SaveChangesAsync();
             await _notifications.UpdateInviteMeetingNotifications(shortUrl);
 
+            //var usersStats = _context.Participants.Where(p => p.MeetingId == meeting.Id).Select(p => new MeetingUserStatistics { UserId = p.UserId }).ToList();
             var dateDiff = meeting.EndTime?.DateTime.Subtract(meeting.StartTime.DateTime);
-            var usersStats = _context.Participants.Where(p => p.MeetingId == meeting.Id).Select(p => new MeetingUserStatistics { UserId = p.UserId }).ToList();
-            var stats = new MeetingStatistics { MeetingId = meeting.Id, MeetingDuration = dateDiff, MeetingDurationNumber = dateDiff?.TotalSeconds, UsersStats = usersStats };
-            _customLogger.WriteMeetingStats(stats);
+                    if (dateDiff?.TotalSeconds > 1)
+                    {
+                        var stats = new MeetingStatistics { MeetingId = meeting.Id, MeetingDurationMS = (int)dateDiff?.TotalMilliseconds, EndDate = meeting.EndTime?.DateTime, StartTime = meeting.StartTime.DateTime };
+                        _customLogger.WriteMeetingStats(stats);
+                    }
+        }
+
+        public Task ElasticFill()
+        {
+            var meetings = _context.Meetings.Where(m => m.EndTime.HasValue).AsEnumerable();
+            return Task.Run(() =>
+            {
+                foreach (var meeting in meetings)
+                {
+                    var dateDiff = meeting.EndTime?.DateTime.Subtract(meeting.StartTime.DateTime);
+                    if (dateDiff?.TotalSeconds > 1)
+                    {
+                        var stats = new MeetingStatistics { MeetingId = meeting.Id, MeetingDurationMS = (int)dateDiff?.TotalMilliseconds, EndDate = meeting.EndTime?.DateTime, StartTime = meeting.StartTime.DateTime };
+                        _customLogger.WriteMeetingStats(stats);
+                    }
+                }
+            });
+           
         }
 
         public async Task<string> GetShortInviteLink(string id, string pwd)

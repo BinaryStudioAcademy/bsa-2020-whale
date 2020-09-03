@@ -7,14 +7,10 @@ namespace Whale.Shared.Models.Statistics
 {
     public class MeetingStatistics
     {
-        public MeetingStatistics()
-        {
-            CorrelationId = Guid.NewGuid().ToString();
-        }
-        public string CorrelationId { get; set; }
         public Guid MeetingId { get; set; }
-        public TimeSpan? MeetingDuration { get; set; }
-        public double? MeetingDurationNumber { get; set; }
-        public List<MeetingUserStatistics> UsersStats { get; set; }
+        public DateTime? EndDate { get; set; }
+        public DateTime? StartTime { get; set; }
+        public int MeetingDurationMS { get; set; }
+        //public List<MeetingUserStatistics> UsersStats { get; set; }
     }
 }

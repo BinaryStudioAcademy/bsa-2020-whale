@@ -43,6 +43,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
   historyVisibility = false;
   upcomingVisibility = false;
   groupChatVisibility = false;
+  statisticsVisibility = false;
 
   ownerEmail: string;
   contactSelected: Contact;
@@ -357,6 +358,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.actionsVisibility = false;
     this.historyVisibility = false;
     this.upcomingVisibility = false;
+    this.statisticsVisibility = false;
   }
 
   contactVisibilityChange(event): void {
@@ -429,11 +431,17 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.actionsVisibility = true;
   }
 
+  public closeStatistics(): void {
+    this.statisticsVisibility = false;
+    this.actionsVisibility = true;
+  }
+
   public onMeetingHistoryClick(): void {
     this.contactChatVisibility = false;
     this.actionsVisibility = false;
     this.groupChatVisibility = false;
     this.upcomingVisibility = false;
+    this.statisticsVisibility = false;
     this.contactSelected = undefined;
     this.groupSelected = undefined;
     this.historyVisibility = !this.historyVisibility;
@@ -448,11 +456,27 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.actionsVisibility = false;
     this.groupChatVisibility = false;
     this.historyVisibility = false;
+    this.statisticsVisibility = false;
     this.contactSelected = undefined;
     this.groupSelected = undefined;
     this.upcomingVisibility = !this.upcomingVisibility;
 
     if (!this.upcomingVisibility) {
+      this.actionsVisibility = true;
+    }
+  }
+
+  public onStatisticsClick(): void {
+    this.contactChatVisibility = false;
+    this.actionsVisibility = false;
+    this.groupChatVisibility = false;
+    this.historyVisibility = false;
+    this.upcomingVisibility = false;
+    this.contactSelected = undefined;
+    this.groupSelected = undefined;
+    this.statisticsVisibility = !this.statisticsVisibility;
+
+    if (!this.statisticsVisibility) {
       this.actionsVisibility = true;
     }
   }
