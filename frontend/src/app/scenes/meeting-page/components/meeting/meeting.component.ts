@@ -1864,6 +1864,7 @@ export class MeetingComponent
   public createPage(): HTMLVideoElement {
     const parrent = document.getElementsByClassName('main-content')[0];
     const fullVideo = document.createElement('video');
+    fullVideo.muted = true;
     parrent.appendChild(fullVideo);
     fullVideo.className += 'fullVideo';
     fullVideo.style.width = '100vw';
