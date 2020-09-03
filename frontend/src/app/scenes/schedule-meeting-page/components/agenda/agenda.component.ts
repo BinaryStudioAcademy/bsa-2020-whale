@@ -25,7 +25,8 @@ export class AgendaComponent implements OnInit {
       name: new FormControl(),
     });
   }
-
+  public name = '';
+  public date = new Date();
   ngOnInit(): void {}
   onSubmit() {
     this.point.name = this.form.controls.name.value;

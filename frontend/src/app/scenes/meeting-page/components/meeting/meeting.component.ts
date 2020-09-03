@@ -144,8 +144,6 @@ export class MeetingComponent
   public isPinnedVideoAllowed = false;
   public isPinnedAudioActive = false;
   public isPinnedVideoActive = false;
-  public isShowRecordingOptins = false;
-  public isHighlightRecording = false;
   public isMeetingLoading = true;
   public mediaData: MediaData[] = [];
   public meeting: Meeting;
@@ -195,6 +193,8 @@ export class MeetingComponent
   @ViewChild('cardsLayout') private cardsLayout: ElementRef<
   HTMLElement
   >;
+  @ViewChild('checkTopic') checkTopic: ElementRef<HTMLInputElement>;
+
 
   private chatElement: any;
   private currentStreamLoaded = new EventEmitter<void>();
@@ -210,6 +210,7 @@ export class MeetingComponent
   private unsubscribeReaction$: Subject<void>;
   //#endregion fields
   public isPlanning = false;
+  public isTopicEnd = false;
   constructor(
     @Inject(DOCUMENT) private document: any,
     private authService: AuthService,
@@ -736,6 +737,7 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (streamId) => {
+          this.isSharing = true;
           const stream = this.connectedStreams.find((x) => x.id === streamId);
           this.fullPage(streamId);
           this.toastr.success('Start sharing screen');
@@ -810,7 +812,27 @@ export class MeetingComponent
           this.toastr.error(error);
         }
       );
-
+    this.meetingSignalrService.onOutTime$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (point) => {
+          this.toastr.success(`Time for "${point.name}" finished`);
+        },
+        () => {
+          this.toastr.error('Error');
+        }
+      );
+    this.meetingSignalrService.onEndedTopic$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (point) => {
+          this.isTopicEnd = true;
+          this.toastr.success(`Topic ${point.name} finished`);
+        },
+        () => {
+          this.toastr.error('Error');
+        }
+      );
     // create new peer
     this.peer = new Peer(environment.peerOptions);
 
@@ -973,10 +995,8 @@ export class MeetingComponent
     });
   }
 
-  public startRecording(isHighlight: boolean): void {
+  public startRecording(): void {
     this.isScreenRecording = true;
-    this.isShowRecordingOptins = false;
-    this.isHighlightRecording = false;
 
     this.blobService.startRecording().subscribe({
       complete: () => (this.isWaitingForRecord = false),
@@ -995,9 +1015,6 @@ export class MeetingComponent
                 link: resp,
               });
             });
-          if (isHighlight) {
-            this.highlightRecording();
-          }
         } else {
           this.isScreenRecording = false;
         }
@@ -1006,9 +1023,6 @@ export class MeetingComponent
   }
 
   public stopRecording(): void {
-    if (!this.isScreenRecording) {
-      return;
-    }
     this.isWaitingForRecord = true;
 
     this.isScreenRecording = false;
@@ -1017,15 +1031,9 @@ export class MeetingComponent
 
     this.meetingSignalrService.invoke(
       SignalMethods.OnConferenceStopRecording,
-      this.meeting.id
+      'Conference stop recording'
     );
     this.toastr.info('Stop recording a conference');
-  }
-
-  private async highlightRecording(): Promise<void> {
-    this.isHighlightRecording = true;
-    await new Promise((r) => setTimeout(r, 30000));
-    this.stopRecording();
   }
 
   public onPollIconClick(): void {
@@ -1920,10 +1928,9 @@ export class MeetingComponent
     fullVideo.muted = true;
     parrent.appendChild(fullVideo);
     fullVideo.className += 'fullVideo';
-    fullVideo.style.width = '100vw';
-    fullVideo.style.height = '100vh';
-    fullVideo.style.objectFit = 'cover';
-    fullVideo.style.position = 'fixed';
+    fullVideo.style.width = '100%';
+    fullVideo.style.height = '100%';
+    fullVideo.style.objectFit = 'contain';
     return fullVideo;
   }
   async removeSharingVideo(): Promise<void> {
@@ -2034,10 +2041,18 @@ export class MeetingComponent
       this.toastr.info('Speech recognition is not supported by the browser');
       this.meetingSignalrService.invoke(SignalMethods.OnSpeechRecognition, {
         meetingId: this.meeting.id,
-        userId: this.currentParticipant.id,
+        userId: this.currentParticipant.user.id,
         message: 'Speech recognition is not supported by the browser',
       } as MeetingSpeechCreate);
     }
   }
   //#endregion SpeechRecognition
+  onAgendaClick(){
+    this.isTopicEnd = false;
+    this.isPlanning = !this.isPlanning;
+  }
+  checkPoint()
+  {
+    this.checkTopic.nativeElement.checked = true;
+  }
 }

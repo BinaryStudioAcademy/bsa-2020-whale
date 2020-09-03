@@ -57,9 +57,12 @@
           New
         </button>
       </a>
-      <div class="contacts-container" [hidden]="!contactsVisibility">
+      <div
+        [ngClass]="renderClass(contacts)"
+        class="contacts-container"
+        [hidden]="!contactsVisibility">
         <div
-          *ngFor="let contact of contacts"
+          *ngFor="let contact of contacts|sortContacts"
           class="user-list ui middle aligned selection list"
         >
           <div
@@ -109,6 +112,7 @@
         </button>
       </a>
       <div
+        [ngClass]="renderClass(groups)"
         class="contacts-container groups user-list ui middle selection list"
         [hidden]="!groupsVisibility"
       >
