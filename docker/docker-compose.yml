@@ -5,6 +5,7 @@ services:
     container_name: 'whale-client'
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - /etc/letsencrypt/live/bsa2020-whale.westeurope.cloudapp.azure.com/cert.pem:/etc/letsencrypt/live/bsa2020-whale.westeurope.cloudapp.azure.com/cert.pem
       - /etc/letsencrypt/live/bsa2020-whale.westeurope.cloudapp.azure.com/chain.pem:/etc/letsencrypt/live/bsa2020-whale.westeurope.cloudapp.azure.com/chain.pem
