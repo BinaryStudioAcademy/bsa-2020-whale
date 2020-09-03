@@ -723,6 +723,7 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (streamId) => {
+          this.isSharing = true;
           const stream = this.connectedStreams.find((x) => x.id === streamId);
           this.fullPage(streamId);
           this.toastr.success('Start sharing screen');
@@ -1867,10 +1868,9 @@ export class MeetingComponent
     fullVideo.muted = true;
     parrent.appendChild(fullVideo);
     fullVideo.className += 'fullVideo';
-    fullVideo.style.width = '100vw';
-    fullVideo.style.height = '100vh';
-    fullVideo.style.objectFit = 'cover';
-    fullVideo.style.position = 'fixed';
+    fullVideo.style.width = '100%';
+    fullVideo.style.height = '100%';
+    fullVideo.style.objectFit = 'contain';
     return fullVideo;
   }
   async removeSharingVideo(): Promise<void> {
