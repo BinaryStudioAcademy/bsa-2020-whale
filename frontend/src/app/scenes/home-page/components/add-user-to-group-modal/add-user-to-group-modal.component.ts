@@ -21,7 +21,7 @@ export interface AddUserToGroupModal extends Group {
   styleUrls: ['./add-user-to-group-modal.component.sass'],
 })
 export class AddUserToGroupModalComponent
-  extends SimpleModalComponent<AddUserToGroupModal, GroupUser>
+  extends SimpleModalComponent<AddUserToGroupModal, User[]>
   implements AddUserToGroupModal, OnInit {
   id: string;
   label: string;
@@ -31,6 +31,7 @@ export class AddUserToGroupModalComponent
   public contacts: Contact[];
   public cachedContacts: Contact[];
   participantsEmails: string[];
+  public responseUser = new Array<User>();
 
   public form: FormGroup;
   public formSearch: FormGroup;
@@ -80,6 +81,10 @@ export class AddUserToGroupModalComponent
   }
 
   public addMemberToList(contact: Contact): void {
+    if (this.emails.find((email) => email === contact.secondMember.email)) {
+      this.toastr.info(`${contact.secondMember.email} is already added.`);
+      return;
+    }
     this.selectedContacts.push(contact);
     this.emails.push(contact.secondMember.email);
     this.groupsUser.push({
@@ -108,6 +113,10 @@ export class AddUserToGroupModalComponent
         !isParticipant
       ) {
         this.emails.push(emailValue);
+        this.groupsUser.push({
+          groupId: this.id,
+          userEmail: emailValue,
+        });
       }
       this.form.controls.email.setValue('');
     }
@@ -131,8 +140,11 @@ export class AddUserToGroupModalComponent
       u.groupId = this.id;
       this.groupService.addUserToGroup(u).subscribe(
         (resp) => {
-          this.result = resp.body;
-          setTimeout(() => this.close(), 1000);
+          this.responseUser.push(resp.body.user);
+          if (this.groupsUser[this.groupsUser.length - 1].userEmail === u.userEmail) {
+            this.result = this.responseUser;
+            setTimeout(() => this.close(), 200);
+          }
         },
         (error) => this.toastr.error(error.Message)
       );
