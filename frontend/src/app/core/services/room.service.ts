@@ -117,7 +117,7 @@ export class RoomService {
     previouslyDividedParticipants.forEach((roomParticipants) => {
       this.previoslyDividedRooms.push({
         roomId: '',
-        name: 'Room',
+        name: 'Room ' + this.previoslyDividedRooms.length,
         participants: roomParticipants
       } as RoomDTO);
     });
@@ -188,7 +188,7 @@ export class RoomService {
   private addEmptyRooms(numberOfRooms: number): void {
     for (let i = 0; i < numberOfRooms; i++) {
       this.previoslyDividedRooms.push({
-        name: 'Room',
+        name: 'Room ' + this.previoslyDividedRooms.length,
         participants: []
       } as RoomDTO);
     }
