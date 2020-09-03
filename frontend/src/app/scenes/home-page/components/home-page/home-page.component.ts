@@ -448,6 +448,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   public onMeetingHistoryClick(): void {
+    if (!this.historyVisibility){
     this.contactChatVisibility = false;
     this.actionsVisibility = false;
     this.groupChatVisibility = false;
@@ -455,10 +456,10 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.contactSelected = undefined;
     this.groupSelected = undefined;
     this.historyVisibility = !this.historyVisibility;
-
     if (!this.historyVisibility) {
       this.actionsVisibility = true;
     }
+  }
   }
 
   public onUpcomingMeetingsClick(): void {
