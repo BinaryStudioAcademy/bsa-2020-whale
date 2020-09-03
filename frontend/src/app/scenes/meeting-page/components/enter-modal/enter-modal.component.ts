@@ -31,8 +31,9 @@ export class EnterModalComponent
     this.microphone = this.isCurrentParticipantHost
       ? true
       : this.isAllowedAudioOnStart;
-    switch (this.recognitionLanguage) {
-      case 'ru':
+    if (this.isCurrentParticipantHost) {
+      switch (this.recognitionLanguage) {
+        case 'ru':
           this.recognitionLanguage = 'Russian';
           break;
         case 'ua':
@@ -41,6 +42,7 @@ export class EnterModalComponent
         default:
           this.recognitionLanguage = 'English';
       }
+    }
   }
 
   public onProceed(): void {

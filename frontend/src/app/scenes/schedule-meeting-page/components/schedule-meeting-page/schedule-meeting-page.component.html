@@ -172,6 +172,22 @@
               </div>
             </div>
           </div>
+          <div class="field">
+            <label>Meeting Language</label>
+            <div class="inline field">
+              <div class="ui compact menu">
+                <div class="ui simple inline dropdown item">
+                  {{ recognitionLanguage }}
+                  <i class="dropdown icon"></i>
+                  <div class="menu">
+                    <div class="item" (click)="recognitionLanguage = 'English'">English</div>
+                    <div class="item" (click)="recognitionLanguage = 'Russian'">Russian</div>
+                    <div class="item" (click)="recognitionLanguage = 'Ukrainian'">Ukrainian</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="ui segment">
           <h5>Plan meeting</h5>

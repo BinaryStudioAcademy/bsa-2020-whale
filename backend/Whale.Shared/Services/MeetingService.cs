@@ -136,7 +136,7 @@ namespace Whale.Shared.Services
         {
             var meeting = _mapper.Map<Meeting>(meetingDTO);
             meeting.Settings = JsonConvert.SerializeObject(new
-            { 
+            {
                 meetingDTO.IsAudioAllowed,
                 meetingDTO.IsVideoAllowed,
                 meetingDTO.IsAllowedToChooseRoom,
@@ -151,8 +151,8 @@ namespace Whale.Shared.Services
             var fullURL = $"?id={meeting.Id}&pwd={pwd}";
             var scheduledMeeting = new ScheduledMeeting
             {
-                CreatorId = user.Id, 
-                MeetingId = meeting.Id, 
+                CreatorId = user.Id,
+                MeetingId = meeting.Id,
                 ParticipantsEmails = JsonConvert.SerializeObject(meetingDTO.ParticipantsEmails),
                 Password = pwd,
                 ShortURL = shortURL,
