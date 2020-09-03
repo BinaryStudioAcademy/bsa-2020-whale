@@ -977,6 +977,56 @@ export class MeetingComponent
     tracks.forEach((track) => {
       track.enabled = enable;
     });
+
+    if (!enable) {
+      tracks.forEach(track => {
+        track.stop();
+      });
+    } else {
+      if (isVideo) {
+        navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false
+        }).then(
+          (stream) => {
+            const keys = Object.keys(this.peer.connections);
+            const peerConnection = this.peer.connections[keys[0]];
+            const videoTrack = stream.getVideoTracks()[0];
+            peerConnection?.forEach((pc) => {
+              const sender = pc.peerConnection.getSenders().find((s) => {
+                return s.track.kind === videoTrack.kind;
+              });
+              sender.replaceTrack(videoTrack);
+            });
+            this.currentUserStream.getVideoTracks().forEach((vt) => {
+              this.currentUserStream.removeTrack(vt);
+            });
+            this.currentUserStream.addTrack(videoTrack);
+          }
+        );
+      } else {
+        navigator.mediaDevices.getUserMedia({
+          video: false,
+          audio: true
+        }).then(
+          (stream) => {
+            const keys = Object.keys(this.peer.connections);
+            const peerConnection = this.peer.connections[keys[0]];
+            const audioTrack = stream.getAudioTracks()[0];
+            peerConnection?.forEach((pc) => {
+              const sender = pc.peerConnection.getSenders().find((s) => {
+                return s.track.kind === audioTrack.kind;
+              });
+              sender.replaceTrack(audioTrack);
+            });
+            this.currentUserStream.getAudioTracks().forEach((at) => {
+              this.currentUserStream.removeTrack(at);
+            });
+            this.currentUserStream.addTrack(audioTrack);
+          }
+        );
+      }
+    }
   }
 
   public startRecording(isHighlight: boolean): void {
@@ -1253,7 +1303,7 @@ export class MeetingComponent
 
             this.questionService.getQuestionsByMeeting(this.meeting.id);
 
-            this.configureRecognition();
+            // this.configureRecognition();
           });
         },
         (error) => {
@@ -1995,10 +2045,10 @@ export class MeetingComponent
       .subscribe(
         (event) => {
           if (!this.isRecognitionStop) {
-            this.recognition.start();
+            // this.recognition.start();
           }
         });
-      this.recognition.start();
+      // this.recognition.start();
     }
     catch {
       this.toastr.info('Speech recognition is not supported by the browser');
