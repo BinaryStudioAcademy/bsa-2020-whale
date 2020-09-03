@@ -41,20 +41,24 @@ export class UserRegistrationService {
       })
       .pipe(first())
       .subscribe((user) => {
-        if (!user.body) {
+        this.userRegistered.next(user.body);
+        if (this.router.url === '/' || this.router.url === '/landing') {
+          this.router.navigate(['/home']);
+        }
+      },
+      error => {
+        if (error.status === 404) {
           this.httpService
             .postClearRequest<IFireBaseUser, User>(this.addUserUrl, fireUser)
             .pipe(first())
-            .subscribe((createdUser) => {
-              this.userRegistered.next(createdUser);
-              this.router.navigate(['/home']);
+            .subscribe((user) => {
+                this.userRegistered.next(user);
+                if (this.router.url === '/' || this.router.url === '/landing') {
+                  this.router.navigate(['/home']);
+                }
             });
-        } else {
-          this.userRegistered.next(user.body);
-          if (this.router.url === '/' || this.router.url === '/landing') {
-            this.router.navigate(['/home']);
-          }
         }
-      });
+      }
+    );
   }
 }

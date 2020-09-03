@@ -14,7 +14,6 @@ import {
   PollResultDto,
   Reaction,
   ChangedMediaPermissions,
-  RoomWithParticipantsIds,
   MeetingSettings,
 } from '@shared/models';
 import { CanvasWhiteboardUpdate } from 'ng2-canvas-whiteboard';
@@ -92,7 +91,7 @@ export class MeetingSignalrService {
   private onRoomCreated = new Subject<string>();
   public readonly onRoomCreated$ = this.onRoomCreated.asObservable();
 
-  private onRoomCreatedToHost = new Subject<RoomWithParticipantsIds>();
+  private onRoomCreatedToHost = new Subject<string>();
   public readonly onRoomCreatedToHost$ = this.onRoomCreatedToHost.asObservable();
 
   private onRoomClosed = new Subject<string>();
@@ -121,6 +120,9 @@ export class MeetingSignalrService {
 
   private reactionRecived = new Subject<Reaction>();
   public readonly reactionRecived$ = this.reactionRecived.asObservable();
+
+  private onParticipantConnectRoom = new Subject<MeetingConnectionData>();
+  public readonly onParticipantConnectRoom$ = this.onParticipantConnectRoom.asObservable();
 
   constructor(private hubService: SignalRService) {
     from(hubService.registerHub(environment.signalrUrl, 'meeting'))
@@ -245,8 +247,8 @@ export class MeetingSignalrService {
 
         this.signalHub.on(
           'OnRoomCreatedToHost',
-          (roomData: RoomWithParticipantsIds) => {
-            this.onRoomCreatedToHost.next(roomData);
+          (roomId: string) => {
+            this.onRoomCreatedToHost.next(roomId);
           }
         );
 
@@ -287,6 +289,10 @@ export class MeetingSignalrService {
         this.signalHub.on('OnReaction', (reaction: Reaction) => {
           this.reactionRecived.next(reaction);
         });
+
+        this.signalHub.on('OnParticipantConnectRoom', (connectionData: MeetingConnectionData) => {
+          this.onParticipantConnectRoom.next(connectionData);
+        });
       });
   }
 
@@ -326,4 +332,5 @@ export enum SignalMethods {
   OnDrawingChangePermissions,
   OnHostChangeRoom,
   OnHostChangeMeetingSetting,
+  GetMeetingEntityForRoom,
 }

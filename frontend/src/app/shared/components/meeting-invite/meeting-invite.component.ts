@@ -166,8 +166,8 @@ export class MeetingInviteComponent
 
   public filterContacts(value: string): void {
     this.cachedContacts = this.contacts.filter((contact) => {
-      return `${contact.secondMember.firstName} ${contact.secondMember.secondName}`.includes(
-        value
+      return `${contact.secondMember.firstName.toLowerCase()} ${contact.secondMember.secondName.toLowerCase()}`.includes(
+        value.toLowerCase()
       );
     });
   }
