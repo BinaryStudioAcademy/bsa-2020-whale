@@ -59,12 +59,17 @@
       <div class="rooms">
         <div
           *ngFor="
-            let participantsOfRoom of roomService.previouslyDividedParticipants
+            let room of roomService.previoslyDividedRooms
           "
           class="ui vertical segment"
         >
-          <div class="ui header">
-            Room:
+          <div class="ui header" *ngIf="{show: false } as showinput">
+            <span *ngIf="!showinput.show">{{ room.name }}</span>
+            <div class="ui action input" *ngIf="showinput.show">
+              <input class="room-name-input" type="text" placeholder="Room name" [(ngModel)]="room.name">
+              <button class="ui button" (click)="showinput.show = !showinput.show">Save</button>
+            </div>
+            <i class="pencil alternate icon" (click)="showinput.show = !showinput.show"></i>
           </div>
           <div
             *ngIf="!meeting.isAllowedToChooseRoom"
@@ -72,22 +77,22 @@
             dndDropzone
             dndEffectAllowed="move"
             [dndDisableIf]="
-              checkIfSelectedParticipantIsInCurrentList(participantsOfRoom)
+              checkIfSelectedParticipantIsInCurrentList(room.participants)
             "
-            (dndDrop)="onDrop($event, participantsOfRoom)"
+            (dndDrop)="onDrop($event, room.participants)"
           >
             <div
-              *ngIf="participantsOfRoom.length === 0"
+              *ngIf="room.participants.length === 0"
               class="ui segment emptyPlace"
             ></div>
             <div
               class="ui segment participant"
-              *ngFor="let participant of participantsOfRoom"
+              *ngFor="let participant of room.participants"
               [dndDraggable]="participant"
               [dndType]="participant"
               dndEffectAllowed="move"
               (dndStart)="onDragStart($event, participant)"
-              (dndMoved)="onDragged(participant, participantsOfRoom)"
+              (dndMoved)="onDragged(participant, room.participants)"
               (dndEnd)="onDragEnd($event)"
             >
               <div class="participant-data">
@@ -115,25 +120,32 @@
         <div
           class="ui divided list"
           *ngFor="
-            let participantsOfRoom of roomService.participantsInRooms | keyvalue
+            let room of roomService.rooms | keyvalue
           "
         >
           <div class="ui header">
             <div>
-              Room:
+              {{ room.value.name }}
             </div>
             <div
               data-tooltip="Join room"
               data-position="top right"
               class="ui inverted secondary button"
-              (click)="redirectIntoRoom(participantsOfRoom.key)"
+              *ngIf="meeting.id !== room.key"
+              (click)="redirectIntoRoom(room.key)"
             >
               Join
+            </div>
+            <div
+              class="ui inverted secondary disabled button"
+              *ngIf="meeting.id === room.key && roomService.isInRoom"
+            >
+              You are here
             </div>
           </div>
           <div
             class="ui item participant"
-            *ngFor="let participant of participantsOfRoom.value"
+            *ngFor="let participant of room.value.participants"
           >
             <div class="participant-data">
               <img
@@ -179,5 +191,4 @@
         Join random
       </butto>
     </div>
-  </div>
 </div>

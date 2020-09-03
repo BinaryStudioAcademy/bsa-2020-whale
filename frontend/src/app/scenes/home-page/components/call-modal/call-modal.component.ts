@@ -10,7 +10,7 @@ import { CallStart } from '@shared/models/call/call-start';
 import { CallDecline } from '@shared/models/call/call-decline';
 import { MeetingCreate } from '@shared/models/meeting/meeting-create';
 import { takeUntil } from 'rxjs/operators';
-import { WhaleSignalService, WhaleSignalMethods } from 'app/core/services';
+import {WhaleSignalService, WhaleSignalMethods, MeetingSettingsService} from 'app/core/services';
 
 @Component({
   selector: 'app-call-modal',
@@ -32,7 +32,8 @@ export class CallModalComponent extends SimpleModalComponent<Contact, null>
 
   constructor(
     private whaleSignalrService: WhaleSignalService,
-    private router: Router
+    private router: Router,
+    private meetingSettingsService: MeetingSettingsService
   ) {
     super();
   }
@@ -73,6 +74,8 @@ export class CallModalComponent extends SimpleModalComponent<Contact, null>
         isScheduled: false,
         isRecurrent: false,
         creatorEmail: this?.firstMember?.email,
+        isWhiteboard: this.meetingSettingsService.getSettings().isWhiteboard,
+        isPoll: this.meetingSettingsService.getSettings().isPoll,
       } as MeetingCreate,
     } as CallStart);
   }

@@ -89,5 +89,11 @@ namespace Whale.API.Controllers
             List<AgendaPointDTO> agendaPoints = await _meetingService.GetAgendaPoints(meetingId);//_httpService.GetAsync<List<AgendaPointDTO>>($"api/meeting/agenda/{meetingId}");
             return Ok(agendaPoints);
         }
+        [HttpPut("agenda")]
+        public async Task<ActionResult> UpdateTopic(AgendaPointDTO topic)
+        {
+            await _meetingService.UpdateTopic(topic);
+            return Ok();
+        }
     }
 }

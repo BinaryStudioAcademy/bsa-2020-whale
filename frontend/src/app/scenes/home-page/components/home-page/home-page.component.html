@@ -112,7 +112,7 @@
         class="contacts-container groups user-list ui middle selection list"
         [hidden]="!groupsVisibility"
       >
-        <div *ngFor="let group of groups">
+        <div *ngFor="let group of groups" >
           <a
             id="home-group"
             [ngClass]="
@@ -122,12 +122,12 @@
           >
             <img
               *ngIf="isImageHere(group)"
-              class="ui avatar image"
+              class="ui avatar image group"
               src="{{ group.photoUrl }}"
             />
             <img
               *ngIf="!isImageHere(group)"
-              class="ui avatar image"
+              class="ui avatar image group"
               src="assets/img/user-group-icon.png"
             />
 

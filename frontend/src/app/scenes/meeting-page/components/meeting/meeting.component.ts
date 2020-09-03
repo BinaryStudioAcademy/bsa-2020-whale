@@ -56,8 +56,10 @@ import {
   ReactionsEnum,
   Reaction,
   MeetingSpeechCreate,
+  CardsLayout,
   MediaPermissions,
   MediaState,
+  ModalActions,
 } from '@shared/models';
 import { EnterModalComponent } from '../enter-modal/enter-modal.component';
 import { DivisionByRoomsModalComponent } from '../division-by-rooms-modal/division-by-rooms-modal.component';
@@ -68,6 +70,7 @@ import { BrowserMediaDevice } from '@shared/browser-media-device';
 import { Question } from '@shared/models/question/question';
 import { MeetingSettingsService } from '../../../../core/services/meeting-settings.service';
 import { MeetingInviteModalData } from '@shared/models/email/meeting-invite-modal-data';
+import { QuestionComponent } from '@shared/components/question/question/question.component';
 
 declare var webkitSpeechRecognition: any;
 
@@ -122,7 +125,6 @@ export class MeetingComponent
   public connectedStreams: MediaStream[] = [];
   public connectionData: MeetingConnectionData;
   public currentParticipant: Participant;
-  public pinModeHorizontal = true;
   public isAudioSettings = false;
   public isCameraMuted = false;
   public isMicrophoneMuted = false;
@@ -157,13 +159,16 @@ export class MeetingComponent
   public otherParticipants: Participant[] = [];
   public pattern = new RegExp(/^\S+.*/);
   public peer: Peer;
+  public pinnedCardsLayout: CardsLayout;
+  public pinnedParticipant: Participant;
+  public pinnedLayoutMenuSticky = false;
   public pollService: PollService;
   public receiveingDrawings = false;
   public isHost = false;
   public isRoom = false;
   public isMoveToRoom = false;
   public isMoveToMeeting = false;
-  public onCanMoveIntoRoomEvent = new EventEmitter<void>();
+  public onCanLeaveEvent = new EventEmitter<void>();
   public isSharing = false;
   private sdpVideoBandwidth = 125;
   public meter = new DecibelMeter('meter');
@@ -183,14 +188,16 @@ export class MeetingComponent
   @ViewChildren('meetingChat') private chatBlock: QueryList<
     ElementRef<HTMLElement>
   >;
-  @ViewChild('bigAvatar') private bigAvatar: ElementRef<HTMLImageElement>;
+  @ViewChildren('question') private questions: QueryList<ElementRef<HTMLElement>>;
+  @ViewChild('cardsLayout') private cardsLayout: ElementRef<
+  HTMLElement
+  >;
 
   private chatElement: any;
   private currentStreamLoaded = new EventEmitter<void>();
   private contectedAt = new Date();
   private elem: any;
   private isCardPinnedInner = false;
-  private pinnedParticipant: Participant;
   private savedStrokes: CanvasWhiteboardUpdate[][] = new Array<
     CanvasWhiteboardUpdate[]
   >();
@@ -424,9 +431,14 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (streamChangedData) => {
+          if (streamChangedData.oldStreamId === this.pinnedParticipant?.streamId) {
+              this.pinnedParticipant.streamId = streamChangedData.newStreamId;
+          }
+
           const changedMediaData = this.mediaData.find(
             (md) => md.currentStreamId === streamChangedData.oldStreamId
           );
+
           if (changedMediaData) {
             const changedParticipant = this.meeting.participants.find(
               (p) => p.streamId === streamChangedData.oldStreamId
@@ -478,6 +490,11 @@ export class MeetingComponent
 
             this.meeting.isAudioAllowed = data.isAudioAllowed;
             this.meeting.isVideoAllowed = data.isVideoAllowed;
+
+            if (!this.isHost) {
+              this.toggleMicrophone();
+              this.toggleCamera();
+            }
 
             this.meetingSignalrService.invoke<ChangedMediaState>(
               SignalMethods.OnMediaStateChanged,
@@ -644,7 +661,7 @@ export class MeetingComponent
           this.messages.push(message);
           this.updateSelectedMessages();
           this.notifyNewMsg(message);
-          if (this.isShowChat) {
+          if (this.isShowChat && this.isChat) {
             this.chatBlock.changes.pipe(first()).subscribe(() => {
               this.scrollDown();
             });
@@ -654,6 +671,23 @@ export class MeetingComponent
           this.toastr.error('Error occured when sending message');
         }
       );
+
+    this.meetingSignalrService.questionCreated$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+      (question: Question) => {
+        if (this.isShowChat && this.questionService.areQuestionsOpened) {
+          this.questions.changes.pipe(first()).subscribe(() => {
+            this.questions.last.nativeElement.scrollIntoView(false);
+          });
+        }
+        this.questionService.addQuestion(question);
+        this.questionService.isNewQuestion = !this.questionService.areQuestionsOpened;
+      },
+      (error) => {
+        console.error(error);
+      }
+    );
 
     this.meetingSignalrService.canvasDraw$
       .pipe(takeUntil(this.unsubscribe$))
@@ -802,6 +836,8 @@ export class MeetingComponent
       }
       this.setOutputDevice();
     });
+
+    this.pinnedCardsLayout = +localStorage.getItem('pinned-cards-layout') ?? CardsLayout.TopRow;
   }
 
   ngAfterViewChecked(): void {
@@ -814,6 +850,9 @@ export class MeetingComponent
     this.simpleModalService.removeAll();
     this.destroyPeer();
     this.currentUserStream?.getTracks().forEach((track) => track.stop());
+
+    this.questionService.areQuestionsOpened = false;
+    this.questionService.questions = [];
 
     if (this.connectionData) {
       if (this.isMoveToRoom && !this.isRoom) {
@@ -1041,9 +1080,7 @@ export class MeetingComponent
 
   scrollDown(): void {
     const chatHtml = this.chatBlock.first.nativeElement as HTMLElement;
-    const isScrolledToBottom =
-      chatHtml.scrollHeight - chatHtml.clientHeight > chatHtml.scrollTop;
-
+    const isScrolledToBottom = chatHtml.scrollHeight - chatHtml.clientHeight > chatHtml.scrollTop;
     if (isScrolledToBottom) {
       chatHtml.scrollTop = chatHtml.scrollHeight - chatHtml.clientHeight;
     }
@@ -1172,6 +1209,8 @@ export class MeetingComponent
       .subscribe(
         (resp) => {
           this.meeting = resp.body;
+          this.roomService.originalMeetingUrl = this.route.snapshot.params.link;
+          this.roomService.originalMeetingId = this.meeting.id;
           this.createEnterModal().then(() => {
             this.currentStreamLoaded.emit();
             this.connectionData.meetingId = this.meeting.id;
@@ -1425,6 +1464,14 @@ export class MeetingComponent
     isAudioActive?: boolean,
     isVideoActive?: boolean
   ): void {
+    if (streamId === this.pinnedParticipant?.streamId) {
+      this.isPinnedAudioAllowed = isAudioAllowed;
+      this.isPinnedVideoAllowed = isVideoAllowed;
+      this.isPinnedAudioActive = isAudioActive;
+      this.isPinnedVideoActive = isVideoActive;
+      return;
+    }
+
     const participant =
       this.currentParticipant.streamId === streamId
         ? this.currentParticipant
@@ -1450,8 +1497,8 @@ export class MeetingComponent
     });
   }
 
-  public pinCard(mediaDataId: string): void {
-    const mediaData = this.mediaData.find((m) => m.id === mediaDataId);
+  public pinCard(streamId: string): void {
+    const mediaData = this.mediaData.find((m) => m.currentStreamId === streamId);
 
     if (!mediaData || !mediaData.stream) {
       return;
@@ -1467,24 +1514,32 @@ export class MeetingComponent
       this.isPinnedAudioActive = data.isAudioActive;
       this.isPinnedVideoActive = data.isVideoActive;
       this.pinnedParticipant = this.meeting.participants.find(
-        (p) => p.streamId === mediaData.stream.id
+        (p) => p.streamId === mediaData.currentStreamId
       );
       this.currentVideo.nativeElement.srcObject = mediaData.stream;
       this.deleteParticipantMediaData(mediaData.stream.id);
-      this.bigAvatar.nativeElement.src = data.avatarUrl;
       this.isCardPinned = true;
     });
   }
 
-  public unpinCard() {
+  public unpinCard(): void {
     this.createParticipantCard(this.pinnedParticipant, true);
     this.isCardPinned = false;
     this.pinnedParticipant = null;
-    this.bigAvatar.nativeElement.src = this.currentParticipant.user.avatarUrl;
     this.isPinnedAudioAllowed = false;
     this.isPinnedVideoAllowed = false;
     this.isPinnedAudioActive = false;
     this.isPinnedVideoActive = false;
+  }
+
+  public setPinnedCardsLayout(layout: CardsLayout): void {
+    localStorage.setItem('pinned-cards-layout', layout.toString());
+    this.pinnedCardsLayout = layout;
+  }
+
+  public onCardsLayoutMouseEnter(): void {
+    this.pinnedLayoutMenuSticky =
+      window.innerWidth <= this.cardsLayout.nativeElement.offsetWidth + 40;
   }
   //#endregion participant cards
 
@@ -1500,6 +1555,10 @@ export class MeetingComponent
         );
       });
       this.isNewMsg = false;
+    } else if (this.isShowChat && this.questionService.areQuestionsOpened) {
+      this.questions.changes.pipe(first()).subscribe(() => {
+        this.questions.last?.nativeElement?.scrollIntoView(false);
+      });
     }
   }
 
@@ -1726,13 +1785,18 @@ export class MeetingComponent
         meeting: this.meeting,
         meetingId: this.meeting.id,
         meetingLink: link,
-        onCanMoveIntoRoomEvent: this.onCanMoveIntoRoomEvent,
+        onCanLeaveEvent: this.onCanLeaveEvent,
       })
       .toPromise()
-      .then((isMove) => {
-        this.isMoveToRoom = isMove;
-        if (this.isMoveToRoom) {
-          this.onCanMoveIntoRoomEvent.emit();
+      .then((action) => {
+        this.isMoveToRoom = action === ModalActions.MoveToRoom;
+        this.isMoveToMeeting = action === ModalActions.MoveToMeeting;
+        if (action === ModalActions.Close){
+          this.isMoveToRoom = false;
+          this.isMoveToMeeting = false;
+        }
+        if (this.isMoveToRoom || this.isMoveToMeeting) {
+          this.onCanLeaveEvent.emit();
         }
       });
   }
@@ -1866,6 +1930,9 @@ export class MeetingComponent
     this.isChat = false;
     this.questionService.isNewQuestion = false;
     this.questionService.areQuestionsOpened = true;
+    this.questions.changes.pipe(first()).subscribe(() => {
+      this.questions.last?.nativeElement?.scrollIntoView(false);
+    });
   }
 
   public onReaction(event: ReactionsEnum): void {
