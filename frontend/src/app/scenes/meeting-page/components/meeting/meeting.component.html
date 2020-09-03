@@ -551,9 +551,9 @@
             (mediaData.length === 1 &&
               mediaData[0].id !== currentParticipant.id) ||
             isCameraMuted) &&
-          !isCardPinned) || (isCardPinned && (!isPinnedVideoAllowed || !isPinnedVideoActive))
+          !isCardPinned) || (isCardPinned && !isPinnedVideoActive)
         "
-        [muted]="!isCardPinned"
+        [muted]="!isCardPinned || pinnedParticipant.streamId === currentParticipant.streamId"
       ></video>
 
       <div class="settings" *ngIf="isVideoSettings && !isCameraMuted">
