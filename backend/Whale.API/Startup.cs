@@ -20,6 +20,7 @@ using Whale.Shared.Helpers;
 using Whale.Shared.MappingProfiles;
 using Whale.Shared.Services;
 using Whale.DAL.Models;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace Whale.API
 {
@@ -135,6 +136,11 @@ namespace Whale.API
             }
 
             app.UseMiddleware<ExceptionMiddleware>();
+
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
 
             app.UseCors("CorsPolicy");
 
