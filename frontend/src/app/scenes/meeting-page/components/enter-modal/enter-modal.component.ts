@@ -20,12 +20,10 @@ export class EnterModalComponent
   public microphone: boolean;
   public recognitionLanguage: string;
   private leave = false;
-  public dropDownValue = 'Choose Language';
 
   constructor() {
     super();
   }
-
   public ngOnInit(): void {
     this.webcam = this.isCurrentParticipantHost
       ? true
@@ -33,11 +31,21 @@ export class EnterModalComponent
     this.microphone = this.isCurrentParticipantHost
       ? true
       : this.isAllowedAudioOnStart;
+    switch (this.recognitionLanguage) {
+      case 'ru':
+          this.recognitionLanguage = 'Russian';
+          break;
+        case 'ua':
+          this.recognitionLanguage = 'Ukrainian';
+          break;
+        default:
+          this.recognitionLanguage = 'English';
+      }
   }
 
   public onProceed(): void {
     if (this.isCurrentParticipantHost) {
-      switch (this.dropDownValue) {
+      switch (this.recognitionLanguage) {
         case 'Russian':
           this.recognitionLanguage = 'ru';
           break;
@@ -57,10 +65,6 @@ export class EnterModalComponent
       recognitionLanguage: this.recognitionLanguage,
     };
     this.close();
-  }
-
-  public onDropdownClick(value: string) {
-    this.dropDownValue = value;
   }
 
   public onLeave(): void {

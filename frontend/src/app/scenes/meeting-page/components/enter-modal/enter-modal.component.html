@@ -104,15 +104,18 @@
               <label>Allow participants video upon entry</label>
             </div>
           </div>
+          <div class="inline field">
+            <span>Meeting Language</span>
           <div class="ui compact menu">
-            <div class="ui simple dropdown item">
-              {{dropDownValue}}
+            <div class="ui simple inline dropdown item">
+              {{ recognitionLanguage }}
               <i class="dropdown icon"></i>
               <div class="menu">
-                <div class="item" (click)="onDropdownClick('English')">English</div>
-                <div class="item" (click)="onDropdownClick('Russian')">Russian</div>
-                <div class="item" (click)="onDropdownClick('Ukrainian')">Ukrainian</div>
+                <div class="item" (click)="recognitionLanguage = 'English'">English</div>
+                <div class="item" (click)="recognitionLanguage = 'Russian'">Russian</div>
+                <div class="item" (click)="recognitionLanguage = 'Ukrainian'">Ukrainian</div>
               </div>
+            </div>
             </div>
           </div>
         </div>
