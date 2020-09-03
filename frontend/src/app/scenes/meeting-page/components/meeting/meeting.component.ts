@@ -24,7 +24,7 @@ import {
 import { SimpleModalService } from 'ngx-simple-modal';
 import { ToastrService } from 'ngx-toastr';
 import Peer from 'peerjs';
-import { Subject, Observable, BehaviorSubject, fromEvent } from 'rxjs';
+import { Subject, Observable, BehaviorSubject, fromEvent, timer } from 'rxjs';
 import { takeUntil, first } from 'rxjs/operators';
 
 import { AuthService } from 'app/core/auth/auth.service';
@@ -162,6 +162,8 @@ export class MeetingComponent
   public pinnedCardsLayout: CardsLayout;
   public pinnedParticipant: Participant;
   public pinnedLayoutMenuSticky = false;
+  public pinnedReaction: ReactionsEnum;
+  public pinnedVolume = 0;
   public pollService: PollService;
   public receiveingDrawings = false;
   public isHost = false;
@@ -179,6 +181,7 @@ export class MeetingComponent
   public IsWhiteboard = false;
   public IsPoll = false;
   public isSomeoneRecordingScreen = false;
+  public reactionDelay: Observable<number>;
 
   @ViewChild('whiteboard') private whiteboard: ElementRef;
   @ViewChild('currentVideo') private currentVideo: ElementRef;
@@ -198,11 +201,13 @@ export class MeetingComponent
   private contectedAt = new Date();
   private elem: any;
   private isCardPinnedInner = false;
+  private pinnedReactions: Subject<ReactionsEnum>;
   private savedStrokes: CanvasWhiteboardUpdate[][] = new Array<
     CanvasWhiteboardUpdate[]
   >();
   private unsubscribe$ = new Subject<void>();
   private userStream: MediaStream;
+  private unsubscribeReaction$: Subject<void>;
   //#endregion fields
   public isPlanning = false;
   constructor(
@@ -467,6 +472,14 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (data) => {
+          if (this.isCardPinned && (!data.changedParticipantConnectionId ||
+            this.pinnedParticipant.streamId === this.currentParticipant.streamId)) {
+              this.isPinnedAudioAllowed = data.isAudioAllowed;
+              this.isPinnedVideoAllowed = data.isVideoAllowed;
+              this.isPinnedAudioActive = data.isAudioActive;
+              this.isPinnedVideoActive = data.isVideoActive;
+          }
+
           if (!data.changedParticipantConnectionId) {
             if (
               this.meeting.isAudioAllowed !== data.isAudioAllowed &&
@@ -784,9 +797,14 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (reaction) => {
+          if (reaction.userId === this.pinnedParticipant?.id) {
+            this.pinnedReactions.next(reaction.reaction);
+            return;
+          }
+
           this.mediaData
             .find((m) => m.id === reaction.userId)
-            .reactions.next(reaction.reaction);
+            ?.reactions.next(reaction.reaction);
         },
         (error) => {
           this.toastr.error(error);
@@ -1508,6 +1526,25 @@ export class MeetingComponent
       return;
     }
 
+    this.unsubscribeReaction$ = new Subject<void>();
+    this.pinnedReactions = new Subject<ReactionsEnum>();
+
+    const audioContext = new AudioContext();
+    const mediaStreamSource = audioContext.createMediaStreamSource(mediaData.stream);
+    const processor = audioContext.createScriptProcessor(256, 1, 1);
+    mediaStreamSource.connect(processor);
+    processor.connect(audioContext.destination);
+    // tslint:disable-next-line: deprecation
+    processor.onaudioprocess = (e) => {
+      const inputData = e.inputBuffer.getChannelData(0);
+      const inputDataLength = inputData.length;
+      let total = 0;
+      for (let i = 0; i < inputDataLength; i++) {
+        total += Math.abs(inputData[i++]);
+      }
+      this.pinnedVolume = Math.sqrt(total / inputDataLength) * 100;
+    };
+
     if (this.pinnedParticipant) {
       this.createParticipantCard(this.pinnedParticipant, true);
     }
@@ -1524,9 +1561,16 @@ export class MeetingComponent
       this.deleteParticipantMediaData(mediaData.stream.id);
       this.isCardPinned = true;
     });
+
+    this.pinnedReactions
+      .asObservable()
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe((reaction) => this.onPinnedReaction(reaction));
   }
 
   public unpinCard(): void {
+    this.unsubscribeReaction$ = null;
+    this.pinnedReactions = null;
     this.createParticipantCard(this.pinnedParticipant, true);
     this.isCardPinned = false;
     this.pinnedParticipant = null;
@@ -1544,6 +1588,15 @@ export class MeetingComponent
   public onCardsLayoutMouseEnter(): void {
     this.pinnedLayoutMenuSticky =
       window.innerWidth <= this.cardsLayout.nativeElement.offsetWidth + 40;
+  }
+
+  private onPinnedReaction(reaction: ReactionsEnum): void {
+    this.pinnedReaction = reaction;
+    this.unsubscribeReaction$.next();
+    this.reactionDelay = timer(5000);
+    this.reactionDelay
+      .pipe(takeUntil(this.unsubscribeReaction$))
+      .subscribe(() => this.pinnedReaction = null);
   }
   //#endregion participant cards
 

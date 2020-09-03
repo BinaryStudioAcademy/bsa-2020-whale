@@ -484,6 +484,27 @@ div:moz-full-screen
     100%
         -color: #4e4b4b
 
+.micro-pulse
+    animation: micro-pulse ease 2s infinite
+
+@keyframes micro-pulse
+    0%
+        color: #2185d0
+    100%
+        -color: #212121
+
+.pinned-reaction
+    position: absolute
+    font-size: 40px
+
+.pinned-reaction-row
+    top: 220px
+    right: 20px
+
+.pinned-reaction-column
+    top: 20px
+    right: 260px
+
 .border-pulse
     animation: border-pulse 2s infinite
 
@@ -622,6 +643,20 @@ div:moz-full-screen
 .small-cards-wrapper-column:hover .cards-position-icons-column
     display: flex
     
+.participant-name-wrapper
+    display: flex
+    i
+        padding-right: 5px
+
+.pinned-participant-info
+    position: absolute
+    bottom: 70px
+    left: 20px
+    background-color: rgba(180, 180, 180, .4)
+    padding: 5px 10px
+    border-radius: 5px
+    cursor: default !important
+
 .left-align
     text-align: left
 
@@ -642,6 +677,7 @@ i.icon.waiting-icon:hover
     right: 30%
     max-height: 80%
     z-index: 0
+
 .qa-anonymous-checkbox
     margin-left: 16px
     margin-right: auto
@@ -653,3 +689,9 @@ i.icon.waiting-icon:hover
 
 .fake-margin
     height: 15px
+
+.inverted-text
+    padding: 0 5px
+    color: white !important
+    background-color: #0E6EB8
+    border-radius: 5px

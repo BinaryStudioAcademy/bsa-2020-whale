@@ -28,7 +28,7 @@
             data.currentStreamId === meetingHolder.streamId)
         "
         [class.slash]="!dynamicData.isAudioActive"
-        [class.micro-pulse]="data.volume > 1"
+        [class.micro-pulse]="data.volume > 20"
         (click)="
           data.isCurrentUser || dynamicData.isUserHost ? toggleMicrophone() : ''
         "
