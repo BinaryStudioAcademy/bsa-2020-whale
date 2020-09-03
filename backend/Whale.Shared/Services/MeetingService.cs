@@ -21,6 +21,7 @@ using Whale.DAL.Models.Email;
 using Whale.Shared.Models.Email;
 using System.Net.Http.Headers;
 using Whale.Shared.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace Whale.Shared.Services
 {
@@ -33,6 +34,7 @@ namespace Whale.Shared.Services
         private readonly EncryptHelper _encryptService;
         private readonly SignalrService _signalrService;
         private readonly NotificationsService _notifications;
+        private readonly string whaleAPIurl;
 
         public static string BaseUrl { get; } = "http://bsa2020-whale.westeurope.cloudapp.azure.com";
 
@@ -44,6 +46,7 @@ namespace Whale.Shared.Services
             ParticipantService participantService,
             EncryptHelper encryptService,
             SignalrService signalrService,
+            IConfiguration configuration,
             NotificationsService notifications)
             : base(context, mapper)
         {
@@ -53,6 +56,7 @@ namespace Whale.Shared.Services
             _encryptService = encryptService;
             _signalrService = signalrService;
             _notifications = notifications;
+            whaleAPIurl = configuration.GetValue<string>("Whale");
         }
 
         public async Task<MeetingDTO> ConnectToMeeting(MeetingLinkDTO linkDTO, string userEmail)
@@ -165,7 +169,8 @@ namespace Whale.Shared.Services
                     MeetingId = meeting.Id,
                     ReceiverEmails = meetingDTO.ParticipantsEmails
                 };
-                client.PostAsync("http://localhost:4201/api/email/scheduled", new StringContent(JsonConvert.SerializeObject(meetingInvite), Encoding.UTF8, "application/json"));
+                (meetingInvite.ReceiverEmails as List<string>).Add(user.Email);
+                client.PostAsync(whaleAPIurl + "/api/email/scheduled", new StringContent(JsonConvert.SerializeObject(meetingInvite), Encoding.UTF8, "application/json"));
             }
             await _redisService.ConnectAsync();
             await _redisService.SetAsync(shortURL, "not-active");
