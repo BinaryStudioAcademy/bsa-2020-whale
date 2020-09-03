@@ -211,12 +211,6 @@ namespace Whale.Shared.Services
                 var userParticipant = await _userService.GetUserByEmail(email);
                 if (userParticipant == null)
                     continue;
-                await _participantService.CreateParticipantAsync(new ParticipantCreateDTO
-                {
-                    Role = ParticipantRole.Participant,
-                    UserEmail = email,
-                    MeetingId = meeting.Id
-                });
                 await _notifications.InviteMeetingNotification(user.Email, email, link);
             }
 
