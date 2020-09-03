@@ -273,6 +273,12 @@ export class MeetingComponent
 
     this.connectedStreams.push(this.currentUserStream);
 
+    this.currentUserStream.getTracks().forEach(track => {
+      track.stop();
+    });
+    this.isCameraMuted = true;
+    this.isMicrophoneMuted = true;
+
     // when someone connected to meeting
     this.meetingSignalrService.signalUserConected$
       .pipe(takeUntil(this.unsubscribe$))
@@ -1221,11 +1227,11 @@ export class MeetingComponent
       return;
     }
 
-    if (modalResult.cameraOff) {
+    if (!modalResult.cameraOff) {
       await this.toggleCamera(true);
     }
 
-    if (modalResult.microOff) {
+    if (!modalResult.microOff) {
       await this.toggleMicrophone(true);
     }
 
