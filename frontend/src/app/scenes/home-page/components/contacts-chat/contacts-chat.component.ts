@@ -127,7 +127,7 @@ export class ContactsChatComponent
   ngOnChanges(changes: SimpleChanges): void {
     this.httpService
       .getRequest<ReadAndUnreadMessages>(
-        '/api/ContactChat/withUnread/' + this.contactSelected.id,
+        '/ContactChat/withUnread/' + this.contactSelected.id,
         new HttpParams().set('userId', this.loggedInUser.id)
       )
       .pipe(takeUntil(this.unsubscribe$))
@@ -176,7 +176,7 @@ export class ContactsChatComponent
 
     this.httpService
       .postRequest<DirectMessage, HttpResponse<DirectMessage>>(
-        '/api/ContactChat/',
+        '/ContactChat/',
         newMessage
       )
       .pipe(take(1))
@@ -264,7 +264,7 @@ export class ContactsChatComponent
     };
 
     this.httpService
-      .postRequest('/api/ContactChat/markRead', unreadMessageId)
+      .postRequest('/ContactChat/markRead', unreadMessageId)
       .subscribe(() => {
         this.messageRead.emit(messageId);
       });

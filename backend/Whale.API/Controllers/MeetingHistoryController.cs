@@ -9,7 +9,7 @@ using Whale.Shared.Models.Meeting;
 namespace Whale.API.Controllers
 {
 	[ApiController]
-	[Route("api/[controller]")]
+	[Route("[controller]")]
 	public class MeetingHistoryController : ControllerBase
 	{
 		private readonly MeetingHistoryService _meetingHistoryService;

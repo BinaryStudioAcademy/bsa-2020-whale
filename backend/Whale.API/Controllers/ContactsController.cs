@@ -10,7 +10,7 @@ using Whale.Shared.Services;
 
 namespace Whale.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     [Authorize]
     public class ContactsController : ControllerBase

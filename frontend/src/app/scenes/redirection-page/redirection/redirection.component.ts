@@ -31,7 +31,7 @@ export class RedirectionComponent implements OnInit {
   public findMeetingByShortLink(shortLink: string): Observable<string> {
     const baseUrl: string = environment.apiUrl;
 
-    return this.http.get(`${baseUrl}/api/meeting/shortInvite/${shortLink}`, {
+    return this.http.get(`${baseUrl}/meeting/shortInvite/${shortLink}`, {
       responseType: 'text',
     });
   }

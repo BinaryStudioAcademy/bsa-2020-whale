@@ -9,7 +9,7 @@ using Whale.Shared.Models.Question;
 namespace Whale.API.Controllers
 {
 	[ApiController]
-	[Route("api/[controller]")]
+	[Route("[controller]")]
 	public class QuestionsController : ControllerBase
 	{
 		private readonly HttpService _httpService;

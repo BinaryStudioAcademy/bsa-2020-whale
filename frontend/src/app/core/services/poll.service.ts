@@ -19,7 +19,7 @@ import { Subject } from 'rxjs';
   providedIn: 'root',
 })
 export class PollService {
-  private route = environment.apiUrl + '/api/polls';
+  private route = environment.apiUrl + '/polls';
 
   public polls: PollDto[] = [];
   public pollResults: PollResultDto[] = [];
@@ -60,7 +60,7 @@ export class PollService {
 
     this.httpService
       .getRequest<PollsAndResultsDto>(
-        environment.meetingApiUrl + '/api/polls',
+        environment.meetingApiUrl + '/polls',
         httpParams
       )
       .subscribe(

@@ -11,7 +11,7 @@ using Whale.Shared.Models.Group.GroupUser;
 
 namespace Whale.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     [Authorize]
     public class GroupsController : ControllerBase

@@ -21,7 +21,7 @@ namespace Whale.API.Controllers.Slack
             _baseURL = "http://bsa2020-whale.westeurope.cloudapp.azure.com";
         }
 
-        [Route("/api/slack/startMeeting")]
+        [Route("/slack/startMeeting")]
         [HttpPost]
         [Produces("application/json")]
         public async Task StartMeeting(SlackCommand userData)
@@ -51,7 +51,7 @@ namespace Whale.API.Controllers.Slack
             }
         }
 
-        [Route("/api/slack/interactivity")]
+        [Route("/slack/interactivity")]
         [HttpPost]
         [Produces("application/json")]
         public async Task<OkResult> Interactivity(SlackCommand data)
@@ -61,7 +61,7 @@ namespace Whale.API.Controllers.Slack
             return Ok();
         }
 
-        [Route("/api/external/startMeeting")]
+        [Route("/external/startMeeting")]
         [HttpPost]
         [Produces("application/json")]
         public async Task<ActionResult<ExternalResponse>> ExternalStartMeeting([FromBody] ExternalCommand data)

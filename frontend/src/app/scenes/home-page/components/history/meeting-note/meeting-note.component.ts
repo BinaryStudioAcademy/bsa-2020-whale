@@ -11,7 +11,7 @@ import { HttpService } from 'app/core/services';
 })
 export class MeetingNoteComponent implements OnInit {
   @Input() meeting: Meeting;
-  public route = environment.apiUrl + '/api/meetingHistory/script/';
+  public route = environment.apiUrl + '/meetingHistory/script/';
   public areResultsVisible = false;
   public areParticipantsVisible = false;
   public areScriptVisible = false;

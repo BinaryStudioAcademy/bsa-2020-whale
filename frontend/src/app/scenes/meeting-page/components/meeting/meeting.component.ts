@@ -1131,7 +1131,7 @@ export class MeetingComponent
 
     const baseUrl: string = environment.apiUrl;
 
-    return this.http.get(`${baseUrl}/api/meeting/shortenLink/${meetingLink}`, {
+    return this.http.get(`${baseUrl}/meeting/shortenLink/${meetingLink}`, {
       responseType: 'text',
     });
   }

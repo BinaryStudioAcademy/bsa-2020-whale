@@ -4,7 +4,7 @@ using Whale.API.Providers;
 
 namespace Whale.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class StorageController : ControllerBase
     {

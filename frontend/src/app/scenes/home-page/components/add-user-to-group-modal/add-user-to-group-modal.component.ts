@@ -62,7 +62,7 @@ export class AddUserToGroupModalComponent
   public getContacts(): void {
     this.isContactsLoading = true;
     this.httpService
-      .getRequest<Contact[]>(environment.apiUrl + '/api/Contacts/accepted')
+      .getRequest<Contact[]>(environment.apiUrl + '/Contacts/accepted')
       .subscribe(
         (response) => {
           const filteredGroups = response.filter(

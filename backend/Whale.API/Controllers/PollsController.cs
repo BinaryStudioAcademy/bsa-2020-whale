@@ -9,7 +9,7 @@ using Whale.Shared.Models.Poll;
 
 namespace Whale.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class PollsController : ControllerBase
     {

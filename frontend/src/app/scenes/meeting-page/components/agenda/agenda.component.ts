@@ -50,7 +50,7 @@ export class AgendaComponent implements OnInit {
     .subscribe(
       (point) => {
         this.toastr.success(`Topic ${point.name} snooze on 5 minute`);
-        this.httpServie.getRequest<PointAgenda[]>(`${environment.apiUrl}/api/meeting/agenda/${this.meetingId}`)
+        this.httpServie.getRequest<PointAgenda[]>(`${environment.apiUrl}/meeting/agenda/${this.meetingId}`)
         .subscribe((res) =>
         {
           this.agenda = res;
@@ -60,7 +60,7 @@ export class AgendaComponent implements OnInit {
         this.toastr.error('Error');
       }
     );
-    this.httpServie.getRequest<PointAgenda[]>(`${environment.apiUrl}/api/meeting/agenda/${this.meetingId}`)
+    this.httpServie.getRequest<PointAgenda[]>(`${environment.apiUrl}/meeting/agenda/${this.meetingId}`)
     .subscribe((res) =>
     {
       this.agenda = res;
@@ -99,7 +99,7 @@ export class AgendaComponent implements OnInit {
         x.startTime = new Date(x.startTime);
         x.startTime.setMinutes(x.startTime.getMinutes() + 5);
       } );
-    list.forEach(x => this.httpServie.putRequest(`${environment.apiUrl}/api/meeting/agenda`, x));
+    list.forEach(x => this.httpServie.putRequest(`${environment.apiUrl}/meeting/agenda`, x));
     this.meetingSignalrService.invoke(SignalMethods.OnSnoozeTopic, {
       point: topic ,
       meetingId: this.meetingId

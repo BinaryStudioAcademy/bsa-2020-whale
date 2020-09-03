@@ -12,7 +12,7 @@ using Whale.Shared.Models.Meeting;
 
 namespace Whale.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class MeetingController : ControllerBase
     {

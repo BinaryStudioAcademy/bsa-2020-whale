@@ -92,7 +92,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
           this.ownerEmail = this.loggedInUser?.email;
 
           this.httpService
-            .getRequest<Contact[]>('/api/contacts')
+            .getRequest<Contact[]>('/contacts')
             .pipe(tap(() => (this.isContactsLoading = false)))
             .subscribe(
               (data: Contact[]) => {

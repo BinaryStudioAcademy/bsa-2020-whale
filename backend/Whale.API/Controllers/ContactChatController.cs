@@ -10,7 +10,7 @@ using Whale.Shared.Models.DirectMessage;
 
 namespace Whale.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     [Authorize]
     public class ContactChatController : ControllerBase

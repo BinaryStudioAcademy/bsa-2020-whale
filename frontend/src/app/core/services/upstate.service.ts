@@ -10,7 +10,7 @@ import { UserRegistrationService } from './user-registration.service';
   providedIn: 'root',
 })
 export class UpstateService {
-  public routePrefix = '/api/user/email';
+  public routePrefix = '/user/email';
   public loggedInUser: User;
 
   private signalUserConected = new Subject<User>();
