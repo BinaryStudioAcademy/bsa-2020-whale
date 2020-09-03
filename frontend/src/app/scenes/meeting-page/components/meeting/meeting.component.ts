@@ -184,7 +184,6 @@ export class MeetingComponent
     ElementRef<HTMLElement>
   >;
   @ViewChildren('question') private questions: QueryList<ElementRef<HTMLElement>>;
-  @ViewChild('bigAvatar') private bigAvatar: ElementRef<HTMLImageElement>;
   @ViewChild('cardsLayout') private cardsLayout: ElementRef<
   HTMLElement
   >;
@@ -1910,6 +1909,9 @@ export class MeetingComponent
     this.isChat = false;
     this.questionService.isNewQuestion = false;
     this.questionService.areQuestionsOpened = true;
+    this.questions.changes.pipe(first()).subscribe(() => {
+      this.questions.last?.nativeElement?.scrollIntoView(false);
+    });
   }
 
   onReaction(event: ReactionsEnum): void {
