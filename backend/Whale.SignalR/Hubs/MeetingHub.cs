@@ -25,6 +25,7 @@ namespace Whale.SignalR.Hubs
     public class MeetingHub : Hub
     {
         private const string meetingSettingsPrefix = "meeting-settings-";
+        private const string roomNamePrefix = "name-";
         private readonly MeetingService _meetingService;
         private readonly ParticipantService _participantService;
         private readonly RedisService _redisService;
@@ -310,9 +311,11 @@ namespace Whale.SignalR.Hubs
             var roomId = Guid.NewGuid().ToString();
             await _redisService.ConnectAsync();
             await _redisService.SetAsync(roomId, new MeetingMessagesAndPasswordDTO { Password = "", IsRoom = true, MeetingId = roomCreateData.MeetingId });
+
             var meeetingData = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(roomCreateData.MeetingId);
             meeetingData.RoomsIds.Add(roomId);
             await _redisService.SetAsync(roomCreateData.MeetingId, meeetingData);
+
             var meetingSettings = await _redisService.GetAsync<MeetingSettingsDTO>($"{meetingSettingsPrefix}{roomCreateData.MeetingId}");
             await _redisService.SetAsync($"{meetingSettingsPrefix}{roomId}", new MeetingSettingsDTO
             {
@@ -324,9 +327,15 @@ namespace Whale.SignalR.Hubs
                 IsPoll = false
             });
 
+            await _redisService.SetAsync(roomNamePrefix + roomId, roomCreateData.RoomName);
+
             _groupsParticipants.Add(roomId, new List<ParticipantDTO>());
 
-            await Clients.Caller.SendAsync("OnRoomCreatedToHost", roomId);
+            await Clients.Caller.SendAsync("OnRoomCreatedToHost", new RoomDTO
+            {
+                RoomId = roomId,
+                Name = roomCreateData.RoomName
+            });
 
             var participants = _groupsParticipants[roomCreateData.MeetingId]
                     .Where(p => roomCreateData.ParticipantsIds.Contains(p.Id.ToString()))
@@ -358,9 +367,11 @@ namespace Whale.SignalR.Hubs
 
             foreach (var id in roomsIds)
             {
+                var roomName = await _redisService.GetAsync<string>(roomNamePrefix + id);
                 rooms.Add(new RoomDTO
                 {
                     RoomId = id,
+                    Name = roomName,
                     Participants = _groupsParticipants[id]?.ToList()
                 });
             }

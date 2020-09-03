@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { SimpleModalComponent } from 'ngx-simple-modal';
+import { MeetingSettingsService } from 'app/core/services';
 
 @Component({
   selector: 'app-enter-modal',
@@ -20,7 +21,7 @@ export class EnterModalComponent
   public microphone: boolean;
   private leave = false;
 
-  constructor() {
+  constructor(private meetingSettingService: MeetingSettingsService) {
     super();
   }
 
@@ -31,6 +32,11 @@ export class EnterModalComponent
     this.microphone = this.isCurrentParticipantHost
       ? true
       : this.isAllowedAudioOnStart;
+
+    if (this.isCurrentParticipantHost){
+      this.isAllowedVideoOnStart = this.meetingSettingService.getSettings().isVideoDisabled;
+      this.isAllowedAudioOnStart = this.meetingSettingService.getSettings().isAudioDisabled;
+    }
   }
 
   public onProceed(): void {

@@ -58,6 +58,7 @@ import {
   CardsLayout,
   MediaPermissions,
   MediaState,
+  ModalActions,
 } from '@shared/models';
 import { EnterModalComponent } from '../enter-modal/enter-modal.component';
 import { DivisionByRoomsModalComponent } from '../division-by-rooms-modal/division-by-rooms-modal.component';
@@ -163,7 +164,7 @@ export class MeetingComponent
   public isRoom = false;
   public isMoveToRoom = false;
   public isMoveToMeeting = false;
-  public onCanMoveIntoRoomEvent = new EventEmitter<void>();
+  public onCanLeaveEvent = new EventEmitter<void>();
   public isSharing = false;
   private sdpVideoBandwidth = 125;
   public meter = new DecibelMeter('meter');
@@ -1225,6 +1226,8 @@ export class MeetingComponent
       .subscribe(
         (resp) => {
           this.meeting = resp.body;
+          this.roomService.originalMeetingUrl = this.route.snapshot.params.link;
+          this.roomService.originalMeetingId = this.meeting.id;
           this.createEnterModal().then(() => {
             this.currentStreamLoaded.emit();
             this.connectionData.meetingId = this.meeting.id;
@@ -1797,13 +1800,18 @@ export class MeetingComponent
         meeting: this.meeting,
         meetingId: this.meeting.id,
         meetingLink: link,
-        onCanMoveIntoRoomEvent: this.onCanMoveIntoRoomEvent,
+        onCanLeaveEvent: this.onCanLeaveEvent,
       })
       .toPromise()
-      .then((isMove) => {
-        this.isMoveToRoom = isMove;
-        if (this.isMoveToRoom) {
-          this.onCanMoveIntoRoomEvent.emit();
+      .then((action) => {
+        this.isMoveToRoom = action === ModalActions.MoveToRoom;
+        this.isMoveToMeeting = action === ModalActions.MoveToMeeting;
+        if (action === ModalActions.Close){
+          this.isMoveToRoom = false;
+          this.isMoveToMeeting = false;
+        }
+        if (this.isMoveToRoom || this.isMoveToMeeting) {
+          this.onCanLeaveEvent.emit();
         }
       });
   }
