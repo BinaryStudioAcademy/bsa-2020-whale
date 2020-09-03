@@ -1980,7 +1980,7 @@ export class MeetingComponent
       this.toastr.info('Speech recognition is not supported by the browser');
       this.meetingSignalrService.invoke(SignalMethods.OnSpeechRecognition, {
         meetingId: this.meeting.id,
-        userId: this.currentParticipant.id,
+        userId: this.currentParticipant.user.id,
         message: 'Speech recognition is not supported by the browser',
       } as MeetingSpeechCreate);
     }
