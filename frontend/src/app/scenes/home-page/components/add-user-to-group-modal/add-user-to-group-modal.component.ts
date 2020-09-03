@@ -97,10 +97,10 @@ export class AddUserToGroupModalComponent
       const isParticipant =
         this.participantsEmails.find((e) => e === emailValue) !== undefined;
       if (isParticipant) {
-        this.toastr.show(`${emailValue} is already participant of group.`);
+        this.toastr.info(`${emailValue} is already participant of group.`);
       }
       if (this.emails.find((email) => email === emailValue)) {
-        this.toastr.show(`${emailValue} is already added.`);
+        this.toastr.info(`${emailValue} is already added.`);
       }
       if (
         emailValue &&
