@@ -34,7 +34,7 @@ namespace Whale.Shared.Services
         private readonly EncryptHelper _encryptService;
         private readonly SignalrService _signalrService;
         private readonly NotificationsService _notifications;
-        private readonly CustomLogger _customLogger;
+        private readonly ElasticSearchService _elasticSearchService;
 
         public static string BaseUrl { get; } = "http://bsa2020-whale.westeurope.cloudapp.azure.com";
 
@@ -47,7 +47,7 @@ namespace Whale.Shared.Services
             EncryptHelper encryptService,
             SignalrService signalrService,
             NotificationsService notifications,
-            CustomLogger customLogger)
+            ElasticSearchService elasticSearchService)
             : base(context, mapper)
         {
             _redisService = redisService;
@@ -56,7 +56,7 @@ namespace Whale.Shared.Services
             _encryptService = encryptService;
             _signalrService = signalrService;
             _notifications = notifications;
-            _customLogger = customLogger;
+            _elasticSearchService = elasticSearchService;
         }
 
         public async Task<MeetingDTO> ConnectToMeeting(MeetingLinkDTO linkDTO, string userEmail)
@@ -290,7 +290,9 @@ namespace Whale.Shared.Services
 
         public async Task EndMeeting(Guid meetingId)
         {
-            var meeting = await _context.Meetings.FirstOrDefaultAsync(m => m.Id == meetingId);
+            var meeting = await _context.Meetings
+                .Include(m => m.Participants)
+                .FirstOrDefaultAsync(m => m.Id == meetingId);
 
             if (meeting == null)
             {
@@ -312,32 +314,47 @@ namespace Whale.Shared.Services
 
             await _context.SaveChangesAsync();
             await _notifications.UpdateInviteMeetingNotifications(shortUrl);
-
-            //var usersStats = _context.Participants.Where(p => p.MeetingId == meeting.Id).Select(p => new MeetingUserStatistics { UserId = p.UserId }).ToList();
-            var dateDiff = meeting.EndTime?.DateTime.Subtract(meeting.StartTime.DateTime);
-                    if (dateDiff?.TotalSeconds > 1)
-                    {
-                        var stats = new MeetingStatistics { MeetingId = meeting.Id, MeetingDurationMS = (int)dateDiff?.TotalMilliseconds, EndDate = meeting.EndTime?.DateTime, StartTime = meeting.StartTime.DateTime };
-                        _customLogger.WriteMeetingStats(stats);
-                    }
+            foreach(var p in meeting.Participants)
+            {
+                var statistics = new MeetingUserStatistics
+                {
+                    Id = $"{p.UserId.ToString()}{p.MeetingId.ToString()}",
+                    UserId = p.UserId,
+                    MeetingId = meeting.Id,
+                    StartDate = meeting.StartTime,
+                    EndDate = (DateTimeOffset)meeting.EndTime,
+                    PresenceTime = 0,
+                    DurationTime = (long)((DateTimeOffset)meeting.EndTime).Subtract(meeting.StartTime).TotalSeconds,
+                    SpeechTime = 0
+                };
+                await _elasticSearchService.SaveSingleAsync(statistics);
+            }
         }
 
-        public Task ElasticFill()
+        public async Task ElasticFill()
         {
-            var meetings = _context.Meetings.Where(m => m.EndTime.HasValue).AsEnumerable();
-            return Task.Run(() =>
+            var users = _context.Users.ToList();
+            foreach(var user in users)
             {
-                foreach (var meeting in meetings)
+                var statistics = _context.Participants
+                .Include(p => p.Meeting)
+                .Where(p => p.UserId == user.Id && p.Meeting.EndTime.HasValue)
+                .Select(p => new MeetingUserStatistics
                 {
-                    var dateDiff = meeting.EndTime?.DateTime.Subtract(meeting.StartTime.DateTime);
-                    if (dateDiff?.TotalSeconds > 1)
-                    {
-                        var stats = new MeetingStatistics { MeetingId = meeting.Id, MeetingDurationMS = (int)dateDiff?.TotalMilliseconds, EndDate = meeting.EndTime?.DateTime, StartTime = meeting.StartTime.DateTime };
-                        _customLogger.WriteMeetingStats(stats);
-                    }
-                }
-            });
-           
+                    Id = $"{p.UserId.ToString()}{p.MeetingId.ToString()}",
+                    UserId = p.UserId,
+                    MeetingId = p.MeetingId,
+                    StartDate = p.Meeting.StartTime,
+                    EndDate = (DateTimeOffset)p.Meeting.EndTime,
+                    PresenceTime = 0,
+                    DurationTime = (long)((DateTimeOffset)p.Meeting.EndTime).Subtract(p.Meeting.StartTime).TotalSeconds,
+                    SpeechTime = 0
+                })
+                .AsEnumerable();
+                await _elasticSearchService.SaveRangeAsync(statistics);
+            }
+
+            
         }
 
         public async Task<string> GetShortInviteLink(string id, string pwd)

@@ -187,6 +187,7 @@
       </app-upcoming-meetings>
       <app-statistics
         *ngIf="statisticsVisibility"
+        [user]="loggedInUser"
         (statisticsClose)="closeStatistics()"
       ></app-statistics>
       <div *ngIf="actionsVisibility" class="vertically-aligned chat ui segment">

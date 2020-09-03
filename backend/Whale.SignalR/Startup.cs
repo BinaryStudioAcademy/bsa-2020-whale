@@ -52,7 +52,7 @@ namespace Whale.SignalR
             services.AddScoped(x => new EncryptHelper(Configuration.GetValue<string>("EncryptSettings:key")));
 
             services.AddSingleton(Configuration.GetSection("ElasticConfiguration").Get<ElasticConfiguration>());
-            services.AddScoped<CustomLogger>();
+            services.AddScoped<ElasticSearchService>();
 
             services.AddSignalR();
             services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>

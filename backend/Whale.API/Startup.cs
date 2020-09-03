@@ -99,7 +99,7 @@ namespace Whale.API
             services.AddScoped(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
 
             services.AddSingleton(Configuration.GetSection("ElasticConfiguration").Get<ElasticConfiguration>());
-            services.AddScoped<CustomLogger>();
+            services.AddTransient<ElasticSearchService>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(opt =>

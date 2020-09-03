@@ -61,7 +61,7 @@ namespace Whale.MeetingAPI
                     .AddDbContextCheck<WhaleDbContext>("DbContextHealthCheck");
 
             services.AddSingleton(Configuration.GetSection("ElasticConfiguration").Get<ElasticConfiguration>());
-            services.AddScoped<CustomLogger>();
+            services.AddTransient<ElasticSearchService>();
 
             //services.AddHealthChecksUI();
             services.AddSignalR();
