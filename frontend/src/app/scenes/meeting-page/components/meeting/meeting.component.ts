@@ -24,7 +24,7 @@ import {
 import { SimpleModalService } from 'ngx-simple-modal';
 import { ToastrService } from 'ngx-toastr';
 import Peer from 'peerjs';
-import { Subject, Observable, BehaviorSubject } from 'rxjs';
+import { Subject, Observable, BehaviorSubject, fromEvent } from 'rxjs';
 import { takeUntil, first } from 'rxjs/operators';
 
 import { AuthService } from 'app/core/auth/auth.service';
@@ -55,6 +55,7 @@ import {
   MediaData,
   ReactionsEnum,
   Reaction,
+  MeetingSpeechCreate,
   CardsLayout,
   MediaPermissions,
   MediaState,
@@ -71,6 +72,7 @@ import { MeetingSettingsService } from '../../../../core/services/meeting-settin
 import { MeetingInviteModalData } from '@shared/models/email/meeting-invite-modal-data';
 import { QuestionComponent } from '@shared/components/question/question/question.component';
 
+declare var webkitSpeechRecognition: any;
 
 @Component({
   selector: 'app-meeting',
@@ -80,6 +82,8 @@ import { QuestionComponent } from '@shared/components/question/question/question
 export class MeetingComponent
   implements OnInit, AfterViewInit, OnDestroy, AfterViewChecked {
   //#region fields
+  public recognition: SpeechRecognition;
+  public isRecognitionStop = false;
   public canvasIsDisplayed = false;
   public canvasOptions: CanvasWhiteboardOptions = {
     clearButtonEnabled: true,
@@ -904,6 +908,8 @@ export class MeetingComponent
     ) {
       this.switchTrack(false, false);
       this.isMicrophoneMuted = true;
+      this.isRecognitionStop = true;
+      this.recognition?.stop();
       return;
     }
 
@@ -912,6 +918,8 @@ export class MeetingComponent
       : this.switchTrack(false, false);
 
     this.isMicrophoneMuted = !this.isMicrophoneMuted;
+    this.isRecognitionStop = this.isMicrophoneMuted;
+    this.isMicrophoneMuted ? this.recognition?.stop() : this.recognition?.start();
     if (!isMissSignaling) {
       this.invokeMediaStateChanged();
     }
@@ -1220,6 +1228,8 @@ export class MeetingComponent
             } as GetMessages);
 
             this.questionService.getQuestionsByMeeting(this.meeting.id);
+
+            this.configureRecognition();
           });
         },
         (error) => {
@@ -1260,6 +1270,7 @@ export class MeetingComponent
         isCurrentParticipantHost,
         isAllowedAudioOnStart: this.meeting.isAudioAllowed,
         isAllowedVideoOnStart: this.meeting.isVideoAllowed,
+        recognitionLanguage: this.meeting.recognitionLanguage,
       })
       .toPromise();
 
@@ -1278,6 +1289,7 @@ export class MeetingComponent
 
     this.meeting.isAudioAllowed = modalResult.isAllowedAudioOnStart;
     this.meeting.isVideoAllowed = modalResult.isAllowedVideoOnStart;
+    this.meeting.recognitionLanguage = modalResult.recognitionLanguage;
 
 
     if (isCurrentParticipantHost) {
@@ -1290,6 +1302,7 @@ export class MeetingComponent
           isVideoDisabled: !this.meeting.isVideoAllowed,
           isPoll: this.meeting.isPoll,
           isAllowedToChooseRoom: this.meeting.isAllowedToChooseRoom,
+          recognitionLanguage: this.meeting.recognitionLanguage
         })
         .pipe(takeUntil(this.unsubscribe$))
         .subscribe(() => {
@@ -1926,7 +1939,7 @@ export class MeetingComponent
     });
   }
 
-  onReaction(event: ReactionsEnum): void {
+  public onReaction(event: ReactionsEnum): void {
     this.isShowReactions = false;
     this.meetingSignalrService.invoke(SignalMethods.OnReaction, {
       meetingId: this.meeting.id,
@@ -1934,4 +1947,43 @@ export class MeetingComponent
       reaction: event,
     } as Reaction);
   }
+  //#region SpeechRecognition
+  private configureRecognition() {
+    try {
+      this.recognition = new webkitSpeechRecognition();
+      this.recognition.continuous = true;
+      if (this.meeting.recognitionLanguage) {
+        this.recognition.lang = this.meeting.recognitionLanguage;
+      }
+      this.recognition.interimResults = false;
+      this.recognition.maxAlternatives = 1;
+      fromEvent(this.recognition, 'result').pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (event: SpeechRecognitionEvent) => {
+          this.meetingSignalrService.invoke(SignalMethods.OnSpeechRecognition, {
+            meetingId: this.meeting.id,
+            userId: this.currentParticipant.user.id,
+            message: event.results[event.results.length - 1][0].transcript,
+          } as MeetingSpeechCreate);
+        }
+      );
+      fromEvent(this.recognition, 'end').pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (event) => {
+          if (!this.isRecognitionStop) {
+            this.recognition.start();
+          }
+        });
+      this.recognition.start();
+    }
+    catch {
+      this.toastr.info('Speech recognition is not supported by the browser');
+      this.meetingSignalrService.invoke(SignalMethods.OnSpeechRecognition, {
+        meetingId: this.meeting.id,
+        userId: this.currentParticipant.id,
+        message: 'Speech recognition is not supported by the browser',
+      } as MeetingSpeechCreate);
+    }
+  }
+  //#endregion SpeechRecognition
 }

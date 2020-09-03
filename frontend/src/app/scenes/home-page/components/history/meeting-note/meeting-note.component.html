@@ -87,6 +87,53 @@
           </div>
         </div>
       </div>
+      <div class="row">
+        <div
+          class="column"
+          style="color: #a0a0a0; min-width: 120px; padding-top: 22px;"
+        >
+          Script
+        </div>
+        <div class="ten wide column">
+          <button
+            class="ui basic button"
+            (click)="loadScript()"
+          >
+            {{
+              areScriptVisible ? "Hide script" : "Show script"
+            }}
+          </button>
+          <app-spiner *ngIf="isScriptLoading" [size]="'small'"></app-spiner>
+          <div class="ui list" *ngIf="areScriptVisible">
+            <div class="item" *ngIf="!script?.length">
+              <div class="content">
+                <div class="ui sub header">
+                  No records
+                </div>
+              </div>
+            </div>
+            <div class="item" *ngFor="let replica of script">
+              <img
+                class="ui mini circular image"
+                src="{{ replica.user.avatarUrl }}"
+              />
+              <div class="content">
+                <div class="ui sub header">
+                  {{
+                    replica.user.secondName
+                      ? replica.user.firstName +
+                        " " +
+                        replica.user.secondName
+                      : replica.user.firstName
+                  }}
+                </div>
+                {{ replica.speechDate | date: "HH:mm" }}
+                {{replica.message}}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

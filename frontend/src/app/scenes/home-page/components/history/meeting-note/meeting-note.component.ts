@@ -1,6 +1,8 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { Meeting } from '@shared/models/meeting/meeting';
 import { Duration } from '@shared/models/other/duration';
+import { MeetingScript, Meeting } from '@shared/models';
+import { environment } from '@env';
+import { HttpService } from 'app/core/services';
 
 @Component({
   selector: 'app-meeting-note',
@@ -9,11 +11,14 @@ import { Duration } from '@shared/models/other/duration';
 })
 export class MeetingNoteComponent implements OnInit {
   @Input() meeting: Meeting;
-
+  public route = environment.apiUrl + '/api/meetingHistory/script/';
   public areResultsVisible = false;
   public areParticipantsVisible = false;
+  public areScriptVisible = false;
+  public isScriptLoading = false;
+  public script: MeetingScript[];
 
-  constructor() {}
+  constructor(private httpService: HttpService) {}
 
   ngOnInit(): void {}
 
@@ -48,5 +53,23 @@ export class MeetingNoteComponent implements OnInit {
         : `${duration.minutes} minutes`;
 
     return hourString + minuteString;
+  }
+
+  public loadScript(): void {
+    if (!this.script)
+    {
+      this.isScriptLoading = true;
+      this.httpService.getRequest<MeetingScript[]>(this.route + this.meeting.id).subscribe(
+        (response) => {
+          this.script = response;
+          this.isScriptLoading = false;
+        },
+        (error) => {
+          this.isScriptLoading = false;
+          this.script = [];
+          }
+        );
+    }
+    this.areScriptVisible = !this.areScriptVisible;
   }
 }
