@@ -22,6 +22,7 @@ import { QuestionStatus } from '@shared/models/question/question-status';
 import { QuestionStatusUpdate } from '@shared/models/question/question-status-update';
 import { QuestionDelete } from '@shared/models/question/question-delete';
 import { ChangedMeetingSettings } from '@shared/models/meeting/changed-meeting-settings';
+import { PointAgenda } from '@shared/models/agenda/agenda';
 
 
 @Injectable({
@@ -124,6 +125,14 @@ export class MeetingSignalrService {
   private onParticipantConnectRoom = new Subject<MeetingConnectionData>();
   public readonly onParticipantConnectRoom$ = this.onParticipantConnectRoom.asObservable();
 
+  private onEndedTopic = new Subject<PointAgenda>();
+  public readonly onEndedTopic$ = this.onEndedTopic.asObservable();
+
+  private onOutTime = new Subject<PointAgenda>();
+  public readonly onOutTime$ = this.onOutTime.asObservable();
+
+  private onSnoozeTopic = new Subject<PointAgenda>();
+  public readonly onSnoozeTopic$ = this.onSnoozeTopic.asObservable();
   constructor(private hubService: SignalRService) {
     from(hubService.registerHub(environment.signalrUrl, 'meeting'))
       .pipe(
@@ -293,6 +302,15 @@ export class MeetingSignalrService {
         this.signalHub.on('OnParticipantConnectRoom', (connectionData: MeetingConnectionData) => {
           this.onParticipantConnectRoom.next(connectionData);
         });
+        this.signalHub.on('OnOutTime', (point: PointAgenda) => {
+           this.onOutTime.next(point);
+        });
+        this.signalHub.on('OnSnoozeTopic', (point: PointAgenda) => {
+          this.onSnoozeTopic.next(point);
+        });
+        this.signalHub.on('OnEndedTopic', (point: PointAgenda) => {
+         this.onEndedTopic.next(point);
+        });
       });
   }
 
@@ -333,4 +351,7 @@ export enum SignalMethods {
   OnHostChangeRoom,
   OnHostChangeMeetingSetting,
   GetMeetingEntityForRoom,
+  OnOutTime,
+  OnSnoozeTopic,
+  OnEndedTopic,
 }

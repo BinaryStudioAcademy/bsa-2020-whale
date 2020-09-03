@@ -325,5 +325,11 @@ namespace Whale.Shared.Services
         {
             return _mapper.Map<List<AgendaPointDTO>>(_context.AgendaPoints.Where(x => x.MeetingId == Guid.Parse(meetingId)).ToList());
         } 
+        public async Task UpdateTopic(AgendaPointDTO point)
+        {
+            point.StartTime.AddMinutes(5);
+            _context.AgendaPoints.Update(_mapper.Map<AgendaPoint>(point));
+            await _context.SaveChangesAsync();
+        }
     }
 }
