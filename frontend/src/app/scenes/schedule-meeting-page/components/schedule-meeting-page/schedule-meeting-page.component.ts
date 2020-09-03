@@ -47,6 +47,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
   private unsubscribe$ = new Subject<void>();
   private loggedInUser: User;
   public isAgenda = true;
+  public recognitionLanguage = 'English';
   point: PointAgenda;
   constructor(
     private toastr: ToastrService,
@@ -98,6 +99,18 @@ export class ScheduleMeetingPageComponent implements OnInit {
     date.setHours(parseInt(time[1], 10) + (time[3] ? 12 : 0));
     date.setMinutes(parseInt(time[2], 10) || 0);
 
+    let meetingLanguage: string;
+    switch (this.recognitionLanguage) {
+      case 'Russian':
+        meetingLanguage = 'ru';
+        break;
+      case 'Ukrainian':
+        meetingLanguage = 'ua';
+        break;
+      default:
+        meetingLanguage = 'en-US';
+    }
+
     this.simpleModalService
       .addModal(MeetingInviteComponent, {
         participantEmails: [this.loggedInUser.email],
@@ -117,6 +130,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
             creatorEmail: this.loggedInUser.email,
             participantsEmails: participantEmails as string[],
             agendaPoints: this.pointList,
+            recognitionLanguage: meetingLanguage,
           } as MeetingCreate)
           .pipe(takeUntil(this.unsubscribe$))
           .subscribe((resp) => {

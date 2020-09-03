@@ -12,6 +12,7 @@ namespace Whale.Shared.Models.Meeting
         public bool IsRoom { get; set; }
         public bool IsVideoAllowed { get; set; }
         public bool IsAudioAllowed { get; set; }
+        public string RecognitionLanguage { get; set; }
         public ParticipantDTO Participant { get; set; }
     }
 }
