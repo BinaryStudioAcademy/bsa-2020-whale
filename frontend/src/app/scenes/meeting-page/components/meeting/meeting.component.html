@@ -514,10 +514,48 @@
             (mediaData.length === 1 &&
               mediaData[0].id !== currentParticipant.id) ||
             isCameraMuted) &&
-          !isCardPinned) || (isCardPinned && (!isPinnedVideoAllowed || !isPinnedVideoActive))
+          !isCardPinned) || (isCardPinned && !isPinnedVideoActive)
         "
-        [muted]="!isCardPinned"
+        [muted]="!isCardPinned || pinnedParticipant.streamId === currentParticipant.streamId"
       ></video>
+
+      <div 
+        class="pinned-reaction" 
+        [ngClass]="pinnedCardsLayout === 0 ? 'pinned-reaction-row' : 'pinned-reaction-column'"
+        *ngIf="pinnedReaction"
+      >
+        {{ pinnedReaction }}
+      </div>
+
+      <div class="pinned-participant-info" *ngIf="isCardPinned && pinnedParticipant.streamId !== currentParticipant.streamId">
+        <div class="participant-name-wrapper">
+          <i
+            *ngIf="isPinnedAudioAllowed || pinnedParticipant.role === 1"
+            class="microphone icon default-cursor"
+            [class.micro-pulse]="pinnedVolume > 20"
+            [ngClass]="isPinnedAudioActive ? '' : 'red'"
+            [class.slash]="!isPinnedAudioActive"
+          ></i>
+          <span
+            *ngIf="!isPinnedAudioAllowed && pinnedParticipant?.role !== 1"
+            data-tooltip="Disabled by the Host"
+            data-position="top left"
+          >
+            <i class="microphone slash icon default-cursor"></i>
+          </span>
+          <span
+            *ngIf="!isPinnedVideoAllowed && pinnedParticipant?.role !== 1"
+            data-tooltip="Disabled by the Host"
+            data-position="top left"
+          >
+            <i class="eye slash icon default-cursor"></i>
+          </span>
+          <p class="header" [class.inverted-text]="pinnedParticipant.role === 1">  
+            {{ pinnedParticipant?.user?.firstName }}
+            {{ pinnedParticipant?.user?.secondName }}
+          </p>
+        </div>
+      </div>
 
       <div class="settings" *ngIf="isVideoSettings && !isCameraMuted">
         <app-video-settings
