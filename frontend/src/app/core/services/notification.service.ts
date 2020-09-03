@@ -7,7 +7,7 @@ import { Notification } from '@shared/models/notification/notification';
   providedIn: 'root',
 })
 export class NotificationService {
-  public routePrefix = '/api/notifications';
+  public routePrefix = '/notifications';
 
   constructor(private httpService: HttpService) {}
 

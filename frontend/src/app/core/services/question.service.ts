@@ -22,7 +22,7 @@ import { QuestionStatus } from '@shared/models/question/question-status';
   providedIn: 'root',
 })
 export class QuestionService {
-  private route = environment.apiUrl + '/api/questions';
+  private route = environment.apiUrl + '/questions';
 
   public questions: Question[] = [];
   public currentUser: User;

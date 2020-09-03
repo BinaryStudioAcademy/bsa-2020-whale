@@ -45,7 +45,7 @@ export class ProfilePageComponent implements OnInit {
   isShowUploadFile: boolean;
   loggedInUser: User;
   updatedUserDB: User;
-  public routePrefix = '/api/user';
+  public routePrefix = '/user';
 
   imageChangedEvent: any = '';
   userPhotoFromCamera: any = '';

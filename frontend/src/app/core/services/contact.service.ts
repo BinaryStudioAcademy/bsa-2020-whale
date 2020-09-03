@@ -8,7 +8,7 @@ import { HttpResponse } from '@angular/common/http';
   providedIn: 'root',
 })
 export class ContactService {
-  public routePrefix = '/api/contacts';
+  public routePrefix = '/contacts';
 
   constructor(private httpService: HttpService) {}
 

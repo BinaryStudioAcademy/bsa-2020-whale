@@ -1,8 +1,8 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://bsa2020-whale.westeurope.cloudapp.azure.com:4201',
-  meetingApiUrl: 'http://bsa2020-whale.westeurope.cloudapp.azure.com:4202',
-  signalrUrl: 'http://bsa2020-whale.westeurope.cloudapp.azure.com:4203',
+  apiUrl: 'https://bsa2020-whale.westeurope.cloudapp.azure.com/api',
+  meetingApiUrl: 'https://bsa2020-whale.westeurope.cloudapp.azure.com/meetingapi',
+  signalrUrl: 'https://bsa2020-whale.westeurope.cloudapp.azure.com/hubs',
   firebase: {
     apiKey: 'AIzaSyCdb8h9YMeJBdcIM5wK_w6Mcw7ZI1CVJAk',
     authDomain: 'bsa-whale.firebaseapp.com',

@@ -24,6 +24,7 @@ using Quartz.Impl;
 using Quartz.Spi;
 using Whale.Shared.Jobs;
 using Whale.DAL.Models;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace Whale.MeetingAPI
 {
@@ -129,6 +130,11 @@ namespace Whale.MeetingAPI
                     options.SwaggerEndpoint("/swagger/v1/swagger.json", "Meeting API v1");
                 });
             }
+
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
 
             app.UseCors("CorsPolicy");
 

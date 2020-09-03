@@ -19,7 +19,7 @@ namespace Whale.SignalR.Services
 
         public async Task DeleteMeetingPolls(string meetingId)
         {
-            await _client.GetAsync($"{_baseUrl}/api/polls/saveResults?meetingId={meetingId}");
+            await _client.GetAsync($"{_baseUrl}/polls/saveResults?meetingId={meetingId}");
         }
     }
 }

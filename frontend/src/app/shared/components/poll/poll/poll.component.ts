@@ -79,7 +79,7 @@ export class PollComponent implements OnInit {
 
     this.httpService
       .postRequest<VoteDto, PollResultDto>(
-        environment.meetingApiUrl + '/api/polls/answers',
+        environment.meetingApiUrl + '/polls/answers',
         voteDto
       )
       .subscribe(

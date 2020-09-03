@@ -11,7 +11,7 @@ using Whale.Shared.Models.Email;
 namespace Whale.API.Controllers
 {
 	[ApiController]
-	[Route("api/email")]
+	[Route("email")]
 	public class EmailController: ControllerBase
 	{
 		private readonly EmailService _emailServcice;

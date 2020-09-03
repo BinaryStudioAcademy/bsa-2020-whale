@@ -26,7 +26,7 @@ export class AppComponent implements OnInit, OnDestroy {
   groupCall: GroupCall;
   user: User;
 
-  private getUserUrl: string = environment.apiUrl + '/api/user/email';
+  private getUserUrl: string = environment.apiUrl + '/user/email';
 
   private unsubscribe$ = new Subject<void>();
 

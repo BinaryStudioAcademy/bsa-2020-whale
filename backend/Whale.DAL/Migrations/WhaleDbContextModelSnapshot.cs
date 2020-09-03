@@ -225,6 +225,25 @@ namespace Whale.DAL.Migrations
                     b.ToTable("Meetings");
                 });
 
+            modelBuilder.Entity("Whale.DAL.Models.MeetingScript", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("MeetingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Script")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MeetingId");
+
+                    b.ToTable("MeetingScripts");
+                });
+
             modelBuilder.Entity("Whale.DAL.Models.Messages.UnreadGroupMessage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -564,6 +583,15 @@ namespace Whale.DAL.Migrations
                     b.HasOne("Whale.DAL.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Whale.DAL.Models.MeetingScript", b =>
+                {
+                    b.HasOne("Whale.DAL.Models.Meeting", "Meeting")
+                        .WithMany()
+                        .HasForeignKey("MeetingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

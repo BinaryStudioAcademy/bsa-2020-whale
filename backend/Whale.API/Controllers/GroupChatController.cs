@@ -10,7 +10,7 @@ using Whale.Shared.Models.GroupMessage;
 
 namespace Whale.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     [Authorize]
     public class GroupChatController : ControllerBase

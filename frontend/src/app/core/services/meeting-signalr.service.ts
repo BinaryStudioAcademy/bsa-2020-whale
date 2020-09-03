@@ -351,6 +351,7 @@ export enum SignalMethods {
   OnDrawingChangePermissions,
   OnHostChangeRoom,
   OnHostChangeMeetingSetting,
+  OnSpeechRecognition,
   GetMeetingEntityForRoom,
   OnOutTime,
   OnSnoozeTopic,

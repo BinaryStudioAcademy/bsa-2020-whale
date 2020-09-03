@@ -36,7 +36,7 @@ namespace Whale.API.Services
                 StartTime = scheduledMeetingExternal.ScheduledTime, 
                 ParticipantsEmails = new List<string>() 
             };
-            var link = await _httpService.PostStringAsync("api/meeting/scheduled", meetingDTO);
+            var link = await _httpService.PostStringAsync("meeting/scheduled", meetingDTO);
             return $"{BaseUrl}/redirection/{link}";
         }
 

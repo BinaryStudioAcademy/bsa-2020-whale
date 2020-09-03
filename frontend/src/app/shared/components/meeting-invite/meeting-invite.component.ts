@@ -60,7 +60,7 @@ export class MeetingInviteComponent
   public getContacts(): void {
     this.isContactsLoading = true;
     this.httpService
-      .getRequest<Contact[]>(environment.apiUrl + '/api/Contacts/accepted')
+      .getRequest<Contact[]>(environment.apiUrl + '/Contacts/accepted')
       .subscribe(
         (response) => {
           let filteredContacts: Contact[];
@@ -144,7 +144,7 @@ export class MeetingInviteComponent
 
       this.httpService
         .postRequest<MeetingInvite, null>(
-          environment.apiUrl + '/api/email',
+          environment.apiUrl + '/email',
           inviteData
         )
         .subscribe(

@@ -12,7 +12,7 @@ using Whale.Shared.Services;
 
 namespace Whale.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class MeetingController : ControllerBase
     {
@@ -86,7 +86,7 @@ namespace Whale.API.Controllers
         [HttpGet("agenda/{meetingId}")]
         public async Task<ActionResult<List<AgendaPointDTO>>> GetAgenda(string meetingId)
         {
-            List<AgendaPointDTO> agendaPoints = await _meetingService.GetAgendaPoints(meetingId);//_httpService.GetAsync<List<AgendaPointDTO>>($"api/meeting/agenda/{meetingId}");
+            List<AgendaPointDTO> agendaPoints = await _meetingService.GetAgendaPoints(meetingId);//_httpService.GetAsync<List<AgendaPointDTO>>($"meeting/agenda/{meetingId}");
             return Ok(agendaPoints);
         }
         [HttpPut("agenda")]
