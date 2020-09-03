@@ -115,11 +115,7 @@ export class RoomService {
     this.previoslyDividedRooms = [];
 
     previouslyDividedParticipants.forEach((roomParticipants) => {
-      this.previoslyDividedRooms.push({
-        roomId: '',
-        name: 'Room ' + this.previoslyDividedRooms.length,
-        participants: roomParticipants
-      } as RoomDTO);
+      this.addRoom(roomParticipants);
     });
 
     if (this.previoslyDividedRooms.length < numberOfRooms) {
@@ -187,11 +183,16 @@ export class RoomService {
 
   private addEmptyRooms(numberOfRooms: number): void {
     for (let i = 0; i < numberOfRooms; i++) {
-      this.previoslyDividedRooms.push({
-        name: 'Room ' + this.previoslyDividedRooms.length,
-        participants: []
-      } as RoomDTO);
+      this.addRoom([]);
     }
+  }
+
+  private addRoom(participants: Array<Participant>): void {
+    this.previoslyDividedRooms.push({
+      roomId: '',
+      name: 'Room ' + this.previoslyDividedRooms.length,
+      participants
+    } as RoomDTO);
   }
 
   private randChunkSplit(
