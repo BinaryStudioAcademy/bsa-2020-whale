@@ -93,7 +93,7 @@ export class AgendaComponent implements OnInit {
     this.myCheck.nativeElement.checked = true;
   }
   snoozeTopic(topic: PointAgenda){
-    let list = this.agenda.filter(x => topic.startTime >= x.startTime);
+    const list = this.agenda.filter(x => topic.startTime >= x.startTime);
     list.forEach(x =>
       {
         x.startTime = new Date(x.startTime);
