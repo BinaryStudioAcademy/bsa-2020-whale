@@ -6,7 +6,6 @@ services:
     ports:
       - "80:80"
     volumes:
-      - /data/certs:/etc/nginx/certs
       - /etc/nginx/nginx.conf:/etc/nginx/nginx.conf
       - /etc/nginx/dhparam.pem:/etc/nginx/dhparam.pem
       - /etc/letsencrypt/live/bsa2020-whale.westeurope.cloudapp.azure.com/cert.pem:/etc/letsencrypt/live/bsa2020-whale.westeurope.cloudapp.azure.com/cert.pem
