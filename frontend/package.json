@@ -44,6 +44,7 @@
     "recordrtc": "^5.6.1",
     "rxjs": "~6.5.5",
     "semantic-ui-css": "^2.4.1",
+    "sort-by-typescript": "^1.1.0",
     "tslib": "^2.0.0",
     "zone.js": "~0.10.3"
   },
