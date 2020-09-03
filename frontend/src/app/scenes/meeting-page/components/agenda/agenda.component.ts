@@ -1,11 +1,10 @@
-import { Component, OnInit, EventEmitter, Input } from '@angular/core';
+import { Component, OnInit, EventEmitter, Input, ElementRef, ViewChild } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { PointAgenda } from '@shared/models/agenda/agenda';
 import { HttpService, MeetingSignalrService, SignalMethods } from 'app/core/services';
 import { environment } from '@env';
 import { takeUntil } from 'rxjs/internal/operators/takeUntil';
 import { Subject } from 'rxjs/internal/Subject';
-import { IToastButton } from '@shared/components/custom-toast/custom-toast.component';
 
 @Component({
   selector: 'app-agenda',
@@ -18,19 +17,18 @@ export class AgendaComponent implements OnInit {
               private meetingSignalrService: MeetingSignalrService) {
   }
   public agenda: PointAgenda[] = [];
-  toastRef;
   @Input() meetingId;
-  intervalToEventList = [];
   dateNow: Date;
   private unsubscribe$ = new Subject<void>();
-  isSneeze = false;
+  isSnooze = false;
+  @ViewChild('myCheck') myCheck: ElementRef<HTMLInputElement>;
   ngOnInit(): void {
     this.dateNow = new Date();
     this.meetingSignalrService.onOutTime$
     .pipe(takeUntil(this.unsubscribe$))
     .subscribe(
       (point) => {
-        this.toastr.success(`Time for topic ${point.name} must be finished or sneezing`);
+        this.toastr.success(`Topic ${point.name} must be finished`);
       },
       () => {
         this.toastr.error('Error');
@@ -41,6 +39,7 @@ export class AgendaComponent implements OnInit {
     .subscribe(
       (point) => {
         this.toastr.success(`Topic ${point.name} finished`);
+        this.checkPoint();
       },
       () => {
         this.toastr.error('Error');
@@ -55,7 +54,6 @@ export class AgendaComponent implements OnInit {
         .subscribe((res) =>
         {
           this.agenda = res;
-          console.log(this.agenda);
         });
       },
       () => {
@@ -74,7 +72,7 @@ export class AgendaComponent implements OnInit {
               point: x ,
               meetingId: this.meetingId
             });
-            this.isSneeze = true;
+            this.isSnooze = true;
             clearTimeout(ntf);
           }
         }, 1000);
@@ -88,16 +86,23 @@ export class AgendaComponent implements OnInit {
         point: a ,
         meetingId: this.meetingId
       });
-      //this.agenda.splice(this.agenda.indexOf(a), 1);
     }
   }
-  sneezeTopic(topic: PointAgenda){
+  checkPoint()
+  {
+    this.myCheck.nativeElement.checked = true;
+  }
+  snoozeTopic(topic: PointAgenda){
     let list = this.agenda.filter(x => topic.startTime >= x.startTime);
-    list.forEach(x => this.httpServie.putRequest<PointAgenda, PointAgenda>(`${environment.apiUrl}/api/meeting/agenda`, x));
+    list.forEach(x =>
+      {
+        x.startTime = new Date(x.startTime);
+        x.startTime.setMinutes(x.startTime.getMinutes() + 5);
+      } );
+    list.forEach(x => this.httpServie.putRequest(`${environment.apiUrl}/api/meeting/agenda`, x));
     this.meetingSignalrService.invoke(SignalMethods.OnSnoozeTopic, {
       point: topic ,
       meetingId: this.meetingId
-    }); 
-    console.log(this.agenda);
+    });
    }
 }
