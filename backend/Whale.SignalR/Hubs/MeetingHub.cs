@@ -396,6 +396,7 @@ namespace Whale.SignalR.Hubs
                 IsWhiteboard = roomSettings.IsWhiteboard,
                 IsPoll = roomSettings.IsPoll,
                 IsAllowedToChooseRoom = roomSettings.IsAllowedToChooseRoom,
+                RecognitionLanguage = roomSettings.RecognitionLanguage,
                 Participants = new List<ParticipantDTO>(),
                 PollResults = new List<PollResultDTO>()
             };
@@ -461,6 +462,13 @@ namespace Whale.SignalR.Hubs
         {
             await Clients.Group(reaction.MeetingId).SendAsync("OnReaction", reaction);
         }
+
+        [HubMethodName("OnSpeechRecognition")]
+        public Task SpeechRecognition(MeetingSpeechCreateDTO speechDTO)
+        {
+            return _meetingService.SpeechRecognition(speechDTO);
+        }
+
         [HubMethodName("OnEndedTopic")]
         public async Task CheckPointAsEnded(AgendaSignal sign)
         {

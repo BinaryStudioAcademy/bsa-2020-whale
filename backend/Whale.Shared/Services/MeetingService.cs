@@ -28,6 +28,7 @@ namespace Whale.Shared.Services
     public class MeetingService : BaseService
     {
         private const string meetingSettingsPrefix = "meeting-settings-";
+        private const string meetingSpeechPrefix = "meeting-speech-";
         private readonly RedisService _redisService;
         private readonly UserService _userService;
         private readonly ParticipantService _participantService;
@@ -90,6 +91,7 @@ namespace Whale.Shared.Services
             meetingDTO.IsPoll = meetingSettings.IsPoll;
             meetingDTO.IsWhiteboard = meetingSettings.IsWhiteboard;
             meetingDTO.IsAllowedToChooseRoom = meetingSettings.IsAllowedToChooseRoom;
+            meetingDTO.RecognitionLanguage = meetingSettings.RecognitionLanguage;
 
             return meetingDTO;
         }
@@ -116,8 +118,9 @@ namespace Whale.Shared.Services
                 IsVideoAllowed = meetingDTO.IsVideoAllowed,
                 IsWhiteboard = meetingDTO.IsWhiteboard,
                 IsAllowedToChooseRoom = meetingDTO.IsAllowedToChooseRoom,
-                IsPoll = meetingDTO.IsPoll
-            });
+                IsPoll = meetingDTO.IsPoll,
+                RecognitionLanguage = meetingDTO.RecognitionLanguage
+    });
 
             string shortURL = ShortId.Generate();
             string fullURL = $"?id={meeting.Id}&pwd={pwd}";
@@ -137,13 +140,14 @@ namespace Whale.Shared.Services
         public async Task<MeetingAndLink> RegisterScheduledMeeting(MeetingCreateDTO meetingDTO)
         {
             var meeting = _mapper.Map<Meeting>(meetingDTO);
-            meeting.Settings = JsonConvert.SerializeObject(new 
-            { 
+            meeting.Settings = JsonConvert.SerializeObject(new
+            {
                 meetingDTO.IsAudioAllowed,
                 meetingDTO.IsVideoAllowed,
                 meetingDTO.IsAllowedToChooseRoom,
                 meetingDTO.IsPoll,
-                meetingDTO.IsWhiteboard
+                meetingDTO.IsWhiteboard,
+                meetingDTO.RecognitionLanguage,
             });
             await _context.Meetings.AddAsync(meeting);
             var user = await _context.Users.FirstOrDefaultAsync(e => e.Email == meetingDTO.CreatorEmail);
@@ -152,8 +156,8 @@ namespace Whale.Shared.Services
             var fullURL = $"?id={meeting.Id}&pwd={pwd}";
             var scheduledMeeting = new ScheduledMeeting
             {
-                CreatorId = user.Id, 
-                MeetingId = meeting.Id, 
+                CreatorId = user.Id,
+                MeetingId = meeting.Id,
                 ParticipantsEmails = JsonConvert.SerializeObject(meetingDTO.ParticipantsEmails),
                 Password = pwd,
                 ShortURL = shortURL,
@@ -188,7 +192,7 @@ namespace Whale.Shared.Services
             await _redisService.SetAsync($"{meetingSettingsPrefix}{meeting.Id}", new MeetingSettingsDTO
             {
                 IsAudioAllowed = ((dynamic)meetingSettings).IsAudioAllowed,
-                IsVideoAllowed = ((dynamic)meetingSettings).IsVideoAllowed
+                IsVideoAllowed = ((dynamic)meetingSettings).IsVideoAllowed,
             });
 
             await _redisService.SetAsync(scheduledMeeing.FullURL, scheduledMeeing.ShortURL);
@@ -243,6 +247,7 @@ namespace Whale.Shared.Services
             meetingSettings.IsAudioAllowed = !updateSettingsDTO.IsAudioDisabled;
             meetingSettings.IsVideoAllowed = !updateSettingsDTO.IsVideoDisabled;
             meetingSettings.IsAllowedToChooseRoom = updateSettingsDTO.IsAllowedToChooseRoom;
+            meetingSettings.RecognitionLanguage = updateSettingsDTO.RecognitionLanguage;
 
             await _redisService.SetAsync($"{meetingSettingsPrefix}{updateSettingsDTO.MeetingId}", meetingSettings);
         }
@@ -293,8 +298,16 @@ namespace Whale.Shared.Services
             {
                 throw new NotFoundException(nameof(Meeting));
             }
-
             await _redisService.ConnectAsync();
+            var redisMeetingScript = await _redisService.GetAllListJson($"{meetingSpeechPrefix}{meetingId}");
+            var meetingScript = new MeetingScript
+            {
+                MeetingId = meeting.Id,
+                Script = redisMeetingScript,
+            };
+            _context.MeetingScripts.Add(meetingScript);
+            await _context.SaveChangesAsync();
+
             var redisMeetingData = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(meetingId.ToString());
             await _redisService.RemoveAsync(meetingId.ToString());
 
@@ -303,6 +316,7 @@ namespace Whale.Shared.Services
             await _redisService.RemoveAsync(fullURL);
             await _redisService.RemoveAsync(shortUrl);
             await _redisService.RemoveAsync($"{meetingSettingsPrefix}{meetingId}");
+            await _redisService.RemoveAsync($"{meetingSpeechPrefix}{meetingId}");
 
             meeting.EndTime = DateTimeOffset.Now;
             _context.Update(meeting);
@@ -321,6 +335,20 @@ namespace Whale.Shared.Services
         {
             await _redisService.ConnectAsync();
             return await _redisService.GetAsync<string>(shortURL);
+        }
+
+        public async Task SpeechRecognition(MeetingSpeechCreateDTO speechDTO)
+        {
+            var speech = new MeetingSpeech
+            {
+                UserId = speechDTO.UserId,
+                Message = speechDTO.Message,
+                SpeechDate = DateTimeOffset.Now
+            };
+            await _redisService.ConnectAsync();
+            await _redisService.AddToList($"{meetingSpeechPrefix}{speechDTO.MeetingId}", speech);
+
+            return;
         }
         public async Task<List<AgendaPointDTO>> GetAgendaPoints(string meetingId)
         {

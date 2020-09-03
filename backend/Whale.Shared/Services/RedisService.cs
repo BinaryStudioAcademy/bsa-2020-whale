@@ -93,5 +93,19 @@ namespace Whale.Shared.Services
             var db = _redis.GetDatabase();
             await db.KeyDeleteAsync(key);
         }
+
+        public async Task AddToList<T>(string setKey, T value)
+        {
+            var db = _redis.GetDatabase();
+            await db.ListRightPushAsync(setKey, JsonConvert.SerializeObject(value));
+        }
+
+        public async Task<string> GetAllListJson(string setKey)
+        {
+            var db = _redis.GetDatabase();
+            RedisValue[] values = await db.ListRangeAsync(setKey, 0, -1);
+            var stringValues = values.ToStringArray();
+            return $"[{String.Join(",", stringValues)}]";
+        }
     }
 }

@@ -25,5 +25,12 @@ namespace Whale.API.Controllers
 			var meetings = await _meetingHistoryService.GetMeetingsWithParticipantsAndPollResults(userId, skip, take);
 			return Ok(meetings);
 		}
+
+		[HttpGet("script/{id}")]
+		public async Task<ActionResult<IEnumerable<MeetingSpeechDTO>>> GetMeetings(Guid id)
+		{
+			var meetings = await _meetingHistoryService.GetMeetingScript(id);
+			return Ok(meetings);
+		}
 	}
 }
