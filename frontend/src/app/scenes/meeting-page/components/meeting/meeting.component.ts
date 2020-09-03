@@ -68,6 +68,7 @@ import { BrowserMediaDevice } from '@shared/browser-media-device';
 import { Question } from '@shared/models/question/question';
 import { MeetingSettingsService } from '../../../../core/services/meeting-settings.service';
 import { MeetingInviteModalData } from '@shared/models/email/meeting-invite-modal-data';
+import { QuestionComponent } from '@shared/components/question/question/question.component';
 
 
 @Component({
@@ -182,6 +183,7 @@ export class MeetingComponent
   @ViewChildren('meetingChat') private chatBlock: QueryList<
     ElementRef<HTMLElement>
   >;
+  @ViewChildren('question') private questions: QueryList<ElementRef<HTMLElement>>;
   @ViewChild('cardsLayout') private cardsLayout: ElementRef<
   HTMLElement
   >;
@@ -654,7 +656,7 @@ export class MeetingComponent
           this.messages.push(message);
           this.updateSelectedMessages();
           this.notifyNewMsg(message);
-          if (this.isShowChat) {
+          if (this.isShowChat && this.isChat) {
             this.chatBlock.changes.pipe(first()).subscribe(() => {
               this.scrollDown();
             });
@@ -664,6 +666,23 @@ export class MeetingComponent
           this.toastr.error('Error occured when sending message');
         }
       );
+
+    this.meetingSignalrService.questionCreated$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+      (question: Question) => {
+        if (this.isShowChat && this.questionService.areQuestionsOpened) {
+          this.questions.changes.pipe(first()).subscribe(() => {
+            this.questions.last.nativeElement.scrollIntoView(false);
+          });
+        }
+        this.questionService.addQuestion(question);
+        this.questionService.isNewQuestion = !this.questionService.areQuestionsOpened;
+      },
+      (error) => {
+        console.error(error);
+      }
+    );
 
     this.meetingSignalrService.canvasDraw$
       .pipe(takeUntil(this.unsubscribe$))
@@ -826,6 +845,9 @@ export class MeetingComponent
     this.simpleModalService.removeAll();
     this.destroyPeer();
     this.currentUserStream?.getTracks().forEach((track) => track.stop());
+
+    this.questionService.areQuestionsOpened = false;
+    this.questionService.questions = [];
 
     if (this.connectionData) {
       if (this.isMoveToRoom && !this.isRoom) {
@@ -1049,9 +1071,7 @@ export class MeetingComponent
 
   scrollDown(): void {
     const chatHtml = this.chatBlock.first.nativeElement as HTMLElement;
-    const isScrolledToBottom =
-      chatHtml.scrollHeight - chatHtml.clientHeight > chatHtml.scrollTop;
-
+    const isScrolledToBottom = chatHtml.scrollHeight - chatHtml.clientHeight > chatHtml.scrollTop;
     if (isScrolledToBottom) {
       chatHtml.scrollTop = chatHtml.scrollHeight - chatHtml.clientHeight;
     }
@@ -1519,6 +1539,10 @@ export class MeetingComponent
         );
       });
       this.isNewMsg = false;
+    } else if (this.isShowChat && this.questionService.areQuestionsOpened) {
+      this.questions.changes.pipe(first()).subscribe(() => {
+        this.questions.last?.nativeElement?.scrollIntoView(false);
+      });
     }
   }
 
@@ -1885,6 +1909,9 @@ export class MeetingComponent
     this.isChat = false;
     this.questionService.isNewQuestion = false;
     this.questionService.areQuestionsOpened = true;
+    this.questions.changes.pipe(first()).subscribe(() => {
+      this.questions.last?.nativeElement?.scrollIntoView(false);
+    });
   }
 
   onReaction(event: ReactionsEnum): void {

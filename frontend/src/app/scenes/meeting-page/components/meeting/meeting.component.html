@@ -621,7 +621,7 @@
         *ngIf="questionService.areQuestionsOpened"
         class="ui chat-inner feed"
       >
-        <div *ngFor="let question of questionService.questions">
+        <div *ngFor="let question of questionService.questions" #question>
           <app-question
             [question]="question"
             [isHost]="currentParticipant.role"
