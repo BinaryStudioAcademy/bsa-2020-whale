@@ -88,6 +88,7 @@ export class AddUserToGroupModalComponent
     });
     this.cachedContacts.splice(this.cachedContacts.indexOf(contact), 1);
     this.contacts.splice(this.contacts.indexOf(contact), 1);
+    this.isLoading = false;
   }
 
   public addEmailTag(valid: boolean): void {
@@ -96,10 +97,10 @@ export class AddUserToGroupModalComponent
       const isParticipant =
         this.participantsEmails.find((e) => e === emailValue) !== undefined;
       if (isParticipant) {
-        this.toastr.show(`${emailValue} is already participant of group.`);
+        this.toastr.info(`${emailValue} is already participant of group.`);
       }
       if (this.emails.find((email) => email === emailValue)) {
-        this.toastr.show(`${emailValue} is already added.`);
+        this.toastr.info(`${emailValue} is already added.`);
       }
       if (
         emailValue &&
@@ -140,8 +141,8 @@ export class AddUserToGroupModalComponent
 
   public filterContacts(value: string): void {
     this.cachedContacts = this.contacts.filter((contact) => {
-      return `${contact.secondMember.firstName} ${contact.secondMember.secondName}`.includes(
-        value
+      return `${contact.secondMember.firstName.toLowerCase()} ${contact.secondMember.secondName.toLowerCase()}`.includes(
+        value.toLowerCase()
       );
     });
   }

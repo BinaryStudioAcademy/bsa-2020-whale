@@ -118,7 +118,7 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
   }
 
   public pinVideo(): void {
-    this.pinVideoEvent.emit(this.data.id);
+    this.pinVideoEvent.emit(this.data.currentStreamId);
   }
 
   public hideCurrentCard(): void {

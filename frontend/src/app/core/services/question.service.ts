@@ -31,6 +31,9 @@ export class QuestionService {
   public areQuestionsOpened = false;
   public createAnonymously = false;
 
+  private newQuestionAdded = new Subject<void>();
+  public newQuestionAdded$ = this.newQuestionAdded.asObservable();
+
   constructor(
     private meetingSignalrService: MeetingSignalrService,
     private httpService: HttpService,
@@ -40,16 +43,6 @@ export class QuestionService {
     this.upstateService.getLoggedInUser().subscribe(
       (user) => {
         this.currentUser = user;
-      },
-      (error) => {
-        console.error(error);
-      }
-    );
-
-    this.meetingSignalrService.questionCreated$.subscribe(
-      (question: Question) => {
-        this.addQuestion(question);
-        this.isNewQuestion = !this.areQuestionsOpened;
       },
       (error) => {
         console.error(error);
