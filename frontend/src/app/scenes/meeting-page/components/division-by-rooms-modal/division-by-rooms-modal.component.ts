@@ -149,7 +149,7 @@ export class DivisionByRoomsModalComponent
   public joinRandomRoom(): void {
     this.result = ModalActions.MoveToRoom;
     this.close();
-    const allRoomsIds = Array.from(this.roomService.participantsInRooms.keys());
+    const allRoomsIds = Array.from(this.roomService.rooms.keys());
     const roomId = allRoomsIds[Math.floor(Math.random() * allRoomsIds.length)];
     this.onCanLeaveEvent.subscribe(() => {
       if (!this.roomService.originalMeetingUrl) {

@@ -15,6 +15,7 @@ import {
   Reaction,
   ChangedMediaPermissions,
   MeetingSettings,
+  RoomDTO,
 } from '@shared/models';
 import { CanvasWhiteboardUpdate } from 'ng2-canvas-whiteboard';
 import { Question } from '@shared/models/question/question';
@@ -91,7 +92,7 @@ export class MeetingSignalrService {
   private onRoomCreated = new Subject<string>();
   public readonly onRoomCreated$ = this.onRoomCreated.asObservable();
 
-  private onRoomCreatedToHost = new Subject<string>();
+  private onRoomCreatedToHost = new Subject<RoomDTO>();
   public readonly onRoomCreatedToHost$ = this.onRoomCreatedToHost.asObservable();
 
   private onRoomClosed = new Subject<string>();
@@ -247,8 +248,8 @@ export class MeetingSignalrService {
 
         this.signalHub.on(
           'OnRoomCreatedToHost',
-          (roomId: string) => {
-            this.onRoomCreatedToHost.next(roomId);
+          (room: RoomDTO) => {
+            this.onRoomCreatedToHost.next(room);
           }
         );
 
