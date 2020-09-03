@@ -43,7 +43,8 @@ namespace Whale.API.Controllers
 
             foreach (var email in meetingDto.ParticipantsEmails)
             {
-                await _notifications.AddTextNotification(email, $"{meetingDto.CreatorEmail} invites you to a meeting on {meetingDto.StartTime.ToString("f", new CultureInfo("us-EN"))}");
+                if(meetingDto.CreatorEmail != email)
+                await _notifications.AddTextNotification(email, $"{meetingDto.CreatorEmail} invites you to a meeting on {meetingDto.StartTime.AddHours(3).ToString("f", new CultureInfo("us-EN"))}");
             }
 
             return Ok(meetingAndLink.Link);
