@@ -578,24 +578,17 @@ export class MeetingComponent
       .subscribe(
         (setting) => {
           if (
-            !this.meeting.isWhiteboard &&
+            this.meeting.isWhiteboard !==
             setting.isWhiteboard &&
             !this.isHost
           ) {
-            this.toastr.info('Host has forbidden a whiteboard.');
-          }
-          if (
-            this.meeting.isWhiteboard &&
-            !setting.isWhiteboard &&
-            !this.isHost
-          ) {
-            this.toastr.info('Host has allowed a whiteboard.');
-          }
-          if (!this.meeting.isPoll && setting.isPoll && !this.isHost) {
-            this.toastr.info('Host has forbidden to create polls.');
-          }
-          if (this.meeting.isPoll && !setting.isWhiteboard && !this.isHost) {
-            this.toastr.info('Host has allowed polls');
+            this.toastr.info(`Host has ${
+              setting.isWhiteboard ? 'forbidden' : 'allowed'
+            } a whiteboard`);
+          } else if (this.meeting.isPoll !== setting.isPoll && !this.isHost) {
+            this.toastr.info(`Host has ${
+              setting.isPoll ? 'forbidden' : 'allowed'
+            } polls`);
           }
           this.meeting.isWhiteboard = setting.isWhiteboard;
           this.meeting.isPoll = setting.isPoll;
