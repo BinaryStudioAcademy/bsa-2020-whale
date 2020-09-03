@@ -914,7 +914,7 @@ export class MeetingComponent
 
     this.isMicrophoneMuted = !this.isMicrophoneMuted;
     if (!isMissSignaling) {
-      // this.invokeMediaStateChanged();
+      this.invokeMediaStateChanged();
     }
   }
 
