@@ -27,6 +27,7 @@ import { QuestionComponent } from './components/question/question/question.compo
 import { QuestionStatusDirective } from './directives/question-status.directive';
 import { DndModule } from 'ngx-drag-drop';
 import { SortContactsPipe } from './pipes/sort-contacts.pipe';
+import { GroupHostOnTopPipe } from './pipes/group-host-on-top.pipe';
 
 @NgModule({
   declarations: [
@@ -53,6 +54,7 @@ import { SortContactsPipe } from './pipes/sort-contacts.pipe';
     QuestionComponent,
     QuestionStatusDirective,
     SortContactsPipe,
+    GroupHostOnTopPipe,
   ],
   imports: [
     CommonModule,
@@ -80,6 +82,7 @@ import { SortContactsPipe } from './pipes/sort-contacts.pipe';
     QuestionComponent,
     DndModule,
     SortContactsPipe,
+    GroupHostOnTopPipe,
   ],
 })
 export class SharedModule {}

@@ -32,6 +32,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
     format: 'DD/MM/YYYY',
     firstDayOfWeek: 'mo',
     showNearMonthDays: false,
+    min: this.createStringFromDate(new Date()),
     monthBtnCssClassCallback: (month) => 'ng2-date-picker-button',
     dayBtnCssClassCallback: (day) => 'ng2-date-picker-button',
   };
@@ -40,6 +41,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
     format: 'HH:mm',
     showTwentyFourHours: true,
     minutesInterval: 10,
+    min: `${new Date().getHours()}:${new Date().getMinutes()}`,
   };
   public pointList: PointAgenda[] = [{ name: '', startTime: new Date() }];
   public isPasswordCheckboxChecked = true;
@@ -59,13 +61,11 @@ export class ScheduleMeetingPageComponent implements OnInit {
     private simpleModalService: SimpleModalService,
     meetingSettingsService: MeetingSettingsService
   ) {
-    const today: Date = new Date();
-
     this.form = new FormGroup({
       topic: new FormControl('UserNameS meeting etc'),
       description: new FormControl(),
-      date: new FormControl(this.createStringFromDate(today)),
-      time: new FormControl(`${today.getHours() + 1}:30`),
+      date: new FormControl(this.createStringFromDate(new Date())),
+      time: new FormControl(`${new Date().getHours()}:${new Date().getMinutes() + 5}`),
       durationHours: new FormControl(1),
       durationMinutes: new FormControl(30),
       isGeneratedMeetingID: new FormControl('true'),
