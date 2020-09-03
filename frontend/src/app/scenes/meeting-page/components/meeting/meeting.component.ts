@@ -487,8 +487,11 @@ export class MeetingComponent
             this.meeting.isAudioAllowed = data.isAudioAllowed;
             this.meeting.isVideoAllowed = data.isVideoAllowed;
 
-            if (!this.isHost) {
+            if (!this.isHost && !data.isAudioAllowed) {
               this.toggleMicrophone();
+            }
+
+            if (!this.isHost && !data.isVideoAllowed) {
               this.toggleCamera();
             }
 
@@ -814,6 +817,7 @@ export class MeetingComponent
           this.setMediaBitrate(sdp, 'video', this.sdpVideoBandwidth),
       });
     });
+
     // // show a warning dialog if close current tab or window
     // window.onbeforeunload = (ev: BeforeUnloadEvent) => {
     //   ev.preventDefault();
