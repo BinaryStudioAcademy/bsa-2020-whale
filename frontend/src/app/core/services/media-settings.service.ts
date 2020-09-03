@@ -70,24 +70,6 @@ export class MediaSettingsService {
     };
   }
 
-  public getVideoConstraints(): MediaStreamConstraints {
-    return {
-      video: {
-        deviceId: this.settings.VideoDeviceId,
-      },
-      audio: false
-    };
-  }
-
-  public getAudioConstraints(): MediaStreamConstraints {
-    return {
-      video: false,
-      audio: {
-        deviceId: this.settings.InputDeviceId,
-      }
-    };
-  }
-
   public changeMirror(isMirror: boolean): void {
     this.settings.IsMirrorVideo = isMirror;
     this.saveSettingsInLocalStorage();

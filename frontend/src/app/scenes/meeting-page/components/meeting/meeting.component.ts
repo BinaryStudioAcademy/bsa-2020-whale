@@ -307,12 +307,6 @@ export class MeetingComponent
 
     this.connectedStreams.push(this.currentUserStream);
 
-    this.currentUserStream.getTracks().forEach(track => {
-      track.stop();
-    });
-    this.isCameraMuted = true;
-    this.isMicrophoneMuted = true;
-
     // when someone connected to meeting
     this.meetingSignalrService.signalUserConected$
       .pipe(takeUntil(this.unsubscribe$))
@@ -931,12 +925,12 @@ export class MeetingComponent
   //#endregion hooks
 
   //#region options
-  public async toggleMicrophone(isMissSignaling: boolean = false): Promise<void> {
+  public toggleMicrophone(isMissSignaling: boolean = false): void {
     if (
       !this.meeting.isAudioAllowed &&
       this.currentParticipant?.role !== ParticipantRole.Host
     ) {
-      await this.switchTrack(false, false);
+      this.switchTrack(false, false);
       this.isMicrophoneMuted = true;
       this.isRecognitionStop = true;
       this.recognition?.stop();
@@ -944,8 +938,8 @@ export class MeetingComponent
     }
 
     this.isMicrophoneMuted
-      ? await this.switchTrack(true, false)
-      : await this.switchTrack(false, false);
+      ? this.switchTrack(true, false)
+      : this.switchTrack(false, false);
 
     this.isMicrophoneMuted = !this.isMicrophoneMuted;
     this.isRecognitionStop = this.isMicrophoneMuted;
@@ -955,19 +949,19 @@ export class MeetingComponent
     }
   }
 
-  public async toggleCamera(isMissSignaling: boolean = false): Promise<void> {
+  public toggleCamera(isMissSignaling: boolean = false): void {
     if (
       !this.meeting.isVideoAllowed &&
       this.currentParticipant?.role !== ParticipantRole.Host
     ) {
-      await this.switchTrack(false, true);
+      this.switchTrack(false, true);
       this.isCameraMuted = true;
       return;
     }
 
     this.isCameraMuted
-      ? await this.switchTrack(true, true)
-      : await this.switchTrack(false, true);
+      ? this.switchTrack(true, true)
+      : this.switchTrack(false, true);
 
     this.isCameraMuted = !this.isCameraMuted;
     if (!isMissSignaling) {
@@ -975,7 +969,7 @@ export class MeetingComponent
     }
   }
 
-  private async switchTrack(enable: boolean, isVideo: boolean): Promise<void> {
+  private switchTrack(enable: boolean, isVideo: boolean): void {
     const tracks = isVideo
       ? this.currentUserStream.getVideoTracks()
       : this.currentUserStream.getAudioTracks();
@@ -983,26 +977,6 @@ export class MeetingComponent
     tracks.forEach((track) => {
       track.enabled = enable;
     });
-
-    if (!enable) {
-      tracks.forEach((track) => {
-        track.stop();
-      });
-    } else {
-      if (isVideo) {
-        const videoStream = await navigator.mediaDevices.getUserMedia(
-          this.mediaSettingsService.getVideoConstraints()
-        );
-        this.handleSuccessVideo(videoStream);
-        document.querySelector('video').srcObject = this.currentUserStream;
-      }
-      else {
-        const audioStream = await navigator.mediaDevices.getUserMedia(
-          this.mediaSettingsService.getAudioConstraints()
-        );
-        this.handleSuccessAudio(audioStream);
-      }
-    }
   }
 
   public startRecording(isHighlight: boolean): void {
@@ -1238,6 +1212,7 @@ export class MeetingComponent
 
       this.createEnterModal().then(() => {
         this.currentStreamLoaded.emit();
+
         this.meetingSignalrService
           .invoke(SignalMethods.OnUserConnect, this.connectionData)
           .subscribe(
@@ -1328,12 +1303,12 @@ export class MeetingComponent
       return;
     }
 
-    if (!modalResult.cameraOff) {
-      await this.toggleCamera(true);
+    if (modalResult.cameraOff) {
+      this.toggleCamera(true);
     }
 
-    if (!modalResult.microOff) {
-      await this.toggleMicrophone(true);
+    if (modalResult.microOff) {
+      this.toggleMicrophone(true);
     }
 
     this.meeting.isAudioAllowed = modalResult.isAllowedAudioOnStart;
@@ -1758,11 +1733,11 @@ export class MeetingComponent
 
   public handleSuccessVideo(stream: MediaStream): void {
     const video = document.querySelector('video') as HTMLVideoElement;
-    video.srcObject = stream;
+    // video.srcObject = stream;
     const keys = Object.keys(this.peer.connections);
     const peerConnection = this.peer.connections[keys[0]];
     const videoTrack = stream.getVideoTracks()[0];
-    peerConnection?.forEach((pc) => {
+    peerConnection.forEach((pc) => {
       const sender = pc.peerConnection.getSenders().find((s) => {
         return s.track.kind === videoTrack.kind;
       });
@@ -1784,21 +1759,18 @@ export class MeetingComponent
     this.isVideoSettings = false;
   }
 
-  private async handleSuccessAudio(stream: MediaStream): Promise<void> {
+  private async handleSuccessAudio(stream): Promise<void> {
     const audio = document.querySelector('audio');
-    if (audio) {
-      audio.srcObject = stream;
-    }
+    audio.srcObject = stream;
     const keys = Object.keys(this.peer.connections);
     const peerConnection = this.peer.connections[keys[0]];
     const audioTrack = stream.getAudioTracks()[0];
-    peerConnection?.forEach((pc) => {
+    peerConnection.forEach((pc) => {
       const sender = pc.peerConnection.getSenders().find((s) => {
         return s.track.kind === audioTrack.kind;
       });
       sender.replaceTrack(audioTrack);
     });
-    this.currentUserStream.addTrack(audioTrack);
   }
 
   public async changeOutputDevice(deviceId: string): Promise<void> {
