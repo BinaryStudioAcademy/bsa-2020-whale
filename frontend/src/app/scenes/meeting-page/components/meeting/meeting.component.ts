@@ -480,11 +480,10 @@ export class MeetingComponent
               this.isPinnedAudioActive = data.isAudioActive;
               this.isPinnedVideoActive = data.isVideoActive;
           }
-
           if (!data.changedParticipantConnectionId) {
             if (
               this.meeting.isAudioAllowed !== data.isAudioAllowed &&
-              this.isHost
+              !this.isHost
             ) {
               this.toastr.info(
                 `Participants' audio ${
@@ -493,7 +492,7 @@ export class MeetingComponent
               );
             } else if (
               this.meeting.isVideoAllowed !== data.isVideoAllowed &&
-              this.isHost
+              !this.isHost
             ) {
               this.toastr.info(
                 `Participants' video ${
@@ -501,18 +500,14 @@ export class MeetingComponent
                 } by the host`
               );
             }
-
             this.meeting.isAudioAllowed = data.isAudioAllowed;
             this.meeting.isVideoAllowed = data.isVideoAllowed;
-
             if (!this.isHost && !data.isAudioAllowed) {
               this.toggleMicrophone();
             }
-
             if (!this.isHost && !data.isVideoAllowed) {
               this.toggleCamera();
             }
-
             this.meetingSignalrService.invoke<ChangedMediaState>(
               SignalMethods.OnMediaStateChanged,
               {
@@ -530,7 +525,7 @@ export class MeetingComponent
           ) {
             if (
               this.meeting.isAudioAllowed !== data.isAudioAllowed &&
-              this.isHost
+              !this.isHost
             ) {
               this.toastr.info(
                 `Your audio ${
@@ -539,7 +534,7 @@ export class MeetingComponent
               );
             } else if (
               this.meeting.isVideoAllowed !== data.isVideoAllowed &&
-              this.isHost
+              !this.isHost
             ) {
               this.toastr.info(
                 `Your video ${
@@ -547,7 +542,6 @@ export class MeetingComponent
                 } by the host`
               );
             }
-
             this.meeting.isAudioAllowed = data.isAudioAllowed;
             this.meeting.isVideoAllowed = data.isVideoAllowed;
             this.updateCardDynamicData(
@@ -560,11 +554,9 @@ export class MeetingComponent
               !this.isCameraMuted,
               !this.isMicrophoneMuted
             );
-
             if (!this.isMicrophoneMuted && !data.isAudioAllowed) {
               this.toggleMicrophone();
             }
-
             if (!this.isCameraMuted && !data.isVideoAllowed) {
               this.toggleCamera();
             }
