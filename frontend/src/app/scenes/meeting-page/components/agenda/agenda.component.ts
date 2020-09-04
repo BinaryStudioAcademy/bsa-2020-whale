@@ -28,7 +28,7 @@ export class AgendaComponent implements OnInit {
     this.httpServie.getRequest<PointAgenda[]>(`${environment.apiUrl}/meeting/agenda/${this.meetingId}`)
     .subscribe((res) =>
     {
-      this.agenda = res;
+      this.agenda = res.filter(x => x.startTime).reverse();
       res.forEach(x => {
         const ntf = setTimeout(() => {
           this.dateNow = new Date();
@@ -37,6 +37,10 @@ export class AgendaComponent implements OnInit {
               point: x ,
               meetingId: this.meetingId
             });
+            if (this.agenda[this.agenda.indexOf(x) - 1])
+            {
+            this.toastr.info(`Time for topic ${this.agenda[this.agenda.indexOf(x) - 1].name} finished`);
+            }
             this.isSnooze = true;
             clearTimeout(ntf);
             this.cachedTopics.push(x);
