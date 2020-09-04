@@ -331,7 +331,7 @@ namespace Whale.Shared.Services
             }
         }
 
-        public async Task ElasticFill()
+        public async Task ReloadStatistics()
         {
             var users = _context.Users.ToList();
             foreach(var user in users)

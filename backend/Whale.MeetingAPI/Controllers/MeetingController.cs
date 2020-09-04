@@ -90,10 +90,10 @@ namespace Whale.API.Controllers
             return Ok(agendaPoints);
         }
 
-        [HttpPost("elastic")]
-        public async Task<ActionResult> FillElastic()
+        [HttpPost("reloadStatistics")]
+        public async Task<ActionResult> ReloadStatistics()
         {
-            await _meetingService.ElasticFill();
+            await _meetingService.ReloadStatistics();
             return Ok();
         }
     }
