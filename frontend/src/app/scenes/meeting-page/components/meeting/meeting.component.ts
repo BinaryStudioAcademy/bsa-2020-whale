@@ -181,7 +181,6 @@ export class MeetingComponent
   public isSomeoneRecordingScreen = false;
   public reactionDelay: Observable<number>;
 
-  @ViewChild('whiteboard') private whiteboard: ElementRef;
   @ViewChild('currentVideo') private currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
     HTMLElement
@@ -195,6 +194,21 @@ export class MeetingComponent
   >;
   @ViewChild('checkTopic') checkTopic: ElementRef<HTMLInputElement>;
 
+  @ViewChild('polls') polls: ElementRef;
+  @ViewChild('pollsButton') pollsButton: ElementRef;
+  @ViewChild('pollsButtonFullscreen') pollsButtonFullscreen: ElementRef;
+  @ViewChild('reactions') reactions: ElementRef;
+  @ViewChild('reactionsButton') reactionsButton: ElementRef;
+  @ViewChild('reactionsButtonFullscreen') reactionsButtonFullscreen: ElementRef;
+  @ViewChild('statistics') statistics: ElementRef;
+  @ViewChild('statisticsButton') statisticsButton: ElementRef;
+  @ViewChild('statisticsButtonFullscreen') statisticsButtonFullscreen: ElementRef;
+  @ViewChild('settings') settings: ElementRef;
+  @ViewChild('settingsButton') settingsButton: ElementRef;
+  @ViewChild('agenda') agenda: ElementRef;
+  @ViewChild('agendaButton') agendaButton: ElementRef;
+  @ViewChild('whiteboard') whiteboard: ElementRef;
+  @ViewChild('whiteboardButton') whiteboardButton: ElementRef;
 
   private chatElement: any;
   private currentStreamLoaded = new EventEmitter<void>();
@@ -246,6 +260,49 @@ export class MeetingComponent
 
     if (element?.classList[0] === undefined) {
       this.isWhiteboardFullScreen = false;
+    }
+  }
+
+  @HostListener('document:click', ['$event.target'])
+  public onClickOutsidePopup(targetElement: ElementRef): void {
+    const isInsidePolls = this.polls?.nativeElement.contains(targetElement);
+    const isInsideReactions = this.reactions?.nativeElement.contains(targetElement);
+    const isInsideStatistics = this.statistics?.nativeElement.contains(targetElement);
+    const isInsideSettings = this.settings?.nativeElement.contains(targetElement);
+    const isInsideAgenda = this.agenda?.nativeElement.contains(targetElement);
+    const isInsideWhiteboard = this.whiteboard?.nativeElement.contains(targetElement);
+
+    if (!isInsidePolls &&
+      targetElement !== this.pollsButton?.nativeElement &&
+      targetElement !== this.pollsButtonFullscreen?.nativeElement) {
+      this.pollService.isShowPoll = false;
+    }
+
+    if (!isInsideReactions &&
+      targetElement !== this.reactionsButton?.nativeElement &&
+      targetElement !== this.reactionsButtonFullscreen?.nativeElement) {
+      this.isShowReactions = false;
+    }
+
+    if (!isInsideStatistics &&
+      targetElement !== this.statisticsButton?.nativeElement &&
+      targetElement !== this.statisticsButtonFullscreen?.nativeElement) {
+      this.isShowStatistics = false;
+    }
+
+    if (!isInsideSettings &&
+      targetElement !== this.settingsButton?.nativeElement) {
+      this.isShowMeetingSettings = false;
+    }
+
+    if (!isInsideAgenda &&
+      targetElement !== this.agendaButton?.nativeElement) {
+      this.isPlanning = false;
+    }
+
+    if (!isInsideWhiteboard &&
+      targetElement !== this.whiteboardButton?.nativeElement) {
+      this.canvasIsDisplayed = false;
     }
   }
 
@@ -1059,6 +1116,7 @@ export class MeetingComponent
     }
     this.isShowStatistics = !this.isShowStatistics;
   }
+
   public onReactionsIconClick(): void {
     this.pollService.isShowPoll = false;
     this.pollService.isPollCreating = false;
