@@ -128,8 +128,6 @@
               {{ room.value.name }}
             </div>
             <div
-              data-tooltip="Join room"
-              data-position="top right"
               class="ui inverted secondary button"
               *ngIf="meeting.id !== room.key"
               (click)="redirectIntoRoom(room.key)"
