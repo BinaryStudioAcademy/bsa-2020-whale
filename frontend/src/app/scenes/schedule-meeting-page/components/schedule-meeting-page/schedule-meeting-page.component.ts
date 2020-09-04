@@ -47,6 +47,11 @@ export class ScheduleMeetingPageComponent implements OnInit {
   private unsubscribe$ = new Subject<void>();
   private loggedInUser: User;
   public isAgenda = true;
+  public isRecurrent = false;
+  public recurrence: Recurrence = Recurrence.EveryDay;
+
+  keys = Object.keys;
+  symbols = Recurrence;
   point: PointAgenda;
   constructor(
     private toastr: ToastrService,
@@ -67,6 +72,8 @@ export class ScheduleMeetingPageComponent implements OnInit {
       time: new FormControl(`${today.getHours() + 1}:30`),
       durationHours: new FormControl(1),
       durationMinutes: new FormControl(30),
+      isMeetingRecurrent: new FormControl(true),
+      recurrent: new FormControl(Recurrence.Never),
       isGeneratedMeetingID: new FormControl('true'),
       isPasswordEnabled: new FormControl(''),
       password: new FormControl(''),
@@ -105,13 +112,15 @@ export class ScheduleMeetingPageComponent implements OnInit {
       } as ScheduleMeetingInviteModalData)
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((participantEmails) => {
+        console.log(this.form.controls.recurrent.value);
         this.meetingService
           .createScheduledMeeting({
             settings: '',
             startTime: date,
             anonymousCount: 0,
             isScheduled: true,
-            isRecurrent: false,
+            isRecurrent: this.form.controls.isMeetingRecurrent.value,
+            recurrency: this.form.controls.recurrent.value,
             isAudioAllowed: this.form.controls.isDisableAudio.value,
             isVideoAllowed: this.form.controls.isDisableVideo.value,
             creatorEmail: this.loggedInUser.email,
@@ -169,7 +178,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
     return date;
   }
 
-  public async addEventToCalendar(): Promise<void> {
+  public async addEventToCalendar(): Promise < void > {
     const startTime = this.createDateTime(
       this.form.controls.date.value,
       this.form.controls.time.value
@@ -224,4 +233,11 @@ export class ScheduleMeetingPageComponent implements OnInit {
   public removeTag(event) {
     this.pointList.splice(this.pointList.indexOf(event), 1);
   }
+}
+
+export enum Recurrence {
+  Never = 0,
+  EveryDay = 1,
+  EveryWeek = 2,
+  EveryMonth = 3
 }

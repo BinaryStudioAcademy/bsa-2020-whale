@@ -33,6 +33,7 @@
                   theme="dp-material"
                   formControlName="time"
                 ></dp-date-picker>
+              </div>                
               </div>
             </div>
           </div>
@@ -58,7 +59,25 @@
               </div>
             </div>
           </div>
-        </div>
+
+          <div class="ui segment">
+            <div class="field">
+              <label>Repeated</label>
+              <div class="field">
+                <div class="custom-select">
+                  <select
+                    id="recurrency-select"
+                    name="recurrency"
+                    class="ui dropdown"
+                    formControlName="recurrent"
+                  >
+                    <option value="0">Never</option>
+                    <option value="1">Every Day</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
         <div class="ui segment">
           <div class="field">
             <label>Meeting ID</label>
@@ -148,7 +167,7 @@
                   type="checkbox"
                   tabindex="0"
                   formControlName="isDisableAudio"
-                  id="isDisableAudio"
+                  id="isDisableAudio" 
                 />
                 <label for="isDisableAudio" class="default-cursor"
                   >Mute participants upon entry</label

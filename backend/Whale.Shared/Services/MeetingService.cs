@@ -85,7 +85,7 @@ namespace Whale.Shared.Services
             meetingDTO.IsPoll = meetingSettings.IsPoll;
             meetingDTO.IsWhiteboard = meetingSettings.IsWhiteboard;
             meetingDTO.IsAllowedToChooseRoom = meetingSettings.IsAllowedToChooseRoom;
-
+            meetingDTO.Recurrency = meetingSettings.Recurrency;
             return meetingDTO;
         }
 
@@ -131,9 +131,12 @@ namespace Whale.Shared.Services
 
         public async Task<MeetingAndLink> RegisterScheduledMeeting(MeetingCreateDTO meetingDTO)
         {
+  
             var meeting = _mapper.Map<Meeting>(meetingDTO);
             meeting.Settings = JsonConvert.SerializeObject(new 
             { 
+                meetingDTO.Recurrency,
+                meetingDTO.IsRecurrent,
                 meetingDTO.IsAudioAllowed,
                 meetingDTO.IsVideoAllowed,
                 meetingDTO.IsAllowedToChooseRoom,
@@ -171,6 +174,41 @@ namespace Whale.Shared.Services
             await _redisService.SetAsync(shortURL, "not-active");
 
             return new MeetingAndLink { Meeting = meeting , Link = shortURL };
+        }
+
+        public async Task<MeetingAndLink> RegisterRecurrentScheduledMeeting(Meeting meetingDTO)
+        {
+           
+            await _context.Meetings.AddAsync(meetingDTO);
+            var user = await _context.Users.FirstOrDefaultAsync(e => e.Email == "kopylif@gmail.com");
+            var pwd = _encryptService.EncryptString(Guid.NewGuid().ToString());
+            var shortURL = ShortId.Generate();
+            var fullURL = $"?id={meetingDTO.Id}&pwd={pwd}";
+            var x = new List<string>(); x.Add("kopylif@gmail.com");
+
+            var scheduledMeeting = new ScheduledMeeting
+            {
+                CreatorId = user.Id,
+                MeetingId = meetingDTO.Id,
+                Password = pwd,
+                ShortURL = shortURL,
+                FullURL = fullURL
+            };
+            await _context.ScheduledMeetings.AddAsync(scheduledMeeting);
+            await _context.SaveChangesAsync();
+            using (var client = new HttpClient())
+            {
+                var meetingInvite = new ScheduledMeetingInvite
+                {
+                    MeetingLink = fullURL,
+                    MeetingId = meetingDTO.Id,
+                };
+                client.PostAsync("http://localhost:4201/api/email/scheduled", new StringContent(JsonConvert.SerializeObject(meetingInvite), Encoding.UTF8, "application/json"));
+            }
+            await _redisService.ConnectAsync();
+            await _redisService.SetAsync(shortURL, "not-active");
+
+            return new MeetingAndLink { Meeting = meetingDTO, Link = shortURL };
         }
 
         public async Task<MeetingLinkDTO> StartScheduledMeeting(Meeting meeting)

@@ -65,7 +65,7 @@ namespace Whale.API.Services
             return scheduledDTOList
                 .OrderBy(s => s.Meeting.StartTime)
                 .Skip(skip)
-                .Take(take); ;
+                .Take(take);
         }
 
         public async Task<ScheduledMeetingDTO> PostAsync(ScheduledMeetingCreateDTO scheduledMeeting)

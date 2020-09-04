@@ -37,16 +37,33 @@ namespace Whale.API.Controllers
         public async Task<ActionResult<string>> CreateMeetingScheduled(MeetingCreateDTO meetingDto)
         {
             var meetingAndLink = await _meetingService.RegisterScheduledMeeting(meetingDto);
-            var jobInfo = new JobInfo(typeof(ScheduledMeetingJob), meetingDto.StartTime);
-            var obj = JsonConvert.SerializeObject(meetingAndLink.Meeting);
-            await _meetingScheduleService.Start(jobInfo, obj);
-
-            foreach (var email in meetingDto.ParticipantsEmails)
+                Console.WriteLine(meetingDto.Recurrency);
+            if (meetingDto.Recurrency != JobRecurrencyEnum.Never)
             {
-                await _notifications.AddTextNotification(email, $"{meetingDto.CreatorEmail} invites you to a meeting on {meetingDto.StartTime.ToString("f", new CultureInfo("us-EN"))}");
+                try
+                {
+                    var jobInfo = new RecurrentJobInfo(typeof(RecurrentScheduledMeetingJob), meetingDto.StartTime, meetingDto.Recurrency);
+                    var obj = JsonConvert.SerializeObject(meetingAndLink.Meeting);
+                    await _meetingScheduleService.StartRecurrent(jobInfo, obj);
+                }
+                catch (Exception e )
+                {
+                    Console.WriteLine(e.Message);
+                }
             }
+            else
+            {
+                var jobInfo = new JobInfo(typeof(ScheduledMeetingJob), meetingDto.StartTime);
+                var obj = JsonConvert.SerializeObject(meetingAndLink.Meeting);
+                await _meetingScheduleService.Start(jobInfo, obj);
 
-            return Ok(meetingAndLink.Link);
+                foreach (var email in meetingDto.ParticipantsEmails)
+                {
+                    if (meetingDto.CreatorEmail != email)
+                        await _notifications.AddTextNotification(email, $"{meetingDto.CreatorEmail} invites you to a meeting on {meetingDto.StartTime.AddHours(3).ToString("f", new CultureInfo("us-EN"))}");
+                }
+            }
+                return Ok(/*meetingAndLink.Link*/);
         }
 
         [HttpGet]
