@@ -1,5 +1,8 @@
 <div class="ui card">
   <div class="ui header">Agenda</div>
+  <div *ngIf="!agenda || agenda.length == 0" class="no-agendas-message">
+    No agendas for this meeting.
+  </div>
   <div *ngFor="let a of agenda">
     <div class="point item">
      <div> {{ a.name }} - {{a.startTime | date:'shortTime'}}</div></div>

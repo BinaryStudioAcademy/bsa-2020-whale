@@ -52,7 +52,7 @@
             >
               <div *ngFor="let user of groupMembers|groupHostOnTop:[groupSelected.creatorEmail]" class="item">
                 <img
-                  class="ui avatar image"
+                  class="ui avatar image fixed-size-28px"
                   src="{{ returnCorrectLink(user) }}"
                 />
                 <div class="content">
