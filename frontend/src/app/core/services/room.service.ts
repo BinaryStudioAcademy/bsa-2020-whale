@@ -109,7 +109,7 @@ export class RoomService {
 
     const previouslyDividedParticipants = this.randChunkSplit(
       participants,
-      Math.round(participants.length / numberOfRooms)
+      Math.ceil(participants.length / numberOfRooms)
     );
 
     this.previoslyDividedRooms = [];
@@ -162,14 +162,7 @@ export class RoomService {
   }
 
   public changeNumberofRooms(numberOfRooms: number): void {
-    if (this.previoslyDividedRooms.length > numberOfRooms) {
-      this.randomlyDivide(numberOfRooms);
-      return;
-    }
-
-    this.addEmptyRooms(
-      numberOfRooms - this.previoslyDividedRooms.length
-    );
+    this.randomlyDivide(numberOfRooms);
   }
 
   public async getMeetingEntityForRoom(roomId: string): Promise<Meeting> {
