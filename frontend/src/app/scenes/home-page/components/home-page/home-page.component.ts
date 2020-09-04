@@ -443,6 +443,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   public closeUpcoming(): void {
+    this.falseAllBooleans();
     this.upcomingVisibility = false;
     this.actionsVisibility = true;
   }
