@@ -10,12 +10,12 @@ import { HttpResponse } from '@angular/common/http';
   providedIn: 'root',
 })
 export class GroupService {
-  public routePrefix = '/api/groups';
+  public routePrefix = '/groups';
 
   constructor(private httpService: HttpService) {}
 
   public getAllGroups(): Observable<Group[]> {
-    return this.httpService.getRequest<Group[]>('/api/groups');
+    return this.httpService.getRequest<Group[]>('/groups');
   }
 
   public createGroup(group: Group): Observable<HttpResponse<Group>> {

@@ -15,6 +15,7 @@ export class MeetingSettingsService {
     isVideoDisabled: false,
     isAllowedToChooseRoom: false,
     isAudioDisabled: false,
+    recognitionLanguage: '',
   } as MeetingSettings;
 
   public getSettings(): MeetingSettings {

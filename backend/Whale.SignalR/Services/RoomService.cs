@@ -15,6 +15,7 @@ namespace Whale.SignalR.Services
     public class RoomService
     {
         private const string meetingSettingsPrefix = "meeting-settings-";
+        private const string roomNamePrefix = "name-";
         private readonly RedisService _redisService;
         private readonly IHubContext<MeetingHub> _meetingHub;
 
@@ -45,6 +46,7 @@ namespace Whale.SignalR.Services
                 await _redisService.DeleteKey(roomId);
                 await _redisService.DeleteKey(roomId + nameof(Poll));
                 await _redisService.DeleteKey(meetingSettingsPrefix + roomId);
+                await _redisService.DeleteKey(roomNamePrefix + roomId);
 
                 var meetingdata = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(meetingId);
                 if (meetingdata != null)

@@ -1,6 +1,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,6 +12,7 @@ using Whale.DAL.Settings;
 using Whale.Shared.Exceptions;
 using Whale.Shared.Helpers;
 using Whale.Shared.MappingProfiles;
+using Whale.Shared.Models;
 using Whale.Shared.Services;
 using Whale.SignalR.Hubs;
 using Whale.SignalR.Services;
@@ -50,6 +52,9 @@ namespace Whale.SignalR
             services.AddScoped(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
             services.AddScoped(x => new EncryptHelper(Configuration.GetValue<string>("EncryptSettings:key")));
 
+            services.AddSingleton(Configuration.GetSection("ElasticConfiguration").Get<ElasticConfiguration>());
+            services.AddScoped<ElasticSearchService>();
+
             services.AddSignalR();
             services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
             {
@@ -83,6 +88,11 @@ namespace Whale.SignalR
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
 
             app.UseCors("CorsPolicy");
 

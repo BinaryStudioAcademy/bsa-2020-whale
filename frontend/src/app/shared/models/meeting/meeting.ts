@@ -1,6 +1,5 @@
 import { Participant } from '../participant/participant';
 import { PollResultDto } from '../poll/poll-result-dto';
-import { MediaPermissions } from '..';
 
 export interface Meeting {
   id: string;
@@ -13,6 +12,7 @@ export interface Meeting {
   isWhiteboard: boolean;
   isPoll: boolean;
   isAllowedToChooseRoom: boolean;
+  recognitionLanguage: string;
   isAudioAllowed: boolean;
   isVideoAllowed: boolean;
 

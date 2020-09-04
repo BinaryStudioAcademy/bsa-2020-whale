@@ -1,8 +1,8 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://bsa2020-whale.westeurope.cloudapp.azure.com:4201',
-  meetingApiUrl: 'http://bsa2020-whale.westeurope.cloudapp.azure.com:4202',
-  signalrUrl: 'http://bsa2020-whale.westeurope.cloudapp.azure.com:4203',
+  apiUrl: 'https://bsa2020-whale.westeurope.cloudapp.azure.com/api',
+  meetingApiUrl: 'https://bsa2020-whale.westeurope.cloudapp.azure.com/meetingapi',
+  signalrUrl: 'https://bsa2020-whale.westeurope.cloudapp.azure.com/hubs',
   firebase: {
     apiKey: 'AIzaSyCdb8h9YMeJBdcIM5wK_w6Mcw7ZI1CVJAk',
     authDomain: 'bsa-whale.firebaseapp.com',
@@ -23,18 +23,12 @@ export const environment = {
     debug: 1,
     config: {
       iceServers: [
-        { urls: 'stun:stun1.l.google.com:19302' },
-        { urls: 'stun:stun2.l.google.com:19302' },
+        { urls: 'stun:bsa2020-whale-webrtc.westeurope.cloudapp.azure.com:5349' },
         {
-          urls: 'turn:192.158.29.39:3478?transport=udp',
-          credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
-          username: '28224511:1379330808',
-        },
-        {
-          urls: 'turn:192.158.29.39:3478?transport=tcp',
-          credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
-          username: '28224511:1379330808',
-        },
+          urls: 'turn:bsa2020-whale-webrtc.westeurope.cloudapp.azure.com:5349',
+          username: 'bsa2020whale',
+          credential: 'bsa2020whale'
+        }
       ],
     },
   },

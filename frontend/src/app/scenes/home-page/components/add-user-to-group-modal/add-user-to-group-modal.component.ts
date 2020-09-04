@@ -21,7 +21,7 @@ export interface AddUserToGroupModal extends Group {
   styleUrls: ['./add-user-to-group-modal.component.sass'],
 })
 export class AddUserToGroupModalComponent
-  extends SimpleModalComponent<AddUserToGroupModal, GroupUser>
+  extends SimpleModalComponent<AddUserToGroupModal, User[]>
   implements AddUserToGroupModal, OnInit {
   id: string;
   label: string;
@@ -31,6 +31,7 @@ export class AddUserToGroupModalComponent
   public contacts: Contact[];
   public cachedContacts: Contact[];
   participantsEmails: string[];
+  public responseUser = new Array<User>();
 
   public form: FormGroup;
   public formSearch: FormGroup;
@@ -62,7 +63,7 @@ export class AddUserToGroupModalComponent
   public getContacts(): void {
     this.isContactsLoading = true;
     this.httpService
-      .getRequest<Contact[]>(environment.apiUrl + '/api/Contacts/accepted')
+      .getRequest<Contact[]>(environment.apiUrl + '/Contacts/accepted')
       .subscribe(
         (response) => {
           const filteredGroups = response.filter(
@@ -80,6 +81,10 @@ export class AddUserToGroupModalComponent
   }
 
   public addMemberToList(contact: Contact): void {
+    if (this.emails.find((email) => email === contact.secondMember.email)) {
+      this.toastr.info(`${contact.secondMember.email} is already added.`);
+      return;
+    }
     this.selectedContacts.push(contact);
     this.emails.push(contact.secondMember.email);
     this.groupsUser.push({
@@ -88,6 +93,7 @@ export class AddUserToGroupModalComponent
     });
     this.cachedContacts.splice(this.cachedContacts.indexOf(contact), 1);
     this.contacts.splice(this.contacts.indexOf(contact), 1);
+    this.isLoading = false;
   }
 
   public addEmailTag(valid: boolean): void {
@@ -96,10 +102,10 @@ export class AddUserToGroupModalComponent
       const isParticipant =
         this.participantsEmails.find((e) => e === emailValue) !== undefined;
       if (isParticipant) {
-        this.toastr.show(`${emailValue} is already participant of group.`);
+        this.toastr.info(`${emailValue} is already participant of group.`);
       }
       if (this.emails.find((email) => email === emailValue)) {
-        this.toastr.show(`${emailValue} is already added.`);
+        this.toastr.info(`${emailValue} is already added.`);
       }
       if (
         emailValue &&
@@ -107,6 +113,10 @@ export class AddUserToGroupModalComponent
         !isParticipant
       ) {
         this.emails.push(emailValue);
+        this.groupsUser.push({
+          groupId: this.id,
+          userEmail: emailValue,
+        });
       }
       this.form.controls.email.setValue('');
     }
@@ -130,8 +140,11 @@ export class AddUserToGroupModalComponent
       u.groupId = this.id;
       this.groupService.addUserToGroup(u).subscribe(
         (resp) => {
-          this.result = resp.body;
-          setTimeout(() => this.close(), 1000);
+          this.responseUser.push(resp.body.user);
+          if (this.groupsUser[this.groupsUser.length - 1].userEmail === u.userEmail) {
+            this.result = this.responseUser;
+            setTimeout(() => this.close(), 200);
+          }
         },
         (error) => this.toastr.error(error.Message)
       );
@@ -140,8 +153,8 @@ export class AddUserToGroupModalComponent
 
   public filterContacts(value: string): void {
     this.cachedContacts = this.contacts.filter((contact) => {
-      return `${contact.secondMember.firstName} ${contact.secondMember.secondName}`.includes(
-        value
+      return `${contact.secondMember.firstName.toLowerCase()} ${contact.secondMember.secondName.toLowerCase()}`.includes(
+        value.toLowerCase()
       );
     });
   }

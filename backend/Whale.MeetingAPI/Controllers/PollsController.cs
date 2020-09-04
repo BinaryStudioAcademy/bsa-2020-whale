@@ -7,7 +7,7 @@ using Whale.Shared.Models.Poll;
 namespace Whale.MeetingAPI.Controllers
 {
 	[ApiController]
-	[Route("api/[controller]")]
+	[Route("[controller]")]
 	public class PollsController : ControllerBase
 	{
 		private readonly PollService _pollService;

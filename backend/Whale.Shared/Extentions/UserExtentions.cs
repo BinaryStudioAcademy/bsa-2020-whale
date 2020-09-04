@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Whale.DAL.Models;
 using Whale.DAL.Settings;
+using Whale.Shared.Models.User;
 
 namespace Whale.Shared.Extentions
 {

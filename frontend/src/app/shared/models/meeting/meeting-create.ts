@@ -16,4 +16,5 @@ export interface MeetingCreate {
   creatorEmail: string;
   participantsEmails: string[];
   agendaPoints?: PointAgenda[];
+  recognitionLanguage: string;
 }

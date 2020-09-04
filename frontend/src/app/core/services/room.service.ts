@@ -14,8 +14,8 @@ import {
 })
 export class RoomService {
   public roomsIds: string[] = [];
-  public participantsInRooms = new Map<string, Array<Participant>>();
-  public previouslyDividedParticipants: Array<Array<Participant>> = [[]];
+  public rooms = new Map<string, RoomDTO>();
+  public previoslyDividedRooms: Array<RoomDTO> = [];
   public isUserHost = false;
   public participants: Array<Participant> = [];
   public isDividedIntoRooms = false;
@@ -28,9 +28,9 @@ export class RoomService {
     private toastr: ToastrService
   ) {
     this.meetingSignalrService.onRoomCreatedToHost$.subscribe(
-      (roomId) => {
-        this.roomsIds.push(roomId);
-        this.participantsInRooms.set(roomId, []);
+      (room) => {
+        this.roomsIds.push(room.roomId);
+        this.rooms.set(room.roomId, room);
       },
       (err) => {
         this.toastr.error('Error occured while trying to create room');
@@ -49,9 +49,9 @@ export class RoomService {
         this.isInRoom ? this.originalMeetingId : meetingId
       )
       .then((rooms: RoomDTO[]) => {
-        this.participantsInRooms = new Map();
+        this.rooms = new Map();
         rooms.forEach((room) => {
-          this.participantsInRooms.set(room.roomId, room.participants);
+          this.rooms.set(room.roomId, room);
         });
         if (rooms.length > 0) {
           this.isDividedIntoRooms = true;
@@ -64,55 +64,61 @@ export class RoomService {
 
   public deleteParticipant(participantId: string): void {
     this.participants = this.participants.filter((p) => p.id !== participantId);
-    const keys = Array.from(this.participantsInRooms.keys());
+    const keys = Array.from(this.rooms.keys());
     for (const key of keys) {
-      const participants = this.participantsInRooms
-        .get(key)
-        .filter((p) => p.id !== participantId);
-      this.participantsInRooms.set(key, participants);
+      const room = this.rooms.get(key);
+      room.participants = room.participants.filter((p) => p.id !== participantId);
+      this.rooms.set(key, room);
     }
-    this.previouslyDividedParticipants = this.previouslyDividedParticipants.map(
-      (participants) => participants.filter((p) => p.id !== participantId)
+    this.previoslyDividedRooms = this.previoslyDividedRooms.map(
+      (room) => {
+        room.participants = room.participants.filter((p) => p.id !== participantId);
+        return room;
+      }
     );
   }
 
   public addParticipant(participant: Participant): void {
     this.participants.push(participant);
-    this.previouslyDividedParticipants[0].push(participant);
+    this.previoslyDividedRooms[0]?.participants.push(participant);
   }
 
   public updateParticipant(participant: Participant): void {
     const index = this.participants.findIndex((p) => p.id === participant.id);
     if (index >= 0) {
       this.participants[index] = participant;
-      this.previouslyDividedParticipants = this.previouslyDividedParticipants.map(
-        (participants) => {
-          const participantIndex = participants.findIndex(
+      this.previoslyDividedRooms = this.previoslyDividedRooms.map(
+        (room) => {
+          const participantIndex = room.participants.findIndex(
             (p) => p.id === participant.id
           );
           if (participantIndex >= 0) {
-            participants[participantIndex] = participant;
+            room.participants[participantIndex] = participant;
           }
-          return participants;
+          return room;
         }
       );
     }
   }
 
   public randomlyDivide(numberOfRooms: number): void {
-    this.previouslyDividedParticipants = [];
+    this.previoslyDividedRooms = [];
     const participants = this.participants.filter(
       (p) => p.role !== ParticipantRole.Host
     );
 
-    this.previouslyDividedParticipants = this.randChunkSplit(
+    const previouslyDividedParticipants = this.randChunkSplit(
       participants,
-      Math.round(participants.length / numberOfRooms)
+      Math.ceil(participants.length / numberOfRooms)
     );
 
-    if (this.previouslyDividedParticipants.length < numberOfRooms) {
+    previouslyDividedParticipants.forEach((roomParticipants) => {
+      this.addRoom(roomParticipants);
+    });
+
+    if (this.previoslyDividedRooms.length < numberOfRooms) {
       this.addEmptyRooms(
-        numberOfRooms - this.previouslyDividedParticipants.length
+        numberOfRooms - this.previoslyDividedRooms.length
       );
     }
   }
@@ -122,13 +128,14 @@ export class RoomService {
     meetingLink: string,
     duration: number
   ): void {
-    this.participantsInRooms = new Map();
-    this.previouslyDividedParticipants.forEach((participants) => {
+    this.rooms = new Map();
+    this.previoslyDividedRooms.forEach((room) => {
       this.meetingSignalrService.invoke(SignalMethods.CreateRoom, {
         meetingId,
         meetingLink,
+        roomName: room.name,
         duration,
-        participantsIds: participants.map((p) => p.id),
+        participantsIds: room.participants.map((p) => p.id),
       } as RoomCreate);
     });
     this.isDividedIntoRooms = true;
@@ -140,26 +147,62 @@ export class RoomService {
     duration: number,
     numberOfRooms: number
   ) {
-    for (let i = 0; i < numberOfRooms; i++) {
+    this.previoslyDividedRooms.forEach((room) => {
       this.meetingSignalrService.invoke(SignalMethods.CreateRoom, {
         meetingId,
         meetingLink,
+        roomName: room.name,
         duration,
         participantsIds: this.participants.filter(p => p.role !== ParticipantRole.Host).map(p => p.id),
-      });
-    }
+      } as RoomCreate);
+    });
     this.isDividedIntoRooms = true;
   }
 
   public changeNumberofRooms(numberOfRooms: number): void {
-    if (this.previouslyDividedParticipants.length > numberOfRooms) {
-      this.randomlyDivide(numberOfRooms);
+    const participants = this.participants.filter(
+      (p) => p.role !== ParticipantRole.Host
+    );
+
+    const previouslyDividedParticipants = this.randChunkSplit(
+      participants,
+      Math.ceil(participants.length / numberOfRooms)
+    );
+
+    if (this.previoslyDividedRooms.length > numberOfRooms) {
+      for (let i = 0; i < previouslyDividedParticipants.length; i++){
+        this.previoslyDividedRooms[i].participants = previouslyDividedParticipants[i];
+      }
+
+      const emptyRooms = this.previoslyDividedRooms.length - numberOfRooms;
+      this.previoslyDividedRooms.splice(numberOfRooms, emptyRooms);
+
       return;
     }
 
-    this.addEmptyRooms(
-      numberOfRooms - this.previouslyDividedParticipants.length
-    );
+    if (previouslyDividedParticipants.length > this.previoslyDividedRooms.length){
+      for (let i = 0; i < previouslyDividedParticipants.length; i++){
+        if (i < this.previoslyDividedRooms.length) {
+          this.previoslyDividedRooms[i].participants = previouslyDividedParticipants[i];
+        } else {
+          this.addRoom(previouslyDividedParticipants[i]);
+        }
+      }
+    } else {
+      for (let i = 0; i < this.previoslyDividedRooms.length; i++){
+        if (i < previouslyDividedParticipants.length){
+          this.previoslyDividedRooms[i].participants = previouslyDividedParticipants[i];
+        } else {
+          this.previoslyDividedRooms[i].participants = [];
+        }
+      }
+    }
+
+    if (this.previoslyDividedRooms.length < numberOfRooms) {
+      this.addEmptyRooms(
+        numberOfRooms - this.previoslyDividedRooms.length
+      );
+    }
   }
 
   public async getMeetingEntityForRoom(roomId: string): Promise<Meeting> {
@@ -174,8 +217,16 @@ export class RoomService {
 
   private addEmptyRooms(numberOfRooms: number): void {
     for (let i = 0; i < numberOfRooms; i++) {
-      this.previouslyDividedParticipants.push([]);
+      this.addRoom([]);
     }
+  }
+
+  private addRoom(participants: Array<Participant>): void {
+    this.previoslyDividedRooms.push({
+      roomId: '',
+      name: 'Room ' + (this.previoslyDividedRooms.length + 1),
+      participants
+    } as RoomDTO);
   }
 
   private randChunkSplit(

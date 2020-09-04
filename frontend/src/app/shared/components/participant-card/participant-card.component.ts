@@ -43,7 +43,6 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
   public actionsPopupContent: HTMLElement;
   public actionsPopup: any;
   public shouldShowActions = false;
-  public isMicrophoneHovered = false;
   public dynamicData: ParticipantDynamicData;
   public reaction: ReactionsEnum;
   public reactionDelay: Observable<number>;
@@ -118,7 +117,7 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
   }
 
   public pinVideo(): void {
-    this.pinVideoEvent.emit(this.data.id);
+    this.pinVideoEvent.emit(this.data.currentStreamId);
   }
 
   public hideCurrentCard(): void {

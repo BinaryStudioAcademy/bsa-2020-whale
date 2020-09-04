@@ -32,6 +32,8 @@ export class ScheduleMeetingPageComponent implements OnInit {
     format: 'DD/MM/YYYY',
     firstDayOfWeek: 'mo',
     showNearMonthDays: false,
+    min: this.createStringFromDate(new Date()),
+    disableKeypress: true,
     monthBtnCssClassCallback: (month) => 'ng2-date-picker-button',
     dayBtnCssClassCallback: (day) => 'ng2-date-picker-button',
   };
@@ -40,8 +42,10 @@ export class ScheduleMeetingPageComponent implements OnInit {
     format: 'HH:mm',
     showTwentyFourHours: true,
     minutesInterval: 10,
+    min: `${new Date().getHours()}:${new Date().getMinutes()}`,
+    disableKeypress: true,
   };
-  public pointList: PointAgenda[] = [{ name: '', startTime: '' }];
+  public pointList: PointAgenda[] = [{ name: '', startTime: new Date() }];
   public isPasswordCheckboxChecked = true;
   public form: FormGroup;
   private unsubscribe$ = new Subject<void>();
@@ -52,6 +56,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
 
   keys = Object.keys;
   symbols = Recurrence;
+  public recognitionLanguage = 'English';
   point: PointAgenda;
   constructor(
     private toastr: ToastrService,
@@ -63,13 +68,11 @@ export class ScheduleMeetingPageComponent implements OnInit {
     private simpleModalService: SimpleModalService,
     meetingSettingsService: MeetingSettingsService
   ) {
-    const today: Date = new Date();
-
     this.form = new FormGroup({
       topic: new FormControl('UserNameS meeting etc'),
       description: new FormControl(),
-      date: new FormControl(this.createStringFromDate(today)),
-      time: new FormControl(`${today.getHours() + 1}:30`),
+      date: new FormControl(this.createStringFromDate(new Date())),
+      time: new FormControl(`${new Date().getHours()}:${new Date().getMinutes() + 5}`),
       durationHours: new FormControl(1),
       durationMinutes: new FormControl(30),
       isMeetingRecurrent: new FormControl(true),
@@ -96,7 +99,9 @@ export class ScheduleMeetingPageComponent implements OnInit {
     if (this.form.controls.saveIntoCalendar.value) {
       await this.addEventToCalendar();
     }
-
+    if (this.pointList[0].name === ''){
+      this.pointList.splice(0, 1);
+    }
     const dateParts = this.form.controls.date.value.split('/');
     const date = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
     const time = this.form.controls.time.value.match(
@@ -104,6 +109,18 @@ export class ScheduleMeetingPageComponent implements OnInit {
     );
     date.setHours(parseInt(time[1], 10) + (time[3] ? 12 : 0));
     date.setMinutes(parseInt(time[2], 10) || 0);
+
+    let meetingLanguage: string;
+    switch (this.recognitionLanguage) {
+      case 'Russian':
+        meetingLanguage = 'ru';
+        break;
+      case 'Ukrainian':
+        meetingLanguage = 'ua';
+        break;
+      default:
+        meetingLanguage = 'en-US';
+    }
 
     this.simpleModalService
       .addModal(MeetingInviteComponent, {
@@ -126,6 +143,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
             creatorEmail: this.loggedInUser.email,
             participantsEmails: participantEmails as string[],
             agendaPoints: this.pointList,
+            recognitionLanguage: meetingLanguage,
           } as MeetingCreate)
           .pipe(takeUntil(this.unsubscribe$))
           .subscribe((resp) => {

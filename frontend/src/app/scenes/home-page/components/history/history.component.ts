@@ -22,7 +22,7 @@ import { ThrowStmt } from '@angular/compiler';
   styleUrls: ['./history.component.sass'],
 })
 export class HistoryComponent implements OnInit {
-  public route = environment.apiUrl + '/api/meetingHistory';
+  public route = environment.apiUrl + '/meetingHistory';
 
   @Input() user: User;
   @Output() historyClose: EventEmitter<void> = new EventEmitter<void>();

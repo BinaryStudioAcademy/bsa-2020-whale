@@ -19,6 +19,7 @@ import { EditGroupInfoModalComponent } from './components/edit-group-info-modal/
 import { UpdateGroupImageModalComponent } from './components/update-group-image-modal/update-group-image-modal.component';
 import { UpcomingMeetingsComponent } from './components/upcoming-meetings/upcoming-meetings.component';
 import { ScheduleMeetingNoteComponent } from './components/upcoming-meetings/schedule-meeting-note/schedule-meeting-note.component';
+import { StatisticsComponent } from './components/statistics/statistics.component';
 
 @NgModule({
   declarations: [
@@ -36,6 +37,7 @@ import { ScheduleMeetingNoteComponent } from './components/upcoming-meetings/sch
     UpdateGroupImageModalComponent,
     UpcomingMeetingsComponent,
     ScheduleMeetingNoteComponent,
+    StatisticsComponent,
   ],
   imports: [
     CommonModule,

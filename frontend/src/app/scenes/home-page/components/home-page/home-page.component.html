@@ -39,6 +39,10 @@
           <i class="share icon"></i>
           Enter the meeting
         </a>
+        <a id="home-go-statistics" class="item" (click)="onStatisticsClick()">
+          <i class="chart bar icon"></i>
+          Statistics
+        </a>
       </a>
       <app-spiner
         *ngIf="isContactsLoading || isChatHubLoading"
@@ -57,9 +61,12 @@
           New
         </button>
       </a>
-      <div class="contacts-container" [hidden]="!contactsVisibility">
+      <div
+        [ngClass]="renderClass(contacts)"
+        class="contacts-container"
+        [hidden]="!contactsVisibility">
         <div
-          *ngFor="let contact of contacts"
+          *ngFor="let contact of contacts|sortContacts"
           class="user-list ui middle aligned selection list"
         >
           <div
@@ -109,10 +116,11 @@
         </button>
       </a>
       <div
+        [ngClass]="renderClass(groups)"
         class="contacts-container groups user-list ui middle selection list"
         [hidden]="!groupsVisibility"
       >
-        <div *ngFor="let group of groups">
+        <div *ngFor="let group of groups" >
           <a
             id="home-group"
             [ngClass]="
@@ -122,12 +130,12 @@
           >
             <img
               *ngIf="isImageHere(group)"
-              class="ui avatar image"
+              class="ui avatar image group"
               src="{{ group.photoUrl }}"
             />
             <img
               *ngIf="!isImageHere(group)"
-              class="ui avatar image"
+              class="ui avatar image group"
               src="assets/img/user-group-icon.png"
             />
 
@@ -179,8 +187,13 @@
       ></app-history>
       <app-upcoming-meetings 
         *ngIf="upcomingVisibility"
-        (upcomingClose)="closeUpcomig()">
+        (upcomingClose)="closeUpcoming()">
       </app-upcoming-meetings>
+      <app-statistics
+        *ngIf="statisticsVisibility"
+        [user]="loggedInUser"
+        (statisticsClose)="closeStatistics()"
+      ></app-statistics>
       <div *ngIf="actionsVisibility" class="vertically-aligned chat ui segment">
         <div
           id="home-chat-go-shedule"

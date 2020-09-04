@@ -12,7 +12,7 @@ using Whale.Shared.Models.Meeting;
 
 namespace Whale.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class MeetingController : ControllerBase
     {
@@ -30,7 +30,7 @@ namespace Whale.API.Controllers
         {
             var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
             meetingDto.CreatorEmail = ownerEmail;
-            return Ok(await _httpService.PostAsync<MeetingCreateDTO, MeetingLinkDTO>("api/meeting", meetingDto));
+            return Ok(await _httpService.PostAsync<MeetingCreateDTO, MeetingLinkDTO>("meeting", meetingDto));
         }
 
         [Authorize]
@@ -39,7 +39,7 @@ namespace Whale.API.Controllers
         {
             var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
             meetingDto.CreatorEmail = ownerEmail;
-            return Ok(await _httpService.PostStringAsync("api/meeting/scheduled", meetingDto));
+            return Ok(await _httpService.PostStringAsync("meeting/scheduled", meetingDto));
         }
 
         [Route("external/schedule")]
@@ -61,26 +61,26 @@ namespace Whale.API.Controllers
         public async Task<ActionResult<MeetingDTO>> ConnectMeeting(Guid id, string pwd)
         {
             var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
-            return Ok(await _httpService.GetAsync<MeetingDTO>($"api/meeting?id={id}&pwd={pwd}&email={ownerEmail}"));
+            return Ok(await _httpService.GetAsync<MeetingDTO>($"meeting?id={id}&pwd={pwd}&email={ownerEmail}"));
         }
 
         [HttpGet("shortInvite/{inviteLink}")]
         public async Task<ActionResult<string>> GetFullMeetingLink(string inviteLink)
         {
-            return Ok(await _httpService.GetStringAsync($"api/meeting/shortInvite/{inviteLink}"));
+            return Ok(await _httpService.GetStringAsync($"meeting/shortInvite/{inviteLink}"));
         }
 
         [HttpGet("end")]
         public async Task<OkResult> SaveMeetingEndTime(Guid meetingId)
         {
-            await _httpService.GetAsync<object>($"api/meeting/end?meetingId={meetingId}");
+            await _httpService.GetAsync<object>($"meeting/end?meetingId={meetingId}");
             return Ok();
         }
 
         [HttpGet("shortenLink/{longURL}")]
         public async Task<ActionResult<string>> GetShortURL(string longURL)
         {
-            string shortLink = await _httpService.GetStringAsync($"api/meeting/shortenLink/{longURL}");
+            string shortLink = await _httpService.GetStringAsync($"meeting/shortenLink/{longURL}");
             return Ok(shortLink);
         }
 
@@ -91,14 +91,20 @@ namespace Whale.API.Controllers
             updateSettingsDTO.ApplicantEmail = 
                 HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
 
-            await _httpService.PutAsync("api/meeting/updateSettings", updateSettingsDTO);
+            await _httpService.PutAsync("meeting/updateSettings", updateSettingsDTO);
             return Ok();
         }
         [HttpGet("agenda/{meetingId}")]
         public async Task<ActionResult<List<AgendaPointDTO>>> GetAgenda(string meetingId)
         {
-            var agendaPoints = await _httpService.GetAsync<List<AgendaPointDTO>>($"api/meeting/agenda/{meetingId}");
+            var agendaPoints = await _httpService.GetAsync<List<AgendaPointDTO>>($"meeting/agenda/{meetingId}");
             return Ok(agendaPoints);
+        }
+        [HttpPut("agenda")]
+        public async Task<ActionResult> UpdateTopic(AgendaPointDTO point)
+        {
+            await _httpService.PutAsync<AgendaPointDTO, AgendaPointDTO>($"meeting/agenda",point);
+            return Ok();
         }
     }
 }

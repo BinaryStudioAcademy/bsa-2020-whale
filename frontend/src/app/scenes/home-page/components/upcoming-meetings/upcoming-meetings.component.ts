@@ -11,7 +11,7 @@ import { environment } from '@env';
   styleUrls: ['./upcoming-meetings.component.sass']
 })
 export class UpcomingMeetingsComponent implements OnInit {
-  public route = environment.apiUrl + '/api/ScheduledMeeting';
+  public route = environment.apiUrl + '/ScheduledMeeting';
 
   @Output() upcomingClose: EventEmitter<void> = new EventEmitter<void>();
   @ViewChild('scrollable') scrollElement: ElementRef;

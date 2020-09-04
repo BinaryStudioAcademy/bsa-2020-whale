@@ -4,4 +4,5 @@ export interface MeetingSettings {
   isAudioDisabled: boolean;
   isVideoDisabled: boolean;
   isAllowedToChooseRoom: boolean;
+  recognitionLanguage: string;
 }

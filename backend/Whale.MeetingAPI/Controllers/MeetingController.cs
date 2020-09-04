@@ -12,7 +12,7 @@ using Whale.Shared.Services;
 
 namespace Whale.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class MeetingController : ControllerBase
     {
@@ -50,6 +50,8 @@ namespace Whale.API.Controllers
                 {
                     Console.WriteLine(e.Message);
                 }
+                if(meetingDto.CreatorEmail != email)
+                await _notifications.AddTextNotification(email, $"{meetingDto.CreatorEmail} invites you to a meeting on {meetingDto.StartTime.AddHours(3).ToString("f", new CultureInfo("us-EN"))}");
             }
             else
             {
@@ -103,8 +105,23 @@ namespace Whale.API.Controllers
         [HttpGet("agenda/{meetingId}")]
         public async Task<ActionResult<List<AgendaPointDTO>>> GetAgenda(string meetingId)
         {
-            List<AgendaPointDTO> agendaPoints = await _meetingService.GetAgendaPoints(meetingId);//_httpService.GetAsync<List<AgendaPointDTO>>($"api/meeting/agenda/{meetingId}");
+            List<AgendaPointDTO> agendaPoints = await _meetingService.GetAgendaPoints(meetingId);//_httpService.GetAsync<List<AgendaPointDTO>>($"meeting/agenda/{meetingId}");
             return Ok(agendaPoints);
+        }
+
+        [HttpPut("agenda")]
+        public async Task<ActionResult> UpdateTopic(AgendaPointDTO topic)
+        {
+            await _meetingService.UpdateTopic(topic);
+            return Ok();
+        }
+
+
+        [HttpPost("reloadStatistics")]
+        public async Task<ActionResult> ReloadStatistics()
+        {
+            await _meetingService.ReloadStatistics();
+            return Ok();
         }
     }
 }

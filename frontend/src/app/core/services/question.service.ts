@@ -22,7 +22,7 @@ import { QuestionStatus } from '@shared/models/question/question-status';
   providedIn: 'root',
 })
 export class QuestionService {
-  private route = environment.apiUrl + '/api/questions';
+  private route = environment.apiUrl + '/questions';
 
   public questions: Question[] = [];
   public currentUser: User;
@@ -30,6 +30,9 @@ export class QuestionService {
   public isNewQuestion = false;
   public areQuestionsOpened = false;
   public createAnonymously = false;
+
+  private newQuestionAdded = new Subject<void>();
+  public newQuestionAdded$ = this.newQuestionAdded.asObservable();
 
   constructor(
     private meetingSignalrService: MeetingSignalrService,
@@ -40,16 +43,6 @@ export class QuestionService {
     this.upstateService.getLoggedInUser().subscribe(
       (user) => {
         this.currentUser = user;
-      },
-      (error) => {
-        console.error(error);
-      }
-    );
-
-    this.meetingSignalrService.questionCreated$.subscribe(
-      (question: Question) => {
-        this.addQuestion(question);
-        this.isNewQuestion = !this.areQuestionsOpened;
       },
       (error) => {
         console.error(error);

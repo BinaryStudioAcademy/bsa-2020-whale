@@ -17,25 +17,28 @@ using Whale.SignalR.Models.Room;
 using Whale.Shared.Models.Question;
 using Whale.SignalR.Models.Reaction;
 using Whale.DAL.Models.Poll;
+using Whale.Shared.Models;
+using Whale.SignalR.Models.Agenda;
 
 namespace Whale.SignalR.Hubs
 {
     public class MeetingHub : Hub
     {
         private const string meetingSettingsPrefix = "meeting-settings-";
+        private const string roomNamePrefix = "name-";
         private readonly MeetingService _meetingService;
         private readonly ParticipantService _participantService;
         private readonly RedisService _redisService;
         private readonly UserService _userService;
         private readonly RoomService _roomService;
         private readonly MeetingHttpService _meetingHttpService;
-        private readonly static Dictionary<string, List<ParticipantDTO>> _groupsParticipants = 
+        private readonly static Dictionary<string, List<ParticipantDTO>> _groupsParticipants =
             new Dictionary<string, List<ParticipantDTO>>();
 
-        public MeetingHub(MeetingService meetingService, 
-            ParticipantService participantService, 
-            RedisService redisService, 
-            UserService userService, 
+        public MeetingHub(MeetingService meetingService,
+            ParticipantService participantService,
+            RedisService redisService,
+            UserService userService,
             RoomService roomService,
             MeetingHttpService meetingHttpService)
         {
@@ -98,7 +101,7 @@ namespace Whale.SignalR.Hubs
             {
 
             }
-         
+
             await Clients.Group(connectionData.MeetingId).SendAsync("OnUserConnect", connectionData);
             await Clients.Caller.SendAsync("OnParticipantConnect", _groupsParticipants[connectionData.MeetingId]);
         }
@@ -117,14 +120,14 @@ namespace Whale.SignalR.Hubs
                 .Where(g => g.Value.Any(p => p.ActiveConnectionId == Context.ConnectionId))
                 .ToList();
 
-            foreach(var group in disconectedParticipantInGroups)
+            foreach (var group in disconectedParticipantInGroups)
             {
                 var disconnectedParticipant = group.Value.Find(p => p.ActiveConnectionId == Context.ConnectionId);
 
                 _groupsParticipants[group.Key].Remove(disconnectedParticipant);
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, group.Key);
                 await Clients.Group(group.Key).SendAsync("OnParticipantDisconnected", disconnectedParticipant);
-                if(group.Value.Count <= 0)
+                if (group.Value.Count <= 0)
                 {
                     await this.DeleteMeeting(group.Key);
                 }
@@ -173,13 +176,13 @@ namespace Whale.SignalR.Hubs
         public async Task ParticipantStreamChanged(StreamChangedDTO streamChangedData)
         {
             var participantInGroup = _groupsParticipants[streamChangedData.MeetingId.ToString()];
-          
+
             var currentParticipant = participantInGroup
                 .First(p => p.ActiveConnectionId == Context.ConnectionId);
 
             currentParticipant.StreamId = streamChangedData.NewStreamId;
 
-                await Clients.Group(streamChangedData.MeetingId.ToString()).SendAsync("OnParticipantStreamChanged", streamChangedData);
+            await Clients.Group(streamChangedData.MeetingId.ToString()).SendAsync("OnParticipantStreamChanged", streamChangedData);
         }
 
         [HubMethodName("OnMediaStateRequested")]
@@ -229,10 +232,10 @@ namespace Whale.SignalR.Hubs
         public async Task SendMessage(MeetingMessageCreateDTO msgDTO)
         {
             var msg = await _meetingService.SendMessage(msgDTO);
-            if(msg.Receiver != null)
+            if (msg.Receiver != null)
             {
                 var receiver = _groupsParticipants[msgDTO.MeetingId].Find(p => p.User.Id == msg.Receiver.Id);
-                if(receiver != null)
+                if (receiver != null)
                 {
                     await Clients.Caller.SendAsync("OnSendMessage", msg);
                     await Clients.Client(receiver.ActiveConnectionId).SendAsync("OnSendMessage", msg);
@@ -308,9 +311,11 @@ namespace Whale.SignalR.Hubs
             var roomId = Guid.NewGuid().ToString();
             await _redisService.ConnectAsync();
             await _redisService.SetAsync(roomId, new MeetingMessagesAndPasswordDTO { Password = "", IsRoom = true, MeetingId = roomCreateData.MeetingId });
+
             var meeetingData = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(roomCreateData.MeetingId);
             meeetingData.RoomsIds.Add(roomId);
             await _redisService.SetAsync(roomCreateData.MeetingId, meeetingData);
+
             var meetingSettings = await _redisService.GetAsync<MeetingSettingsDTO>($"{meetingSettingsPrefix}{roomCreateData.MeetingId}");
             await _redisService.SetAsync($"{meetingSettingsPrefix}{roomId}", new MeetingSettingsDTO
             {
@@ -322,9 +327,15 @@ namespace Whale.SignalR.Hubs
                 IsPoll = false
             });
 
+            await _redisService.SetAsync(roomNamePrefix + roomId, roomCreateData.RoomName);
+
             _groupsParticipants.Add(roomId, new List<ParticipantDTO>());
 
-            await Clients.Caller.SendAsync("OnRoomCreatedToHost", roomId);
+            await Clients.Caller.SendAsync("OnRoomCreatedToHost", new RoomDTO
+            {
+                RoomId = roomId,
+                Name = roomCreateData.RoomName
+            });
 
             var participants = _groupsParticipants[roomCreateData.MeetingId]
                     .Where(p => roomCreateData.ParticipantsIds.Contains(p.Id.ToString()))
@@ -354,11 +365,13 @@ namespace Whale.SignalR.Hubs
             var roomsIds = (await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(meetingId)).RoomsIds;
             var rooms = new List<RoomDTO>();
 
-            foreach(var id in roomsIds)
+            foreach (var id in roomsIds)
             {
+                var roomName = await _redisService.GetAsync<string>(roomNamePrefix + id);
                 rooms.Add(new RoomDTO
                 {
                     RoomId = id,
+                    Name = roomName,
                     Participants = _groupsParticipants[id]?.ToList()
                 });
             }
@@ -383,6 +396,7 @@ namespace Whale.SignalR.Hubs
                 IsWhiteboard = roomSettings.IsWhiteboard,
                 IsPoll = roomSettings.IsPoll,
                 IsAllowedToChooseRoom = roomSettings.IsAllowedToChooseRoom,
+                RecognitionLanguage = roomSettings.RecognitionLanguage,
                 Participants = new List<ParticipantDTO>(),
                 PollResults = new List<PollResultDTO>()
             };
@@ -414,7 +428,7 @@ namespace Whale.SignalR.Hubs
         [HubMethodName("OnStartShareScreen")]
         public async Task OnStartShare(ShareScreenDTO share)
         {
-            await Clients.Group(share.meetingId).SendAsync("OnStartShareScreen",share.streamId);
+            await Clients.Group(share.meetingId).SendAsync("OnStartShareScreen", share.streamId);
         }
 
         [HubMethodName("OnStopShareScreen")]
@@ -447,6 +461,28 @@ namespace Whale.SignalR.Hubs
         public async Task SendReaction(ReactionDTO reaction)
         {
             await Clients.Group(reaction.MeetingId).SendAsync("OnReaction", reaction);
+        }
+
+        [HubMethodName("OnSpeechRecognition")]
+        public Task SpeechRecognition(MeetingSpeechCreateDTO speechDTO)
+        {
+            return _meetingService.SpeechRecognition(speechDTO);
+        }
+
+        [HubMethodName("OnEndedTopic")]
+        public async Task CheckPointAsEnded(AgendaSignal sign)
+        {
+            await Clients.Group(sign.MeetingId).SendAsync("OnEndedTopic",sign.Point);
+        }
+        [HubMethodName("OnOutTime")]
+        public async Task CheckRunningOut(AgendaSignal sign)
+        {
+            await Clients.Group(sign.MeetingId).SendAsync("OnOutTime", sign.Point);
+        }
+        [HubMethodName("OnSnoozeTopic")]
+        public async Task SnoozeTopic(AgendaSignal sign)
+        {
+            await Clients.Group(sign.MeetingId).SendAsync("OnSnoozeTopic", sign.Point);
         }
     }
 }

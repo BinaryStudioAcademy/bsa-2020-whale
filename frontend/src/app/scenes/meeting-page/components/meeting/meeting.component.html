@@ -114,7 +114,6 @@
           class="big user plus icon big-left-margin"
         ></i>
       </span>
-      <!-- <i #handleHand class="big hand rock icon drag-icon"></i> -->
     </div>
     <div *ngIf="isShowParticipants" class="ui participants-container">
       <div class="invite-icon-container">
@@ -251,48 +250,19 @@
                 ></i>
               </div>
             </div>
-            <i
-              id="meeting-options-recording"
-              *ngIf="!isScreenRecording"
-              (mouseover)="isShowRecordingOptins = true"
-              (mouseleave)="isShowRecordingOptins = false"
-              (click)="startRecording(isHighlightRecording)"
-              class="big circle icon"
-            >
-              <div class="hover-helper" *ngIf="isShowRecordingOptins"></div>
-              <div class="record-container" *ngIf="isShowRecordingOptins">
-                <div class="ui vertical labeled icon buttons">
-                  <button
-                    class="ui button left-align"
-                    (click)="startRecording(false)"
-                  >
-                    <i
-                      [className]="
-                        isHighlightRecording
-                          ? 'caret right icon medium-icon'
-                          : 'caret square right icon medium-icon'
-                      "
-                    ></i>
-                    Start Recording
-                  </button>
-                  <button
-                    class="ui button left-align"
-                    (click)="startRecording(true)"
-                  >
-                    <i
-                      [className]="
-                        isHighlightRecording
-                          ? 'caret square right icon medium-icon'
-                          : 'caret right icon medium-icon'
-                      "
-                    ></i>
-                    Highlight
-                  </button>
-                </div>
-              </div>
-            </i>
             <span
-              *ngIf="isScreenRecording && !isHighlightRecording"
+              *ngIf="!isScreenRecording"
+              data-tooltip="Start Recording"
+              data-position="top left"
+            >
+              <i
+                id="meeting-options-recording"
+                (click)="startRecording()"
+                class="big circle icon"
+              ></i>
+            </span>
+            <span
+              *ngIf="isScreenRecording"
               data-tooltip="Stop Recording"
               data-position="top left"
             >
@@ -300,16 +270,6 @@
                 id="meeting-options-recording"
                 (click)="stopRecording()"
                 class="big stop circle icon"
-              ></i>
-            </span>
-            <span
-              *ngIf="isScreenRecording && isHighlightRecording"
-              data-tooltip="Recording will stop automatically"
-              data-position="top left"
-            >
-              <i
-                id="meeting-options-recording"
-                class="big stop circle icon waiting-icon"
               ></i>
             </span>
             <span data-tooltip="Share Screen" data-position="top left">
@@ -385,8 +345,11 @@
               </i>
             </span>
             <span data-tooltip="Plan Meeting">
-              <i class="big list alternate icon"
-              (click)="isPlanning=!isPlanning"></i>
+              <i
+                class="big list alternate icon"
+                (click)="onAgendaClick()"
+                [ngClass]="{pulse: isTopicEnd}"
+              ></i>
             </span>
             <span data-tooltip="Fullscreen" data-position="top right">
               <i
@@ -404,71 +367,82 @@
                 class="big user plus icon big-left-margin"
               ></i>
             </span>
+            </div>
+            <div>
+              <button
+                id="meeting-options-leave"
+                class="ui red button"
+                (click)="leave()"
+              >
+                Leave
+              </button>
+            </div>
           </div>
-          <div>
-            <button
-              id="meeting-options-leave"
-              class="ui red button"
-              (click)="leave()"
+        </div>
+        <div
+          #whiteboard
+          class="canvas"
+          *ngIf="canvasIsDisplayed"
+          ngDraggable
+          [handle]="draggableHeader"
+        >
+          <div #draggableHeader class="whiteboard-header">
+            <div class="whiteboard-title">Whiteboard {{ whiteboardDisable }}</div>
+          </div>
+          <div class="whiteboard-buttons">
+            <i
+              *ngIf="!isWhiteboardFullScreen"
+              (click)="whiteboardFullscreen(); $event.stopPropagation()"
+              class="expand icon"
+            ></i>
+            <i
+              *ngIf="isWhiteboardFullScreen"
+              (click)="whiteboardFullscreen(); $event.stopPropagation()"
+              class="compress icon"
+            ></i>
+            <i (click)="showCanvas()" class="times icon"></i>
+          </div>
+          <div class="board" *ngIf="!meeting.isWhiteboard || isHost">
+            <canvas-whiteboard
+              #canvasWhiteboard
+              [options]="canvasOptions"
+              (onBatchUpdate)="onCanvasDraw($event)"
+              (onClear)="onCanvasClear()"
             >
-              Leave
-            </button>
+            </canvas-whiteboard>
+          </div>
+          <div class="board" *ngIf="meeting.isWhiteboard && !isHost">
+            <canvas-whiteboard
+              #canvasWhiteboard
+              [options]="canvasOptionsDisable"
+              (onBatchUpdate)="onCanvasDraw($event)"
+              (onClear)="onCanvasClear()"
+            >
+            </canvas-whiteboard>
           </div>
         </div>
-      </div>
-      <div
-        #whiteboard
-        class="canvas"
-        *ngIf="canvasIsDisplayed"
-        ngDraggable
-        [handle]="draggableHeader"
-      >
-        <div #draggableHeader class="whiteboard-header">
-          <div class="whiteboard-title">Whiteboard {{ whiteboardDisable }}</div>
-        </div>
-        <div class="whiteboard-buttons">
-          <i
-            *ngIf="!isWhiteboardFullScreen"
-            (click)="whiteboardFullscreen(); $event.stopPropagation()"
-            class="expand icon"
-          ></i>
-          <i
-            *ngIf="isWhiteboardFullScreen"
-            (click)="whiteboardFullscreen(); $event.stopPropagation()"
-            class="compress icon"
-          ></i>
-          <i (click)="showCanvas()" class="times icon"></i>
-        </div>
-        <div class="board" *ngIf="!meeting.isWhiteboard || isHost">
-          <canvas-whiteboard
-            #canvasWhiteboard
-            [options]="canvasOptions"
-            (onBatchUpdate)="onCanvasDraw($event)"
-            (onClear)="onCanvasClear()"
-          >
-          </canvas-whiteboard>
-        </div>
-        <div class="board" *ngIf="meeting.isWhiteboard && !isHost">
-          <canvas-whiteboard
-            #canvasWhiteboard
-            [options]="canvasOptionsDisable"
-            (onBatchUpdate)="onCanvasDraw($event)"
-            (onClear)="onCanvasClear()"
-          >
-          </canvas-whiteboard>
-        </div>
-      </div>
 
-      <div
-        [ngClass]="isCardPinned ? 'users-slider' : 'users'"
-        *ngIf="
-          mediaData.length > 1 ||
-          (mediaData.length === 1 &&
-            mediaData[0].id !== currentParticipant.id) ||
-          (mediaData.length === 1 && isCardPinned)
-        "
-      >
-        <div [ngClass]="isCardPinned ? 'cards-small-wrapper' : 'cards-wrapper'">
+        <div
+          [ngClass]="isCardPinned ? 'users-slider' : 'users'"
+          [class.users-slider-row]="isCardPinned && pinnedCardsLayout === 0"
+          [class.users-slider-column]="isCardPinned && pinnedCardsLayout === 1"
+          *ngIf="
+            (mediaData.length > 1 ||
+            (mediaData.length === 1 &&
+              mediaData[0].id !== currentParticipant.id) ||
+            (mediaData.length === 1 && isCardPinned)) &&
+            !isSharing
+          "
+        >
+
+        <div
+          #cardsLayout
+          (mouseenter)="onCardsLayoutMouseEnter()"
+          [class.cards-wrapper]="!isCardPinned"
+          [class.small-cards-wrapper-row]="isCardPinned && pinnedCardsLayout === 0"
+          [class.small-cards-wrapper-column]="isCardPinned && pinnedCardsLayout === 1"
+        >
+          <div class="fake-margin"></div>
           <app-participant-card
             [ngClass]="
               isCardPinned ? 'participant-card-small' : 'participant-card'
@@ -489,56 +463,99 @@
             [meetingHolder]="currentParticipant"
             [meetingId]="meeting.id"
           >
-          </app-participant-card>
-          <div class="cards-position-icons" *ngIf="isCardPinned">
-            <span
-              *ngIf="pinModeHorizontal"
-              data-tooltip="All to right"
-              data-position="bottom right"
-            >
-              <i class="arrows alternate vertical icon"></i>
-            </span>
-            <span
-              *ngIf="!pinModeHorizontal"
-              data-tooltip="All to top"
-              data-position="bottom right"
-            >
-              <i class="arrows alternate horizontal icon"></i>
-            </span>
-            <span data-tooltip="Unpin" data-position="bottom right">
-              <i class="table icon" (click)="unpinCard()"></i>
-            </span>
-          </div>
+        </app-participant-card>
+        <div
+          #cardsLayoutMenu
+          [ngClass]="pinnedCardsLayout === 0 ? 'cards-position-icons-row' : 'cards-position-icons-column'" 
+          [class.cards-position-icons-row-sticky]="pinnedCardsLayout === 0 && pinnedLayoutMenuSticky"
+          *ngIf="isCardPinned">
+          <span
+            *ngIf="pinnedCardsLayout === 0"
+            data-tooltip="To Right Column"
+            data-position="bottom right"
+          >
+            <i class="arrows alternate vertical icon"
+              (click)="setPinnedCardsLayout(1)"
+            ></i>
+          </span>
+          <span
+            *ngIf="pinnedCardsLayout === 1"
+            data-tooltip="To Top Row"
+            data-position="bottom right"
+          >
+            <i class="arrows alternate horizontal icon small-left-margin"
+              (click)="setPinnedCardsLayout(0)"
+            ></i>
+          </span>
+          <span data-tooltip="Unpin" data-position="bottom right">
+            <i 
+              class="table icon" 
+              [class.small-left-margin]="pinnedCardsLayout === 1"
+              (click)="unpinCard()"></i>
+          </span>
         </div>
+      </div>
       </div>
 
       <img
-        #bigAvatar
-        [src]="currentParticipant?.user?.avatarUrl"
-        [hidden]="
-          ((!isCameraMuted || (isCameraMuted && mediaData.length > 1)) &&
-            !isCardPinned) ||
-          (isCardPinned && (!isPinnedVideoAllowed || !isPinnedVideoActive))
-        "
+        *ngIf="(isCameraMuted && mediaData.length <= 1 && !isCardPinned) ||
+          (isCardPinned && !isPinnedVideoActive)"
+        [src]="isCardPinned ? pinnedParticipant?.user?.avatarUrl : currentParticipant?.user?.avatarUrl"
         class="big-avatar"
+        [class.big-avatar-pinned]="isCardPinned"
       />
-
-      <!-- <app-cards-carousel [mediaData]></app-cards-carousel> -->
 
       <video
         #currentVideo
         autoplay="autoplay"
         class="participant-fullscreen"
         [hidden]="
-          (mediaData.length > 1 ||
+          ((mediaData.length > 1 ||
             (mediaData.length === 1 &&
               mediaData[0].id !== currentParticipant.id) ||
             isCameraMuted) &&
-          !isCardPinned &&
-          !(isCardPinned && isPinnedVideoActive && isPinnedVideoAllowed)
+          !isCardPinned) || (isCardPinned && !isPinnedVideoActive)
         "
-        [muted]="!isCardPinned"
+        [muted]="!isCardPinned || pinnedParticipant.streamId === currentParticipant.streamId"
       ></video>
+
+      <div 
+        class="pinned-reaction" 
+        [ngClass]="pinnedCardsLayout === 0 ? 'pinned-reaction-row' : 'pinned-reaction-column'"
+        *ngIf="pinnedReaction"
+      >
+        {{ pinnedReaction }}
+      </div>
+
+      <div class="pinned-participant-info" *ngIf="isCardPinned && pinnedParticipant.streamId !== currentParticipant.streamId">
+        <div class="participant-name-wrapper">
+          <i
+            *ngIf="isPinnedAudioAllowed || pinnedParticipant.role === 1"
+            class="microphone icon default-cursor"
+            [class.micro-pulse]="pinnedVolume > 20"
+            [ngClass]="isPinnedAudioActive ? '' : 'red'"
+            [class.slash]="!isPinnedAudioActive"
+          ></i>
+          <span
+            *ngIf="!isPinnedAudioAllowed && pinnedParticipant?.role !== 1"
+            data-tooltip="Disabled by the Host"
+            data-position="top left"
+          >
+            <i class="microphone slash icon default-cursor"></i>
+          </span>
+          <span
+            *ngIf="!isPinnedVideoAllowed && pinnedParticipant?.role !== 1"
+            data-tooltip="Disabled by the Host"
+            data-position="top left"
+          >
+            <i class="eye slash icon default-cursor"></i>
+          </span>
+          <p class="header" [class.inverted-text]="pinnedParticipant.role === 1">  
+            {{ pinnedParticipant?.user?.firstName }}
+            {{ pinnedParticipant?.user?.secondName }}
+          </p>
+        </div>
+      </div>
 
       <div class="settings" *ngIf="isVideoSettings && !isCameraMuted">
         <app-video-settings
@@ -553,6 +570,7 @@
           (clickEmited)="changeOutputDevice($event)"
         ></app-output-settings>
       </div>
+    </div>
 
     <div *ngIf="isShowChat" class="ui chat card">
       <div class="ui buttons">
@@ -607,7 +625,7 @@
         *ngIf="questionService.areQuestionsOpened"
         class="ui chat-inner feed"
       >
-        <div *ngFor="let question of questionService.questions">
+        <div *ngFor="let question of questionService.questions" #question>
           <app-question
             [question]="question"
             [isHost]="currentParticipant.role"
@@ -618,7 +636,7 @@
         </div>
       </div>
       <div class="ui form vertically-aligned">
-        <div *ngIf="isChat" class="ui right labeled input">
+        <div *ngIf="isChat" class="ui right labeled input receiver-select-container">
           <label for="receiver" class="ui label">Send To:</label>
           <select
             class="ui compact selection dropdown"
@@ -638,10 +656,20 @@
             >
           </select>
         </div>
-        <div *ngIf="questionService.areQuestionsOpened" class="qa-anonymous-checkbox">
+        <div
+          *ngIf="questionService.areQuestionsOpened"
+          class="qa-anonymous-checkbox"
+        >
           <div class="ui checkbox">
-            <input id="questions-anonymous-checkbox" type="checkbox" name="example" [(ngModel)]="questionService.createAnonymously">
-            <label for="questions-anonymous-checkbox" class="default-cursor">Send anonymously</label>
+            <input
+              id="questions-anonymous-checkbox"
+              type="checkbox"
+              name="example"
+              [(ngModel)]="questionService.createAnonymously"
+            />
+            <label for="questions-anonymous-checkbox" class="default-cursor"
+              >Send anonymously</label
+            >
           </div>
         </div>
 
@@ -650,7 +678,7 @@
             (keydown.enter)="onEnterKeyPress($event)"
             rows="1"
             placeholder="Enter to send.
-  Enter+Shift for new line."
+Enter+Shift for new line."
             [(ngModel)]="msgText"
             required
           >
@@ -669,104 +697,104 @@
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="poll-create-container" *ngIf="isShowStatistics">
-    <app-meeting-statistics
-      [statistic]="meetingStatistics"
-    ></app-meeting-statistics>
-  </div>
+    <div class="poll-create-container" *ngIf="isShowStatistics">
+      <app-meeting-statistics
+        [statistic]="meetingStatistics"
+      ></app-meeting-statistics>
+    </div>
 
-  <div class="poll-create-container" *ngIf="isShowReactions">
-    <app-reactions (reaction)="onReaction($event)"></app-reactions>
-  </div>
+    <div class="poll-create-container" *ngIf="isShowReactions">
+      <app-reactions (reaction)="onReaction($event)"></app-reactions>
+    </div>
 
-  <div
-    class="ui poll-create-container overflow-scroll segment"
-    *ngIf="pollService.isPollCreating"
-  >
-    <app-poll-create
-      [meetingId]="meeting.id"
-      (pollCreated)="
-        pollService.onPollCreated(
-          $event,
-          connectionData.meetingId,
-          connectionData.userEmail
-        )
-      "
-    ></app-poll-create>
-  </div>
-
-  <div
-    class="ui poll-create-container overflow-scroll segment"
-    *ngIf="pollService.isShowPoll"
-  >
-    <button
-      id="meeting-poll-new"
-      *ngIf="!meeting.isPoll || isHost"
-      (click)="pollService.onNewPollClick()"
-      class="ui button"
-      id="new-poll-btn"
-    >
-      New poll
-    </button>
     <div
-      data-tooltip="Disabled by Host"
-      data-position="bottom left"
-      *ngIf="meeting.isPoll && !isHost"
+      class="ui poll-create-container overflow-scroll segment"
+      *ngIf="pollService.isPollCreating"
     >
-      <div class="ui disabled button">
+      <app-poll-create
+        [meetingId]="meeting.id"
+        (pollCreated)="
+          pollService.onPollCreated(
+            $event,
+            connectionData.meetingId,
+            connectionData.userEmail
+          )
+        "
+      ></app-poll-create>
+    </div>
+
+    <div
+      class="ui poll-create-container overflow-scroll segment"
+      *ngIf="pollService.isShowPoll"
+    >
+      <button
+        id="meeting-poll-new"
+        *ngIf="!meeting.isPoll || isHost"
+        (click)="pollService.onNewPollClick()"
+        class="ui button"
+        id="new-poll-btn"
+      >
         New poll
+      </button>
+      <div
+        data-tooltip="Disabled by Host"
+        data-position="bottom left"
+        *ngIf="meeting.isPoll && !isHost"
+      >
+        <div class="ui disabled button">
+          New poll
+        </div>
+      </div>
+      <div class="ui segment">
+        <!--POLLS CONTAINER -->
+        <h3>Polls</h3>
+        <div *ngFor="let pollx of pollService.polls; let i = index">
+          <hr class="poll-divider" />
+          <span
+            id="meeting-poll-delete"
+            *ngIf="isHost"
+            class="delete-poll-icon"
+            (click)="pollService.onDeletePollIconClick(pollx)"
+          >
+            &times;
+          </span>
+          <app-poll
+            [poll]="pollx"
+            [user]="currentParticipant.user"
+            (pollAnswered)="pollService.onPollAnswered($event)"
+          >
+          </app-poll>
+        </div>
+      </div>
+      <div class="ui segment">
+        <h3>Results</h3>
+        <div *ngFor="let pollxResult of pollService.pollResults; let i = index">
+          <hr class="poll-divider" />
+          <span
+            id="meeting-poll-result"
+            *ngIf="currentParticipant.role == 1"
+            class="delete-poll-icon"
+            (click)="
+              pollService.onDeletePollResultIconClick(pollxResult, meeting.id)
+            "
+          >
+            &times;
+          </span>
+          <app-poll-results [pollResult]="pollxResult"></app-poll-results>
+        </div>
       </div>
     </div>
-    <div class="ui segment">
-      <!--POLLS CONTAINER -->
-      <h3>Polls</h3>
-      <div *ngFor="let pollx of pollService.polls; let i = index">
-        <hr class="poll-divider" />
-        <span
-          id="meeting-poll-delete"
-          *ngIf="isHost"
-          class="delete-poll-icon"
-          (click)="pollService.onDeletePollIconClick(pollx)"
-        >
-          &times;
-        </span>
-        <app-poll
-          [poll]="pollx"
-          [user]="currentParticipant.user"
-          (pollAnswered)="pollService.onPollAnswered($event)"
-        >
-        </app-poll>
-      </div>
+    <div class="agenda-container">
+      <app-agenda (topicEnd)="topicEnd($event)" *ngIf="isPlanning" [meetingId]="meeting.id"></app-agenda>
     </div>
-    <div class="ui segment">
-      <h3>Results</h3>
-      <div *ngFor="let pollxResult of pollService.pollResults; let i = index">
-        <hr class="poll-divider" />
-        <span
-          id="meeting-poll-result"
-          *ngIf="currentParticipant.role == 1"
-          class="delete-poll-icon"
-          (click)="
-            pollService.onDeletePollResultIconClick(pollxResult, meeting.id)
-          "
-        >
-          &times;
-        </span>
-        <app-poll-results [pollResult]="pollxResult"></app-poll-results>
-      </div>
+    <div
+      class="ui meeting-setting-container overflow-scroll segment"
+      *ngIf="isShowMeetingSettings"
+    >
+      <!--SETTINGS CONTAINER -->
+      <h3>Meeting settings</h3>
+      <app-setting-meeting [meeting]="meeting"> </app-setting-meeting>
     </div>
-  </div>
-  <div class="agenda-container">
-    <app-agenda *ngIf="isPlanning" [meetingId]="meeting.id"></app-agenda>
-  </div>
-  <div
-    class="ui meeting-setting-container overflow-scroll segment"
-    *ngIf="isShowMeetingSettings"
-  >
-    <!--SETTINGS CONTAINER -->
-    <h3>Meeting settings</h3>
-    <app-setting-meeting [meeting]="meeting"> </app-setting-meeting>
   </div>
 </div>

@@ -21,7 +21,7 @@ namespace Whale.API.Controllers.Slack
             _baseURL = "http://bsa2020-whale.westeurope.cloudapp.azure.com";
         }
 
-        [Route("/api/slack/startMeeting")]
+        [Route("/slack/startMeeting")]
         [HttpPost]
         [Produces("application/json")]
         public async Task StartMeeting(SlackCommand userData)
@@ -40,7 +40,7 @@ namespace Whale.API.Controllers.Slack
 
             try
             {
-                var meetingLinkDTO = await _httpService.PostAsync<MeetingCreateDTO, MeetingLinkDTO>("api/meeting", meetingDTO);
+                var meetingLinkDTO = await _httpService.PostAsync<MeetingCreateDTO, MeetingLinkDTO>("meeting", meetingDTO);
                 var link = $"{_baseURL}/meeting-page/%3Fid%3D{meetingLinkDTO.Id}&pwd%3D{meetingLinkDTO.Password}";
 
                 await _slackService.SendSlackReplyAsync("", userData.channel_id, link, userData.text);
@@ -51,7 +51,7 @@ namespace Whale.API.Controllers.Slack
             }
         }
 
-        [Route("/api/slack/interactivity")]
+        [Route("/slack/interactivity")]
         [HttpPost]
         [Produces("application/json")]
         public async Task<OkResult> Interactivity(SlackCommand data)
@@ -61,10 +61,10 @@ namespace Whale.API.Controllers.Slack
             return Ok();
         }
 
-        [Route("/api/external/startMeeting")]
+        [Route("/external/startMeeting")]
         [HttpPost]
         [Produces("application/json")]
-        public async Task<ActionResult<ExternalResponse>> ExternalStartMeeting(ExternalCommand data)
+        public async Task<ActionResult<ExternalResponse>> ExternalStartMeeting([FromBody] ExternalCommand data)
         {
 
             if (string.IsNullOrEmpty(data.email) || !await _slackService.ValidateUser(data.email))
@@ -78,7 +78,7 @@ namespace Whale.API.Controllers.Slack
 
             try
             {
-                var meetingLinkDTO = await _httpService.PostAsync<MeetingCreateDTO, MeetingLinkDTO>("api/meeting", meetingDTO);
+                var meetingLinkDTO = await _httpService.PostAsync<MeetingCreateDTO, MeetingLinkDTO>("meeting", meetingDTO);
                 var link = $"{_baseURL}/meeting-page/%3Fid%3D{meetingLinkDTO.Id}&pwd%3D{meetingLinkDTO.Password}";
 
                 return Ok(_slackService.GetExternalMessage("Join a Meeting", link));

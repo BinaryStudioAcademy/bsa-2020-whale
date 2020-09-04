@@ -125,7 +125,7 @@ export class GroupChatComponent
     this.isMembersVisible = false;
     this.httpService
       .getRequest<ReadAndUnreadGroupMessages>(
-        '/api/GroupChat/withUnread/' + this.groupSelected.id,
+        '/GroupChat/withUnread/' + this.groupSelected.id,
         new HttpParams().set('userId', this.loggedInUser.id)
       )
       .pipe(takeUntil(this.unsubscribe$))
@@ -219,7 +219,7 @@ export class GroupChatComponent
 
     this.httpService
       .postRequest<GroupMessage, HttpResponse<GroupMessage>>(
-        '/api/GroupChat/',
+        '/GroupChat/',
         newMessage
       )
       .pipe(take(1))
@@ -294,7 +294,7 @@ export class GroupChatComponent
       })
       .subscribe((user) => {
         if (user !== undefined) {
-          this.groupMembers.push(user.user);
+          Array.prototype.push.apply(this.groupMembers, user);
           this.toastr.success('User added successfuly');
         }
       });
@@ -403,7 +403,7 @@ export class GroupChatComponent
       groupId: this.groupSelected.id,
     };
     this.httpService
-      .postRequest('/api/GroupChat/markRead', unreadMessageId)
+      .postRequest('/GroupChat/markRead', unreadMessageId)
       .subscribe(() => {
         this.messageRead.emit(msgId);
       });
