@@ -40,16 +40,22 @@ export class SettingMeetingComponent implements OnInit, AfterViewInit {
   constructor(
     private meetingSettingsService: MeetingSettingsService,
     private meetingSignalrService: MeetingSignalrService,
-    private meetingService: MeetingService,
-    private toastr: ToastrService,
-    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
-    this.isWhiteboard = this.meeting?.isWhiteboard || this.meetingSettingsService.getSettings().isWhiteboard;
-    this.isPoll = this.meeting?.isPoll || this.meetingSettingsService.getSettings().isPoll;
-    this.isAudioDisabled = !this.meeting?.isAudioAllowed || this.meetingSettingsService.getSettings().isAudioDisabled;
-    this.isVideoDisabled = !this.meeting?.isVideoAllowed || this.meetingSettingsService.getSettings().isVideoDisabled;
+    if (this.meeting) {
+      this.isWhiteboard = this.meeting.isWhiteboard;
+      this.isPoll = this.meeting.isPoll;
+      this.isAudioDisabled = !this.meeting.isAudioAllowed;
+      this.isVideoDisabled = !this.meeting.isVideoAllowed;
+    } else {
+      const meetingSettings = this.meetingSettingsService.getSettings();
+
+      this.isWhiteboard = meetingSettings.isWhiteboard;
+      this.isPoll = meetingSettings.isPoll;
+      this.isAudioDisabled = meetingSettings.isAudioDisabled;
+      this.isVideoDisabled = meetingSettings.isVideoDisabled;
+    }
   }
 
   ngAfterViewInit(): void {
