@@ -33,6 +33,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
     firstDayOfWeek: 'mo',
     showNearMonthDays: false,
     min: this.createStringFromDate(new Date()),
+    disableKeypress: true,
     monthBtnCssClassCallback: (month) => 'ng2-date-picker-button',
     dayBtnCssClassCallback: (day) => 'ng2-date-picker-button',
   };
@@ -42,6 +43,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
     showTwentyFourHours: true,
     minutesInterval: 10,
     min: `${new Date().getHours()}:${new Date().getMinutes()}`,
+    disableKeypress: true,
   };
   public pointList: PointAgenda[] = [{ name: '', startTime: new Date() }];
   public isPasswordCheckboxChecked = true;
@@ -90,7 +92,9 @@ export class ScheduleMeetingPageComponent implements OnInit {
     if (this.form.controls.saveIntoCalendar.value) {
       await this.addEventToCalendar();
     }
-
+    if (this.pointList[0].name === ''){
+      this.pointList.splice(0, 1);
+    }
     const dateParts = this.form.controls.date.value.split('/');
     const date = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
     const time = this.form.controls.time.value.match(

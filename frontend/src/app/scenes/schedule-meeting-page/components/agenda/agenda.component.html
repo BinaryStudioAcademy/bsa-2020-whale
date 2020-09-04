@@ -11,6 +11,7 @@
         theme="dp-material"
         [config]="timeConfig"
         formControlName="time"
+        (onChange)="onSubmit()"
       ></dp-date-picker>
       <span data-tooltip="Remove topic" data-position="top right">
       <i class="icon close" (click)="removeTag($event)"></i></span>
