@@ -809,7 +809,7 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (point) => {
-          this.toastr.success(`Time for "${point.name}" finished`);
+          this.toastr.success(`Time for "${point.name}" started`);
         },
         () => {
           this.toastr.error('Error');
