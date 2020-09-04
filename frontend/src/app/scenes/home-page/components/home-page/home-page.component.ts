@@ -550,7 +550,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.onGroupClick(groupa);
   }
   public renderClass(array: any[]): string {
-    switch (array.length){
+    switch (array?.length){
       case 0:
         return '';
       case 1:
