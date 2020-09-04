@@ -26,7 +26,8 @@ export const environment = {
         { urls: 'stun:bsa2020-whale-webrtc.westeurope.cloudapp.azure.com:5349' },
         {
           urls: 'turn:bsa2020-whale-webrtc.westeurope.cloudapp.azure.com:5349',
-          username: 'bsa2020whale:bsa2020whale',
+          username: 'bsa2020whale',
+          credential: 'bsa2020whale'
         }
       ],
     },
