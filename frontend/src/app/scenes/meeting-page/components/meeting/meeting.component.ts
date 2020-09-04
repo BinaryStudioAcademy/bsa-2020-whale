@@ -1042,6 +1042,8 @@ export class MeetingComponent
   }
 
   public onStatisticsIconClick(): void {
+    window.onclick = null;
+
     this.isShowReactions = false;
     this.pollService.isShowPoll = false;
     this.isShowMeetingSettings = false;
@@ -1061,7 +1063,14 @@ export class MeetingComponent
       };
     }
     this.isShowStatistics = !this.isShowStatistics;
+
+    if (this.isShowStatistics) {
+      window.onclick = () => {
+        this.isShowStatistics = false;
+      };
+    }
   }
+
   public onReactionsIconClick(): void {
     this.pollService.isShowPoll = false;
     this.pollService.isPollCreating = false;

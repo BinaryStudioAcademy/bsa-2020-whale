@@ -81,7 +81,7 @@
       <span data-tooltip="Statistics" data-position="top right">
         <i
           id="meeting-draggable-statistics"
-          (click)="onStatisticsIconClick()"
+          (click)="onStatisticsIconClick(); $event.stopPropagation()"
           class="big chart bar icon"
         ></i>
       </span>
@@ -297,7 +297,7 @@
             <span data-tooltip="Statistics" *ngIf="!isRoom">
               <i
                 id="meeting-options-statistics"
-                (click)="onStatisticsIconClick()"
+                (click)="onStatisticsIconClick(); $event.stopPropagation()"
                 class="big chart bar icon"
               ></i
             ></span>
