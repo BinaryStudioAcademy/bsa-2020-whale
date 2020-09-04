@@ -149,14 +149,15 @@ export class RoomService {
     duration: number,
     numberOfRooms: number
   ) {
-    for (let i = 0; i < numberOfRooms; i++) {
+    this.previoslyDividedRooms.forEach((room) => {
       this.meetingSignalrService.invoke(SignalMethods.CreateRoom, {
         meetingId,
         meetingLink,
+        roomName: room.name,
         duration,
         participantsIds: this.participants.filter(p => p.role !== ParticipantRole.Host).map(p => p.id),
-      });
-    }
+      } as RoomCreate);
+    });
     this.isDividedIntoRooms = true;
   }
 
@@ -190,7 +191,7 @@ export class RoomService {
   private addRoom(participants: Array<Participant>): void {
     this.previoslyDividedRooms.push({
       roomId: '',
-      name: 'Room ' + this.previoslyDividedRooms.length,
+      name: 'Room ' + (this.previoslyDividedRooms.length + 1),
       participants
     } as RoomDTO);
   }
