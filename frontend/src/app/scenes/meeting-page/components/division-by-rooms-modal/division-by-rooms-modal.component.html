@@ -34,7 +34,6 @@
           type="number"
           placeholder="number of rooms"
           [(ngModel)]="numberOfRooms"
-          (change)="numberOfRoomsChanged()"
           required
         />
         <button
@@ -66,8 +65,8 @@
           <div class="ui header" *ngIf="{show: false } as showinput">
             <span *ngIf="!showinput.show">{{ room.name }}</span>
             <div class="ui action input" *ngIf="showinput.show">
-              <input class="room-name-input" type="text" placeholder="Room name" [(ngModel)]="room.name" (change)="changeRoomName(room)">
-              <button class="ui button" (click)="showinput.show = !showinput.show">Save</button>
+              <input class="room-name-input" type="text" placeholder="Room name" [(ngModel)]="room.name">
+              <button class="ui button" (click)="showinput.show = !showinput.show; changeRoomName(room)">Save</button>
             </div>
             <i class="pencil alternate icon" (click)="showinput.show = !showinput.show"></i>
           </div>
