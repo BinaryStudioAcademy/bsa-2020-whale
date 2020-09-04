@@ -14,7 +14,6 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   @Input() user: User;
   @Output() statisticsClose: EventEmitter<void> = new EventEmitter<void>();
 
-  public statistics: UserMeetingStatistics[];
 
   private unsubscribe$ = new Subject<void>();
 
@@ -37,8 +36,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
       .getStatistics()
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(resp => {
-        this.statistics = resp.body;
-        console.log(this.statistics);
+        console.log(resp.body);
       },
       (error) => this.toastr.error(error.Message));
   }

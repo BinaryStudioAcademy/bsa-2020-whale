@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Nest;
 using Whale.Shared.Models.Statistics;
 using Whale.Shared.Services;
 
@@ -23,7 +24,7 @@ namespace Whale.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MeetingUserStatistics>>> GetByUser()
+        public async Task<ActionResult<AggregateDictionary>> GetByUser()
         {
             var email = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
             return Ok(await _elasticSearchService.SearchStatistics(email));
