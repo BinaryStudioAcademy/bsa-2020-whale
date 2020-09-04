@@ -686,7 +686,8 @@ export class MeetingComponent
       (question: Question) => {
         if (this.isShowChat && this.questionService.areQuestionsOpened) {
           this.questions.changes.pipe(first()).subscribe(() => {
-            this.questions.last.nativeElement.scrollIntoView(false);
+            const questionsBlock = this.questions.last.nativeElement.parentElement;
+            questionsBlock.scrollTop = questionsBlock.scrollHeight - questionsBlock.clientHeight;
           });
         }
         this.questionService.addQuestion(question);
