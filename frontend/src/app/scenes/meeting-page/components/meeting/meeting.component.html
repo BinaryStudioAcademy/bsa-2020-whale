@@ -73,6 +73,7 @@
       </span>
       <span data-tooltip="Polls">
         <i
+          #pollsButtonFullscreen
           id="meeting-draggable-poll"
           (click)="pollService.onPollIconClick()"
           class="big clipboard list icon"
@@ -80,8 +81,9 @@
       </span>
       <span data-tooltip="Statistics" data-position="top right">
         <i
+          #statisticsButton
           id="meeting-draggable-statistics"
-          (click)="onStatisticsIconClick(); $event.stopPropagation()"
+          (click)="onStatisticsIconClick()"
           class="big chart bar icon"
         ></i>
       </span>
@@ -94,6 +96,7 @@
       </span>
       <span data-tooltip="Add Reactions" data-position="top right">
         <i
+          #reactionsButtonFullscreen
           (click)="onReactionsIconClick()"
           class="big thumbs up large icon"
         ></i>
@@ -232,6 +235,7 @@
               data-position="top left"
             >
               <i
+                #settingsButton
                 id="meeting-settings"
                 (click)="onMeetingSettingClick()"
                 class="big cogs icon"
@@ -289,6 +293,7 @@
             </span>
             <span data-tooltip="Polls">
               <i
+                #pollsButton
                 id="meeting-options-poll"
                 (click)="onPollIconClick()"
                 class="big clipboard list icon"
@@ -296,6 +301,7 @@
             ></span>
             <span data-tooltip="Statistics" *ngIf="!isRoom">
               <i
+                #statisticsButtonFullscreen
                 id="meeting-options-statistics"
                 (click)="onStatisticsIconClick(); $event.stopPropagation()"
                 class="big chart bar icon"
@@ -324,10 +330,11 @@
               data-position="top right"
               [ngClass]="{ pulse: checkDrawing() }"
             >
-              <i (click)="showCanvas()" class="big paint brush icon"></i>
+              <i #whiteboardButton (click)="showCanvas()" class="big paint brush icon"></i>
             </span>
             <span data-tooltip="Add Reactions" data-position="top right">
               <i
+                #reactionsButton
                 (click)="onReactionsIconClick()"
                 class="big thumbs up large icon"
               >
@@ -346,6 +353,7 @@
             </span>
             <span data-tooltip="Plan Meeting">
               <i
+                #agendaButton
                 class="big list alternate icon"
                 (click)="onAgendaClick()"
                 [ngClass]="{pulse: isTopicEnd}"
@@ -698,13 +706,13 @@ Enter+Shift for new line."
       </div>
     </div>
 
-    <div class="poll-create-container" *ngIf="isShowStatistics">
+    <div #statistics class="poll-create-container" *ngIf="isShowStatistics">
       <app-meeting-statistics
         [statistic]="meetingStatistics"
       ></app-meeting-statistics>
     </div>
 
-    <div class="poll-create-container" *ngIf="isShowReactions">
+    <div #reactions class="poll-create-container" *ngIf="isShowReactions">
       <app-reactions (reaction)="onReaction($event)"></app-reactions>
     </div>
 
@@ -725,6 +733,7 @@ Enter+Shift for new line."
     </div>
 
     <div
+      #polls
       class="ui poll-create-container overflow-scroll segment"
       *ngIf="pollService.isShowPoll"
     >
@@ -785,10 +794,11 @@ Enter+Shift for new line."
         </div>
       </div>
     </div>
-    <div class="agenda-container">
+    <div #agenda class="agenda-container">
       <app-agenda (topicEnd)="topicEnd($event)" *ngIf="isPlanning" [meetingId]="meeting.id"></app-agenda>
     </div>
     <div
+      #settings
       class="ui meeting-setting-container overflow-scroll segment"
       *ngIf="isShowMeetingSettings"
     >
