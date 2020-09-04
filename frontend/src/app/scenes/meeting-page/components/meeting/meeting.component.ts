@@ -287,9 +287,7 @@ export class MeetingComponent
   public async ngOnInit(): Promise<void> {
     this.isRoom = window.location.pathname.includes('room');
     this.roomService.isInRoom = this.isRoom;
-    if (this.isRoom) {
-      this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-    }
+    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
     this.currentUserStream = await navigator.mediaDevices
       .getUserMedia(await this.mediaSettingsService.getMediaConstraints())
