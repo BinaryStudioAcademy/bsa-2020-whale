@@ -360,7 +360,13 @@ export class MeetingComponent
             (p) => p.id !== this.currentParticipant.id
           );
           this.createParticipantCard(this.currentParticipant);
-
+          if (!this.recognition){
+            this.meetingSignalrService.invoke(SignalMethods.OnSpeechRecognition, {
+              meetingId: this.meeting.id,
+              userId: this.currentParticipant.user.id,
+              message: '>Speech recognition is not supported by the browser',
+            } as MeetingSpeechCreate);
+          }
           if (this.meeting.isAllowedToChooseRoom && !this.isHost){
             this.openRoomsModal();
           }
@@ -2033,11 +2039,6 @@ export class MeetingComponent
     }
     catch {
       this.toastr.info('Speech recognition is not supported by the browser');
-      this.meetingSignalrService.invoke(SignalMethods.OnSpeechRecognition, {
-        meetingId: this.meeting.id,
-        userId: this.currentParticipant.user.id,
-        message: 'Speech recognition is not supported by the browser',
-      } as MeetingSpeechCreate);
     }
   }
   //#endregion SpeechRecognition
