@@ -112,8 +112,6 @@ export class RoomService {
       Math.ceil(participants.length / numberOfRooms)
     );
 
-    this.previoslyDividedRooms = [];
-
     previouslyDividedParticipants.forEach((roomParticipants) => {
       this.addRoom(roomParticipants);
     });
@@ -162,7 +160,49 @@ export class RoomService {
   }
 
   public changeNumberofRooms(numberOfRooms: number): void {
-    this.randomlyDivide(numberOfRooms);
+    const participants = this.participants.filter(
+      (p) => p.role !== ParticipantRole.Host
+    );
+
+    const previouslyDividedParticipants = this.randChunkSplit(
+      participants,
+      Math.ceil(participants.length / numberOfRooms)
+    );
+
+    if (this.previoslyDividedRooms.length > numberOfRooms) {
+      for (let i = 0; i < previouslyDividedParticipants.length; i++){
+        this.previoslyDividedRooms[i].participants = previouslyDividedParticipants[i];
+      }
+
+      const emptyRooms = this.previoslyDividedRooms.length - numberOfRooms;
+      this.previoslyDividedRooms.splice(numberOfRooms, emptyRooms);
+
+      return;
+    }
+
+    if (previouslyDividedParticipants.length > this.previoslyDividedRooms.length){
+      for (let i = 0; i < previouslyDividedParticipants.length; i++){
+        if (i < this.previoslyDividedRooms.length) {
+          this.previoslyDividedRooms[i].participants = previouslyDividedParticipants[i];
+        } else {
+          this.addRoom(previouslyDividedParticipants[i]);
+        }
+      }
+    } else {
+      for (let i = 0; i < this.previoslyDividedRooms.length; i++){
+        if (i < previouslyDividedParticipants.length){
+          this.previoslyDividedRooms[i].participants = previouslyDividedParticipants[i];
+        } else {
+          this.previoslyDividedRooms[i].participants = [];
+        }
+      }
+    }
+
+    if (this.previoslyDividedRooms.length < numberOfRooms) {
+      this.addEmptyRooms(
+        numberOfRooms - this.previoslyDividedRooms.length
+      );
+    }
   }
 
   public async getMeetingEntityForRoom(roomId: string): Promise<Meeting> {

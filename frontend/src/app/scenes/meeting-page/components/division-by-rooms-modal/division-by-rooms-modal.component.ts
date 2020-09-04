@@ -161,7 +161,7 @@ export class DivisionByRoomsModalComponent
   }
 
   public changeRoomName(room: RoomDTO): void {
-    if (room.name === ''){
+    if (room.name.trim() === ''){
       room.name = 'Room';
       this.toastr.warning('You cannot create room without name');
     }
