@@ -153,7 +153,7 @@ namespace Whale.Shared.Services
                 .FirstOrDefault(c => c.Id == contactDTO.Id);
 
             if (entity.FirstMember.Email != userEmail && entity.SecondMember.Email != userEmail)
-                throw new InvalidCredentialsExseption();
+                throw new InvalidCredentialsException();
             if (entity == null)
                 throw new NotFoundException("Contact", contactDTO.Id.ToString());
             entity.PinnedMessageId = contactDTO.PinnedMessageId;
@@ -170,7 +170,7 @@ namespace Whale.Shared.Services
                 .FirstOrDefault(c => c.Id == contactId);
 
             if (contact.FirstMember.Email != userEmail && contact.SecondMember.Email != userEmail)
-                throw new InvalidCredentialsExseption();
+                throw new InvalidCredentialsException();
 
             if (contact == null) return false;
 

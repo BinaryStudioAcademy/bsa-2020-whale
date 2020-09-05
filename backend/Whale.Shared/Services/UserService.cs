@@ -132,7 +132,7 @@ namespace Whale.Shared.Services
             if (user == null)
                 throw new NotFoundException("User", userId.ToString());
             if (user.Email != userEmail)
-                throw new InvalidCredentialsExseption();
+                throw new InvalidCredentialsException();
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
             return true;

@@ -68,7 +68,7 @@ namespace Whale.Shared.Services
             var redisDTO = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(linkDTO.Id.ToString());
             Console.WriteLine($"MeetingId: {linkDTO.Id}\nrdisDTO: {redisDTO is null}");
             if (redisDTO?.Password != linkDTO.Password)
-                throw new InvalidCredentialsExseption();
+                throw new InvalidCredentialsException();
 
             var meeting = await _context.Meetings.FirstOrDefaultAsync(m => m.Id == linkDTO.Id);
             if (meeting == null)
