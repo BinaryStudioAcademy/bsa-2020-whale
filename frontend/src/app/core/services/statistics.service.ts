@@ -14,7 +14,7 @@ export class StatisticsService {
     private httpService: HttpService,
   ) { }
 
-  public getStatistics(): Observable<HttpResponse<any>>{
-    return this.httpService.getFullRequest<any>(this.routePrefix);
+  public getStatistics(): Observable<HttpResponse<UserMeetingStatistics[]>>{
+    return this.httpService.getFullRequest<UserMeetingStatistics[]>(this.routePrefix);
   }
 }

@@ -1,4 +1,5 @@
 ﻿using Nest;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,7 +43,7 @@ namespace Whale.Shared.Services
             }
         }
 
-        public async Task<IReadOnlyCollection<DateHistogramBucket>> SearchStatistics(string email)
+        public async Task<IEnumerable<DateHistogramBucket>> SearchStatistics(string email)
         {
             var user = await _userService.GetUserByEmail(email);
             var indexName = $"{indexPrefix}{user.Id.ToString()}";
@@ -54,24 +55,40 @@ namespace Whale.Shared.Services
                 .Query(q => q
                     .DateRange(d => d
                         .Field(f => f.EndDate)
-                        .LessThanOrEquals(DateMath.Now
-                        .Add(TimeSpan.FromDays(1)).RoundTo(DateMathTimeUnit.Hour))
-                        .GreaterThanOrEquals(DateMath.Now.Subtract(TimeSpan.FromDays(7)).RoundTo(DateMathTimeUnit.Hour))))
-               .Aggregations(a => a
-                    .DateHistogram("date_histogram", h => h
+                        .LessThanOrEquals(DateMath.Now.Add(TimeSpan.FromDays(1)).RoundTo(DateMathTimeUnit.Hour))
+                        .GreaterThanOrEquals(DateMath.Now.Subtract(TimeSpan.FromDays(30)).RoundTo(DateMathTimeUnit.Hour))))
+                .Aggregations(a => a
+                    .DateHistogram("dateHistogram", h => h
                         .Field(f => f.EndDate)
                         .CalendarInterval(DateInterval.Day)
-                        .Order(HistogramOrder.CountAscending)
-                        .Format("MM-dd")
+                        .MinimumDocumentCount(1)
                         .Aggregations(aa => aa
-                            .Min("min_duration", ma => ma
+                            .Min("minDuration", ma => ma
+                                .Field(f => f.DurationTime)
+                            )
+                            .Max("maxDuration", ma => ma
                                 .Field(f => f.DurationTime))
-                            .Max("max_duration", ma => ma
+                            .Average("avgDuration", aa => aa
                                 .Field(f => f.DurationTime))
-                            .Average("average-duration", aa => aa
-                                .Field(f => f.DurationTime))))));
+                             .Min("minSpeech", ma => ma
+                                .Field(f => f.SpeechTime))
+                            .Max("maxSpeech", ma => ma
+                                .Field(f => f.SpeechTime))
+                            .Average("avgSpeech", aa => aa
+                                .Field(f => f.SpeechTime))
+                            .Min("minPresence", ma => ma
+                                .Field(f => f.PresenceTime)) 
+                            .Max("maxPresence", ma => ma
+                                .Field(f => f.PresenceTime))
+                            .Average("avgPresence", aa => aa
+                                .Field(f => f.PresenceTime))
+                            .Min("date", m => m
+                                .Field(f => f.EndDate).Format("yyyy-MM-dd"))
+                  )))
+                );
+            
 
-            return response.Aggregations.DateHistogram("date_histogram").Buckets;
+             return response.Aggregations.DateHistogram("dateHistogram").Buckets;
 
         }
     }

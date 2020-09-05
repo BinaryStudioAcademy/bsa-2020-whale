@@ -24,6 +24,7 @@
     "@angular/router": "~10.0.6",
     "@aspnet/signalr": "^1.1.4",
     "@popperjs/core": "^2.4.4",
+    "@syncfusion/ej2-angular-charts": "^18.2.56",
     "@types/dom-mediacapture-record": "^1.0.7",
     "@types/gapi": "0.0.39",
     "@types/gapi.auth2": "0.0.52",

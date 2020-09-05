@@ -320,11 +320,9 @@ namespace Whale.Shared.Services
                 {
                     Id = $"{p.UserId.ToString()}{p.MeetingId.ToString()}",
                     UserId = p.UserId,
-                    MeetingId = meeting.Id,
-                    StartDate = meeting.StartTime,
                     EndDate = (DateTimeOffset)meeting.EndTime,
                     PresenceTime = 0,
-                    DurationTime = (long)((DateTimeOffset)meeting.EndTime).Subtract(meeting.StartTime).TotalSeconds,
+                    DurationTime = (long)((DateTimeOffset)meeting.EndTime).Subtract(meeting.StartTime).TotalMilliseconds,
                     SpeechTime = 0
                 };
                 await _elasticSearchService.SaveSingleAsync(statistics);
@@ -343,11 +341,9 @@ namespace Whale.Shared.Services
                 {
                     Id = $"{p.UserId.ToString()}{p.MeetingId.ToString()}",
                     UserId = p.UserId,
-                    MeetingId = p.MeetingId,
-                    StartDate = p.Meeting.StartTime,
                     EndDate = (DateTimeOffset)p.Meeting.EndTime,
                     PresenceTime = 0,
-                    DurationTime = (long)((DateTimeOffset)p.Meeting.EndTime).Subtract(p.Meeting.StartTime).TotalSeconds,
+                    DurationTime = (long)((DateTimeOffset)p.Meeting.EndTime).Subtract(p.Meeting.StartTime).TotalMilliseconds,
                     SpeechTime = 0
                 })
                 .AsEnumerable();

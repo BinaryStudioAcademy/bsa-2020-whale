@@ -26,7 +26,7 @@ namespace Whale.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyCollection<DateHistogramBucket>>> GetByUser()
+        public async Task<ActionResult<IEnumerable<DateHistogramBucket>>> GetByUser()
         {
             var email = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
             return Ok(await _elasticSearchService.SearchStatistics(email));

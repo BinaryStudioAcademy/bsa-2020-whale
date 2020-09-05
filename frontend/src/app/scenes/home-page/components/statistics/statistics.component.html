@@ -12,5 +12,10 @@
         </div>
     </div>
 
+    <ejs-chart [title]='chartTitle' [primaryXAxis]='xAxis' [primaryYAxis]='yAxis' [tooltip]='tooltip'>
+      <e-series-collection >
+        <e-series type='Line' [dataSource]='data' xName='date' yName='value' [marker]='markerSettings'></e-series>
+      </e-series-collection>
+    </ejs-chart>
    
 </div>
