@@ -1876,7 +1876,7 @@ export class MeetingComponent
     const keys = Object.keys(this.peer.connections);
     const peerConnection = this.peer.connections[keys[0]];
     const videoTrack = stream.getVideoTracks()[0];
-    peerConnection.forEach((pc) => {
+    peerConnection?.forEach((pc) => {
       const sender = pc.peerConnection.getSenders().find((s) => {
         return s.track.kind === videoTrack.kind;
       });
@@ -1904,7 +1904,7 @@ export class MeetingComponent
     const keys = Object.keys(this.peer.connections);
     const peerConnection = this.peer.connections[keys[0]];
     const audioTrack = stream.getAudioTracks()[0];
-    peerConnection.forEach((pc) => {
+    peerConnection?.forEach((pc) => {
       const sender = pc.peerConnection.getSenders().find((s) => {
         return s.track.kind === audioTrack.kind;
       });
