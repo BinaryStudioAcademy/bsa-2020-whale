@@ -1006,7 +1006,7 @@ export class MeetingComponent
 
     this.isMicrophoneMuted = !this.isMicrophoneMuted;
     this.isRecognitionStop = this.isMicrophoneMuted;
-    this.isMicrophoneMuted ? this.recognition?.stop() : this.recognition?.start();
+    // this.isMicrophoneMuted ? this.recognition?.stop() : this.recognition?.start();
     if (!isMissSignaling) {
       this.invokeMediaStateChanged();
     }
@@ -1318,7 +1318,7 @@ export class MeetingComponent
 
             this.questionService.getQuestionsByMeeting(this.meeting.id);
 
-            this.configureRecognition();
+            // this.configureRecognition();
           });
         },
         (error) => {
