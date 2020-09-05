@@ -925,12 +925,12 @@ export class MeetingComponent
   //#endregion hooks
 
   //#region options
-  public async toggleMicrophone(isMissSignaling: boolean = false): Promise<void> {
+  public toggleMicrophone(isMissSignaling: boolean = false): void {
     if (
       !this.meeting.isAudioAllowed &&
       this.currentParticipant?.role !== ParticipantRole.Host
     ) {
-      await this.switchTrack(false, false);
+      this.switchTrack(false, false);
       this.isMicrophoneMuted = true;
       this.isRecognitionStop = true;
       this.recognition?.stop();
@@ -938,8 +938,8 @@ export class MeetingComponent
     }
 
     this.isMicrophoneMuted
-      ? await this.switchTrack(true, false)
-      : await this.switchTrack(false, false);
+      ? this.switchTrack(true, false)
+      : this.switchTrack(false, false);
 
     this.isMicrophoneMuted = !this.isMicrophoneMuted;
     this.isRecognitionStop = this.isMicrophoneMuted;
@@ -949,17 +949,19 @@ export class MeetingComponent
     }
   }
 
-  public async toggleCamera(isMissSignaling: boolean = false): Promise<void> {
+  public toggleCamera(isMissSignaling: boolean = false): void {
     if (
       !this.meeting.isVideoAllowed &&
       this.currentParticipant?.role !== ParticipantRole.Host
     ) {
-      await this.switchTrack(false, true);
+      this.switchTrack(false, true);
       this.isCameraMuted = true;
       return;
     }
 
-    await this.switchTrack(this.isCameraMuted, true);
+    this.isCameraMuted
+      ? this.switchTrack(true, true)
+      : this.switchTrack(false, true);
 
     this.isCameraMuted = !this.isCameraMuted;
     if (!isMissSignaling) {
@@ -967,7 +969,7 @@ export class MeetingComponent
     }
   }
 
-  private async switchTrack(enable: boolean, isVideo: boolean): Promise<void> {
+  private switchTrack(enable: boolean, isVideo: boolean): void {
     const tracks = isVideo
       ? this.currentUserStream.getVideoTracks()
       : this.currentUserStream.getAudioTracks();
@@ -1301,7 +1303,7 @@ export class MeetingComponent
 
             this.questionService.getQuestionsByMeeting(this.meeting.id);
 
-            this.configureRecognition();
+            // this.configureRecognition();
           });
         },
         (error) => {
@@ -2043,10 +2045,10 @@ export class MeetingComponent
       .subscribe(
         (event) => {
           if (!this.isRecognitionStop) {
-            this.recognition.start();
+            // this.recognition.start();
           }
         });
-      this.recognition.start();
+      // this.recognition.start();
     }
     catch {
       this.toastr.info('Speech recognition is not supported by the browser');
