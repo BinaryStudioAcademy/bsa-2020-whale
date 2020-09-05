@@ -20,13 +20,12 @@ namespace Whale.API.Controllers
         public NotificationsController(NotificationsService notificationsService)
         {
             _notificationsService = notificationsService;
-            
         }
-        
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<NotificationDTO>>> GetAll()
         {
-            string email = HttpContext?.User.Claims
+            var email = HttpContext?.User.Claims
                 .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
             var contacts = await _notificationsService.GetAllNotificationsAsync(email);
 
@@ -36,7 +35,7 @@ namespace Whale.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            string email = HttpContext?.User.Claims
+            var email = HttpContext?.User.Claims
                 .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
             await _notificationsService.DeleteNotificationAsync(email, id);
             return NoContent();

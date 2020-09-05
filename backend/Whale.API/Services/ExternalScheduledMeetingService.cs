@@ -20,27 +20,27 @@ namespace Whale.API.Services
             _httpService = httpService;
         }
 
-        public async Task<string> StartScheduledMeeting(ScheduledMeetingExternal scheduledMeetingExternal)
+        public async Task<string> StartScheduledMeetingAsync(ScheduledMeetingExternal scheduledMeetingExternal)
         {
-            if (string.IsNullOrEmpty(scheduledMeetingExternal.Email) || !await ValidateUser(scheduledMeetingExternal.Email))
+            if (string.IsNullOrEmpty(scheduledMeetingExternal.Email) || !await ValidateUserAsync(scheduledMeetingExternal.Email))
             {
                 throw new NotFoundException("User", scheduledMeetingExternal.Email);
             }
 
-            var meetingDTO = new MeetingCreateDTO() { 
-                CreatorEmail = scheduledMeetingExternal.Email, 
-                IsScheduled = true, 
-                IsRecurrent = false, 
-                StartTime = scheduledMeetingExternal.ScheduledTime, 
-                ParticipantsEmails = new List<string>() 
+            var meetingDTO = new MeetingCreateDTO() {
+                CreatorEmail = scheduledMeetingExternal.Email,
+                IsScheduled = true,
+                IsRecurrent = false,
+                StartTime = scheduledMeetingExternal.ScheduledTime,
+                ParticipantsEmails = new List<string>()
             };
             var link = await _httpService.PostStringAsync("meeting/scheduled", meetingDTO);
             return $"{BaseUrl}/redirection/{link}";
         }
 
-        public async Task<bool> ValidateUser(string userEmail)
+        public async Task<bool> ValidateUserAsync(string userEmail)
         {
-            var user = await _userService.GetUserByEmail(userEmail);
+            var user = await _userService.GetUserByEmailAsync(userEmail);
             return user != null;
         }
     }

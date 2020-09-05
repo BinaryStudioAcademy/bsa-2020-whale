@@ -6,7 +6,6 @@ using System;
 using System.Threading.Tasks;
 using Whale.DAL.Settings;
 
-
 namespace Whale.API.Providers
 {
     public class FileStorageProvider

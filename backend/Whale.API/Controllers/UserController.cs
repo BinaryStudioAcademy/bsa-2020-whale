@@ -27,14 +27,15 @@ namespace Whale.API.Controllers
         [HttpGet]
         public async Task<ActionResult<UserDTO>> GetCurrentUser()
         {
-            string email = HttpContext?.User.Claims
+            var email = HttpContext?.User.Claims
                 .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            var contact = await _userService.GetUserByEmail(email);
-            if (contact == null) return NotFound();
+            var contact = await _userService.GetUserByEmailAsync(email);
+            if (contact == null)
+                return NotFound();
 
             return Ok(contact);
         }
-        
+
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDTO>> Get(Guid id)
         {
@@ -50,14 +51,13 @@ namespace Whale.API.Controllers
         public async Task<ActionResult<UserDTO>> GetUserByEmail(string email)
         {
             if (!Regex.IsMatch(email,
-                @"^(?("")("".+?(?<!\\)""@)|(([0-9a-z]((\.(?!\.))|[-!#\$%&'\*\+/=\?\^`\{\}\|~\w])*)(?<=[0-9a-z])@))" +
-                @"(?(\[)(\[(\d{1,3}\.){3}\d{1,3}\])|(([0-9a-z][-0-9a-z]*[0-9a-z]*\.)+[a-z0-9][\-a-z0-9]{0,22}[a-z0-9]))$",
+                @"^(?("")("".+?(?<!\\)""@)|(([0-9a-z]((\.(?!\.))|[-!#\$%&'\*\+/=\?\^`\{\}\|~\w])*)(?<=[0-9a-z])@))(?(\[)(\[(\d{1,3}\.){3}\d{1,3}\])|(([0-9a-z][-0-9a-z]*[0-9a-z]*\.)+[a-z0-9][\-a-z0-9]{0,22}[a-z0-9]))$",
                 RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250)))
             {
                 throw new BaseCustomException("Invaid email format");
             }
 
-            var result = await _userService.GetUserByEmail(email);
+            var result = await _userService.GetUserByEmailAsync(email);
 
             return Ok(result);
         }

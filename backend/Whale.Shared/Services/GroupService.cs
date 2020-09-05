@@ -28,7 +28,6 @@ namespace Whale.Shared.Services
             _signalrService = signalrService;
             _blobStorageSettings = blobStorageSettings;
             _notificationsService = notificationsService;
-
         }
 
         public async Task<IEnumerable<GroupDTO>> GetAllGroupsAsync(string userEmail)
@@ -99,7 +98,7 @@ namespace Whale.Shared.Services
             return _mapper.Map<GroupDTO>(group);
         }
 
-        public async Task<GroupDTO> UpdateGroup(UpdateGroupDTO updateGroup)
+        public async Task<GroupDTO> UpdateGroupAsync(UpdateGroupDTO updateGroup)
         {
             var group = _context.Groups.FirstOrDefault(g => g.Id == updateGroup.Id);
 
@@ -178,7 +177,7 @@ namespace Whale.Shared.Services
             return true;
         }
 
-        public async Task<bool> RemoveUserFromGroup(Guid groupId, string userEmail)
+        public async Task<bool> RemoveUserFromGroupAsync(Guid groupId, string userEmail)
         {
             var group = _context.Groups.FirstOrDefault(c => c.Id == groupId);
             if (group is null) return false;

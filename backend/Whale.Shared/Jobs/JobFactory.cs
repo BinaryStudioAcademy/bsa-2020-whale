@@ -15,8 +15,8 @@ namespace Whale.Shared.Jobs
 
         public IJob NewJob(TriggerFiredBundle bundle, IScheduler scheduler)
         {
-            using (var scope = _serviceScopeFactory.CreateScope())
-                return scope.ServiceProvider.GetService(bundle.JobDetail.JobType) as IJob;
+            using var scope = _serviceScopeFactory.CreateScope();
+            return scope.ServiceProvider.GetService(bundle.JobDetail.JobType) as IJob;
         }
 
         public void ReturnJob(IJob job) { }

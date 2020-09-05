@@ -19,14 +19,13 @@ namespace Whale.API.Controllers
         public StatisticsController(ElasticSearchService elasticSearchService)
         {
             _elasticSearchService = elasticSearchService;
-
         }
 
         [HttpGet]
         public async Task<ActionResult<IReadOnlyCollection<DateHistogramBucket>>> GetByUser()
         {
             var email = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            return Ok(await _elasticSearchService.SearchStatistics(email));
+            return Ok(await _elasticSearchService.SearchStatisticsAsync(email));
         }
     }
 }

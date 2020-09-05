@@ -7,7 +7,7 @@ namespace Whale.API.Services
 {
     public class HttpService
     {
-        private HttpClient _httpClient;
+        private readonly HttpClient _httpClient;
         private readonly string _baseUrl;
 
         public HttpService(HttpClient httpClient, string baseUrl)

@@ -36,7 +36,7 @@ namespace Whale.Shared.Services
             using (var scope = _serviceScopeFactory.CreateScope())
             {
                 var meetingService = scope.ServiceProvider.GetService<MeetingService>();
-                _meetings = await meetingService.GetScheduledMeetins();
+                _meetings = await meetingService.GetScheduledMeetinsAsync();
             }
 
             foreach (var meeting in _meetings)
@@ -45,9 +45,9 @@ namespace Whale.Shared.Services
                 _id = Guid.NewGuid();
 
                 var job = JobBuilder.Create<ScheduledMeetingJob>()
-                .WithIdentity($"{_id}-job")
-                .UsingJobData($"JobData", data)
-                .Build();
+                    .WithIdentity($"{_id}-job")
+                    .UsingJobData("JobData", data)
+                    .Build();
 
                 var trigger = TriggerBuilder.Create()
                     .WithIdentity($"{_id}.trigger")

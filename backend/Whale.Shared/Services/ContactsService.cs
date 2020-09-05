@@ -24,7 +24,13 @@ namespace Whale.Shared.Services
         private readonly SignalrService _signalrService;
         private readonly RedisService _redisService;
         private const string onlineUsersKey = "online";
-        public ContactsService(WhaleDbContext context, IMapper mapper, NotificationsService notifications, BlobStorageSettings blobStorageSettings, SignalrService signalrService, RedisService redisService) : base(context, mapper)
+        public ContactsService(
+            WhaleDbContext context,
+            IMapper mapper,
+            NotificationsService notifications,
+            BlobStorageSettings blobStorageSettings,
+            SignalrService signalrService,
+            RedisService redisService) : base(context, mapper)
         {
             _notifications = notifications;
             _blobStorageSettings = blobStorageSettings;
@@ -42,39 +48,34 @@ namespace Whale.Shared.Services
                  .Include(c => c.FirstMember)
                  .Include(c => c.SecondMember)
                  .Include(c => c.PinnedMessage)
-                 .Where(c => c.FirstMemberId == user.Id || (c.SecondMemberId == user.Id && c.isAccepted))
+                 .Where(c => c.FirstMemberId == user.Id || (c.SecondMemberId == user.Id && c.IsAccepted))
                  .ToListAsync();
 
             contacts = (await contacts.LoadAvatarsAsync(_blobStorageSettings, c => c.FirstMember)).ToList();
             contacts = (await contacts.LoadAvatarsAsync(_blobStorageSettings, c => c.SecondMember)).ToList();
 
-            var contactsDto = contacts
+            return contacts
                 .Select(c =>
-            {
-                var contact = new ContactDTO()
                 {
-                    Id = c.Id,
-                    FirstMemberId = (c.FirstMemberId == user.Id) ? c.FirstMemberId : c.SecondMemberId,
-                    FirstMember = _mapper.Map<UserDTO>((c.FirstMemberId == user.Id) ? c.FirstMember : c.SecondMember),
-                    SecondMemberId = (c.SecondMemberId == user.Id) ? c.FirstMemberId : c.SecondMemberId,
-                    SecondMember = _mapper.Map<UserDTO>((c.SecondMemberId == user.Id) ? c.FirstMember : c.SecondMember),
-                    PinnedMessage = _mapper.Map<DirectMessageDTO>(c.PinnedMessage),
-                    IsAccepted = c.isAccepted,
-                };
-                contact.FirstMember.ConnectionId = GetConnectionId(contact.FirstMember.Id);
-                contact.SecondMember.ConnectionId = GetConnectionId(contact.SecondMember.Id);
-                int unreadMessageCount = _context.UnreadMessageIds
-                .Where(um => um.ReceiverId == contact.FirstMemberId && _context.DirectMessages
-                    .Any(dm => dm.Id == um.MessageId && dm.AuthorId == contact.SecondMemberId))
-                .Count();
-                contact.UnreadMessageCount = unreadMessageCount;
+                    var contact = new ContactDTO()
+                    {
+                        Id = c.Id,
+                        FirstMemberId = (c.FirstMemberId == user.Id) ? c.FirstMemberId : c.SecondMemberId,
+                        FirstMember = _mapper.Map<UserDTO>((c.FirstMemberId == user.Id) ? c.FirstMember : c.SecondMember),
+                        SecondMemberId = (c.SecondMemberId == user.Id) ? c.FirstMemberId : c.SecondMemberId,
+                        SecondMember = _mapper.Map<UserDTO>((c.SecondMemberId == user.Id) ? c.FirstMember : c.SecondMember),
+                        PinnedMessage = _mapper.Map<DirectMessageDTO>(c.PinnedMessage),
+                        IsAccepted = c.IsAccepted,
+                    };
+                    contact.FirstMember.ConnectionId = GetConnectionId(contact.FirstMember.Id);
+                    contact.SecondMember.ConnectionId = GetConnectionId(contact.SecondMember.Id);
+                    contact.UnreadMessageCount = _context.UnreadMessageIds
+                    .Where(um => um.ReceiverId == contact.FirstMemberId && _context.DirectMessages
+                        .Any(dm => dm.Id == um.MessageId && dm.AuthorId == contact.SecondMemberId))
+                    .Count();
 
-                return contact;
-            });
-
-
-
-            return contactsDto;
+                    return contact;
+                });
         }
 
         public async Task<IEnumerable<ContactDTO>> GetAcceptedContactsAsync(string userEmail)
@@ -87,14 +88,14 @@ namespace Whale.Shared.Services
                  .Include(c => c.FirstMember)
                  .Include(c => c.SecondMember)
                  .Include(c => c.PinnedMessage)
-                 .Where(c => c.FirstMemberId == user.Id || (c.SecondMemberId == user.Id && c.isAccepted))
-                 .Where(c => c.isAccepted)
+                 .Where(c => c.FirstMemberId == user.Id || (c.SecondMemberId == user.Id && c.IsAccepted))
+                 .Where(c => c.IsAccepted)
                  .ToListAsync();
 
             contacts = (await contacts.LoadAvatarsAsync(_blobStorageSettings, c => c.FirstMember)).ToList();
             contacts = (await contacts.LoadAvatarsAsync(_blobStorageSettings, c => c.SecondMember)).ToList();
 
-            var contactsDto = contacts
+            return contacts
                 .Select(c =>
                 {
                     var contact = new ContactDTO()
@@ -105,14 +106,12 @@ namespace Whale.Shared.Services
                         SecondMemberId = (c.SecondMemberId == user.Id) ? c.FirstMemberId : c.SecondMemberId,
                         SecondMember = _mapper.Map<UserDTO>((c.SecondMemberId == user.Id) ? c.FirstMember : c.SecondMember),
                         PinnedMessage = _mapper.Map<DirectMessageDTO>(c.PinnedMessage),
-                        IsAccepted = c.isAccepted,
+                        IsAccepted = c.IsAccepted,
                     };
                     contact.FirstMember.ConnectionId = GetConnectionId(contact.FirstMember.Id);
                     contact.SecondMember.ConnectionId = GetConnectionId(contact.SecondMember.Id);
                     return contact;
                 });
-
-            return contactsDto;
         }
 
         public async Task<ContactDTO> GetContactAsync(Guid contactId, string userEmail)
@@ -138,7 +137,7 @@ namespace Whale.Shared.Services
                 SecondMemberId = (contact.SecondMemberId == user.Id) ? contact.FirstMemberId : contact.SecondMemberId,
                 SecondMember = _mapper.Map<UserDTO>((contact.SecondMemberId == user.Id) ? contact.FirstMember : contact.SecondMember),
                 PinnedMessage = _mapper.Map<DirectMessageDTO>(contact.PinnedMessage),
-                IsAccepted = contact.isAccepted,
+                IsAccepted = contact.IsAccepted,
             };
             dtoContact.FirstMember.ConnectionId = GetConnectionId(contact.FirstMember.Id);
             dtoContact.SecondMember.ConnectionId = GetConnectionId(contact.SecondMember.Id);
@@ -192,7 +191,7 @@ namespace Whale.Shared.Services
                 .Include(c => c.FirstMember)
                 .Include(c => c.SecondMember)
                 .FirstOrDefault(c => ((c.FirstMember.Email == contactnerEmail && c.SecondMember.Email == userEmail) ||
-                    (c.FirstMember.Email == userEmail && c.SecondMember.Email == contactnerEmail)) && !c.isAccepted);
+                    (c.FirstMember.Email == userEmail && c.SecondMember.Email == contactnerEmail)) && !c.IsAccepted);
 
             if (contact == null)
                 throw new NotFoundException("Pending Contact", contactnerEmail);
@@ -226,9 +225,9 @@ namespace Whale.Shared.Services
 
             if (contact is object)
             {
-                if (!contact.isAccepted && contact.SecondMemberId == owner.Id)
+                if (!contact.IsAccepted && contact.SecondMemberId == owner.Id)
                 {
-                    contact.isAccepted = true;
+                    contact.IsAccepted = true;
                     _context.Contacts.Update(contact);
                     await _context.SaveChangesAsync();
                     var contactOwnerDTO = await GetContactAsync(contact.Id, ownerEmail);
@@ -245,7 +244,7 @@ namespace Whale.Shared.Services
             {
                 FirstMemberId = owner.Id,
                 SecondMemberId = contactner.Id,
-                isAccepted = false,
+                IsAccepted = false,
             };
             _context.Contacts.Add(contact);
             await _context.SaveChangesAsync();

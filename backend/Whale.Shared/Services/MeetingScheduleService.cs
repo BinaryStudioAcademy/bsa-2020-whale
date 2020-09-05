@@ -39,7 +39,7 @@ namespace Whale.Shared.Services
                 .Build();
         }
 
-        public async Task Start(JobInfo jobInfo, string obj)
+        public async Task StartAsync(JobInfo jobInfo, string obj)
         {
             scheduler = await _schedulerFactory.GetScheduler();
             scheduler.JobFactory = _jobFactory;
@@ -49,7 +49,7 @@ namespace Whale.Shared.Services
             await scheduler.Start();
         }
 
-        public async Task Stop()
+        public async Task StopAsync()
         {
             await scheduler?.Shutdown();
         }

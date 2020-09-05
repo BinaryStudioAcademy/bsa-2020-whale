@@ -40,10 +40,10 @@ namespace Whale.SignalR.Services
                 await _meetingHub.Clients.Group(meetingId).SendAsync("OnRoomClosed", meetingLink);
                 groupParticipants.Remove(roomId);
                 await _redisService.ConnectAsync();
-                await _redisService.DeleteKey(roomId);
-                await _redisService.DeleteKey(roomId + nameof(Poll));
-                await _redisService.DeleteKey(meetingSettingsPrefix + roomId);
-                await _redisService.DeleteKey(roomNamePrefix + roomId);
+                await _redisService.DeleteKeyAsync(roomId);
+                await _redisService.DeleteKeyAsync(roomId + nameof(Poll));
+                await _redisService.DeleteKeyAsync(meetingSettingsPrefix + roomId);
+                await _redisService.DeleteKeyAsync(roomNamePrefix + roomId);
 
                 var meetingdata = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(meetingId);
                 if (meetingdata != null)

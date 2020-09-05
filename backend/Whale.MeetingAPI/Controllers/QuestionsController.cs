@@ -19,33 +19,32 @@ namespace Whale.MeetingAPI.Controllers
 		}
 
 		[HttpGet]
-		public async Task<ActionResult<IEnumerable<QuestionDTO>>> GetQuestionsByMeeting(Guid meetingId)
+		public async Task<ActionResult<IEnumerable<QuestionDTO>>> GetQuestionsByMeetingAsync(Guid meetingId)
 		{
-			var questions = await _questionService.GetQuestionsByMeetingFromRedis(meetingId);
-			return Ok(questions);
+			return Ok(await _questionService.GetQuestionsByMeetingFromRedisAsync(meetingId));
 		}
 
 		[HttpPost]
-		public async Task<OkResult> CreateQuestion([FromBody] QuestionCreateDTO questionCreate)
+		public async Task<OkResult> CreateQuestionAsync([FromBody] QuestionCreateDTO questionCreate)
 		{
-			await _questionService.CreateQuestion(questionCreate);
+			await _questionService.CreateQuestionAsync(questionCreate);
 			return Ok();
 		}
 
 		[HttpPut("status")]
-		public async Task<OkResult> UpdateQuestionStatus([FromBody] QuestionStatusUpdateDTO questionStatusUpdate)
+		public async Task<OkResult> UpdateQuestionStatusAsync([FromBody] QuestionStatusUpdateDTO questionStatusUpdate)
 		{
-			await _questionService.UpdateQuestionStatus(questionStatusUpdate);
+			await _questionService.UpdateQuestionStatusAsync(questionStatusUpdate);
 			return Ok();
 		}
 
 		[HttpDelete("{questionId}")]
-		public async Task<NoContentResult> DeleteQuestion(Guid questionId, Guid meetingId)
+		public async Task<NoContentResult> DeleteQuestionAsync(Guid questionId, Guid meetingId)
 		{
-			await _questionService.DeleteQuestion(new QuestionDeleteDTO 
-			{ 
-				QuestionId = questionId, 
-				MeetingId = meetingId 
+			await _questionService.DeleteQuestionAsync(new QuestionDeleteDTO
+			{
+				QuestionId = questionId,
+				MeetingId = meetingId
 			});
 
 			return NoContent();

@@ -30,18 +30,18 @@ namespace Whale.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<MeetingLinkDTO>> CreateMeeting(MeetingCreateDTO meetingDto)
+        public async Task<ActionResult<MeetingLinkDTO>> CreateMeetingAsync(MeetingCreateDTO meetingDto)
         {
-            return Ok(await _meetingService.CreateMeeting(meetingDto));
+            return Ok(await _meetingService.CreateMeetingAsync(meetingDto));
         }
 
         [HttpPost("scheduled")]
-        public async Task<ActionResult<string>> CreateMeetingScheduled(MeetingCreateDTO meetingDto)
+        public async Task<ActionResult<string>> CreateMeetingScheduledAsync(MeetingCreateDTO meetingDto)
         {
-            var meetingAndLink = await _meetingService.RegisterScheduledMeeting(meetingDto);
+            var meetingAndLink = await _meetingService.RegisterScheduledMeetingAsync(meetingDto);
             var jobInfo = new JobInfo(typeof(ScheduledMeetingJob), meetingDto.StartTime);
             var obj = JsonConvert.SerializeObject(meetingAndLink.Meeting);
-            await _meetingScheduleService.Start(jobInfo, obj);
+            await _meetingScheduleService.StartAsync(jobInfo, obj);
 
             foreach (var email in meetingDto.ParticipantsEmails)
             {
@@ -53,58 +53,53 @@ namespace Whale.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<MeetingDTO>> ConnectToMeeting(Guid id, string pwd, string email)
+        public async Task<ActionResult<MeetingDTO>> ConnectToMeetingAsync(Guid id, string pwd, string email)
         {
-            return Ok(await _meetingService.ConnectToMeeting(new MeetingLinkDTO { Id = id, Password = pwd}, email));
+            return Ok(await _meetingService.ConnectToMeetingAsync(new MeetingLinkDTO { Id = id, Password = pwd}, email));
         }
 
         [HttpGet("shortInvite/{inviteLink}")]
-        public async Task<ActionResult<string>> GetFullMeetingLink(string inviteLink)
+        public async Task<ActionResult<string>> GetFullMeetingLinkAsync(string inviteLink)
         {
-            var meetingLink = await _meetingService.GetFullInviteLink(inviteLink);
-
-            return Ok(meetingLink);
+            return Ok(await _meetingService.GetFullInviteLinkAsync(inviteLink));
         }
 
         [HttpGet("shortenLink")]
-        public async Task<ActionResult<string>> GetShortURL(string id, string pwd)
+        public async Task<ActionResult<string>> GetShortURLAsync(string id, string pwd)
         {
-            string shortLink = await _meetingService.GetShortInviteLink(id, pwd);
-            return Ok(shortLink);
+            return Ok(await _meetingService.GetShortInviteLinkAsync(id, pwd));
         }
 
         [HttpGet("end")]
-        public async Task<OkResult> SaveMeetingEndTime(Guid meetingId)
+        public async Task<OkResult> SaveMeetingEndTimeAsync(Guid meetingId)
         {
-            await _meetingService.EndMeeting(meetingId);
+            await _meetingService.EndMeetingAsync(meetingId);
             return Ok();
         }
 
         [HttpPut("updateSettings")]
-        public async Task<ActionResult> UpdateMeetingSettings(UpdateSettingsDTO updateSettingsDTO)
+        public async Task<ActionResult> UpdateMeetingSettingsAsync(UpdateSettingsDTO updateSettingsDTO)
         {
-            await _meetingService.UpdateMeetingSettings(updateSettingsDTO);
+            await _meetingService.UpdateMeetingSettingsAsync(updateSettingsDTO);
             return Ok();
         }
         [HttpGet("agenda/{meetingId}")]
-        public async Task<ActionResult<List<AgendaPointDTO>>> GetAgenda(string meetingId)
+        public ActionResult<List<AgendaPointDTO>> GetAgenda(string meetingId)
         {
-            List<AgendaPointDTO> agendaPoints = _meetingService.GetAgendaPoints(meetingId);//_httpService.GetAsync<List<AgendaPointDTO>>($"meeting/agenda/{meetingId}");
-            return Ok(agendaPoints);
+            return Ok(_meetingService.GetAgendaPoints(meetingId));
         }
 
         [HttpPut("agenda")]
-        public async Task<ActionResult> UpdateTopic(AgendaPointDTO topic)
+        public async Task<ActionResult> UpdateTopicAsync(AgendaPointDTO topic)
         {
-            await _meetingService.UpdateTopic(topic);
+            await _meetingService.UpdateTopicAsync(topic);
             return Ok();
         }
 
-
         [HttpPost("reloadStatistics")]
-        public async Task<ActionResult> ReloadStatistics()
+        public async Task<ActionResult> ReloadStatisticsAsync()
         {
-            await _meetingService.ReloadStatistics();
+            await _meetingService.ReloadStatisticsAsync();
             return Ok();
         }
     }

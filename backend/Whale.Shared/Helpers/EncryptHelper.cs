@@ -19,6 +19,7 @@ namespace Whale.Shared.Helpers
             {
                 builder.Append(bytes[i].ToString("x2"));
             }
+
             return builder.ToString();
         }
     }

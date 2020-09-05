@@ -34,7 +34,7 @@ namespace Whale.MeetingAPI
             var builder = new ConfigurationBuilder()
                 .SetBasePath(hostingEnvironment.ContentRootPath)
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{hostingEnvironment.EnvironmentName}.json", reloadOnChange: true, optional: true)
+                .AddJsonFile($"appsettings.{hostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables();
 
             Configuration = builder.Build();
@@ -90,10 +90,7 @@ namespace Whale.MeetingAPI
 
             services.AddScoped(_ => new RedisService(Configuration.GetConnectionString("RedisOptions")));
 
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Meeting API", Version = "v1" });
-            });
+            services.AddSwaggerGen(c => c.SwaggerDoc("v1", new OpenApiInfo { Title = "Meeting API", Version = "v1" }));
             services.AddScoped(_ => new EncryptHelper(Configuration.GetValue<string>("EncryptSettings:key")));
 
             //---Jobs---
@@ -106,15 +103,9 @@ namespace Whale.MeetingAPI
                 q.SchedulerName = "Quartz Scheduler";
                 q.UseSimpleTypeLoader();
                 q.UseInMemoryStore();
-                q.UseDefaultThreadPool(tp =>
-                {
-                    tp.MaxConcurrency = 10;
-                });
+                q.UseDefaultThreadPool(tp => tp.MaxConcurrency = 10);
             });
-            services.AddQuartzServer(opt =>
-            {
-                opt.WaitForJobsToComplete = true;
-            });
+            services.AddQuartzServer(opt => opt.WaitForJobsToComplete = true);
             services.AddHostedService<MeetingHostedService>();
         }
 
@@ -127,10 +118,7 @@ namespace Whale.MeetingAPI
 
                 app.UseSwagger();
 
-                app.UseSwaggerUI(options =>
-                {
-                    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Meeting API v1");
-                });
+                app.UseSwaggerUI(options => options.SwaggerEndpoint("/swagger/v1/swagger.json", "Meeting API v1"));
             }
 
             app.UseForwardedHeaders(new ForwardedHeadersOptions

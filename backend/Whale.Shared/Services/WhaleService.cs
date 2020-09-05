@@ -18,7 +18,7 @@ namespace Whale.Shared.Services
             _redisService = redisService;
         }
 
-        public async Task<UserOnlineDTO> UserConnect(string userEmail, string connectionId)
+        public async Task<UserOnlineDTO> UserConnectAsync(string userEmail, string connectionId)
         {
             await _redisService.ConnectAsync();
             ICollection<UserOnlineDTO> onlineUsers;
@@ -32,7 +32,7 @@ namespace Whale.Shared.Services
                 onlineUsers = new List<UserOnlineDTO>();
             }
 
-            var user = await _userService.GetUserByEmail(userEmail);
+            var user = await _userService.GetUserByEmailAsync(userEmail);
             onlineUsers = onlineUsers?.Where(u => u.Id != user.Id).ToList() ?? new List<UserOnlineDTO>(); //TODO: Fix it 
             var newUserOnline = new UserOnlineDTO { Id = user.Id, ConnectionId = connectionId };
             onlineUsers.Add(newUserOnline);
@@ -40,17 +40,17 @@ namespace Whale.Shared.Services
             return newUserOnline;
         }
 
-        public async Task UserDisconnect(string userEmail)
+        public async Task UserDisconnectAsync(string userEmail)
         {
             await _redisService.ConnectAsync();
             var onlineUsers = await _redisService.GetAsync<ICollection<UserOnlineDTO>>(OnlineUsersKey);
-            var user = await _userService.GetUserByEmail(userEmail);
+            var user = await _userService.GetUserByEmailAsync(userEmail);
             onlineUsers = onlineUsers.Where(u => u.Id != user.Id).ToList();
 
             await _redisService.SetAsync(OnlineUsersKey, onlineUsers);
         }
 
-        public async Task<Guid> UserDisconnectOnError(string connectionId)
+        public async Task<Guid> UserDisconnectOnErrorAsync(string connectionId)
         {
             await _redisService.ConnectAsync();
             var onlineUsers = _redisService.Get<ICollection<UserOnlineDTO>>(OnlineUsersKey);
@@ -61,7 +61,7 @@ namespace Whale.Shared.Services
             }
             if (onlineUsers.Count == 0)
             {
-                await _redisService.DeleteKey(OnlineUsersKey);
+                await _redisService.DeleteKeyAsync(OnlineUsersKey);
             }
             else
             {
@@ -70,7 +70,7 @@ namespace Whale.Shared.Services
             return onlineUser?.Id ?? Guid.NewGuid(); //TODO: Fix it
         }
 
-        public async Task<IEnumerable<string>> GetConnections(Guid receiverId)
+        public async Task<IEnumerable<string>> GetConnectionsAsync(Guid receiverId)
         {
             await _redisService.ConnectAsync();
             var onlineUsers = _redisService.Get<ICollection<UserOnlineDTO>>(OnlineUsersKey);

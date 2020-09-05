@@ -13,6 +13,5 @@ namespace Whale.Shared.Models.Group
         public string CreatorEmail { get; set; }
         public string PhotoUrl { get; set; }
         public int UnreadMessageCount { get; set; }
-
     }
 }

@@ -2,7 +2,7 @@
 {
     public class ShareScreenDTO
     {
-        public string streamId { get; set; }
-        public string meetingId { get; set; }
+        public string StreamId { get; set; }
+        public string MeetingId { get; set; }
     }
 }

@@ -25,7 +25,7 @@ namespace Whale.API.Services
 		{
 			_blobStorageSettings = blobStorageSettings;
 		}
-		public async Task<IEnumerable<MeetingDTO>> GetMeetingsWithParticipantsAndPollResults(Guid userId, int skip, int take)
+		public async Task<IEnumerable<MeetingDTO>> GetMeetingsWithParticipantsAndPollResultsAsync(Guid userId, int skip, int take)
 		{
 			var meetings = _context.Participants
 				.Include(p => p.Meeting)
@@ -57,11 +57,13 @@ namespace Whale.API.Services
 
 			return _mapper.Map<IEnumerable<MeetingDTO>>(meetingList);
 		}
-		public async Task<IEnumerable<MeetingSpeechDTO>> GetMeetingScript(Guid meetingId)
+
+		public async Task<IEnumerable<MeetingSpeechDTO>> GetMeetingScriptAsync(Guid meetingId)
         {
 			var scriptJson = await _context.MeetingScripts.FirstOrDefaultAsync(m => m.MeetingId == meetingId);
 			if (scriptJson is null)
 				throw new NotFoundException("MeetingScripts", meetingId.ToString());
+
 			var script = JsonConvert.DeserializeObject<IEnumerable<MeetingSpeech>>(scriptJson.Script);
 			var scriptTasks = script.OrderBy(m => m.SpeechDate).Join(_context.Users, m => m.UserId, u => u.Id,
 				async (m, u) => new MeetingSpeechDTO

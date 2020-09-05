@@ -12,6 +12,7 @@ namespace Whale.API
 			ConfigurationService.ConfigureLogging();
 			CreateHost(args);
 		}
+
 		private static void CreateHost(string[] args)
 		{
 			try

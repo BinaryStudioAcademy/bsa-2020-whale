@@ -21,11 +21,9 @@ namespace Whale.Shared.Jobs
             var dataMap = context.JobDetail.JobDataMap;
             var meeting = JsonConvert.DeserializeObject<Meeting>(dataMap.GetString("JobData"));
 
-            using (var scope = _serviceScopeFactory.CreateScope())
-            {
-                var meetingService = scope.ServiceProvider.GetService<MeetingService>();
-                await meetingService.StartScheduledMeeting(meeting);
-            }
+            using var scope = _serviceScopeFactory.CreateScope();
+            var meetingService = scope.ServiceProvider.GetService<MeetingService>();
+            await meetingService.StartScheduledMeetingAsync(meeting);
         }
     }
 }

@@ -9,7 +9,6 @@ namespace Whale.MeetingAPI
     {
         private readonly WhaleDbContext _dbContext;
 
-
         public DbContextHealthCheck(WhaleDbContext dbContext)
         {
             _dbContext = dbContext;
