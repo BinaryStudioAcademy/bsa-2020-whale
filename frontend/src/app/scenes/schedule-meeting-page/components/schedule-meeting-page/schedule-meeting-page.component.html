@@ -36,6 +36,9 @@
               </div>
             </div>
           </div>
+          <div class="date-is-invalid" *ngIf="!isDateValid()">
+            Date or time is invalid
+          </div>
 
           <div class="nine wide field">
             <label>Duration</label>
@@ -205,7 +208,7 @@
         <button
           id="schedule-submit"
           class="ui button primary"
-          [disabled]="!form.valid"
+          [disabled]="!form.valid || !isDateValid()"
           (click)="sendMeeting()"
         >
           Schedule meeting
