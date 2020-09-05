@@ -297,9 +297,8 @@ namespace Whale.Shared.Services
 
         public async Task EndMeeting(Guid meetingId)
         {
-            var meeting = await _context.Meetings
-                .Include(m => m.Participants)
-                .FirstOrDefaultAsync(m => m.Id == meetingId);
+            var meeting = await _context.Meetings.FirstOrDefaultAsync(m => m.Id == meetingId);
+            meeting.Participants = await _context.Participants.Where(p => p.MeetingId == meeting.Id).ToListAsync();
 
             if (meeting == null)
             {
