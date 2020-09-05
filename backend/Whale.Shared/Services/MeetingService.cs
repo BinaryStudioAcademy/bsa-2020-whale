@@ -22,6 +22,8 @@ using Whale.Shared.Models.Email;
 using System.Net.Http.Headers;
 using Whale.Shared.Models;
 using Microsoft.Extensions.Configuration;
+using Whale.Shared.Models.Statistics;
+
 
 namespace Whale.Shared.Services
 {
@@ -36,6 +38,7 @@ namespace Whale.Shared.Services
         private readonly SignalrService _signalrService;
         private readonly NotificationsService _notifications;
         private readonly string whaleAPIurl;
+        private readonly ElasticSearchService _elasticSearchService;
 
         public static string BaseUrl { get; } = "http://bsa2020-whale.westeurope.cloudapp.azure.com";
 
@@ -48,7 +51,8 @@ namespace Whale.Shared.Services
             EncryptHelper encryptService,
             SignalrService signalrService,
             IConfiguration configuration,
-            NotificationsService notifications)
+            NotificationsService notifications,
+            ElasticSearchService elasticSearchService)
             : base(context, mapper)
         {
             _redisService = redisService;
@@ -58,6 +62,7 @@ namespace Whale.Shared.Services
             _signalrService = signalrService;
             _notifications = notifications;
             whaleAPIurl = configuration.GetValue<string>("Whale");
+            _elasticSearchService = elasticSearchService;
         }
 
         public async Task<MeetingDTO> ConnectToMeeting(MeetingLinkDTO linkDTO, string userEmail)
@@ -292,7 +297,9 @@ namespace Whale.Shared.Services
 
         public async Task EndMeeting(Guid meetingId)
         {
-            var meeting = await _context.Meetings.FirstOrDefaultAsync(m => m.Id == meetingId);
+            var meeting = await _context.Meetings
+                .Include(m => m.Participants)
+                .FirstOrDefaultAsync(m => m.Id == meetingId);
 
             if (meeting == null)
             {
@@ -323,6 +330,47 @@ namespace Whale.Shared.Services
 
             await _context.SaveChangesAsync();
             await _notifications.UpdateInviteMeetingNotifications(shortUrl);
+            foreach(var p in meeting.Participants)
+            {
+                var statistics = new MeetingUserStatistics
+                {
+                    Id = $"{p.UserId.ToString()}{p.MeetingId.ToString()}",
+                    UserId = p.UserId,
+                    MeetingId = meeting.Id,
+                    StartDate = meeting.StartTime,
+                    EndDate = (DateTimeOffset)meeting.EndTime,
+                    PresenceTime = 0,
+                    DurationTime = (long)((DateTimeOffset)meeting.EndTime).Subtract(meeting.StartTime).TotalSeconds,
+                    SpeechTime = 0
+                };
+                await _elasticSearchService.SaveSingleAsync(statistics);
+            }
+        }
+
+        public async Task ReloadStatistics()
+        {
+            var users = _context.Users.ToList();
+            foreach(var user in users)
+            {
+                var statistics = _context.Participants
+                .Include(p => p.Meeting)
+                .Where(p => p.UserId == user.Id && p.Meeting.EndTime.HasValue)
+                .Select(p => new MeetingUserStatistics
+                {
+                    Id = $"{p.UserId.ToString()}{p.MeetingId.ToString()}",
+                    UserId = p.UserId,
+                    MeetingId = p.MeetingId,
+                    StartDate = p.Meeting.StartTime,
+                    EndDate = (DateTimeOffset)p.Meeting.EndTime,
+                    PresenceTime = 0,
+                    DurationTime = (long)((DateTimeOffset)p.Meeting.EndTime).Subtract(p.Meeting.StartTime).TotalSeconds,
+                    SpeechTime = 0
+                })
+                .AsEnumerable();
+                await _elasticSearchService.SaveRangeAsync(statistics);
+            }
+
+            
         }
 
         public async Task<string> GetShortInviteLink(string id, string pwd)

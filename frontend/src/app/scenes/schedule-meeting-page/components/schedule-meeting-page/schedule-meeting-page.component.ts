@@ -65,7 +65,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
       topic: new FormControl('UserNameS meeting etc'),
       description: new FormControl(),
       date: new FormControl(this.createStringFromDate(new Date())),
-      time: new FormControl(`${new Date().getHours()}:${new Date().getMinutes() + 5}`),
+      time: new FormControl(`${new Date().getHours() + 1}:${new Date().getMinutes()}`),
       durationHours: new FormControl(1),
       durationMinutes: new FormControl(30),
       isGeneratedMeetingID: new FormControl('true'),
@@ -86,11 +86,35 @@ export class ScheduleMeetingPageComponent implements OnInit {
     this.point = this.pointList[0];
   }
 
+  public isDateValid(): boolean {
+    const todayDateString = this.createStringFromDate(new Date());
+    const todayParts = todayDateString.split('/');
+    const todayDate = new Date(
+      Number(todayParts[2]),
+      Number(todayParts[1]) - 1,
+      Number(todayParts[0]),
+      new Date().getHours(),
+      new Date().getMinutes()
+    );
+
+    const userTimeString = this.form.get('time').value as string;
+    const userTimeParts = userTimeString.split(':');
+    const userDateString = this.form.get('date').value as string;
+    const userDateParts = userDateString.split('/');
+    const userDate = new Date(Number(userDateParts[2]), Number(userDateParts[1]) - 1, Number(userDateParts[0]));
+    userDate.setHours(Number(userTimeParts[0]));
+    userDate.setMinutes(Number(userTimeParts[1]));
+
+    return userDate > todayDate;
+  }
+
   public async sendMeeting(): Promise<void> {
     if (this.form.controls.saveIntoCalendar.value) {
       await this.addEventToCalendar();
     }
-
+    if (this.pointList[0].name === ''){
+      this.pointList.splice(0, 1);
+    }
     const dateParts = this.form.controls.date.value.split('/');
     const date = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
     const time = this.form.controls.time.value.match(

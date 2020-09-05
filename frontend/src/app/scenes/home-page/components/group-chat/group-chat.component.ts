@@ -294,7 +294,7 @@ export class GroupChatComponent
       })
       .subscribe((user) => {
         if (user !== undefined) {
-          this.groupMembers.push(user.user);
+          Array.prototype.push.apply(this.groupMembers, user);
           this.toastr.success('User added successfuly');
         }
       });

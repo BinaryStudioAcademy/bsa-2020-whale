@@ -24,7 +24,7 @@ import {
 import { SimpleModalService } from 'ngx-simple-modal';
 import { ToastrService } from 'ngx-toastr';
 import Peer from 'peerjs';
-import { Subject, Observable, BehaviorSubject, fromEvent } from 'rxjs';
+import { Subject, Observable, BehaviorSubject, fromEvent, timer } from 'rxjs';
 import { takeUntil, first } from 'rxjs/operators';
 
 import { AuthService } from 'app/core/auth/auth.service';
@@ -144,8 +144,6 @@ export class MeetingComponent
   public isPinnedVideoAllowed = false;
   public isPinnedAudioActive = false;
   public isPinnedVideoActive = false;
-  public isShowRecordingOptins = false;
-  public isHighlightRecording = false;
   public isMeetingLoading = true;
   public mediaData: MediaData[] = [];
   public meeting: Meeting;
@@ -162,6 +160,8 @@ export class MeetingComponent
   public pinnedCardsLayout: CardsLayout;
   public pinnedParticipant: Participant;
   public pinnedLayoutMenuSticky = false;
+  public pinnedReaction: ReactionsEnum;
+  public pinnedVolume = 0;
   public pollService: PollService;
   public receiveingDrawings = false;
   public isHost = false;
@@ -179,8 +179,8 @@ export class MeetingComponent
   public IsWhiteboard = false;
   public IsPoll = false;
   public isSomeoneRecordingScreen = false;
+  public reactionDelay: Observable<number>;
 
-  @ViewChild('whiteboard') private whiteboard: ElementRef;
   @ViewChild('currentVideo') private currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
     HTMLElement
@@ -194,17 +194,34 @@ export class MeetingComponent
   >;
   @ViewChild('checkTopic') checkTopic: ElementRef<HTMLInputElement>;
 
+  @ViewChild('polls') polls: ElementRef;
+  @ViewChild('pollsButton') pollsButton: ElementRef;
+  @ViewChild('pollsButtonFullscreen') pollsButtonFullscreen: ElementRef;
+  @ViewChild('reactions') reactions: ElementRef;
+  @ViewChild('reactionsButton') reactionsButton: ElementRef;
+  @ViewChild('reactionsButtonFullscreen') reactionsButtonFullscreen: ElementRef;
+  @ViewChild('statistics') statistics: ElementRef;
+  @ViewChild('statisticsButton') statisticsButton: ElementRef;
+  @ViewChild('statisticsButtonFullscreen') statisticsButtonFullscreen: ElementRef;
+  @ViewChild('settings') settings: ElementRef;
+  @ViewChild('settingsButton') settingsButton: ElementRef;
+  @ViewChild('agenda') agenda: ElementRef;
+  @ViewChild('agendaButton') agendaButton: ElementRef;
+  @ViewChild('whiteboard') whiteboard: ElementRef;
+  @ViewChild('whiteboardButton') whiteboardButton: ElementRef;
 
   private chatElement: any;
   private currentStreamLoaded = new EventEmitter<void>();
   private contectedAt = new Date();
   private elem: any;
   private isCardPinnedInner = false;
+  private pinnedReactions: Subject<ReactionsEnum>;
   private savedStrokes: CanvasWhiteboardUpdate[][] = new Array<
     CanvasWhiteboardUpdate[]
   >();
   private unsubscribe$ = new Subject<void>();
   private userStream: MediaStream;
+  private unsubscribeReaction$: Subject<void>;
   //#endregion fields
   public isPlanning = false;
   public isTopicEnd = false;
@@ -246,6 +263,49 @@ export class MeetingComponent
     }
   }
 
+  @HostListener('document:click', ['$event.target'])
+  public onClickOutsidePopup(targetElement: ElementRef): void {
+    const isInsidePolls = this.polls?.nativeElement.contains(targetElement);
+    const isInsideReactions = this.reactions?.nativeElement.contains(targetElement);
+    const isInsideStatistics = this.statistics?.nativeElement.contains(targetElement);
+    const isInsideSettings = this.settings?.nativeElement.contains(targetElement);
+    const isInsideAgenda = this.agenda?.nativeElement.contains(targetElement);
+    const isInsideWhiteboard = this.whiteboard?.nativeElement.contains(targetElement);
+
+    if (!isInsidePolls &&
+      targetElement !== this.pollsButton?.nativeElement &&
+      targetElement !== this.pollsButtonFullscreen?.nativeElement) {
+      this.pollService.isShowPoll = false;
+    }
+
+    if (!isInsideReactions &&
+      targetElement !== this.reactionsButton?.nativeElement &&
+      targetElement !== this.reactionsButtonFullscreen?.nativeElement) {
+      this.isShowReactions = false;
+    }
+
+    if (!isInsideStatistics &&
+      targetElement !== this.statisticsButton?.nativeElement &&
+      targetElement !== this.statisticsButtonFullscreen?.nativeElement) {
+      this.isShowStatistics = false;
+    }
+
+    if (!isInsideSettings &&
+      targetElement !== this.settingsButton?.nativeElement) {
+      this.isShowMeetingSettings = false;
+    }
+
+    if (!isInsideAgenda &&
+      targetElement !== this.agendaButton?.nativeElement) {
+      this.isPlanning = false;
+    }
+
+    if (!isInsideWhiteboard &&
+      targetElement !== this.whiteboardButton?.nativeElement) {
+      this.canvasIsDisplayed = false;
+    }
+  }
+
   //#region accessors
   private set currentUserStream(value: MediaStream) {
     if (this.userStream) {
@@ -284,9 +344,7 @@ export class MeetingComponent
   public async ngOnInit(): Promise<void> {
     this.isRoom = window.location.pathname.includes('room');
     this.roomService.isInRoom = this.isRoom;
-    if (this.isRoom) {
-      this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-    }
+    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
     this.currentUserStream = await navigator.mediaDevices
       .getUserMedia(await this.mediaSettingsService.getMediaConstraints())
@@ -359,7 +417,13 @@ export class MeetingComponent
             (p) => p.id !== this.currentParticipant.id
           );
           this.createParticipantCard(this.currentParticipant);
-
+          if (!this.recognition){
+            this.meetingSignalrService.invoke(SignalMethods.OnSpeechRecognition, {
+              meetingId: this.meeting.id,
+              userId: this.currentParticipant.user.id,
+              message: '>Speech recognition is not supported by the browser',
+            } as MeetingSpeechCreate);
+          }
           if (this.meeting.isAllowedToChooseRoom && !this.isHost){
             this.openRoomsModal();
           }
@@ -470,10 +534,17 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (data) => {
+          if (this.isCardPinned && (!data.changedParticipantConnectionId ||
+            this.pinnedParticipant.streamId === this.currentParticipant.streamId)) {
+              this.isPinnedAudioAllowed = data.isAudioAllowed;
+              this.isPinnedVideoAllowed = data.isVideoAllowed;
+              this.isPinnedAudioActive = data.isAudioActive;
+              this.isPinnedVideoActive = data.isVideoActive;
+          }
           if (!data.changedParticipantConnectionId) {
             if (
               this.meeting.isAudioAllowed !== data.isAudioAllowed &&
-              this.isHost
+              !this.isHost
             ) {
               this.toastr.info(
                 `Participants' audio ${
@@ -482,7 +553,7 @@ export class MeetingComponent
               );
             } else if (
               this.meeting.isVideoAllowed !== data.isVideoAllowed &&
-              this.isHost
+              !this.isHost
             ) {
               this.toastr.info(
                 `Participants' video ${
@@ -490,18 +561,14 @@ export class MeetingComponent
                 } by the host`
               );
             }
-
             this.meeting.isAudioAllowed = data.isAudioAllowed;
             this.meeting.isVideoAllowed = data.isVideoAllowed;
-
             if (!this.isHost && !data.isAudioAllowed) {
               this.toggleMicrophone();
             }
-
             if (!this.isHost && !data.isVideoAllowed) {
               this.toggleCamera();
             }
-
             this.meetingSignalrService.invoke<ChangedMediaState>(
               SignalMethods.OnMediaStateChanged,
               {
@@ -519,7 +586,7 @@ export class MeetingComponent
           ) {
             if (
               this.meeting.isAudioAllowed !== data.isAudioAllowed &&
-              this.isHost
+              !this.isHost
             ) {
               this.toastr.info(
                 `Your audio ${
@@ -528,7 +595,7 @@ export class MeetingComponent
               );
             } else if (
               this.meeting.isVideoAllowed !== data.isVideoAllowed &&
-              this.isHost
+              !this.isHost
             ) {
               this.toastr.info(
                 `Your video ${
@@ -536,7 +603,6 @@ export class MeetingComponent
                 } by the host`
               );
             }
-
             this.meeting.isAudioAllowed = data.isAudioAllowed;
             this.meeting.isVideoAllowed = data.isVideoAllowed;
             this.updateCardDynamicData(
@@ -549,11 +615,9 @@ export class MeetingComponent
               !this.isCameraMuted,
               !this.isMicrophoneMuted
             );
-
             if (!this.isMicrophoneMuted && !data.isAudioAllowed) {
               this.toggleMicrophone();
             }
-
             if (!this.isCameraMuted && !data.isVideoAllowed) {
               this.toggleCamera();
             }
@@ -580,24 +644,17 @@ export class MeetingComponent
       .subscribe(
         (setting) => {
           if (
-            !this.meeting.isWhiteboard &&
+            this.meeting.isWhiteboard !==
             setting.isWhiteboard &&
             !this.isHost
           ) {
-            this.toastr.info('Host has forbidden a whiteboard.');
-          }
-          if (
-            this.meeting.isWhiteboard &&
-            !setting.isWhiteboard &&
-            !this.isHost
-          ) {
-            this.toastr.info('Host has allowed a whiteboard.');
-          }
-          if (!this.meeting.isPoll && setting.isPoll && !this.isHost) {
-            this.toastr.info('Host has forbidden to create polls.');
-          }
-          if (this.meeting.isPoll && !setting.isWhiteboard && !this.isHost) {
-            this.toastr.info('Host has allowed polls');
+            this.toastr.info(`Host has ${
+              setting.isWhiteboard ? 'forbidden' : 'allowed'
+            } a whiteboard`);
+          } else if (this.meeting.isPoll !== setting.isPoll && !this.isHost) {
+            this.toastr.info(`Host has ${
+              setting.isPoll ? 'forbidden' : 'allowed'
+            } polls`);
           }
           this.meeting.isWhiteboard = setting.isWhiteboard;
           this.meeting.isPoll = setting.isPoll;
@@ -684,7 +741,8 @@ export class MeetingComponent
       (question: Question) => {
         if (this.isShowChat && this.questionService.areQuestionsOpened) {
           this.questions.changes.pipe(first()).subscribe(() => {
-            this.questions.last.nativeElement.scrollIntoView(false);
+            const questionsBlock = this.questions.last.nativeElement.parentElement;
+            questionsBlock.scrollTop = questionsBlock.scrollHeight - questionsBlock.clientHeight;
           });
         }
         this.questionService.addQuestion(question);
@@ -788,9 +846,14 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (reaction) => {
+          if (reaction.userId === this.pinnedParticipant?.id) {
+            this.pinnedReactions.next(reaction.reaction);
+            return;
+          }
+
           this.mediaData
             .find((m) => m.id === reaction.userId)
-            .reactions.next(reaction.reaction);
+            ?.reactions.next(reaction.reaction);
         },
         (error) => {
           this.toastr.error(error);
@@ -800,7 +863,7 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (point) => {
-          this.toastr.success(`Time for "${point.name}" finished`);
+          this.toastr.success(`Time for "${point.name}" started`);
         },
         () => {
           this.toastr.error('Error');
@@ -1029,10 +1092,8 @@ export class MeetingComponent
     }
   }
 
-  public startRecording(isHighlight: boolean): void {
+  public startRecording(): void {
     this.isScreenRecording = true;
-    this.isShowRecordingOptins = false;
-    this.isHighlightRecording = false;
 
     this.blobService.startRecording().subscribe({
       complete: () => (this.isWaitingForRecord = false),
@@ -1051,9 +1112,6 @@ export class MeetingComponent
                 link: resp,
               });
             });
-          if (isHighlight) {
-            this.highlightRecording();
-          }
         } else {
           this.isScreenRecording = false;
         }
@@ -1062,9 +1120,6 @@ export class MeetingComponent
   }
 
   public stopRecording(): void {
-    if (!this.isScreenRecording) {
-      return;
-    }
     this.isWaitingForRecord = true;
 
     this.isScreenRecording = false;
@@ -1073,15 +1128,9 @@ export class MeetingComponent
 
     this.meetingSignalrService.invoke(
       SignalMethods.OnConferenceStopRecording,
-      this.meeting.id
+      'Conference stop recording'
     );
     this.toastr.info('Stop recording a conference');
-  }
-
-  private async highlightRecording(): Promise<void> {
-    this.isHighlightRecording = true;
-    await new Promise((r) => setTimeout(r, 30000));
-    this.stopRecording();
   }
 
   public onPollIconClick(): void {
@@ -1117,6 +1166,7 @@ export class MeetingComponent
     }
     this.isShowStatistics = !this.isShowStatistics;
   }
+
   public onReactionsIconClick(): void {
     this.pollService.isShowPoll = false;
     this.pollService.isPollCreating = false;
@@ -1195,6 +1245,7 @@ export class MeetingComponent
     window.onbeforeunload = () => {};
     this.meter.stopListening();
     this.meter.disconnect();
+    this.recognition?.stop();
     this.router.navigate(['/home']);
   }
 
@@ -1317,6 +1368,7 @@ export class MeetingComponent
     this.destroyPeer();
     this.meter.stopListening();
     this.meter.disconnect();
+    this.recognition?.stop();
     this.router.navigate(['/home']);
   }
 
@@ -1582,6 +1634,25 @@ export class MeetingComponent
       return;
     }
 
+    this.unsubscribeReaction$ = new Subject<void>();
+    this.pinnedReactions = new Subject<ReactionsEnum>();
+
+    const audioContext = new AudioContext();
+    const mediaStreamSource = audioContext.createMediaStreamSource(mediaData.stream);
+    const processor = audioContext.createScriptProcessor(256, 1, 1);
+    mediaStreamSource.connect(processor);
+    processor.connect(audioContext.destination);
+    // tslint:disable-next-line: deprecation
+    processor.onaudioprocess = (e) => {
+      const inputData = e.inputBuffer.getChannelData(0);
+      const inputDataLength = inputData.length;
+      let total = 0;
+      for (let i = 0; i < inputDataLength; i++) {
+        total += Math.abs(inputData[i++]);
+      }
+      this.pinnedVolume = Math.sqrt(total / inputDataLength) * 100;
+    };
+
     if (this.pinnedParticipant) {
       this.createParticipantCard(this.pinnedParticipant, true);
     }
@@ -1598,9 +1669,16 @@ export class MeetingComponent
       this.deleteParticipantMediaData(mediaData.stream.id);
       this.isCardPinned = true;
     });
+
+    this.pinnedReactions
+      .asObservable()
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe((reaction) => this.onPinnedReaction(reaction));
   }
 
   public unpinCard(): void {
+    this.unsubscribeReaction$ = null;
+    this.pinnedReactions = null;
     this.createParticipantCard(this.pinnedParticipant, true);
     this.isCardPinned = false;
     this.pinnedParticipant = null;
@@ -1618,6 +1696,15 @@ export class MeetingComponent
   public onCardsLayoutMouseEnter(): void {
     this.pinnedLayoutMenuSticky =
       window.innerWidth <= this.cardsLayout.nativeElement.offsetWidth + 40;
+  }
+
+  private onPinnedReaction(reaction: ReactionsEnum): void {
+    this.pinnedReaction = reaction;
+    this.unsubscribeReaction$.next();
+    this.reactionDelay = timer(5000);
+    this.reactionDelay
+      .pipe(takeUntil(this.unsubscribeReaction$))
+      .subscribe(() => this.pinnedReaction = null);
   }
   //#endregion participant cards
 
@@ -2055,11 +2142,6 @@ export class MeetingComponent
     }
     catch {
       this.toastr.info('Speech recognition is not supported by the browser');
-      this.meetingSignalrService.invoke(SignalMethods.OnSpeechRecognition, {
-        meetingId: this.meeting.id,
-        userId: this.currentParticipant.id,
-        message: 'Speech recognition is not supported by the browser',
-      } as MeetingSpeechCreate);
     }
   }
   //#endregion SpeechRecognition

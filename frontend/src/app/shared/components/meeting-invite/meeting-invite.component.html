@@ -29,6 +29,9 @@
           ></app-contact>
         </div>
       </div>
+      <div *ngIf="cachedContacts.length === 0" class="no-contacts">
+        No contacts
+      </div>
       <form
         class="email-form"
         [formGroup]="form"
@@ -45,10 +48,11 @@
             />
           </div>
           <div
-            data-tooltip="Enter email and press Enter"
+            data-tooltip="Press button or Enter after input email"
             class="email-question"
+            (click)="addEmailTag(emailForm.valid)"
           >
-            <i class="question circle outline icon"></i>
+            <i class="paper plane icon"></i>
           </div>
         </div>
         <div class="ui error message" *ngIf="emailForm.invalid">

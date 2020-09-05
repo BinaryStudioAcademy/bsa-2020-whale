@@ -34,7 +34,6 @@
           type="number"
           placeholder="number of rooms"
           [(ngModel)]="numberOfRooms"
-          (change)="numberOfRoomsChanged()"
           required
         />
         <button
@@ -67,7 +66,7 @@
             <span *ngIf="!showinput.show">{{ room.name }}</span>
             <div class="ui action input" *ngIf="showinput.show">
               <input class="room-name-input" type="text" placeholder="Room name" [(ngModel)]="room.name">
-              <button class="ui button" (click)="showinput.show = !showinput.show">Save</button>
+              <button class="ui button" (click)="showinput.show = !showinput.show; changeRoomName(room)">Save</button>
             </div>
             <i class="pencil alternate icon" (click)="showinput.show = !showinput.show"></i>
           </div>
@@ -128,8 +127,6 @@
               {{ room.value.name }}
             </div>
             <div
-              data-tooltip="Join room"
-              data-position="top right"
               class="ui inverted secondary button"
               *ngIf="meeting.id !== room.key"
               (click)="redirectIntoRoom(room.key)"

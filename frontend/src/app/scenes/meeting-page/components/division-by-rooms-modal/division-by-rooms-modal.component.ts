@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, EventEmitter, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
 import { SimpleModalComponent } from 'ngx-simple-modal';
-import { Participant, RoomCreateModal, Meeting, ModalActions } from '@shared/models';
+import { Participant, RoomCreateModal, Meeting, ModalActions, RoomDTO } from '@shared/models';
 import { RoomService, MeetingSettingsService, MeetingSignalrService } from 'app/core/services';
 import { Subject } from 'rxjs';
 import { Router } from '@angular/router';
@@ -158,5 +158,12 @@ export class DivisionByRoomsModalComponent
       }
       this.router.navigate([`/room/${roomId}`]);
     });
+  }
+
+  public changeRoomName(room: RoomDTO): void {
+    if (room.name.trim() === ''){
+      room.name = 'Room';
+      this.toastr.warning('You cannot create room without name');
+    }
   }
 }
