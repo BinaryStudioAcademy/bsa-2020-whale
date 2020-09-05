@@ -14,6 +14,7 @@ import { UpstateService } from '../../../core/services/upstate.service';
 import { NotificationService } from 'app/core/services/notification.service';
 import { Subject } from 'rxjs';
 import { WhaleSignalService, WhaleSignalMethods } from 'app/core/services';
+import { GroupMembersVisibilityService } from 'app/core/services/group-members-visibility.service';
 
 @Component({
   selector: 'app-page-header',
@@ -38,7 +39,8 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
     public auth: AuthService,
     private upstateService: UpstateService,
     private notificationService: NotificationService,
-    private whaleSignalrService: WhaleSignalService
+    private whaleSignalrService: WhaleSignalService,
+    private groupMembersVisibility: GroupMembersVisibilityService,
   ) {}
 
   public showNotificationsMenu(): void {
@@ -49,6 +51,7 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
 
       window.onclick = null;
       this.isNotificationsVisible = !this.isNotificationsVisible;
+      this.groupMembersVisibility.isMembersVisible = false;
 
       if (this.isNotificationsVisible) {
         window.onclick = () => {
@@ -65,6 +68,7 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
 
     window.onclick = null;
     this.settingsMenuVisible = !this.settingsMenuVisible;
+    this.groupMembersVisibility.isMembersVisible = false;
 
     if (this.settingsMenuVisible) {
       window.onclick = () => {
