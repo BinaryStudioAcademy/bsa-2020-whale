@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SendGrid;
 using SendGrid.Helpers.Mail;
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -11,14 +10,13 @@ using System.Threading.Tasks;
 using Whale.API.Services.Abstract;
 using Whale.DAL;
 using Whale.DAL.Models;
-using Whale.DAL.Models.Email;
 using Whale.DAL.Settings;
 using Whale.Shared.Models.Email;
 using Whale.Shared.Services;
 
 namespace Whale.API.Services
 {
-	public class EmailService: BaseService
+    public class EmailService: BaseService
 	{
         private readonly RedisService _redisService;
         private readonly UserService _userService;

@@ -117,8 +117,10 @@ namespace Whale.Shared.Services
             };
             var optionsDTO = JsonConvert.SerializeObject(options, camelSettings);
             var notification = await _context.Notifications.FirstOrDefaultAsync(n => n.UserId == user.Id && n.Options == optionsDTO);
+
             if (notification is null)
                 throw new NotFoundException("Notification");
+
             _context.Notifications.Remove(notification);
             await _context.SaveChangesAsync();
             var connection = await _signalrService.ConnectHubAsync("whale");
@@ -129,6 +131,7 @@ namespace Whale.Shared.Services
         public async Task DeleteNotificationAsync(string userEmail, Guid notificationId)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+
             if (user is null)
                 throw new NotFoundException("User", userEmail);
 
@@ -145,9 +148,12 @@ namespace Whale.Shared.Services
         public async Task<NotificationDTO> UpdateNotificationAsync(NotificationDTO notDto)
         {
             var notification = await _context.Notifications.FirstOrDefaultAsync(n => n.Id == notDto.Id);
-            if (notification == null) throw new NotFoundException("Notification", notDto.Id.ToString());
+
+            if (notification == null)
+                throw new NotFoundException("Notification", notDto.Id.ToString());
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == notification.UserId);
+
             if (user is null)
                 throw new NotFoundException("User", user.Id.ToString());
 
@@ -168,7 +174,7 @@ namespace Whale.Shared.Services
         public async Task UpdateInviteMeetingNotifications(string link)
         {
             var noticications = _context.Notifications.Where(n => n.Options.Contains(link)).ToList();
-            if (noticications.Count <= 0)
+            if (noticications.Count == 0)
                 return;
 
             var email = JsonConvert.DeserializeObject<OptionsInviteMeeting>(noticications[0].Options, camelSettings).ContactEmail;
@@ -187,7 +193,6 @@ namespace Whale.Shared.Services
                 unpdatedNotification.Options = optionsString;
                 await UpdateNotificationAsync(unpdatedNotification);
             }
-
         }
 
         public async Task AddUpdateUnreadMessageNotification(DirectMessage message, string receiverEmail, UnreadMessageId unreadMessageId)
@@ -216,8 +221,7 @@ namespace Whale.Shared.Services
 
                 var options = JsonConvert.DeserializeObject<UnreadMessageOptions>(notification.Options, camelSettings);
                 options.UnreadMessageIds.Add(unreadMessageId);
-                var optionsJson = JsonConvert.SerializeObject(options, camelSettings);
-                unpdatedNotification.Options = optionsJson;
+                unpdatedNotification.Options = JsonConvert.SerializeObject(options, camelSettings);
 
                 await UpdateNotificationAsync(unpdatedNotification);
             }
@@ -249,8 +253,7 @@ namespace Whale.Shared.Services
 
                 var options = JsonConvert.DeserializeObject<UnreadGroupMessageOptions>(notification.Options, camelSettings);
                 options.UnreadGroupMessages.Add(unreadGroupMessage);
-                var optionsJson = JsonConvert.SerializeObject(options, camelSettings);
-                unpdatedNotification.Options = optionsJson;
+                unpdatedNotification.Options = JsonConvert.SerializeObject(options, camelSettings);
 
                 await UpdateNotificationAsync(unpdatedNotification);
             }
@@ -285,8 +288,7 @@ namespace Whale.Shared.Services
                 return;
             }
 
-            var optionsJson = JsonConvert.SerializeObject(options, camelSettings);
-            unpdatedNotification.Options = optionsJson;
+            unpdatedNotification.Options = JsonConvert.SerializeObject(options, camelSettings);
 
             await UpdateNotificationAsync(unpdatedNotification);
 
@@ -321,8 +323,7 @@ namespace Whale.Shared.Services
                 return;
             }
 
-            var optionsJson = JsonConvert.SerializeObject(options, camelSettings);
-            unpdatedNotification.Options = optionsJson;
+            unpdatedNotification.Options = JsonConvert.SerializeObject(options, camelSettings);
 
             await UpdateNotificationAsync(unpdatedNotification);
 

@@ -1,9 +1,5 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using shortid;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +15,7 @@ using Whale.Shared.Services.Abstract;
 
 namespace Whale.MeetingAPI.Services
 {
-	public class PollService : BaseService
+    public class PollService : BaseService
 	{
 		private readonly SignalrService _signalrService;
 		private readonly RedisService _redisService;

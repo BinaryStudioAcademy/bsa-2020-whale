@@ -18,22 +18,13 @@ namespace Whale.Shared.Services
         }
         public async Task ConnectAsync()
         {
-                var configString = $"{_redisHost}";
-                _redis = await ConnectionMultiplexer.ConnectAsync(configString);
+            var configString = $"{_redisHost}";
+            _redis = await ConnectionMultiplexer.ConnectAsync(configString);
         }
         public void Connect()
         {
-            try
-            {
-                var configString = $"{_redisHost}";
-                _redis = ConnectionMultiplexer.Connect(configString);
-            }
-            catch (RedisConnectionException err)
-            {
-                //Log.Error(err.ToString());
-                throw err;
-            }
-            //Log.Debug("Connected to Redis");
+            var configString = $"{_redisHost}";
+            _redis = ConnectionMultiplexer.Connect(configString);
         }
 
         public void Set<T>(string key, T value)

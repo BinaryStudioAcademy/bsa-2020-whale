@@ -2,14 +2,12 @@
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Whale.API.Services.Abstract;
 using Whale.DAL;
 using Whale.DAL.Models;
-using Whale.DAL.Models.Poll;
 using Whale.DAL.Settings;
 using Whale.Shared.Exceptions;
 using Whale.Shared.Extentions;
@@ -18,7 +16,7 @@ using Whale.Shared.Models.User;
 
 namespace Whale.API.Services
 {
-	public class MeetingHistoryService : BaseService
+    public class MeetingHistoryService : BaseService
 	{
 		private readonly BlobStorageSettings _blobStorageSettings;
 

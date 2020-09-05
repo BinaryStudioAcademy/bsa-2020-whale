@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Whale.Shared.Models.Meeting.MeetingMessage
+﻿namespace Whale.Shared.Models.Meeting.MeetingMessage
 {
     public class GetMessagesDTO
     {

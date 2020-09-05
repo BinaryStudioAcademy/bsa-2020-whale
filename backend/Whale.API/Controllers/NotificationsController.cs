@@ -5,8 +5,6 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Whale.API.Models.Notification;
-using Whale.Shared.Models.Contact;
 using Whale.Shared.Models.Notification;
 using Whale.Shared.Services;
 

@@ -3,13 +3,9 @@ using Microsoft.Azure.Storage.Blob;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using Whale.DAL.Models;
 using Whale.DAL.Settings;
-using Whale.Shared.Models.User;
 
 namespace Whale.Shared.Extentions
 {

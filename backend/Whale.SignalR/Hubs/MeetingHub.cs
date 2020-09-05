@@ -16,8 +16,6 @@ using Whale.SignalR.Services;
 using Whale.SignalR.Models.Room;
 using Whale.Shared.Models.Question;
 using Whale.SignalR.Models.Reaction;
-using Whale.DAL.Models.Poll;
-using Whale.Shared.Models;
 using Whale.SignalR.Models.Agenda;
 
 namespace Whale.SignalR.Hubs

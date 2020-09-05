@@ -19,7 +19,6 @@ using Whale.Shared.Exceptions;
 using Whale.Shared.Helpers;
 using Whale.Shared.MappingProfiles;
 using Whale.Shared.Services;
-using Whale.DAL.Models;
 using Microsoft.AspNetCore.HttpOverrides;
 using Whale.Shared.Models;
 
@@ -27,7 +26,7 @@ namespace Whale.API
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration, IWebHostEnvironment hostingEnvironment)
+        public Startup(IWebHostEnvironment hostingEnvironment)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(hostingEnvironment.ContentRootPath)

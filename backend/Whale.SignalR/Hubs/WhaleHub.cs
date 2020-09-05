@@ -8,7 +8,6 @@ using Whale.DAL.Models;
 using Whale.Shared.Models.Contact;
 using Whale.Shared.Models.Group;
 using Whale.Shared.Models.Group.GroupUser;
-using Whale.Shared.Models.Meeting;
 using Whale.Shared.Models.Notification;
 using Whale.Shared.Services;
 using Whale.SignalR.Models.Call;
@@ -24,7 +23,12 @@ namespace Whale.SignalR.Hubs
         private readonly UserService _userService;
 
 
-        public WhaleHub(WhaleService whaleService, MeetingService meetingService, UserService userService, ContactsService contactsService, GroupService groupsService)
+        public WhaleHub(
+            WhaleService whaleService,
+            MeetingService meetingService,
+            UserService userService,
+            ContactsService contactsService,
+            GroupService groupsService)
         {
             _whaleService = whaleService;
             _meetingService = meetingService;
@@ -224,7 +228,5 @@ namespace Whale.SignalR.Hubs
                 await Groups.RemoveFromGroupAsync(connection, userGroup.GroupId.ToString());
             }
         }
-
-
     }
 }

@@ -21,7 +21,7 @@ namespace Whale.SignalR
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration, IWebHostEnvironment hostingEnvironment)
+        public Startup(IWebHostEnvironment hostingEnvironment)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(hostingEnvironment.ContentRootPath)
@@ -45,12 +45,12 @@ namespace Whale.SignalR
             services.AddTransient<UserService>();
             services.AddTransient<GroupService>();
             services.AddTransient<WhaleService>();
-            services.AddTransient<MeetingHttpService>(s => new MeetingHttpService(Configuration.GetValue<string>("MeetingAPI")));
+            services.AddTransient(_ => new MeetingHttpService(Configuration.GetValue<string>("MeetingAPI")));
             services.AddScoped<RoomService>();
 
-            services.AddTransient(p => new SignalrService(Configuration.GetValue<string>("SignalR")));
-            services.AddScoped(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
-            services.AddScoped(x => new EncryptHelper(Configuration.GetValue<string>("EncryptSettings:key")));
+            services.AddTransient(_ => new SignalrService(Configuration.GetValue<string>("SignalR")));
+            services.AddScoped(_ => new RedisService(Configuration.GetConnectionString("RedisOptions")));
+            services.AddScoped(_ => new EncryptHelper(Configuration.GetValue<string>("EncryptSettings:key")));
 
             services.AddSingleton(Configuration.GetSection("ElasticConfiguration").Get<ElasticConfiguration>());
             services.AddScoped<ElasticSearchService>();
@@ -65,7 +65,7 @@ namespace Whale.SignalR
                 .WithOrigins("http://localhost:4200", "http://bsa2020-whale.westeurope.cloudapp.azure.com");
             }));
 
-            services.AddScoped<BlobStorageSettings>(options => Configuration.Bind<BlobStorageSettings>("BlobStorageSettings"));
+            services.AddScoped(_ => Configuration.Bind<BlobStorageSettings>("BlobStorageSettings"));
 
             services.AddAutoMapper(cfg =>
             {

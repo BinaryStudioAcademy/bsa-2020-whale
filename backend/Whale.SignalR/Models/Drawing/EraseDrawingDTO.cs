@@ -1,5 +1,4 @@
-﻿
-namespace Whale.SignalR.Models.Drawing
+﻿namespace Whale.SignalR.Models.Drawing
 {
     public class EraseDrawingDTO
     {

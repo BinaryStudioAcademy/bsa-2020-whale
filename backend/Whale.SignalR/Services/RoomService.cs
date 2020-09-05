@@ -1,8 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Timers;
 using Whale.DAL.Models.Poll;
 using Whale.Shared.Models.Meeting;
@@ -25,11 +22,11 @@ namespace Whale.SignalR.Services
             _meetingHub = meetingHub;
         }
 
-        public async void CloseRoomAfterTimeExpire(
-            double roomExpiry, 
-            string meetingLink, 
-            string roomId, 
-            string meetingId, 
+        public void CloseRoomAfterTimeExpire(
+            double roomExpiry,
+            string meetingLink,
+            string roomId,
+            string meetingId,
             Dictionary<string, List<ParticipantDTO>> groupParticipants)
         {
             var timer = new Timer(roomExpiry * 60 * 1000);

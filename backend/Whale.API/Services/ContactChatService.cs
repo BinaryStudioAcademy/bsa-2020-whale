@@ -125,7 +125,7 @@ namespace Whale.API.Services
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
             if (user is null || user.Id != unreadMessageDto.ReceiverId)
-                throw new InvalidCredentials();
+                throw new InvalidCredentialsExseption();
             var unreadMessage = await _context.UnreadMessageIds.FirstOrDefaultAsync(
                 message => message.MessageId == unreadMessageDto.MessageId &&
                 message.ReceiverId == unreadMessageDto.ReceiverId
@@ -145,7 +145,7 @@ namespace Whale.API.Services
             if (contact is null)
                 throw new NotFoundException("Contact", contactId.ToString());
             if (contact.FirstMember.Email != userEmail && contact.SecondMember.Email != userEmail)
-                throw new InvalidCredentials();
+                throw new InvalidCredentialsExseption();
         }
     }
 }

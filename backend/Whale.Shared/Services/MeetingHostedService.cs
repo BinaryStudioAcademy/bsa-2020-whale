@@ -5,10 +5,8 @@ using Quartz;
 using Quartz.Spi;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Whale.DAL;
 using Whale.DAL.Models;
 using Whale.Shared.Jobs;
 

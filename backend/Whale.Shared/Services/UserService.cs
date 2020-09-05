@@ -21,7 +21,12 @@ namespace Whale.Shared.Services
         private readonly RedisService _redisService;
         private const string onlineUsersKey = "online";
 
-        public UserService(WhaleDbContext context, IMapper mapper, BlobStorageSettings blobStorageSettings, RedisService redisService) : base(context, mapper)
+        public UserService(
+            WhaleDbContext context,
+            IMapper mapper,
+            BlobStorageSettings blobStorageSettings,
+            RedisService redisService
+            ) : base(context, mapper)
         {
             _blobStorageSettings = blobStorageSettings;
             _redisService = redisService;
@@ -69,7 +74,6 @@ namespace Whale.Shared.Services
         public async Task<UserDTO> CreateUserAsync(UserCreateDTO userDTO)
         {
             var entity = _mapper.Map<User>(userDTO);
-
             var user = _context.Users.FirstOrDefault(c => c.Email == userDTO.Email);
 
             if (user != null) throw new AlreadyExistsException("User", userDTO.Email);
@@ -128,7 +132,7 @@ namespace Whale.Shared.Services
             if (user == null)
                 throw new NotFoundException("User", userId.ToString());
             if (user.Email != userEmail)
-                throw new InvalidCredentials();
+                throw new InvalidCredentialsExseption();
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
             return true;

@@ -3,11 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Whale.Shared.Exceptions;
 using Whale.Shared.Services.Abstract;
-using Whale.Shared.Services;
 using Whale.DAL;
 using Whale.DAL.Models;
 using Whale.Shared.Models.Group;
@@ -21,19 +19,18 @@ namespace Whale.Shared.Services
 {
     public class GroupService : BaseService
     {
-        private UserService _userService;
-        private SignalrService _signalrService;
+        private readonly SignalrService _signalrService;
         private readonly BlobStorageSettings _blobStorageSettings;
-        private NotificationsService _notificationsService;
+        private readonly NotificationsService _notificationsService;
 
-        public GroupService(WhaleDbContext context, IMapper mapper, UserService userService, SignalrService signalrService, NotificationsService notificationsService, BlobStorageSettings blobStorageSettings) : base(context, mapper)
+        public GroupService(WhaleDbContext context, IMapper mapper, SignalrService signalrService, NotificationsService notificationsService, BlobStorageSettings blobStorageSettings) : base(context, mapper)
         {
-            _userService = userService;
             _signalrService = signalrService;
             _blobStorageSettings = blobStorageSettings;
             _notificationsService = notificationsService;
 
         }
+
         public async Task<IEnumerable<GroupDTO>> GetAllGroupsAsync(string userEmail)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
@@ -58,11 +55,10 @@ namespace Whale.Shared.Services
                      PinnedMessageId = c.Group.PinnedMessageId,
                  };
 
-                 int unreadMessageCount = _context.UnreadGroupMessages
+                 group.UnreadMessageCount = _context.UnreadGroupMessages
                  .Where(um => um.ReceiverId == c.UserId && _context.GroupMessages
                      .Any(gm => gm.Id == um.MessageId && gm.AuthorId != user.Id && gm.GroupId == group.Id))
                  .Count();
-                 group.UnreadMessageCount = unreadMessageCount;
 
                  return group;
              });
@@ -72,6 +68,7 @@ namespace Whale.Shared.Services
 
             return _mapper.Map<IEnumerable<GroupDTO>>(groupsWithMessageAmount);
         }
+
         public async Task<GroupDTO> GetGroupAsync(Guid groupId, string userEmail)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
@@ -152,6 +149,7 @@ namespace Whale.Shared.Services
 
             return await GetGroupAsync(newCreatedGroup.Id, userEmail);
         }
+
         public async Task<bool> DeleteGroupAsync(Guid id)
         {
             var group = _context.Groups.FirstOrDefault(c => c.Id == id);
@@ -216,7 +214,6 @@ namespace Whale.Shared.Services
                 .Select(g => g.User)
                 .ToListAsync();
 
-
             if (users is null)
                 throw new Exception("No users in group");
 
@@ -254,6 +251,5 @@ namespace Whale.Shared.Services
             newUserInGroup.User = await newUserInGroup.User.LoadAvatarAsync(_blobStorageSettings);
             return _mapper.Map<GroupUserDTO>(newUserInGroup);
         }
-
     }
 }

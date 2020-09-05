@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Whale.Shared.Models.User;
 
@@ -23,6 +22,7 @@ namespace Whale.Shared.Services
         {
             await _redisService.ConnectAsync();
             ICollection<UserOnlineDTO> onlineUsers;
+
             try
             {
                 onlineUsers = await _redisService.GetAsync<ICollection<UserOnlineDTO>>(OnlineUsersKey);
@@ -31,6 +31,7 @@ namespace Whale.Shared.Services
             {
                 onlineUsers = new List<UserOnlineDTO>();
             }
+
             var user = await _userService.GetUserByEmail(userEmail);
             onlineUsers = onlineUsers?.Where(u => u.Id != user.Id).ToList() ?? new List<UserOnlineDTO>(); //TODO: Fix it 
             var newUserOnline = new UserOnlineDTO { Id = user.Id, ConnectionId = connectionId };
@@ -54,8 +55,7 @@ namespace Whale.Shared.Services
             await _redisService.ConnectAsync();
             var onlineUsers = _redisService.Get<ICollection<UserOnlineDTO>>(OnlineUsersKey);
             var onlineUser = onlineUsers.FirstOrDefault(u => u.ConnectionId == connectionId);
-            var onlineUserConnections = onlineUsers.Where(u => u.Id == onlineUser?.Id).ToList();
-            foreach (var ou in onlineUserConnections)
+            foreach (var ou in onlineUsers.Where(u => u.Id == onlineUser?.Id).ToList())
             {
                 onlineUsers.Remove(ou);
             }

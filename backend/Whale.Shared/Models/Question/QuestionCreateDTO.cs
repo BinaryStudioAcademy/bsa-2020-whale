@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Whale.Shared.Models.Question
 {
-	public class QuestionCreateDTO
+    public class QuestionCreateDTO
 	{
 		public Guid MeetingId { get; set; }
 		public bool IsAnonymous { get; set; }

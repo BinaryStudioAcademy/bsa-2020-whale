@@ -59,7 +59,7 @@ namespace Whale.Shared.Services
                     SecondMemberId = (c.SecondMemberId == user.Id) ? c.FirstMemberId : c.SecondMemberId,
                     SecondMember = _mapper.Map<UserDTO>((c.SecondMemberId == user.Id) ? c.FirstMember : c.SecondMember),
                     PinnedMessage = _mapper.Map<DirectMessageDTO>(c.PinnedMessage),
-                    isAccepted = c.isAccepted,
+                    IsAccepted = c.isAccepted,
                 };
                 contact.FirstMember.ConnectionId = GetConnectionId(contact.FirstMember.Id);
                 contact.SecondMember.ConnectionId = GetConnectionId(contact.SecondMember.Id);
@@ -105,7 +105,7 @@ namespace Whale.Shared.Services
                         SecondMemberId = (c.SecondMemberId == user.Id) ? c.FirstMemberId : c.SecondMemberId,
                         SecondMember = _mapper.Map<UserDTO>((c.SecondMemberId == user.Id) ? c.FirstMember : c.SecondMember),
                         PinnedMessage = _mapper.Map<DirectMessageDTO>(c.PinnedMessage),
-                        isAccepted = c.isAccepted,
+                        IsAccepted = c.isAccepted,
                     };
                     contact.FirstMember.ConnectionId = GetConnectionId(contact.FirstMember.Id);
                     contact.SecondMember.ConnectionId = GetConnectionId(contact.SecondMember.Id);
@@ -138,7 +138,7 @@ namespace Whale.Shared.Services
                 SecondMemberId = (contact.SecondMemberId == user.Id) ? contact.FirstMemberId : contact.SecondMemberId,
                 SecondMember = _mapper.Map<UserDTO>((contact.SecondMemberId == user.Id) ? contact.FirstMember : contact.SecondMember),
                 PinnedMessage = _mapper.Map<DirectMessageDTO>(contact.PinnedMessage),
-                isAccepted = contact.isAccepted,
+                IsAccepted = contact.isAccepted,
             };
             dtoContact.FirstMember.ConnectionId = GetConnectionId(contact.FirstMember.Id);
             dtoContact.SecondMember.ConnectionId = GetConnectionId(contact.SecondMember.Id);
@@ -154,7 +154,7 @@ namespace Whale.Shared.Services
                 .FirstOrDefault(c => c.Id == contactDTO.Id);
 
             if (entity.FirstMember.Email != userEmail && entity.SecondMember.Email != userEmail)
-                throw new InvalidCredentials();
+                throw new InvalidCredentialsExseption();
             if (entity == null)
                 throw new NotFoundException("Contact", contactDTO.Id.ToString());
             entity.PinnedMessageId = contactDTO.PinnedMessageId;
@@ -171,7 +171,7 @@ namespace Whale.Shared.Services
                 .FirstOrDefault(c => c.Id == contactId);
 
             if (contact.FirstMember.Email != userEmail && contact.SecondMember.Email != userEmail)
-                throw new InvalidCredentials();
+                throw new InvalidCredentialsExseption();
 
             if (contact == null) return false;
 

@@ -10,7 +10,6 @@ using Whale.DAL;
 using Whale.DAL.Models;
 using Whale.Shared.Exceptions;
 using Whale.Shared.Models.Meeting;
-using Whale.Shared.Models.User;
 using Whale.Shared.Services;
 using Whale.Shared.Services.Abstract;
 

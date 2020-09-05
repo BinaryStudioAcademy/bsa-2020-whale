@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using Whale.DAL.Models.Messages;
 
 namespace Whale.Shared.Models.Notification

@@ -6,7 +6,7 @@ using Polls = Whale.DAL.Models.Poll;
 
 namespace Whale.DAL.Models
 {
-    public class Meeting:BaseEntity
+    public class Meeting : BaseEntity
     {
         public string Settings { get; set; }
         public DateTimeOffset StartTime { get; set; }

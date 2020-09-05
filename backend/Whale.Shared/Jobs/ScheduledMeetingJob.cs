@@ -1,12 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Quartz;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Whale.DAL.Models;
-using Whale.Shared.Models.Meeting;
 using Whale.Shared.Services;
 
 namespace Whale.Shared.Jobs
