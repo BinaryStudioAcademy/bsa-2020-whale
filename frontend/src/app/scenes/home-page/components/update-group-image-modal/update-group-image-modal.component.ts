@@ -66,7 +66,7 @@ export class UpdateGroupImageModalComponent
       this.group.photoUrl = resp;
       this.groupService.updateGroup(this.group).subscribe(
         () => {
-          this.toastr.success('Group image successfuly changed');
+          this.toastr.success('Group image successfully changed');
         },
         (error) => this.toastr.error(error.Message)
       );

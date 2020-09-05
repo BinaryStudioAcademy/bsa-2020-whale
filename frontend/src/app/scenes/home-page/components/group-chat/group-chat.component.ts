@@ -311,7 +311,7 @@ export class GroupChatComponent
       .subscribe((user) => {
         if (user !== undefined) {
           Array.prototype.push.apply(this.groupMembers, user);
-          this.toastr.success('User added successfuly');
+          this.toastr.success('User added successfully');
         }
       });
   }
@@ -327,7 +327,7 @@ export class GroupChatComponent
             .subscribe(
               () => {
                 this.removeUser(user.id);
-                this.toastr.success(
+                this.toastr.info(
                   `You successfully deleted ${user.firstName} ${user.secondName} from the group "${this.groupSelected.label}"`
                 );
                 this.whaleSignalrService.invoke(
