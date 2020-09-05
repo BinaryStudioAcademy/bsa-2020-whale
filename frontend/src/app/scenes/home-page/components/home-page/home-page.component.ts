@@ -272,7 +272,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
       .subscribe((newGroup) => {
         if (newGroup !== undefined) {
           this.addGroup(newGroup);
-          this.toastr.success('Group created successfuly');
+          this.toastr.success('Group created successfully');
         }
       });
   }
@@ -307,8 +307,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
           this.groupService.deleteGroup(selectedGroup).subscribe(
             (response) => {
               if (response.status === 204) {
-                this.toastr.success(
-                  `${selectedGroup.label} deleted successfuly`
+                this.toastr.info(
+                  `${selectedGroup.label} deleted successfully`
                 );
                 this.removeGroup(selectedGroup.id);
                 if (!this.groups.length) {
