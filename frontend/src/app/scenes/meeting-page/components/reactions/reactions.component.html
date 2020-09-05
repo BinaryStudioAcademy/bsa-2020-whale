@@ -1,6 +1,12 @@
 <div class="ui segment">
+  <span class="reaction" (click)="onReactionClick(reactionsEnum.Whale)">{{
+    reactionsEnum.Whale
+  }}</span>
   <span class="reaction" (click)="onReactionClick(reactionsEnum.ThumbsUp)">{{
     reactionsEnum.ThumbsUp
+  }}</span>
+  <span class="reaction" (click)="onReactionClick(reactionsEnum.ThumbsDown)">{{
+    reactionsEnum.ThumbsDown
   }}</span>
   <span
     class="reaction"
