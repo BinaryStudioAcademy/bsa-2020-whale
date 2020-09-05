@@ -102,7 +102,7 @@ export class GroupChatComponent
     private homePageComponent: HomePageComponent,
     private blobService: BlobService,
     private messageService: MessageService,
-    private groupMembersVisibility: GroupMembersVisibilityService,
+    public groupMembersVisibility: GroupMembersVisibilityService,
   ) {}
 
   ngAfterViewInit(): void {
