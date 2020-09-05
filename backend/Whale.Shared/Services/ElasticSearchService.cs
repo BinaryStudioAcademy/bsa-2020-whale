@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Whale.Shared.Exceptions;
 using Whale.Shared.Models;
@@ -27,9 +26,8 @@ namespace Whale.Shared.Services
 
         public async Task SaveSingleAsync(MeetingUserStatistics record)
         {
-            var indexName = $"{indexPrefix}{record.UserId.ToString()}";
+            var indexName = $"{indexPrefix}{record.UserId}";
             await _elasticClient.IndexAsync(record, i => i.Index(indexName));
-            
         }
 
         public async Task SaveRangeAsync(IEnumerable<MeetingUserStatistics> records)
@@ -42,10 +40,10 @@ namespace Whale.Shared.Services
             }
         }
 
-        public async Task<IReadOnlyCollection<DateHistogramBucket>> SearchStatistics(string email)
+        public async Task<IReadOnlyCollection<DateHistogramBucket>> SearchStatisticsAsync(string email)
         {
-            var user = await _userService.GetUserByEmail(email);
-            var indexName = $"{indexPrefix}{user.Id.ToString()}";
+            var user = await _userService.GetUserByEmailAsync(email);
+            var indexName = $"{indexPrefix}{user.Id}";
             if (user == null) throw new NotFoundException("User", email);
 
             var response = await _elasticClient.SearchAsync<MeetingUserStatistics>(s => s
@@ -72,7 +70,6 @@ namespace Whale.Shared.Services
                                 .Field(f => f.DurationTime))))));
 
             return response.Aggregations.DateHistogram("date_histogram").Buckets;
-
         }
     }
 }

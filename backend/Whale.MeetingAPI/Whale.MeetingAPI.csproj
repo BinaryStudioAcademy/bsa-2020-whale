@@ -38,7 +38,4 @@
   <ItemGroup>
     <ProjectReference Include="..\Whale.Shared\Whale.Shared.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Models\" />
-  </ItemGroup>
 </Project>

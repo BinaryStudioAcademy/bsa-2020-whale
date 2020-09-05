@@ -23,19 +23,22 @@ namespace Whale.API.Services
         private readonly BlobStorageSettings _blobStorageSettings;
         private readonly NotificationsService _notificationsService;
 
-        public ContactChatService(WhaleDbContext context, IMapper mapper, SignalrService signalrService, BlobStorageSettings blobStorageSettings, NotificationsService notificationsService) 
+        public ContactChatService(
+            WhaleDbContext context,
+            IMapper mapper,
+            SignalrService signalrService,
+            BlobStorageSettings blobStorageSettings,
+            NotificationsService notificationsService)
             : base(context, mapper)
         {
             _signalrService = signalrService;
             _blobStorageSettings = blobStorageSettings;
             _notificationsService = notificationsService;
         }
-        //var receivingMessages = messages.Where(m => m.ContactId != m.AuthorId);
 
-        //var unreadMessages = _context.UnreadMessages.Where(um => um.ReceiverId == contactId);
         public async Task<ICollection<DirectMessage>> GetAllContactsMessagesAsync(Guid contactId, string userEmail)
         {
-            await CheckUserInContact(contactId, userEmail);
+            await CheckUserInContactAsync(contactId, userEmail);
 
             var messages = await _context.DirectMessages
                 .Include(msg => msg.Author)
@@ -43,13 +46,13 @@ namespace Whale.API.Services
                 .Where(p => p.ContactId == contactId) // Filter here
                 .ToListAsync();
             if (messages == null) throw new Exception("No messages");
-           
+
             return _mapper.Map<ICollection<DirectMessage>>(await messages.LoadAvatarsAsync(_blobStorageSettings, msg => msg.Author));
         }
 
         public async Task<ReadAndUnreadMessagesDTO> GetReadAndUnreadAsync(Guid contactId, Guid userId, string userEmail)
         {
-            await CheckUserInContact(contactId, userEmail);
+            await CheckUserInContactAsync(contactId, userEmail);
 
             var messagesWithoutAvatars = await _context.DirectMessages
                 .Include(msg => msg.Author)
@@ -68,18 +71,16 @@ namespace Whale.API.Services
 
             var readMessages = messages.Except(unreadMessages).ToList();
 
-            var readAndUnreadMessages = new ReadAndUnreadMessagesDTO
+            return new ReadAndUnreadMessagesDTO
             {
                 ReadMessages = _mapper.Map<IEnumerable<DirectMessageDTO>>(readMessages),
                 UnreadMessages = _mapper.Map<IEnumerable<DirectMessageDTO>>(unreadMessages)
             };
-
-            return readAndUnreadMessages;
         }
 
-        public async Task<DirectMessage> CreateDirectMessage(DirectMessageCreateDTO directMessageDto, string userEmail)
+        public async Task<DirectMessage> CreateDirectMessageAsync(DirectMessageCreateDTO directMessageDto, string userEmail)
         {
-            await CheckUserInContact(directMessageDto.ContactId, userEmail);
+            await CheckUserInContactAsync(directMessageDto.ContactId, userEmail);
 
             var messageEntity = _mapper.Map<DirectMessage>(directMessageDto);
             messageEntity.CreatedAt = DateTimeOffset.UtcNow;
@@ -93,7 +94,7 @@ namespace Whale.API.Services
             await createdMessage.Author.LoadAvatarAsync(_blobStorageSettings);
             var createdMessageDTO = _mapper.Map<DirectMessage>(createdMessage);
 
-            await AddUnreadMessage(createdMessage, userEmail);
+            await AddUnreadMessageAsync(createdMessage, userEmail);
 
             var connection = await _signalrService.ConnectHubAsync("chatHub");
             await connection.InvokeAsync("NewMessageReceived", createdMessageDTO);
@@ -101,9 +102,9 @@ namespace Whale.API.Services
             return createdMessageDTO;
         }
 
-        public async Task AddUnreadMessage(DirectMessage message, string userEmail)
+        public async Task AddUnreadMessageAsync(DirectMessage message, string userEmail)
         {
-            await CheckUserInContact(message.ContactId, userEmail);
+            await CheckUserInContactAsync(message.ContactId, userEmail);
 
             var contact = await _context.Contacts
                 .Include(c => c.FirstMember)
@@ -117,15 +118,15 @@ namespace Whale.API.Services
                 ReceiverId = receiver.Id
             });
             await _context.SaveChangesAsync();
-         
-            await _notificationsService.AddUpdateUnreadMessageNotification(message, receiver.Email, entry.Entity);
+
+            await _notificationsService.AddUpdateUnreadMessageNotificationAsync(message, receiver.Email, entry.Entity);
         }
 
-        public async Task MarkMessageAsRead(UnreadMessageIdDTO unreadMessageDto, string userEmail)
+        public async Task MarkMessageAsReadAsync(UnreadMessageIdDTO unreadMessageDto, string userEmail)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
             if (user is null || user.Id != unreadMessageDto.ReceiverId)
-                throw new InvalidCredentials();
+                throw new InvalidCredentialsExseption();
             var unreadMessage = await _context.UnreadMessageIds.FirstOrDefaultAsync(
                 message => message.MessageId == unreadMessageDto.MessageId &&
                 message.ReceiverId == unreadMessageDto.ReceiverId
@@ -133,10 +134,10 @@ namespace Whale.API.Services
             _context.UnreadMessageIds.Remove(unreadMessage);
             await _context.SaveChangesAsync();
 
-            await _notificationsService.DeleteUpdateUnreadMessageNotification(unreadMessage.ReceiverId, unreadMessage.Id);
+            await _notificationsService.DeleteUpdateUnreadMessageNotificationAsync(unreadMessage.ReceiverId, unreadMessage.Id);
         }
 
-        private async Task CheckUserInContact(Guid contactId, string userEmail)
+        private async Task CheckUserInContactAsync(Guid contactId, string userEmail)
         {
             var contact = await _context.Contacts
                 .Include(c => c.FirstMember)
@@ -144,8 +145,9 @@ namespace Whale.API.Services
                 .FirstOrDefaultAsync(c => c.Id == contactId);
             if (contact is null)
                 throw new NotFoundException("Contact", contactId.ToString());
+
             if (contact.FirstMember.Email != userEmail && contact.SecondMember.Email != userEmail)
-                throw new InvalidCredentials();
+                throw new InvalidCredentialsExseption();
         }
     }
 }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Whale.Shared.Models.Group
+﻿namespace Whale.Shared.Models.Group
 {
     public class GroupCreateDTO
     {

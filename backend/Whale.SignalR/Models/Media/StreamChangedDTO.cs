@@ -7,7 +7,7 @@ namespace Whale.SignalR.Models.Media
         public Guid MeetingId { get; set; }
         public string OldStreamId { get; set; }
         public string NewStreamId { get; set; }
-        public bool isVideoActive {get; set; }
-        public bool isAudioActive { get; set; }
+        public bool IsVideoActive {get; set; }
+        public bool IsAudioActive { get; set; }
     }
 }

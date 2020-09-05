@@ -10,7 +10,7 @@ namespace Whale.API.Helpers
 		public static Task ValidateProperties<T>(T entity)
 		{
 			var validationResults = new List<ValidationResult>();
-			bool isValid = Validator.TryValidateObject(
+			var isValid = Validator.TryValidateObject(
 				entity,
 				new ValidationContext(entity),
 				validationResults,
@@ -18,7 +18,7 @@ namespace Whale.API.Helpers
 
 			if (!isValid)
 			{
-				string errorMessage = "";
+				var errorMessage = "";
 				foreach (var result in validationResults)
 				{
 					errorMessage += result.ErrorMessage + "\n";

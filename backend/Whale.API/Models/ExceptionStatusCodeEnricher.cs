@@ -18,8 +18,8 @@ namespace Whale.API.Models
         private LogEventProperty GetLogEventProperty(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
         {
             int value = 500;
-            if (logEvent.Exception is BaseCustomException)
-                value = (logEvent.Exception as BaseCustomException)._httpError;
+            if (logEvent.Exception is BaseCustomException ex)
+                value = ex._httpError;
             return propertyFactory.CreateProperty(PropertyName, value);
         }
     }

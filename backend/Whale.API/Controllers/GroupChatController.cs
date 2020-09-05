@@ -20,7 +20,6 @@ namespace Whale.API.Controllers
         public GroupChatController(GroupChatService chatService)
         {
             _chatService = chatService;
-
         }
 
         [HttpGet("{groupDTOId}")]
@@ -40,13 +39,13 @@ namespace Whale.API.Controllers
         [HttpPost]
         public async Task<ActionResult<GroupMessageDTO>> CreateDirectMessage([FromBody] GroupMessageCreateDTO dto)
         {
-            return Ok(await _chatService.CreateGroupMessage(dto));
+            return Ok(await _chatService.CreateGroupMessageAsync(dto));
         }
 
         [HttpPost("markRead")]
         public async Task<OkResult> MarkMessageAsRead([FromBody] UnreadGroupMessageDTO unreadMessageIdDto)
         {
-            await _chatService.MarkMessageAsRead(unreadMessageIdDto);
+            await _chatService.MarkMessageAsReadAsync(unreadMessageIdDto);
             return Ok();
         }
     }
