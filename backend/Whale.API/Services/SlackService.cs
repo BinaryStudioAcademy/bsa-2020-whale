@@ -18,7 +18,7 @@ namespace Whale.API.Services
         private readonly IConfiguration _configuration;
         private readonly HttpClient _httpClient;
         private readonly UserService _userService;
-        private string _slackUrl = "https://slack.com/api";
+        private readonly string _slackUrl = "https://slack.com/api";
 
         public SlackService(IConfiguration configuration, HttpClient httpClient, UserService userService)
         {
@@ -31,9 +31,10 @@ namespace Whale.API.Services
         public async Task SendSlackReplyAsync(string text, string channel, string url = null, string meetingName = null)
         {
             var listBlock = new List<Block>();
-            var innerMeetingName = string.Empty;
-
-            _ = string.IsNullOrEmpty(meetingName) ? innerMeetingName = "Join a Meeting" : innerMeetingName = "Join a " + meetingName;
+            string innerMeetingName;
+            _ = string.IsNullOrEmpty(meetingName)
+                ? innerMeetingName = "Join a Meeting"
+                : innerMeetingName = "Join a " + meetingName;
 
             if (url != null)
             {
@@ -65,7 +66,7 @@ namespace Whale.API.Services
                     text = new Text()
                     {
                         type = "mrkdwn",
-                        text = @"Hello, unfortunately, we could not identify your credentials in the Whale application.       *Please sign up using the link below:*"
+                        text = "Hello, unfortunately, we could not identify your credentials in the Whale application.       *Please sign up using the link below:*"
                     }
                 };
                 listBlock.Add(firstBlock);
@@ -91,24 +92,23 @@ namespace Whale.API.Services
             var response = await _httpClient.GetAsync($"{_slackUrl}/users.profile.get?token={_configuration.GetValue<string>("WhaleSlackBotToken")}&user={userId}&pretty=1");
             if (response.StatusCode != HttpStatusCode.OK)
                 throw new Exception($"{response.StatusCode}: {await response.Content.ReadAsStringAsync()}");
+
             return await response.Content.ReadAsAsync<SlackUser>();
         }
 
-        public async Task<bool> ValidateUser(string userEmail)
+        public async Task<bool> ValidateUserAsync(string userEmail)
         {
-            var users = await _userService.GetAllUsers();
-            return users.Where(x => x.Email.Equals(userEmail, StringComparison.InvariantCultureIgnoreCase)).Count() > 0;
+            var users = await _userService.GetAllUsersAsync();
+            return users.Count(x => x.Email.Equals(userEmail, StringComparison.InvariantCultureIgnoreCase)) > 0;
         }
 
         public ExternalResponse GetExternalMessage(string text, string url)
         {
-            var response = new ExternalResponse
+            return new ExternalResponse
             {
                 Text = text,
                 Url = url
             };
-
-            return response;
         }
     }
 }

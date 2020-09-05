@@ -10,7 +10,6 @@ using Whale.DAL;
 using Whale.DAL.Models;
 using Whale.Shared.Exceptions;
 using Whale.Shared.Models.Meeting;
-using Whale.Shared.Models.User;
 using Whale.Shared.Services;
 using Whale.Shared.Services.Abstract;
 
@@ -36,10 +35,9 @@ namespace Whale.API.Services
             return _mapper.Map<ScheduledMeetingDTO>(meeting);
         }
 
-        
         public async Task<IEnumerable<ScheduledDTO>> GetAllScheduledAsync(string email, int skip, int take)
         {
-            var user = await _userService.GetUserByEmail(email);
+            var user = await _userService.GetUserByEmailAsync(email);
             if (user == null)
                 throw new NotFoundException("User", email);
 
@@ -52,7 +50,7 @@ namespace Whale.API.Services
                 if (meeting.EndTime != null)
                     continue;
                 var participantEmails = JsonConvert.DeserializeObject<List<string>>(scheduled.ParticipantsEmails);
-                var userParticipants = (await _userService.GetAllUsers()).Where(u => participantEmails.Contains(u.Email));
+                var userParticipants = (await _userService.GetAllUsersAsync()).Where(u => participantEmails.Contains(u.Email));
                 scheduledDTOList.Add(new ScheduledDTO
                 {
                     Id = scheduled.Id,
@@ -65,7 +63,7 @@ namespace Whale.API.Services
             return scheduledDTOList
                 .OrderBy(s => s.Meeting.StartTime)
                 .Skip(skip)
-                .Take(take); ;
+                .Take(take);
         }
 
         public async Task<ScheduledMeetingDTO> PostAsync(ScheduledMeetingCreateDTO scheduledMeeting)
@@ -80,7 +78,7 @@ namespace Whale.API.Services
         {
             var meeting = _context.Meetings.FirstOrDefault(m => m.Id == scheduledMeeting.Id);
 
-            if (meeting is null) 
+            if (meeting is null)
                 throw new NotFoundException("Scheduled Meeting", scheduledMeeting.Id.ToString());
 
             meeting.Settings = scheduledMeeting.Settings;

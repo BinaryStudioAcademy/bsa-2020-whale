@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Whale.DAL.Models.Question;
 
 namespace Whale.Shared.Models.Question
 {
-	public class QuestionDTO
+    public class QuestionDTO
 	{
 		public Guid Id { get; set; }
 		public Guid MeetingId { get; set; }

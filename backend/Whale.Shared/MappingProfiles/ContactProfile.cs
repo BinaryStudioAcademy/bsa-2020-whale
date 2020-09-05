@@ -4,7 +4,7 @@ using Whale.Shared.Models.Contact;
 
 namespace Whale.Shared.MappingProfiles
 {
-    public class ContactProfile: Profile
+    public class ContactProfile : Profile
     {
         public ContactProfile()
         {

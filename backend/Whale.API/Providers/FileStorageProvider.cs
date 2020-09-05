@@ -3,10 +3,8 @@ using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using MimeTypes;
 using System;
-using System.IO;
 using System.Threading.Tasks;
 using Whale.DAL.Settings;
-
 
 namespace Whale.API.Providers
 {

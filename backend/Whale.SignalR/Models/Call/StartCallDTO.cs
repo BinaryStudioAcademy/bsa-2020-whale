@@ -7,6 +7,5 @@ namespace Whale.SignalR.Models.Call
     {
         public Guid ContactId { get; set; }
         public MeetingCreateDTO Meeting { get; set; }
-
     }
 }

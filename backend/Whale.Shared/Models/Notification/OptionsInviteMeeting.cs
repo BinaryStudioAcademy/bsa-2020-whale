@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Whale.Shared.Models.Notification
+﻿namespace Whale.Shared.Models.Notification
 {
     public class OptionsInviteMeeting
     {

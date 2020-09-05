@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Whale.DAL.Abstraction;
+﻿using Whale.DAL.Abstraction;
 
 namespace Whale.DAL.Models.Poll
 {
-	public class Voter : BaseEntity
+    public class Voter : BaseEntity
 	{
 		public string FirstName { get; set; }
 		public string SecondName { get; set; }

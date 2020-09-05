@@ -17,27 +17,24 @@ using Whale.Shared.MappingProfiles;
 using Whale.Shared.Helpers;
 using Whale.DAL.Settings;
 using Whale.Shared.Exceptions;
-using System;
 using Whale.MeetingAPI.MappingProfiles;
 using Quartz;
 using Quartz.Impl;
 using Quartz.Spi;
 using Whale.Shared.Jobs;
-using Whale.DAL.Models;
 using Microsoft.AspNetCore.HttpOverrides;
 using Whale.Shared.Models;
-
 
 namespace Whale.MeetingAPI
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration, IWebHostEnvironment hostingEnvironment)
+        public Startup(IWebHostEnvironment hostingEnvironment)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(hostingEnvironment.ContentRootPath)
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{hostingEnvironment.EnvironmentName}.json", reloadOnChange: true, optional: true)
+                .AddJsonFile($"appsettings.{hostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables();
 
             Configuration = builder.Build();
@@ -55,7 +52,7 @@ namespace Whale.MeetingAPI
             services.AddTransient<ParticipantService>();
             services.AddTransient<NotificationsService>();
             services.AddTransient<QuestionService>();
-            services.AddTransient(p => new SignalrService(Configuration.GetValue<string>("SignalR")));
+            services.AddTransient(_ => new SignalrService(Configuration.GetValue<string>("SignalR")));
 
             services.AddControllers()
                     .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
@@ -89,15 +86,12 @@ namespace Whale.MeetingAPI
             },
             Assembly.GetExecutingAssembly());
 
-            services.AddScoped<BlobStorageSettings>(options => Configuration.Bind<BlobStorageSettings>("BlobStorageSettings"));
+            services.AddScoped(_ => Configuration.Bind<BlobStorageSettings>("BlobStorageSettings"));
 
-            services.AddScoped(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
+            services.AddScoped(_ => new RedisService(Configuration.GetConnectionString("RedisOptions")));
 
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Meeting API", Version = "v1" });
-            });
-            services.AddScoped(x => new EncryptHelper(Configuration.GetValue<string>("EncryptSettings:key")));
+            services.AddSwaggerGen(c => c.SwaggerDoc("v1", new OpenApiInfo { Title = "Meeting API", Version = "v1" }));
+            services.AddScoped(_ => new EncryptHelper(Configuration.GetValue<string>("EncryptSettings:key")));
 
             //---Jobs---
             services.AddSingleton<IJobFactory, JobFactory>();
@@ -109,15 +103,9 @@ namespace Whale.MeetingAPI
                 q.SchedulerName = "Quartz Scheduler";
                 q.UseSimpleTypeLoader();
                 q.UseInMemoryStore();
-                q.UseDefaultThreadPool(tp =>
-                {
-                    tp.MaxConcurrency = 10;
-                });
+                q.UseDefaultThreadPool(tp => tp.MaxConcurrency = 10);
             });
-            services.AddQuartzServer(opt =>
-            {
-                opt.WaitForJobsToComplete = true;
-            });
+            services.AddQuartzServer(opt => opt.WaitForJobsToComplete = true);
             services.AddHostedService<MeetingHostedService>();
         }
 
@@ -130,10 +118,7 @@ namespace Whale.MeetingAPI
 
                 app.UseSwagger();
 
-                app.UseSwaggerUI(options =>
-                {
-                    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Meeting API v1");
-                });
+                app.UseSwaggerUI(options => options.SwaggerEndpoint("/swagger/v1/swagger.json", "Meeting API v1"));
             }
 
             app.UseForwardedHeaders(new ForwardedHeadersOptions

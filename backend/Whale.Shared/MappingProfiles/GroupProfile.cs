@@ -1,9 +1,6 @@
 ﻿using AutoMapper;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Whale.DAL.Models;
-using Whale.Shared.Models.Group; 
+using Whale.Shared.Models.Group;
 
 namespace Whale.Shared.MappingProfiles
 {

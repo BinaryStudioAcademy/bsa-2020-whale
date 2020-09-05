@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using System;
+﻿using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -8,7 +7,7 @@ namespace Whale.API.Services
 {
     public class HttpService
     {
-        private HttpClient _httpClient;
+        private readonly HttpClient _httpClient;
         private readonly string _baseUrl;
 
         public HttpService(HttpClient httpClient, string baseUrl)

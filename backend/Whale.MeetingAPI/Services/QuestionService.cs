@@ -19,9 +19,9 @@ namespace Whale.MeetingAPI.Services
 		private readonly RedisService _redisService;
 
 		public QuestionService(
-			WhaleDbContext context, 
-			IMapper mapper, 
-			SignalrService signalrService, 
+			WhaleDbContext context,
+			IMapper mapper,
+			SignalrService signalrService,
 			RedisService redisService)
 			: base(context, mapper)
 		{
@@ -29,23 +29,24 @@ namespace Whale.MeetingAPI.Services
 			_redisService = redisService;
 		}
 
-		public async Task<IEnumerable<QuestionDTO>> GetQuestionsByMeetingFromRedis(Guid meetingId)
+		public async Task<IEnumerable<QuestionDTO>> GetQuestionsByMeetingFromRedisAsync(Guid meetingId)
 		{
 			await _redisService.ConnectAsync();
-			var questions = await _redisService.GetSetMembers<Question>(meetingId + nameof(Question));
+
+			var questions = await _redisService.GetSetMembersAsync<Question>(meetingId + nameof(Question));
 			questions = questions.OrderBy(q => q.AskedAt);
-			var questionDtos = _mapper.Map<IEnumerable<QuestionDTO>>(questions);
-			return questionDtos;
+
+			return _mapper.Map<IEnumerable<QuestionDTO>>(questions);
 		}
 
-		public async Task CreateQuestion(QuestionCreateDTO questionCreate)
+		public async Task CreateQuestionAsync(QuestionCreateDTO questionCreate)
 		{
 			var question = _mapper.Map<Question>(questionCreate);
 			question.Id = Guid.NewGuid();
 			question.AskedAt = DateTimeOffset.Now;
 
 			await _redisService.ConnectAsync();
-			await _redisService.AddToSet<Question>(questionCreate.MeetingId + nameof(Question), question);
+			await _redisService.AddToSetAsync<Question>(questionCreate.MeetingId + nameof(Question), question);
 
 			// signal
 			var connection = await _signalrService.ConnectHubAsync("meeting");
@@ -53,11 +54,11 @@ namespace Whale.MeetingAPI.Services
 			await connection.InvokeAsync("QuestionCreate", questionDto);
 		}
 
-		public async Task UpdateQuestionStatus(QuestionStatusUpdateDTO questionStatusUpdate)
+		public async Task UpdateQuestionStatusAsync(QuestionStatusUpdateDTO questionStatusUpdate)
 		{
 			await _redisService.ConnectAsync();
 			var setKey = questionStatusUpdate.MeetingId + nameof(Question);
-			var questions = await _redisService.GetSetMembers<Question>(setKey);
+			var questions = await _redisService.GetSetMembersAsync<Question>(setKey);
 			var question = questions.FirstOrDefault(q => q.Id == questionStatusUpdate.QuestionId);
 
 			if(question == null)
@@ -65,20 +66,20 @@ namespace Whale.MeetingAPI.Services
 				throw new NotFoundException(nameof(Question), questionStatusUpdate.QuestionId.ToString());
 			}
 
-			await _redisService.DeleteSetMember<Question>(setKey, question);
+			await _redisService.DeleteSetMemberAsync<Question>(setKey, question);
 			question.QuestionStatus = questionStatusUpdate.QuestionStatus;
-			await _redisService.AddToSet<Question>(setKey, question);
+			await _redisService.AddToSetAsync<Question>(setKey, question);
 
 			// signal
 			var connecton = await _signalrService.ConnectHubAsync("meeting");
 			await connecton.InvokeAsync("QuestionStatusUpdate", questionStatusUpdate);
 		}
 
-		public async Task DeleteQuestion(QuestionDeleteDTO questionDelete)
+		public async Task DeleteQuestionAsync(QuestionDeleteDTO questionDelete)
 		{
 			await _redisService.ConnectAsync();
 			var setKey = questionDelete.MeetingId + nameof(Question);
-			var questions = await _redisService.GetSetMembers<Question>(setKey);
+			var questions = await _redisService.GetSetMembersAsync<Question>(setKey);
 			var question = questions.FirstOrDefault(q => q.Id == questionDelete.QuestionId);
 
 			if (question == null)
@@ -86,22 +87,22 @@ namespace Whale.MeetingAPI.Services
 				throw new NotFoundException(nameof(Question), questionDelete.QuestionId.ToString());
 			}
 
-			await _redisService.DeleteSetMember<Question>(setKey, question);
+			await _redisService.DeleteSetMemberAsync<Question>(setKey, question);
 
 			// signal
 			var connecton = await _signalrService.ConnectHubAsync("meeting");
 			await connecton.InvokeAsync("QuestionDelete", questionDelete);
 		}
 
-		public async Task DeleteQuestionsFromRedisAndSaveToDatabase(Guid meetingId)
+		public async Task DeleteQuestionsFromRedisAndSaveToDatabaseAsync(Guid meetingId)
 		{
 			await _redisService.ConnectAsync();
-			var questions = await _redisService.GetSetMembers<Question>(meetingId + nameof(Question));
+			var questions = await _redisService.GetSetMembersAsync<Question>(meetingId + nameof(Question));
 
 			await _context.Questions.AddRangeAsync(questions);
 			await _context.SaveChangesAsync();
 
-			await _redisService.DeleteKey(meetingId + nameof(Question));
+			await _redisService.DeleteKeyAsync(meetingId + nameof(Question));
 		}
 	}
 }

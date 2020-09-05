@@ -1,10 +1,6 @@
-﻿using Microsoft.Extensions.Hosting;
-using Quartz;
-using Quartz.Impl;
+﻿using Quartz;
 using Quartz.Spi;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Whale.Shared.Jobs;
 
@@ -14,8 +10,8 @@ namespace Whale.Shared.Services
     {
         private readonly IJobFactory _jobFactory;
         private readonly ISchedulerFactory _schedulerFactory;
+        private readonly Guid id;
         private IScheduler scheduler;
-        private Guid id;
 
         public MeetingScheduleService(IJobFactory jobFactory, ISchedulerFactory schedulerFactory)
         {
@@ -29,7 +25,7 @@ namespace Whale.Shared.Services
             return JobBuilder
                 .Create(jobInfo.JobType)
                 .WithIdentity($"{id}-job")
-                .UsingJobData($"JobData", obj)
+                .UsingJobData("JobData", obj)
                 .Build();
         }
 
@@ -43,7 +39,7 @@ namespace Whale.Shared.Services
                 .Build();
         }
 
-        public async Task Start(JobInfo jobInfo, string obj)
+        public async Task StartAsync(JobInfo jobInfo, string obj)
         {
             scheduler = await _schedulerFactory.GetScheduler();
             scheduler.JobFactory = _jobFactory;
@@ -53,7 +49,7 @@ namespace Whale.Shared.Services
             await scheduler.Start();
         }
 
-        public async Task Stop()
+        public async Task StopAsync()
         {
             await scheduler?.Shutdown();
         }
