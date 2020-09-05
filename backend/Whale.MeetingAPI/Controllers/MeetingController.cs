@@ -19,7 +19,10 @@ namespace Whale.API.Controllers
         private readonly MeetingScheduleService _meetingScheduleService;
         private readonly NotificationsService _notifications;
 
-        public MeetingController(MeetingService meetingService, MeetingScheduleService meetingScheduleService, NotificationsService notifications)
+        public MeetingController(
+            MeetingService meetingService,
+            MeetingScheduleService meetingScheduleService,
+            NotificationsService notifications)
         {
             _meetingService = meetingService;
             _meetingScheduleService = meetingScheduleService;
@@ -86,7 +89,7 @@ namespace Whale.API.Controllers
         [HttpGet("agenda/{meetingId}")]
         public async Task<ActionResult<List<AgendaPointDTO>>> GetAgenda(string meetingId)
         {
-            List<AgendaPointDTO> agendaPoints = await _meetingService.GetAgendaPoints(meetingId);//_httpService.GetAsync<List<AgendaPointDTO>>($"meeting/agenda/{meetingId}");
+            List<AgendaPointDTO> agendaPoints = _meetingService.GetAgendaPoints(meetingId);//_httpService.GetAsync<List<AgendaPointDTO>>($"meeting/agenda/{meetingId}");
             return Ok(agendaPoints);
         }
 

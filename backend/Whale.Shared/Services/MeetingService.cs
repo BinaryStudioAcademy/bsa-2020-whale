@@ -13,17 +13,13 @@ using Whale.Shared.Models.Meeting;
 using Whale.Shared.Models.Participant;
 using Whale.Shared.Models.Meeting.MeetingMessage;
 using shortid;
-using System.Diagnostics;
 using Newtonsoft.Json;
 using System.Net.Http;
 using System.Text;
-using Whale.DAL.Models.Email;
 using Whale.Shared.Models.Email;
-using System.Net.Http.Headers;
 using Whale.Shared.Models;
 using Microsoft.Extensions.Configuration;
 using Whale.Shared.Models.Statistics;
-
 
 namespace Whale.Shared.Services
 {
@@ -398,10 +394,10 @@ namespace Whale.Shared.Services
 
             return;
         }
-        public async Task<List<AgendaPointDTO>> GetAgendaPoints(string meetingId)
+        public List<AgendaPointDTO> GetAgendaPoints(string meetingId)
         {
             return _mapper.Map<List<AgendaPointDTO>>(_context.AgendaPoints.Where(x => x.MeetingId == Guid.Parse(meetingId)).ToList());
-        } 
+        }
         public async Task UpdateTopic(AgendaPointDTO point)
         {
             point.StartTime.AddMinutes(5);
