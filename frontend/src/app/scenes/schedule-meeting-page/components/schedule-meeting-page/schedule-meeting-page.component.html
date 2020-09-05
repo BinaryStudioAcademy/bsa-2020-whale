@@ -125,6 +125,27 @@
         </div>
         <div class="ui segment">
           <div class="field">
+            <label>Meeting Type</label>
+            <div class="inline field">
+              <div class="ui compact menu">
+                <div class="ui simple inline dropdown item">
+                  {{ meetingType }}
+                  <i class="dropdown icon"></i>
+                  <div class="menu">
+                    <div class="item" (click)="switchMeetingTypes(1)">Simple</div>
+                    <div class="item" (click)="switchMeetingTypes(2)">Party</div>
+                    <div class="item" (click)="switchMeetingTypes(3)">Training</div>
+                    <div class="item" (click)="switchMeetingTypes(4)">Lesson</div>
+                    <div class="item" (click)="switchMeetingTypes(5)">Conference</div>
+                  </div>
+                </div>
+              </div>
+              <div class="ui left pointing label" *ngIf="switchMeetingTypeLabel">
+                {{meetingTypeLabel}}
+              </div>
+            </div>
+          </div>
+          <div class="field">
             <label>Video</label>
             <div class="inline field">
               <div class="ui checkbox">

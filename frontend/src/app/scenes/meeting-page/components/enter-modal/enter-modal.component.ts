@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { SimpleModalComponent } from 'ngx-simple-modal';
 import { MeetingSettingsService } from 'app/core/services';
+import {MeetingTypeEnum} from '@shared/Enums/MeetingTypeEnum';
 
 @Component({
   selector: 'app-enter-modal',
@@ -20,6 +21,9 @@ export class EnterModalComponent
   public webcam: boolean;
   public microphone: boolean;
   public recognitionLanguage: string;
+  public meetingTypeLabel: string;
+  public switchMeetingTypeLabel: boolean;
+  public meetingType = MeetingTypeEnum[1];
   private leave = false;
 
   constructor(private meetingSettingService: MeetingSettingsService) {
@@ -44,6 +48,49 @@ export class EnterModalComponent
           break;
         default:
           this.recognitionLanguage = 'English';
+      }
+    }
+  }
+
+  public switchMeetingTypes(type: MeetingTypeEnum): void {
+    this.switchMeetingTypeLabel = true;
+    if (this.isCurrentParticipantHost) {
+      switch (type) {
+        case 1:
+          this.isAllowedAudioOnStart = true;
+          this.isAllowedVideoOnStart = true;
+          this.meetingType = MeetingTypeEnum[1];
+          this.meetingTypeLabel = 'Simple (audio on for all, video on for all, music off)';
+          break;
+        case 2:
+          this.isAllowedAudioOnStart = true;
+          this.isAllowedVideoOnStart = true;
+          this.meetingType = MeetingTypeEnum[2];
+          this.meetingTypeLabel = 'Party (audio on for all, video on for all, music on)';
+          break;
+        case 3:
+          this.isAllowedAudioOnStart = false;
+          this.isAllowedVideoOnStart = true;
+          this.meetingType = MeetingTypeEnum[3];
+          this.meetingTypeLabel = 'Training (audio on only for host, video on for all, music on)';
+          break;
+        case 4:
+          this.isAllowedAudioOnStart = false;
+          this.isAllowedVideoOnStart = true;
+          this.meetingType = MeetingTypeEnum[4];
+          this.meetingTypeLabel = 'Lesson (audio on only for host, video on for all, music off)';
+          break;
+        case 5:
+          this.isAllowedAudioOnStart = false;
+          this.isAllowedVideoOnStart = false;
+          this.meetingType = MeetingTypeEnum[5];
+          this.meetingTypeLabel = 'Conference (audio on only for host, video on for host)';
+          break;
+        default:
+          this.isAllowedAudioOnStart = true;
+          this.isAllowedVideoOnStart = true;
+          this.meetingType = MeetingTypeEnum[1];
+          this.meetingTypeLabel = 'Simple (audio on for all, video on for all, music off)';
       }
     }
   }

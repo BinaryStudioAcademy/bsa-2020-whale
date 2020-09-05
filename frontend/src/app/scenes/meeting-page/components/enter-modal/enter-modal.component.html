@@ -75,6 +75,25 @@
             <h4>Host Options</h4>
           </div>
           <div class="inline field">
+            <span>Meeting Type</span>
+            <div class="ui compact menu">
+              <div class="ui simple inline dropdown item">
+                {{ meetingType }}
+                <i class="dropdown icon"></i>
+                <div class="menu">
+                  <div class="item" (click)="switchMeetingTypes(1)">Simple</div>
+                  <div class="item" (click)="switchMeetingTypes(2)">Party</div>
+                  <div class="item" (click)="switchMeetingTypes(3)">Training</div>
+                  <div class="item" (click)="switchMeetingTypes(4)">Lesson</div>
+                  <div class="item" (click)="switchMeetingTypes(5)">Conference</div>
+                </div>
+              </div>
+            </div>
+            <div class="ui pointing label" *ngIf="switchMeetingTypeLabel">
+              {{meetingTypeLabel}}
+            </div>
+          </div>
+          <div class="inline field">
             <div
               id="enter-modal-webcam"
               class="ui toggle checkbox"

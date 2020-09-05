@@ -20,6 +20,7 @@ import {
   ScheduleMeetingInviteModalData,
 } from '@shared/components/meeting-invite/meeting-invite.component';
 import { SimpleModalService } from 'ngx-simple-modal';
+import {MeetingTypeEnum} from "@shared/Enums/MeetingTypeEnum";
 
 @Component({
   selector: 'app-schedule-meeting-page',
@@ -50,6 +51,9 @@ export class ScheduleMeetingPageComponent implements OnInit {
   private loggedInUser: User;
   public isAgenda = true;
   public recognitionLanguage = 'English';
+  public meetingType = MeetingTypeEnum[1];
+  public meetingTypeLabel: string;
+  public switchMeetingTypeLabel: boolean;
   point: PointAgenda;
   constructor(
     private toastr: ToastrService,
@@ -237,5 +241,46 @@ export class ScheduleMeetingPageComponent implements OnInit {
   }
   public removeTag(event) {
     this.pointList.splice(this.pointList.indexOf(event), 1);
+  }
+
+  public switchMeetingTypes(type: MeetingTypeEnum): void {
+    this.switchMeetingTypeLabel = true;
+    switch (type) {
+        case 1:
+          this.form.controls.isDisableAudio.setValue(true);
+          this.form.controls.isDisableVideo.setValue(true);
+          this.meetingType = MeetingTypeEnum[1];
+          this.meetingTypeLabel = 'Simple (audio on for all, video on for all, music off)';
+          break;
+        case 2:
+          this.form.controls.isDisableAudio.setValue(true);
+          this.form.controls.isDisableVideo.setValue(true);
+          this.meetingType = MeetingTypeEnum[2];
+          this.meetingTypeLabel = 'Party (audio on for all, video on for all, music on)';
+          break;
+        case 3:
+          this.form.controls.isDisableAudio.setValue(false);
+          this.form.controls.isDisableVideo.setValue(true);
+          this.meetingType = MeetingTypeEnum[3];
+          this.meetingTypeLabel = 'Training (audio on only for host, video on for all, music on)';
+          break;
+        case 4:
+          this.form.controls.isDisableAudio.setValue(false);
+          this.form.controls.isDisableVideo.setValue(true);
+          this.meetingType = MeetingTypeEnum[4];
+          this.meetingTypeLabel = 'Lesson (audio on only for host, video on for all, music off)';
+          break;
+        case 5:
+          this.form.controls.isDisableAudio.setValue(false);
+          this.form.controls.isDisableVideo.setValue(false);
+          this.meetingType = MeetingTypeEnum[5];
+          this.meetingTypeLabel = 'Conference (audio on only for host, video on for host)';
+          break;
+        default:
+          this.form.controls.isDisableAudio.setValue(true);
+          this.form.controls.isDisableVideo.setValue(true);
+          this.meetingType = MeetingTypeEnum[1];
+          this.meetingTypeLabel = 'Simple (audio on for all, video on for all, music off)';
+      }
   }
 }
