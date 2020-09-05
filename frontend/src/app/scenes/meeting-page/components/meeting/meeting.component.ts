@@ -1095,6 +1095,7 @@ export class MeetingComponent
       'Conference stop recording'
     );
     this.toastr.info('Stop recording a conference');
+    this.isSomeoneRecordingScreen = false;
   }
 
   public onPollIconClick(): void {
