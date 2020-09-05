@@ -909,13 +909,13 @@ export class MeetingComponent
       });
     });
 
-    // // show a warning dialog if close current tab or window
-    // window.onbeforeunload = (ev: BeforeUnloadEvent) => {
-    //   ev.preventDefault();
-    //   ev = ev;
-    //   ev.returnValue = '';
-    //   return '';
-    // };
+    // show a warning dialog if close current tab or window
+    window.onbeforeunload = (ev: BeforeUnloadEvent) => {
+      ev.preventDefault();
+      ev = ev;
+      ev.returnValue = '';
+      return '';
+    };
   }
 
   public ngAfterViewInit(): void {
@@ -1040,6 +1040,56 @@ export class MeetingComponent
     tracks.forEach((track) => {
       track.enabled = enable;
     });
+
+    if (!enable) {
+      tracks.forEach(track => {
+        track.stop();
+      });
+    } else {
+      if (isVideo) {
+        navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false
+        }).then(
+          (stream) => {
+            const keys = Object.keys(this.peer.connections);
+            const peerConnection = this.peer.connections[keys[0]];
+            const videoTrack = stream.getVideoTracks()[0];
+            peerConnection?.forEach((pc) => {
+              const sender = pc.peerConnection.getSenders().find((s) => {
+                return s.track.kind === videoTrack.kind;
+              });
+              sender.replaceTrack(videoTrack);
+            });
+            this.currentUserStream.getVideoTracks().forEach((vt) => {
+              this.currentUserStream.removeTrack(vt);
+            });
+            this.currentUserStream.addTrack(videoTrack);
+          }
+        );
+      } else {
+        navigator.mediaDevices.getUserMedia({
+          video: false,
+          audio: true
+        }).then(
+          (stream) => {
+            const keys = Object.keys(this.peer.connections);
+            const peerConnection = this.peer.connections[keys[0]];
+            const audioTrack = stream.getAudioTracks()[0];
+            peerConnection?.forEach((pc) => {
+              const sender = pc.peerConnection.getSenders().find((s) => {
+                return s.track.kind === audioTrack.kind;
+              });
+              sender.replaceTrack(audioTrack);
+            });
+            this.currentUserStream.getAudioTracks().forEach((at) => {
+              this.currentUserStream.removeTrack(at);
+            });
+            this.currentUserStream.addTrack(audioTrack);
+          }
+        );
+      }
+    }
   }
 
   public startRecording(): void {
@@ -1820,7 +1870,9 @@ export class MeetingComponent
 
   public handleSuccessVideo(stream: MediaStream): void {
     const video = document.querySelector('video') as HTMLVideoElement;
-    // video.srcObject = stream;
+    if (video.srcObject) {
+      video.srcObject = stream;
+    }
     const keys = Object.keys(this.peer.connections);
     const peerConnection = this.peer.connections[keys[0]];
     const videoTrack = stream.getVideoTracks()[0];
@@ -2081,6 +2133,7 @@ export class MeetingComponent
       fromEvent(this.recognition, 'end').pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (event) => {
+          console.log('end');
           if (!this.isRecognitionStop) {
             this.recognition.start();
           }
