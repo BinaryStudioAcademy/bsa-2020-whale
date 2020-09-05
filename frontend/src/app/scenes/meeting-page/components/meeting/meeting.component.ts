@@ -1022,9 +1022,7 @@ export class MeetingComponent
       return;
     }
 
-    this.isCameraMuted
-      ? this.switchTrack(true, true)
-      : this.switchTrack(false, true);
+    this.switchTrack(this.isCameraMuted, true);
 
     this.isCameraMuted = !this.isCameraMuted;
     if (!isMissSignaling) {
@@ -1043,52 +1041,18 @@ export class MeetingComponent
 
     if (!enable) {
       tracks.forEach(track => {
+        track.enabled = enable;
         track.stop();
       });
+      return;
+    }
+
+    if (isVideo) {
+      navigator.mediaDevices.getUserMedia(this.mediaSettingsService.getVideoConstraints())
+        .then(audioStream => this.handleSuccessVideo(audioStream));
     } else {
-      if (isVideo) {
-        navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: false
-        }).then(
-          (stream) => {
-            const keys = Object.keys(this.peer.connections);
-            const peerConnection = this.peer.connections[keys[0]];
-            const videoTrack = stream.getVideoTracks()[0];
-            peerConnection?.forEach((pc) => {
-              const sender = pc.peerConnection.getSenders().find((s) => {
-                return s.track.kind === videoTrack.kind;
-              });
-              sender.replaceTrack(videoTrack);
-            });
-            this.currentUserStream.getVideoTracks().forEach((vt) => {
-              this.currentUserStream.removeTrack(vt);
-            });
-            this.currentUserStream.addTrack(videoTrack);
-          }
-        );
-      } else {
-        navigator.mediaDevices.getUserMedia({
-          video: false,
-          audio: true
-        }).then(
-          (stream) => {
-            const keys = Object.keys(this.peer.connections);
-            const peerConnection = this.peer.connections[keys[0]];
-            const audioTrack = stream.getAudioTracks()[0];
-            peerConnection?.forEach((pc) => {
-              const sender = pc.peerConnection.getSenders().find((s) => {
-                return s.track.kind === audioTrack.kind;
-              });
-              sender.replaceTrack(audioTrack);
-            });
-            this.currentUserStream.getAudioTracks().forEach((at) => {
-              this.currentUserStream.removeTrack(at);
-            });
-            this.currentUserStream.addTrack(audioTrack);
-          }
-        );
-      }
+      navigator.mediaDevices.getUserMedia(this.mediaSettingsService.getAudioConstraints())
+        .then(videoStream => this.handleSuccessAudio(videoStream));
     }
   }
 
@@ -1898,9 +1862,11 @@ export class MeetingComponent
     this.isVideoSettings = false;
   }
 
-  private async handleSuccessAudio(stream): Promise<void> {
+  private async handleSuccessAudio(stream: MediaStream): Promise<void> {
     const audio = document.querySelector('audio');
-    audio.srcObject = stream;
+    if (audio) {
+      audio.srcObject = stream;
+    }
     const keys = Object.keys(this.peer.connections);
     const peerConnection = this.peer.connections[keys[0]];
     const audioTrack = stream.getAudioTracks()[0];
@@ -1910,6 +1876,10 @@ export class MeetingComponent
       });
       sender.replaceTrack(audioTrack);
     });
+    this.currentUserStream.getAudioTracks().forEach((at) => {
+      this.currentUserStream.removeTrack(at);
+    });
+    this.currentUserStream.addTrack(audioTrack);
   }
 
   public async changeOutputDevice(deviceId: string): Promise<void> {
@@ -2133,7 +2103,6 @@ export class MeetingComponent
       fromEvent(this.recognition, 'end').pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (event) => {
-          console.log('end');
           if (!this.isRecognitionStop) {
             this.recognition.start();
           }
