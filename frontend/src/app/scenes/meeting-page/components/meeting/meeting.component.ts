@@ -1838,7 +1838,7 @@ export class MeetingComponent
       video.srcObject = stream;
     }
     const keys = Object.keys(this.peer.connections);
-    const peerConnection = this.peer.connections[keys[0]];
+    const peerConnection = this.peer.connections[keys[keys.length - 1]];
     const videoTrack = stream.getVideoTracks()[0];
     peerConnection?.forEach((pc) => {
       const sender = pc.peerConnection.getSenders().find((s) => {
@@ -1868,7 +1868,7 @@ export class MeetingComponent
       audio.srcObject = stream;
     }
     const keys = Object.keys(this.peer.connections);
-    const peerConnection = this.peer.connections[keys[0]];
+    const peerConnection = this.peer.connections[keys[keys.length - 1]];
     const audioTrack = stream.getAudioTracks()[0];
     peerConnection?.forEach((pc) => {
       const sender = pc.peerConnection.getSenders().find((s) => {
