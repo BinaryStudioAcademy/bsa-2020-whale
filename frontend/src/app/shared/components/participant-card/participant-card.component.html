@@ -8,8 +8,11 @@
       class="video"
       autoplay
       [ngClass]="dynamicData.isVideoActive ? 'visible' : 'hidden'"
-      [muted]="data.isCurrentUser ? 'muted' : ''"
+      [muted]="'muted'"
     ></video>
+    <audio autoplay [muted]="data.isCurrentUser ? 'muted' : ''">
+
+    </audio>
     <p
       class="participant-initials"
       [ngClass]="dynamicData.isVideoActive ? 'hidden' : 'visible'"

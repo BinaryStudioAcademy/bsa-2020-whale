@@ -909,13 +909,13 @@ export class MeetingComponent
       });
     });
 
-    // // show a warning dialog if close current tab or window
-    // window.onbeforeunload = (ev: BeforeUnloadEvent) => {
-    //   ev.preventDefault();
-    //   ev = ev;
-    //   ev.returnValue = '';
-    //   return '';
-    // };
+    // show a warning dialog if close current tab or window
+    window.onbeforeunload = (ev: BeforeUnloadEvent) => {
+      ev.preventDefault();
+      ev = ev;
+      ev.returnValue = '';
+      return '';
+    };
   }
 
   public ngAfterViewInit(): void {
@@ -1022,9 +1022,7 @@ export class MeetingComponent
       return;
     }
 
-    this.isCameraMuted
-      ? this.switchTrack(true, true)
-      : this.switchTrack(false, true);
+    this.switchTrack(this.isCameraMuted, true);
 
     this.isCameraMuted = !this.isCameraMuted;
     if (!isMissSignaling) {
@@ -1040,6 +1038,22 @@ export class MeetingComponent
     tracks.forEach((track) => {
       track.enabled = enable;
     });
+
+    if (!enable) {
+      tracks.forEach(track => {
+        track.enabled = enable;
+        track.stop();
+      });
+      return;
+    }
+
+    if (isVideo) {
+      navigator.mediaDevices.getUserMedia(this.mediaSettingsService.getVideoConstraints())
+        .then(audioStream => this.handleSuccessVideo(audioStream));
+    } else {
+      navigator.mediaDevices.getUserMedia(this.mediaSettingsService.getAudioConstraints())
+        .then(videoStream => this.handleSuccessAudio(videoStream));
+    }
   }
 
   public startRecording(): void {
@@ -1820,11 +1834,13 @@ export class MeetingComponent
 
   public handleSuccessVideo(stream: MediaStream): void {
     const video = document.querySelector('video') as HTMLVideoElement;
-    // video.srcObject = stream;
+    if (video.srcObject) {
+      video.srcObject = stream;
+    }
     const keys = Object.keys(this.peer.connections);
     const peerConnection = this.peer.connections[keys[0]];
     const videoTrack = stream.getVideoTracks()[0];
-    peerConnection.forEach((pc) => {
+    peerConnection?.forEach((pc) => {
       const sender = pc.peerConnection.getSenders().find((s) => {
         return s.track.kind === videoTrack.kind;
       });
@@ -1846,18 +1862,24 @@ export class MeetingComponent
     this.isVideoSettings = false;
   }
 
-  private async handleSuccessAudio(stream): Promise<void> {
+  private async handleSuccessAudio(stream: MediaStream): Promise<void> {
     const audio = document.querySelector('audio');
-    audio.srcObject = stream;
+    if (audio) {
+      audio.srcObject = stream;
+    }
     const keys = Object.keys(this.peer.connections);
     const peerConnection = this.peer.connections[keys[0]];
     const audioTrack = stream.getAudioTracks()[0];
-    peerConnection.forEach((pc) => {
+    peerConnection?.forEach((pc) => {
       const sender = pc.peerConnection.getSenders().find((s) => {
         return s.track.kind === audioTrack.kind;
       });
       sender.replaceTrack(audioTrack);
     });
+    this.currentUserStream.getAudioTracks().forEach((at) => {
+      this.currentUserStream.removeTrack(at);
+    });
+    this.currentUserStream.addTrack(audioTrack);
   }
 
   public async changeOutputDevice(deviceId: string): Promise<void> {
