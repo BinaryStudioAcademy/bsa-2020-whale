@@ -846,13 +846,13 @@ export class MeetingComponent
       });
     });
 
-    // // show a warning dialog if close current tab or window
-    // window.onbeforeunload = (ev: BeforeUnloadEvent) => {
-    //   ev.preventDefault();
-    //   ev = ev;
-    //   ev.returnValue = '';
-    //   return '';
-    // };
+    // show a warning dialog if close current tab or window
+    window.onbeforeunload = (ev: BeforeUnloadEvent) => {
+      ev.preventDefault();
+      ev = ev;
+      ev.returnValue = '';
+      return '';
+    };
   }
 
   public ngAfterViewInit(): void {
@@ -1303,7 +1303,7 @@ export class MeetingComponent
 
             this.questionService.getQuestionsByMeeting(this.meeting.id);
 
-            // this.configureRecognition();
+            this.configureRecognition();
           });
         },
         (error) => {
@@ -1783,7 +1783,9 @@ export class MeetingComponent
 
   public handleSuccessVideo(stream: MediaStream): void {
     const video = document.querySelector('video') as HTMLVideoElement;
-    // video.srcObject = stream;
+    if (video.srcObject) {
+      video.srcObject = stream;
+    }
     const keys = Object.keys(this.peer.connections);
     const peerConnection = this.peer.connections[keys[0]];
     const videoTrack = stream.getVideoTracks()[0];
@@ -2044,11 +2046,12 @@ export class MeetingComponent
       fromEvent(this.recognition, 'end').pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (event) => {
+          console.log('end');
           if (!this.isRecognitionStop) {
-            // this.recognition.start();
+            this.recognition.start();
           }
         });
-      // this.recognition.start();
+      this.recognition.start();
     }
     catch {
       this.toastr.info('Speech recognition is not supported by the browser');
