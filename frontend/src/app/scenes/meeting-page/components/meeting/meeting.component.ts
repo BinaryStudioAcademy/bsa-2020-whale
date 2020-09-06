@@ -75,6 +75,7 @@ import { MeetingSettingsService } from '../../../../core/services/meeting-settin
 import { MeetingInviteModalData } from '@shared/models/email/meeting-invite-modal-data';
 import { QuestionComponent } from '@shared/components/question/question/question.component';
 import { ParticipantCardComponent } from '@shared/components/participant-card/participant-card.component';
+import { PointAgenda } from '@shared/models/agenda/agenda';
 
 declare var webkitSpeechRecognition: any;
 
@@ -187,7 +188,7 @@ export class MeetingComponent
   startedSpeak: Date = null;
   startedPresence: Date = null;
   speechDuration = 0;
-
+  topicList: PointAgenda[] = [];
   @ViewChild('currentVideo') private currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
     HTMLElement
@@ -882,8 +883,10 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (point) => {
-          this.isTopicEnd = true;
-          this.toastr.success(`Topic ${point.name} finished`);
+          const toast = this.toastr.success(`Topic ${point.name} finished`, 'Tab this for snooze on 5 min', {
+            enableHtml :  true
+          });
+          toast.onTap.subscribe(() => this.snoozeTopic(point));
         },
         () => {
           this.toastr.error('Error');
@@ -1346,6 +1349,7 @@ export class MeetingComponent
             this.questionService.getQuestionsByMeeting(this.meeting.id);
 
             this.configureRecognition();
+            this.getAgenda();
           });
           this.startedPresence = new Date();
           setInterval(() => {
@@ -2173,9 +2177,40 @@ export class MeetingComponent
     this.isTopicEnd = false;
     this.isPlanning = !this.isPlanning;
   }
-  checkPoint()
-  {
-    this.checkTopic.nativeElement.checked = true;
+  async getAgenda(){
+    this.meetingService.getAgenda(this.meeting.id)
+      .subscribe((res) =>
+      {
+        this.topicList = res;
+        this.topicList.forEach(x => {
+          x.isFinished = false;
+          const ntf = setTimeout(() => {
+            const date = new Date();
+            if (date >= new Date(x.startTime) && x.isFinished === false){
+              this.meetingSignalrService.invoke(SignalMethods.OnOutTime, {
+                point: x ,
+                meetingId: this.meeting.id
+              });
+
+              if (this.topicList[this.topicList.indexOf(x) - 1])
+              {
+                this.meetingSignalrService.invoke(SignalMethods.OnEndedTopic, {
+                  point: this.topicList[this.topicList.indexOf(x) - 1],
+                  meetingId: this.meeting.id
+                });
+              }
+            }
+            clearTimeout(ntf);
+            x.isFinished = true;
+            });
+          }, 1000);
+      });
+  }
+  snoozeTopic(point: PointAgenda){
+    const list = this.topicList.splice(this.topicList.indexOf(point) - 1, this.topicList.length);
+    list.forEach(x => x.startTime = new Date(x.startTime));
+    list.forEach(x => { x.startTime.setMinutes(x.startTime.getMinutes() + 5); });
+    list.forEach(x => this.meetingService.updateAgenda(x).subscribe());
   }
 
   updateMeetingStatistics(): void {

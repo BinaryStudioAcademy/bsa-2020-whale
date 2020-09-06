@@ -428,15 +428,17 @@ namespace Whale.Shared.Services
 
             return;
         }
-        public List<AgendaPointDTO> GetAgendaPoints(string meetingId)
+        public List<AgendaPointDTO> GetAgendaPoints(string meetingId){
+            return _mapper.Map<List<AgendaPointDTO>>(_context.AgendaPoints.Where(x => x.MeetingId == Guid.Parse(meetingId)).OrderBy(x=>x.StartTime).ToList());
+        } 
+        public async Task UpdateTopic(AgendaPointDTO point)
         {
-            return _mapper.Map<List<AgendaPointDTO>>(_context.AgendaPoints.Where(x => x.MeetingId == Guid.Parse(meetingId)).ToList());
-        }
-        public async Task UpdateTopicAsync(AgendaPointDTO point)
-        {
-            point.StartTime.AddMinutes(5);
-            _context.AgendaPoints.Update(_mapper.Map<AgendaPoint>(point));
-            await _context.SaveChangesAsync();
+            var topic = _context.AgendaPoints.FirstOrDefault(x => x.Id == point.Id);
+            if (topic != null)
+            {
+                topic.StartTime = point.StartTime;
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }
