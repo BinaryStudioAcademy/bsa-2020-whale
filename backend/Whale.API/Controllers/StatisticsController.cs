@@ -30,12 +30,5 @@ namespace Whale.API.Controllers
             var offset = DateTime.Now.Subtract(DateTime.UtcNow);
             return Ok(await _elasticSearchService.SearchStatistics(email, new DateTime(startDate).Add(offset), new DateTime(endDate).Add(offset)));
         }
-
-        [HttpPost]
-        public async Task<ActionResult> Post(MeetingUserStatistics d)
-        {
-            await _elasticSearchService.SaveSingleAsync(d);
-            return Ok();
-        }
     }
 }

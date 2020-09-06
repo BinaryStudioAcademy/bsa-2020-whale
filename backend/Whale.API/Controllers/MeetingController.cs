@@ -99,7 +99,7 @@ namespace Whale.API.Controllers
         {
             statistics.Email = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
 
-            await _httpService.PutAsync("api/meeting/statistics", statistics);
+            await _httpService.PutAsync("meeting/statistics", statistics);
             return Ok();
         }
 
