@@ -174,7 +174,7 @@ export class MeetingComponent
   public isMoveToMeeting = false;
   public onCanLeaveEvent = new EventEmitter<void>();
   public isSharing = false;
-  private sdpVideoBandwidth = 125000;
+  private sdpVideoBandwidth = 125;
   public meter = new DecibelMeter('meter');
   public browserMediaDevice = new BrowserMediaDevice();
   public lastTrack: MediaStreamTrack;
