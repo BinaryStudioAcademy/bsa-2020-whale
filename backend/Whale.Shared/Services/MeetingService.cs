@@ -291,7 +291,6 @@ namespace Whale.Shared.Services
         public async Task EndMeeting(Guid meetingId)
         {
             var meeting = await _context.Meetings
-                .Include(m => m.Participants)
                 .FirstOrDefaultAsync(m => m.Id == meetingId);
 
             if (meeting == null)
@@ -314,7 +313,10 @@ namespace Whale.Shared.Services
 
             await _context.SaveChangesAsync();
             await _notifications.UpdateInviteMeetingNotifications(shortUrl);
-            foreach(var p in meeting.Participants)
+
+            var participants = _context.Participants.Where(p => p.MeetingId == meeting.Id).ToList();
+
+            foreach(var p in participants)
             {
                 var statistics = new MeetingUserStatistics
                 {

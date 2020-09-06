@@ -25,11 +25,12 @@ namespace Whale.API.Controllers
 
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<DateHistogramBucket>>> GetByUser()
+        [HttpGet("{startDate}/{endDate}")]
+        public async Task<ActionResult<IEnumerable<DateHistogramBucket>>> GetByUser(long startDate, long endDate)
         {
             var email = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            return Ok(await _elasticSearchService.SearchStatistics(email));
+            var offset = DateTime.Now.Subtract(DateTime.UtcNow);
+            return Ok(await _elasticSearchService.SearchStatistics(email, new DateTime(startDate).Add(offset), new DateTime(endDate).Add(offset)));
         }
     }
 }

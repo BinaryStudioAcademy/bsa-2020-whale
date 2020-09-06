@@ -27,12 +27,14 @@ import { QuestionComponent } from './components/question/question/question.compo
 import { QuestionStatusDirective } from './directives/question-status.directive';
 import { DndModule } from 'ngx-drag-drop';
 import { ToastrWithButtonComponent } from './components/toastr-with-button/toastr-with-button.component';
+import { KeysPipe } from './pipes/keys.pipe';
 
 @NgModule({
   declarations: [
     PageHeaderComponent,
     SpinerComponent,
     DateFormatPipe,
+    KeysPipe,
     ParticipantCardComponent,
     PollCreateComponent,
     PollComponent,
@@ -69,6 +71,7 @@ import { ToastrWithButtonComponent } from './components/toastr-with-button/toast
     PollResultsComponent,
     SpinerComponent,
     DateFormatPipe,
+    KeysPipe,
     ParticipantCardComponent,
     MeetingStatisticsComponent,
     IncomingCallComponent,

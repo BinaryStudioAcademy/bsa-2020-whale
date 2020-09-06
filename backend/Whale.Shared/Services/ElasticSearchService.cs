@@ -43,7 +43,7 @@ namespace Whale.Shared.Services
             }
         }
 
-        public async Task<IEnumerable<DateHistogramBucket>> SearchStatistics(string email)
+        public async Task<IEnumerable<DateHistogramBucket>> SearchStatistics(string email, DateTime startDate, DateTime endDate)
         {
             var user = await _userService.GetUserByEmail(email);
             var indexName = $"{indexPrefix}{user.Id.ToString()}";
@@ -55,8 +55,8 @@ namespace Whale.Shared.Services
                 .Query(q => q
                     .DateRange(d => d
                         .Field(f => f.EndDate)
-                        .LessThanOrEquals(DateMath.Now.Add(TimeSpan.FromDays(1)).RoundTo(DateMathTimeUnit.Hour))
-                        .GreaterThanOrEquals(DateMath.Now.Subtract(TimeSpan.FromDays(30)).RoundTo(DateMathTimeUnit.Hour))))
+                        .LessThanOrEquals(endDate)
+                        .GreaterThanOrEquals(startDate)))
                 .Aggregations(a => a
                     .DateHistogram("dateHistogram", h => h
                         .Field(f => f.EndDate)
