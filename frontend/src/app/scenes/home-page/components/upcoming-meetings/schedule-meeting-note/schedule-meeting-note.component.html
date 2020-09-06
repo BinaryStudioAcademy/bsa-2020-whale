@@ -1,11 +1,22 @@
 <div class="ui card width-100">
     <div class="content">
-      <div class="header" style="margin-left: 50px;">
+      <div *ngIf="scheduled.meeting.topic" class="header topic">
+        {{ scheduled.meeting.topic  }}
+      </div>
+      <div *ngIf="!scheduled.meeting.topic" class="header topic">
         Meeting {{ scheduled.meeting.id }}
       </div>
     </div>
     <div class="content">
       <div class="ui internally celled grid">
+        <div *ngIf="scheduled.meeting.description" class="row">
+          <div class="column first">
+            Description
+          </div>
+          <div class="ten wide column">
+            {{ scheduled.meeting.description }}
+          </div>
+        </div>
         <div class="row">
           <div class="column first">
             Start at

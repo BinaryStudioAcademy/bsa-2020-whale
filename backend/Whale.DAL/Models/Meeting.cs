@@ -9,6 +9,8 @@ namespace Whale.DAL.Models
     public class Meeting : BaseEntity
     {
         public string Settings { get; set; }
+        public string Topic { get; set; }
+        public string Description { get; set; }
         public DateTimeOffset StartTime { get; set; }
         public DateTimeOffset? EndTime { get; set; }
         public int AnonymousCount { get; set; }

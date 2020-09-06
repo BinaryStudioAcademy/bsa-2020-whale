@@ -144,6 +144,8 @@ export class ScheduleMeetingPageComponent implements OnInit {
       .subscribe((participantEmails) => {
         this.meetingService
           .createScheduledMeeting({
+            topic: this.form.get('topic').value,
+            description: this.form.get('description').value,
             settings: '',
             startTime: date,
             anonymousCount: 0,
