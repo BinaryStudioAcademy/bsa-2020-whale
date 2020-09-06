@@ -22,39 +22,26 @@ export class PushNotificationsService {
       });
     }
   }
-  create(title: string, options ? : PushNotification): any {
-    const self = this;
-    return new Observable((obs) => {
+  create(title: string, options?: PushNotification): any {
+
+    return new Observable((obs: any) => {
+
       if (!('Notification' in window)) {
-        console.log('Notifications are not available in this environment');
+        obs.error('Notifications are not available in this environment');
         obs.complete();
       }
-      if (self.permission !== 'granted') {
-        console.log("The user hasn't granted you permission to send push notifications");
+
+      if (this.permission !== 'granted') {
+        obs.error(`The user hasn't granted you permission to send push notifications`);
         obs.complete();
       }
-      let _notify = new Notification(title, options);
-      _notify.onshow = (e) => {
-        return obs.next({
-          notification: _notify,
-          event: e
-        });
-      };
-      _notify.onclick = (e) => {
-        return obs.next({
-          notification: _notify,
-          event: e
-        });
-      };
-      _notify.onerror = (e) => {
-        return obs.error({
-          notification: _notify,
-          event: e
-        });
-      };
-      _notify.onclose = () => {
-        return obs.complete();
-      };
+
+      const n = new Notification(title, options);
+
+      n.onshow = (e: any) => obs.next({notification: n, event: e});
+      n.onclick = (e: any) => obs.next({notification: n, event: e});
+      n.onerror = (e: any) => obs.error({notification: n, event: e});
+      n.onclose = () => obs.complete();
     });
   }
   Send(body: string): void {
