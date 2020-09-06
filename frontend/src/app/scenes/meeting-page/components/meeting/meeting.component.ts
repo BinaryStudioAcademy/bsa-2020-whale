@@ -1231,6 +1231,7 @@ export class MeetingComponent
     window.onbeforeunload = () => {};
     this.meter.stopListening();
     this.meter.disconnect();
+    this.isRecognitionStop = true;
     this.recognition?.stop();
     this.router.navigate(['/home']);
   }
@@ -1354,6 +1355,7 @@ export class MeetingComponent
     this.destroyPeer();
     this.meter.stopListening();
     this.meter.disconnect();
+    this.isRecognitionStop = true;
     this.recognition?.stop();
     this.router.navigate(['/home']);
   }
