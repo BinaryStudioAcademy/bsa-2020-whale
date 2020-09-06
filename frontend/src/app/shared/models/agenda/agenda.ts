@@ -3,4 +3,5 @@ export interface PointAgenda {
   meetingId?: string;
   name: string;
   startTime: Date;
+  isFinished?: boolean;
 }
