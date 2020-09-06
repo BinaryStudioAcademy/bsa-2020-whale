@@ -11,6 +11,65 @@
         <i id="history-close" class="large close icon" (click)="close()"></i>
         </div>
     </div>
+    <form class="ui form" [formGroup]="form">
+      <div class="ui row">
+        <span>From:</span>
+        <dp-date-picker
+          [config]="config"
+          theme="dp-material"
+          formControlName="startDate"
+        ></dp-date-picker>
+        <span>To:</span>
+        <dp-date-picker
+          [config]="config"
+          theme="dp-material"
+          formControlName="endDate"
+        ></dp-date-picker>
 
+        <button
+          id="daterange-change"
+          class="ui button primary"
+          [disabled]="!form.valid"
+          (click)="submit()"
+        >
+          Change Date Range
+        </button>
+      </div>
+    </form>
+
+    <div class="ui row">
+      <div class="custom-select ui compact menu">
+        <select
+          [(ngModel)]="statisticField"
+          class="select"
+          (ngModelChange)="changeField($event)"
+        >
+          <option
+            *ngFor="let f of fields | keys"
+            [value]=+f.key
+            >{{ f?.value }} duration</option
+          >
+        </select>
+      </div>
+      <div class="custom-select ui compact menu">
+        <select
+          [(ngModel)]="aggregation"
+          class="select"
+          (ngModelChange)="changeAggregation($event)"
+        >
+          <option
+            *ngFor="let f of aggregations | keys"
+            [value]=+f.key
+            >{{ f?.value }}</option
+          >
+        </select>
+      </div>
+    </div>
+
+    <ejs-chart *ngIf="data.length > 0" [title]='chartTitle' [primaryXAxis]='xAxis' [primaryYAxis]='yAxis' [tooltip]='tooltip' class="chart">
+      <e-series-collection >
+        <e-series type='Line' [dataSource]='data' xName='date' yName='value' [marker]='markerSettings'></e-series>
+      </e-series-collection>
+    </ejs-chart>
    
 </div>

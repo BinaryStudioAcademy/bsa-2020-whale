@@ -1,11 +1,33 @@
 export interface UserMeetingStatistics {
-    id: string;
-    userId: string;
-    meetingId: string;
-    startDate: Date;
-    endDate: Date;
-    durationTime: number;
-    speechTime: number;
-    presenceTime: number;
-    meetingDuration: string;
+    date: {
+        value: number;
+        valueAsString: string;
+    };
+    minDuration: {
+        value: number;
+    };
+    maxDuration: {
+        value: number;
+    };
+    avgDuration: {
+        value: number;
+    };
+    minSpeech: {
+        value: number;
+    };
+    maxSpeech: {
+        value: number;
+    };
+    avgSpeech: {
+        value: number;
+    };
+    minPresence: {
+        value: number;
+    };
+    maxPresence: {
+        value: number;
+    };
+    avgPresence: {
+        value: number;
+    };
 }

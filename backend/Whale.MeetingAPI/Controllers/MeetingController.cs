@@ -8,6 +8,7 @@ using Whale.Shared.Jobs;
 using Whale.Shared.Models;
 using Whale.Shared.Models.Meeting;
 using Whale.Shared.Services;
+using Whale.Shared.Models.ElasticModels.Statistics;
 
 namespace Whale.API.Controllers
 {
@@ -96,10 +97,17 @@ namespace Whale.API.Controllers
             return Ok();
         }
 
+        [HttpPut("statistics")]
+        public async Task<ActionResult> UpdateMeetingStatistics(UpdateStatistics statistics)
+        {
+            await _meetingService.UpdateMeetingStatistic(statistics);
+            return Ok();
+        }
+
         [HttpPost("reloadStatistics")]
         public async Task<ActionResult> ReloadStatisticsAsync()
         {
-            await _meetingService.ReloadStatisticsAsync();
+            await _meetingService.ReloadStatistics();
             return Ok();
         }
     }

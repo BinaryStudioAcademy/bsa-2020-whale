@@ -174,7 +174,7 @@ export class MeetingComponent
   public isMoveToMeeting = false;
   public onCanLeaveEvent = new EventEmitter<void>();
   public isSharing = false;
-  private sdpVideoBandwidth = 125000;
+  private sdpVideoBandwidth = 125;
   public meter = new DecibelMeter('meter');
   public browserMediaDevice = new BrowserMediaDevice();
   public lastTrack: MediaStreamTrack;
@@ -184,6 +184,9 @@ export class MeetingComponent
   public IsPoll = false;
   public isSomeoneRecordingScreen = false;
   public reactionDelay: Observable<number>;
+  startedSpeak: Date = null;
+  startedPresence: Date = null;
+  speechDuration = 0;
 
   @ViewChild('currentVideo') private currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
@@ -1233,6 +1236,7 @@ export class MeetingComponent
     this.meter.disconnect();
     this.isRecognitionStop = true;
     this.recognition?.stop();
+    this.updateMeetingStatistics();
     this.router.navigate(['/home']);
   }
 
@@ -1343,6 +1347,10 @@ export class MeetingComponent
 
             this.configureRecognition();
           });
+          this.startedPresence = new Date();
+          setInterval(() => {
+            this.updateMeetingStatistics();
+          }, 60000);
         },
         (error) => {
           this.leaveUnConnected();
@@ -1357,6 +1365,7 @@ export class MeetingComponent
     this.meter.disconnect();
     this.isRecognitionStop = true;
     this.recognition?.stop();
+    this.updateMeetingStatistics();
     this.router.navigate(['/home']);
   }
 
@@ -1532,7 +1541,18 @@ export class MeetingComponent
         this.meter.connect(device);
         this.meter.on(
           'sample',
-          (dB, percent, value) => (newMediaData.volume = dB + 100)
+          (dB, percent, value) => {
+            newMediaData.volume = dB + 100;
+            if (newMediaData.volume > 1 && !this.isMicrophoneMuted){
+              if (this.startedSpeak != null){
+                this.speechDuration += new Date().getTime() - this.startedSpeak.getTime();
+              }
+              this.startedSpeak = new Date();
+            }
+            else {
+              this.startedSpeak = null;
+            }
+          }
         );
         this.meter.listen();
       });
@@ -2079,11 +2099,11 @@ export class MeetingComponent
       line++;
     }
     if (lines[line].indexOf('b') === 0) {
-      lines[line] = 'b=TIAS:' + bitrate;
+      lines[line] = 'b=TIAS:' + bitrate + '000\nb=AS:' + bitrate;
       return lines.join('\n');
     }
     let newLines = lines.slice(0, line);
-    newLines.push('b=TIAS:' + bitrate);
+    newLines.push('b=TIAS:' + bitrate + '000\nb=AS:' + bitrate);
     newLines = newLines.concat(lines.slice(line, lines.length));
     return newLines.join('\n');
   }
@@ -2111,6 +2131,7 @@ export class MeetingComponent
       reaction: event,
     } as Reaction);
   }
+
   //#region SpeechRecognition
   private configureRecognition() {
     try {
@@ -2152,5 +2173,22 @@ export class MeetingComponent
   checkPoint()
   {
     this.checkTopic.nativeElement.checked = true;
+  }
+
+  updateMeetingStatistics(): void {
+    let presence = 0;
+    if (this.startedPresence != null){
+      presence = new Date().getTime() - this.startedPresence.getTime();
+    }
+    this.meetingService.updateMeetingStatistics({
+      meetingId: this.meeting.id,
+      speechTime: this.speechDuration,
+      presenceTime: presence
+    })
+    .pipe(takeUntil(this.unsubscribe$))
+    .subscribe((rest) => {},
+      (err) => (this.toastr.error(err.Message)));
+    this.startedPresence = new Date();
+    this.speechDuration = 0;
   }
 }
