@@ -208,6 +208,7 @@ namespace Whale.Shared.Services
             {
                 IsAudioAllowed = ((dynamic)meetingSettings).IsAudioAllowed,
                 IsVideoAllowed = ((dynamic)meetingSettings).IsVideoAllowed,
+                RecognitionLanguage = ((dynamic)meetingSettings).RecognitionLanguage,
             });
 
             await _redisService.SetAsync(scheduledMeeing.FullURL, scheduledMeeing.ShortURL);
