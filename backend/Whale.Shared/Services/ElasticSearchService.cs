@@ -92,7 +92,7 @@ namespace Whale.Shared.Services
                   )))
                 );
             
-            return response.Aggregations.DateHistogram("date_histogram").Buckets;
+            return response.Aggregations.DateHistogram("dateHistogram").Buckets;
         }
     }
 }

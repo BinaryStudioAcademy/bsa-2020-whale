@@ -107,7 +107,7 @@ namespace Whale.API.Controllers
         [HttpPost("reloadStatistics")]
         public async Task<ActionResult> ReloadStatisticsAsync()
         {
-            await _meetingService.ReloadStatisticsAsync();
+            await _meetingService.ReloadStatistics();
             return Ok();
         }
     }
