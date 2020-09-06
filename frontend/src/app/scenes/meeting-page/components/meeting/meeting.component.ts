@@ -1627,9 +1627,6 @@ export class MeetingComponent
     .forEach(card => {
       card.style.height = '100%';
       card.style.width = '100%';
-      const uiCard = card.querySelector('.ui.card') as HTMLDivElement;
-      const video = card.querySelector('video');
-      video.style.height = 'calc(100% + 30px)';
     });
 
     this.unsubscribeReaction$ = new Subject<void>();
