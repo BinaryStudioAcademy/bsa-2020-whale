@@ -7,4 +7,5 @@ export interface ScheduledMeeting {
     creator: User;
     participants: User[];
     link: string;
+    canceled: boolean;
 }

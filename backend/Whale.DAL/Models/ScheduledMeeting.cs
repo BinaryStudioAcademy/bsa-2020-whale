@@ -15,5 +15,6 @@ namespace Whale.DAL.Models
         public string FullURL { get; set; }
         public string ShortURL { get; set; }
         public string Password { get; set; }
+        public bool Canceled { get; set; }
     }
 }

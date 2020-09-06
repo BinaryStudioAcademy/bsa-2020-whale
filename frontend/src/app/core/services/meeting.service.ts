@@ -40,15 +40,6 @@ export class MeetingService {
     );
   }
 
-  // public updateMediaOnStart(
-  //   mediaOnStart: MediaOnStart
-  // ): Observable<HttpResponse<void>> {
-  //   return this.httpService.putFullRequest(
-  //     `${this.routePrefix}/updateMedia`,
-  //     mediaOnStart
-  //   );
-  // }
-
   public updateMeetingSettings(
     updateSettings: UpdateSettings
   ): Observable<HttpResponse<void>> {
