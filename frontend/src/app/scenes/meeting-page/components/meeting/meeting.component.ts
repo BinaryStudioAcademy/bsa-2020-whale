@@ -174,7 +174,7 @@ export class MeetingComponent
   public isMoveToMeeting = false;
   public onCanLeaveEvent = new EventEmitter<void>();
   public isSharing = false;
-  private sdpVideoBandwidth = 125;
+  private sdpVideoBandwidth = 125000;
   public meter = new DecibelMeter('meter');
   public browserMediaDevice = new BrowserMediaDevice();
   public lastTrack: MediaStreamTrack;
@@ -2079,11 +2079,11 @@ export class MeetingComponent
       line++;
     }
     if (lines[line].indexOf('b') === 0) {
-      lines[line] = 'b=AS:' + bitrate;
+      lines[line] = 'b=TIAS:' + bitrate;
       return lines.join('\n');
     }
     let newLines = lines.slice(0, line);
-    newLines.push('b=AS:' + bitrate);
+    newLines.push('b=TIAS:' + bitrate);
     newLines = newLines.concat(lines.slice(line, lines.length));
     return newLines.join('\n');
   }
