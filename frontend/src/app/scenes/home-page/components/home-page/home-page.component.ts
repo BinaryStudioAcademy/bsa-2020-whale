@@ -72,7 +72,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
     private meetingSettingsService: MeetingSettingsService,
     private currentChat: CurrentChatService,
     private pushNotificationService: PushNotificationsService
-  ) {this.pushNotificationService.requestPermission();}
+  ) {
+    this.pushNotificationService.requestPermission();
+  }
 
   ngOnDestroy(): void {
     this.unsubscribe$.next();
