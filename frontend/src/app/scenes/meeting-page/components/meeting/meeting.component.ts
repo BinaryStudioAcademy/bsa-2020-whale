@@ -1031,7 +1031,7 @@ export class MeetingComponent
 
     this.isMicrophoneMuted = !this.isMicrophoneMuted;
     this.isRecognitionStop = this.isMicrophoneMuted;
-    this.isMicrophoneMuted ? this.recognition?.stop() : this.recognition?.start();
+    // this.isMicrophoneMuted ? this.recognition?.stop() : this.recognition?.start();
     if (!isMissSignaling) {
       this.invokeMediaStateChanged();
     }
@@ -1346,7 +1346,7 @@ export class MeetingComponent
 
             this.questionService.getQuestionsByMeeting(this.meeting.id);
 
-            this.configureRecognition();
+            // this.configureRecognition();
           });
           this.startedPresence = new Date();
           setInterval(() => {
@@ -1889,14 +1889,16 @@ export class MeetingComponent
     if (video.srcObject) {
       video.srcObject = stream;
     }
-    const keys = Object.keys(this.peer.connections);
-    const peerConnection = this.peer.connections[keys[keys.length - 1]];
     const videoTrack = stream.getVideoTracks()[0];
-    peerConnection?.forEach((pc) => {
-      const sender = pc.peerConnection.getSenders().find((s) => {
-        return s.track.kind === videoTrack.kind;
+    const keys = Object.keys(this.peer.connections);
+    keys.forEach(key => {
+      const peerConnection = this.peer.connections[key];
+      peerConnection?.forEach((pc) => {
+        const sender = pc.peerConnection.getSenders().find((s) => {
+          return s.track.kind === videoTrack.kind;
+        });
+        sender.replaceTrack(videoTrack);
       });
-      sender.replaceTrack(videoTrack);
     });
     this.currentUserStream.getVideoTracks().forEach((vt) => {
       this.currentUserStream.removeTrack(vt);
@@ -1919,14 +1921,16 @@ export class MeetingComponent
     if (audio) {
       audio.srcObject = stream;
     }
-    const keys = Object.keys(this.peer.connections);
-    const peerConnection = this.peer.connections[keys[keys.length - 1]];
     const audioTrack = stream.getAudioTracks()[0];
-    peerConnection?.forEach((pc) => {
-      const sender = pc.peerConnection.getSenders().find((s) => {
-        return s.track.kind === audioTrack.kind;
+    const keys = Object.keys(this.peer.connections);
+    keys.forEach(key => {
+      const peerConnection = this.peer.connections[keys[keys.length - 1]];
+      peerConnection?.forEach((pc) => {
+        const sender = pc.peerConnection.getSenders().find((s) => {
+          return s.track.kind === audioTrack.kind;
+        });
+        sender.replaceTrack(audioTrack);
       });
-      sender.replaceTrack(audioTrack);
     });
     this.currentUserStream.getAudioTracks().forEach((at) => {
       this.currentUserStream.removeTrack(at);
