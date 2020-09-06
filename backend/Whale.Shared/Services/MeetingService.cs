@@ -21,7 +21,7 @@ using Whale.DAL.Models.Email;
 using Whale.Shared.Models.Email;
 using System.Net.Http.Headers;
 using Whale.Shared.Models;
-using Whale.Shared.Models.Statistics;
+using Whale.Shared.Models.ElasticModels.Statistics;
 
 namespace Whale.Shared.Services
 {
@@ -322,19 +322,38 @@ namespace Whale.Shared.Services
                 {
                     Id = $"{p.UserId.ToString()}{p.MeetingId.ToString()}",
                     UserId = p.UserId,
+                    StartDate = p.Meeting.StartTime,
                     EndDate = (DateTimeOffset)meeting.EndTime,
-                    PresenceTime = 0,
-                    DurationTime = (long)((DateTimeOffset)meeting.EndTime).Subtract(meeting.StartTime).TotalMilliseconds,
-                    SpeechTime = 0
                 };
                 await _elasticSearchService.SaveSingleAsync(statistics);
             }
         }
 
+        public async Task UpdateMeetingStatistic(UpdateStatistics update)
+        {
+            var user = await _userService.GetUserByEmail(update.Email);
+            if (user == null) throw new NotFoundException("User", update.Email);
+
+            var meeting = await _context.Meetings.FirstOrDefaultAsync(m => m.Id == update.MeetingId);
+            if (meeting == null) throw new NotFoundException("Meeting", update.MeetingId.ToString());
+
+            var statistics = new MeetingUserStatistics
+            {
+                Id = $"{user.Id.ToString()}{meeting.Id.ToString()}",
+                UserId = user.Id,
+                StartDate = meeting.StartTime,
+                EndDate = DateTimeOffset.Now,
+                PresenceTime = update.PresenceTime,
+                SpeechTime = update.SpeechTime
+            };
+            await _elasticSearchService.SaveSingleAsync(statistics);
+        }
+
         public async Task ReloadStatistics()
         {
             var users = _context.Users.ToList();
-            foreach(var user in users)
+            var rand = new Random();
+            foreach (var user in users)
             {
                 var statistics = _context.Participants
                 .Include(p => p.Meeting)
@@ -344,15 +363,13 @@ namespace Whale.Shared.Services
                     Id = $"{p.UserId.ToString()}{p.MeetingId.ToString()}",
                     UserId = p.UserId,
                     EndDate = (DateTimeOffset)p.Meeting.EndTime,
-                    PresenceTime = 0,
+                    PresenceTime = (long)(rand.NextDouble()*((DateTimeOffset)p.Meeting.EndTime).Subtract(p.Meeting.StartTime).TotalMilliseconds),
                     DurationTime = (long)((DateTimeOffset)p.Meeting.EndTime).Subtract(p.Meeting.StartTime).TotalMilliseconds,
-                    SpeechTime = 0
+                    SpeechTime = (long)(rand.NextDouble() * ((DateTimeOffset)p.Meeting.EndTime).Subtract(p.Meeting.StartTime).TotalMilliseconds / 5)
                 })
                 .AsEnumerable();
                 await _elasticSearchService.SaveRangeAsync(statistics);
             }
-
-            
         }
 
         public async Task<string> GetShortInviteLink(string id, string pwd)

@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Whale.Shared.Exceptions;
 using Whale.Shared.Models;
-using Whale.Shared.Models.Statistics;
+using Whale.Shared.Models.ElasticModels.Statistics;
 
 namespace Whale.Shared.Services
 {
@@ -27,8 +27,15 @@ namespace Whale.Shared.Services
         }
 
         public async Task SaveSingleAsync(MeetingUserStatistics record)
-        {
+        {  
             var indexName = $"{indexPrefix}{record.UserId.ToString()}";
+            var getResponse = await _elasticClient.GetAsync<MeetingUserStatistics>(record.Id, r => r.Index(indexName));
+            record.DurationTime = (long)record.EndDate.Subtract(record.StartDate).TotalMilliseconds;
+            if (getResponse.Found)
+            {
+                record.SpeechTime += getResponse.Source.SpeechTime;
+                record.PresenceTime += getResponse.Source.PresenceTime;
+            }
             await _elasticClient.IndexAsync(record, i => i.Index(indexName));
             
         }

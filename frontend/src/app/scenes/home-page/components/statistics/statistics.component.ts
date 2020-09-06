@@ -63,7 +63,7 @@ constructor(
     private statisticsService: StatisticsService,
     private toastr: ToastrService,
   ) {
-    const endDate = moment();
+    const endDate = moment({hour: 0, minute: 0, seconds: 0});
     const startDate = moment({hour: 0, minute: 0, seconds: 0}).add(-7, 'days');
     this.form = new FormGroup({
       startDate: new FormControl(startDate),

@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { MeetingLink } from '../../shared/models/meeting/meeting-link';
 import { Meeting } from '../../shared/models/meeting/meeting';
-import { MediaOnStart } from '@shared/models';
+import { MediaOnStart, UpdateStatistics } from '@shared/models';
 import { UpdateSettings } from '@shared/models/meeting/update-settings';
 
 @Injectable({
@@ -56,5 +56,9 @@ export class MeetingService {
       `${this.routePrefix}/updateSettings`,
       updateSettings
     );
+  }
+
+  public updateMeetingStatistics(statistics: UpdateStatistics): Observable<HttpResponse<void>> {
+    return this.httpService.putFullRequest(`${this.routePrefix}/statistics`, statistics);
   }
 }

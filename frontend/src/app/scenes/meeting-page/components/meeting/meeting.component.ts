@@ -168,6 +168,9 @@ export class MeetingComponent
   public IsWhiteboard = false;
   public IsPoll = false;
   public isSomeoneRecordingScreen = false;
+  startedSpeak: Date = null;
+  startedPresence: Date = null;
+  speechDuration = 0;
 
   @ViewChild('whiteboard') private whiteboard: ElementRef;
   @ViewChild('currentVideo') private currentVideo: ElementRef;
@@ -1072,6 +1075,7 @@ export class MeetingComponent
     window.onbeforeunload = () => {};
     this.meter.stopListening();
     this.meter.disconnect();
+    this.updateMeetingStatistics();
     this.router.navigate(['/home']);
   }
 
@@ -1192,6 +1196,10 @@ export class MeetingComponent
 
             this.questionService.getQuestionsByMeeting(this.meeting.id);
           });
+          this.startedPresence = new Date();
+          setInterval(() => {
+            this.updateMeetingStatistics();
+          }, 60000);
         },
         (error) => {
           this.leaveUnConnected();
@@ -1204,6 +1212,7 @@ export class MeetingComponent
     this.destroyPeer();
     this.meter.stopListening();
     this.meter.disconnect();
+    this.updateMeetingStatistics();
     this.router.navigate(['/home']);
   }
 
@@ -1373,7 +1382,18 @@ export class MeetingComponent
         this.meter.connect(device);
         this.meter.on(
           'sample',
-          (dB, percent, value) => (newMediaData.volume = dB + 100)
+          (dB, percent, value) => {
+            newMediaData.volume = dB + 100;
+            if (newMediaData.volume > 1 && !this.isMicrophoneMuted){
+              if (this.startedSpeak != null){
+                this.speechDuration += new Date().getTime() - this.startedSpeak.getTime();
+              }
+              this.startedSpeak = new Date();
+            }
+            else {
+              this.startedSpeak = null;
+            }
+          }
         );
         this.meter.listen();
       });
@@ -1870,5 +1890,22 @@ export class MeetingComponent
       userId: this.currentParticipant.id,
       reaction: event,
     } as Reaction);
+  }
+
+  updateMeetingStatistics(): void {
+    let presence = 0;
+    if (this.startedPresence != null){
+      presence = new Date().getTime() - this.startedPresence.getTime();
+    }
+    this.meetingService.updateMeetingStatistics({
+      meetingId: this.meeting.id,
+      speechTime: this.speechDuration,
+      presenceTime: presence
+    })
+    .pipe(takeUntil(this.unsubscribe$))
+    .subscribe((rest) => {},
+      (err) => (this.toastr.error(err.Message)));
+    this.startedPresence = new Date();
+    this.speechDuration = 0;
   }
 }

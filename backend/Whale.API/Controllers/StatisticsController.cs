@@ -7,14 +7,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Nest;
-using Whale.Shared.Models.Statistics;
+using Whale.Shared.Models.ElasticModels.Statistics;
 using Whale.Shared.Services;
 
 namespace Whale.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class StatisticsController : ControllerBase
     {
         private readonly ElasticSearchService _elasticSearchService;
@@ -31,6 +31,13 @@ namespace Whale.API.Controllers
             var email = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
             var offset = DateTime.Now.Subtract(DateTime.UtcNow);
             return Ok(await _elasticSearchService.SearchStatistics(email, new DateTime(startDate).Add(offset), new DateTime(endDate).Add(offset)));
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Post(MeetingUserStatistics d)
+        {
+            await _elasticSearchService.SaveSingleAsync(d);
+            return Ok();
         }
     }
 }
