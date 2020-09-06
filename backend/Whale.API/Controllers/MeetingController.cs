@@ -105,6 +105,12 @@ namespace Whale.API.Controllers
             return Ok();
         }
 
+        [HttpPost("reloadStatistics")]
+        public async Task<ActionResult> ReloadStatistics()
+        {
+            await _httpService.PostAsync("api/meeting/reloadStatistics", "");
+            return Ok();
+        }
 
         [HttpGet("agenda/{meetingId}")]
         public async Task<ActionResult<List<AgendaPointDTO>>> GetAgenda(string meetingId)
