@@ -98,7 +98,7 @@ export class MeetingInviteComponent
     if (valid) {
       const emailValue = this.form.controls.email.value.toLowerCase();
       const isParticipant =
-        this.participants.find((p) => p.user.email === emailValue) !==
+        this.participants?.find((p) => p.user.email === emailValue) !==
         undefined;
       if (isParticipant) {
         this.toastr.show(`${emailValue} is already participant of meeting.`);
