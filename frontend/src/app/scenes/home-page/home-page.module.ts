@@ -20,6 +20,8 @@ import { UpdateGroupImageModalComponent } from './components/update-group-image-
 import { UpcomingMeetingsComponent } from './components/upcoming-meetings/upcoming-meetings.component';
 import { ScheduleMeetingNoteComponent } from './components/upcoming-meetings/schedule-meeting-note/schedule-meeting-note.component';
 import { StatisticsComponent } from './components/statistics/statistics.component';
+import { ChartModule, DateTimeService, LineSeriesService, TooltipService } from '@syncfusion/ej2-angular-charts';
+import { DpDatePickerModule } from 'ng2-date-picker';
 
 @NgModule({
   declarations: [
@@ -46,7 +48,10 @@ import { StatisticsComponent } from './components/statistics/statistics.componen
     InfiniteScrollModule,
     ReactiveFormsModule,
     ImageCropperModule,
+    ChartModule,
+    DpDatePickerModule
   ],
+  providers: [DateTimeService, LineSeriesService, TooltipService],
   entryComponents: [CallModalComponent, GroupCallModalComponent],
 })
 export class HomePageModule {}
