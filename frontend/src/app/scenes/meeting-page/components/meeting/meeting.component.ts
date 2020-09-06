@@ -1923,7 +1923,7 @@ export class MeetingComponent
     const audioTrack = stream.getAudioTracks()[0];
     const keys = Object.keys(this.peer.connections);
     keys.forEach(key => {
-      const peerConnection = this.peer.connections[keys[keys.length - 1]];
+      const peerConnection = this.peer.connections[key];
       peerConnection?.forEach((pc) => {
         const sender = pc.peerConnection.getSenders().find((s) => {
           return s.track.kind === audioTrack.kind;
