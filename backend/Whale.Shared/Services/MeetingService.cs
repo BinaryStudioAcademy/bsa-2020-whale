@@ -19,8 +19,8 @@ using System.Text;
 using Whale.Shared.Models.Email;
 using Whale.Shared.Models;
 using Microsoft.Extensions.Configuration;
-using Whale.Shared.Models.Statistics;
 using shortid.Configuration;
+using Whale.Shared.Models.ElasticModels.Statistics;
 
 namespace Whale.Shared.Services
 {
@@ -208,6 +208,7 @@ namespace Whale.Shared.Services
             {
                 IsAudioAllowed = ((dynamic)meetingSettings).IsAudioAllowed,
                 IsVideoAllowed = ((dynamic)meetingSettings).IsVideoAllowed,
+                RecognitionLanguage = ((dynamic)meetingSettings).RecognitionLanguage,
             });
 
             await _redisService.SetAsync(scheduledMeeing.FullURL, scheduledMeeing.ShortURL);
@@ -344,44 +345,39 @@ namespace Whale.Shared.Services
             await _context.SaveChangesAsync();
             await _notifications.UpdateInviteMeetingNotifications(shortUrl);
 
+
             foreach(var p in meeting.Participants)
             {
                 var statistics = new MeetingUserStatistics
                 {
                     Id = $"{p.UserId}{p.MeetingId}",
                     UserId = p.UserId,
-                    MeetingId = meeting.Id,
-                    StartDate = meeting.StartTime,
+                    StartDate = p.Meeting.StartTime,
                     EndDate = (DateTimeOffset)meeting.EndTime,
-                    PresenceTime = 0,
-                    DurationTime = (long)((DateTimeOffset)meeting.EndTime).Subtract(meeting.StartTime).TotalSeconds,
-                    SpeechTime = 0
                 };
                 await _elasticSearchService.SaveSingleAsync(statistics);
             }
         }
 
-        public async Task ReloadStatisticsAsync()
+
+        public async Task UpdateMeetingStatistic(UpdateStatistics update)
         {
-            foreach(var user in _context.Users.ToList())
+            var user = await _userService.GetUserByEmailAsync(update.Email);
+            if (user == null) throw new NotFoundException("User", update.Email);
+
+            var meeting = await _context.Meetings.FirstOrDefaultAsync(m => m.Id == update.MeetingId);
+            if (meeting == null) throw new NotFoundException("Meeting", update.MeetingId.ToString());
+
+            var statistics = new MeetingUserStatistics
             {
-                var statistics = _context.Participants
-                .Include(p => p.Meeting)
-                .Where(p => p.UserId == user.Id && p.Meeting.EndTime.HasValue)
-                .Select(p => new MeetingUserStatistics
-                {
-                    Id = $"{p.UserId}{p.MeetingId}",
-                    UserId = p.UserId,
-                    MeetingId = p.MeetingId,
-                    StartDate = p.Meeting.StartTime,
-                    EndDate = (DateTimeOffset)p.Meeting.EndTime,
-                    PresenceTime = 0,
-                    DurationTime = (long)((DateTimeOffset)p.Meeting.EndTime).Subtract(p.Meeting.StartTime).TotalSeconds,
-                    SpeechTime = 0
-                })
-                .AsEnumerable();
-                await _elasticSearchService.SaveRangeAsync(statistics);
-            }
+                Id = $"{user.Id.ToString()}{meeting.Id.ToString()}",
+                UserId = user.Id,
+                StartDate = meeting.StartTime,
+                EndDate = DateTimeOffset.Now,
+                PresenceTime = update.PresenceTime,
+                SpeechTime = update.SpeechTime
+            };
+            await _elasticSearchService.SaveSingleAsync(statistics);
         }
 
         public async Task<string> GetShortInviteLinkAsync(string id, string pwd)

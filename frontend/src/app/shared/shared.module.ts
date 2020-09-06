@@ -28,12 +28,14 @@ import { QuestionStatusDirective } from './directives/question-status.directive'
 import { DndModule } from 'ngx-drag-drop';
 import { SortContactsPipe } from './pipes/sort-contacts.pipe';
 import { GroupHostOnTopPipe } from './pipes/group-host-on-top.pipe';
+import { KeysPipe } from './pipes/keys.pipe';
 
 @NgModule({
   declarations: [
     PageHeaderComponent,
     SpinerComponent,
     DateFormatPipe,
+    KeysPipe,
     ParticipantCardComponent,
     PollCreateComponent,
     PollComponent,
@@ -71,6 +73,7 @@ import { GroupHostOnTopPipe } from './pipes/group-host-on-top.pipe';
     PollResultsComponent,
     SpinerComponent,
     DateFormatPipe,
+    KeysPipe,
     ParticipantCardComponent,
     MeetingStatisticsComponent,
     IncomingCallComponent,

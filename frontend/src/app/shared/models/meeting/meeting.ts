@@ -3,6 +3,8 @@ import { PollResultDto } from '../poll/poll-result-dto';
 
 export interface Meeting {
   id: string;
+  topic?: string;
+  description?: string;
   settings: string;
   startTime: Date;
   endTime?: Date;

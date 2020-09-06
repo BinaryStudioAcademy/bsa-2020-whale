@@ -8,11 +8,7 @@ div.ui.card.width-100
 .ui.header
     display: flex
     justify-content: space-between
-    margin-bottom: -18px
-
-.relative
-    margin-top: 50px
-    height: 100px
+    margin-bottom: 18px
 
 .close-icon-container
     display: flex
@@ -22,3 +18,54 @@ div.ui.card.width-100
 
 .close.icon
     cursor: pointer
+
+.ui.row
+    display: flex
+    align-items: center
+  
+
+select
+    box-shadow: 0 2px 3px rgba(#DDDDDF, 0.1) inset
+    border: none
+    border-radius: 10px
+    
+.custom-select select 
+    appearance: none
+    display: flex
+    justify-content: space-between
+    padding: 0px 10px
+    font-size: 14px
+    box-shadow: 0 2px 3px rgba(#DDDDDF, 0.1) inset
+    border: none
+    border-radius: 6px
+    width: 200px
+    -webkit-appearance: none
+    -moz-appearance: none
+    appearance: none
+
+select:hover
+    cursor: pointer
+
+.custom-select:after
+    content: '<>'
+    visibility: visible
+    -webkit-transform: rotate(90deg)
+    -moz-transform: rotate(90deg)
+    position: relative
+    top: 12px
+    right: 7px
+    pointer-events: none
+    width: 0px
+   
+.action
+    display: flex
+    flex-direction: column
+    justify-content: space-between
+
+.container
+    display: flex !important
+    flex-direction: column !important
+
+.custom-select
+    margin: 20px !important
+    margin-right: 0px

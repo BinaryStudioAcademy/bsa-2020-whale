@@ -1,6 +1,12 @@
 <div class="ui card width-100">
     <div class="content">
-      <div class="header title"
+      <div *ngIf="scheduled.meeting.topic" 
+      class="header topic title"
+      [class.text-not-active]="scheduled.canceled">
+        {{ scheduled.meeting.topic  }}{{ scheduled.canceled ? ' (Canceled)' : '' }}
+      </div>
+      <div *ngIf="!scheduled.meeting.topic"
+      class="header topic title"
       [class.text-not-active]="scheduled.canceled">
         Meeting {{ scheduled.meeting.id }}{{ scheduled.canceled ? ' (Canceled)' : '' }}
       </div>
@@ -10,6 +16,14 @@
     </div>
     <div class="content">
       <div class="ui internally celled grid">
+        <div *ngIf="scheduled.meeting.description" class="row">
+          <div class="column first">
+            Description
+          </div>
+          <div class="ten wide column">
+            {{ scheduled.meeting.description }}
+          </div>
+        </div>
         <div class="row">
           <div class="column first">
             Start at

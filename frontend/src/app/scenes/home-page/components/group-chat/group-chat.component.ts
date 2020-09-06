@@ -14,6 +14,7 @@ import {
   AfterViewChecked,
   ViewChildren,
   QueryList,
+  HostListener,
 } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { GroupMessage } from '@shared/models/message/group-message';
@@ -42,6 +43,7 @@ import {
 import { UnreadGroupMessage } from '@shared/models';
 import { MessageService } from 'app/core/services/message.service';
 import { ReadAndUnreadGroupMessages } from '@shared/models/message/read-and-unread-group-messages';
+import { GroupMembersVisibilityService } from 'app/core/services/group-members-visibility.service';
 
 @Component({
   selector: 'app-group-chat',
@@ -67,6 +69,9 @@ export class GroupChatComponent
   @ViewChildren('intersectionElement') intersectionElements: QueryList<
     ElementRef<HTMLDivElement>
   >;
+
+  @ViewChild('groupMembersButton') groupMembersButton: ElementRef;
+
   public intersectionObserver: IntersectionObserver;
   chatElement: any;
   groupMessageRecieved = new EventEmitter<GroupMessage>();
@@ -79,7 +84,6 @@ export class GroupChatComponent
   };
   groupMembers: User[] = [];
   isMessagesLoading = true;
-  isMembersVisible = false;
 
   newMessage: GroupMessage = {
     groupId: '',
@@ -97,7 +101,8 @@ export class GroupChatComponent
     private upstateSevice: UpstateService,
     private homePageComponent: HomePageComponent,
     private blobService: BlobService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    public groupMembersVisibility: GroupMembersVisibilityService,
   ) {}
 
   ngAfterViewInit(): void {
@@ -122,7 +127,7 @@ export class GroupChatComponent
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    this.isMembersVisible = false;
+    this.groupMembersVisibility.isMembersVisible = false;
     this.httpService
       .getRequest<ReadAndUnreadGroupMessages>(
         '/GroupChat/withUnread/' + this.groupSelected.id,
@@ -185,6 +190,17 @@ export class GroupChatComponent
   ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
+  }
+
+  @HostListener('document:click', ['$event.target'])
+  public onClickOutsidePopup(targetElement: ElementRef): void {
+    if (targetElement !== this.groupMembersButton?.nativeElement) {
+      this.groupMembersVisibility.isMembersVisible = false;
+    }
+  }
+
+  public showGroupMembers(): void {
+    this.groupMembersVisibility.isMembersVisible = !this.groupMembersVisibility.isMembersVisible;
   }
 
   scrollDown(): void {
@@ -295,7 +311,7 @@ export class GroupChatComponent
       .subscribe((user) => {
         if (user !== undefined) {
           Array.prototype.push.apply(this.groupMembers, user);
-          this.toastr.success('User added successfuly');
+          this.toastr.success('User added successfully');
         }
       });
   }
@@ -311,7 +327,7 @@ export class GroupChatComponent
             .subscribe(
               () => {
                 this.removeUser(user.id);
-                this.toastr.success(
+                this.toastr.info(
                   `You successfully deleted ${user.firstName} ${user.secondName} from the group "${this.groupSelected.label}"`
                 );
                 this.whaleSignalrService.invoke(

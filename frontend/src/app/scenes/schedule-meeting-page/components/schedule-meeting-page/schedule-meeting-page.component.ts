@@ -7,12 +7,11 @@ import { GoogleCalendarService } from 'app/core/services/google-calendar.service
 import moment from 'moment';
 import { AuthService } from 'app/core/auth/auth.service';
 import { Router } from '@angular/router';
-import { MeetingService, UpstateService } from 'app/core/services';
+import { MeetingService, UpstateService, MeetingSettingsService } from 'app/core/services';
 import { takeUntil } from 'rxjs/operators';
 import { MeetingCreate } from '@shared/models';
 import { Subject } from 'rxjs';
 import { User } from '@shared/models/user';
-import { MeetingSettingsService } from 'app/core/services';
 import { PointAgenda } from '@shared/models/agenda/agenda';
 import { AgendaComponent } from '../agenda/agenda.component';
 import {
@@ -144,6 +143,8 @@ export class ScheduleMeetingPageComponent implements OnInit {
       .subscribe((participantEmails) => {
         this.meetingService
           .createScheduledMeeting({
+            topic: this.form.get('topic').value,
+            description: this.form.get('description').value,
             settings: '',
             startTime: date,
             anonymousCount: 0,

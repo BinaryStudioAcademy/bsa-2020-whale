@@ -38,6 +38,9 @@ import {
   SignalMethods,
   RoomService,
   QuestionService,
+  CardSizeService,
+  CardGridDivisor,
+  VideoCardSize,
 } from 'app/core/services';
 import {
   ChangedMediaPermissions,
@@ -70,6 +73,8 @@ import { BrowserMediaDevice } from '@shared/browser-media-device';
 import { Question } from '@shared/models/question/question';
 import { MeetingSettingsService } from '../../../../core/services/meeting-settings.service';
 import { MeetingInviteModalData } from '@shared/models/email/meeting-invite-modal-data';
+import { QuestionComponent } from '@shared/components/question/question/question.component';
+import { ParticipantCardComponent } from '@shared/components/participant-card/participant-card.component';
 
 declare var webkitSpeechRecognition: any;
 
@@ -181,6 +186,9 @@ export class MeetingComponent
   public IsPoll = false;
   public isSomeoneRecordingScreen = false;
   public reactionDelay: Observable<number>;
+  startedSpeak: Date = null;
+  startedPresence: Date = null;
+  speechDuration = 0;
 
   @ViewChild('currentVideo') private currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
@@ -190,6 +198,7 @@ export class MeetingComponent
     ElementRef<HTMLElement>
   >;
   @ViewChildren('question') private questions: QueryList<ElementRef<HTMLElement>>;
+  @ViewChildren('participantCard', {read: ElementRef }) private participantCards: QueryList<ElementRef<HTMLElement>>;
   @ViewChild('cardsLayout') private cardsLayout: ElementRef<
   HTMLElement
   >;
@@ -241,7 +250,8 @@ export class MeetingComponent
     private toastr: ToastrService,
     private meetingSignalrService: MeetingSignalrService,
     public roomService: RoomService,
-    public questionService: QuestionService
+    public questionService: QuestionService,
+    public cardSizeService: CardSizeService
   ) {
     this.pollService = new PollService(
       this.meetingSignalrService,
@@ -929,6 +939,21 @@ export class MeetingComponent
     });
 
     this.pinnedCardsLayout = +localStorage.getItem('pinned-cards-layout') ?? CardsLayout.TopRow;
+
+    this.participantCards.changes.subscribe(
+      () => {
+        if (this.isCardPinned) {
+          return;
+        }
+        const cardDivisor = this.cardSizeService.calculateCardDivisor(this.participantCards.length);
+        const cardSize = this.cardSizeService.calculateCardSize(cardDivisor);
+        this.participantCards
+          .map(cardComponent => cardComponent.nativeElement)
+          .forEach(card => {
+            this.cardSizeService.setCardSize(card, cardSize);
+        });
+      }
+    );
   }
 
   ngAfterViewChecked(): void {
@@ -1095,6 +1120,7 @@ export class MeetingComponent
       'Conference stop recording'
     );
     this.toastr.info('Stop recording a conference');
+    this.isSomeoneRecordingScreen = false;
   }
 
   public onPollIconClick(): void {
@@ -1209,7 +1235,9 @@ export class MeetingComponent
     window.onbeforeunload = () => {};
     this.meter.stopListening();
     this.meter.disconnect();
+    this.isRecognitionStop = true;
     this.recognition?.stop();
+    this.updateMeetingStatistics();
     this.router.navigate(['/home']);
   }
 
@@ -1320,6 +1348,10 @@ export class MeetingComponent
 
             this.configureRecognition();
           });
+          this.startedPresence = new Date();
+          setInterval(() => {
+            this.updateMeetingStatistics();
+          }, 60000);
         },
         (error) => {
           this.leaveUnConnected();
@@ -1332,7 +1364,9 @@ export class MeetingComponent
     this.destroyPeer();
     this.meter.stopListening();
     this.meter.disconnect();
+    this.isRecognitionStop = true;
     this.recognition?.stop();
+    this.updateMeetingStatistics();
     this.router.navigate(['/home']);
   }
 
@@ -1508,7 +1542,18 @@ export class MeetingComponent
         this.meter.connect(device);
         this.meter.on(
           'sample',
-          (dB, percent, value) => (newMediaData.volume = dB + 100)
+          (dB, percent, value) => {
+            newMediaData.volume = dB + 100;
+            if (newMediaData.volume > 1 && !this.isMicrophoneMuted){
+              if (this.startedSpeak != null){
+                this.speechDuration += new Date().getTime() - this.startedSpeak.getTime();
+              }
+              this.startedSpeak = new Date();
+            }
+            else {
+              this.startedSpeak = null;
+            }
+          }
         );
         this.meter.listen();
       });
@@ -1597,6 +1642,13 @@ export class MeetingComponent
     if (!mediaData || !mediaData.stream) {
       return;
     }
+
+    this.participantCards
+    .map(cardComponent => cardComponent.nativeElement)
+    .forEach(card => {
+      card.style.height = '100%';
+      card.style.width = '100%';
+    });
 
     this.unsubscribeReaction$ = new Subject<void>();
     this.pinnedReactions = new Subject<ReactionsEnum>();
@@ -1838,7 +1890,7 @@ export class MeetingComponent
       video.srcObject = stream;
     }
     const keys = Object.keys(this.peer.connections);
-    const peerConnection = this.peer.connections[keys[0]];
+    const peerConnection = this.peer.connections[keys[keys.length - 1]];
     const videoTrack = stream.getVideoTracks()[0];
     peerConnection?.forEach((pc) => {
       const sender = pc.peerConnection.getSenders().find((s) => {
@@ -1868,7 +1920,7 @@ export class MeetingComponent
       audio.srcObject = stream;
     }
     const keys = Object.keys(this.peer.connections);
-    const peerConnection = this.peer.connections[keys[0]];
+    const peerConnection = this.peer.connections[keys[keys.length - 1]];
     const audioTrack = stream.getAudioTracks()[0];
     peerConnection?.forEach((pc) => {
       const sender = pc.peerConnection.getSenders().find((s) => {
@@ -2048,11 +2100,11 @@ export class MeetingComponent
       line++;
     }
     if (lines[line].indexOf('b') === 0) {
-      lines[line] = 'b=AS:' + bitrate;
+      lines[line] = 'b=TIAS:' + bitrate + '000\nb=AS:' + bitrate;
       return lines.join('\n');
     }
     let newLines = lines.slice(0, line);
-    newLines.push('b=AS:' + bitrate);
+    newLines.push('b=TIAS:' + bitrate + '000\nb=AS:' + bitrate);
     newLines = newLines.concat(lines.slice(line, lines.length));
     return newLines.join('\n');
   }
@@ -2080,6 +2132,7 @@ export class MeetingComponent
       reaction: event,
     } as Reaction);
   }
+
   //#region SpeechRecognition
   private configureRecognition() {
     try {
@@ -2121,5 +2174,22 @@ export class MeetingComponent
   checkPoint()
   {
     this.checkTopic.nativeElement.checked = true;
+  }
+
+  updateMeetingStatistics(): void {
+    let presence = 0;
+    if (this.startedPresence != null){
+      presence = new Date().getTime() - this.startedPresence.getTime();
+    }
+    this.meetingService.updateMeetingStatistics({
+      meetingId: this.meeting.id,
+      speechTime: this.speechDuration,
+      presenceTime: presence
+    })
+    .pipe(takeUntil(this.unsubscribe$))
+    .subscribe((rest) => {},
+      (err) => (this.toastr.error(err.Message)));
+    this.startedPresence = new Date();
+    this.speechDuration = 0;
   }
 }

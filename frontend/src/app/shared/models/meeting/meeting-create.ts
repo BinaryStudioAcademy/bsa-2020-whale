@@ -1,6 +1,8 @@
 import { PointAgenda } from '../agenda/agenda';
 
 export interface MeetingCreate {
+  topic?: string;
+  description?: string;
   settings: string;
   startTime: Date;
   anonymousCount: number;
