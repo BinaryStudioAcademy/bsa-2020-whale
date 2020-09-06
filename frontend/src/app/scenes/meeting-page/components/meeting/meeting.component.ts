@@ -38,6 +38,9 @@ import {
   SignalMethods,
   RoomService,
   QuestionService,
+  CardSizeService,
+  CardGridDivisor,
+  VideoCardSize,
 } from 'app/core/services';
 import {
   ChangedMediaPermissions,
@@ -71,6 +74,7 @@ import { Question } from '@shared/models/question/question';
 import { MeetingSettingsService } from '../../../../core/services/meeting-settings.service';
 import { MeetingInviteModalData } from '@shared/models/email/meeting-invite-modal-data';
 import { QuestionComponent } from '@shared/components/question/question/question.component';
+import { ParticipantCardComponent } from '@shared/components/participant-card/participant-card.component';
 
 declare var webkitSpeechRecognition: any;
 
@@ -189,6 +193,7 @@ export class MeetingComponent
     ElementRef<HTMLElement>
   >;
   @ViewChildren('question') private questions: QueryList<ElementRef<HTMLElement>>;
+  @ViewChildren('participantCard', {read: ElementRef }) private participantCards: QueryList<ElementRef<HTMLElement>>;
   @ViewChild('cardsLayout') private cardsLayout: ElementRef<
   HTMLElement
   >;
@@ -241,7 +246,8 @@ export class MeetingComponent
     private toastr: ToastrService,
     private meetingSignalrService: MeetingSignalrService,
     public roomService: RoomService,
-    public questionService: QuestionService
+    public questionService: QuestionService,
+    public cardSizeService: CardSizeService
   ) {
     this.pollService = new PollService(
       this.meetingSignalrService,
@@ -929,6 +935,21 @@ export class MeetingComponent
     });
 
     this.pinnedCardsLayout = +localStorage.getItem('pinned-cards-layout') ?? CardsLayout.TopRow;
+
+    this.participantCards.changes.subscribe(
+      () => {
+        if (this.isCardPinned) {
+          return;
+        }
+        const cardDivisor = this.cardSizeService.calculateCardDivisor(this.participantCards.length);
+        const cardSize = this.cardSizeService.calculateCardSize(cardDivisor);
+        this.participantCards
+          .map(cardComponent => cardComponent.nativeElement)
+          .forEach(card => {
+            this.cardSizeService.setCardSize(card, cardSize);
+        });
+      }
+    );
   }
 
   ngAfterViewChecked(): void {
@@ -1598,6 +1619,13 @@ export class MeetingComponent
     if (!mediaData || !mediaData.stream) {
       return;
     }
+
+    this.participantCards
+    .map(cardComponent => cardComponent.nativeElement)
+    .forEach(card => {
+      card.style.height = '100%';
+      card.style.width = '100%';
+    });
 
     this.unsubscribeReaction$ = new Subject<void>();
     this.pinnedReactions = new Subject<ReactionsEnum>();

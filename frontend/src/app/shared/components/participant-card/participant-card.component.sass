@@ -9,6 +9,9 @@
 
 .ui.card
     width: 100%
+    height: 100%
+    .image
+        height: calc(100% - 48px)
 
 .ui.card:hover .participant-name-wrapper
     padding-right: 20px
@@ -18,10 +21,10 @@
 
 video
     width: 100%
+    height: 100%
     display: inherit
     border-radius: inherit
     object-fit: cover
-    max-height: 265px
     margin-bottom: -1px
 
 .participant-avatar-container
