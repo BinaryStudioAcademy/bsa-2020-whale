@@ -171,6 +171,7 @@ export class MeetingComponent
   startedSpeak: Date = null;
   startedPresence: Date = null;
   speechDuration = 0;
+  updateStatisticsTaskId: any;
 
   @ViewChild('whiteboard') private whiteboard: ElementRef;
   @ViewChild('currentVideo') private currentVideo: ElementRef;
@@ -1076,6 +1077,7 @@ export class MeetingComponent
     this.meter.stopListening();
     this.meter.disconnect();
     this.updateMeetingStatistics();
+    clearInterval(this.updateStatisticsTaskId);
     this.router.navigate(['/home']);
   }
 
@@ -1197,7 +1199,7 @@ export class MeetingComponent
             this.questionService.getQuestionsByMeeting(this.meeting.id);
           });
           this.startedPresence = new Date();
-          setInterval(() => {
+          this.updateStatisticsTaskId = setInterval(() => {
             this.updateMeetingStatistics();
           }, 60000);
         },
@@ -1213,6 +1215,7 @@ export class MeetingComponent
     this.meter.stopListening();
     this.meter.disconnect();
     this.updateMeetingStatistics();
+    clearInterval(this.updateStatisticsTaskId);
     this.router.navigate(['/home']);
   }
 
