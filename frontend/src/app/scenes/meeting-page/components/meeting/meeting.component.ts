@@ -801,7 +801,7 @@ export class MeetingComponent
           {
             this.isSharing = true;
           }
-          this.fullPage(streamId);
+          this.pinCard(streamId);
           const user = this.meeting.participants.find(x => x.streamId === streamId).user;
           this.toastr.success(`${user.firstName} ${user.secondName} start sharing screen`);
         },
@@ -812,7 +812,9 @@ export class MeetingComponent
     this.meetingSignalrService.shareScreenStop$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(() => {
-        this.stopShare();
+        this.unpinCard();
+        this.isSharing = false;
+        this.toastr.info('Stop sharing screen');
       });
 
     this.meetingSignalrService.onRoomCreated$
@@ -2053,23 +2055,6 @@ export class MeetingComponent
       meetingId: this.meeting.id,
     });
   }
-  public fullPage(streamId): void {
-    const stream = this.connectedStreams.find((x) => x.id === streamId);
-    const fullVideo = this.createPage();
-    fullVideo.srcObject = stream;
-    fullVideo.play();
-  }
-  public createPage(): HTMLVideoElement {
-    const parrent = document.getElementsByClassName('main-content')[0];
-    const fullVideo = document.createElement('video');
-    fullVideo.muted = true;
-    parrent.appendChild(fullVideo);
-    fullVideo.className += 'fullVideo';
-    fullVideo.style.width = '100%';
-    fullVideo.style.height = '100%';
-    fullVideo.style.objectFit = 'contain';
-    return fullVideo;
-  }
   async removeSharingVideo(): Promise<void> {
     const keys = Object.keys(this.peer.connections);
     const peerConnection = this.peer.connections[keys[0]];
@@ -2087,12 +2072,6 @@ export class MeetingComponent
       SignalMethods.OnStopShareScreen,
       this.meeting.id
     );
-  }
-  async stopShare(): Promise<void> {
-    const fullVideo = document.querySelector('.fullVideo') as HTMLElement;
-    fullVideo.remove();
-    this.isSharing = false;
-    this.toastr.info('Stop sharing screen');
   }
   //#endregion ShareScreen
 
