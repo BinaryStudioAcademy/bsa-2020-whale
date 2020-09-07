@@ -237,7 +237,7 @@
             <app-agenda
               [point]="point"
               (tagRemoved)="removeTag($event)"
-              (newPoint)="addNewPoint($event)"
+              (agendaValid)="agendaValid($event)"              
             >
             </app-agenda>
           </div>
@@ -247,7 +247,7 @@
         <button
           id="schedule-submit"
           class="ui button primary"
-          [disabled]="!form.valid || !isDateValid()"
+          [disabled]="!form.valid || !isDateValid() || !agendaValidate"
           (click)="sendMeeting()"
         >
           Schedule meeting

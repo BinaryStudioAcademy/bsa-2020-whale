@@ -53,6 +53,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
 
   public recognitionLanguage = 'English';
   point: PointAgenda;
+  agendaValidate = false;
   constructor(
     private toastr: ToastrService,
     private calendarService: GoogleCalendarService,
@@ -288,6 +289,10 @@ export class ScheduleMeetingPageComponent implements OnInit {
   }
   public removeTag(event) {
     this.pointList.splice(this.pointList.indexOf(event), 1);
+  }
+  public agendaValid(event){
+    this.agendaValidate = event;
+    console.log(event)
   }
 }
 
