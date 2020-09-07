@@ -164,7 +164,7 @@
             <button
               id="profile-submit-name"
               type="submit"
-              [disabled]="!nameForm.valid"
+              [disabled]="!nameForm.valid || isEmptyName()"
               class="small ui button save"
             >
               <a> <i class="check icon"></i> Save </a>

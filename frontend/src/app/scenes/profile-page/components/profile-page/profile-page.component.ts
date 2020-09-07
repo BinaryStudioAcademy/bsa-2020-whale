@@ -258,6 +258,13 @@ export class ProfilePageComponent implements OnInit {
     this.modal.nativeElement.style.display = 'none';
   }
 
+  isEmptyName(): boolean {
+    const firstNameWithoutWhitespaces = this.updatedUser.firstName.trim();
+    const secondNameWithoutWhitespaces = this.updatedUser.secondName.trim();
+
+    return firstNameWithoutWhitespaces.length === 0 || secondNameWithoutWhitespaces.length === 0;
+  }
+
   saveEditedUsername(): void {
     this.editName = !this.editName;
     this.httpService
