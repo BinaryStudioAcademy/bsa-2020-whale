@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { IDatePickerConfig } from 'ng2-date-picker';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { HttpService } from '../../../../core/services/http.service';
 import { ToastrService } from 'ngx-toastr';
 import { GoogleCalendarService } from 'app/core/services/google-calendar.service';
@@ -62,10 +62,10 @@ export class ScheduleMeetingPageComponent implements OnInit {
     meetingSettingsService: MeetingSettingsService
   ) {
     this.form = new FormGroup({
-      topic: new FormControl('UserNameS meeting etc'),
+      topic: new FormControl('', [Validators.required]),
       description: new FormControl(),
-      date: new FormControl(this.createStringFromDate(new Date())),
-      time: new FormControl(`${new Date().getHours() + 1}:${new Date().getMinutes()}`),
+      date: new FormControl(this.createStringFromDate(new Date()), [Validators.required]),
+      time: new FormControl(`${new Date().getHours() + 1}:${new Date().getMinutes()}`, [Validators.required]),
       durationHours: new FormControl(1),
       durationMinutes: new FormControl(30),
       isGeneratedMeetingID: new FormControl('true'),
