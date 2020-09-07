@@ -12,19 +12,21 @@
         </div>
     </div>
     <form class="ui form" [formGroup]="form">
-      <div class="ui row">
-        <span>From:</span>
-        <dp-date-picker
-          [config]="config"
-          theme="dp-material"
-          formControlName="startDate"
-        ></dp-date-picker>
-        <span>To:</span>
-        <dp-date-picker
-          [config]="config"
-          theme="dp-material"
-          formControlName="endDate"
-        ></dp-date-picker>
+      <div class="ui row-date">
+        <div class="dates-input">
+          <span>From:</span>
+          <dp-date-picker
+            [config]="config"
+            theme="dp-material"
+            formControlName="startDate"
+          ></dp-date-picker>
+          <span>To:</span>
+          <dp-date-picker
+            [config]="config"
+            theme="dp-material"
+            formControlName="endDate"
+          ></dp-date-picker>
+        </div>
 
         <button
           id="daterange-change"
@@ -32,12 +34,13 @@
           [disabled]="!form.valid"
           (click)="submit()"
         >
-          Change Date Range
+          Update
         </button>
       </div>
     </form>
 
     <div class="ui row">
+      <span>Statistic field:</span>
       <div class="custom-select ui compact menu">
         <select
           [(ngModel)]="statisticField"
@@ -51,25 +54,42 @@
           >
         </select>
       </div>
-      <div class="custom-select ui compact menu">
-        <select
-          [(ngModel)]="aggregation"
-          class="select"
-          (ngModelChange)="changeAggregation($event)"
-        >
-          <option
-            *ngFor="let f of aggregations | keys"
-            [value]=+f.key
-            >{{ f?.value }}</option
-          >
-        </select>
-      </div>
     </div>
 
-    <ejs-chart *ngIf="data.length > 0" [title]='chartTitle' [primaryXAxis]='xAxis' [primaryYAxis]='yAxis' [tooltip]='tooltip' class="chart">
-      <e-series-collection >
-        <e-series type='Line' [dataSource]='data' xName='date' yName='value' [marker]='markerSettings'></e-series>
-      </e-series-collection>
-    </ejs-chart>
+    <div class="chart-wrapper" *ngIf="chartData; else noDataText">
+      <ngx-charts-line-chart
+        [results]="chartData"
+        [xAxis]="true"
+        [yAxis]="true"
+        [legend]="true"
+        [xAxisTickFormatting]="dateTickFormatting"
+        [yAxisTickFormatting]="valueTickFormatting"
+        [xScaleMin]="minDate"
+        [xScaleMax]="maxDate"
+        [roundDomains]="true"
+        [rotateXAxisTicks]="true"
+        [autoScale]="false">
+        <ng-template #tooltipTemplate let-model="model">
+          <h4>{{ dateTickFormatting(model.name) }}</h4>
+          <div class="tooltip-model">
+            <span>{{ model.series }}:</span>
+            <span class="last">{{ valueTickFormatting(model.value) }}</span>
+          </div>    
+        </ng-template>
+        <ng-template #seriesTooltipTemplate let-model="model">
+          <h4>{{ dateTickFormatting(model[0].name) }}</h4>
+          <div class="tooltip-models-wrapper">
+            <div *ngFor="let m of model" class="tooltip-model">
+              <span><i class="tooltip-label-color" [style.background-color]="m.color"></i></span>
+              <span>{{ m.series }}:</span>
+              <span class="last">{{ valueTickFormatting(m.value) }}</span>
+            </div>     
+          </div>    
+        </ng-template>
+      </ngx-charts-line-chart>
+    </div>
+    <ng-template #noDataText>
+      <h3 class="text-center">You had no calls during specified period</h3>
+    </ng-template>
    
 </div>
