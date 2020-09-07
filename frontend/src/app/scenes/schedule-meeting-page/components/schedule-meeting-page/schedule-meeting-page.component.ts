@@ -292,7 +292,6 @@ export class ScheduleMeetingPageComponent implements OnInit {
   }
   public agendaValid(event){
     this.agendaValidate = event;
-    console.log(event)
   }
 }
 
