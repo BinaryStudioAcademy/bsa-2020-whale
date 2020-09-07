@@ -1,9 +1,11 @@
 import { Participant } from '../participant/participant';
 import { PollResultDto } from '../poll/poll-result-dto';
-import { MediaPermissions } from '..';
+import { Recurrence } from './meeting-recurrence';
 
 export interface Meeting {
   id: string;
+  topic?: string;
+  description?: string;
   settings: string;
   startTime: Date;
   endTime?: Date;
@@ -13,6 +15,8 @@ export interface Meeting {
   isWhiteboard: boolean;
   isPoll: boolean;
   isAllowedToChooseRoom: boolean;
+  recognitionLanguage: string;
+  recurrence: Recurrence;
   isAudioAllowed: boolean;
   isVideoAllowed: boolean;
 

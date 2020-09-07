@@ -1,0 +1,110 @@
+div.ui.card.width-100
+    width: 100%
+
+.ui.segment
+   left: 10px
+   width: 100%    
+
+.ui.header
+    display: flex
+    justify-content: space-between
+    margin-bottom: 18px
+
+.close-icon-container
+    display: flex
+    align-items: center
+    margin-bottom: 10px
+    font-size: 1rem
+
+.close.icon
+    cursor: pointer
+
+.ui.row
+    margin-left: 20px
+    margin-right: 20px
+    display: flex
+    align-items: center
+
+.ui.row-date
+    margin-left: 20px
+    margin-right: 20px
+    display: grid
+    grid-template-columns: 1fr auto
+    align-items: center
+    .dates-input
+        display: flex
+        align-items: center
+        span
+            margin-right: 10px
+        dp-date-picker
+            margin-right: 20px
+
+select
+    box-shadow: 0 2px 3px rgba(#DDDDDF, 0.1) inset
+    border: none
+    border-radius: 10px
+    
+.custom-select select 
+    appearance: none
+    display: flex
+    justify-content: space-between
+    padding: .67857143em 1em
+    line-height: 1.21428571em
+    font-size: 1em
+    box-shadow: 0 2px 3px rgba(#DDDDDF, 0.1) inset
+    border: none
+    border-radius: 6px
+    width: 120px
+    -webkit-appearance: none
+    -moz-appearance: none
+    appearance: none
+
+select:hover
+    cursor: pointer
+
+.custom-select:after
+    content: '<>'
+    visibility: visible
+    -webkit-transform: rotate(90deg)
+    -moz-transform: rotate(90deg)
+    position: relative
+    top: 12px
+    right: 7px
+    pointer-events: none
+    width: 0px
+   
+.action
+    display: flex
+    flex-direction: column
+    justify-content: space-between
+
+.container
+    display: flex !important
+    flex-direction: column !important
+
+.custom-select
+    margin: 20px !important
+    margin-right: 0px
+
+.chart-wrapper
+    min-height: 500px
+
+.tooltip-label-color
+    border-radius: 3px
+    color: #5b646b
+    display: inline-block
+    height: 15px
+    margin-right: 5px
+    width: 15px
+
+
+.tooltip-model
+    display: grid
+    text-align: left
+    align-items: center
+    grid-template-columns: auto 1fr auto
+    .last
+        margin-left: 10px
+
+.text-center
+    text-align: center

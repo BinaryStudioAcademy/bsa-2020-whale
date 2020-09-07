@@ -1,8 +1,11 @@
-import { Component, OnInit, EventEmitter, Input } from '@angular/core';
+import { Component, OnInit, EventEmitter, Input, ElementRef, ViewChild, Output } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { PointAgenda } from '@shared/models/agenda/agenda';
-import { HttpService } from 'app/core/services';
+import { HttpService, MeetingSignalrService, SignalMethods, MeetingService } from 'app/core/services';
 import { environment } from '@env';
+import { takeUntil } from 'rxjs/internal/operators/takeUntil';
+import { Subject } from 'rxjs/internal/Subject';
+import { threadId } from 'worker_threads';
 
 @Component({
   selector: 'app-agenda',
@@ -10,25 +13,11 @@ import { environment } from '@env';
   styleUrls: ['./agenda.component.sass'],
 })
 export class AgendaComponent implements OnInit {
-  public agenda: PointAgenda[] = [];
-  toastRef;
-  @Input() meetingId;
-  constructor(private toastr: ToastrService, private httpServie: HttpService) {
+  constructor() {
   }
-
-
+  @Input() agenda: PointAgenda[] = [];
+  cachedTopics: PointAgenda[] = [];
   ngOnInit(): void {
-    this.httpServie.getRequest<PointAgenda[]>(`${environment.apiUrl}/api/meeting/agenda/${this.meetingId}`)
-    .subscribe((res) =>
-    {
-      this.agenda = res;
-
-    });
-
   }
-  finishedPoint(event, a: PointAgenda){
-    if (event.target.checked){
-      this.toastr.info(a.name + ' was finished');
-    }
-  }
+
 }

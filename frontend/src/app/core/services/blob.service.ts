@@ -59,7 +59,7 @@ export class BlobService {
 
     formData.append('meeting-record', blob, 'record');
 
-    return this.http.post(`${this.baseUrl}/api/storage/save`, formData, {
+    return this.http.post(`${this.baseUrl}/storage/save`, formData, {
       responseType: 'text',
     });
   }
@@ -69,7 +69,7 @@ export class BlobService {
 
     formData.append('user-image', blob, 'image');
 
-    return this.http.post(`${this.baseUrl}/api/storage/save`, formData, {
+    return this.http.post(`${this.baseUrl}/storage/save`, formData, {
       responseType: 'text',
     });
   }

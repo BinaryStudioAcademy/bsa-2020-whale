@@ -11,7 +11,7 @@ using Whale.Shared.Models.Email;
 namespace Whale.API.Controllers
 {
 	[ApiController]
-	[Route("api/email")]
+	[Route("email")]
 	public class EmailController: ControllerBase
 	{
 		private readonly EmailService _emailServcice;
@@ -24,14 +24,14 @@ namespace Whale.API.Controllers
 		[HttpPost]
 		public async Task<OkResult> SendEmail([FromBody] MeetingInviteDTO inviteDto)
 		{
-			await _emailServcice.SendMeetingInvites(inviteDto);
+			await _emailServcice.SendMeetingInvitesAsync(inviteDto);
 			return Ok();
 		}
 
 		[HttpPost("scheduled")]
 		public async Task<OkResult> SendScheduledEmail([FromBody] ScheduledMeetingInvite invite)
 		{
-			await _emailServcice.SendMeetingInviteToHost(invite);
+			await _emailServcice.SendMeetingInviteToHostAsync(invite);
 			return Ok();
 		}
 	}

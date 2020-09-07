@@ -42,7 +42,10 @@ export class MeetingInviteComponent
   senderId: string;
   inviteLink: string;
 
-  constructor(private httpService: HttpService, private toastr: ToastrService) {
+  constructor(
+    private httpService: HttpService,
+    private toastr: ToastrService,
+    ) {
     super();
     this.form = new FormGroup({
       email: new FormControl(''),
@@ -60,7 +63,7 @@ export class MeetingInviteComponent
   public getContacts(): void {
     this.isContactsLoading = true;
     this.httpService
-      .getRequest<Contact[]>(environment.apiUrl + '/api/Contacts/accepted')
+      .getRequest<Contact[]>(environment.apiUrl + '/Contacts/accepted')
       .subscribe(
         (response) => {
           let filteredContacts: Contact[];
@@ -77,6 +80,11 @@ export class MeetingInviteComponent
                 )
             );
           }
+
+          this.participantEmails.forEach(email => {
+            filteredContacts = filteredContacts.filter((c) => c.secondMember.email !== email);
+          });
+
           this.contacts = Array.from(filteredContacts);
           this.cachedContacts = Array.from(filteredContacts);
           this.isContactsLoading = false;
@@ -98,7 +106,7 @@ export class MeetingInviteComponent
     if (valid) {
       const emailValue = this.form.controls.email.value.toLowerCase();
       const isParticipant =
-        this.participants.find((p) => p.user.email === emailValue) !==
+        this.participants?.find((p) => p.user.email === emailValue) !==
         undefined;
       if (isParticipant) {
         this.toastr.show(`${emailValue} is already participant of meeting.`);
@@ -144,7 +152,7 @@ export class MeetingInviteComponent
 
       this.httpService
         .postRequest<MeetingInvite, null>(
-          environment.apiUrl + '/api/email',
+          environment.apiUrl + '/email',
           inviteData
         )
         .subscribe(

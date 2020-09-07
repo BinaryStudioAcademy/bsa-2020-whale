@@ -1,4 +1,4 @@
-<spiner *ngIf="isMeetingLoading" size="'massive'"></spiner>
+<app-spiner *ngIf="isMeetingLoading" size="massive"></app-spiner>
 <app-page-header
   (openChatClicked)="onOpenChat($event)"
   (openGroupChatClicked)="onOpenGroupChat($event)"
@@ -7,7 +7,7 @@
   <div class="left-col">
     <div class="ui left vertical menu bar">
       <a class="item">
-        <app-spiner *ngIf="isUserLoadig" size="'small'"></app-spiner>
+        <app-spiner *ngIf="isUserLoadig" size="small"></app-spiner>
         <div (click)="goToPage('profile-page')" class="main-user">
           <img
             class="ui circular image avatar-pic"
@@ -19,6 +19,10 @@
         </div>
       </a>
       <a class="item">
+        <a id="home-go-create" class="item" (click)="createMeeting()">
+          <i class="share icon"></i>
+          Enter the meeting
+        </a>
         <a id="home-go-history" class="item" (click)="onMeetingHistoryClick()">
           <i class="clock outline icon"></i>
           Meetings history
@@ -35,14 +39,14 @@
           <i class="calendar alternate outline icon"></i>
           Schedule meeting
         </a>
-        <a id="home-go-create" class="item" (click)="createMeeting()">
-          <i class="share icon"></i>
-          Enter the meeting
+        <a id="home-go-statistics" class="item" (click)="onStatisticsClick()">
+          <i class="chart bar icon"></i>
+          Statistics
         </a>
       </a>
       <app-spiner
         *ngIf="isContactsLoading || isChatHubLoading"
-        [size]="'medium'"
+        size="massive"
       ></app-spiner>
       <a
         id="home-toggle-contacts"
@@ -57,9 +61,12 @@
           New
         </button>
       </a>
-      <div class="contacts-container" [hidden]="!contactsVisibility">
+      <div
+        [ngClass]="renderClass(contacts)"
+        class="contacts-container"
+        [hidden]="!contactsVisibility">
         <div
-          *ngFor="let contact of contacts"
+          *ngFor="let contact of contacts|sortContacts"
           class="user-list ui middle aligned selection list"
         >
           <div
@@ -97,7 +104,7 @@
           </div>
         </div>
       </div>
-      <app-spiner *ngIf="isGroupsLoading" [size]="'medium'"></app-spiner>
+      <app-spiner *ngIf="isGroupsLoading" size="massive"></app-spiner>
       <a id="home-toggle-groups" (click)="onGroupsClick()" class="item header"
         >Groups
         <button
@@ -109,10 +116,11 @@
         </button>
       </a>
       <div
+        [ngClass]="renderClass(groups)"
         class="contacts-container groups user-list ui middle selection list"
         [hidden]="!groupsVisibility"
       >
-        <div *ngFor="let group of groups">
+        <div *ngFor="let group of groups" >
           <a
             id="home-group"
             [ngClass]="
@@ -122,12 +130,12 @@
           >
             <img
               *ngIf="isImageHere(group)"
-              class="ui avatar image"
+              class="ui avatar image group"
               src="{{ group.photoUrl }}"
             />
             <img
               *ngIf="!isImageHere(group)"
-              class="ui avatar image"
+              class="ui avatar image group"
               src="assets/img/user-group-icon.png"
             />
 
@@ -179,8 +187,13 @@
       ></app-history>
       <app-upcoming-meetings 
         *ngIf="upcomingVisibility"
-        (upcomingClose)="closeUpcomig()">
+        (upcomingClose)="closeUpcoming()">
       </app-upcoming-meetings>
+      <app-statistics
+        *ngIf="statisticsVisibility"
+        [user]="loggedInUser"
+        (statisticsClose)="closeStatistics()"
+      ></app-statistics>
       <div *ngIf="actionsVisibility" class="vertically-aligned chat ui segment">
         <div
           id="home-chat-go-shedule"
@@ -191,14 +204,14 @@
             class="ui centered small image"
             src="https://img.icons8.com/bubbles/100/000000/planner.png"
           />
-          <span class="text-aligned">Schedule meeting</span>
+          <span>Schedule meeting</span>
         </div>
         <div class="text-aligned" (click)="onMeetingHistoryClick()">
           <img
             class="ui centered small image"
             src="https://img.icons8.com/bubbles/100/000000/todo-list.png"
           />
-          <span class="text-aligned">Meetings history</span>
+          <span>Meetings history</span>
         </div>
         <div
           id="home-chat-go-create"
@@ -209,7 +222,7 @@
             class="ui centered small image"
             src="https://img.icons8.com/bubbles/100/000000/forward.png"
           />
-          <span class="text-aligned header">Enter the meeting </span>
+          <span>Enter the meeting </span>
         </div>
       </div>
     </div>

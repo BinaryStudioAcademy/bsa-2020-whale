@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
 using Whale.DAL.Abstraction;
 
 namespace Whale.DAL.Models
@@ -16,5 +15,6 @@ namespace Whale.DAL.Models
         public string FullURL { get; set; }
         public string ShortURL { get; set; }
         public string Password { get; set; }
+        public bool Canceled { get; set; }
     }
 }

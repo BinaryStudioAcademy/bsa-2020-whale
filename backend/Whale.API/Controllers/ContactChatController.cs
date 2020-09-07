@@ -10,7 +10,7 @@ using Whale.Shared.Models.DirectMessage;
 
 namespace Whale.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     [Authorize]
     public class ContactChatController : ControllerBase
@@ -20,7 +20,6 @@ namespace Whale.API.Controllers
         public ContactChatController(ContactChatService chatService)
         {
             _chatService = chatService;
-
         }
 
         [HttpGet("{contactDTOId}")]
@@ -43,14 +42,14 @@ namespace Whale.API.Controllers
         public async Task<ActionResult<DirectMessageDTO>> CreateDirectMessage([FromBody] DirectMessageCreateDTO dto)
         {
             var email = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            return Ok(await _chatService.CreateDirectMessage(dto, email));
+            return Ok(await _chatService.CreateDirectMessageAsync(dto, email));
         }
 
         [HttpPost("markRead")]
         public async Task<OkResult> MarkMessageAsRead([FromBody] UnreadMessageIdDTO unreadMessageIdDto)
         {
             var email = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            await _chatService.MarkMessageAsRead(unreadMessageIdDto, email);
+            await _chatService.MarkMessageAsReadAsync(unreadMessageIdDto, email);
             return Ok();
         }
     }

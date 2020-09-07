@@ -45,7 +45,7 @@ export class ProfilePageComponent implements OnInit {
   isShowUploadFile: boolean;
   loggedInUser: User;
   updatedUserDB: User;
-  public routePrefix = '/api/user';
+  public routePrefix = '/user';
 
   imageChangedEvent: any = '';
   userPhotoFromCamera: any = '';
@@ -256,6 +256,13 @@ export class ProfilePageComponent implements OnInit {
     this.GetAvatar();
     this.header.getUser();
     this.modal.nativeElement.style.display = 'none';
+  }
+
+  isEmptyName(): boolean {
+    const firstNameWithoutWhitespaces = this.updatedUser.firstName.trim();
+    const secondNameWithoutWhitespaces = this.updatedUser.secondName.trim();
+
+    return firstNameWithoutWhitespaces.length === 0 || secondNameWithoutWhitespaces.length === 0;
   }
 
   saveEditedUsername(): void {

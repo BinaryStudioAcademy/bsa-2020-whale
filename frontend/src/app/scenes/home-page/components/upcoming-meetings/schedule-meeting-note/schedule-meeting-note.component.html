@@ -1,19 +1,60 @@
 <div class="ui card width-100">
     <div class="content">
-      <div class="header" style="margin-left: 50px;">
-        Meeting {{ scheduled.meeting.id }}
+      <div *ngIf="scheduled.meeting.topic" 
+      class="header topic title"
+      [class.text-not-active]="scheduled.canceled">
+        {{ scheduled.meeting.topic  }}{{ scheduled.canceled ? ' (Canceled)' : '' }}
+      </div>
+      <div *ngIf="!scheduled.meeting.topic"
+      class="header"
+      [class.text-not-active]="scheduled.canceled">
+        Meeting {{ scheduled.meeting.id }}{{ scheduled.canceled ? ' (Canceled)' : '' }}
+      </div>
+      <div *ngIf="isLoading" class="relative">
+        <app-spiner size="small"></app-spiner>
       </div>
     </div>
     <div class="content">
       <div class="ui internally celled grid">
+        <div *ngIf="scheduled.meeting.description" class="row">
+          <div class="column first">
+            Description
+          </div>
+          <div 
+          class="ten wide column"
+          [class.text-not-active]="scheduled.canceled">
+            {{ scheduled.meeting.description }}
+          </div>
+        </div>
         <div class="row">
           <div class="column first">
             Start at
           </div>
-          <div class="ten wide column">
+          <div class="ten wide column"
+          [class.text-not-active]="scheduled.canceled">
             {{ scheduled.meeting.startTime | date: "dd/MM/yyyy" }}
             at
             {{ scheduled.meeting.startTime | date: "HH:mm" }}
+          </div>
+        </div>
+        <div class="row">
+          <div class="column first">
+            Recurred
+          </div>
+          <div class="ten wide column">
+            {{ recurrence }}
+            <button 
+            *ngIf = "isReccurentAvailable"
+            class="ui basic button"
+            (click)="stopRecurringMeeting()"
+            >
+            Stop recurring
+            </button>
+            <span 
+            *ngIf = "isReccurentStopped"
+            >
+            (stopped)
+            </span>
           </div>
         </div>
         <div class="row">
@@ -25,10 +66,13 @@
                 <div class="item">
                     <img
                       class="ui mini circular image"
+                      [class.semi-transparent]="scheduled.canceled"
                       src="{{ scheduled.creator.avatarUrl }}"
                     />
-                    <div class="content">
-                      <div class="ui sub header">
+                    <div class="content" 
+                    [class.text-not-active]="scheduled.canceled">
+                      <div class="ui sub header"
+                      [class.text-not-active]="scheduled.canceled">
                         {{
                             scheduled.creator.secondName
                             ? scheduled.creator.firstName +
@@ -53,20 +97,37 @@
             <button
               class="ui basic button"
               (click)="areParticipantsVisible = !areParticipantsVisible"
+              [class.text-not-active]="scheduled.canceled"
             >
               {{
                 areParticipantsVisible ? "Hide participants" : "Show participants"
               }}
               ({{ scheduled.participants?.length }})
             </button>
+            <div *ngIf="scheduled.creator.email === authService.currentUser.email" class="add-participants">
+              <span
+                data-tooltip="Add participants"
+                data-position="right center"
+              >
+              <i
+                class="user plus icon"
+                (click)="addParticipants()"
+              ></i>
+              </span>
+            </div>
             <div class="ui list" *ngIf="areParticipantsVisible">
               <div class="item" *ngFor="let participant of scheduled.participants">
                 <img
                   class="ui mini circular image"
+                  [class.semi-transparent]="scheduled.canceled"
                   src="{{ participant.avatarUrl }}"
                 />
-                <div class="content">
-                  <div class="ui sub header">
+                <div 
+                class="content"
+                [class.text-not-active]="scheduled.canceled">
+                  <div
+                  class="ui sub header"
+                  [class.text-not-active]="scheduled.canceled">
                     {{
                       participant.secondName
                         ? participant.firstName +
@@ -81,21 +142,28 @@
             </div>
           </div>
         </div>
-        <div class="row">
-          <div class="actions">
-                <button
-                class="ui primary button"
-                (click)="join()"
-                [disabled]="isDisabled"
-                >
-                Join Meeting
-                </button>
-                <button
-                class="ui basic button"
-                (click)="copyLink()"
-                >
-                Copy link
-                </button>
+        <div class="row" *ngIf="!scheduled.canceled">
+          <div class="actions" *ngIf="!isLoading">
+            <button
+            *ngIf="isCurrentUserHost"
+            class="ui basic button"
+            (click)="cancelMeeting()"
+            >
+            Cancel
+            </button>   
+            <button
+            class="ui basic button"
+            (click)="copyLink()"
+            >
+            Copy link
+            </button>
+            <button
+            class="ui primary button"
+            (click)="join()"
+            [disabled]="isDisabled"
+            >
+            Join Meeting
+            </button>
           </div>
         </div>
       </div>

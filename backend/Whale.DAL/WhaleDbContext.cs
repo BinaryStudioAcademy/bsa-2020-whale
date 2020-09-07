@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using Whale.DAL.Models;
 using Whale.DAL.Models.Messages;
@@ -30,6 +29,8 @@ namespace Whale.DAL
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Question> Questions { get; set; }
         public DbSet<ScheduledMeeting> ScheduledMeetings { get; set; }
+        public DbSet<MeetingScript> MeetingScripts { get; set; }
+
         public DbSet<AgendaPoint> AgendaPoints { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -40,7 +41,6 @@ namespace Whale.DAL
             modelBuilder.Entity<Group>()
                 .HasOne(a => a.PinnedMessage)
                 .WithMany();
-           
 
             modelBuilder.Entity<Poll>()
                 .Property(pollResult => pollResult.OptionResults)

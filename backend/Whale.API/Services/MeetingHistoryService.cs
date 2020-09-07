@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,14 +8,15 @@ using System.Threading.Tasks;
 using Whale.API.Services.Abstract;
 using Whale.DAL;
 using Whale.DAL.Models;
-using Whale.DAL.Models.Poll;
 using Whale.DAL.Settings;
+using Whale.Shared.Exceptions;
 using Whale.Shared.Extentions;
 using Whale.Shared.Models.Meeting;
+using Whale.Shared.Models.User;
 
 namespace Whale.API.Services
 {
-	public class MeetingHistoryService : BaseService
+    public class MeetingHistoryService : BaseService
 	{
 		private readonly BlobStorageSettings _blobStorageSettings;
 
@@ -23,7 +25,7 @@ namespace Whale.API.Services
 		{
 			_blobStorageSettings = blobStorageSettings;
 		}
-		public async Task<IEnumerable<MeetingDTO>> GetMeetingsWithParticipantsAndPollResults(Guid userId, int skip, int take)
+		public async Task<IEnumerable<MeetingDTO>> GetMeetingsWithParticipantsAndPollResultsAsync(Guid userId, int skip, int take)
 		{
 			var meetings = _context.Participants
 				.Include(p => p.Meeting)
@@ -54,6 +56,24 @@ namespace Whale.API.Services
 			var meetingList = (await Task.WhenAll(meetingTasks)).ToList();
 
 			return _mapper.Map<IEnumerable<MeetingDTO>>(meetingList);
+		}
+
+		public async Task<IEnumerable<MeetingSpeechDTO>> GetMeetingScriptAsync(Guid meetingId)
+        {
+			var scriptJson = await _context.MeetingScripts.FirstOrDefaultAsync(m => m.MeetingId == meetingId);
+			if (scriptJson is null)
+				throw new NotFoundException("MeetingScripts", meetingId.ToString());
+
+			var script = JsonConvert.DeserializeObject<IEnumerable<MeetingSpeech>>(scriptJson.Script);
+			var scriptTasks = script.OrderBy(m => m.SpeechDate).Join(_context.Users, m => m.UserId, u => u.Id,
+				async (m, u) => new MeetingSpeechDTO
+				{
+					User = _mapper.Map<UserDTO>(await u.LoadAvatarAsync(_blobStorageSettings)),
+					Message = m.Message,
+					SpeechDate = m.SpeechDate
+				}
+			);
+			return (await Task.WhenAll(scriptTasks)).ToList();
 		}
 	}
 }

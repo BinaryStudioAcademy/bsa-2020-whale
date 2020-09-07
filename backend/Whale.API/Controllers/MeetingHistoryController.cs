@@ -9,7 +9,7 @@ using Whale.Shared.Models.Meeting;
 namespace Whale.API.Controllers
 {
 	[ApiController]
-	[Route("api/[controller]")]
+	[Route("[controller]")]
 	public class MeetingHistoryController : ControllerBase
 	{
 		private readonly MeetingHistoryService _meetingHistoryService;
@@ -22,7 +22,14 @@ namespace Whale.API.Controllers
 		[HttpGet]
 		public async Task<ActionResult<IEnumerable<MeetingDTO>>> GetMeetings(Guid userId, int skip, int take)
 		{
-			var meetings = await _meetingHistoryService.GetMeetingsWithParticipantsAndPollResults(userId, skip, take);
+			var meetings = await _meetingHistoryService.GetMeetingsWithParticipantsAndPollResultsAsync(userId, skip, take);
+			return Ok(meetings);
+		}
+
+		[HttpGet("script/{id}")]
+		public async Task<ActionResult<IEnumerable<MeetingSpeechDTO>>> GetMeetings(Guid id)
+		{
+			var meetings = await _meetingHistoryService.GetMeetingScriptAsync(id);
 			return Ok(meetings);
 		}
 	}

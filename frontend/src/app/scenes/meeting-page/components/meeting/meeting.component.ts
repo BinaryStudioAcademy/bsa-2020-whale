@@ -24,7 +24,7 @@ import {
 import { SimpleModalService } from 'ngx-simple-modal';
 import { ToastrService } from 'ngx-toastr';
 import Peer from 'peerjs';
-import { Subject, Observable, BehaviorSubject } from 'rxjs';
+import { Subject, Observable, BehaviorSubject, fromEvent, timer } from 'rxjs';
 import { takeUntil, first } from 'rxjs/operators';
 
 import { AuthService } from 'app/core/auth/auth.service';
@@ -38,6 +38,9 @@ import {
   SignalMethods,
   RoomService,
   QuestionService,
+  CardSizeService,
+  CardGridDivisor,
+  VideoCardSize,
 } from 'app/core/services';
 import {
   ChangedMediaPermissions,
@@ -55,9 +58,11 @@ import {
   MediaData,
   ReactionsEnum,
   Reaction,
+  MeetingSpeechCreate,
   CardsLayout,
   MediaPermissions,
   MediaState,
+  ModalActions,
 } from '@shared/models';
 import { EnterModalComponent } from '../enter-modal/enter-modal.component';
 import { DivisionByRoomsModalComponent } from '../division-by-rooms-modal/division-by-rooms-modal.component';
@@ -68,10 +73,12 @@ import { BrowserMediaDevice } from '@shared/browser-media-device';
 import { Question } from '@shared/models/question/question';
 import { MeetingSettingsService } from '../../../../core/services/meeting-settings.service';
 import { MeetingInviteModalData } from '@shared/models/email/meeting-invite-modal-data';
-import { ElementAst } from '@angular/compiler';
-import { runInThisContext } from 'vm';
-import { promises } from 'dns';
+import { QuestionComponent } from '@shared/components/question/question/question.component';
+import { ParticipantCardComponent } from '@shared/components/participant-card/participant-card.component';
+import { PointAgenda } from '@shared/models/agenda/agenda';
+import { Hash } from 'crypto';
 
+declare var webkitSpeechRecognition: any;
 
 @Component({
   selector: 'app-meeting',
@@ -81,6 +88,8 @@ import { promises } from 'dns';
 export class MeetingComponent
   implements OnInit, AfterViewInit, OnDestroy, AfterViewChecked {
   //#region fields
+  public recognition: SpeechRecognition;
+  public isRecognitionStop = false;
   public canvasIsDisplayed = false;
   public canvasOptions: CanvasWhiteboardOptions = {
     clearButtonEnabled: true,
@@ -141,8 +150,6 @@ export class MeetingComponent
   public isPinnedVideoAllowed = false;
   public isPinnedAudioActive = false;
   public isPinnedVideoActive = false;
-  public isShowRecordingOptins = false;
-  public isHighlightRecording = false;
   public isMeetingLoading = true;
   public mediaData: MediaData[] = [];
   public meeting: Meeting;
@@ -159,13 +166,17 @@ export class MeetingComponent
   public pinnedCardsLayout: CardsLayout;
   public pinnedParticipant: Participant;
   public pinnedLayoutMenuSticky = false;
+  public pinnedReaction: ReactionsEnum;
+  public pinnedVolume = 0;
   public pollService: PollService;
   public receiveingDrawings = false;
   public isHost = false;
   public isRoom = false;
   public isMoveToRoom = false;
   public isMoveToMeeting = false;
-  public onCanMoveIntoRoomEvent = new EventEmitter<void>();
+  public isPlanning = false;
+  public isTopicEnd = false;
+  public onCanLeaveEvent = new EventEmitter<void>();
   public isSharing = false;
   private sdpVideoBandwidth = 125;
   public meter = new DecibelMeter('meter');
@@ -181,8 +192,14 @@ export class MeetingComponent
   audioUrl: string;
   isMusicUploaded: boolean = false;
   
+  public reactionDelay: Observable<number>;
+  startedSpeak: Date = null;
+  startedPresence: Date = null;
+  speechDuration = 0;
+  topicList: PointAgenda[] = [];
+  updateStatisticsTaskId: any;
+  
   @ViewChild('uploadFile') fileInput: ElementRef;
-  @ViewChild('whiteboard') private whiteboard: ElementRef;
   @ViewChild('currentVideo') private currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
     HTMLElement
@@ -190,22 +207,43 @@ export class MeetingComponent
   @ViewChildren('meetingChat') private chatBlock: QueryList<
     ElementRef<HTMLElement>
   >;
+  @ViewChildren('question') private questions: QueryList<ElementRef<HTMLElement>>;
+  @ViewChildren('participantCard', { read: ElementRef }) private participantCards: QueryList<ElementRef<HTMLElement>>;
   @ViewChild('cardsLayout') private cardsLayout: ElementRef<
-  HTMLElement
+    HTMLElement
   >;
+  @ViewChild('checkTopic') checkTopic: ElementRef<HTMLInputElement>;
 
-  private chatElement: any;
+  @ViewChild('polls') polls: ElementRef;
+  @ViewChild('pollsButton') pollsButton: ElementRef;
+  @ViewChild('pollsButtonFullscreen') pollsButtonFullscreen: ElementRef;
+  @ViewChild('reactions') reactions: ElementRef;
+  @ViewChild('reactionsButton') reactionsButton: ElementRef;
+  @ViewChild('reactionsButtonFullscreen') reactionsButtonFullscreen: ElementRef;
+  @ViewChild('statistics') statistics: ElementRef;
+  @ViewChild('statisticsButton') statisticsButton: ElementRef;
+  @ViewChild('statisticsButtonFullscreen') statisticsButtonFullscreen: ElementRef;
+  @ViewChild('settings') settings: ElementRef;
+  @ViewChild('settingsButton') settingsButton: ElementRef;
+  @ViewChild('agenda') agenda: ElementRef;
+  @ViewChild('agendaButton') agendaButton: ElementRef;
+  @ViewChild('whiteboard') whiteboard: ElementRef;
+  @ViewChild('whiteboardButton') whiteboardButton: ElementRef;
+
   private currentStreamLoaded = new EventEmitter<void>();
   private contectedAt = new Date();
   private elem: any;
   private isCardPinnedInner = false;
+  private pinnedReactions: Subject<ReactionsEnum>;
   private savedStrokes: CanvasWhiteboardUpdate[][] = new Array<
     CanvasWhiteboardUpdate[]
   >();
   private unsubscribe$ = new Subject<void>();
   private userStream: MediaStream;
+  private unsubscribeReaction$: Subject<void>;
+  public chatElement: HTMLElement;
   //#endregion fields
-  public isPlanning = false;
+
   constructor(
     @Inject(DOCUMENT) private document: any,
     private authService: AuthService,
@@ -222,7 +260,8 @@ export class MeetingComponent
     private toastr: ToastrService,
     private meetingSignalrService: MeetingSignalrService,
     public roomService: RoomService,
-    public questionService: QuestionService
+    public questionService: QuestionService,
+    public cardSizeService: CardSizeService
   ) {
     this.pollService = new PollService(
       this.meetingSignalrService,
@@ -241,6 +280,49 @@ export class MeetingComponent
 
     if (element?.classList[0] === undefined) {
       this.isWhiteboardFullScreen = false;
+    }
+  }
+
+  @HostListener('document:click', ['$event.target'])
+  public onClickOutsidePopup(targetElement: ElementRef): void {
+    const isInsidePolls = this.polls?.nativeElement.contains(targetElement);
+    const isInsideReactions = this.reactions?.nativeElement.contains(targetElement);
+    const isInsideStatistics = this.statistics?.nativeElement.contains(targetElement);
+    const isInsideSettings = this.settings?.nativeElement.contains(targetElement);
+    const isInsideAgenda = this.agenda?.nativeElement.contains(targetElement);
+    const isInsideWhiteboard = this.whiteboard?.nativeElement.contains(targetElement);
+
+    if (!isInsidePolls &&
+      targetElement !== this.pollsButton?.nativeElement &&
+      targetElement !== this.pollsButtonFullscreen?.nativeElement) {
+      this.pollService.isShowPoll = false;
+    }
+
+    if (!isInsideReactions &&
+      targetElement !== this.reactionsButton?.nativeElement &&
+      targetElement !== this.reactionsButtonFullscreen?.nativeElement) {
+      this.isShowReactions = false;
+    }
+
+    if (!isInsideStatistics &&
+      targetElement !== this.statisticsButton?.nativeElement &&
+      targetElement !== this.statisticsButtonFullscreen?.nativeElement) {
+      this.isShowStatistics = false;
+    }
+
+    if (!isInsideSettings &&
+      targetElement !== this.settingsButton?.nativeElement) {
+      this.isShowMeetingSettings = false;
+    }
+
+    if (!isInsideAgenda &&
+      targetElement !== this.agendaButton?.nativeElement) {
+      this.isPlanning = false;
+    }
+
+    if (!isInsideWhiteboard &&
+      targetElement !== this.whiteboardButton?.nativeElement) {
+      this.canvasIsDisplayed = false;
     }
   }
 
@@ -282,9 +364,7 @@ export class MeetingComponent
   public async ngOnInit(): Promise<void> {
     this.isRoom = window.location.pathname.includes('room');
     this.roomService.isInRoom = this.isRoom;
-    if (this.isRoom) {
-      this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-    }
+    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
     this.currentUserStream = await navigator.mediaDevices
       .getUserMedia(await this.mediaSettingsService.getMediaConstraints())
@@ -330,8 +410,8 @@ export class MeetingComponent
 
           this.connect(connectData.peerId);
 
-          this.toastr.success(`${connectData.participant.user.firstName}
-          ${connectData.participant.user.secondName} connected`);
+          this.toastr.success(`${connectData.participant.user.firstName ? connectData.participant.user.firstName : ''}
+          ${connectData.participant.user.secondName ? connectData.participant.user.secondName : ''} connected`);
         },
         (err) => {
           this.toastr.error(err.Message);
@@ -357,8 +437,14 @@ export class MeetingComponent
             (p) => p.id !== this.currentParticipant.id
           );
           this.createParticipantCard(this.currentParticipant);
-
-          if (this.meeting.isAllowedToChooseRoom && !this.isHost){
+          if (!this.recognition) {
+            this.meetingSignalrService.invoke(SignalMethods.OnSpeechRecognition, {
+              meetingId: this.meeting.id,
+              userId: this.currentParticipant.user.id,
+              message: '>Speech recognition is not supported by the browser',
+            } as MeetingSpeechCreate);
+          }
+          if (this.meeting.isAllowedToChooseRoom && !this.isHost) {
             this.openRoomsModal();
           }
         },
@@ -371,6 +457,12 @@ export class MeetingComponent
     this.meetingSignalrService.signalParticipantLeft$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((connectionData) => {
+        if (this.pinnedParticipant?.id === connectionData.participant?.id) {
+          this.unpinCard();
+        }
+
+        this.connectedStreams = this.connectedStreams.filter(stream => stream.id !== connectionData.streamId);
+
         this.removeParticipantFromMeeting(connectionData.participant);
         if (this.connectedPeers.has(connectionData.peerId)) {
           this.connectedPeers.delete(connectionData.peerId);
@@ -387,8 +479,11 @@ export class MeetingComponent
     this.meetingSignalrService.signalParticipantDisconnected$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((participant) => {
+        if (this.pinnedParticipant?.id === participant?.id) {
+          this.unpinCard();
+        }
         this.removeParticipantFromMeeting(participant);
-
+        this.connectedStreams = this.connectedStreams.filter(stream => stream.id !== participant.streamId);
         this.connectedPeers = new Map(
           [...this.connectedPeers].filter(
             ([_, v]) => v.id !== participant.streamId
@@ -433,7 +528,7 @@ export class MeetingComponent
       .subscribe(
         (streamChangedData) => {
           if (streamChangedData.oldStreamId === this.pinnedParticipant?.streamId) {
-              this.pinnedParticipant.streamId = streamChangedData.newStreamId;
+            this.pinnedParticipant.streamId = streamChangedData.newStreamId;
           }
 
           const changedMediaData = this.mediaData.find(
@@ -468,35 +563,41 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (data) => {
+          if (this.isCardPinned && (!data.changedParticipantConnectionId ||
+            this.pinnedParticipant.streamId === this.currentParticipant.streamId)) {
+            this.isPinnedAudioAllowed = data.isAudioAllowed;
+            this.isPinnedVideoAllowed = data.isVideoAllowed;
+            this.isPinnedAudioActive = data.isAudioActive;
+            this.isPinnedVideoActive = data.isVideoActive;
+          }
           if (!data.changedParticipantConnectionId) {
             if (
               this.meeting.isAudioAllowed !== data.isAudioAllowed &&
-              this.isHost
+              !this.isHost
             ) {
               this.toastr.info(
                 `Participants' audio ${
-                  data.isAudioAllowed ? 'enabled' : 'disabled'
+                data.isAudioAllowed ? 'enabled' : 'disabled'
                 } by the host`
               );
             } else if (
               this.meeting.isVideoAllowed !== data.isVideoAllowed &&
-              this.isHost
+              !this.isHost
             ) {
               this.toastr.info(
                 `Participants' video ${
-                  data.isVideoAllowed ? 'enabled' : 'disabled'
+                data.isVideoAllowed ? 'enabled' : 'disabled'
                 } by the host`
               );
             }
-
             this.meeting.isAudioAllowed = data.isAudioAllowed;
             this.meeting.isVideoAllowed = data.isVideoAllowed;
-
-            if (!this.isHost) {
+            if (!this.isHost && !data.isAudioAllowed) {
               this.toggleMicrophone();
+            }
+            if (!this.isHost && !data.isVideoAllowed) {
               this.toggleCamera();
             }
-
             this.meetingSignalrService.invoke<ChangedMediaState>(
               SignalMethods.OnMediaStateChanged,
               {
@@ -514,24 +615,23 @@ export class MeetingComponent
           ) {
             if (
               this.meeting.isAudioAllowed !== data.isAudioAllowed &&
-              this.isHost
+              !this.isHost
             ) {
               this.toastr.info(
                 `Your audio ${
-                  data.isAudioAllowed ? 'enabled' : 'disabled'
+                data.isAudioAllowed ? 'enabled' : 'disabled'
                 } by the host`
               );
             } else if (
               this.meeting.isVideoAllowed !== data.isVideoAllowed &&
-              this.isHost
+              !this.isHost
             ) {
               this.toastr.info(
                 `Your video ${
-                  data.isVideoAllowed ? 'enabled' : 'disabled'
+                data.isVideoAllowed ? 'enabled' : 'disabled'
                 } by the host`
               );
             }
-
             this.meeting.isAudioAllowed = data.isAudioAllowed;
             this.meeting.isVideoAllowed = data.isVideoAllowed;
             this.updateCardDynamicData(
@@ -544,11 +644,9 @@ export class MeetingComponent
               !this.isCameraMuted,
               !this.isMicrophoneMuted
             );
-
             if (!this.isMicrophoneMuted && !data.isAudioAllowed) {
               this.toggleMicrophone();
             }
-
             if (!this.isCameraMuted && !data.isVideoAllowed) {
               this.toggleCamera();
             }
@@ -575,24 +673,17 @@ export class MeetingComponent
       .subscribe(
         (setting) => {
           if (
-            !this.meeting.isWhiteboard &&
+            this.meeting.isWhiteboard !==
             setting.isWhiteboard &&
             !this.isHost
           ) {
-            this.toastr.info('Host has forbidden a whiteboard.');
-          }
-          if (
-            this.meeting.isWhiteboard &&
-            !setting.isWhiteboard &&
-            !this.isHost
-          ) {
-            this.toastr.info('Host has allowed a whiteboard.');
-          }
-          if (!this.meeting.isPoll && setting.isPoll && !this.isHost) {
-            this.toastr.info('Host has forbidden to create polls.');
-          }
-          if (this.meeting.isPoll && !setting.isWhiteboard && !this.isHost) {
-            this.toastr.info('Host has allowed polls');
+            this.toastr.info(`Host has ${
+              setting.isWhiteboard ? 'forbidden' : 'allowed'
+              } a whiteboard`);
+          } else if (this.meeting.isPoll !== setting.isPoll && !this.isHost) {
+            this.toastr.info(`Host has ${
+              setting.isPoll ? 'forbidden' : 'allowed'
+              } polls`);
           }
           this.meeting.isWhiteboard = setting.isWhiteboard;
           this.meeting.isPoll = setting.isPoll;
@@ -662,7 +753,7 @@ export class MeetingComponent
           this.messages.push(message);
           this.updateSelectedMessages();
           this.notifyNewMsg(message);
-          if (this.isShowChat) {
+          if (this.isShowChat && this.isChat) {
             this.chatBlock.changes.pipe(first()).subscribe(() => {
               this.scrollDown();
             });
@@ -670,6 +761,24 @@ export class MeetingComponent
         },
         () => {
           this.toastr.error('Error occured when sending message');
+        }
+      );
+
+    this.meetingSignalrService.questionCreated$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (question: Question) => {
+          if (this.isShowChat && this.questionService.areQuestionsOpened) {
+            this.questions.changes.pipe(first()).subscribe(() => {
+              const questionsBlock = this.questions.last.nativeElement.parentElement;
+              questionsBlock.scrollTop = questionsBlock.scrollHeight - questionsBlock.clientHeight;
+            });
+          }
+          this.questionService.addQuestion(question);
+          this.questionService.isNewQuestion = !this.questionService.areQuestionsOpened;
+        },
+        (error) => {
+          console.error(error);
         }
       );
 
@@ -705,8 +814,13 @@ export class MeetingComponent
       .subscribe(
         (streamId) => {
           const stream = this.connectedStreams.find((x) => x.id === streamId);
-          this.fullPage(streamId);
-          this.toastr.success('Start sharing screen');
+          if (this.currentParticipant.streamId === streamId)
+          {
+            this.isSharing = true;
+          }
+          this.pinCard(streamId);
+          const user = this.meeting.participants.find(x => x.streamId === streamId).user;
+          this.toastr.success(`${user.firstName} ${user.secondName} start sharing screen`);
         },
         () => {
           this.toastr.error('Error while trying to share screen');
@@ -715,14 +829,16 @@ export class MeetingComponent
     this.meetingSignalrService.shareScreenStop$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(() => {
-        this.stopShare();
+        this.unpinCard();
+        this.isSharing = false;
+        this.toastr.info('Stop sharing screen');
       });
 
     this.meetingSignalrService.onRoomCreated$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (roomId) => {
-          if (!this.isHost && this.meeting.isAllowedToChooseRoom){
+          if (!this.isHost && this.meeting.isAllowedToChooseRoom) {
             this.simpleModalService.removeAll();
             this.openRoomsModal();
           }
@@ -765,15 +881,42 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (reaction) => {
+          if (reaction.userId === this.pinnedParticipant?.id) {
+            this.pinnedReactions.next(reaction.reaction);
+            return;
+          }
+
           this.mediaData
             .find((m) => m.id === reaction.userId)
-            .reactions.next(reaction.reaction);
+            ?.reactions.next(reaction.reaction);
         },
         (error) => {
           this.toastr.error(error);
         }
       );
-
+    this.meetingSignalrService.onOutTime$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (point) => {
+          this.toastr.success(`Time for "${point.name}" started`);
+        },
+        () => {
+          this.toastr.error('Error');
+        }
+      );
+    this.meetingSignalrService.onEndedTopic$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (point) => {
+          const toast = this.toastr.success(`Topic ${point.name} finished`, 'Click this for snooze on 5 min', {
+            enableHtml :  true
+          });
+          toast.onTap.subscribe(() => this.snoozeTopic(point));
+        },
+        () => {
+          this.toastr.error('Error');
+        }
+      );
     // create new peer
     this.peer = new Peer(environment.peerOptions);
 
@@ -802,13 +945,14 @@ export class MeetingComponent
           this.setMediaBitrate(sdp, 'video', this.sdpVideoBandwidth),
       });
     });
-    // // show a warning dialog if close current tab or window
-    // window.onbeforeunload = (ev: BeforeUnloadEvent) => {
-    //   ev.preventDefault();
-    //   ev = ev;
-    //   ev.returnValue = '';
-    //   return '';
-    // };
+
+    // show a warning dialog if close current tab or window
+    window.onbeforeunload = (ev: BeforeUnloadEvent) => {
+      ev.preventDefault();
+      ev = ev;
+      ev.returnValue = '';
+      return '';
+    };
   }
 
   public ngAfterViewInit(): void {
@@ -822,6 +966,21 @@ export class MeetingComponent
     });
 
     this.pinnedCardsLayout = +localStorage.getItem('pinned-cards-layout') ?? CardsLayout.TopRow;
+
+    this.participantCards.changes.subscribe(
+      () => {
+        if (this.isCardPinned) {
+          return;
+        }
+        const cardDivisor = this.cardSizeService.calculateCardDivisor(this.participantCards.length);
+        const cardSize = this.cardSizeService.calculateCardSize(cardDivisor);
+        this.participantCards
+          .map(cardComponent => cardComponent.nativeElement)
+          .forEach(card => {
+            this.cardSizeService.setCardSize(card, cardSize);
+          });
+      }
+    );
   }
 
   ngAfterViewChecked(): void {
@@ -831,9 +990,15 @@ export class MeetingComponent
   }
 
   public ngOnDestroy(): void {
+    this.isRecognitionStop = true;
+    this.recognition?.abort();
+    this.recognition = undefined;
     this.simpleModalService.removeAll();
     this.destroyPeer();
     this.currentUserStream?.getTracks().forEach((track) => track.stop());
+
+    this.questionService.areQuestionsOpened = false;
+    this.questionService.questions = [];
 
     if (this.connectionData) {
       if (this.isMoveToRoom && !this.isRoom) {
@@ -871,7 +1036,7 @@ export class MeetingComponent
     if (disconectedMediaDataIndex >= 0) {
       this.mediaData.splice(disconectedMediaDataIndex, 1);
       if (message) {
-        this.toastr.info(`${firstName}${lastName ? lastName : ''} ${message}`);
+        this.toastr.info(`${firstName ? firstName : ''} ${lastName ? lastName : ''} ${message}`);
       }
     }
   }
@@ -885,6 +1050,7 @@ export class MeetingComponent
     ) {
       this.switchTrack(false, false);
       this.isMicrophoneMuted = true;
+      this.stopRecognition();
       return;
     }
 
@@ -893,6 +1059,8 @@ export class MeetingComponent
       : this.switchTrack(false, false);
 
     this.isMicrophoneMuted = !this.isMicrophoneMuted;
+    this.isRecognitionStop = this.isMicrophoneMuted;
+    // this.isMicrophoneMuted ? this.stopRecognition() : this.recognition?.start();
     if (!isMissSignaling) {
       this.invokeMediaStateChanged();
     }
@@ -908,9 +1076,7 @@ export class MeetingComponent
       return;
     }
 
-    this.isCameraMuted
-      ? this.switchTrack(true, true)
-      : this.switchTrack(false, true);
+    this.switchTrack(this.isCameraMuted, true);
 
     this.isCameraMuted = !this.isCameraMuted;
     if (!isMissSignaling) {
@@ -926,12 +1092,26 @@ export class MeetingComponent
     tracks.forEach((track) => {
       track.enabled = enable;
     });
+
+    if (!enable) {
+      tracks.forEach(track => {
+        track.enabled = enable;
+        track.stop();
+      });
+      return;
+    }
+
+    if (isVideo) {
+      navigator.mediaDevices.getUserMedia(this.mediaSettingsService.getVideoConstraints())
+        .then(audioStream => this.handleSuccessVideo(audioStream));
+    } else {
+      navigator.mediaDevices.getUserMedia(this.mediaSettingsService.getAudioConstraints())
+        .then(videoStream => this.handleSuccessAudio(videoStream));
+    }
   }
 
-  public startRecording(isHighlight: boolean): void {
+  public startRecording(): void {
     this.isScreenRecording = true;
-    this.isShowRecordingOptins = false;
-    this.isHighlightRecording = false;
 
     this.blobService.startRecording().subscribe({
       complete: () => (this.isWaitingForRecord = false),
@@ -950,20 +1130,18 @@ export class MeetingComponent
                 link: resp,
               });
             });
-          if (isHighlight) {
-            this.highlightRecording();
-          }
         } else {
           this.isScreenRecording = false;
+          this.meetingSignalrService.invoke(
+            SignalMethods.OnConferenceStopRecording,
+            this.meeting.id
+          );
         }
       },
     });
   }
 
   public stopRecording(): void {
-    if (!this.isScreenRecording) {
-      return;
-    }
     this.isWaitingForRecord = true;
 
     this.isScreenRecording = false;
@@ -975,12 +1153,7 @@ export class MeetingComponent
       this.meeting.id
     );
     this.toastr.info('Stop recording a conference');
-  }
-
-  private async highlightRecording(): Promise<void> {
-    this.isHighlightRecording = true;
-    await new Promise((r) => setTimeout(r, 30000));
-    this.stopRecording();
+    this.isSomeoneRecordingScreen = false;
   }
 
   public onPollIconClick(): void {
@@ -1016,6 +1189,7 @@ export class MeetingComponent
     }
     this.isShowStatistics = !this.isShowStatistics;
   }
+
   public onReactionsIconClick(): void {
     this.pollService.isShowPoll = false;
     this.pollService.isPollCreating = false;
@@ -1057,9 +1231,7 @@ export class MeetingComponent
 
   scrollDown(): void {
     const chatHtml = this.chatBlock.first.nativeElement as HTMLElement;
-    const isScrolledToBottom =
-      chatHtml.scrollHeight - chatHtml.clientHeight > chatHtml.scrollTop;
-
+    const isScrolledToBottom = chatHtml.scrollHeight - chatHtml.clientHeight > chatHtml.scrollTop;
     if (isScrolledToBottom) {
       chatHtml.scrollTop = chatHtml.scrollHeight - chatHtml.clientHeight;
     }
@@ -1093,9 +1265,12 @@ export class MeetingComponent
 
   public leave(): void {
     // this is made to remove eventListener for other routes
-    window.onbeforeunload = () => {};
+    window.onbeforeunload = () => { };
+    this.stopRecognition();
     this.meter.stopListening();
     this.meter.disconnect();
+    this.updateMeetingStatistics();
+    clearInterval(this.updateStatisticsTaskId);
     this.router.navigate(['/home']);
   }
 
@@ -1106,7 +1281,7 @@ export class MeetingComponent
 
     const baseUrl: string = environment.apiUrl;
 
-    return this.http.get(`${baseUrl}/api/meeting/shortenLink/${meetingLink}`, {
+    return this.http.get(`${baseUrl}/meeting/shortenLink/${meetingLink}`, {
       responseType: 'text',
     });
   }
@@ -1141,6 +1316,9 @@ export class MeetingComponent
 
     // get answer and show other user
     call?.on('stream', (stream) => {
+      if (this.connectedStreams.includes(stream)) {
+        return;
+      }
       this.connectedStreams.push(stream);
       const connectedPeer = this.connectedPeers.get(call.peer);
       if (!connectedPeer || connectedPeer.id !== stream.id) {
@@ -1167,7 +1345,7 @@ export class MeetingComponent
         this.meetingSignalrService
           .invoke(SignalMethods.OnUserConnect, this.connectionData)
           .subscribe(
-            () => {},
+            () => { },
             (err) => {
               this.toastr.error('Unable to connect to meeting');
               this.router.navigate(['/home']);
@@ -1188,6 +1366,8 @@ export class MeetingComponent
       .subscribe(
         (resp) => {
           this.meeting = resp.body;
+          this.roomService.originalMeetingUrl = this.route.snapshot.params.link;
+          this.roomService.originalMeetingId = this.meeting.id;
           this.createEnterModal().then(() => {
             this.currentStreamLoaded.emit();
             this.connectionData.meetingId = this.meeting.id;
@@ -1201,7 +1381,13 @@ export class MeetingComponent
             } as GetMessages);
 
             this.questionService.getQuestionsByMeeting(this.meeting.id);
+            this.configureRecognition();
+            this.getAgenda();
           });
+          this.startedPresence = new Date();
+          this.updateStatisticsTaskId = setInterval(() => {
+            this.updateMeetingStatistics();
+          }, 60000);
         },
         (error) => {
           this.leaveUnConnected();
@@ -1214,6 +1400,8 @@ export class MeetingComponent
     this.destroyPeer();
     this.meter.stopListening();
     this.meter.disconnect();
+    this.updateMeetingStatistics();
+    clearInterval(this.updateStatisticsTaskId);
     this.router.navigate(['/home']);
   }
 
@@ -1241,6 +1429,7 @@ export class MeetingComponent
         isCurrentParticipantHost,
         isAllowedAudioOnStart: this.meeting.isAudioAllowed,
         isAllowedVideoOnStart: this.meeting.isVideoAllowed,
+        recognitionLanguage: this.meeting.recognitionLanguage,
       })
       .toPromise();
 
@@ -1259,6 +1448,7 @@ export class MeetingComponent
 
     this.meeting.isAudioAllowed = modalResult.isAllowedAudioOnStart;
     this.meeting.isVideoAllowed = modalResult.isAllowedVideoOnStart;
+    this.meeting.recognitionLanguage = modalResult.recognitionLanguage;
 
 
     if (isCurrentParticipantHost) {
@@ -1267,10 +1457,12 @@ export class MeetingComponent
           meetingId: this.meeting.id,
           applicantEmail: this.authService.currentUser.email,
           isWhiteboard: this.meeting.isWhiteboard,
+          recurrence: this.meeting.recurrence,
           isAudioDisabled: !this.meeting.isAudioAllowed,
           isVideoDisabled: !this.meeting.isVideoAllowed,
           isPoll: this.meeting.isPoll,
           isAllowedToChooseRoom: this.meeting.isAllowedToChooseRoom,
+          recognitionLanguage: this.meeting.recognitionLanguage
         })
         .pipe(takeUntil(this.unsubscribe$))
         .subscribe(() => {
@@ -1386,7 +1578,18 @@ export class MeetingComponent
         this.meter.connect(device);
         this.meter.on(
           'sample',
-          (dB, percent, value) => (newMediaData.volume = dB + 100)
+          (dB, percent, value) => {
+            newMediaData.volume = dB + 100;
+            if (newMediaData.volume > 1 && !this.isMicrophoneMuted) {
+              if (this.startedSpeak != null) {
+                this.speechDuration += new Date().getTime() - this.startedSpeak.getTime();
+              }
+              this.startedSpeak = new Date();
+            }
+            else {
+              this.startedSpeak = null;
+            }
+          }
         );
         this.meter.listen();
       });
@@ -1476,6 +1679,32 @@ export class MeetingComponent
       return;
     }
 
+    this.participantCards
+      .map(cardComponent => cardComponent.nativeElement)
+      .forEach(card => {
+        card.style.height = '100%';
+        card.style.width = '100%';
+      });
+
+    this.unsubscribeReaction$ = new Subject<void>();
+    this.pinnedReactions = new Subject<ReactionsEnum>();
+
+    const audioContext = new AudioContext();
+    const mediaStreamSource = audioContext.createMediaStreamSource(mediaData.stream);
+    const processor = audioContext.createScriptProcessor(256, 1, 1);
+    mediaStreamSource.connect(processor);
+    processor.connect(audioContext.destination);
+    // tslint:disable-next-line: deprecation
+    processor.onaudioprocess = (e) => {
+      const inputData = e.inputBuffer.getChannelData(0);
+      const inputDataLength = inputData.length;
+      let total = 0;
+      for (let i = 0; i < inputDataLength; i++) {
+        total += Math.abs(inputData[i++]);
+      }
+      this.pinnedVolume = Math.sqrt(total / inputDataLength) * 100;
+    };
+
     if (this.pinnedParticipant) {
       this.createParticipantCard(this.pinnedParticipant, true);
     }
@@ -1492,10 +1721,18 @@ export class MeetingComponent
       this.deleteParticipantMediaData(mediaData.stream.id);
       this.isCardPinned = true;
     });
+
+    this.pinnedReactions
+      .asObservable()
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe((reaction) => this.onPinnedReaction(reaction));
   }
 
-  public unpinCard(): void {
-    this.createParticipantCard(this.pinnedParticipant, true);
+  public unpinCard(skipCardCreation: boolean = false): void {
+    this.currentVideo.nativeElement.srcObject = this.currentUserStream;
+    this.unsubscribeReaction$ = null;
+    this.pinnedReactions = null;
+    this.createParticipantCard(this.pinnedParticipant, this.pinnedParticipant.id === this.currentParticipant.id);
     this.isCardPinned = false;
     this.pinnedParticipant = null;
     this.isPinnedAudioAllowed = false;
@@ -1513,6 +1750,15 @@ export class MeetingComponent
     this.pinnedLayoutMenuSticky =
       window.innerWidth <= this.cardsLayout.nativeElement.offsetWidth + 40;
   }
+
+  private onPinnedReaction(reaction: ReactionsEnum): void {
+    this.pinnedReaction = reaction;
+    this.unsubscribeReaction$.next();
+    this.reactionDelay = timer(5000);
+    this.reactionDelay
+      .pipe(takeUntil(this.unsubscribeReaction$))
+      .subscribe(() => this.pinnedReaction = null);
+  }
   //#endregion participant cards
 
   //#region chat
@@ -1527,6 +1773,10 @@ export class MeetingComponent
         );
       });
       this.isNewMsg = false;
+    } else if (this.isShowChat && this.questionService.areQuestionsOpened) {
+      this.questions.changes.pipe(first()).subscribe(() => {
+        this.questions.last?.nativeElement?.scrollIntoView(false);
+      });
     }
   }
 
@@ -1734,15 +1984,19 @@ export class MeetingComponent
 
   public handleSuccessVideo(stream: MediaStream): void {
     const video = document.querySelector('video') as HTMLVideoElement;
-    // video.srcObject = stream;
-    const keys = Object.keys(this.peer.connections);
-    const peerConnection = this.peer.connections[keys[0]];
+    if (video.srcObject) {
+      video.srcObject = stream;
+    }
     const videoTrack = stream.getVideoTracks()[0];
-    peerConnection.forEach((pc) => {
-      const sender = pc.peerConnection.getSenders().find((s) => {
-        return s.track.kind === videoTrack.kind;
+    const keys = Object.keys(this.peer.connections);
+    keys.forEach(key => {
+      const peerConnection = this.peer.connections[key];
+      peerConnection?.forEach((pc) => {
+        const sender = pc.peerConnection.getSenders().find((s) => {
+          return s.track.kind === videoTrack.kind;
+        });
+        sender.replaceTrack(videoTrack);
       });
-      sender.replaceTrack(videoTrack);
     });
     this.currentUserStream.getVideoTracks().forEach((vt) => {
       this.currentUserStream.removeTrack(vt);
@@ -1760,18 +2014,26 @@ export class MeetingComponent
     this.isVideoSettings = false;
   }
 
-  private async handleSuccessAudio(stream): Promise<void> {
+  private async handleSuccessAudio(stream: MediaStream): Promise<void> {
     const audio = document.querySelector('audio');
-    audio.srcObject = stream;
-    const keys = Object.keys(this.peer.connections);
-    const peerConnection = this.peer.connections[keys[0]];
+    if (audio) {
+      audio.srcObject = stream;
+    }
     const audioTrack = stream.getAudioTracks()[0];
-    peerConnection.forEach((pc) => {
-      const sender = pc.peerConnection.getSenders().find((s) => {
-        return s.track.kind === audioTrack.kind;
+    const keys = Object.keys(this.peer.connections);
+    keys.forEach(key => {
+      const peerConnection = this.peer.connections[key];
+      peerConnection?.forEach((pc) => {
+        const sender = pc.peerConnection.getSenders().find((s) => {
+          return s.track.kind === audioTrack.kind;
+        });
+        sender.replaceTrack(audioTrack);
       });
-      sender.replaceTrack(audioTrack);
     });
+    this.currentUserStream.getAudioTracks().forEach((at) => {
+      this.currentUserStream.removeTrack(at);
+    });
+    this.currentUserStream.addTrack(audioTrack);
   }
 
   public async changeOutputDevice(deviceId: string): Promise<void> {
@@ -1814,13 +2076,18 @@ export class MeetingComponent
         meeting: this.meeting,
         meetingId: this.meeting.id,
         meetingLink: link,
-        onCanMoveIntoRoomEvent: this.onCanMoveIntoRoomEvent,
+        onCanLeaveEvent: this.onCanLeaveEvent,
       })
       .toPromise()
-      .then((isMove) => {
-        this.isMoveToRoom = isMove;
-        if (this.isMoveToRoom) {
-          this.onCanMoveIntoRoomEvent.emit();
+      .then((action) => {
+        this.isMoveToRoom = action === ModalActions.MoveToRoom;
+        this.isMoveToMeeting = action === ModalActions.MoveToMeeting;
+        if (action === ModalActions.Close) {
+          this.isMoveToRoom = false;
+          this.isMoveToMeeting = false;
+        }
+        if (this.isMoveToRoom || this.isMoveToMeeting) {
+          this.onCanLeaveEvent.emit();
         }
       });
   }
@@ -1873,33 +2140,16 @@ export class MeetingComponent
       streamId: this.currentUserStream.id,
       meetingId: this.meeting.id,
     });
-    this.isSharing = true;
-  }
-  public fullPage(streamId): void {
-    const stream = this.connectedStreams.find((x) => x.id === streamId);
-    const fullVideo = this.createPage();
-    fullVideo.srcObject = stream;
-    fullVideo.play();
-  }
-  public createPage(): HTMLVideoElement {
-    const parrent = document.getElementsByClassName('main-content')[0];
-    const fullVideo = document.createElement('video');
-    parrent.appendChild(fullVideo);
-    fullVideo.className += 'fullVideo';
-    fullVideo.style.width = '100vw';
-    fullVideo.style.height = '100vh';
-    fullVideo.style.objectFit = 'cover';
-    fullVideo.style.position = 'fixed';
-    return fullVideo;
   }
   async removeSharingVideo(): Promise<void> {
     const keys = Object.keys(this.peer.connections);
-    const peerConnection = this.peer.connections[keys[0]];
-    peerConnection.forEach((pc) => {
-      const sender = pc.peerConnection.getSenders().find((s) => {
-        return s.track.kind === this.lastTrack.kind;
+    keys.forEach(key => {
+      this.peer.connections[key].forEach((pc) => {
+        const sender = pc.peerConnection.getSenders().find((s) => {
+          return s.track.kind === this.lastTrack.kind;
+        });
+        sender.replaceTrack(this.lastTrack);
       });
-      sender.replaceTrack(this.lastTrack);
     });
     this.currentUserStream.getVideoTracks().forEach((vt) => {
       this.currentUserStream.removeTrack(vt);
@@ -1909,12 +2159,6 @@ export class MeetingComponent
       SignalMethods.OnStopShareScreen,
       this.meeting.id
     );
-  }
-  async stopShare(): Promise<void> {
-    const fullVideo = document.querySelector('.fullVideo') as HTMLElement;
-    fullVideo.remove();
-    this.isSharing = false;
-    this.toastr.info('Stop sharing screen');
   }
   //#endregion ShareScreen
 
@@ -1935,11 +2179,11 @@ export class MeetingComponent
       line++;
     }
     if (lines[line].indexOf('b') === 0) {
-      lines[line] = 'b=AS:' + bitrate;
+      lines[line] = 'b=TIAS:' + bitrate + '000\nb=AS:' + bitrate;
       return lines.join('\n');
     }
     let newLines = lines.slice(0, line);
-    newLines.push('b=AS:' + bitrate);
+    newLines.push('b=TIAS:' + bitrate + '000\nb=AS:' + bitrate);
     newLines = newLines.concat(lines.slice(line, lines.length));
     return newLines.join('\n');
   }
@@ -1954,14 +2198,130 @@ export class MeetingComponent
     this.isChat = false;
     this.questionService.isNewQuestion = false;
     this.questionService.areQuestionsOpened = true;
+    this.questions.changes.pipe(first()).subscribe(() => {
+      this.questions.last?.nativeElement?.scrollIntoView(false);
+    });
   }
 
-  onReaction(event: ReactionsEnum): void {
+  public onReaction(event: ReactionsEnum): void {
     this.isShowReactions = false;
     this.meetingSignalrService.invoke(SignalMethods.OnReaction, {
       meetingId: this.meeting.id,
       userId: this.currentParticipant.id,
       reaction: event,
     } as Reaction);
+  }
+
+  //#region SpeechRecognition
+  private configureRecognition() {
+    try {
+      this.recognition = new webkitSpeechRecognition();
+      this.recognition.continuous = true;
+      if (this.meeting.recognitionLanguage) {
+        this.recognition.lang = this.meeting.recognitionLanguage;
+      }
+      this.recognition.interimResults = false;
+      this.recognition.maxAlternatives = 1;
+      fromEvent(this.recognition, 'result').pipe(takeUntil(this.unsubscribe$))
+        .subscribe(
+          (event: SpeechRecognitionEvent) => {
+            this.meetingSignalrService.invoke(SignalMethods.OnSpeechRecognition, {
+              meetingId: this.meeting.id,
+              userId: this.currentParticipant.user.id,
+              message: event.results[event.results.length - 1][0].transcript,
+            } as MeetingSpeechCreate);
+          }
+        );
+      fromEvent(this.recognition, 'end').pipe(takeUntil(this.unsubscribe$))
+        .subscribe(
+          (event) => {
+            if (!this.isRecognitionStop) {
+              this.recognition.start();
+            }
+          });
+      this.recognition.start();
+    }
+    catch {
+      this.toastr.info('Speech recognition is not supported by the browser');
+    }
+  }
+  private stopRecognition() {
+    this.isRecognitionStop = true;
+    this.recognition?.stop();
+  }
+  //#endregion SpeechRecognition
+  onAgendaClick() {
+    this.isTopicEnd = false;
+    this.isPlanning = !this.isPlanning;
+  }
+  async getAgenda() {
+    this.meetingService.getAgenda(this.meeting.id)
+      .subscribe((res) => {
+        this.topicList = res;
+        this.topicList.forEach(x => {
+          x.isFinished = false;
+          const ntf = setTimeout(() => {
+            const date = new Date();
+            if (date >= new Date(x.startTime) && x.isFinished === false) {
+              this.meetingSignalrService.invoke(SignalMethods.OnOutTime, {
+                point: x,
+                meetingId: this.meeting.id
+              });
+
+              if (this.topicList[this.topicList.indexOf(x) - 1]) {
+                this.meetingSignalrService.invoke(SignalMethods.OnEndedTopic, {
+                  point: this.topicList[this.topicList.indexOf(x) - 1],
+                  meetingId: this.meeting.id
+                });
+              }
+            }
+            clearTimeout(ntf);
+            x.isFinished = true;
+          });
+        }, 1000);
+      });
+  }
+  snoozeTopic(point: PointAgenda) {
+    const list = this.topicList.splice(this.topicList.indexOf(point) - 1, this.topicList.length);
+    list.forEach(x => x.startTime = new Date(x.startTime));
+    list.forEach(x => { x.startTime.setMinutes(x.startTime.getMinutes() + 5); });
+    list.forEach(x => this.meetingService.updateAgenda(x).subscribe());
+  }
+
+  updateMeetingStatistics(): void {
+    let presence = 0;
+    if (this.startedPresence != null) {
+      presence = new Date().getTime() - this.startedPresence.getTime();
+    }
+    this.meetingService.updateMeetingStatistics({
+      meetingId: this.meeting.id,
+      speechTime: this.speechDuration,
+      presenceTime: presence
+    })
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe((rest) => { },
+        (err) => (this.toastr.error(err.Message)));
+    this.startedPresence = new Date();
+    this.speechDuration = 0;
+  }
+
+  public showConnectedStreams() {
+    console.info('this.connectedStreams');
+    console.info(this.connectedStreams);
+  }
+
+  public showPeerConnections() {
+    console.info('this.peer.connections');
+    console.info(this.peer.connections);
+  }
+
+  public showMediaData() {
+    console.info('this.mediaData');
+    console.info(this.mediaData);
+  }
+
+  public showCurrentUserStream() {
+    console.info('this.CurrentUserStream');
+    console.info(this.currentUserStream);
   }
 }

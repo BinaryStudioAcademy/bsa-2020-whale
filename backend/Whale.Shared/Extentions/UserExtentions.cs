@@ -3,9 +3,6 @@ using Microsoft.Azure.Storage.Blob;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using Whale.DAL.Models;
 using Whale.DAL.Settings;
@@ -18,30 +15,30 @@ namespace Whale.Shared.Extentions
         {
             if(user.LinkType == LinkTypeEnum.External) return user;
 
-            var response = await getAllBlobsAsync(settings);
+            var response = await GetAllBlobsAsync(settings);
 
-            return getLinkFromStorage(user, response);
+            return GetLinkFromStorage(user, response);
         }
 
         public static async Task<IEnumerable<T>> LoadAvatarsAsync<T>(this IEnumerable<T> source, BlobStorageSettings settings, Func<T, User> predicate)
         {
-            var response = await getAllBlobsAsync(settings);
+            var response = await GetAllBlobsAsync(settings);
 
             return source.Select(t =>
             {
-                predicate(t).getLinkFromStorage(response);
+                predicate(t).GetLinkFromStorage(response);
                 return t;
             });
         }
 
         public static async Task<IEnumerable<User>> LoadAvatarsAsync(this IEnumerable<User> source, BlobStorageSettings settings)
         {
-            var response = await getAllBlobsAsync(settings);
+            var response = await GetAllBlobsAsync(settings);
 
-            return source.Select(u => u.getLinkFromStorage(response));
+            return source.Select(u => u.GetLinkFromStorage(response));
         }
 
-        private static async Task<BlobResultSegment> getAllBlobsAsync(BlobStorageSettings settings)
+        private static async Task<BlobResultSegment> GetAllBlobsAsync(BlobStorageSettings settings)
         {
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(settings.ConnectionString);
             var blobClient = storageAccount.CreateCloudBlobClient();
@@ -50,7 +47,7 @@ namespace Whale.Shared.Extentions
             return await container.ListBlobsSegmentedAsync(null);
         }
 
-        private static User getLinkFromStorage(this User user, BlobResultSegment response)
+        private static User GetLinkFromStorage(this User user, BlobResultSegment response)
         {
             if (user.LinkType == LinkTypeEnum.External) return user;
 

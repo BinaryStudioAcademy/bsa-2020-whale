@@ -7,7 +7,7 @@ using Whale.Shared.Models.Poll;
 namespace Whale.MeetingAPI.Controllers
 {
 	[ApiController]
-	[Route("api/[controller]")]
+	[Route("[controller]")]
 	public class PollsController : ControllerBase
 	{
 		private readonly PollService _pollService;
@@ -18,33 +18,32 @@ namespace Whale.MeetingAPI.Controllers
 		}
 
 		[HttpPost]
-		public async Task<ActionResult<PollDTO>> PostPoll([FromBody] PollCreateDTO pollCreateDto)
+		public async Task<ActionResult<PollDTO>> PostPollAsync([FromBody] PollCreateDTO pollCreateDto)
 		{
-			var pollDto = await _pollService.CreatePoll(pollCreateDto);
+			var pollDto = await _pollService.CreatePollAsync(pollCreateDto);
 			return CreatedAtAction("PostPoll", pollDto);
 		}
 
 		[HttpPost("answers")]
-		public async Task<IActionResult> PostPollAnswer([FromBody] VoteDTO pollAnswerDto)
+		public async Task<IActionResult> PostPollAnswerAsync([FromBody] VoteDTO pollAnswerDto)
 		{
-			await _pollService.SavePollAnswer(pollAnswerDto);
+			await _pollService.SavePollAnswerAsync(pollAnswerDto);
 			return Ok();
 		}
 
 		[HttpGet("saveResults")]
-		public async Task<IActionResult> SavePollResults(Guid meetingId)
+		public async Task<IActionResult> SavePollResultsAsync(Guid meetingId)
 		{
-			await _pollService.SavePollResultsToDatabaseAndDeleteFromRedis(meetingId);
+			await _pollService.SavePollResultsToDatabaseAndDeleteFromRedisAsync(meetingId);
 			return Ok();
 		}
 
 		[HttpGet]
-		public async Task<ActionResult<PollsAndResultsDTO>> GetPollsAndResults(Guid meetingId, Guid userId)
+		public async Task<ActionResult<PollsAndResultsDTO>> GetPollsAndResultsAsync(Guid meetingId, Guid userId)
 		{
 			try
 			{
-				var pollsAndResultsDto = await _pollService.GetPollsAndResults(meetingId, userId);
-				return Ok(pollsAndResultsDto);
+				return Ok(await _pollService.GetPollsAndResultsAsync(meetingId, userId));
 			}
 			catch (Exception e)
 			{
@@ -53,9 +52,9 @@ namespace Whale.MeetingAPI.Controllers
 		}
 
 		[HttpDelete]
-		public async Task<IActionResult> DeletePoll(string meetingId, string pollId)
+		public async Task<IActionResult> DeletePollAsync(string meetingId, string pollId)
 		{
-			await _pollService.DeletePoll(meetingId, pollId);
+			await _pollService.DeletePollAsync(meetingId, pollId);
 			return NoContent();
 		}
 	}

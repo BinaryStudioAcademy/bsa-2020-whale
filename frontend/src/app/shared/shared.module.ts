@@ -26,12 +26,16 @@ import { ContactComponent } from './components/contacts/contact/contact.componen
 import { QuestionComponent } from './components/question/question/question.component';
 import { QuestionStatusDirective } from './directives/question-status.directive';
 import { DndModule } from 'ngx-drag-drop';
+import { SortContactsPipe } from './pipes/sort-contacts.pipe';
+import { GroupHostOnTopPipe } from './pipes/group-host-on-top.pipe';
+import { KeysPipe } from './pipes/keys.pipe';
 
 @NgModule({
   declarations: [
     PageHeaderComponent,
     SpinerComponent,
     DateFormatPipe,
+    KeysPipe,
     ParticipantCardComponent,
     PollCreateComponent,
     PollComponent,
@@ -51,6 +55,8 @@ import { DndModule } from 'ngx-drag-drop';
     ContactComponent,
     QuestionComponent,
     QuestionStatusDirective,
+    SortContactsPipe,
+    GroupHostOnTopPipe,
   ],
   imports: [
     CommonModule,
@@ -67,6 +73,7 @@ import { DndModule } from 'ngx-drag-drop';
     PollResultsComponent,
     SpinerComponent,
     DateFormatPipe,
+    KeysPipe,
     ParticipantCardComponent,
     MeetingStatisticsComponent,
     IncomingCallComponent,
@@ -77,6 +84,8 @@ import { DndModule } from 'ngx-drag-drop';
     TagComponent,
     QuestionComponent,
     DndModule,
+    SortContactsPipe,
+    GroupHostOnTopPipe,
   ],
 })
 export class SharedModule {}

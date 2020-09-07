@@ -7,6 +7,8 @@
   <ItemGroup>
     <Compile Remove="Migrations\20200827210948_AddMediaPermissionsToMeeting.cs" />
     <Compile Remove="Migrations\20200827210948_AddMediaPermissionsToMeeting.Designer.cs" />
+    <Compile Remove="Migrations\20200902131756_AddMeetingReplica.cs" />
+    <Compile Remove="Migrations\20200902131756_AddMeetingReplica.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

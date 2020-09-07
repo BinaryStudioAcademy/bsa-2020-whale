@@ -11,7 +11,7 @@ import { environment } from '@env';
   styleUrls: ['./upcoming-meetings.component.sass']
 })
 export class UpcomingMeetingsComponent implements OnInit {
-  public route = environment.apiUrl + '/api/ScheduledMeeting';
+  private route = environment.apiUrl + '/scheduledMeeting';
 
   @Output() upcomingClose: EventEmitter<void> = new EventEmitter<void>();
   @ViewChild('scrollable') scrollElement: ElementRef;
@@ -45,7 +45,7 @@ export class UpcomingMeetingsComponent implements OnInit {
       .set('take', `${this.take}`);
 
     this.isUpcomingLoading = true;
-    this.httpService.getRequest<ScheduledMeeting[]>(`${this.route}/all`, params).subscribe(
+    this.httpService.getRequest<ScheduledMeeting[]>(`${this.route}/upcomming`, params).subscribe(
       (response) => {
         if (response.length === 0 && this.meetings.length === 0) {
           this.isUpcomingMeetingEmpty = true;

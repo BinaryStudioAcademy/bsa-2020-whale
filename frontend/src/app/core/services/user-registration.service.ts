@@ -13,8 +13,8 @@ import { ReplaySubject, Subject, BehaviorSubject, AsyncSubject } from 'rxjs';
   providedIn: 'root',
 })
 export class UserRegistrationService {
-  private getUserUrl: string = environment.apiUrl + '/api/user/email';
-  private addUserUrl: string = environment.apiUrl + '/api/user';
+  private getUserUrl: string = environment.apiUrl + '/user/email';
+  private addUserUrl: string = environment.apiUrl + '/user';
 
   private userRegistered = new ReplaySubject<User>(1);
   public userRegistered$ = this.userRegistered.asObservable();

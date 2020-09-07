@@ -4,4 +4,7 @@ export * from './meeting-create';
 export * from './meeting-link';
 export * from './message';
 export * from './meeting-settings';
+export * from './speech';
+export * from './meeting-script';
 export * from './cards-layout';
+export * from './meeting-recurrence';

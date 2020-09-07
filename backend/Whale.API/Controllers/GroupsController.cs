@@ -11,7 +11,7 @@ using Whale.Shared.Models.Group.GroupUser;
 
 namespace Whale.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     [Authorize]
     public class GroupsController : ControllerBase
@@ -21,17 +21,16 @@ namespace Whale.API.Controllers
         public GroupsController(GroupService groupService)
         {
             _groupService = groupService;
-
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GroupDTO>>> GetAll()
         {
-            string email = HttpContext?.User.Claims
+            var email = HttpContext?.User.Claims
                 .FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
-            
             var contacts = await _groupService.GetAllGroupsAsync(email);
-            if (contacts == null) return NotFound();
+            if (contacts == null)
+                return NotFound();
 
             return Ok(contacts);
         }
@@ -39,12 +38,13 @@ namespace Whale.API.Controllers
         [HttpGet("id/{groupId}")]
         public async Task<ActionResult<GroupDTO>> Get(Guid groupId)
         {
-            string email = HttpContext?.User.Claims
+            var email = HttpContext?.User.Claims
                 .FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
 
             var group = await _groupService.GetGroupAsync(groupId, email);
 
-            if (group == null) return NotFound();
+            if (group == null)
+                return NotFound();
 
             return Ok(group);
         }
@@ -62,7 +62,8 @@ namespace Whale.API.Controllers
         {
             var deleted = await _groupService.DeleteGroupAsync(id);
 
-            if (deleted) return NoContent();
+            if (deleted)
+                return NoContent();
 
             return NotFound();
         }
@@ -70,7 +71,7 @@ namespace Whale.API.Controllers
         [HttpDelete("{groupId}/{userEmail}")]
         public async Task<IActionResult> RemoveUserFromGroup(Guid groupId, string userEmail)
         {
-            var deleted = await _groupService.RemoveUserFromGroup(groupId, userEmail);
+            var deleted = await _groupService.RemoveUserFromGroupAsync(groupId, userEmail);
 
             if (deleted) return NoContent();
 
@@ -80,7 +81,7 @@ namespace Whale.API.Controllers
         [HttpPut("update")]
         public async Task<ActionResult<GroupDTO>> UpdateGroup([FromBody] UpdateGroupDTO groupDTO)
         {
-            return Ok(await _groupService.UpdateGroup(groupDTO));
+            return Ok(await _groupService.UpdateGroupAsync(groupDTO));
         }
 
         [HttpPost("user")]

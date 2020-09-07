@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, EventEmitter, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
 import { SimpleModalComponent } from 'ngx-simple-modal';
-import { Participant, RoomCreateModal, Meeting } from '@shared/models';
+import { Participant, RoomCreateModal, Meeting, ModalActions, RoomDTO } from '@shared/models';
 import { RoomService, MeetingSettingsService, MeetingSignalrService } from 'app/core/services';
 import { Subject } from 'rxjs';
 import { Router } from '@angular/router';
@@ -14,7 +14,7 @@ import { takeUntil } from 'rxjs/operators';
   styleUrls: ['./division-by-rooms-modal.component.sass'],
 })
 export class DivisionByRoomsModalComponent
-  extends SimpleModalComponent<RoomCreateModal, boolean>
+  extends SimpleModalComponent<RoomCreateModal, ModalActions>
   implements RoomCreateModal, OnInit, OnDestroy, AfterViewInit {
   private unsubscribe$ = new Subject<void>();
 
@@ -24,7 +24,7 @@ export class DivisionByRoomsModalComponent
   public meetingId: string;
   public numberOfRooms = 2;
   public duration = 10;
-  public onCanMoveIntoRoomEvent: EventEmitter<void>;
+  public onCanLeaveEvent: EventEmitter<void>;
   public selectedParticipant: Participant;
   public meeting: Meeting;
 
@@ -39,6 +39,7 @@ export class DivisionByRoomsModalComponent
   }
 
   ngOnInit(): void {
+    this.result = ModalActions.Close;
     this.roomService.randomlyDivide(this.numberOfRooms);
 
     this.meetingSignalrService.onParticipantConnectRoom$
@@ -77,21 +78,19 @@ export class DivisionByRoomsModalComponent
   }
 
   public leaveRoom(): void {
-    this.result = false;
+    this.result = ModalActions.MoveToMeeting;
     this.close();
+    this.onCanLeaveEvent.subscribe(() => {
     this.router.navigate([
       `/meeting-page/${this.roomService.originalMeetingUrl}`,
     ]);
+  });
   }
 
   public redirectIntoRoom(roomId: string): void {
-    this.result = true;
+    this.result = ModalActions.MoveToRoom;
     this.close();
-    this.onCanMoveIntoRoomEvent.subscribe(() => {
-      if (!this.roomService.originalMeetingUrl) {
-        this.roomService.originalMeetingUrl = this.meetingLink;
-        this.roomService.originalMeetingId = this.meetingId;
-      }
+    this.onCanLeaveEvent.subscribe(() => {
       this.router.navigate([`/room/${roomId}`]);
     });
   }
@@ -148,16 +147,23 @@ export class DivisionByRoomsModalComponent
   }
 
   public joinRandomRoom(): void {
-    this.result = true;
+    this.result = ModalActions.MoveToRoom;
     this.close();
-    const allRoomsIds = Array.from(this.roomService.participantsInRooms.keys());
+    const allRoomsIds = Array.from(this.roomService.rooms.keys());
     const roomId = allRoomsIds[Math.floor(Math.random() * allRoomsIds.length)];
-    this.onCanMoveIntoRoomEvent.subscribe(() => {
+    this.onCanLeaveEvent.subscribe(() => {
       if (!this.roomService.originalMeetingUrl) {
         this.roomService.originalMeetingUrl = this.meetingLink;
         this.roomService.originalMeetingId = this.meetingId;
       }
       this.router.navigate([`/room/${roomId}`]);
     });
+  }
+
+  public changeRoomName(room: RoomDTO): void {
+    if (room.name.trim() === ''){
+      room.name = 'Room';
+      this.toastr.warning('You cannot create room without name');
+    }
   }
 }

@@ -21,18 +21,18 @@ namespace Whale.API.Controllers.Slack
             _baseURL = "http://bsa2020-whale.westeurope.cloudapp.azure.com";
         }
 
-        [Route("/api/slack/startMeeting")]
+        [Route("/slack/startMeeting")]
         [HttpPost]
         [Produces("application/json")]
         public async Task StartMeeting(SlackCommand userData)
         {
-            await _slackService.SendSlackReplyAsync("", userData.channel_id);
+            await _slackService.SendSlackReplyAsync("", userData.Channel_id);
 
-            var user = await _slackService.GetUserProfileAsync(userData.user_id);
+            var user = await _slackService.GetUserProfileAsync(userData.User_id);
 
-            if (string.IsNullOrEmpty(user.profile.email) || !await _slackService.ValidateUser(user.profile.email))
+            if (string.IsNullOrEmpty(user.profile.email) || !await _slackService.ValidateUserAsync(user.profile.email))
             {
-                await _slackService.SendInvitationAsync(userData.channel_id, _baseURL);
+                await _slackService.SendInvitationAsync(userData.Channel_id, _baseURL);
                 return;
             }
 
@@ -40,45 +40,44 @@ namespace Whale.API.Controllers.Slack
 
             try
             {
-                var meetingLinkDTO = await _httpService.PostAsync<MeetingCreateDTO, MeetingLinkDTO>("api/meeting", meetingDTO);
+                var meetingLinkDTO = await _httpService.PostAsync<MeetingCreateDTO, MeetingLinkDTO>("meeting", meetingDTO);
                 var link = $"{_baseURL}/meeting-page/%3Fid%3D{meetingLinkDTO.Id}&pwd%3D{meetingLinkDTO.Password}";
 
-                await _slackService.SendSlackReplyAsync("", userData.channel_id, link, userData.text);
+                await _slackService.SendSlackReplyAsync("", userData.Channel_id, link, userData.Text);
             }
             catch (Exception)
             {
-                await _slackService.SendSlackReplyAsync("Some troubles happened", userData.channel_id);
+                await _slackService.SendSlackReplyAsync("Some troubles happened", userData.Channel_id);
             }
         }
 
-        [Route("/api/slack/interactivity")]
+        [Route("/slack/interactivity")]
         [HttpPost]
         [Produces("application/json")]
-        public async Task<OkResult> Interactivity(SlackCommand data)
+        public OkResult Interactivity(SlackCommand _)
         {
             //TODO the bot more interactive
 
             return Ok();
         }
 
-        [Route("/api/external/startMeeting")]
+        [Route("/external/startMeeting")]
         [HttpPost]
         [Produces("application/json")]
         public async Task<ActionResult<ExternalResponse>> ExternalStartMeeting([FromBody] ExternalCommand data)
         {
-
-            if (string.IsNullOrEmpty(data.email) || !await _slackService.ValidateUser(data.email))
+            if (string.IsNullOrEmpty(data.Email) || !await _slackService.ValidateUserAsync(data.Email))
             {
                 var result = _slackService.GetExternalMessage("Hello, unfortunately, we could not identify your credentials in the Whale application." +
                                                               "Please sign up using the link below:", _baseURL);
                 return Unauthorized(result);
             }
 
-            var meetingDTO = new MeetingCreateDTO() { CreatorEmail = data.email, IsScheduled = false };
+            var meetingDTO = new MeetingCreateDTO() { CreatorEmail = data.Email, IsScheduled = false };
 
             try
             {
-                var meetingLinkDTO = await _httpService.PostAsync<MeetingCreateDTO, MeetingLinkDTO>("api/meeting", meetingDTO);
+                var meetingLinkDTO = await _httpService.PostAsync<MeetingCreateDTO, MeetingLinkDTO>("meeting", meetingDTO);
                 var link = $"{_baseURL}/meeting-page/%3Fid%3D{meetingLinkDTO.Id}&pwd%3D{meetingLinkDTO.Password}";
 
                 return Ok(_slackService.GetExternalMessage("Join a Meeting", link));

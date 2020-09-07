@@ -11,6 +11,6 @@ namespace Whale.DAL.Models
         public User SecondMember { get; set; }
         public Guid? PinnedMessageId { get; set; }
         public DirectMessage PinnedMessage { get; set; }
-        public bool isAccepted { get; set; }
+        public bool IsAccepted { get; set; }
     }
 }
