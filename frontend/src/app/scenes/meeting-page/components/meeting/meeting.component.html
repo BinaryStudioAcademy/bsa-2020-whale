@@ -7,10 +7,6 @@
   <p>Waiting record...</p>
 </div>
 
-<div *ngIf="isSomeoneRecordingScreen" class="notification">
-  <p>Conference is recording</p>
-</div>
-
 <div #mainArea class="bg-white">
   <div class="content display-flex">
     <div class="tools" ngDraggable [handle]="handleHand">
@@ -168,13 +164,15 @@
       </div>
     </div>
     <div class="main-content">
+      <div *ngIf="isSomeoneRecordingScreen" class="notification">
+        <p>Conference is recording</p>
+      </div>    
       <div class="options">
         <div class="ui options__buttons">
           <div class="inner-block">
             <span
               *ngIf="
-                !isScreenRecording &&
-                (meeting?.isAudioAllowed || currentParticipant?.role === 1)
+                meeting?.isAudioAllowed || currentParticipant?.role === 1
               "
               data-tooltip="Toggle Microphone"
               data-position="top left"
@@ -208,8 +206,7 @@
             </span>
             <span
               *ngIf="
-                !isScreenRecording &&
-                (meeting?.isVideoAllowed || currentParticipant?.role === 1)
+                meeting?.isVideoAllowed || currentParticipant?.role === 1
               "
               data-tooltip="Toggle Webcam"
             >
