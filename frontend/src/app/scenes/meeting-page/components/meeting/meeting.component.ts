@@ -191,6 +191,8 @@ export class MeetingComponent
   startedPresence: Date = null;
   speechDuration = 0;
   topicList: PointAgenda[] = [];
+  updateStatisticsTaskId: any;
+
   @ViewChild('currentVideo') private currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
     HTMLElement
@@ -1241,6 +1243,7 @@ export class MeetingComponent
     this.isRecognitionStop = true;
     this.recognition?.stop();
     this.updateMeetingStatistics();
+    clearInterval(this.updateStatisticsTaskId);
     this.router.navigate(['/home']);
   }
 
@@ -1352,7 +1355,7 @@ export class MeetingComponent
             this.getAgenda();
           });
           this.startedPresence = new Date();
-          setInterval(() => {
+          this.updateStatisticsTaskId = setInterval(() => {
             this.updateMeetingStatistics();
           }, 60000);
         },
@@ -1370,6 +1373,7 @@ export class MeetingComponent
     this.isRecognitionStop = true;
     this.recognition?.stop();
     this.updateMeetingStatistics();
+    clearInterval(this.updateStatisticsTaskId);
     this.router.navigate(['/home']);
   }
 

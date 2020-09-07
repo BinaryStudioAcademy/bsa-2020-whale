@@ -34,7 +34,7 @@ namespace Whale.MeetingAPI.Services
 		public async Task<PollDTO> CreatePollAsync(PollCreateDTO pollCreateDto)
 		{
 			_redisService.Connect();
-			var meetingData = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(pollCreateDto.MeetingId.ToString());
+			var meetingData = await _redisService.GetAsync<MeetingRedisData>(pollCreateDto.MeetingId.ToString());
 			if (meetingData is null) throw new NotFoundException(nameof(Meeting));
 
 			Poll pollEntity = _mapper.Map<Poll>(pollCreateDto);

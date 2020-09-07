@@ -65,7 +65,7 @@ namespace Whale.Shared.Services
         public async Task<MeetingDTO> ConnectToMeetingAsync(MeetingLinkDTO linkDTO, string userEmail)
         {
             await _redisService.ConnectAsync();
-            var redisDTO = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(linkDTO.Id.ToString());
+            var redisDTO = await _redisService.GetAsync<MeetingRedisData>(linkDTO.Id.ToString());
             Console.WriteLine($"MeetingId: {linkDTO.Id}\nrdisDTO: {redisDTO is null}");
             if (redisDTO?.Password != linkDTO.Password)
                 throw new InvalidCredentialsException();
@@ -112,7 +112,7 @@ namespace Whale.Shared.Services
             await _redisService.ConnectAsync();
 
             var pwd = _encryptService.EncryptString(Guid.NewGuid().ToString());
-            await _redisService.SetAsync(meeting.Id.ToString(), new MeetingMessagesAndPasswordDTO { Password = pwd, MeetingId = meeting.Id.ToString() });
+            await _redisService.SetAsync(meeting.Id.ToString(), new MeetingRedisData { Password = pwd, MeetingId = meeting.Id.ToString() });
             await _redisService.SetAsync($"{meetingSettingsPrefix}{meeting.Id}", new MeetingSettingsDTO
             {
                 MeetingHostEmail = meetingDTO.CreatorEmail,
@@ -203,7 +203,7 @@ namespace Whale.Shared.Services
             var meetingSettings = JsonConvert.DeserializeObject(meeting.Settings);
             var scheduledMeeing = await _context.ScheduledMeetings.FirstOrDefaultAsync(e => e.MeetingId == meeting.Id);
             await _redisService.ConnectAsync();
-            await _redisService.SetAsync(meeting.Id.ToString(), new MeetingMessagesAndPasswordDTO { Password = scheduledMeeing.Password, MeetingId = meeting.Id.ToString() });
+            await _redisService.SetAsync(meeting.Id.ToString(), new MeetingRedisData { Password = scheduledMeeing.Password, MeetingId = meeting.Id.ToString() });
             await _redisService.SetAsync($"{meetingSettingsPrefix}{meeting.Id}", new MeetingSettingsDTO
             {
                 IsAudioAllowed = ((dynamic)meetingSettings).IsAudioAllowed,
@@ -285,7 +285,7 @@ namespace Whale.Shared.Services
             }
 
             await _redisService.ConnectAsync();
-            var redisDTO = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(msgDTO.MeetingId);
+            var redisDTO = await _redisService.GetAsync<MeetingRedisData>(msgDTO.MeetingId);
             redisDTO.Messages.Add(message);
             await _redisService.SetAsync(msgDTO.MeetingId, redisDTO);
 
@@ -295,7 +295,7 @@ namespace Whale.Shared.Services
         public async Task<IEnumerable<MeetingMessageDTO>> GetMessagesAsync(string groupName, string userEmail)
         {
             await _redisService.ConnectAsync();
-            var redisDTO = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(groupName);
+            var redisDTO = await _redisService.GetAsync<MeetingRedisData>(groupName);
             return  redisDTO.Messages
                 .Where(m => m.Receiver == null || m.Author.Email == userEmail || m.Receiver.Email == userEmail);
         }
@@ -328,7 +328,7 @@ namespace Whale.Shared.Services
 
             await _context.SaveChangesAsync();
 
-            var redisMeetingData = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(meetingId.ToString());
+            var redisMeetingData = await _redisService.GetAsync<MeetingRedisData>(meetingId.ToString());
             await _redisService.RemoveAsync(meetingId.ToString());
 
             var fullURL = $"?id={meetingId}&pwd={redisMeetingData.Password}";

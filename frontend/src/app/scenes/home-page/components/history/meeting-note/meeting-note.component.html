@@ -103,7 +103,7 @@
               areScriptVisible ? "Hide script" : "Show script"
             }}
           </button>
-          <app-spiner *ngIf="isScriptLoading" [size]="'small'"></app-spiner>
+          <app-spiner *ngIf="isScriptLoading" size="small"></app-spiner>
           <div class="ui list" *ngIf="areScriptVisible">
             <div class="item" *ngIf="!script?.length">
               <div class="content">
