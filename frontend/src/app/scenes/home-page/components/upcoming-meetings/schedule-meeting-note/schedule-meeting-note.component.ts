@@ -3,11 +3,16 @@ import { ScheduledMeeting, CancelScheduled, Recurrence, User } from '@shared/mod
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
 import { UpstateService, MeetingService } from 'app/core/services';
+import { SimpleModalService } from 'ngx-simple-modal';
+import {
+  MeetingInviteComponent,
+  ScheduleMeetingInviteModalData,
+} from '@shared/components/meeting-invite/meeting-invite.component';
+import { MeetingUpdateParticipants } from '@shared/models/meeting/meeting-update-participants';
 import { AuthService } from 'app/core/auth/auth.service';
 import { HttpService } from 'app/core/services';
 import { environment } from '@env';
 import { ConfirmationModalComponent } from '@shared/components/confirmation-modal/confirmation-modal.component';
-import { SimpleModalService } from 'ngx-simple-modal';
 
 @Component({
   selector: 'app-schedule-meeting-note',
@@ -127,5 +132,29 @@ export class ScheduleMeetingNoteComponent implements OnInit{
         this.isReccurentAvailable = false;
       }
     );
+  }
+
+  public addParticipants(): void {
+    const alreadyInvited = this.scheduled.participants.map(p => p.email);
+
+    this.simpleModalService
+      .addModal(MeetingInviteComponent, {
+        participantEmails: alreadyInvited,
+        isScheduled: true,
+      } as ScheduleMeetingInviteModalData)
+      .subscribe((participantEmails) => {
+        if ((participantEmails as string[]).length > 0) {
+          this.meetingService
+          .addParticipants({
+            id: this.scheduled.id,
+            participantsEmails: participantEmails,
+            creatorEmail: this.scheduled.creator.email,
+            startTime: this.scheduled.meeting.startTime
+          } as MeetingUpdateParticipants)
+          .subscribe(() => {
+            this.toastr.success('Added').onHidden.subscribe(() => location.reload());
+          });
+        }
+      });
   }
 }

@@ -20,6 +20,7 @@ using Whale.Shared.Models.Email;
 using Whale.Shared.Models;
 using Microsoft.Extensions.Configuration;
 using shortid.Configuration;
+using System.Globalization;
 using Whale.Shared.Models.ElasticModels.Statistics;
 using System.Timers;
 using Whale.DAL.Models.Poll;
@@ -150,6 +151,29 @@ namespace Whale.Shared.Services
             });
 
             return new MeetingLinkDTO { Id = meeting.Id, Password = pwd };
+        }
+
+        public async Task<string> AddParticipants(MeetingUpdateParticipantsDTO dto)
+        {
+            foreach (var email in dto.ParticipantsEmails)
+            {
+                if (dto.CreatorEmail != email)
+                    await _notifications.AddTextNotification(email, $"{dto.CreatorEmail} invites you to a meeting on {dto.StartTime.AddHours(3).ToString("f", new CultureInfo("us-EN"))}");
+            }
+
+            var scheduledMeeting = await _context.ScheduledMeetings.FirstAsync(m => m.Id == dto.Id);
+
+            var participantEmails = JsonConvert.DeserializeObject<List<string>>(scheduledMeeting.ParticipantsEmails);
+
+            foreach (var email in dto.ParticipantsEmails)
+            {
+                participantEmails.Add(email);
+            }
+
+            scheduledMeeting.ParticipantsEmails = JsonConvert.SerializeObject(participantEmails);
+            await _context.SaveChangesAsync();
+
+            return scheduledMeeting.ShortURL;
         }
 
         public async Task<MeetingAndLink> RegisterScheduledMeetingAsync(MeetingCreateDTO meetingDTO)

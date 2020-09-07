@@ -43,6 +43,14 @@ namespace Whale.API.Controllers
             return Ok(true);
         }
 
+        [HttpPut("addParticipants")]
+        public async Task<ActionResult<string>> AddParticipants(MeetingUpdateParticipantsDTO dto)
+        {
+            var link = await _meetingService.AddParticipants(dto);
+
+            return Ok(link);
+        }
+
         [HttpPost("scheduled")]
         public async Task<ActionResult<string>> CreateMeetingScheduledAsync(MeetingCreateDTO meetingDto)
         {

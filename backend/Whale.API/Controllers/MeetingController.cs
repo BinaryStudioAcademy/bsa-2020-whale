@@ -34,6 +34,13 @@ namespace Whale.API.Controllers
         }
 
         [Authorize]
+        [HttpPut("addParticipants")]
+        public async Task<ActionResult<string>> AddParticipants(MeetingUpdateParticipantsDTO dto)
+        {
+            return Ok(await _httpService.PutStringAsync("meeting/addParticipants", dto));
+        }
+
+        [Authorize]
         [HttpPost("scheduled")]
         public async Task<ActionResult<string>> CreateMeetingScheduled(MeetingCreateDTO meetingDto)
         {
