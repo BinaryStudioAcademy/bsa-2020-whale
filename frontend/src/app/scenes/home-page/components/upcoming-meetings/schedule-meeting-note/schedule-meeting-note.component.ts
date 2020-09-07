@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, EventEmitter } from '@angular/core';
+import { Component, Input, OnInit, EventEmitter, OnDestroy } from '@angular/core';
 import { ScheduledMeeting, CancelScheduled } from '@shared/models';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
@@ -11,7 +11,7 @@ import { environment } from '@env';
   templateUrl: './schedule-meeting-note.component.html',
   styleUrls: ['./schedule-meeting-note.component.sass']
 })
-export class ScheduleMeetingNoteComponent implements OnInit{
+export class ScheduleMeetingNoteComponent implements OnInit, OnDestroy {
   @Input() scheduled: ScheduledMeeting;
   public areParticipantsVisible = false;
   public cancelMeetingEvent = new EventEmitter<string>();
@@ -19,6 +19,7 @@ export class ScheduleMeetingNoteComponent implements OnInit{
   public isDisabled = true;
   public now: Date = new Date();
   public isLoading = false;
+  nowFuncId: any;
 
   private route = environment.apiUrl + '/scheduledMeeting';
 
@@ -28,10 +29,13 @@ export class ScheduleMeetingNoteComponent implements OnInit{
     private toastr: ToastrService,
     private router: Router,
   ) {
-    setInterval(() => {
+    this.nowFuncId = setInterval(() => {
       this.now = new Date();
       this.isDisabled = this.now < new Date(this.scheduled.meeting.startTime);
     }, 1000);
+  }
+  ngOnDestroy(): void {
+    clearInterval(this.nowFuncId);
   }
   ngOnInit(): void {
     this.isCurrentUserHost = this.authService.currentUser.email === this.scheduled.creator.email;
