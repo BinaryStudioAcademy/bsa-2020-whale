@@ -18,6 +18,7 @@ export class AgendaComponent implements OnInit {
   };
   @Input() point: PointAgenda;
   @Output() tagRemoved = new EventEmitter<PointAgenda>();
+  @Output() agendaValid = new EventEmitter<boolean>();
   constructor() {
     const today: Date = new Date();
     this.form = new FormGroup({
@@ -31,6 +32,7 @@ export class AgendaComponent implements OnInit {
   onSubmit() {
     this.point.name = this.form.controls.name.value;
     this.point.startTime = this.form.controls.time.value;
+    this.agendaValid.emit(this.form.valid);
   }
   removeTag(point): void {
     this.tagRemoved.emit(point);
