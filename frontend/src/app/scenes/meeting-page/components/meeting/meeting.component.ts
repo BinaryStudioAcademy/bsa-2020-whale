@@ -403,8 +403,8 @@ export class MeetingComponent
 
           this.connect(connectData.peerId);
 
-          this.toastr.success(`${connectData.participant.user.firstName}
-          ${connectData.participant.user.secondName} connected`);
+          this.toastr.success(`${connectData.participant.user.firstName ? connectData.participant.user.firstName : ''}
+          ${connectData.participant.user.secondName ? connectData.participant.user.secondName : ''} connected`);
         },
         (err) => {
           this.toastr.error(err.Message);
@@ -1014,7 +1014,7 @@ export class MeetingComponent
     if (disconectedMediaDataIndex >= 0) {
       this.mediaData.splice(disconectedMediaDataIndex, 1);
       if (message) {
-        this.toastr.info(`${firstName}${lastName ? lastName : ''} ${message}`);
+        this.toastr.info(`${firstName ? firstName : ''} ${lastName ? lastName : ''} ${message}`);
       }
     }
   }
