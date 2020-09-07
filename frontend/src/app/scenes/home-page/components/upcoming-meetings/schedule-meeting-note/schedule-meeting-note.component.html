@@ -6,7 +6,7 @@
         {{ scheduled.meeting.topic  }}{{ scheduled.canceled ? ' (Canceled)' : '' }}
       </div>
       <div *ngIf="!scheduled.meeting.topic"
-      class="header topic title"
+      class="header"
       [class.text-not-active]="scheduled.canceled">
         Meeting {{ scheduled.meeting.id }}{{ scheduled.canceled ? ' (Canceled)' : '' }}
       </div>
