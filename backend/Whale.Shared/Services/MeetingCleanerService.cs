@@ -1,15 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Timers;
 using Whale.DAL;
 using Whale.DAL.Models;
 using Whale.DAL.Models.Poll;
 using Whale.Shared.Exceptions;
-using Whale.Shared.Models.ElasticModels.Statistics;
 using Whale.Shared.Models.Meeting;
 
 namespace Whale.Shared.Services
@@ -62,10 +58,12 @@ namespace Whale.Shared.Services
                     await _redisService.RemoveAsync($"{meetingSpeechPrefix}{meetingId}");
                     await _redisService.RemoveAsync(meetingId + nameof(Poll));
 
-                    meeting.EndTime = DateTimeOffset.Now;
-                    context.Meetings.Update(meeting);
-
-                    await context.SaveChangesAsync();
+                    if (meeting.EndTime is null)
+                    {
+                        meeting.EndTime = DateTimeOffset.Now;
+                        context.Meetings.Update(meeting);
+                        await context.SaveChangesAsync();
+                    }
                 }
             };
 
