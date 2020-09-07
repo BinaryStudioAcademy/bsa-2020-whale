@@ -76,6 +76,7 @@ import { MeetingInviteModalData } from '@shared/models/email/meeting-invite-moda
 import { QuestionComponent } from '@shared/components/question/question/question.component';
 import { ParticipantCardComponent } from '@shared/components/participant-card/participant-card.component';
 import { PointAgenda } from '@shared/models/agenda/agenda';
+import { Hash } from 'crypto';
 
 declare var webkitSpeechRecognition: any;
 
@@ -453,6 +454,9 @@ export class MeetingComponent
         if (this.pinnedParticipant?.id === connectionData.participant?.id) {
           this.unpinCard();
         }
+
+        this.connectedStreams = this.connectedStreams.filter(stream => stream.id !== connectionData.streamId);
+
         this.removeParticipantFromMeeting(connectionData.participant);
         if (this.connectedPeers.has(connectionData.peerId)) {
           this.connectedPeers.delete(connectionData.peerId);
@@ -473,7 +477,7 @@ export class MeetingComponent
           this.unpinCard();
         }
         this.removeParticipantFromMeeting(participant);
-
+        this.connectedStreams = this.connectedStreams.filter(stream => stream.id !== participant.streamId);
         this.connectedPeers = new Map(
           [...this.connectedPeers].filter(
             ([_, v]) => v.id !== participant.streamId
@@ -1048,7 +1052,7 @@ export class MeetingComponent
 
     this.isMicrophoneMuted = !this.isMicrophoneMuted;
     this.isRecognitionStop = this.isMicrophoneMuted;
-    this.isMicrophoneMuted ? this.stopRecognition() : this.recognition?.start();
+    // this.isMicrophoneMuted ? this.stopRecognition() : this.recognition?.start();
     if (!isMissSignaling) {
       this.invokeMediaStateChanged();
     }
@@ -1365,7 +1369,7 @@ export class MeetingComponent
             } as GetMessages);
 
             this.questionService.getQuestionsByMeeting(this.meeting.id);
-            this.configureRecognition();
+            // this.configureRecognition();
             this.getAgenda();
           });
           this.startedPresence = new Date();
@@ -2251,5 +2255,25 @@ export class MeetingComponent
         (err) => (this.toastr.error(err.Message)));
     this.startedPresence = new Date();
     this.speechDuration = 0;
+  }
+
+  public showConnectedStreams() {
+    console.info('this.connectedStreams');
+    console.info(this.connectedStreams);
+  }
+
+  public showPeerConnections() {
+    console.info('this.peer.connections');
+    console.info(this.peer.connections);
+  }
+
+  public showMediaData() {
+    console.info('this.mediaData');
+    console.info(this.mediaData);
+  }
+
+  public showCurrentUserStream() {
+    console.info('this.CurrentUserStream');
+    console.info(this.mediaData);
   }
 }
