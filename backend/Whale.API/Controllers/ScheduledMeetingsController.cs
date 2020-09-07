@@ -34,6 +34,14 @@ namespace Whale.API.Controllers
             return Ok(await _scheduledMeetingService.GetAllScheduledAsync(ownerEmail, skip, take));
         }
 
+        [Authorize]
+        [HttpGet("upcomming")]
+        public async Task<ActionResult<IEnumerable<ScheduledDTO>>> GetUpcomingAsync(int skip, int take)
+        {
+            var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+            return Ok(await _scheduledMeetingService.GetUpcomingScheduledAsync(ownerEmail, skip, take));
+        }
+
         [HttpPost]
         public async Task<ActionResult<ScheduledMeetingDTO>> CreateAsync([FromBody] ScheduledMeetingCreateDTO scheduled)
         {
@@ -45,6 +53,14 @@ namespace Whale.API.Controllers
         public async Task<ActionResult<ScheduledMeetingDTO>> UpdateAsync([FromBody] ScheduledMeetingDTO scheduled)
         {
             return Ok(await _scheduledMeetingService.UpdateAsync(scheduled));
+        }
+
+        [HttpPut("cancel")]
+        public async Task<ActionResult<ScheduledMeetingDTO>> CancelScheduledMeetingAsync([FromBody] CancelMeetingDTO dto)
+        {
+            var applicantEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+            await _scheduledMeetingService.CancelScheduledMeetingAsync(dto.ScheduledMeetingId, applicantEmail);
+            return Ok();
         }
 
         [HttpDelete("{id}")]

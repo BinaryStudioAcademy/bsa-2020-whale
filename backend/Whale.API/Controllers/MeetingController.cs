@@ -8,6 +8,7 @@ using Whale.API.Models.ScheduledMeeting;
 using Whale.API.Services;
 using Whale.Shared.Exceptions;
 using Whale.Shared.Models;
+using Whale.Shared.Models.ElasticModels.Statistics;
 using Whale.Shared.Models.Meeting;
 
 namespace Whale.API.Controllers
@@ -99,12 +100,24 @@ namespace Whale.API.Controllers
             await _httpService.PutAsync("meeting/updateSettings", updateSettingsDTO);
             return Ok();
         }
+
+        [Authorize]
+        [HttpPut("statistics")]
+        public async Task<ActionResult> UpdateMeetingStatistics(UpdateStatistics statistics)
+        {
+            statistics.Email = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+
+            await _httpService.PutAsync("meeting/statistics", statistics);
+            return Ok();
+        }
+
         [HttpGet("agenda/{meetingId}")]
         public async Task<ActionResult<List<AgendaPointDTO>>> GetAgenda(string meetingId)
         {
             var agendaPoints = await _httpService.GetAsync<List<AgendaPointDTO>>($"meeting/agenda/{meetingId}");
             return Ok(agendaPoints);
         }
+
         [HttpPut("agenda")]
         public async Task<ActionResult> UpdateTopic(AgendaPointDTO point)
         {

@@ -39,7 +39,7 @@ export class EnterModalComponent
         case 'ru':
           this.recognitionLanguage = 'Russian';
           break;
-        case 'ua':
+        case 'uk':
           this.recognitionLanguage = 'Ukrainian';
           break;
         default:
@@ -55,7 +55,7 @@ export class EnterModalComponent
           this.recognitionLanguage = 'ru';
           break;
         case 'Ukrainian':
-          this.recognitionLanguage = 'ua';
+          this.recognitionLanguage = 'uk';
           break;
         default:
           this.recognitionLanguage = 'en-US';

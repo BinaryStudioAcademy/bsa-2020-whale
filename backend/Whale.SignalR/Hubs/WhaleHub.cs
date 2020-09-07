@@ -206,10 +206,9 @@ namespace Whale.SignalR.Hubs
         [HubMethodName("OnDeleteGroup")]
         public async Task DeleteGroupAsync(Guid groupDTO, IEnumerable<GroupUser> groupUsers)
         {
-            var _groupUsers = groupUsers;
-            foreach (var usr in _groupUsers)
+            foreach (var user in groupUsers)
             {
-                var connections = await _whaleService.GetConnectionsAsync(usr.UserId);
+                var connections = await _whaleService.GetConnectionsAsync(user.UserId);
                 foreach (var connection in connections)
                 {
                     await Clients.Client(connection).SendAsync("OnDeleteGroup", groupDTO);

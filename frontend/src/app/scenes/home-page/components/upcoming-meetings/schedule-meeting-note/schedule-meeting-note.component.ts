@@ -1,5 +1,5 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { ScheduledMeeting } from '@shared/models';
+import { Component, Input, OnInit, EventEmitter } from '@angular/core';
+import { ScheduledMeeting, CancelScheduled } from '@shared/models';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
 import { SimpleModalService } from 'ngx-simple-modal';
@@ -10,19 +10,31 @@ import {
 import { MeetingService } from 'app/core/services/meeting.service';
 import { MeetingUpdateParticipants } from '@shared/models/meeting/meeting-update-participants';
 import { AuthService } from 'app/core/auth/auth.service';
+import { HttpService } from 'app/core/services';
+import { environment } from '@env';
+import { ConfirmationModalComponent } from '@shared/components/confirmation-modal/confirmation-modal.component';
+import { SimpleModalService } from 'ngx-simple-modal';
 
 @Component({
   selector: 'app-schedule-meeting-note',
   templateUrl: './schedule-meeting-note.component.html',
   styleUrls: ['./schedule-meeting-note.component.sass']
 })
-export class ScheduleMeetingNoteComponent implements OnInit {
+export class ScheduleMeetingNoteComponent implements OnInit{
   @Input() scheduled: ScheduledMeeting;
+  public areParticipantsVisible = false;
+  public cancelMeetingEvent = new EventEmitter<string>();
+  public isCurrentUserHost = false;
   public isDisabled = true;
   public now: Date = new Date();
+  public isLoading = false;
 
-  public areParticipantsVisible = false;
+  private route = environment.apiUrl + '/scheduledMeeting';
+
   constructor(
+    private authService: AuthService,
+    private httpService: HttpService,
+    private simpleModalService: SimpleModalService,
     private toastr: ToastrService,
     private router: Router,
     private simpleModalService: SimpleModalService,
@@ -35,20 +47,44 @@ export class ScheduleMeetingNoteComponent implements OnInit {
     }, 1000);
   }
   ngOnInit(): void {
+    this.isCurrentUserHost = this.authService.currentUser.email === this.scheduled.creator.email;
   }
 
-  join(): void {
+  public cancelMeeting(): void {
+    this.simpleModalService
+    .addModal(ConfirmationModalComponent, {
+      message: 'Are you sure you want to cancel the meeting?',
+    })
+    .subscribe((isConfirm) => {
+      if (isConfirm) {
+        this.isLoading = true;
+        this.scheduled.canceled = true;
+        this.httpService.putFullRequest<CancelScheduled, void>(`${this.route}/cancel`,
+        { scheduledMeetingId: this.scheduled.id }).subscribe(
+          () => this.isLoading = false,
+          () => {
+            this.toastr.error('Error during a meeting cancelation');
+            this.scheduled.canceled = false;
+            this.isLoading = false;
+          }
+        );
+      }
+    });
+
+    return;
+  }
+
+  public join(): void {
     this.router.navigate([`/redirection/${this.scheduled.link}`]);
   }
 
-  copyLink(): void {
+  public copyLink(): void {
     const URL: string = document.location.href;
     const chanks = URL.split('/');
     chanks[chanks.length - 1] = 'redirection';
     chanks[chanks.length] = this.scheduled.link;
     this.createTextareaAndCopy(chanks.join('/'));
   }
-
 
   private createTextareaAndCopy(value: string): void {
     const copyBox = document.createElement('textarea');

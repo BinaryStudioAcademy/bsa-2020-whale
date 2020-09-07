@@ -8,6 +8,7 @@ using Whale.Shared.Jobs;
 using Whale.Shared.Models;
 using Whale.Shared.Models.Meeting;
 using Whale.Shared.Services;
+using Whale.Shared.Models.ElasticModels.Statistics;
 
 namespace Whale.API.Controllers
 {
@@ -54,7 +55,10 @@ namespace Whale.API.Controllers
             foreach (var email in meetingDto.ParticipantsEmails)
             {
                 if(meetingDto.CreatorEmail != email)
-                await _notifications.AddTextNotification(email, $"{meetingDto.CreatorEmail} invites you to a meeting on {meetingDto.StartTime.AddHours(3).ToString("f", new CultureInfo("us-EN"))}");
+                {
+                    await _notifications.AddTextNotification(email,
+                        $"{meetingDto.CreatorEmail} invites you to a meeting on {meetingDto.StartTime.AddHours(3).ToString("f", new CultureInfo("us-EN"))}");
+                }
             }
 
             return Ok(meetingAndLink.Link);
@@ -91,6 +95,7 @@ namespace Whale.API.Controllers
             await _meetingService.UpdateMeetingSettingsAsync(updateSettingsDTO);
             return Ok();
         }
+
         [HttpGet("agenda/{meetingId}")]
         public ActionResult<List<AgendaPointDTO>> GetAgenda(string meetingId)
         {
@@ -100,14 +105,14 @@ namespace Whale.API.Controllers
         [HttpPut("agenda")]
         public async Task<ActionResult> UpdateTopicAsync(AgendaPointDTO topic)
         {
-            await _meetingService.UpdateTopicAsync(topic);
+            await _meetingService.UpdateTopic(topic);
             return Ok();
         }
 
-        [HttpPost("reloadStatistics")]
-        public async Task<ActionResult> ReloadStatisticsAsync()
+        [HttpPut("statistics")]
+        public async Task<ActionResult> UpdateMeetingStatistics(UpdateStatistics statistics)
         {
-            await _meetingService.ReloadStatisticsAsync();
+            await _meetingService.UpdateMeetingStatistic(statistics);
             return Ok();
         }
     }
