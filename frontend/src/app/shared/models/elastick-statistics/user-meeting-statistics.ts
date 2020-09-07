@@ -30,4 +30,7 @@ export interface UserMeetingStatistics {
     avgPresence: {
         value: number;
     };
+    docCount: {
+        value: number;
+    };
 }

@@ -69,8 +69,7 @@ namespace Whale.Shared.Services
                         .MinimumDocumentCount(1)
                         .Aggregations(aa => aa
                             .Min("minDuration", ma => ma
-                                .Field(f => f.DurationTime)
-                            )
+                                .Field(f => f.DurationTime))
                             .Max("maxDuration", ma => ma
                                 .Field(f => f.DurationTime))
                             .Average("avgDuration", aa => aa
@@ -88,11 +87,47 @@ namespace Whale.Shared.Services
                             .Average("avgPresence", aa => aa
                                 .Field(f => f.PresenceTime))
                             .Min("date", m => m
-                                .Field(f => f.EndDate).Format("yyyy-MM-dd"))
+                                .Field(f => f.EndDate)
+                                .Format("yyyy-MM-dd"))
+                            .ValueCount("docCount", c => c
+                                .Field(f => f.EndDate))
                   )))
                 );
             
             return response.Aggregations.DateHistogram("dateHistogram").Buckets;
+        }
+
+        public async Task<AggregateDictionary> SearchAllTimeStatistics(string email)
+        {
+            var user = await _userService.GetUserByEmailAsync(email);
+            var indexName = $"{indexPrefix}{user.Id}";
+            if (user == null) throw new NotFoundException("User", email);
+
+            var response = await _elasticClient.SearchAsync<MeetingUserStatistics>(s => s
+                .Index(indexName)
+                .Size(0)
+                .Aggregations(aa => aa
+                    .Min("minDuration", ma => ma
+                        .Field(f => f.DurationTime))
+                    .Max("maxDuration", ma => ma
+                        .Field(f => f.DurationTime))
+                    .Average("avgDuration", aa => aa
+                        .Field(f => f.DurationTime))
+                    .Min("minSpeech", ma => ma
+                        .Field(f => f.SpeechTime))
+                    .Max("maxSpeech", ma => ma
+                        .Field(f => f.SpeechTime))
+                    .Average("avgSpeech", aa => aa
+                        .Field(f => f.SpeechTime))
+                    .Min("minPresence", ma => ma
+                        .Field(f => f.PresenceTime))
+                    .Max("maxPresence", ma => ma
+                        .Field(f => f.PresenceTime))
+                    .Average("avgPresence", aa => aa
+                        .Field(f => f.PresenceTime))
+                    .ValueCount("docCount", c => c
+                                .Field(f => f.EndDate))));
+            return response.Aggregations;
         }
     }
 }

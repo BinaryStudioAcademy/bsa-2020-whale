@@ -3,7 +3,6 @@ import { User, UserMeetingStatistics } from '@shared/models';
 import { StatisticsService } from 'app/core/services';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
-import { ToastrService } from 'ngx-toastr';
 import { IDatePickerConfig } from 'ng2-date-picker';
 import { FormGroup, FormControl } from '@angular/forms';
 import moment from 'moment';
@@ -11,7 +10,8 @@ import moment from 'moment';
 enum StatisticFields {
   Call,
   Speech,
-  Presence
+  Presence,
+  Count
 }
 
 @Component({
@@ -46,7 +46,6 @@ export class StatisticsComponent implements OnInit, OnDestroy {
 
 constructor(
     private statisticsService: StatisticsService,
-    private toastr: ToastrService,
   ) {
     const endDate = moment({hour: 0, minute: 0, seconds: 0});
     const startDate = moment({hour: 0, minute: 0, seconds: 0}).add(-7, 'days');
@@ -183,6 +182,20 @@ ngOnInit(): void {
         ];
         break;
       }
+      case StatisticFields.Count: {
+        updatedData = [
+          {
+            name: 'Number of calls',
+            series: this.statistics.map((s) => {
+              return {
+                name: new Date(s.date.valueAsString),
+                value: s.docCount.value
+              };
+            })
+          }
+        ];
+        break;
+      }
     }
     this.chartData = [...updatedData];
   }
@@ -230,13 +243,16 @@ ngOnInit(): void {
       return val.toLocaleDateString('en-US', options);
   }
 
-  valueTickFormatting(totalS: number): string {
+  valueDateTickFormatting(val: number): string {
+    if (this.statisticField === StatisticFields.Count){
+      return val.toString();
+    }
     function pad(num: number, size: number): string {
       const s = '000000000' + num;
       return s.substr(s.length - size);
     }
     let dayString = '';
-    let temp = Math.floor(totalS / 1000);
+    let temp = Math.floor(val / 1000);
     const day = Math.floor(temp / 86400);
     if (day > 0){
       dayString = `${day}d `;
@@ -247,6 +263,10 @@ ngOnInit(): void {
     const minutes = pad(Math.floor(temp / 60), 2);
     const seconds = pad(temp % 60, 2);
     return `${dayString}${hours}:${minutes}:${seconds}`;
+  }
+
+  valueTickFormatting(val: number): string{
+    return val.toString();
   }
 
   public close(): void {
