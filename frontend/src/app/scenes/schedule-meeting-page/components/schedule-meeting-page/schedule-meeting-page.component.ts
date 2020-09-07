@@ -60,11 +60,14 @@ export class ScheduleMeetingPageComponent implements OnInit {
     private simpleModalService: SimpleModalService,
     meetingSettingsService: MeetingSettingsService
   ) {
+    const minutes = new Date().getMinutes();
     this.form = new FormGroup({
       topic: new FormControl('', [Validators.required]),
       description: new FormControl(),
       date: new FormControl(this.createStringFromDate(new Date()), [Validators.required]),
-      time: new FormControl(`${new Date().getHours() + 1}:${new Date().getMinutes()}`, [Validators.required]),
+      time: new FormControl(
+        `${new Date().getHours() + 1}:${new Date().getMinutes() + 10 - (minutes % 10)}`, [Validators.required]
+      ),
       durationHours: new FormControl(1),
       durationMinutes: new FormControl(30),
       isGeneratedMeetingID: new FormControl('true'),
