@@ -30,5 +30,12 @@ namespace Whale.API.Controllers
             var offset = DateTime.Now.Subtract(DateTime.UtcNow);
             return Ok(await _elasticSearchService.SearchStatistics(email, new DateTime(startDate).Add(offset), new DateTime(endDate).Add(offset)));
         }
+
+        [HttpGet("allTime")]
+        public async Task<ActionResult<AggregateDictionary>> GetAllTimeByUser()
+        {
+            var email = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            return Ok(await _elasticSearchService.SearchAllTimeStatistics(email));
+        }
     }
 }

@@ -17,4 +17,8 @@ export class StatisticsService {
   public getStatistics(startDate: number, endDate: number): Observable<HttpResponse<UserMeetingStatistics[]>>{
     return this.httpService.getFullRequest<UserMeetingStatistics[]>(`${this.routePrefix}/${startDate}/${endDate}`);
   }
+
+  public getAllTimeStatistics(): Observable<HttpResponse<UserMeetingStatistics>>{
+    return this.httpService.getFullRequest<UserMeetingStatistics>(`${this.routePrefix}/allTime`);
+  }
 }
