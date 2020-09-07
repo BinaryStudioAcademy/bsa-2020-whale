@@ -64,7 +64,7 @@
 .invite-tooltip[data-tooltip]:after
     font-size: .8em
 
-.users
+.users-container
     padding: 5px
     background-color: #ffffff
     display: flex
@@ -91,8 +91,9 @@
     justify-content: flex-end
     
 .participant-card
-    width: 50%
-    max-width: 560px
+    display: flex
+    justify-content: center
+    align-items: center
     padding: 5px
 
 .participant-card-small
@@ -162,11 +163,6 @@ i.big.icon:hover
     opacity: 1
     cursor: pointer
 
-i.big.icon.clipboard, i.big.icon.chart, i.big.copy.icon, .big.paint.brush.icon
-    margin-left: 3px
-
-i.big.icon.wechat
-    margin-left: 2px
 
 .angle.up.icon:hover,
 .big.share.square.icon:hover,
@@ -194,12 +190,6 @@ i.big.icon.wechat
 .small-cards-wrapper-row
     &::-webkit-scrollbar-track
         background: rgba(0,0,0,.1)
-
-.participants-button-container
-    display: inline-block
-
-.relative-container
-    position: relative
 
 .participants-container
     display: flex
@@ -264,10 +254,6 @@ div div.participant:hover
     margin-bottom: auto
     font-weight: 400
 
-.users-icon-fix
-    display: inline
-    background: none
-
 .display-flex
     display: flex
 
@@ -300,8 +286,6 @@ i.icon:hover
 .block
     margin: 10px 10px 10px 0px
 
-.users-icon-fix.block
-    padding-top: 15px
 
 // fullscreen
 .tools
@@ -579,6 +563,7 @@ div:moz-full-screen
 
 .small-cards-wrapper-column
     display: flex
+    max-height: 88%
     flex-direction: column-reverse
     padding: 3px
     align-self: self-start

@@ -43,13 +43,13 @@ namespace Whale.API.Services
             var messages = await _context.GroupMessages
                 .Include(msg => msg.Author)
                 .OrderBy(msg => msg.CreatedAt)
-                .Where(p => p.GroupId == groupId) 
+                .Where(p => p.GroupId == groupId)
                 .ToListAsync();
             if (messages == null) throw new Exception("No messages");
             return _mapper.Map<ICollection<GroupMessage>>(await messages.LoadAvatarsAsync(_blobStorageSettings, msg => msg.Author));
         }
 
-        public async Task<GroupMessageDTO> CreateGroupMessage(GroupMessageCreateDTO groupMessageDto)
+        public async Task<GroupMessageDTO> CreateGroupMessageAsync(GroupMessageCreateDTO groupMessageDto)
         {
             var messageEntity = _mapper.Map<GroupMessage>(groupMessageDto);
             _context.GroupMessages.Add(messageEntity);
@@ -90,17 +90,14 @@ namespace Whale.API.Services
             );
 
             var readMessages = messages.Except(unreadMessages).ToList();
-                
-            var readAndUnreadMessages = new ReadAndUnreadGroupMessages
+
+            return new ReadAndUnreadGroupMessages
             {
                 ReadMessages = _mapper.Map<IEnumerable<GroupMessageDTO>>(readMessages),
                 UnreadMessages = _mapper.Map<IEnumerable<GroupMessageDTO>>(unreadMessages)
             };
-
-            return readAndUnreadMessages;
         }
 
-       
         public async Task AddUnreadGroupMessage(GroupMessage message)
         {
             var group = await _groupService.GetGroupAsync(message.GroupId);
@@ -116,25 +113,21 @@ namespace Whale.API.Services
                     GroupId = message.GroupId
                 });
                 await _context.SaveChangesAsync();
-                await _notificationsService.AddUpdateUnreadGroupMessageNotification(message, u.Email, entry.Entity);
+                await _notificationsService.AddUpdateUnreadGroupMessageNotificationAsync(message, u.Email, entry.Entity);
             }
         }
 
-        public async Task MarkMessageAsRead(UnreadGroupMessageDTO unreadGroupMessageDto)
+        public async Task MarkMessageAsReadAsync(UnreadGroupMessageDTO unreadGroupMessageDto)
         {
             var unreadMessage = await _context.UnreadGroupMessages.FirstOrDefaultAsync(
                 message => message.MessageId == unreadGroupMessageDto.MessageId &&
                 message.ReceiverId == unreadGroupMessageDto.ReceiverId &&
-                message.GroupId == unreadGroupMessageDto.GroupId 
-            );
+                message.GroupId == unreadGroupMessageDto.GroupId);
 
             _context.UnreadGroupMessages.Remove(unreadMessage);
             await _context.SaveChangesAsync();
 
-            await _notificationsService.DeleteUpdateUnreadGroupMessageNotification(unreadMessage.ReceiverId, unreadMessage.Id);
+            await _notificationsService.DeleteUpdateUnreadGroupMessageNotificationAsync(unreadMessage.ReceiverId, unreadMessage.Id);
         }
-
-       
-       
     }
 }

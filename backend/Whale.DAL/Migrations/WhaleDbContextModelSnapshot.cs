@@ -53,6 +53,8 @@ namespace Whale.DAL.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("MeetingId");
+
                     b.ToTable("AgendaPoints");
                 });
 
@@ -65,14 +67,14 @@ namespace Whale.DAL.Migrations
                     b.Property<Guid>("FirstMemberId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("IsAccepted")
+                        .HasColumnType("bit");
+
                     b.Property<Guid?>("PinnedMessageId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("SecondMemberId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("isAccepted")
-                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
@@ -205,6 +207,9 @@ namespace Whale.DAL.Migrations
                     b.Property<int>("AnonymousCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTimeOffset?>("EndTime")
                         .HasColumnType("datetimeoffset");
 
@@ -219,6 +224,9 @@ namespace Whale.DAL.Migrations
 
                     b.Property<DateTimeOffset>("StartTime")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Topic")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -376,6 +384,9 @@ namespace Whale.DAL.Migrations
                     b.Property<string>("Asker")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsAnonymous")
+                        .HasColumnType("bit");
+
                     b.Property<Guid>("MeetingId")
                         .HasColumnType("uniqueidentifier");
 
@@ -417,6 +428,9 @@ namespace Whale.DAL.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("Canceled")
+                        .HasColumnType("bit");
 
                     b.Property<Guid>("CreatorId")
                         .HasColumnType("uniqueidentifier");
@@ -514,6 +528,15 @@ namespace Whale.DAL.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("UserAchivements");
+                });
+
+            modelBuilder.Entity("Whale.DAL.Models.AgendaPoint", b =>
+                {
+                    b.HasOne("Whale.DAL.Models.Meeting", null)
+                        .WithMany("AgendaPoints")
+                        .HasForeignKey("MeetingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Whale.DAL.Models.Contact", b =>

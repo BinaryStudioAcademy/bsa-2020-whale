@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Whale.API.Models.ScheduledMeeting;
@@ -21,10 +22,16 @@ namespace Whale.API.Services
     public class ScheduledMeetingsService: BaseService
     {
         private readonly UserService _userService;
+        private readonly NotificationsService _notificationsService;
 
-        public ScheduledMeetingsService(WhaleDbContext context, IMapper mapper, UserService userService)
+        public ScheduledMeetingsService(
+            WhaleDbContext context,
+            IMapper mapper,
+            UserService userService,
+            NotificationsService notificationsService)
             : base(context, mapper) {
             _userService = userService;
+            _notificationsService = notificationsService;
         }
 
         public async Task<ScheduledMeetingDTO> GetAsync(Guid uid)
@@ -38,10 +45,9 @@ namespace Whale.API.Services
             return _mapper.Map<ScheduledMeetingDTO>(meeting);
         }
 
-        
         public async Task<IEnumerable<ScheduledDTO>> GetAllScheduledAsync(string email, int skip, int take)
         {
-            var user = await _userService.GetUserByEmail(email);
+            var user = await _userService.GetUserByEmailAsync(email);
             if (user == null)
                 throw new NotFoundException("User", email);
 
@@ -54,7 +60,7 @@ namespace Whale.API.Services
                 if (meeting.EndTime != null)
                     continue;
                 var participantEmails = JsonConvert.DeserializeObject<List<string>>(scheduled.ParticipantsEmails);
-                var userParticipants = (await _userService.GetAllUsers()).Where(u => participantEmails.Contains(u.Email));
+                var userParticipants = (await _userService.GetAllUsersAsync()).Where(u => participantEmails.Contains(u.Email))
                 var settings = JsonConvert.DeserializeObject<MeetingSettingsDTO>(meeting.Settings);
                 var meetingDTO =  new MeetingDTO
                 {
@@ -81,7 +87,8 @@ namespace Whale.API.Services
                     Meeting = meetingDTO,
                     Creator = creator,
                     Participants = userParticipants.ToList(),
-                    Link = scheduled.ShortURL
+                    Link = scheduled.ShortURL,
+                    Canceled = scheduled.Canceled
                 });
             }
             return scheduledDTOList
@@ -98,11 +105,12 @@ namespace Whale.API.Services
 
             return await GetAsync(newMeeting.Id);
         }
+
         public async Task<ScheduledMeetingDTO> UpdateAsync(ScheduledMeetingDTO scheduledMeeting)
         {
             var meeting = _context.Meetings.FirstOrDefault(m => m.Id == scheduledMeeting.Id);
 
-            if (meeting is null) 
+            if (meeting is null)
                 throw new NotFoundException("Scheduled Meeting", scheduledMeeting.Id.ToString());
 
             meeting.Settings = scheduledMeeting.Settings;
@@ -112,6 +120,38 @@ namespace Whale.API.Services
 
             return _mapper.Map<ScheduledMeetingDTO>(meeting);
         }
+
+        public async Task CancelScheduledMeetingAsync(Guid scheduledMeetingId, string applicantEmail)
+        {
+            var scheduled = _context.ScheduledMeetings.FirstOrDefault(s => s.Id == scheduledMeetingId);
+            if (scheduled == null)
+                throw new NotFoundException("Scheduled Meeting", scheduledMeetingId.ToString());
+
+            var meeting = _context.Meetings.FirstOrDefault(m => m.Id == scheduled.MeetingId);
+            if (meeting == null)
+                throw new NotFoundException("Meeting", scheduledMeetingId.ToString());
+
+            var applicant = await _userService.GetUserByEmailAsync(applicantEmail);
+            if (applicant == null)
+                throw new NotFoundException("User");
+
+            if (scheduled.CreatorId != applicant.Id)
+                throw new NotAllowedException(applicantEmail);
+
+            scheduled.Canceled = true;
+
+            await _context.SaveChangesAsync();
+
+            foreach (var email in JsonConvert.DeserializeObject<List<string>>(scheduled.ParticipantsEmails))
+            {
+                if (applicantEmail != email)
+                {
+                    await _notificationsService.AddTextNotification(email,
+                        $"{applicantEmail} has canceled the meeting on {meeting.StartTime.AddHours(3).ToString("f", new CultureInfo("us-EN"))}");
+                }
+            }
+        }
+
         public async Task DeleteAsync(Guid id)
         {
             var meeting = _context.Meetings.FirstOrDefault(c => c.Id == id);

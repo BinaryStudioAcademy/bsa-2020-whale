@@ -1,18 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { IDatePickerConfig } from 'ng2-date-picker';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { HttpService } from '../../../../core/services/http.service';
 import { ToastrService } from 'ngx-toastr';
 import { GoogleCalendarService } from 'app/core/services/google-calendar.service';
 import moment from 'moment';
 import { AuthService } from 'app/core/auth/auth.service';
 import { Router } from '@angular/router';
-import { MeetingService, UpstateService } from 'app/core/services';
+import { MeetingService, UpstateService, MeetingSettingsService } from 'app/core/services';
 import { takeUntil } from 'rxjs/operators';
 import { MeetingCreate, Recurrence } from '@shared/models';
 import { Subject } from 'rxjs';
 import { User } from '@shared/models/user';
-import { MeetingSettingsService } from 'app/core/services';
 import { PointAgenda } from '@shared/models/agenda/agenda';
 import { AgendaComponent } from '../agenda/agenda.component';
 import {
@@ -33,7 +32,6 @@ export class ScheduleMeetingPageComponent implements OnInit {
     firstDayOfWeek: 'mo',
     showNearMonthDays: false,
     min: this.createStringFromDate(new Date()),
-    disableKeypress: true,
     monthBtnCssClassCallback: (month) => 'ng2-date-picker-button',
     dayBtnCssClassCallback: (day) => 'ng2-date-picker-button',
   };
@@ -43,7 +41,6 @@ export class ScheduleMeetingPageComponent implements OnInit {
     showTwentyFourHours: true,
     minutesInterval: 1,
     min: `${new Date().getHours()}:${new Date().getMinutes()}`,
-    disableKeypress: true,
   };
   public pointList: PointAgenda[] = [{ name: '', startTime: new Date() }];
   public isPasswordCheckboxChecked = true;
@@ -66,11 +63,14 @@ export class ScheduleMeetingPageComponent implements OnInit {
     private simpleModalService: SimpleModalService,
     meetingSettingsService: MeetingSettingsService
   ) {
+    const minutes = new Date().getMinutes();
     this.form = new FormGroup({
-      topic: new FormControl('UserNameS meeting etc'),
+      topic: new FormControl('', [Validators.required]),
       description: new FormControl(),
-      date: new FormControl(this.createStringFromDate(new Date())),
-      time: new FormControl(`${new Date().getHours()}:${new Date().getMinutes() + 5}`),
+      date: new FormControl(this.createStringFromDate(new Date()), [Validators.required]),
+      time: new FormControl(
+        `${new Date().getHours() + 1}:${new Date().getMinutes() + 10 - (minutes % 10)}`, [Validators.required]
+      ),
       durationHours: new FormControl(1),
       durationMinutes: new FormControl(30),
       isMeetingRecurrent: new FormControl(true),
@@ -90,6 +90,28 @@ export class ScheduleMeetingPageComponent implements OnInit {
   ngOnInit(): void {
     this.getUser();
     this.point = this.pointList[0];
+  }
+
+  public isDateValid(): boolean {
+    const todayDateString = this.createStringFromDate(new Date());
+    const todayParts = todayDateString.split('/');
+    const todayDate = new Date(
+      Number(todayParts[2]),
+      Number(todayParts[1]) - 1,
+      Number(todayParts[0]),
+      new Date().getHours(),
+      new Date().getMinutes()
+    );
+
+    const userTimeString = this.form.get('time').value as string;
+    const userTimeParts = userTimeString.split(':');
+    const userDateString = this.form.get('date').value as string;
+    const userDateParts = userDateString.split('/');
+    const userDate = new Date(Number(userDateParts[2]), Number(userDateParts[1]) - 1, Number(userDateParts[0]));
+    userDate.setHours(Number(userTimeParts[0]));
+    userDate.setMinutes(Number(userTimeParts[1]));
+
+    return userDate > todayDate;
   }
 
   public async sendMeeting(): Promise<void> {
@@ -113,7 +135,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
         meetingLanguage = 'ru';
         break;
       case 'Ukrainian':
-        meetingLanguage = 'ua';
+        meetingLanguage = 'uk';
         break;
       default:
         meetingLanguage = 'en-US';
@@ -146,6 +168,8 @@ export class ScheduleMeetingPageComponent implements OnInit {
       .subscribe((participantEmails) => {
         this.meetingService
           .createScheduledMeeting({
+            topic: this.form.get('topic').value,
+            description: this.form.get('description').value,
             settings: '',
             startTime: date,
             anonymousCount: 0,

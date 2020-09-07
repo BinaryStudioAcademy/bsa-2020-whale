@@ -16,3 +16,4 @@ export * from './whale-signal.service';
 export * from './room.service';
 export * from './question.service';
 export * from './statistics.service';
+export * from './card-size.service';

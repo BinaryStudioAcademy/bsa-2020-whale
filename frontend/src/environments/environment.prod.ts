@@ -16,14 +16,14 @@ export const environment = {
     '893944865679-eav20gfr3sbintikhq42dhhc414loq4p.apps.googleusercontent.com',
   peerOptions: {
     key: 'peerjs',
-    host: '0.peerjs.com',
+    host: 'whale-peerjs-server.herokuapp.com',
     port: 443,
     path: '/',
     secure: true,
     debug: 1,
     config: {
       iceServers: [
-        { urls: 'stun:bsa2020-whale-webrtc.westeurope.cloudapp.azure.com:5349' },
+        // { urls: 'stun:bsa2020-whale-webrtc.westeurope.cloudapp.azure.com:5349' },
         {
           urls: 'turn:bsa2020-whale-webrtc.westeurope.cloudapp.azure.com:5349',
           username: 'bsa2020whale',

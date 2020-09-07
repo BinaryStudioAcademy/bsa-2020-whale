@@ -21,13 +21,18 @@ namespace Whale.Shared.Services
         private readonly RedisService _redisService;
         private const string onlineUsersKey = "online";
 
-        public UserService(WhaleDbContext context, IMapper mapper, BlobStorageSettings blobStorageSettings, RedisService redisService) : base(context, mapper)
+        public UserService(
+            WhaleDbContext context,
+            IMapper mapper,
+            BlobStorageSettings blobStorageSettings,
+            RedisService redisService
+            ) : base(context, mapper)
         {
             _blobStorageSettings = blobStorageSettings;
             _redisService = redisService;
         }
 
-        public async Task<IEnumerable<UserDTO>> GetAllUsers()
+        public async Task<IEnumerable<UserDTO>> GetAllUsersAsync()
         {
             var users = await _context.Users.ToListAsync();
             await users.LoadAvatarsAsync(_blobStorageSettings);
@@ -54,7 +59,7 @@ namespace Whale.Shared.Services
             return userDto;
         }
 
-        public async Task<UserDTO> GetUserByEmail(string email)
+        public async Task<UserDTO> GetUserByEmailAsync(string email)
         {
             var user = await _context.Users.FirstOrDefaultAsync(e => e.Email == email);
             if (user == null) throw new NotFoundException("User", email);
@@ -69,7 +74,6 @@ namespace Whale.Shared.Services
         public async Task<UserDTO> CreateUserAsync(UserCreateDTO userDTO)
         {
             var entity = _mapper.Map<User>(userDTO);
-
             var user = _context.Users.FirstOrDefault(c => c.Email == userDTO.Email);
 
             if (user != null) throw new AlreadyExistsException("User", userDTO.Email);
@@ -96,7 +100,7 @@ namespace Whale.Shared.Services
                 .Select(e => e.Trim())
                 .ToList();
             newUser.FirstName = name[0];
-            newUser.SecondName = name.Count() > 1 ? name[1] : null;
+            newUser.SecondName = name?.Count() > 1 ? name[1] : null;
             await _context.Users.AddAsync(newUser);
             await _context.SaveChangesAsync();
 
@@ -128,7 +132,7 @@ namespace Whale.Shared.Services
             if (user == null)
                 throw new NotFoundException("User", userId.ToString());
             if (user.Email != userEmail)
-                throw new InvalidCredentials();
+                throw new InvalidCredentialsException();
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
             return true;

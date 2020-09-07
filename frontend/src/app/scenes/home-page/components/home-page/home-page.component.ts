@@ -20,10 +20,10 @@ import { UpstateService } from 'app/core/services/upstate.service';
 import { ContactService } from 'app/core/services';
 import { MessageService } from 'app/core/services/message.service';
 import { ConfirmationModalComponent } from '@shared/components/confirmation-modal/confirmation-modal.component';
-import { group } from 'console';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { MeetingSettingsService } from '../../../../core/services/meeting-settings.service';
 import { CurrentChatService } from 'app/core/services/currentChat.service';
+import {PushNotificationsService} from '../../../../core/services/push-notification.service';
 
 @Component({
   selector: 'app-home-page',
@@ -70,8 +70,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
     private contactService: ContactService,
     private messageService: MessageService,
     private meetingSettingsService: MeetingSettingsService,
-    private currentChat: CurrentChatService
-  ) {}
+    private currentChat: CurrentChatService,
+    private pushNotificationService: PushNotificationsService
+  ) {
+    this.pushNotificationService.requestPermission();
+  }
 
   ngOnDestroy(): void {
     this.unsubscribe$.next();
@@ -272,7 +275,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
       .subscribe((newGroup) => {
         if (newGroup !== undefined) {
           this.addGroup(newGroup);
-          this.toastr.success('Group created successfuly');
+          this.toastr.success('Group created successfully');
+          this.pushNotificationService.Send('Group created successfully');
         }
       });
   }
@@ -307,8 +311,15 @@ export class HomePageComponent implements OnInit, OnDestroy {
           this.groupService.deleteGroup(selectedGroup).subscribe(
             (response) => {
               if (response.status === 204) {
-                this.toastr.success(
-                  `${selectedGroup.label} deleted successfuly`
+                this.toastr.info(
+                  `${selectedGroup.label} deleted successfully`
+                );
+                this.pushNotificationService.SendAsObservable(`Group "${selectedGroup.label}" deleted successfully`).subscribe(
+                  (res) => { if (res.event.type === 'click') {
+                    // You can do anything else here
+                    res.notification.close();
+                  }
+                  }
                 );
                 this.removeGroup(selectedGroup.id);
                 if (!this.groups.length) {
@@ -401,7 +412,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
             this.contactService
               .DeletePendingContact(contact.secondMember.email)
               .subscribe(
-                (resp) => {
+                () => {
                   this.toastr.success('Canceled');
                 },
                 (error) => {

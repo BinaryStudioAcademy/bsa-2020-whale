@@ -1,5 +1,4 @@
-﻿
-namespace Whale.Shared.Models.Meeting.MeetingMessage
+﻿namespace Whale.Shared.Models.Meeting.MeetingMessage
 {
     public class MeetingMessageCreateDTO
     {

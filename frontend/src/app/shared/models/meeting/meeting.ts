@@ -4,6 +4,8 @@ import { Recurrence } from './meeting-recurrence';
 
 export interface Meeting {
   id: string;
+  topic?: string;
+  description?: string;
   settings: string;
   startTime: Date;
   endTime?: Date;

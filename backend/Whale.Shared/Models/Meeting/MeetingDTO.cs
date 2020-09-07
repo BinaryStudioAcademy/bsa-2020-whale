@@ -10,6 +10,8 @@ namespace Whale.Shared.Models.Meeting
     public class MeetingDTO
     {
         public Guid Id { get; set; }
+        public string Topic { get; set; }
+        public string Description { get; set; }
         public string Settings { get; set; }
         public DateTimeOffset StartTime { get; set; }
         public DateTimeOffset? EndTime { get; set; }

@@ -1,12 +1,12 @@
 ﻿using Nest;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Whale.Shared.Exceptions;
 using Whale.Shared.Models;
-using Whale.Shared.Models.Statistics;
+using Whale.Shared.Models.ElasticModels.Statistics;
 
 namespace Whale.Shared.Services
 {
@@ -26,10 +26,16 @@ namespace Whale.Shared.Services
         }
 
         public async Task SaveSingleAsync(MeetingUserStatistics record)
-        {
+        {  
             var indexName = $"{indexPrefix}{record.UserId.ToString()}";
+            var getResponse = await _elasticClient.GetAsync<MeetingUserStatistics>(record.Id, r => r.Index(indexName));
+            record.DurationTime = (long)record.EndDate.Subtract(record.StartDate).TotalMilliseconds;
+            if (getResponse.Found)
+            {
+                record.SpeechTime += getResponse.Source.SpeechTime;
+                record.PresenceTime += getResponse.Source.PresenceTime;
+            }
             await _elasticClient.IndexAsync(record, i => i.Index(indexName));
-            
         }
 
         public async Task SaveRangeAsync(IEnumerable<MeetingUserStatistics> records)
@@ -42,10 +48,10 @@ namespace Whale.Shared.Services
             }
         }
 
-        public async Task<IReadOnlyCollection<DateHistogramBucket>> SearchStatistics(string email)
+        public async Task<IEnumerable<DateHistogramBucket>> SearchStatistics(string email, DateTime startDate, DateTime endDate)
         {
-            var user = await _userService.GetUserByEmail(email);
-            var indexName = $"{indexPrefix}{user.Id.ToString()}";
+            var user = await _userService.GetUserByEmailAsync(email);
+            var indexName = $"{indexPrefix}{user.Id}";
             if (user == null) throw new NotFoundException("User", email);
 
             var response = await _elasticClient.SearchAsync<MeetingUserStatistics>(s => s
@@ -54,25 +60,39 @@ namespace Whale.Shared.Services
                 .Query(q => q
                     .DateRange(d => d
                         .Field(f => f.EndDate)
-                        .LessThanOrEquals(DateMath.Now
-                        .Add(TimeSpan.FromDays(1)).RoundTo(DateMathTimeUnit.Hour))
-                        .GreaterThanOrEquals(DateMath.Now.Subtract(TimeSpan.FromDays(7)).RoundTo(DateMathTimeUnit.Hour))))
-               .Aggregations(a => a
-                    .DateHistogram("date_histogram", h => h
+                        .LessThanOrEquals(endDate)
+                        .GreaterThanOrEquals(startDate)))
+                .Aggregations(a => a
+                    .DateHistogram("dateHistogram", h => h
                         .Field(f => f.EndDate)
                         .CalendarInterval(DateInterval.Day)
-                        .Order(HistogramOrder.CountAscending)
-                        .Format("MM-dd")
+                        .MinimumDocumentCount(1)
                         .Aggregations(aa => aa
-                            .Min("min_duration", ma => ma
+                            .Min("minDuration", ma => ma
+                                .Field(f => f.DurationTime)
+                            )
+                            .Max("maxDuration", ma => ma
                                 .Field(f => f.DurationTime))
-                            .Max("max_duration", ma => ma
+                            .Average("avgDuration", aa => aa
                                 .Field(f => f.DurationTime))
-                            .Average("average-duration", aa => aa
-                                .Field(f => f.DurationTime))))));
-
-            return response.Aggregations.DateHistogram("date_histogram").Buckets;
-
+                             .Min("minSpeech", ma => ma
+                                .Field(f => f.SpeechTime))
+                            .Max("maxSpeech", ma => ma
+                                .Field(f => f.SpeechTime))
+                            .Average("avgSpeech", aa => aa
+                                .Field(f => f.SpeechTime))
+                            .Min("minPresence", ma => ma
+                                .Field(f => f.PresenceTime)) 
+                            .Max("maxPresence", ma => ma
+                                .Field(f => f.PresenceTime))
+                            .Average("avgPresence", aa => aa
+                                .Field(f => f.PresenceTime))
+                            .Min("date", m => m
+                                .Field(f => f.EndDate).Format("yyyy-MM-dd"))
+                  )))
+                );
+            
+            return response.Aggregations.DateHistogram("dateHistogram").Buckets;
         }
     }
 }

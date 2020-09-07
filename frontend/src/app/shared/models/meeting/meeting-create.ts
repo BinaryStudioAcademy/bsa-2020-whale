@@ -2,6 +2,8 @@ import { PointAgenda } from '../agenda/agenda';
 import { Recurrence } from './meeting-recurrence';
 
 export interface MeetingCreate {
+  topic?: string;
+  description?: string;
   settings: string;
   startTime: Date;
   anonymousCount: number;

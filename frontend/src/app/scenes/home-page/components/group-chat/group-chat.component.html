@@ -41,13 +41,14 @@
               data-position="bottom center"
             >
               <i
+                #groupMembersButton
                 id="group-members-list"
                 class="large address book outline icon"
-                (click)="isMembersVisible = !isMembersVisible"
+                (click)="showGroupMembers()"
               ></i>
             </span>
             <div
-              *ngIf="isMembersVisible"
+              *ngIf="groupMembersVisibility.isMembersVisible"
               class="left menu ui middle aligned selection list lol"
             >
               <div *ngFor="let user of groupMembers|groupHostOnTop:[groupSelected.creatorEmail]" class="item">
@@ -117,7 +118,7 @@
     </div>
   </div>
   <div class="ui chat-inner feed" #chatWindow>
-    <app-spiner *ngIf="isMessagesLoading" [size]="'medium'"></app-spiner>
+    <app-spiner *ngIf="isMessagesLoading" size="medium"></app-spiner>
     <div
       *ngIf="messages.length == 0"
       class="ui large vertically-aligned no-message"

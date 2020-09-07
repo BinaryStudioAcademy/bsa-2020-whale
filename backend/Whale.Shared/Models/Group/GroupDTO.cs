@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Whale.Shared.Models.GroupMessage;
 
 namespace Whale.Shared.Models.Group
@@ -15,6 +13,5 @@ namespace Whale.Shared.Models.Group
         public string CreatorEmail { get; set; }
         public string PhotoUrl { get; set; }
         public int UnreadMessageCount { get; set; }
-
     }
 }

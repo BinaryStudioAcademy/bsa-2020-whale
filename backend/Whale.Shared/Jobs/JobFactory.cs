@@ -1,9 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Quartz;
 using Quartz.Spi;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Whale.Shared.Jobs
 {
@@ -18,8 +15,8 @@ namespace Whale.Shared.Jobs
 
         public IJob NewJob(TriggerFiredBundle bundle, IScheduler scheduler)
         {
-            using (var scope = _serviceScopeFactory.CreateScope())
-                return scope.ServiceProvider.GetService(bundle.JobDetail.JobType) as IJob;
+            using var scope = _serviceScopeFactory.CreateScope();
+            return scope.ServiceProvider.GetService(bundle.JobDetail.JobType) as IJob;
         }
 
         public void ReturnJob(IJob job) { }

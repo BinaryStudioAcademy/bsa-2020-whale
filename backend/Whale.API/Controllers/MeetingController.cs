@@ -8,6 +8,7 @@ using Whale.API.Models.ScheduledMeeting;
 using Whale.API.Services;
 using Whale.Shared.Exceptions;
 using Whale.Shared.Models;
+using Whale.Shared.Models.ElasticModels.Statistics;
 using Whale.Shared.Models.Meeting;
 
 namespace Whale.API.Controllers
@@ -28,8 +29,7 @@ namespace Whale.API.Controllers
         [HttpPost]
         public async Task<ActionResult<MeetingLinkDTO>> CreateMeeting(MeetingCreateDTO meetingDto)
         {
-            var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
-            meetingDto.CreatorEmail = ownerEmail;
+            meetingDto.CreatorEmail = (HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value);
             return Ok(await _httpService.PostAsync<MeetingCreateDTO, MeetingLinkDTO>("meeting", meetingDto));
         }
 
@@ -37,8 +37,7 @@ namespace Whale.API.Controllers
         [HttpPost("scheduled")]
         public async Task<ActionResult<string>> CreateMeetingScheduled(MeetingCreateDTO meetingDto)
         {
-            var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
-            meetingDto.CreatorEmail = ownerEmail;
+            meetingDto.CreatorEmail = (HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value);
             return Ok(await _httpService.PostStringAsync("meeting/scheduled", meetingDto));
         }
 
@@ -56,7 +55,7 @@ namespace Whale.API.Controllers
         {
             try
             {
-                return Ok(await _externalScheduledMeetingService.StartScheduledMeeting(data));
+                return Ok(await _externalScheduledMeetingService.StartScheduledMeetingAsync(data));
             }
             catch(NotFoundException e)
             {
@@ -95,22 +94,34 @@ namespace Whale.API.Controllers
         [HttpPut("updateSettings")]
         public async Task<ActionResult> UpdateMeetingSettings(UpdateSettingsDTO updateSettingsDTO)
         {
-            updateSettingsDTO.ApplicantEmail = 
+            updateSettingsDTO.ApplicantEmail =
                 HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
 
             await _httpService.PutAsync("meeting/updateSettings", updateSettingsDTO);
             return Ok();
         }
+
+        [Authorize]
+        [HttpPut("statistics")]
+        public async Task<ActionResult> UpdateMeetingStatistics(UpdateStatistics statistics)
+        {
+            statistics.Email = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+
+            await _httpService.PutAsync("meeting/statistics", statistics);
+            return Ok();
+        }
+
         [HttpGet("agenda/{meetingId}")]
         public async Task<ActionResult<List<AgendaPointDTO>>> GetAgenda(string meetingId)
         {
             var agendaPoints = await _httpService.GetAsync<List<AgendaPointDTO>>($"meeting/agenda/{meetingId}");
             return Ok(agendaPoints);
         }
+
         [HttpPut("agenda")]
         public async Task<ActionResult> UpdateTopic(AgendaPointDTO point)
         {
-            await _httpService.PutAsync<AgendaPointDTO, AgendaPointDTO>($"meeting/agenda",point);
+            await _httpService.PutAsync<AgendaPointDTO, AgendaPointDTO>("meeting/agenda",point);
             return Ok();
         }
     }

@@ -6,8 +6,9 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { MeetingLink } from '../../shared/models/meeting/meeting-link';
 import { Meeting } from '../../shared/models/meeting/meeting';
-import { MediaOnStart } from '@shared/models';
+import { MediaOnStart, UpdateStatistics } from '@shared/models';
 import { UpdateSettings } from '@shared/models/meeting/update-settings';
+import { PointAgenda } from '@shared/models/agenda/agenda';
 
 @Injectable({
   providedIn: 'root',
@@ -29,7 +30,7 @@ export class MeetingService {
   public createScheduledMeeting(
     meeting: MeetingCreate
   ){
-    return this.http.post(`${this.routePrefix}/scheduled`, meeting , {
+     return this.http.post(`${this.routePrefix}/scheduled`, meeting , {
       responseType: 'text',
     });
   }
@@ -39,15 +40,6 @@ export class MeetingService {
       `${this.routePrefix}${link}`
     );
   }
-
-  // public updateMediaOnStart(
-  //   mediaOnStart: MediaOnStart
-  // ): Observable<HttpResponse<void>> {
-  //   return this.httpService.putFullRequest(
-  //     `${this.routePrefix}/updateMedia`,
-  //     mediaOnStart
-  //   );
-  // }
 
   public updateMeetingSettings(
     updateSettings: UpdateSettings
@@ -64,4 +56,13 @@ export class MeetingService {
     );
   }
 
+  public updateMeetingStatistics(statistics: UpdateStatistics): Observable<HttpResponse<void>> {
+    return this.httpService.putFullRequest(`${this.routePrefix}/statistics`, statistics);
+  }
+  public updateAgenda(updateAgenda): Observable<PointAgenda>{
+    return this.httpService.putRequest(`${this.routePrefix}/agenda`, updateAgenda);
+  }
+  public getAgenda(meetingId): Observable<PointAgenda[]>{
+    return this.httpService.getRequest<PointAgenda[]>(`${environment.apiUrl}/meeting/agenda/${meetingId}`);
+  }
 }

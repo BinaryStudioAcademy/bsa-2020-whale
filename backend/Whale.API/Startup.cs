@@ -19,20 +19,20 @@ using Whale.Shared.Exceptions;
 using Whale.Shared.Helpers;
 using Whale.Shared.MappingProfiles;
 using Whale.Shared.Services;
-using Whale.DAL.Models;
 using Microsoft.AspNetCore.HttpOverrides;
 using Whale.Shared.Models;
+using Nest;
 
 namespace Whale.API
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration, IWebHostEnvironment hostingEnvironment)
+        public Startup(IWebHostEnvironment hostingEnvironment)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(hostingEnvironment.ContentRootPath)
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{hostingEnvironment.EnvironmentName}.json", reloadOnChange: true, optional: true)
+                .AddJsonFile($"appsettings.{hostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables();
 
             Configuration = builder.Build();
@@ -43,7 +43,8 @@ namespace Whale.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<WhaleDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("WhaleDatabase")));
+            services.AddDbContext<WhaleDbContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("WhaleDatabase")));
             services.AddControllers()
                     .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
@@ -64,6 +65,11 @@ namespace Whale.API
             });
 
             services.AddSingleton(mappingConfig.CreateMapper());
+            var contextOption = new DbContextOptionsBuilder<WhaleDbContext>();
+            services.AddScoped(_ => new MeetingCleanerService(
+                contextOption.UseSqlServer(Configuration.GetConnectionString("WhaleDatabase")).Options,
+                new RedisService(Configuration.GetConnectionString("RedisOptions"))
+                ));
 
             services.AddTransient<SlackService>();
             services.AddTransient<NotificationsService>();
@@ -77,13 +83,12 @@ namespace Whale.API
             services.AddTransient<GroupService>();
             services.AddTransient<GroupChatService>();
             services.AddTransient<ExternalScheduledMeetingService>();
-            services.AddScoped(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
+            services.AddScoped(_ => new RedisService(Configuration.GetConnectionString("RedisOptions")));
             services.AddScoped<HttpClient>();
             services.AddTransient(p => new HttpService(p.GetRequiredService<HttpClient>(), Configuration.GetValue<string>("MeetingAPI")));
-            services.AddTransient(p => new SignalrService(Configuration.GetValue<string>("SignalR")));
+            services.AddTransient(_ => new SignalrService(Configuration.GetValue<string>("SignalR")));
             services.AddTransient<EmailService>();
             services.Configure<SendGridSettings>(settings => settings.ApiKey = Configuration.GetValue<string>("WhaleSendGridApiKey"));
-
 
             services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
             {
@@ -94,10 +99,8 @@ namespace Whale.API
                 .WithOrigins("http://localhost:4200", "http://bsa2020-whale.westeurope.cloudapp.azure.com");
             }));
 
-            services.AddScoped<BlobStorageSettings>(options => Configuration.Bind<BlobStorageSettings>("BlobStorageSettings"));
+            services.AddScoped(_ => Configuration.Bind<BlobStorageSettings>("BlobStorageSettings"));
             services.AddScoped<FileStorageProvider>();
-
-            services.AddScoped(x => new RedisService(Configuration.GetConnectionString("RedisOptions")));
 
             services.AddSingleton(Configuration.GetSection("ElasticConfiguration").Get<ElasticConfiguration>());
             services.AddTransient<ElasticSearchService>();
@@ -116,12 +119,8 @@ namespace Whale.API
                     };
                 });
 
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Whale API", Version = "v1" });
-            });
-            services.AddScoped(x => new EncryptHelper(Configuration.GetValue<string>("EncryptSettings:key")));
-
+            services.AddSwaggerGen(c => c.SwaggerDoc("v1", new OpenApiInfo { Title = "Whale API", Version = "v1" }));
+            services.AddScoped(_ => new EncryptHelper(Configuration.GetValue<string>("EncryptSettings:key")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -133,10 +132,7 @@ namespace Whale.API
 
                 app.UseSwagger();
 
-                app.UseSwaggerUI(options =>
-                {
-                    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Whale API v1");
-                });
+                app.UseSwaggerUI(options => options.SwaggerEndpoint("/swagger/v1/swagger.json", "Whale API v1"));
             }
 
             app.UseMiddleware<ExceptionMiddleware>();
@@ -154,10 +150,7 @@ namespace Whale.API
 
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => endpoints.MapControllers());
         }
     }
 }

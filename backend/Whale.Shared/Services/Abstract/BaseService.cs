@@ -1,5 +1,4 @@
-﻿
-using AutoMapper;
+﻿using AutoMapper;
 using Whale.DAL;
 
 namespace Whale.Shared.Services.Abstract

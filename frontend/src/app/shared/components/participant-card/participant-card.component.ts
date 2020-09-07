@@ -48,6 +48,7 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
   public reactionDelay: Observable<number>;
 
   private video: HTMLVideoElement;
+  private audio: HTMLAudioElement;
   private participantContainer: HTMLElement;
   private participantName: HTMLElement;
   private unsubscribe$ = new Subject<void>();
@@ -63,6 +64,7 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
     this.handleActionsPopup();
 
     this.video.srcObject = this.data.stream;
+    this.audio.srcObject = this.data.stream;
     if (
       this.mediaSettingsService.getSettings().IsMirrorVideo &&
       this.data.isCurrentUser
@@ -158,6 +160,7 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
 
   private initCardElements(): void {
     this.video = this.elRef.nativeElement.querySelector('video');
+    this.audio = this.elRef.nativeElement.querySelector('audio');
     this.participantName = this.elRef.nativeElement.querySelector('.header');
     this.participantContainer = this.elRef.nativeElement.querySelector(
       '.image'
