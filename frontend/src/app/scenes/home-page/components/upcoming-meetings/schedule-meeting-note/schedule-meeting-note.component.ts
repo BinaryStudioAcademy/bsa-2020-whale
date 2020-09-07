@@ -34,7 +34,7 @@ export class ScheduleMeetingNoteComponent implements OnInit{
   public isLoading = false;
 
   constructor(
-    private authService: AuthService,
+    public authService: AuthService,
     private httpService: HttpService,
     private simpleModalService: SimpleModalService,
     private toastr: ToastrService,
@@ -125,7 +125,7 @@ export class ScheduleMeetingNoteComponent implements OnInit{
       && this.currentUser.email === this.scheduled.creator.email;
   }
 
-  private stopRecurringMeeting(): void{
+  public stopRecurringMeeting(): void{
     this.meetingService.stopMeetingRecurring(this.scheduled.id).subscribe(
       () => {
         this.isReccurentStopped = true;
