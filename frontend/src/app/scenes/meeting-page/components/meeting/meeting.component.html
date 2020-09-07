@@ -1,4 +1,4 @@
-<app-spiner *ngIf="isMeetingLoading" size="massive"></app-spiner>
+<spiner *ngIf="isMeetingLoading" size="'massive'"></spiner>
 <div *ngIf="isWaitingForRecord" class="notification">
   <p>Waiting record...</p>
 </div>
@@ -110,6 +110,16 @@
           class="big user plus icon block"
         ></i>
       </span>
+      <span
+      data-tooltip="Plan Meeting"
+      data-position="top right"
+    >
+      <i
+        #agendaButton
+        class="big list alternate icon"
+        (click)="onAgendaClick()"
+      ></i>
+    </span>
       <span data-tooltip="Quit fullscreen" data-position="top right">
         <i
           id="meeting-draggable-fullscrean"
@@ -356,7 +366,6 @@
                 #agendaButton
                 class="big list alternate icon"
                 (click)="onAgendaClick()"
-                [ngClass]="{pulse: isTopicEnd}"
               ></i>
             </span>
             <span 
@@ -431,6 +440,7 @@
           >
           </canvas-whiteboard>
         </div>
+        <div></div>
       </div>
       <div
         [ngClass]="isCardPinned ? 'users-slider' : 'users-container'"
