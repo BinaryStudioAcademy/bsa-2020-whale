@@ -1715,7 +1715,7 @@ export class MeetingComponent
     this.currentVideo.nativeElement.srcObject = this.currentUserStream;
     this.unsubscribeReaction$ = null;
     this.pinnedReactions = null;
-    if (!skipCardCreation) { this.createParticipantCard(this.pinnedParticipant); }
+    this.createParticipantCard(this.pinnedParticipant, this.pinnedParticipant.id === this.currentParticipant.id);
     this.isCardPinned = false;
     this.pinnedParticipant = null;
     this.isPinnedAudioAllowed = false;
