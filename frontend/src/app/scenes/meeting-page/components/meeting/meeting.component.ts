@@ -2086,12 +2086,13 @@ export class MeetingComponent
   }
   async removeSharingVideo(): Promise<void> {
     const keys = Object.keys(this.peer.connections);
-    const peerConnection = this.peer.connections[keys[0]];
-    peerConnection.forEach((pc) => {
-      const sender = pc.peerConnection.getSenders().find((s) => {
-        return s.track.kind === this.lastTrack.kind;
+    keys.forEach(key => {
+      this.peer.connections[key].forEach((pc) => {
+        const sender = pc.peerConnection.getSenders().find((s) => {
+          return s.track.kind === this.lastTrack.kind;
+        });
+        sender.replaceTrack(this.lastTrack);
       });
-      sender.replaceTrack(this.lastTrack);
     });
     this.currentUserStream.getVideoTracks().forEach((vt) => {
       this.currentUserStream.removeTrack(vt);
