@@ -1,19 +1,18 @@
 import { Component, Input, OnInit, EventEmitter } from '@angular/core';
-import { ScheduledMeeting, CancelScheduled } from '@shared/models';
+import { ScheduledMeeting, CancelScheduled, Recurrence, User } from '@shared/models';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
+import { UpstateService, MeetingService } from 'app/core/services';
 import { SimpleModalService } from 'ngx-simple-modal';
 import {
   MeetingInviteComponent,
   ScheduleMeetingInviteModalData,
 } from '@shared/components/meeting-invite/meeting-invite.component';
-import { MeetingService } from 'app/core/services/meeting.service';
 import { MeetingUpdateParticipants } from '@shared/models/meeting/meeting-update-participants';
 import { AuthService } from 'app/core/auth/auth.service';
 import { HttpService } from 'app/core/services';
 import { environment } from '@env';
 import { ConfirmationModalComponent } from '@shared/components/confirmation-modal/confirmation-modal.component';
-import { SimpleModalService } from 'ngx-simple-modal';
 
 @Component({
   selector: 'app-schedule-meeting-note',
@@ -27,9 +26,12 @@ export class ScheduleMeetingNoteComponent implements OnInit{
   public isCurrentUserHost = false;
   public isDisabled = true;
   public now: Date = new Date();
+  public recurrence: string;
+  public currentUser: User;
+  isReccurentAvailable = false;
+  isReccurentStopped = false;
+  public route = environment.apiUrl + '/ScheduledMeeting';
   public isLoading = false;
-
-  private route = environment.apiUrl + '/scheduledMeeting';
 
   constructor(
     private authService: AuthService,
@@ -37,9 +39,8 @@ export class ScheduleMeetingNoteComponent implements OnInit{
     private simpleModalService: SimpleModalService,
     private toastr: ToastrService,
     private router: Router,
-    private simpleModalService: SimpleModalService,
+    private upstate: UpstateService,
     private meetingService: MeetingService,
-    private authService: AuthService,
   ) {
     setInterval(() => {
       this.now = new Date();
@@ -47,6 +48,24 @@ export class ScheduleMeetingNoteComponent implements OnInit{
     }, 1000);
   }
   ngOnInit(): void {
+    switch (this.scheduled.meeting.recurrence) {
+      case Recurrence.EveryDay:
+        this.recurrence = 'Every day';
+        break;
+      case Recurrence.EveryWeek:
+        this.recurrence = 'Every week';
+        break;
+      case Recurrence.EveryMonth:
+        this.recurrence = 'Every month';
+        break;
+      default:
+        this.recurrence = 'Never';
+    }
+
+    this.upstate.getLoggedInUser().subscribe((userFromDB: User) => {
+      this.currentUser = userFromDB;
+      this.isReccuringAvailable();
+    });
     this.isCurrentUserHost = this.authService.currentUser.email === this.scheduled.creator.email;
   }
 
@@ -99,6 +118,20 @@ export class ScheduleMeetingNoteComponent implements OnInit{
     document.execCommand('copy');
     document.body.removeChild(copyBox);
     this.toastr.success('Copied');
+  }
+
+  private isReccuringAvailable(): void{
+    this.isReccurentAvailable = this.scheduled.meeting.recurrence !== Recurrence.Never
+      && this.currentUser.email === this.scheduled.creator.email;
+  }
+
+  private stopRecurringMeeting(): void{
+    this.meetingService.stopMeetingRecurring(this.scheduled.id).subscribe(
+      () => {
+        this.isReccurentStopped = true;
+        this.isReccurentAvailable = false;
+      }
+    );
   }
 
   public addParticipants(): void {
