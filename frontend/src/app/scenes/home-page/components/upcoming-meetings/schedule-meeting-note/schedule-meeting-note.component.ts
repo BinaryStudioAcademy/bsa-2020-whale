@@ -66,9 +66,11 @@ export class ScheduleMeetingNoteComponent implements OnInit {
   }
 
   public addParticipants(): void {
+    const alreadyInvited = this.scheduled.participants.map(p => p.email);
+
     this.simpleModalService
       .addModal(MeetingInviteComponent, {
-        participantEmails: [],
+        participantEmails: alreadyInvited,
         isScheduled: true,
       } as ScheduleMeetingInviteModalData)
       .subscribe((participantEmails) => {

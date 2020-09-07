@@ -7,7 +7,6 @@ import { SimpleModalComponent } from 'ngx-simple-modal';
 import { MeetingInviteModalData } from '@shared/models/email/meeting-invite-modal-data';
 import { MeetingInvite } from '@shared/models/email/meeting-invite';
 import { Contact, User, Participant } from '@shared/models';
-import { InviteModalService } from 'app/core/services/invite-modal.service'; 
 
 export interface ScheduleMeetingInviteModalData {
   isScheduled: boolean;
@@ -46,7 +45,6 @@ export class MeetingInviteComponent
   constructor(
     private httpService: HttpService,
     private toastr: ToastrService,
-    private inviteModal: InviteModalService,
     ) {
     super();
     this.form = new FormGroup({
@@ -83,7 +81,7 @@ export class MeetingInviteComponent
             );
           }
 
-          this.inviteModal.emails.forEach(email => {
+          this.participantEmails.forEach(email => {
             filteredContacts = filteredContacts.filter((c) => c.secondMember.email !== email);
           });
 
@@ -100,7 +98,6 @@ export class MeetingInviteComponent
   public onContactClicked(contact: Contact): void {
     this.selectedContacts.push(contact);
     this.emails.push(contact.secondMember.email);
-    this.inviteModal.emails.push(contact.secondMember.email);
     this.cachedContacts.splice(this.cachedContacts.indexOf(contact), 1);
     this.contacts.splice(this.contacts.indexOf(contact), 1);
   }
@@ -123,7 +120,6 @@ export class MeetingInviteComponent
         !isParticipant
       ) {
         this.emails.push(emailValue);
-        this.inviteModal.emails.push(emailValue);
       }
       this.form.controls.email.setValue('');
     }
@@ -131,7 +127,6 @@ export class MeetingInviteComponent
 
   public removeTag(email: string): void {
     this.emails.splice(this.emails.indexOf(email), 1);
-    this.inviteModal.emails.splice(this.inviteModal.emails.indexOf(email), 1);
     const contact = this.selectedContacts.find(
       (c) => c.secondMember.email === email
     );
