@@ -20,7 +20,9 @@
           <div class="column first">
             Description
           </div>
-          <div class="ten wide column">
+          <div 
+          class="ten wide column"
+          [class.text-not-active]="scheduled.canceled">
             {{ scheduled.meeting.description }}
           </div>
         </div>
@@ -44,6 +46,7 @@
                 <div class="item">
                     <img
                       class="ui mini circular image"
+                      [class.semi-transparent]="scheduled.canceled"
                       src="{{ scheduled.creator.avatarUrl }}"
                     />
                     <div class="content" 
@@ -74,6 +77,7 @@
             <button
               class="ui basic button"
               (click)="areParticipantsVisible = !areParticipantsVisible"
+              [class.text-not-active]="scheduled.canceled"
             >
               {{
                 areParticipantsVisible ? "Hide participants" : "Show participants"
@@ -84,10 +88,15 @@
               <div class="item" *ngFor="let participant of scheduled.participants">
                 <img
                   class="ui mini circular image"
+                  [class.semi-transparent]="scheduled.canceled"
                   src="{{ participant.avatarUrl }}"
                 />
-                <div class="content">
-                  <div class="ui sub header">
+                <div 
+                class="content"
+                [class.text-not-active]="scheduled.canceled">
+                  <div
+                  class="ui sub header"
+                  [class.text-not-active]="scheduled.canceled">
                     {{
                       participant.secondName
                         ? participant.firstName +
