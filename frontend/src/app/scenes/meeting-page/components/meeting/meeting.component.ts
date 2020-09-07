@@ -1124,7 +1124,7 @@ export class MeetingComponent
 
     this.meetingSignalrService.invoke(
       SignalMethods.OnConferenceStopRecording,
-      'Conference stop recording'
+      this.meeting.id
     );
     this.toastr.info('Stop recording a conference');
     this.isSomeoneRecordingScreen = false;
