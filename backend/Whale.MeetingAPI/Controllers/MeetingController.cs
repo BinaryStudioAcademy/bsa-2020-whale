@@ -97,7 +97,7 @@ namespace Whale.API.Controllers
         [HttpPut("agenda")]
         public async Task<ActionResult> UpdateTopicAsync(AgendaPointDTO topic)
         {
-            await _meetingService.UpdateTopicAsync(topic);
+            await _meetingService.UpdateTopic(topic);
             return Ok();
         }
 
