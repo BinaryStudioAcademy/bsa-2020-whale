@@ -8,6 +8,7 @@ import { MeetingLink } from '../../shared/models/meeting/meeting-link';
 import { Meeting } from '../../shared/models/meeting/meeting';
 import { MediaOnStart } from '@shared/models';
 import { UpdateSettings } from '@shared/models/meeting/update-settings';
+import { MeetingUpdateParticipants } from '@shared/models/meeting/meeting-update-participants';
 
 @Injectable({
   providedIn: 'root',
@@ -24,6 +25,12 @@ export class MeetingService {
       `${this.routePrefix}`,
       meeting
     );
+  }
+
+  public addParticipants(participants: MeetingUpdateParticipants) {
+    return this.http.put(`${this.routePrefix}/addParticipants`, participants , {
+      responseType: 'text',
+    });
   }
 
   public createScheduledMeeting(
