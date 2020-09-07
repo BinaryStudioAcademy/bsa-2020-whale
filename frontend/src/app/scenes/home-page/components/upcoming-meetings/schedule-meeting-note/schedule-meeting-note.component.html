@@ -80,6 +80,17 @@
               }}
               ({{ scheduled.participants?.length }})
             </button>
+            <div *ngIf="scheduled.creator.email === authService.currentUser.email" class="add-participants">
+              <span
+                data-tooltip="Add participants"
+                data-position="right center"
+              >
+              <i
+                class="user plus icon"
+                (click)="addParticipants()"
+              ></i>
+              </span>
+            </div>
             <div class="ui list" *ngIf="areParticipantsVisible">
               <div class="item" *ngFor="let participant of scheduled.participants">
                 <img

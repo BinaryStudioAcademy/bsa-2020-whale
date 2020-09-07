@@ -2,6 +2,13 @@ import { Component, Input, OnInit, EventEmitter } from '@angular/core';
 import { ScheduledMeeting, CancelScheduled } from '@shared/models';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
+import { SimpleModalService } from 'ngx-simple-modal';
+import {
+  MeetingInviteComponent,
+  ScheduleMeetingInviteModalData,
+} from '@shared/components/meeting-invite/meeting-invite.component';
+import { MeetingService } from 'app/core/services/meeting.service';
+import { MeetingUpdateParticipants } from '@shared/models/meeting/meeting-update-participants';
 import { AuthService } from 'app/core/auth/auth.service';
 import { HttpService } from 'app/core/services';
 import { environment } from '@env';
@@ -30,6 +37,9 @@ export class ScheduleMeetingNoteComponent implements OnInit{
     private simpleModalService: SimpleModalService,
     private toastr: ToastrService,
     private router: Router,
+    private simpleModalService: SimpleModalService,
+    private meetingService: MeetingService,
+    private authService: AuthService,
   ) {
     setInterval(() => {
       this.now = new Date();
@@ -89,5 +99,29 @@ export class ScheduleMeetingNoteComponent implements OnInit{
     document.execCommand('copy');
     document.body.removeChild(copyBox);
     this.toastr.success('Copied');
+  }
+
+  public addParticipants(): void {
+    const alreadyInvited = this.scheduled.participants.map(p => p.email);
+
+    this.simpleModalService
+      .addModal(MeetingInviteComponent, {
+        participantEmails: alreadyInvited,
+        isScheduled: true,
+      } as ScheduleMeetingInviteModalData)
+      .subscribe((participantEmails) => {
+        if ((participantEmails as string[]).length > 0) {
+          this.meetingService
+          .addParticipants({
+            id: this.scheduled.id,
+            participantsEmails: participantEmails,
+            creatorEmail: this.scheduled.creator.email,
+            startTime: this.scheduled.meeting.startTime
+          } as MeetingUpdateParticipants)
+          .subscribe(() => {
+            this.toastr.success('Added').onHidden.subscribe(() => location.reload());
+          });
+        }
+      });
   }
 }
