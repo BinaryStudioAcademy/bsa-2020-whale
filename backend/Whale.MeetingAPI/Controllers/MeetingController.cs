@@ -36,6 +36,21 @@ namespace Whale.API.Controllers
             return Ok(await _meetingService.CreateMeetingAsync(meetingDto));
         }
 
+        [HttpGet("scheduled/stop/{id}")]
+        public async Task<ActionResult<bool>> StopMeetingScheduling(Guid id)
+        {
+            await _meetingScheduleService.StopAsync();
+            return Ok(true);
+        }
+
+        [HttpPut("addParticipants")]
+        public async Task<ActionResult<string>> AddParticipants(MeetingUpdateParticipantsDTO dto)
+        {
+            var link = await _meetingService.AddParticipants(dto);
+
+            return Ok(link);
+        }
+
         [HttpPost("scheduled")]
         public async Task<ActionResult<string>> CreateMeetingScheduledAsync(MeetingCreateDTO meetingDto)
         {
@@ -44,16 +59,41 @@ namespace Whale.API.Controllers
             var obj = JsonConvert.SerializeObject(meetingAndLink.Meeting);
             await _meetingScheduleService.StartAsync(jobInfo, obj);
 
-            foreach (var email in meetingDto.ParticipantsEmails)
+            if (meetingDto.Recurrence != JobRecurrenceEnum.Never)
             {
-                if(meetingDto.CreatorEmail != email)
+                var meetingAndParticipants = new MeetingAndParticipants
                 {
-                    await _notifications.AddTextNotification(email,
-                        $"{meetingDto.CreatorEmail} invites you to a meeting on {meetingDto.StartTime.AddHours(3).ToString("f", new CultureInfo("us-EN"))}");
+                    Meeting = meetingAndLink.Meeting,
+                    CreatorEmail = meetingDto.CreatorEmail,
+                    ParticipantsEmails = meetingDto.ParticipantsEmails
+                };
+                var job = new RecurrentJobInfo(typeof(RecurrentScheduledMeetingJob), meetingDto.StartTime, meetingDto.Recurrence, meetingAndLink.Meeting.Id);
+                obj = JsonConvert.SerializeObject(meetingAndParticipants);
+                await _meetingScheduleService.StartRecurrent(job, obj);
+                foreach (var email in meetingDto.ParticipantsEmails)
+                {
+                    if(meetingDto.CreatorEmail != email)
+                    {
+                        await _notifications.AddTextNotification(email,
+                            $"{meetingDto.CreatorEmail} invites you to a meeting on {meetingDto.StartTime.AddHours(3).ToString("f", new CultureInfo("us-EN"))}");
+                    }
+                }
+                return Ok(meetingAndLink.Link);
+            }
+            else
+            {
+                jobInfo = new JobInfo(typeof(ScheduledMeetingJob), meetingDto.StartTime);
+                obj = JsonConvert.SerializeObject(meetingAndLink.Meeting);
+                await _meetingScheduleService.StartAsync(jobInfo, obj);
+
+                foreach (var email in meetingDto.ParticipantsEmails)
+                {
+                    if (meetingDto.CreatorEmail != email)
+                        await _notifications.AddTextNotification(email, $"{meetingDto.CreatorEmail} invites you to a meeting on {meetingDto.StartTime.AddHours(3).ToString("f", new CultureInfo("us-EN"))}");
                 }
             }
-
             return Ok(meetingAndLink.Link);
+
         }
 
         [HttpGet]

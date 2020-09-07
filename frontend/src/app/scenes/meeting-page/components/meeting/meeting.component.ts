@@ -76,6 +76,7 @@ import { MeetingInviteModalData } from '@shared/models/email/meeting-invite-moda
 import { QuestionComponent } from '@shared/components/question/question/question.component';
 import { ParticipantCardComponent } from '@shared/components/participant-card/participant-card.component';
 import { PointAgenda } from '@shared/models/agenda/agenda';
+import { Hash } from 'crypto';
 
 declare var webkitSpeechRecognition: any;
 
@@ -453,6 +454,9 @@ export class MeetingComponent
         if (this.pinnedParticipant?.id === connectionData.participant?.id) {
           this.unpinCard();
         }
+
+        this.connectedStreams = this.connectedStreams.filter(stream => stream.id !== connectionData.streamId);
+
         this.removeParticipantFromMeeting(connectionData.participant);
         if (this.connectedPeers.has(connectionData.peerId)) {
           this.connectedPeers.delete(connectionData.peerId);
@@ -473,7 +477,7 @@ export class MeetingComponent
           this.unpinCard();
         }
         this.removeParticipantFromMeeting(participant);
-
+        this.connectedStreams = this.connectedStreams.filter(stream => stream.id !== participant.streamId);
         this.connectedPeers = new Map(
           [...this.connectedPeers].filter(
             ([_, v]) => v.id !== participant.streamId
@@ -808,7 +812,7 @@ export class MeetingComponent
           {
             this.isSharing = true;
           }
-          this.fullPage(streamId);
+          this.pinCard(streamId);
           const user = this.meeting.participants.find(x => x.streamId === streamId).user;
           this.toastr.success(`${user.firstName} ${user.secondName} start sharing screen`);
         },
@@ -819,7 +823,9 @@ export class MeetingComponent
     this.meetingSignalrService.shareScreenStop$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(() => {
-        this.stopShare();
+        this.unpinCard();
+        this.isSharing = false;
+        this.toastr.info('Stop sharing screen');
       });
 
     this.meetingSignalrService.onRoomCreated$
@@ -1048,7 +1054,7 @@ export class MeetingComponent
 
     this.isMicrophoneMuted = !this.isMicrophoneMuted;
     this.isRecognitionStop = this.isMicrophoneMuted;
-    this.isMicrophoneMuted ? this.stopRecognition() : this.recognition?.start();
+    // this.isMicrophoneMuted ? this.stopRecognition() : this.recognition?.start();
     if (!isMissSignaling) {
       this.invokeMediaStateChanged();
     }
@@ -1365,7 +1371,7 @@ export class MeetingComponent
             } as GetMessages);
 
             this.questionService.getQuestionsByMeeting(this.meeting.id);
-            this.configureRecognition();
+            // this.configureRecognition();
             this.getAgenda();
           });
           this.startedPresence = new Date();
@@ -1441,6 +1447,7 @@ export class MeetingComponent
           meetingId: this.meeting.id,
           applicantEmail: this.authService.currentUser.email,
           isWhiteboard: this.meeting.isWhiteboard,
+          recurrence: this.meeting.recurrence,
           isAudioDisabled: !this.meeting.isAudioAllowed,
           isVideoDisabled: !this.meeting.isVideoAllowed,
           isPoll: this.meeting.isPoll,
@@ -2063,31 +2070,15 @@ export class MeetingComponent
       meetingId: this.meeting.id,
     });
   }
-  public fullPage(streamId): void {
-    const stream = this.connectedStreams.find((x) => x.id === streamId);
-    const fullVideo = this.createPage();
-    fullVideo.srcObject = stream;
-    fullVideo.play();
-  }
-  public createPage(): HTMLVideoElement {
-    const parrent = document.getElementsByClassName('main-content')[0];
-    const fullVideo = document.createElement('video');
-    fullVideo.muted = true;
-    parrent.appendChild(fullVideo);
-    fullVideo.className += 'fullVideo';
-    fullVideo.style.width = '100%';
-    fullVideo.style.height = '100%';
-    fullVideo.style.objectFit = 'contain';
-    return fullVideo;
-  }
   async removeSharingVideo(): Promise<void> {
     const keys = Object.keys(this.peer.connections);
-    const peerConnection = this.peer.connections[keys[0]];
-    peerConnection.forEach((pc) => {
-      const sender = pc.peerConnection.getSenders().find((s) => {
-        return s.track.kind === this.lastTrack.kind;
+    keys.forEach(key => {
+      this.peer.connections[key].forEach((pc) => {
+        const sender = pc.peerConnection.getSenders().find((s) => {
+          return s.track.kind === this.lastTrack.kind;
+        });
+        sender.replaceTrack(this.lastTrack);
       });
-      sender.replaceTrack(this.lastTrack);
     });
     this.currentUserStream.getVideoTracks().forEach((vt) => {
       this.currentUserStream.removeTrack(vt);
@@ -2097,12 +2088,6 @@ export class MeetingComponent
       SignalMethods.OnStopShareScreen,
       this.meeting.id
     );
-  }
-  async stopShare(): Promise<void> {
-    const fullVideo = document.querySelector('.fullVideo') as HTMLElement;
-    fullVideo.remove();
-    this.isSharing = false;
-    this.toastr.info('Stop sharing screen');
   }
   //#endregion ShareScreen
 
@@ -2251,5 +2236,25 @@ export class MeetingComponent
         (err) => (this.toastr.error(err.Message)));
     this.startedPresence = new Date();
     this.speechDuration = 0;
+  }
+
+  public showConnectedStreams() {
+    console.info('this.connectedStreams');
+    console.info(this.connectedStreams);
+  }
+
+  public showPeerConnections() {
+    console.info('this.peer.connections');
+    console.info(this.peer.connections);
+  }
+
+  public showMediaData() {
+    console.info('this.mediaData');
+    console.info(this.mediaData);
+  }
+
+  public showCurrentUserStream() {
+    console.info('this.CurrentUserStream');
+    console.info(this.currentUserStream);
   }
 }

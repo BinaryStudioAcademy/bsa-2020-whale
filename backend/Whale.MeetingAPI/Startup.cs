@@ -101,6 +101,9 @@ namespace Whale.MeetingAPI
             //---Jobs---
             services.AddSingleton<IJobFactory, JobFactory>();
             services.AddSingleton<ScheduledMeetingJob>();
+            services.AddSingleton<RecurrentScheduledMeetingJob>();
+            services.AddTransient<IJobListener, RecurrentJobListener>();
+
             services.AddTransient<ISchedulerFactory, StdSchedulerFactory>();
             services.AddTransient<MeetingScheduleService>();
             services.AddQuartz(q =>

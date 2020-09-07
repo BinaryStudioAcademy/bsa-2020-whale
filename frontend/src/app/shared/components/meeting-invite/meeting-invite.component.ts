@@ -42,7 +42,10 @@ export class MeetingInviteComponent
   senderId: string;
   inviteLink: string;
 
-  constructor(private httpService: HttpService, private toastr: ToastrService) {
+  constructor(
+    private httpService: HttpService,
+    private toastr: ToastrService,
+    ) {
     super();
     this.form = new FormGroup({
       email: new FormControl(''),
@@ -77,6 +80,11 @@ export class MeetingInviteComponent
                 )
             );
           }
+
+          this.participantEmails.forEach(email => {
+            filteredContacts = filteredContacts.filter((c) => c.secondMember.email !== email);
+          });
+
           this.contacts = Array.from(filteredContacts);
           this.cachedContacts = Array.from(filteredContacts);
           this.isContactsLoading = false;

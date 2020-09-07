@@ -11,6 +11,9 @@ using Whale.DAL;
 using Whale.DAL.Models;
 using Whale.Shared.Exceptions;
 using Whale.Shared.Models.Meeting;
+using Whale.Shared.Models.Participant;
+using Whale.Shared.Models.Poll;
+using Whale.Shared.Models.User;
 using Whale.Shared.Services;
 using Whale.Shared.Services.Abstract;
 
@@ -58,10 +61,30 @@ namespace Whale.API.Services
                     continue;
                 var participantEmails = JsonConvert.DeserializeObject<List<string>>(scheduled.ParticipantsEmails);
                 var userParticipants = (await _userService.GetAllUsersAsync()).Where(u => participantEmails.Contains(u.Email));
+                var settings = JsonConvert.DeserializeObject<MeetingSettingsDTO>(meeting.Settings);
+                var meetingDTO =  new MeetingDTO
+                {
+                    Id = meeting.Id,
+                    Settings = meeting.Settings,
+                    StartTime = meeting.StartTime,
+                    EndTime = meeting.EndTime,
+                    AnonymousCount = meeting.AnonymousCount,
+                    IsScheduled = meeting.IsScheduled,
+                    IsRecurrent = meeting.IsRecurrent,
+                    IsVideoAllowed = settings.IsVideoAllowed,
+                    IsAudioAllowed = settings.IsAudioAllowed,
+                    IsWhiteboard = settings.IsWhiteboard,
+                    IsPoll = settings.IsPoll,
+                    IsAllowedToChooseRoom = settings.IsAllowedToChooseRoom,
+                    RecognitionLanguage = settings.RecognitionLanguage,
+                    Recurrence = settings.Recurrence,
+                    Participants = _mapper.Map<IEnumerable<ParticipantDTO>>(meeting.Participants),
+                    PollResults = _mapper.Map<IEnumerable<PollResultDTO>>(meeting.PollResults)
+                };
                 scheduledDTOList.Add(new ScheduledDTO
                 {
                     Id = scheduled.Id,
-                    Meeting = _mapper.Map<MeetingDTO>(meeting),
+                    Meeting = meetingDTO,
                     Creator = creator,
                     Participants = userParticipants.ToList(),
                     Link = scheduled.ShortURL,

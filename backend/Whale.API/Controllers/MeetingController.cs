@@ -34,11 +34,25 @@ namespace Whale.API.Controllers
         }
 
         [Authorize]
+        [HttpPut("addParticipants")]
+        public async Task<ActionResult<string>> AddParticipants(MeetingUpdateParticipantsDTO dto)
+        {
+            return Ok(await _httpService.PutStringAsync("meeting/addParticipants", dto));
+        }
+
+        [Authorize]
         [HttpPost("scheduled")]
         public async Task<ActionResult<string>> CreateMeetingScheduled(MeetingCreateDTO meetingDto)
         {
             meetingDto.CreatorEmail = (HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value);
             return Ok(await _httpService.PostStringAsync("meeting/scheduled", meetingDto));
+        }
+
+        [Authorize]
+        [HttpGet("scheduled/stop/{id}")]
+        public async Task<ActionResult> StopMeetingRecurring(Guid id)
+        {
+            return Ok(await _httpService.GetAsync<bool>($"meeting/scheduled/stop/{id}"));
         }
 
         [Route("external/schedule")]
