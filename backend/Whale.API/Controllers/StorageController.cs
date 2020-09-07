@@ -16,6 +16,7 @@ namespace Whale.API.Controllers
         }
 
         [HttpPost]
+        [RequestSizeLimit(500_000_000)]
         [Route("save")]
         public async Task<ActionResult<string>> Save()
         {
