@@ -118,7 +118,7 @@
     </div>
   </div>
   <div class="ui chat-inner feed" #chatWindow>
-    <app-spiner *ngIf="isMessagesLoading" [size]="'medium'"></app-spiner>
+    <app-spiner *ngIf="isMessagesLoading" size="medium"></app-spiner>
     <div
       *ngIf="messages.length == 0"
       class="ui large vertically-aligned no-message"
