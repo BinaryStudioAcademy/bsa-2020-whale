@@ -73,4 +73,14 @@ export class BlobService {
       responseType: 'text',
     });
   }
+
+  public postBlobUploadAudio(blob: Blob): Observable<string> {
+    const formData = new FormData();
+
+    formData.append('user-audio', blob, 'auido');
+
+    return this.http.post(`${this.baseUrl}/api/storage/save/mp3`, formData, {
+      responseType: 'text',
+    });
+  }
 }
