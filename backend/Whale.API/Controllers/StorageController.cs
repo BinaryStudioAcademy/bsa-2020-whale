@@ -23,5 +23,13 @@ namespace Whale.API.Controllers
             var file = Request.Form.Files[0];
             return Ok(await _storageProvider.UploadFileAsync(file));
         }
+
+        [HttpPost]
+        [Route("save/mp3")]
+        public async Task<ActionResult<string>> SaveAudio()
+        {
+            var file = Request.Form.Files[0];
+            return Ok(await _storageProvider.UploadAudioFileAsync(file));
+        }
     }
 }

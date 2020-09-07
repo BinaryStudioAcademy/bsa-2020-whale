@@ -400,6 +400,16 @@
           </div>
         </div>
       </div>
+      <div class="catch-area">
+        <div class="music-player" *ngIf="isHost">
+          <input type="file" #uploadFile style="display: none;" accept=".mp3" (change)="onFileChange($event.target.files)">
+          <span class="player-title"><i>Player</i></span>
+          <i class="player folder open icon" (click)="uploadMp3($event)"></i>
+          <i class="player play icon" (click)="playMusic()" [ngClass]="{'disabled-icon': !isMusicUploaded}"></i>
+          <i class="player pause icon" (click)="pauseMusic()" [ngClass]="{'disabled-icon': !isMusicUploaded}"></i>
+          <i class="player stop icon" (click)="turnOffMusic()" [ngClass]="{'disabled-icon': !isMusicUploaded}"></i>
+        </div>
+      </div>
       <div
         #whiteboard
         class="canvas"
