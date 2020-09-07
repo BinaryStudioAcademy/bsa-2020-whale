@@ -1126,6 +1126,10 @@ export class MeetingComponent
             });
         } else {
           this.isScreenRecording = false;
+          this.meetingSignalrService.invoke(
+            SignalMethods.OnConferenceStopRecording,
+            this.meeting.id
+          );
         }
       },
     });
