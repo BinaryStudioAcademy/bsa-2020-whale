@@ -33,25 +33,35 @@ namespace Whale.API.Controllers
             return Ok(await _meetingService.CreateMeeting(meetingDto));
         }
 
+        [HttpGet("scheduled/stop/{id}")]
+        public async Task<ActionResult<bool>> StopMeetingScheduling(Guid id)
+        {
+            await _meetingScheduleService.Stop();
+            return Ok(true);
+        }
+
         [HttpPost("scheduled")]
         public async Task<ActionResult<string>> CreateMeetingScheduled(MeetingCreateDTO meetingDto)
         {
             var meetingAndLink = await _meetingService.RegisterScheduledMeeting(meetingDto);
-                Console.WriteLine(meetingDto.Recurrency);
-            if (meetingDto.Recurrency != JobRecurrencyEnum.Never)
+
+            if (meetingDto.Recurrence != JobRecurrenceEnum.Never)
             {
-                try
+                var meetingAndParticipants = new MeetingAndParticipants
                 {
-                    var jobInfo = new RecurrentJobInfo(typeof(RecurrentScheduledMeetingJob), meetingDto.StartTime, meetingDto.Recurrency);
-                    var obj = JsonConvert.SerializeObject(meetingAndLink.Meeting);
-                    await _meetingScheduleService.StartRecurrent(jobInfo, obj);
-                }
-                catch (Exception e )
+                    Meeting = meetingAndLink.Meeting,
+                    CreatorEmail = meetingDto.CreatorEmail,
+                    ParticipantsEmails = meetingDto.ParticipantsEmails
+                };
+                var jobInfo = new RecurrentJobInfo(typeof(RecurrentScheduledMeetingJob), meetingDto.StartTime, meetingDto.Recurrence, meetingAndLink.Meeting.Id);
+                var obj = JsonConvert.SerializeObject(meetingAndParticipants);
+                await _meetingScheduleService.StartRecurrent(jobInfo, obj);
+                foreach (var email in meetingDto.ParticipantsEmails)
                 {
-                    Console.WriteLine(e.Message);
+                    if (meetingDto.CreatorEmail != email)
+                    await _notifications.AddTextNotification(email, $"{meetingDto.CreatorEmail} invites you to a meeting on {meetingDto.StartTime.AddHours(3).ToString("f", new CultureInfo("us-EN"))}");
                 }
-                if(meetingDto.CreatorEmail != email)
-                await _notifications.AddTextNotification(email, $"{meetingDto.CreatorEmail} invites you to a meeting on {meetingDto.StartTime.AddHours(3).ToString("f", new CultureInfo("us-EN"))}");
+                return Ok(meetingAndLink.Link);
             }
             else
             {
@@ -65,13 +75,14 @@ namespace Whale.API.Controllers
                         await _notifications.AddTextNotification(email, $"{meetingDto.CreatorEmail} invites you to a meeting on {meetingDto.StartTime.AddHours(3).ToString("f", new CultureInfo("us-EN"))}");
                 }
             }
-                return Ok(/*meetingAndLink.Link*/);
+            return Ok(meetingAndLink.Link);
+
         }
 
         [HttpGet]
         public async Task<ActionResult<MeetingDTO>> ConnectToMeeting(Guid id, string pwd, string email)
         {
-            return Ok(await _meetingService.ConnectToMeeting(new MeetingLinkDTO { Id = id, Password = pwd}, email));
+            return Ok(await _meetingService.ConnectToMeeting(new MeetingLinkDTO { Id = id, Password = pwd }, email));
         }
 
         [HttpGet("shortInvite/{inviteLink}")]

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Whale.Shared.Jobs
 {
-    public enum JobRecurrencyEnum
+    public enum JobRecurrenceEnum
     {
         Never,
         EveryDay,

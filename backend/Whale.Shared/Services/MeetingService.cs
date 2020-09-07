@@ -96,7 +96,7 @@ namespace Whale.Shared.Services
             meetingDTO.IsPoll = meetingSettings.IsPoll;
             meetingDTO.IsWhiteboard = meetingSettings.IsWhiteboard;
             meetingDTO.IsAllowedToChooseRoom = meetingSettings.IsAllowedToChooseRoom;
-            meetingDTO.Recurrency = meetingSettings.Recurrency;
+            meetingDTO.Recurrence = meetingSettings.Recurrence;
             meetingDTO.RecognitionLanguage = meetingSettings.RecognitionLanguage;
 
             return meetingDTO;
@@ -126,7 +126,7 @@ namespace Whale.Shared.Services
                 IsAllowedToChooseRoom = meetingDTO.IsAllowedToChooseRoom,
                 IsPoll = meetingDTO.IsPoll,
                 RecognitionLanguage = meetingDTO.RecognitionLanguage
-    });
+            });
 
             string shortURL = ShortId.Generate();
             string fullURL = $"?id={meeting.Id}&pwd={pwd}";
@@ -145,7 +145,7 @@ namespace Whale.Shared.Services
 
         public async Task<MeetingAndLink> RegisterScheduledMeeting(MeetingCreateDTO meetingDTO)
         {
-  
+
             var meeting = _mapper.Map<Meeting>(meetingDTO);
             meeting.Settings = JsonConvert.SerializeObject(new
             {
@@ -155,6 +155,7 @@ namespace Whale.Shared.Services
                 meetingDTO.IsPoll,
                 meetingDTO.IsWhiteboard,
                 meetingDTO.RecognitionLanguage,
+                meetingDTO.Recurrence
             });
             await _context.Meetings.AddAsync(meeting);
             var user = await _context.Users.FirstOrDefaultAsync(e => e.Email == meetingDTO.CreatorEmail);
@@ -187,26 +188,25 @@ namespace Whale.Shared.Services
             await _redisService.ConnectAsync();
             await _redisService.SetAsync(shortURL, "not-active");
 
-            return new MeetingAndLink { Meeting = meeting , Link = shortURL };
+            return new MeetingAndLink { Meeting = meeting, Link = shortURL };
         }
 
-        public async Task<MeetingAndLink> RegisterRecurrentScheduledMeeting(Meeting meetingDTO)
+        public async Task<MeetingAndLink> RegisterRecurrentScheduledMeeting(MeetingAndParticipants meetingDTO)
         {
-           
-            await _context.Meetings.AddAsync(meetingDTO);
-            var user = await _context.Users.FirstOrDefaultAsync(e => e.Email == "kopylif@gmail.com");
+            await _context.Meetings.AddAsync(meetingDTO.Meeting);
+            var user = _context.Users.FirstOrDefault(e => e.Email == meetingDTO.CreatorEmail);
             var pwd = _encryptService.EncryptString(Guid.NewGuid().ToString());
             var shortURL = ShortId.Generate();
-            var fullURL = $"?id={meetingDTO.Id}&pwd={pwd}";
-            var x = new List<string>(); x.Add("kopylif@gmail.com");
+            var fullURL = $"?id={meetingDTO.Meeting.Id}&pwd={pwd}";
 
             var scheduledMeeting = new ScheduledMeeting
             {
                 CreatorId = user.Id,
-                MeetingId = meetingDTO.Id,
+                MeetingId = meetingDTO.Meeting.Id,
                 Password = pwd,
                 ShortURL = shortURL,
-                FullURL = fullURL
+                FullURL = fullURL,
+                ParticipantsEmails = JsonConvert.SerializeObject(meetingDTO.ParticipantsEmails)
             };
             await _context.ScheduledMeetings.AddAsync(scheduledMeeting);
             await _context.SaveChangesAsync();
@@ -215,14 +215,14 @@ namespace Whale.Shared.Services
                 var meetingInvite = new ScheduledMeetingInvite
                 {
                     MeetingLink = fullURL,
-                    MeetingId = meetingDTO.Id,
+                    MeetingId = meetingDTO.Meeting.Id,
                 };
                 client.PostAsync("http://localhost:4201/api/email/scheduled", new StringContent(JsonConvert.SerializeObject(meetingInvite), Encoding.UTF8, "application/json"));
             }
             await _redisService.ConnectAsync();
             await _redisService.SetAsync(shortURL, "not-active");
 
-            return new MeetingAndLink { Meeting = meetingDTO, Link = shortURL };
+            return new MeetingAndLink { Meeting = meetingDTO.Meeting, Link = shortURL };
         }
 
         public async Task<MeetingLinkDTO> StartScheduledMeeting(Meeting meeting)
@@ -246,7 +246,7 @@ namespace Whale.Shared.Services
             {
                 Role = ParticipantRole.Host,
                 UserEmail = user.Email,
-                MeetingId = meeting.Id
+                MeetingId = meeting.Id,
             });
 
             var participantEmails = JsonConvert.DeserializeObject<List<string>>(scheduledMeeting.ParticipantsEmails);
@@ -269,6 +269,12 @@ namespace Whale.Shared.Services
             return await _context.Meetings
                 .Where(e => e.IsScheduled && e.EndTime == null && e.StartTime >= DateTimeOffset.Now)
                 .ToListAsync();
+        }
+        public async Task<Meeting> GetScheduledMeeting(Guid id)
+        {
+            return await _context.Meetings
+                .Where(e => e.IsScheduled && e.Id == id)
+                .FirstOrDefaultAsync();
         }
 
         public async Task UpdateMeetingSettings(UpdateSettingsDTO updateSettingsDTO)
@@ -321,7 +327,7 @@ namespace Whale.Shared.Services
         {
             await _redisService.ConnectAsync();
             var redisDTO = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(groupName);
-            return  redisDTO.Messages
+            return redisDTO.Messages
                 .Where(m => m.Receiver == null || m.Author.Email == userEmail || m.Receiver.Email == userEmail);
         }
 
@@ -367,7 +373,7 @@ namespace Whale.Shared.Services
 
             await _context.SaveChangesAsync();
             await _notifications.UpdateInviteMeetingNotifications(shortUrl);
-            foreach(var p in meeting.Participants)
+            foreach (var p in meeting.Participants)
             {
                 var statistics = new MeetingUserStatistics
                 {
@@ -387,7 +393,7 @@ namespace Whale.Shared.Services
         public async Task ReloadStatistics()
         {
             var users = _context.Users.ToList();
-            foreach(var user in users)
+            foreach (var user in users)
             {
                 var statistics = _context.Participants
                 .Include(p => p.Meeting)
@@ -407,7 +413,7 @@ namespace Whale.Shared.Services
                 await _elasticSearchService.SaveRangeAsync(statistics);
             }
 
-            
+
         }
 
         public async Task<string> GetShortInviteLink(string id, string pwd)
@@ -438,7 +444,7 @@ namespace Whale.Shared.Services
         public async Task<List<AgendaPointDTO>> GetAgendaPoints(string meetingId)
         {
             return _mapper.Map<List<AgendaPointDTO>>(_context.AgendaPoints.Where(x => x.MeetingId == Guid.Parse(meetingId)).ToList());
-        } 
+        }
         public async Task UpdateTopic(AgendaPointDTO point)
         {
             point.StartTime.AddMinutes(5);

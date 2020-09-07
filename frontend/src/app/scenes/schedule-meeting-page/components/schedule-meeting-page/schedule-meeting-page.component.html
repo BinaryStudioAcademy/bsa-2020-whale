@@ -63,17 +63,18 @@
           <div class="ui segment">
             <div class="field">
               <label>Repeated</label>
-              <div class="field">
-                <div class="custom-select">
-                  <select
-                    id="recurrency-select"
-                    name="recurrency"
-                    class="ui dropdown"
-                    formControlName="recurrent"
-                  >
-                    <option value="0">Never</option>
-                    <option value="1">Every Day</option>
-                  </select>
+              <div class="inline field">
+                <div class="ui compact menu">
+                  <div class="ui simple inline dropdown item">
+                    {{ recurrence }}
+                    <i class="dropdown icon"></i>
+                    <div class="menu">
+                      <div class="item" (click)="recurrence = 'Never'">Never</div>
+                      <div class="item" (click)="recurrence = 'Every day'">Every day</div>
+                      <div class="item" (click)="recurrence = 'Every week'">Every week</div>
+                      <div class="item" (click)="recurrence = 'Every month'">Every month</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

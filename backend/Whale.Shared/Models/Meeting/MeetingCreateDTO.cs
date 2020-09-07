@@ -11,7 +11,7 @@ namespace Whale.Shared.Models.Meeting
         public int AnonymousCount { get; set; }
         public bool IsScheduled { get; set; }
         public bool IsRecurrent { get; set; }
-        public JobRecurrencyEnum Recurrency { get; set; }
+        public JobRecurrenceEnum Recurrence { get; set; }
         public bool IsVideoAllowed { get; set; }
         public bool IsAudioAllowed { get; set; }
         public bool IsWhiteboard { get; set; }

@@ -26,18 +26,15 @@ namespace Whale.Shared.Jobs
 
         public async Task Execute(IJobExecutionContext context)
         {
-            //var dataMap = context.JobDetail.JobDataMap;
-            //var meeting = JsonConvert.DeserializeObject<Meeting>(dataMap.GetString("JobData"));
+            var dataMap = context.JobDetail.JobDataMap;
+            var meeting = JsonConvert.DeserializeObject<MeetingAndParticipants>(dataMap.GetString("JobData"));
 
-            //using (var scope = _serviceScopeFactory.CreateScope())
-            //{
-            //    var meetingService = scope.ServiceProvider.GetService<MeetingService>();
-            //    //meeting.StartTime = DateTimeOffset.Now;
-            //    //meeting.Id = Guid.Empty;
-            //    //await meetingService.RegisterRecurrentScheduledMeeting(meeting);
-            //    //await meetingService.StartScheduledMeeting(meeting);
-
-            //}
+            using (var scope = _serviceScopeFactory.CreateScope())
+            {
+                var meetingService = scope.ServiceProvider.GetService<MeetingService>();
+                var meetinG = await meetingService.GetScheduledMeeting(meeting.Meeting.Id);
+                await meetingService.StartScheduledMeeting(meetinG);
+            }
         }
     }
 }

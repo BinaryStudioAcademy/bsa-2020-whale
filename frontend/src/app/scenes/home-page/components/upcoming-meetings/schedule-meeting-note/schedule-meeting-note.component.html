@@ -17,6 +17,26 @@
           </div>
         </div>
         <div class="row">
+          <div class="column first">
+            Recurred
+          </div>
+          <div class="ten wide column">
+            {{ recurrence }}
+            <button 
+            *ngIf = "isReccurentAvailable"
+            class="ui basic button"
+            (click)="stopRecurringMeeting()"
+            >
+            Stop recurring
+            </button>
+            <span 
+            *ngIf = "isReccurentStopped"
+            >
+            (stopped)
+            </span>
+          </div>
+        </div>
+        <div class="row">
             <div class="column first">
               Creator
             </div>

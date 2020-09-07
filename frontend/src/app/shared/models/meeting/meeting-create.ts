@@ -1,5 +1,5 @@
 import { PointAgenda } from '../agenda/agenda';
-import { Recurrence } from 'app/scenes/schedule-meeting-page/components/schedule-meeting-page/schedule-meeting-page.component';
+import { Recurrence } from './meeting-recurrence';
 
 export interface MeetingCreate {
   settings: string;
@@ -7,7 +7,7 @@ export interface MeetingCreate {
   anonymousCount: number;
   isScheduled: boolean;
   isRecurrent: boolean;
-  recurrency: Recurrence;
+  recurrence: Recurrence;
   isAudioAllowed: boolean;
   isVideoAllowed: boolean;
   isWhiteboard: boolean;

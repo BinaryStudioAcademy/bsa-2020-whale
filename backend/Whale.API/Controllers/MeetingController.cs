@@ -42,6 +42,13 @@ namespace Whale.API.Controllers
             return Ok(await _httpService.PostStringAsync("meeting/scheduled", meetingDto));
         }
 
+        [Authorize]
+        [HttpGet("scheduled/stop/{id}")]
+        public async Task<ActionResult> StopMeetingRecurring(Guid id)
+        {
+            return Ok(await _httpService.GetAsync<bool>($"meeting/scheduled/stop/{id}"));
+        }
+
         [Route("external/schedule")]
         [HttpPost]
         [Produces("application/json")]

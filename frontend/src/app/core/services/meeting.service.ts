@@ -57,4 +57,11 @@ export class MeetingService {
       updateSettings
     );
   }
+
+  public stopMeetingRecurring(id: string): Observable<HttpResponse<void>> {
+    return this.httpService.getFullRequest(
+      `${this.routePrefix}/scheduled/stop/${id}`
+    );
+  }
+
 }

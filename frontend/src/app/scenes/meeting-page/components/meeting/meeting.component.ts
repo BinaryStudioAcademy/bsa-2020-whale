@@ -1324,6 +1324,7 @@ export class MeetingComponent
           meetingId: this.meeting.id,
           applicantEmail: this.authService.currentUser.email,
           isWhiteboard: this.meeting.isWhiteboard,
+          recurrence: this.meeting.recurrence,
           isAudioDisabled: !this.meeting.isAudioAllowed,
           isVideoDisabled: !this.meeting.isVideoAllowed,
           isPoll: this.meeting.isPoll,

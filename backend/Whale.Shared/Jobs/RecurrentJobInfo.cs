@@ -6,17 +6,16 @@ namespace Whale.Shared.Jobs
 {
     public class RecurrentJobInfo
     {
-        
-
         public Type JobType { get; protected set; }
         public DateTimeOffset JobTime { get; protected set; }
-        public JobRecurrencyEnum JobRecurrency { get; set; }
-
-        public RecurrentJobInfo(Type type, DateTimeOffset startTime, JobRecurrencyEnum recurrency)
+        public JobRecurrenceEnum JobRecurrence { get; set; }
+        public Guid JobId { get; set; }
+        public RecurrentJobInfo(Type type, DateTimeOffset startTime, JobRecurrenceEnum Recurrence, Guid jobId)
         {
             JobType = type;
             JobTime = startTime;
-            JobRecurrency = recurrency;
+            JobRecurrence = Recurrence;
+            JobId = jobId;
         }
     }
 }
