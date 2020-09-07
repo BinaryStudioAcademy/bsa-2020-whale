@@ -1,4 +1,4 @@
-<spiner *ngIf="isMeetingLoading" size="'massive'"></spiner>
+<app-spiner *ngIf="isMeetingLoading" size="massive"></app-spiner>
 <app-page-header
   (openChatClicked)="onOpenChat($event)"
   (openGroupChatClicked)="onOpenGroupChat($event)"
@@ -7,7 +7,7 @@
   <div class="left-col">
     <div class="ui left vertical menu bar">
       <a class="item">
-        <app-spiner *ngIf="isUserLoadig" size="'small'"></app-spiner>
+        <app-spiner *ngIf="isUserLoadig" size="small"></app-spiner>
         <div (click)="goToPage('profile-page')" class="main-user">
           <img
             class="ui circular image avatar-pic"
@@ -46,7 +46,7 @@
       </a>
       <app-spiner
         *ngIf="isContactsLoading || isChatHubLoading"
-        [size]="'medium'"
+        size="massive"
       ></app-spiner>
       <a
         id="home-toggle-contacts"
@@ -104,7 +104,7 @@
           </div>
         </div>
       </div>
-      <app-spiner *ngIf="isGroupsLoading" [size]="'medium'"></app-spiner>
+      <app-spiner *ngIf="isGroupsLoading" size="massive"></app-spiner>
       <a id="home-toggle-groups" (click)="onGroupsClick()" class="item header"
         >Groups
         <button
