@@ -22,8 +22,7 @@ using Microsoft.Extensions.Configuration;
 using shortid.Configuration;
 using System.Globalization;
 using Whale.Shared.Models.ElasticModels.Statistics;
-using System.Timers;
-using Whale.DAL.Models.Poll;
+
 
 namespace Whale.Shared.Services
 {
