@@ -74,6 +74,38 @@ namespace Whale.API.Services
                 .Take(take);
         }
 
+        public async Task<IEnumerable<ScheduledDTO>> GetUpcomingScheduledAsync(string email, int skip, int take)
+        {
+            var user = await _userService.GetUserByEmailAsync(email);
+            if (user == null)
+                throw new NotFoundException("User", email);
+
+            var scheduledList = _context.ScheduledMeetings.Where(s => s.CreatorId == user.Id || s.ParticipantsEmails.Contains(user.Email)).ToList();
+            var scheduledDTOList = new List<ScheduledDTO>();
+            foreach (var scheduled in scheduledList)
+            {
+                var creator = scheduled.CreatorId == user.Id ? user : await _userService.GetUserAsync(scheduled.CreatorId);
+                var meeting = await _context.Meetings.FirstOrDefaultAsync(m => m.Id == scheduled.MeetingId);
+                if (meeting.EndTime != null || meeting.StartTime < DateTime.Now.AddHours(-3))
+                    continue;
+                var participantEmails = JsonConvert.DeserializeObject<List<string>>(scheduled.ParticipantsEmails);
+                var userParticipants = (await _userService.GetAllUsersAsync()).Where(u => participantEmails.Contains(u.Email));
+                scheduledDTOList.Add(new ScheduledDTO
+                {
+                    Id = scheduled.Id,
+                    Meeting = _mapper.Map<MeetingDTO>(meeting),
+                    Creator = creator,
+                    Participants = userParticipants.ToList(),
+                    Link = scheduled.ShortURL,
+                    Canceled = scheduled.Canceled
+                });
+            }
+            return scheduledDTOList
+                .OrderBy(s => s.Meeting.StartTime)
+                .Skip(skip)
+                .Take(take);
+        }
+
         public async Task<ScheduledMeetingDTO> PostAsync(ScheduledMeetingCreateDTO scheduledMeeting)
         {
             var newMeeting = _mapper.Map<Meeting>(scheduledMeeting);
