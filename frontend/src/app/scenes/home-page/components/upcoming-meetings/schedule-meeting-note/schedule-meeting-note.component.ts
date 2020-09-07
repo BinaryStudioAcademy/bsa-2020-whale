@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import { AuthService } from 'app/core/auth/auth.service';
 import { HttpService } from 'app/core/services';
 import { environment } from '@env';
+import { ConfirmationModalComponent } from '@shared/components/confirmation-modal/confirmation-modal.component';
+import { SimpleModalService } from 'ngx-simple-modal';
 
 @Component({
   selector: 'app-schedule-meeting-note',
@@ -25,6 +27,7 @@ export class ScheduleMeetingNoteComponent implements OnInit{
   constructor(
     private authService: AuthService,
     private httpService: HttpService,
+    private simpleModalService: SimpleModalService,
     private toastr: ToastrService,
     private router: Router,
   ) {
@@ -38,16 +41,27 @@ export class ScheduleMeetingNoteComponent implements OnInit{
   }
 
   public cancelMeeting(): void {
-    this.isLoading = true;
-    this.scheduled.canceled = true;
-    this.httpService.putFullRequest<CancelScheduled, void>(`${this.route}/cancel`, { scheduledMeetingId: this.scheduled.id }).subscribe(
-      () => this.isLoading = false,
-      () => {
-        this.toastr.error('Error during a meeting cancelation');
-        this.scheduled.canceled = false;
-        this.isLoading = false;
+    this.simpleModalService
+    .addModal(ConfirmationModalComponent, {
+      message: 'Are you sure you want to cancel the meeting?',
+    })
+    .subscribe((isConfirm) => {
+      if (isConfirm) {
+        this.isLoading = true;
+        this.scheduled.canceled = true;
+        this.httpService.putFullRequest<CancelScheduled, void>(`${this.route}/cancel`,
+        { scheduledMeetingId: this.scheduled.id }).subscribe(
+          () => this.isLoading = false,
+          () => {
+            this.toastr.error('Error during a meeting cancelation');
+            this.scheduled.canceled = false;
+            this.isLoading = false;
+          }
+        );
       }
-    );
+    });
+
+    return;
   }
 
   public join(): void {

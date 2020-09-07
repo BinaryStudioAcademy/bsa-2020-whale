@@ -412,7 +412,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
             this.contactService
               .DeletePendingContact(contact.secondMember.email)
               .subscribe(
-                (resp) => {
+                () => {
                   this.toastr.success('Canceled');
                 },
                 (error) => {
