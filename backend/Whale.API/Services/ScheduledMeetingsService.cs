@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Whale.API.Models.ScheduledMeeting;
@@ -18,10 +19,16 @@ namespace Whale.API.Services
     public class ScheduledMeetingsService: BaseService
     {
         private readonly UserService _userService;
+        private readonly NotificationsService _notificationsService;
 
-        public ScheduledMeetingsService(WhaleDbContext context, IMapper mapper, UserService userService)
+        public ScheduledMeetingsService(
+            WhaleDbContext context,
+            IMapper mapper,
+            UserService userService,
+            NotificationsService notificationsService)
             : base(context, mapper) {
             _userService = userService;
+            _notificationsService = notificationsService;
         }
 
         public async Task<ScheduledMeetingDTO> GetAsync(Guid uid)
@@ -111,6 +118,15 @@ namespace Whale.API.Services
             scheduled.Canceled = true;
 
             await _context.SaveChangesAsync();
+
+            foreach (var email in JsonConvert.DeserializeObject<List<string>>(scheduled.ParticipantsEmails))
+            {
+                if (applicantEmail != email)
+                {
+                    await _notificationsService.AddTextNotification(email,
+                        $"{applicantEmail} has canceled the meeting on {meeting.StartTime.AddHours(3).ToString("f", new CultureInfo("us-EN"))}");
+                }
+            }
         }
 
         public async Task DeleteAsync(Guid id)

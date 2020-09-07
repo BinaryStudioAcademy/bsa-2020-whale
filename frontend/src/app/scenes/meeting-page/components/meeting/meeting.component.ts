@@ -803,10 +803,14 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (streamId) => {
-          this.isSharing = true;
           const stream = this.connectedStreams.find((x) => x.id === streamId);
+          if (this.currentParticipant.streamId === streamId)
+          {
+            this.isSharing = true;
+          }
           this.fullPage(streamId);
-          this.toastr.success('Start sharing screen');
+          const user = this.meeting.participants.find(x => x.streamId === streamId).user;
+          this.toastr.success(`${user.firstName} ${user.secondName} start sharing screen`);
         },
         () => {
           this.toastr.error('Error while trying to share screen');
@@ -892,8 +896,8 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (point) => {
-          const toast = this.toastr.success(`Topic ${point.name} finished`, 'Tab this for snooze on 5 min', {
-            enableHtml: true
+          const toast = this.toastr.success(`Topic ${point.name} finished`, 'Click this for snooze on 5 min', {
+            enableHtml :  true
           });
           toast.onTap.subscribe(() => this.snoozeTopic(point));
         },
@@ -1130,7 +1134,7 @@ export class MeetingComponent
 
     this.meetingSignalrService.invoke(
       SignalMethods.OnConferenceStopRecording,
-      'Conference stop recording'
+      this.meeting.id
     );
     this.toastr.info('Stop recording a conference');
     this.isSomeoneRecordingScreen = false;
@@ -2058,7 +2062,6 @@ export class MeetingComponent
       streamId: this.currentUserStream.id,
       meetingId: this.meeting.id,
     });
-    this.isSharing = true;
   }
   public fullPage(streamId): void {
     const stream = this.connectedStreams.find((x) => x.id === streamId);
