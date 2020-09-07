@@ -19,6 +19,10 @@
         </div>
       </a>
       <a class="item">
+        <a id="home-go-create" class="item" (click)="createMeeting()">
+          <i class="share icon"></i>
+          Enter the meeting
+        </a>
         <a id="home-go-history" class="item" (click)="onMeetingHistoryClick()">
           <i class="clock outline icon"></i>
           Meetings history
@@ -34,10 +38,6 @@
         >
           <i class="calendar alternate outline icon"></i>
           Schedule meeting
-        </a>
-        <a id="home-go-create" class="item" (click)="createMeeting()">
-          <i class="share icon"></i>
-          Enter the meeting
         </a>
         <a id="home-go-statistics" class="item" (click)="onStatisticsClick()">
           <i class="chart bar icon"></i>
@@ -204,14 +204,14 @@
             class="ui centered small image"
             src="https://img.icons8.com/bubbles/100/000000/planner.png"
           />
-          <span class="text-aligned">Schedule meeting</span>
+          <span>Schedule meeting</span>
         </div>
         <div class="text-aligned" (click)="onMeetingHistoryClick()">
           <img
             class="ui centered small image"
             src="https://img.icons8.com/bubbles/100/000000/todo-list.png"
           />
-          <span class="text-aligned">Meetings history</span>
+          <span>Meetings history</span>
         </div>
         <div
           id="home-chat-go-create"
@@ -222,7 +222,7 @@
             class="ui centered small image"
             src="https://img.icons8.com/bubbles/100/000000/forward.png"
           />
-          <span class="text-aligned header">Enter the meeting </span>
+          <span>Enter the meeting </span>
         </div>
       </div>
     </div>

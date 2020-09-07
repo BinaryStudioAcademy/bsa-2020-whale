@@ -1371,7 +1371,7 @@ export class MeetingComponent
             } as GetMessages);
 
             this.questionService.getQuestionsByMeeting(this.meeting.id);
-            // this.configureRecognition();
+            this.configureRecognition();
             this.getAgenda();
           });
           this.startedPresence = new Date();
@@ -2154,7 +2154,6 @@ export class MeetingComponent
       fromEvent(this.recognition, 'result').pipe(takeUntil(this.unsubscribe$))
         .subscribe(
           (event: SpeechRecognitionEvent) => {
-            console.info('recognition result');
             this.meetingSignalrService.invoke(SignalMethods.OnSpeechRecognition, {
               meetingId: this.meeting.id,
               userId: this.currentParticipant.user.id,
@@ -2165,8 +2164,6 @@ export class MeetingComponent
       fromEvent(this.recognition, 'end').pipe(takeUntil(this.unsubscribe$))
         .subscribe(
           (event) => {
-            console.info('recognition end');
-            console.info(!this.isRecognitionStop);
             if (!this.isRecognitionStop) {
               this.recognition.start();
             }
@@ -2178,7 +2175,6 @@ export class MeetingComponent
     }
   }
   private stopRecognition() {
-    console.info('stop');
     this.isRecognitionStop = true;
     this.recognition?.stop();
   }
