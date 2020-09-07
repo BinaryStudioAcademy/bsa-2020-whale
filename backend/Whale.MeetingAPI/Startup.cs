@@ -53,6 +53,11 @@ namespace Whale.MeetingAPI
             services.AddTransient<NotificationsService>();
             services.AddTransient<QuestionService>();
             services.AddTransient(_ => new SignalrService(Configuration.GetValue<string>("SignalR")));
+            var contextOption = new DbContextOptionsBuilder<WhaleDbContext>();
+            services.AddScoped(_ => new MeetingCleanerService(contextOption.UseSqlServer(
+                Configuration.GetConnectionString("WhaleDatabase")).Options,
+                new RedisService(Configuration.GetConnectionString("RedisOptions"))
+                ));
 
             services.AddControllers()
                     .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);

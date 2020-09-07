@@ -21,6 +21,7 @@ using Whale.Shared.MappingProfiles;
 using Whale.Shared.Services;
 using Microsoft.AspNetCore.HttpOverrides;
 using Whale.Shared.Models;
+using Nest;
 
 namespace Whale.API
 {
@@ -64,6 +65,11 @@ namespace Whale.API
             });
 
             services.AddSingleton(mappingConfig.CreateMapper());
+            var contextOption = new DbContextOptionsBuilder<WhaleDbContext>();
+            services.AddScoped(_ => new MeetingCleanerService(
+                contextOption.UseSqlServer(Configuration.GetConnectionString("WhaleDatabase")).Options,
+                new RedisService(Configuration.GetConnectionString("RedisOptions"))
+                ));
 
             services.AddTransient<SlackService>();
             services.AddTransient<NotificationsService>();
@@ -95,8 +101,6 @@ namespace Whale.API
 
             services.AddScoped(_ => Configuration.Bind<BlobStorageSettings>("BlobStorageSettings"));
             services.AddScoped<FileStorageProvider>();
-
-            services.AddScoped(_ => new RedisService(Configuration.GetConnectionString("RedisOptions")));
 
             services.AddSingleton(Configuration.GetSection("ElasticConfiguration").Get<ElasticConfiguration>());
             services.AddTransient<ElasticSearchService>();

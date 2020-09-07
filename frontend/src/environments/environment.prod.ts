@@ -20,7 +20,7 @@ export const environment = {
     port: 443,
     path: '/',
     secure: true,
-    debug: 3,
+    debug: 1,
     config: {
       iceServers: [
         // { urls: 'stun:bsa2020-whale-webrtc.westeurope.cloudapp.azure.com:5349' },
