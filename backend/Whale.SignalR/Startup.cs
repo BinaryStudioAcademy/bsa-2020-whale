@@ -46,6 +46,11 @@ namespace Whale.SignalR
             services.AddTransient<WhaleService>();
             services.AddTransient(_ => new MeetingHttpService(Configuration.GetValue<string>("MeetingAPI")));
             services.AddScoped<RoomService>();
+            var contextOption = new DbContextOptionsBuilder<WhaleDbContext>();
+            services.AddScoped(_ => new MeetingCleanerService(
+                contextOption.UseSqlServer(Configuration.GetConnectionString("WhaleDatabase")).Options,
+                new RedisService(Configuration.GetConnectionString("RedisOptions"))
+                ));
 
             services.AddTransient(_ => new SignalrService(Configuration.GetValue<string>("SignalR")));
             services.AddScoped(_ => new RedisService(Configuration.GetConnectionString("RedisOptions")));
