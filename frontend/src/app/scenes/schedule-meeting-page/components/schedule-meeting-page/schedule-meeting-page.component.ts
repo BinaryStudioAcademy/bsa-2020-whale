@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { IDatePickerConfig } from 'ng2-date-picker';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { HttpService } from '../../../../core/services/http.service';
 import { ToastrService } from 'ngx-toastr';
 import { GoogleCalendarService } from 'app/core/services/google-calendar.service';
@@ -60,11 +60,14 @@ export class ScheduleMeetingPageComponent implements OnInit {
     private simpleModalService: SimpleModalService,
     meetingSettingsService: MeetingSettingsService
   ) {
+    const minutes = new Date().getMinutes();
     this.form = new FormGroup({
-      topic: new FormControl('UserNameS meeting etc'),
+      topic: new FormControl('', [Validators.required]),
       description: new FormControl(),
-      date: new FormControl(this.createStringFromDate(new Date())),
-      time: new FormControl(`${new Date().getHours() + 1}:${new Date().getMinutes()}`),
+      date: new FormControl(this.createStringFromDate(new Date()), [Validators.required]),
+      time: new FormControl(
+        `${new Date().getHours() + 1}:${new Date().getMinutes() + 10 - (minutes % 10)}`, [Validators.required]
+      ),
       durationHours: new FormControl(1),
       durationMinutes: new FormControl(30),
       isGeneratedMeetingID: new FormControl('true'),
@@ -128,7 +131,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
         meetingLanguage = 'ru';
         break;
       case 'Ukrainian':
-        meetingLanguage = 'ua';
+        meetingLanguage = 'uk';
         break;
       default:
         meetingLanguage = 'en-US';
