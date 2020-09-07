@@ -21,6 +21,8 @@ using Whale.Shared.Models;
 using Microsoft.Extensions.Configuration;
 using shortid.Configuration;
 using Whale.Shared.Models.ElasticModels.Statistics;
+using System.Timers;
+using Whale.DAL.Models.Poll;
 
 namespace Whale.Shared.Services
 {
@@ -36,6 +38,7 @@ namespace Whale.Shared.Services
         private readonly NotificationsService _notifications;
         private readonly string whaleAPIurl;
         private readonly ElasticSearchService _elasticSearchService;
+        private readonly MeetingCleanerService _meetingCleanerService;
 
         public static string BaseUrl { get; } = "http://bsa2020-whale.westeurope.cloudapp.azure.com";
 
@@ -49,7 +52,9 @@ namespace Whale.Shared.Services
             SignalrService signalrService,
             IConfiguration configuration,
             NotificationsService notifications,
-            ElasticSearchService elasticSearchService)
+            ElasticSearchService elasticSearchService,
+            MeetingCleanerService meetingCleanerService
+            )
             : base(context, mapper)
         {
             _redisService = redisService;
@@ -60,6 +65,7 @@ namespace Whale.Shared.Services
             _notifications = notifications;
             whaleAPIurl = configuration.GetValue<string>("Whale");
             _elasticSearchService = elasticSearchService;
+            _meetingCleanerService = meetingCleanerService;
         }
 
         public async Task<MeetingDTO> ConnectToMeetingAsync(MeetingLinkDTO linkDTO, string userEmail)
@@ -235,6 +241,8 @@ namespace Whale.Shared.Services
 
                 await _notifications.InviteMeetingNotification(user.Email, email, link);
             }
+
+            _meetingCleanerService.DeleteMeetingIfNoOneEnter(meeting.Id, scheduledMeeing.FullURL, scheduledMeeing.ShortURL);
 
             return new MeetingLinkDTO { Id = meeting.Id, Password = scheduledMeeing.Password };
         }

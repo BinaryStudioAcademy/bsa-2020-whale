@@ -123,7 +123,7 @@ namespace Whale.SignalR.Hubs
             {
                 meetingData = await _redisService.GetAsync<MeetingRedisData>(meetingData.MeetingId);
 
-                disconnectedParticipant = meetingData.Participants.FirstOrDefault(p => p.ActiveConnectionId != Context.ConnectionId);
+                disconnectedParticipant = meetingData.Participants.FirstOrDefault(p => p.ActiveConnectionId == Context.ConnectionId);
                 meetingData.Participants.Remove(disconnectedParticipant);
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, meetingData.MeetingId);
                 await Clients.Group(meetingData.MeetingId).SendAsync("OnParticipantDisconnected", disconnectedParticipant);
@@ -146,7 +146,7 @@ namespace Whale.SignalR.Hubs
             await _redisService.ConnectAsync();
             var meetingData = await _redisService.GetAsync<MeetingRedisData>(connectionData.MeetingId);
 
-            var disconnectedParticipant = meetingData.Participants.FirstOrDefault(p => p.Id != connectionData.Participant.Id);
+            var disconnectedParticipant = meetingData.Participants.FirstOrDefault(p => p.Id == connectionData.Participant.Id);
             connectionData.Participant = disconnectedParticipant;
             meetingData.Participants = meetingData.Participants.Where(p => p.Id != connectionData.Participant.Id).ToList();
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, connectionData.MeetingId);
@@ -157,7 +157,7 @@ namespace Whale.SignalR.Hubs
             {
                 meetingData = await _redisService.GetAsync<MeetingRedisData>(meetingData.MeetingId);
 
-                disconnectedParticipant = meetingData.Participants.FirstOrDefault(p => p.Id != connectionData.Participant.Id);
+                disconnectedParticipant = meetingData.Participants.FirstOrDefault(p => p.Id == connectionData.Participant.Id);
                 connectionData.MeetingId = meetingData.MeetingId;
                 connectionData.IsRoom = false;
                 connectionData.Participant = disconnectedParticipant;
