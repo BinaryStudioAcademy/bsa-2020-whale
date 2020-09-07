@@ -36,6 +36,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   public form: FormGroup;
 
   statistics: UserMeetingStatistics[];
+  allTimeStatistics: UserMeetingStatistics;
   private unsubscribe$ = new Subject<void>();
 
   chartData: any[];
@@ -55,13 +56,24 @@ constructor(
     });
   }
 
-ngOnInit(): void {
+  ngOnInit(): void {
+    this.getAllTimeStatistics();
     this.submit();
   }
 
   public ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
+  }
+
+  getAllTimeStatistics(): void {
+    this.statisticsService
+      .getAllTimeStatistics()
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(resp => {
+        this.allTimeStatistics = resp.body;
+      },
+      (error) => (this.allTimeStatistics = null));
   }
 
   getStatistics(startDate: Date, endDate: Date): void {

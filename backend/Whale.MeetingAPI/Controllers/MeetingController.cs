@@ -55,10 +55,6 @@ namespace Whale.API.Controllers
         public async Task<ActionResult<string>> CreateMeetingScheduledAsync(MeetingCreateDTO meetingDto)
         {
             var meetingAndLink = await _meetingService.RegisterScheduledMeetingAsync(meetingDto);
-            var jobInfo = new JobInfo(typeof(ScheduledMeetingJob), meetingDto.StartTime);
-            var obj = JsonConvert.SerializeObject(meetingAndLink.Meeting);
-            await _meetingScheduleService.StartAsync(jobInfo, obj);
-
             if (meetingDto.Recurrence != JobRecurrenceEnum.Never)
             {
                 var meetingAndParticipants = new MeetingAndParticipants
@@ -68,11 +64,11 @@ namespace Whale.API.Controllers
                     ParticipantsEmails = meetingDto.ParticipantsEmails
                 };
                 var job = new RecurrentJobInfo(typeof(RecurrentScheduledMeetingJob), meetingDto.StartTime, meetingDto.Recurrence, meetingAndLink.Meeting.Id);
-                obj = JsonConvert.SerializeObject(meetingAndParticipants);
+                var obj = JsonConvert.SerializeObject(meetingAndParticipants);
                 await _meetingScheduleService.StartRecurrent(job, obj);
                 foreach (var email in meetingDto.ParticipantsEmails)
                 {
-                    if(meetingDto.CreatorEmail != email)
+                    if (meetingDto.CreatorEmail != email)
                     {
                         await _notifications.AddTextNotification(email,
                             $"{meetingDto.CreatorEmail} invites you to a meeting on {meetingDto.StartTime.AddHours(3).ToString("f", new CultureInfo("us-EN"))}");
@@ -82,8 +78,8 @@ namespace Whale.API.Controllers
             }
             else
             {
-                jobInfo = new JobInfo(typeof(ScheduledMeetingJob), meetingDto.StartTime);
-                obj = JsonConvert.SerializeObject(meetingAndLink.Meeting);
+                var jobInfo = new JobInfo(typeof(ScheduledMeetingJob), meetingDto.StartTime);
+                var obj = JsonConvert.SerializeObject(meetingAndLink.Meeting);
                 await _meetingScheduleService.StartAsync(jobInfo, obj);
 
                 foreach (var email in meetingDto.ParticipantsEmails)
@@ -99,7 +95,7 @@ namespace Whale.API.Controllers
         [HttpGet]
         public async Task<ActionResult<MeetingDTO>> ConnectToMeetingAsync(Guid id, string pwd, string email)
         {
-            return Ok(await _meetingService.ConnectToMeetingAsync(new MeetingLinkDTO { Id = id, Password = pwd}, email));
+            return Ok(await _meetingService.ConnectToMeetingAsync(new MeetingLinkDTO { Id = id, Password = pwd }, email));
         }
 
         [HttpGet("shortInvite/{inviteLink}")]
