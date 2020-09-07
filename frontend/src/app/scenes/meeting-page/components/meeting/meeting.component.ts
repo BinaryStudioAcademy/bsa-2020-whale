@@ -1290,6 +1290,9 @@ export class MeetingComponent
 
     // get answer and show other user
     call?.on('stream', (stream) => {
+      if (this.connectedStreams.includes(stream)) {
+        return;
+      }
       this.connectedStreams.push(stream);
       const connectedPeer = this.connectedPeers.get(call.peer);
       if (!connectedPeer || connectedPeer.id !== stream.id) {
