@@ -173,6 +173,8 @@ export class MeetingComponent
   public isRoom = false;
   public isMoveToRoom = false;
   public isMoveToMeeting = false;
+  public isPlanning = false;
+  public isTopicEnd = false;
   public onCanLeaveEvent = new EventEmitter<void>();
   public isSharing = false;
   private sdpVideoBandwidth = 125;
@@ -221,7 +223,6 @@ export class MeetingComponent
   @ViewChild('whiteboard') whiteboard: ElementRef;
   @ViewChild('whiteboardButton') whiteboardButton: ElementRef;
 
-  private chatElement: any;
   private currentStreamLoaded = new EventEmitter<void>();
   private contectedAt = new Date();
   private elem: any;
@@ -233,9 +234,9 @@ export class MeetingComponent
   private unsubscribe$ = new Subject<void>();
   private userStream: MediaStream;
   private unsubscribeReaction$: Subject<void>;
+  public chatElement: HTMLElement;
   //#endregion fields
-  public isPlanning = false;
-  public isTopicEnd = false;
+
   constructor(
     @Inject(DOCUMENT) private document: any,
     private authService: AuthService,

@@ -47,6 +47,14 @@ namespace Whale.API.Controllers
             return Ok(await _scheduledMeetingService.UpdateAsync(scheduled));
         }
 
+        [HttpPut("cancel")]
+        public async Task<ActionResult<ScheduledMeetingDTO>> CancelScheduledMeetingAsync([FromBody] CancelMeetingDTO dto)
+        {
+            var applicantEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+            await _scheduledMeetingService.CancelScheduledMeetingAsync(dto.ScheduledMeetingId, applicantEmail);
+            return Ok();
+        }
+
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteAsync(Guid id)
         {

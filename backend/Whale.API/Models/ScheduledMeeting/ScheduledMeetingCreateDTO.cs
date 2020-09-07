@@ -10,5 +10,6 @@ namespace Whale.API.Models.ScheduledMeeting
         public DateTimeOffset ScheduledTime { get; set; }
         public int AnonymousCount { get; set; }
         public IEnumerable<AgendaPoint> AgendaPoints { get; set; }
+        public bool Canceled { get; set; }
     }
 }
