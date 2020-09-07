@@ -1,10 +1,17 @@
 <div class="ui card width-100">
     <div class="content">
-      <div *ngIf="scheduled.meeting.topic" class="header topic">
-        {{ scheduled.meeting.topic  }}
+      <div *ngIf="scheduled.meeting.topic" 
+      class="header topic title"
+      [class.text-not-active]="scheduled.canceled">
+        {{ scheduled.meeting.topic  }}{{ scheduled.canceled ? ' (Canceled)' : '' }}
       </div>
-      <div *ngIf="!scheduled.meeting.topic" class="header topic">
-        Meeting {{ scheduled.meeting.id }}
+      <div *ngIf="!scheduled.meeting.topic"
+      class="header topic title"
+      [class.text-not-active]="scheduled.canceled">
+        Meeting {{ scheduled.meeting.id }}{{ scheduled.canceled ? ' (Canceled)' : '' }}
+      </div>
+      <div *ngIf="isLoading" class="relative">
+        <app-spiner size="small"></app-spiner>
       </div>
     </div>
     <div class="content">
@@ -21,7 +28,8 @@
           <div class="column first">
             Start at
           </div>
-          <div class="ten wide column">
+          <div class="ten wide column"
+          [class.text-not-active]="scheduled.canceled">
             {{ scheduled.meeting.startTime | date: "dd/MM/yyyy" }}
             at
             {{ scheduled.meeting.startTime | date: "HH:mm" }}
@@ -38,8 +46,10 @@
                       class="ui mini circular image"
                       src="{{ scheduled.creator.avatarUrl }}"
                     />
-                    <div class="content">
-                      <div class="ui sub header">
+                    <div class="content" 
+                    [class.text-not-active]="scheduled.canceled">
+                      <div class="ui sub header"
+                      [class.text-not-active]="scheduled.canceled">
                         {{
                             scheduled.creator.secondName
                             ? scheduled.creator.firstName +
@@ -92,21 +102,28 @@
             </div>
           </div>
         </div>
-        <div class="row">
-          <div class="actions">
-                <button
-                class="ui primary button"
-                (click)="join()"
-                [disabled]="isDisabled"
-                >
-                Join Meeting
-                </button>
-                <button
-                class="ui basic button"
-                (click)="copyLink()"
-                >
-                Copy link
-                </button>
+        <div class="row" *ngIf="!scheduled.canceled">
+          <div class="actions" *ngIf="!isLoading">
+            <button
+            *ngIf="isCurrentUserHost"
+            class="ui basic button"
+            (click)="cancelMeeting()"
+            >
+            Cancel
+            </button>   
+            <button
+            class="ui basic button"
+            (click)="copyLink()"
+            >
+            Copy link
+            </button>
+            <button
+            class="ui primary button"
+            (click)="join()"
+            [disabled]="isDisabled"
+            >
+            Join Meeting
+            </button>
           </div>
         </div>
       </div>

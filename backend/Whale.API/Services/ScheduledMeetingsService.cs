@@ -57,7 +57,8 @@ namespace Whale.API.Services
                     Meeting = _mapper.Map<MeetingDTO>(meeting),
                     Creator = creator,
                     Participants = userParticipants.ToList(),
-                    Link = scheduled.ShortURL
+                    Link = scheduled.ShortURL,
+                    Canceled = scheduled.Canceled
                 });
             }
             return scheduledDTOList
@@ -74,6 +75,7 @@ namespace Whale.API.Services
 
             return await GetAsync(newMeeting.Id);
         }
+
         public async Task<ScheduledMeetingDTO> UpdateAsync(ScheduledMeetingDTO scheduledMeeting)
         {
             var meeting = _context.Meetings.FirstOrDefault(m => m.Id == scheduledMeeting.Id);
@@ -88,6 +90,29 @@ namespace Whale.API.Services
 
             return _mapper.Map<ScheduledMeetingDTO>(meeting);
         }
+
+        public async Task CancelScheduledMeetingAsync(Guid scheduledMeetingId, string applicantEmail)
+        {
+            var scheduled = _context.ScheduledMeetings.FirstOrDefault(s => s.Id == scheduledMeetingId);
+            if (scheduled == null)
+                throw new NotFoundException("Scheduled Meeting", scheduledMeetingId.ToString());
+
+            var meeting = _context.Meetings.FirstOrDefault(m => m.Id == scheduled.MeetingId);
+            if (meeting == null)
+                throw new NotFoundException("Meeting", scheduledMeetingId.ToString());
+
+            var applicant = await _userService.GetUserByEmailAsync(applicantEmail);
+            if (applicant == null)
+                throw new NotFoundException("User");
+
+            if (scheduled.CreatorId != applicant.Id)
+                throw new NotAllowedException(applicantEmail);
+
+            scheduled.Canceled = true;
+
+            await _context.SaveChangesAsync();
+        }
+
         public async Task DeleteAsync(Guid id)
         {
             var meeting = _context.Meetings.FirstOrDefault(c => c.Id == id);

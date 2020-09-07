@@ -12,5 +12,6 @@ namespace Whale.API.Models.ScheduledMeeting
         public UserDTO Creator { get; set; }
         public List<UserDTO> Participants { get; set; }
         public string Link { get; set; }
+        public bool Canceled { get; set; }
     }
 }

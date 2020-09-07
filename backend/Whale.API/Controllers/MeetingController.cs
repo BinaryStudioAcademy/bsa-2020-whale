@@ -93,6 +93,7 @@ namespace Whale.API.Controllers
             await _httpService.PutAsync("meeting/updateSettings", updateSettingsDTO);
             return Ok();
         }
+
         [Authorize]
         [HttpPut("statistics")]
         public async Task<ActionResult> UpdateMeetingStatistics(UpdateStatistics statistics)
@@ -109,6 +110,7 @@ namespace Whale.API.Controllers
             var agendaPoints = await _httpService.GetAsync<List<AgendaPointDTO>>($"meeting/agenda/{meetingId}");
             return Ok(agendaPoints);
         }
+
         [HttpPut("agenda")]
         public async Task<ActionResult> UpdateTopic(AgendaPointDTO point)
         {
