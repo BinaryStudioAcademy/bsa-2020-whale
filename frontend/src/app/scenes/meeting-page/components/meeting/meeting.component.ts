@@ -968,6 +968,7 @@ export class MeetingComponent
   }
 
   public ngOnDestroy(): void {
+    this.stopRecognition();
     this.simpleModalService.removeAll();
     this.destroyPeer();
     this.currentUserStream?.getTracks().forEach((track) => track.stop());
@@ -1025,8 +1026,7 @@ export class MeetingComponent
     ) {
       this.switchTrack(false, false);
       this.isMicrophoneMuted = true;
-      this.isRecognitionStop = true;
-      this.recognition?.stop();
+      this.stopRecognition();
       return;
     }
 
@@ -1036,7 +1036,7 @@ export class MeetingComponent
 
     this.isMicrophoneMuted = !this.isMicrophoneMuted;
     this.isRecognitionStop = this.isMicrophoneMuted;
-    // this.isMicrophoneMuted ? this.recognition?.stop() : this.recognition?.start();
+    this.isMicrophoneMuted ? this.stopRecognition() : this.recognition?.start();
     if (!isMissSignaling) {
       this.invokeMediaStateChanged();
     }
@@ -1240,8 +1240,6 @@ export class MeetingComponent
     window.onbeforeunload = () => {};
     this.meter.stopListening();
     this.meter.disconnect();
-    this.isRecognitionStop = true;
-    this.recognition?.stop();
     this.updateMeetingStatistics();
     clearInterval(this.updateStatisticsTaskId);
     this.router.navigate(['/home']);
@@ -1370,8 +1368,6 @@ export class MeetingComponent
     this.destroyPeer();
     this.meter.stopListening();
     this.meter.disconnect();
-    this.isRecognitionStop = true;
-    this.recognition?.stop();
     this.updateMeetingStatistics();
     clearInterval(this.updateStatisticsTaskId);
     this.router.navigate(['/home']);
@@ -2157,6 +2153,7 @@ export class MeetingComponent
       fromEvent(this.recognition, 'result').pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (event: SpeechRecognitionEvent) => {
+          console.info('recognition result');
           this.meetingSignalrService.invoke(SignalMethods.OnSpeechRecognition, {
             meetingId: this.meeting.id,
             userId: this.currentParticipant.user.id,
@@ -2167,6 +2164,8 @@ export class MeetingComponent
       fromEvent(this.recognition, 'end').pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (event) => {
+          console.info('recognition end');
+          console.info(!this.isRecognitionStop);
           if (!this.isRecognitionStop) {
             this.recognition.start();
           }
@@ -2176,6 +2175,11 @@ export class MeetingComponent
     catch {
       this.toastr.info('Speech recognition is not supported by the browser');
     }
+  }
+  private stopRecognition() {
+    console.info('stop');
+    this.isRecognitionStop = true;
+    this.recognition?.stop();
   }
   //#endregion SpeechRecognition
   onAgendaClick(){
