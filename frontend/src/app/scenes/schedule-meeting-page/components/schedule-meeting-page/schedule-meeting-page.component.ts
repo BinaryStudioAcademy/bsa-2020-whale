@@ -131,7 +131,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
         meetingLanguage = 'ru';
         break;
       case 'Ukrainian':
-        meetingLanguage = 'ua';
+        meetingLanguage = 'uk';
         break;
       default:
         meetingLanguage = 'en-US';
