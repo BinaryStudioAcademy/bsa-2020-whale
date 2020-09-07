@@ -968,7 +968,9 @@ export class MeetingComponent
   }
 
   public ngOnDestroy(): void {
-    this.stopRecognition();
+    this.isRecognitionStop = true;
+    this.recognition?.abort();
+    this.recognition = undefined;
     this.simpleModalService.removeAll();
     this.destroyPeer();
     this.currentUserStream?.getTracks().forEach((track) => track.stop());
@@ -1238,6 +1240,7 @@ export class MeetingComponent
   public leave(): void {
     // this is made to remove eventListener for other routes
     window.onbeforeunload = () => {};
+    this.stopRecognition();
     this.meter.stopListening();
     this.meter.disconnect();
     this.updateMeetingStatistics();
