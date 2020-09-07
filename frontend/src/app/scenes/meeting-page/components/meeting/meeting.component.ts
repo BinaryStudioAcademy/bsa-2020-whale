@@ -2276,6 +2276,6 @@ export class MeetingComponent
 
   public showCurrentUserStream() {
     console.info('this.CurrentUserStream');
-    console.info(this.mediaData);
+    console.info(this.currentUserStream);
   }
 }
