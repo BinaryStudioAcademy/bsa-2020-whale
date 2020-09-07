@@ -33,7 +33,7 @@ namespace Whale.Shared.Jobs
             {
                 var meetingService = scope.ServiceProvider.GetService<MeetingService>();
                 var meetinG = await meetingService.GetScheduledMeeting(meeting.Meeting.Id);
-                await meetingService.StartScheduledMeeting(meetinG);
+                await meetingService.StartScheduledMeetingAsync(meetinG);
             }
         }
     }

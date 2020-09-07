@@ -60,7 +60,7 @@ namespace Whale.API.Services
                 if (meeting.EndTime != null)
                     continue;
                 var participantEmails = JsonConvert.DeserializeObject<List<string>>(scheduled.ParticipantsEmails);
-                var userParticipants = (await _userService.GetAllUsersAsync()).Where(u => participantEmails.Contains(u.Email))
+                var userParticipants = (await _userService.GetAllUsersAsync()).Where(u => participantEmails.Contains(u.Email));
                 var settings = JsonConvert.DeserializeObject<MeetingSettingsDTO>(meeting.Settings);
                 var meetingDTO =  new MeetingDTO
                 {

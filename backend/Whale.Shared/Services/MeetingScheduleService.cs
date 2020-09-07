@@ -23,7 +23,6 @@ namespace Whale.Shared.Services
         private static ReadOnlyDictionary<JobRecurrenceEnum, int> RecurrenceLenght = new ReadOnlyDictionary<JobRecurrenceEnum, int>(dict);
         private readonly IJobFactory _jobFactory;
         private readonly ISchedulerFactory _schedulerFactory;
-        private readonly Guid id;
         private IScheduler scheduler;
         private Guid id;
         private IJobListener _jobListener;

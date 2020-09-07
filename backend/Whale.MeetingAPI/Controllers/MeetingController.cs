@@ -39,7 +39,7 @@ namespace Whale.API.Controllers
         [HttpGet("scheduled/stop/{id}")]
         public async Task<ActionResult<bool>> StopMeetingScheduling(Guid id)
         {
-            await _meetingScheduleService.Stop();
+            await _meetingScheduleService.StopAsync();
             return Ok(true);
         }
 
@@ -67,9 +67,9 @@ namespace Whale.API.Controllers
                     CreatorEmail = meetingDto.CreatorEmail,
                     ParticipantsEmails = meetingDto.ParticipantsEmails
                 };
-                var jobInfo = new RecurrentJobInfo(typeof(RecurrentScheduledMeetingJob), meetingDto.StartTime, meetingDto.Recurrence, meetingAndLink.Meeting.Id);
-                var obj = JsonConvert.SerializeObject(meetingAndParticipants);
-                await _meetingScheduleService.StartRecurrent(jobInfo, obj);
+                var job = new RecurrentJobInfo(typeof(RecurrentScheduledMeetingJob), meetingDto.StartTime, meetingDto.Recurrence, meetingAndLink.Meeting.Id);
+                obj = JsonConvert.SerializeObject(meetingAndParticipants);
+                await _meetingScheduleService.StartRecurrent(job, obj);
                 foreach (var email in meetingDto.ParticipantsEmails)
                 {
                     if(meetingDto.CreatorEmail != email)
@@ -82,9 +82,9 @@ namespace Whale.API.Controllers
             }
             else
             {
-                var jobInfo = new JobInfo(typeof(ScheduledMeetingJob), meetingDto.StartTime);
-                var obj = JsonConvert.SerializeObject(meetingAndLink.Meeting);
-                await _meetingScheduleService.Start(jobInfo, obj);
+                jobInfo = new JobInfo(typeof(ScheduledMeetingJob), meetingDto.StartTime);
+                obj = JsonConvert.SerializeObject(meetingAndLink.Meeting);
+                await _meetingScheduleService.StartAsync(jobInfo, obj);
 
                 foreach (var email in meetingDto.ParticipantsEmails)
                 {
