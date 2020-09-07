@@ -26,8 +26,7 @@ namespace Whale.SignalR.Services
             double roomExpiry,
             string meetingLink,
             string roomId,
-            string meetingId,
-            Dictionary<string, List<ParticipantDTO>> groupParticipants)
+            string meetingId)
         {
             var timer = new Timer(roomExpiry * 60 * 1000);
 
@@ -38,14 +37,13 @@ namespace Whale.SignalR.Services
 
                 await _meetingHub.Clients.Group(roomId).SendAsync("OnRoomClosed", meetingLink);
                 await _meetingHub.Clients.Group(meetingId).SendAsync("OnRoomClosed", meetingLink);
-                groupParticipants.Remove(roomId);
                 await _redisService.ConnectAsync();
                 await _redisService.DeleteKeyAsync(roomId);
                 await _redisService.DeleteKeyAsync(roomId + nameof(Poll));
                 await _redisService.DeleteKeyAsync(meetingSettingsPrefix + roomId);
                 await _redisService.DeleteKeyAsync(roomNamePrefix + roomId);
 
-                var meetingdata = await _redisService.GetAsync<MeetingMessagesAndPasswordDTO>(meetingId);
+                var meetingdata = await _redisService.GetAsync<MeetingRedisData>(meetingId);
                 if (meetingdata != null)
                 {
                     meetingdata.RoomsIds = new List<string>();
