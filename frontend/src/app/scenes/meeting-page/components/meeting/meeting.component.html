@@ -537,15 +537,11 @@
         "
         [muted]="!isCardPinned || pinnedParticipant.streamId === currentParticipant.streamId"
       ></video>
-      <div 
-        class="pinned-reaction" 
-        [ngClass]="pinnedCardsLayout === 0 ? 'pinned-reaction-row' : 'pinned-reaction-column'"
-        *ngIf="pinnedReaction"
-      >
-        {{ pinnedReaction }}
-      </div>
-      <div class="pinned-participant-info" *ngIf="isCardPinned && pinnedParticipant.streamId !== currentParticipant.streamId">
-        <div class="participant-name-wrapper">
+
+      <div class="pinned-participant-info">
+        <div
+        class="participant-name-wrapper" 
+        *ngIf="isCardPinned && pinnedParticipant.streamId !== currentParticipant.streamId">
           <i
             *ngIf="isPinnedAudioAllowed || pinnedParticipant.role === 1"
             class="microphone icon default-cursor"
@@ -571,6 +567,12 @@
             {{ pinnedParticipant?.user?.firstName }}
             {{ pinnedParticipant?.user?.secondName }}
           </p>
+        </div>
+        <div 
+        class="pinned-reaction" 
+        *ngIf="pinnedReaction"
+        >
+          {{ pinnedReaction }}
         </div>
       </div>
 
