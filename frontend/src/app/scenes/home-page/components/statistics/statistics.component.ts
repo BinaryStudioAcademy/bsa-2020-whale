@@ -14,12 +14,6 @@ enum StatisticFields {
   Presence
 }
 
-enum Aggregations {
-  Min,
-  Average,
-  Max
-}
-
 @Component({
   selector: 'app-statistics',
   templateUrl: './statistics.component.html',
@@ -30,7 +24,6 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   @Output() statisticsClose: EventEmitter<void> = new EventEmitter<void>();
 
   public fields = StatisticFields;
-  public aggregations = Aggregations;
 
   config: IDatePickerConfig = {
     weekDayFormat: 'dd',
@@ -45,19 +38,11 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   statistics: UserMeetingStatistics[];
   private unsubscribe$ = new Subject<void>();
 
-  data = [];
-  chartTitle: string;
-  markerSettings = {
-    visible: true
-  };
-  xAxis: object;
-  yAxis: object;
-  tooltip = {
-    enable: true
-  };
-
+  chartData: any[];
   statisticField = StatisticFields.Call;
-  aggregation = Aggregations.Max;
+  minDate: Date;
+  maxDate: Date;
+  dateTicks: Date[];
 
 constructor(
     private statisticsService: StatisticsService,
@@ -72,9 +57,7 @@ constructor(
   }
 
 ngOnInit(): void {
-    const startDate = moment(this.form.controls.startDate.value).toDate();
-    const endDate = moment(this.form.controls.endDate.value).add(1, 'days').add(-1, 'seconds').toDate();
-    this.getStatistics(startDate, endDate);
+    this.submit();
   }
 
   public ngOnDestroy(): void {
@@ -82,141 +65,126 @@ ngOnInit(): void {
     this.unsubscribe$.complete();
   }
 
-getStatistics(startDate: Date, endDate: Date): void {
+  getStatistics(startDate: Date, endDate: Date): void {
     this.statisticsService
       .getStatistics(this.getTicks(startDate), this.getTicks(endDate))
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(resp => {
         this.statistics = resp.body;
-        this.getData();
-        this.xAxis = {
-          title: 'Date Time',
-          valueType: 'DateTime',
-          labelFormat: 'EEEE',
-          minimum: startDate,
-          maximum: endDate,
-          interval: 1,
-          intervalType: 'Days'
-        };
-        this.yAxis = {
-          title: 'Duration',
-          valueType: 'DateTime',
-          intervalType: 'Minutes'
-        };
+        if (this.statistics.length > 0){
+          this.getData();
+        } else {
+          this.chartData = null;
+        }
       },
-      (error) => this.toastr.error(error.Message));
+      (error) => (this.chartData = null));
   }
 
   getTicks(date: Date): number {
     return ((date.getTime() * 10000) + 621355968000000000);
   }
 
-
   getData(): void{
+    let updatedData;
     switch (this.statisticField) {
       case StatisticFields.Call: {
-        switch (this.aggregation) {
-          case Aggregations.Min: {
-            this.data = this.statistics.map((s) => {
+        updatedData = [
+          {
+            name: 'Max call duration',
+            series: this.statistics.map((s) => {
               return {
-                date: new Date(s.date.valueAsString),
-                value: this.getDate(s.minDuration.value)
+                name: new Date(s.date.valueAsString),
+                value: s.maxDuration.value
               };
-            });
-            break;
-          }
-          case Aggregations.Average: {
-            this.data = this.statistics.map((s) => {
+            })
+          },
+          {
+            name: 'Average call duration',
+            series: this.statistics.map((s) => {
               return {
-                date: new Date(s.date.valueAsString),
-                value: this.getDate(s.avgDuration.value)
+                name: new Date(s.date.valueAsString),
+                value: s.avgDuration.value
               };
-            });
-            break;
-          }
-          case Aggregations.Max: {
-            this.data = this.statistics.map((s) => {
+            })
+          },
+          {
+            name: 'Min call duration',
+            series: this.statistics.map((s) => {
               return {
-                date: new Date(s.date.valueAsString),
-                value: this.getDate(s.maxDuration.value)
+                name: new Date(s.date.valueAsString),
+                value: s.minDuration.value
               };
-            });
-            break;
+            })
           }
-        }
+        ];
         break;
       }
       case StatisticFields.Presence: {
-        switch (this.aggregation) {
-          case Aggregations.Min: {
-            this.data = this.statistics.map((s) => {
+        updatedData = [
+          {
+            name: 'Max presence duration',
+            series: this.statistics.map((s) => {
               return {
-                date: new Date(s.date.valueAsString),
-                value: this.getDate(s.minPresence.value)
+                name: new Date(s.date.valueAsString),
+                value: s.maxPresence.value
               };
-            });
-            break;
-          }
-          case Aggregations.Average: {
-            this.data = this.statistics.map((s) => {
+            })
+          },
+          {
+            name: 'Average presence duration',
+            series: this.statistics.map((s) => {
               return {
-                date: new Date(s.date.valueAsString),
-                value: this.getDate(s.avgPresence.value)
+                name: new Date(s.date.valueAsString),
+                value: s.avgPresence.value
               };
-            });
-            break;
-          }
-          case Aggregations.Max: {
-            this.data = this.statistics.map((s) => {
+            })
+          },
+          {
+            name: 'Min presence duration',
+            series: this.statistics.map((s) => {
               return {
-                date: new Date(s.date.valueAsString),
-                value: this.getDate(s.maxPresence.value)
+                name: new Date(s.date.valueAsString),
+                value: s.minPresence.value
               };
-            });
-            break;
+            })
           }
-        }
+        ];
         break;
       }
       case StatisticFields.Speech: {
-        switch (this.aggregation) {
-          case Aggregations.Min: {
-            this.data = this.statistics.map((s) => {
+        updatedData = [
+          {
+            name: 'Max speech duration',
+            series: this.statistics.map((s) => {
               return {
-                date: new Date(s.date.valueAsString),
-                value: this.getDate(s.minSpeech.value)
+                name: new Date(s.date.valueAsString),
+                value: s.maxSpeech.value
               };
-            });
-            break;
-          }
-          case Aggregations.Average: {
-            this.data = this.statistics.map((s) => {
+            })
+          },
+          {
+            name: 'Average speech duration',
+            series: this.statistics.map((s) => {
               return {
-                date: new Date(s.date.valueAsString),
-                value: this.getDate(s.avgSpeech.value)
+                name: new Date(s.date.valueAsString),
+                value: s.avgSpeech.value
               };
-            });
-            break;
-          }
-          case Aggregations.Max: {
-            this.data = this.statistics.map((s) => {
+            })
+          },
+          {
+            name: 'Min speech duration',
+            series: this.statistics.map((s) => {
               return {
-                date: new Date(s.date.valueAsString),
-                value: this.getDate(s.maxSpeech.value)
+                name: new Date(s.date.valueAsString),
+                value: s.minSpeech.value
               };
-            });
-            break;
+            })
           }
-        }
+        ];
         break;
       }
     }
-    this.chartTitle = `${Aggregations[this.aggregation]} ${StatisticFields[this.statisticField]} duration`;
-  }
-
-  changeAggregation(value: string): void{
-    this.aggregation = Number(value);
-    this.getData();
+    this.chartData = [...updatedData];
   }
 
   changeField(value: string): void{
@@ -224,55 +192,61 @@ getStatistics(startDate: Date, endDate: Date): void {
     this.getData();
   }
 
-  getDate(ms: number): Date {
-    const d = new Date();
-    d.setHours(0);
-    d.setMinutes(0);
-    d.setSeconds(0);
-    d.setMilliseconds(ms);
-    return d;
-  }
-
-  createStringFromDate(date: Date): string {
-    let pieces: string[] = [];
-    pieces.push(`${date.getDate()}`);
-    pieces.push(`${date.getMonth() + 1}`);
-    pieces.push(`${date.getFullYear()}`);
-    pieces = pieces.map((piece) => {
-      if (piece.length === 1) {
-        return '0' + piece;
-      } else {
-        return piece;
-      }
-    });
-
-    return pieces.join('/');
-  }
-
   submit(): void{
     const startDate = moment(this.form.controls.startDate.value).toDate();
     const endDate = moment(this.form.controls.endDate.value).add(1, 'days').add(-1, 'seconds').toDate();
+    this.minDate = moment(this.form.controls.startDate.value).add(-6, 'hours').toDate();
+    this.maxDate = moment(this.form.controls.endDate.value).add(6, 'hours').toDate();
     let isOutOfRange = true;
-    if (this.data.length > 1) {
-      const startCachedDate = this.data[0].date;
-      const endCachedDate = new Date(this.data[this.data.length - 1].date);
+    if (this.chartData != null) {
+      const startCachedDate = this.chartData[0].series.name;
+      const endCachedDate = new Date(this.chartData[this.chartData.length - 1].series.name);
       endCachedDate.setDate(endCachedDate.getDate() + 1);
       if (startDate >= startCachedDate && endDate <= endCachedDate){
-        this.xAxis = {
-          title: 'Date Time',
-          valueType: 'DateTime',
-          labelFormat: 'EEEE',
-          minimum: startDate,
-          maximum: endDate,
-          interval: 1,
-          intervalType: 'Days'
-        };
         isOutOfRange = false;
       }
     }
     if (isOutOfRange) {
       this.getStatistics(startDate, endDate);
     }
+  }
+
+  calculateTicks(){
+    this.minDate = moment(this.form.controls.startDate.value).add(-6, 'hours').toDate();
+    this.maxDate = moment(this.form.controls.endDate.value).add(6, 'hours').toDate();
+    let startMoment = moment(this.form.controls.startDate.value);
+    const endMoment = moment(this.form.controls.endDate.value);
+    const diffDays = startMoment.diff(endMoment, 'days');
+    const step = (Math.ceil(diffDays / 10));
+    this.dateTicks = [];
+    while (startMoment <= endMoment){
+      this.dateTicks.push(startMoment.toDate());
+      startMoment = startMoment.add(step, 'days');
+    }
+  }
+
+  dateTickFormatting(val: Date): string {
+      const options = { weekday: 'short', month: 'short', day: 'numeric' };
+      return val.toLocaleDateString('en-US', options);
+  }
+
+  valueTickFormatting(totalS: number): string {
+    function pad(num: number, size: number): string {
+      const s = '000000000' + num;
+      return s.substr(s.length - size);
+    }
+    let dayString = '';
+    let temp = Math.floor(totalS / 1000);
+    const day = Math.floor(temp / 86400);
+    if (day > 0){
+      dayString = `${day}d `;
+    }
+    temp %= 86400;
+    const hours = pad(Math.floor(temp / 3600), 2);
+    temp %= 3600;
+    const minutes = pad(Math.floor(temp / 60), 2);
+    const seconds = pad(temp % 60, 2);
+    return `${dayString}${hours}:${minutes}:${seconds}`;
   }
 
   public close(): void {
