@@ -9,7 +9,7 @@ import { AuthService } from 'app/core/auth/auth.service';
 import { Router } from '@angular/router';
 import { MeetingService, UpstateService, MeetingSettingsService } from 'app/core/services';
 import { takeUntil } from 'rxjs/operators';
-import { MeetingCreate } from '@shared/models';
+import { MeetingCreate, Recurrence } from '@shared/models';
 import { Subject } from 'rxjs';
 import { User } from '@shared/models/user';
 import { PointAgenda } from '@shared/models/agenda/agenda';
@@ -39,7 +39,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
   public timeConfig: IDatePickerConfig = {
     format: 'HH:mm',
     showTwentyFourHours: true,
-    minutesInterval: 10,
+    minutesInterval: 1,
     min: `${new Date().getHours()}:${new Date().getMinutes()}`,
   };
   public pointList: PointAgenda[] = [{ name: '', startTime: new Date() }];
@@ -48,6 +48,9 @@ export class ScheduleMeetingPageComponent implements OnInit {
   private unsubscribe$ = new Subject<void>();
   private loggedInUser: User;
   public isAgenda = true;
+  public isRecurrent = false;
+  public recurrence = 'Never';
+
   public recognitionLanguage = 'English';
   point: PointAgenda;
   constructor(
@@ -70,6 +73,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
       ),
       durationHours: new FormControl(1),
       durationMinutes: new FormControl(30),
+      isMeetingRecurrent: new FormControl(true),
       isGeneratedMeetingID: new FormControl('true'),
       isPasswordEnabled: new FormControl(''),
       password: new FormControl(''),
@@ -136,6 +140,24 @@ export class ScheduleMeetingPageComponent implements OnInit {
       default:
         meetingLanguage = 'en-US';
     }
+    let meetingRecurrence: Recurrence;
+    switch (this.recurrence) {
+      case 'Every day':
+        meetingRecurrence = Recurrence.EveryDay;
+        this.isRecurrent = true;
+        break;
+      case 'Every week':
+        meetingRecurrence = Recurrence.EveryWeek;
+        this.isRecurrent = true;
+        break;
+      case 'Every month':
+        meetingRecurrence = Recurrence.EveryMonth;
+        this.isRecurrent = true;
+        break;
+      default:
+        meetingRecurrence = Recurrence.Never;
+        this.isRecurrent = false;
+    }
 
     this.simpleModalService
       .addModal(MeetingInviteComponent, {
@@ -152,7 +174,8 @@ export class ScheduleMeetingPageComponent implements OnInit {
             startTime: date,
             anonymousCount: 0,
             isScheduled: true,
-            isRecurrent: false,
+            isRecurrent: this.isRecurrent,
+            recurrence: meetingRecurrence,
             isAudioAllowed: this.form.controls.isDisableAudio.value,
             isVideoAllowed: this.form.controls.isDisableVideo.value,
             creatorEmail: this.loggedInUser.email,
@@ -211,7 +234,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
     return date;
   }
 
-  public async addEventToCalendar(): Promise<void> {
+  public async addEventToCalendar(): Promise < void > {
     const startTime = this.createDateTime(
       this.form.controls.date.value,
       this.form.controls.time.value
@@ -267,3 +290,4 @@ export class ScheduleMeetingPageComponent implements OnInit {
     this.pointList.splice(this.pointList.indexOf(event), 1);
   }
 }
+

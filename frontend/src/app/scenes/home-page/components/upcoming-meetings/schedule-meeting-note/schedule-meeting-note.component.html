@@ -36,6 +36,26 @@
           </div>
         </div>
         <div class="row">
+          <div class="column first">
+            Recurred
+          </div>
+          <div class="ten wide column">
+            {{ recurrence }}
+            <button 
+            *ngIf = "isReccurentAvailable"
+            class="ui basic button"
+            (click)="stopRecurringMeeting()"
+            >
+            Stop recurring
+            </button>
+            <span 
+            *ngIf = "isReccurentStopped"
+            >
+            (stopped)
+            </span>
+          </div>
+        </div>
+        <div class="row">
             <div class="column first">
               Creator
             </div>
@@ -80,6 +100,17 @@
               }}
               ({{ scheduled.participants?.length }})
             </button>
+            <div *ngIf="scheduled.creator.email === authService.currentUser.email" class="add-participants">
+              <span
+                data-tooltip="Add participants"
+                data-position="right center"
+              >
+              <i
+                class="user plus icon"
+                (click)="addParticipants()"
+              ></i>
+              </span>
+            </div>
             <div class="ui list" *ngIf="areParticipantsVisible">
               <div class="item" *ngFor="let participant of scheduled.participants">
                 <img

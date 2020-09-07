@@ -20,6 +20,7 @@ using Whale.Shared.Models.Email;
 using Whale.Shared.Models;
 using Microsoft.Extensions.Configuration;
 using shortid.Configuration;
+using System.Globalization;
 using Whale.Shared.Models.ElasticModels.Statistics;
 using System.Timers;
 using Whale.DAL.Models.Poll;
@@ -99,6 +100,7 @@ namespace Whale.Shared.Services
             meetingDTO.IsPoll = meetingSettings.IsPoll;
             meetingDTO.IsWhiteboard = meetingSettings.IsWhiteboard;
             meetingDTO.IsAllowedToChooseRoom = meetingSettings.IsAllowedToChooseRoom;
+            meetingDTO.Recurrence = meetingSettings.Recurrence;
             meetingDTO.RecognitionLanguage = meetingSettings.RecognitionLanguage;
 
             return meetingDTO;
@@ -151,8 +153,32 @@ namespace Whale.Shared.Services
             return new MeetingLinkDTO { Id = meeting.Id, Password = pwd };
         }
 
+        public async Task<string> AddParticipants(MeetingUpdateParticipantsDTO dto)
+        {
+            foreach (var email in dto.ParticipantsEmails)
+            {
+                if (dto.CreatorEmail != email)
+                    await _notifications.AddTextNotification(email, $"{dto.CreatorEmail} invites you to a meeting on {dto.StartTime.AddHours(3).ToString("f", new CultureInfo("us-EN"))}");
+            }
+
+            var scheduledMeeting = await _context.ScheduledMeetings.FirstAsync(m => m.Id == dto.Id);
+
+            var participantEmails = JsonConvert.DeserializeObject<List<string>>(scheduledMeeting.ParticipantsEmails);
+
+            foreach (var email in dto.ParticipantsEmails)
+            {
+                participantEmails.Add(email);
+            }
+
+            scheduledMeeting.ParticipantsEmails = JsonConvert.SerializeObject(participantEmails);
+            await _context.SaveChangesAsync();
+
+            return scheduledMeeting.ShortURL;
+        }
+
         public async Task<MeetingAndLink> RegisterScheduledMeetingAsync(MeetingCreateDTO meetingDTO)
         {
+
             var meeting = _mapper.Map<Meeting>(meetingDTO);
             meeting.Settings = JsonConvert.SerializeObject(new
             {
@@ -162,6 +188,7 @@ namespace Whale.Shared.Services
                 meetingDTO.IsPoll,
                 meetingDTO.IsWhiteboard,
                 meetingDTO.RecognitionLanguage,
+                meetingDTO.Recurrence
             });
             await _context.Meetings.AddAsync(meeting);
             var user = await _context.Users.FirstOrDefaultAsync(e => e.Email == meetingDTO.CreatorEmail);
@@ -201,7 +228,41 @@ namespace Whale.Shared.Services
             await _redisService.ConnectAsync();
             await _redisService.SetAsync(shortURL, "not-active");
 
-            return new MeetingAndLink { Meeting = meeting , Link = shortURL };
+            return new MeetingAndLink { Meeting = meeting, Link = shortURL };
+        }
+
+        public async Task<MeetingAndLink> RegisterRecurrentScheduledMeeting(MeetingAndParticipants meetingDTO)
+        {
+            await _context.Meetings.AddAsync(meetingDTO.Meeting);
+            var user = _context.Users.FirstOrDefault(e => e.Email == meetingDTO.CreatorEmail);
+            var pwd = _encryptService.EncryptString(Guid.NewGuid().ToString());
+            var shortURL = ShortId.Generate();
+            var fullURL = $"?id={meetingDTO.Meeting.Id}&pwd={pwd}";
+
+            var scheduledMeeting = new ScheduledMeeting
+            {
+                CreatorId = user.Id,
+                MeetingId = meetingDTO.Meeting.Id,
+                Password = pwd,
+                ShortURL = shortURL,
+                FullURL = fullURL,
+                ParticipantsEmails = JsonConvert.SerializeObject(meetingDTO.ParticipantsEmails)
+            };
+            await _context.ScheduledMeetings.AddAsync(scheduledMeeting);
+            await _context.SaveChangesAsync();
+            using (var client = new HttpClient())
+            {
+                var meetingInvite = new ScheduledMeetingInvite
+                {
+                    MeetingLink = fullURL,
+                    MeetingId = meetingDTO.Meeting.Id,
+                };
+                client.PostAsync("http://localhost:4201/api/email/scheduled", new StringContent(JsonConvert.SerializeObject(meetingInvite), Encoding.UTF8, "application/json"));
+            }
+            await _redisService.ConnectAsync();
+            await _redisService.SetAsync(shortURL, "not-active");
+
+            return new MeetingAndLink { Meeting = meetingDTO.Meeting, Link = shortURL };
         }
 
         public async Task<MeetingLinkDTO> StartScheduledMeetingAsync(Meeting meeting)
@@ -226,7 +287,7 @@ namespace Whale.Shared.Services
             {
                 Role = ParticipantRole.Host,
                 UserEmail = user.Email,
-                MeetingId = meeting.Id
+                MeetingId = meeting.Id,
             });
 
             var participantEmails = JsonConvert.DeserializeObject<List<string>>(scheduledMeeting.ParticipantsEmails);
@@ -252,6 +313,12 @@ namespace Whale.Shared.Services
             return await _context.Meetings
                 .Where(e => e.IsScheduled && e.EndTime == null && e.StartTime >= DateTimeOffset.Now)
                 .ToListAsync();
+        }
+        public async Task<Meeting> GetScheduledMeeting(Guid id)
+        {
+            return await _context.Meetings
+                .Where(e => e.IsScheduled && e.Id == id)
+                .FirstOrDefaultAsync();
         }
 
         public async Task UpdateMeetingSettingsAsync(UpdateSettingsDTO updateSettingsDTO)
@@ -352,9 +419,7 @@ namespace Whale.Shared.Services
 
             await _context.SaveChangesAsync();
             await _notifications.UpdateInviteMeetingNotifications(shortUrl);
-
-
-            foreach(var p in meeting.Participants)
+            foreach (var p in meeting.Participants)
             {
                 var statistics = new MeetingUserStatistics
                 {
@@ -368,7 +433,7 @@ namespace Whale.Shared.Services
         }
 
 
-        public async Task UpdateMeetingStatistic(UpdateStatistics update)
+          public async Task UpdateMeetingStatistic(UpdateStatistics update)
         {
             var user = await _userService.GetUserByEmailAsync(update.Email);
             if (user == null) throw new NotFoundException("User", update.Email);

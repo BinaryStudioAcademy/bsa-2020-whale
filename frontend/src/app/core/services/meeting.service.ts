@@ -8,6 +8,7 @@ import { MeetingLink } from '../../shared/models/meeting/meeting-link';
 import { Meeting } from '../../shared/models/meeting/meeting';
 import { MediaOnStart, UpdateStatistics } from '@shared/models';
 import { UpdateSettings } from '@shared/models/meeting/update-settings';
+import { MeetingUpdateParticipants } from '@shared/models/meeting/meeting-update-participants';
 import { PointAgenda } from '@shared/models/agenda/agenda';
 
 @Injectable({
@@ -25,6 +26,12 @@ export class MeetingService {
       `${this.routePrefix}`,
       meeting
     );
+  }
+
+  public addParticipants(participants: MeetingUpdateParticipants) {
+    return this.http.put(`${this.routePrefix}/addParticipants`, participants , {
+      responseType: 'text',
+    });
   }
 
   public createScheduledMeeting(
@@ -49,6 +56,13 @@ export class MeetingService {
       updateSettings
     );
   }
+
+  public stopMeetingRecurring(id: string): Observable<HttpResponse<void>> {
+    return this.httpService.getFullRequest(
+      `${this.routePrefix}/scheduled/stop/${id}`
+    );
+  }
+
   public updateMeetingStatistics(statistics: UpdateStatistics): Observable<HttpResponse<void>> {
     return this.httpService.putFullRequest(`${this.routePrefix}/statistics`, statistics);
   }

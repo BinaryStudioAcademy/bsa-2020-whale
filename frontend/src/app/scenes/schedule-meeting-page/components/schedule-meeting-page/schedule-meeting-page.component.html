@@ -48,6 +48,7 @@
                   theme="dp-material"
                   formControlName="time"
                 ></dp-date-picker>
+              </div>                
               </div>
             </div>
             <div
@@ -80,7 +81,26 @@
               </div>
             </div>
           </div>
-        </div>
+
+          <div class="ui segment">
+            <div class="field">
+              <label>Repeated</label>
+              <div class="inline field">
+                <div class="ui compact menu">
+                  <div class="ui simple inline dropdown item">
+                    {{ recurrence }}
+                    <i class="dropdown icon"></i>
+                    <div class="menu">
+                      <div class="item" (click)="recurrence = 'Never'">Never</div>
+                      <div class="item" (click)="recurrence = 'Every day'">Every day</div>
+                      <div class="item" (click)="recurrence = 'Every week'">Every week</div>
+                      <div class="item" (click)="recurrence = 'Every month'">Every month</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         <div class="ui segment">
           <div class="field">
             <label>Meeting ID</label>
@@ -170,7 +190,7 @@
                   type="checkbox"
                   tabindex="0"
                   formControlName="isDisableAudio"
-                  id="isDisableAudio"
+                  id="isDisableAudio" 
                 />
                 <label for="isDisableAudio" class="default-cursor"
                   >Mute participants upon entry</label

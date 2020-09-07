@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using Whale.Shared.Jobs;
 using Whale.Shared.Models.Participant;
 using Whale.Shared.Models.Poll;
+
 
 namespace Whale.Shared.Models.Meeting
 {
@@ -16,6 +18,7 @@ namespace Whale.Shared.Models.Meeting
         public int AnonymousCount { get; set; }
         public bool IsScheduled { get; set; }
         public bool IsRecurrent { get; set; }
+        public JobRecurrenceEnum Recurrence { get; set; }
         public bool IsVideoAllowed { get; set; }
         public bool IsAudioAllowed { get; set; }
         public bool IsWhiteboard { get; set; }

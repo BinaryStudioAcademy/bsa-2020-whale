@@ -408,6 +408,7 @@ namespace Whale.SignalR.Hubs
                 IsPoll = roomSettings.IsPoll,
                 IsAllowedToChooseRoom = roomSettings.IsAllowedToChooseRoom,
                 RecognitionLanguage = roomSettings.RecognitionLanguage,
+                Recurrence = roomSettings.Recurrence,
                 Participants = new List<ParticipantDTO>(),
                 PollResults = new List<PollResultDTO>()
             };
