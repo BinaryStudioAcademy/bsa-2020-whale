@@ -927,14 +927,11 @@ export class MeetingComponent
     this.peer.on('call', (call) => {
       // show caller
       call.on('stream', (stream) => {
-        if (true) {
+        if (!this.connectedStreams.includes(stream)) {
           const participant = this.meeting.participants.find(
             (p) => p.streamId === stream.id
           );
-          this.connectedStreams = this.connectedStreams.filter(str => str.id !== participant.streamId);
-          this.mediaData = this.mediaData.filter(md => md.id !== participant.id);
           this.connectedStreams.push(stream);
-
           this.createParticipantCard(participant);
         }
         this.connectedPeers.set(call.peer, stream);
@@ -1317,9 +1314,9 @@ export class MeetingComponent
 
     // get answer and show other user
     call?.on('stream', (stream) => {
-      // if (this.connectedStreams.includes(stream)) {
-      //   return;
-      // }
+      if (this.connectedStreams.includes(stream)) {
+        return;
+      }
       this.connectedStreams.push(stream);
       const connectedPeer = this.connectedPeers.get(call.peer);
       if (!connectedPeer || connectedPeer.id !== stream.id) {
@@ -1382,7 +1379,7 @@ export class MeetingComponent
             } as GetMessages);
 
             this.questionService.getQuestionsByMeeting(this.meeting.id);
-            // this.configureRecognition();
+            this.configureRecognition();
             this.getAgenda();
           });
           this.startedPresence = new Date();
@@ -1516,7 +1513,6 @@ export class MeetingComponent
     participant: Participant,
     shouldPrepend = false
   ): void {
-
     const stream =
       participant.streamId === this.currentParticipant.streamId
         ? this.currentUserStream
@@ -1534,22 +1530,22 @@ export class MeetingComponent
         userFirstName: participant.user.firstName,
         userSecondName: participant.user.secondName,
         avatarUrl: participant.user.avatarUrl,
-        isVideoAllowed: true,
-          // stream.id === this.currentUserStream.id
-          //   ? this.meeting.isVideoAllowed
-          //   : false,
-        isAudioAllowed: true,
-          // stream.id === this.currentUserStream.id
-          //   ? this.meeting.isAudioAllowed
-          //   : false,
-        isVideoActive: true,
-          // stream.id === this.currentUserStream.id
-          //   ? this.currentUserStream.getVideoTracks().some((vt) => vt.enabled)
-          //   : false,
-        isAudioActive: true
-          // stream.id === this.currentUserStream.id
-          //   ? this.currentUserStream.getAudioTracks().some((at) => at.enabled)
-          //   : true,
+        isVideoAllowed:
+          stream.id === this.currentUserStream.id
+            ? this.meeting.isVideoAllowed
+            : false,
+        isAudioAllowed:
+          stream.id === this.currentUserStream.id
+            ? this.meeting.isAudioAllowed
+            : false,
+        isVideoActive:
+          stream.id === this.currentUserStream.id
+            ? this.currentUserStream.getVideoTracks().some((vt) => vt.enabled)
+            : false,
+        isAudioActive:
+          stream.id === this.currentUserStream.id
+            ? this.currentUserStream.getAudioTracks().some((at) => at.enabled)
+            : true,
       }),
       reactions: new Subject<ReactionsEnum>(),
       volume: 0,
@@ -2326,41 +2322,5 @@ export class MeetingComponent
   public showCurrentUserStream() {
     console.info('this.CurrentUserStream');
     console.info(this.currentUserStream);
-  }
-
-  public reconnect() {
-    this.peer.disconnect();
-    this.peer.reconnect();
-  }
-
-  public reconnect2() {
-    this.peer = new Peer(environment.peerOptions);
-
-    // when peer opened send my peer id everyone
-    this.peer.on('open', (id) => this.onPeerOpen(id));
-
-    // when get call answer to it
-    this.peer.on('call', (call) => {
-      // show caller
-      call.on('stream', (stream) => {
-        if (true) {
-          const participant = this.meeting.participants.find(
-            (p) => p.streamId === stream.id
-          );
-          this.connectedStreams = this.connectedStreams.filter(str => str.id !== participant.streamId);
-          this.mediaData = this.mediaData.filter(md => md.id !== participant.id);
-          this.connectedStreams.push(stream);
-
-          this.createParticipantCard(participant);
-        }
-        this.connectedPeers.set(call.peer, stream);
-      });
-
-      // send mediaStream to caller
-      call.answer(this.currentUserStream, {
-        sdpTransform: (sdp) =>
-          this.setMediaBitrate(sdp, 'video', this.sdpVideoBandwidth),
-      });
-    });
   }
 }
