@@ -1024,6 +1024,7 @@ export class MeetingComponent
 
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
+    this.turnOffMusic();
   }
 
   private deleteParticipantMediaData(
