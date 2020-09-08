@@ -24,6 +24,7 @@ import {
 import { SimpleModalService } from 'ngx-simple-modal';
 import { ToastrService } from 'ngx-toastr';
 import Peer from 'peerjs';
+import { BaseConnection } from 'peerjs/lib/baseconnection';
 import { Subject, Observable, BehaviorSubject, fromEvent, timer } from 'rxjs';
 import { takeUntil, first } from 'rxjs/operators';
 
@@ -510,6 +511,7 @@ export class MeetingComponent
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (mediaData) => {
+          console.info('512 mediaStateChanged', mediaData);
           this.updateCardDynamicData(
             mediaData.streamId,
             mediaData.isAudioAllowed,
@@ -925,17 +927,24 @@ export class MeetingComponent
     // when peer opened send my peer id everyone
     this.peer.on('open', (id) => this.onPeerOpen(id));
 
-    // when get call answer to it
+    // when got call from another peer, answer to it
     this.peer.on('call', (call) => {
+      console.info('call', call);
       // show caller
       call.on('stream', (stream) => {
-        if (!this.connectedStreams.includes(stream)) {
-          const participant = this.meeting.participants.find(
-            (p) => p.streamId === stream.id
-          );
-          this.connectedStreams.push(stream);
-          this.createParticipantCard(participant);
+        if (this.connectedStreams.includes(stream)) {
+          return;
         }
+        if (this.connectedStreams.find(str => str.id === stream.id)) {
+          this.mediaData = this.mediaData.filter(data => data.stream.id !== stream.id);
+          this.meeting.participants[0].streamId = stream.id;
+        }
+        const participant = this.meeting.participants.find(
+          (p) => p.streamId === stream.id
+        );
+        this.connectedStreams.push(stream);
+        console.info('937');
+        this.createParticipantCard(participant);
         this.connectedPeers.set(call.peer, stream);
       });
 
@@ -1316,17 +1325,21 @@ export class MeetingComponent
 
     // get answer and show other user
     call?.on('stream', (stream) => {
-      if (this.connectedStreams.includes(stream)) {
-        return;
-      }
-      this.connectedStreams.push(stream);
-      const connectedPeer = this.connectedPeers.get(call.peer);
-      if (!connectedPeer || connectedPeer.id !== stream.id) {
-        const participant = this.meeting.participants.find(
-          (p) => p.streamId === stream.id
-        );
-        this.createParticipantCard(participant);
-        this.connectedPeers.set(call.peer, stream);
+      if (!this.connectedStreams.includes(stream)) {
+        if (this.connectedStreams.find(str => str.id === stream.id)) {
+          this.mediaData = this.mediaData.filter(data => data.stream.id !== stream.id);
+          return;
+        }
+        this.connectedStreams.push(stream);
+        const connectedPeer = this.connectedPeers.get(call.peer);
+        if (!connectedPeer || connectedPeer.id !== stream.id) {
+          const participant = this.meeting.participants.find(
+            (p) => p.streamId === stream.id
+          );
+          console.info('1331');
+          this.createParticipantCard(participant);
+          this.connectedPeers.set(call.peer, stream);
+        }
       }
     });
   }
@@ -1383,7 +1396,7 @@ export class MeetingComponent
             } as GetMessages);
 
             this.questionService.getQuestionsByMeeting(this.meeting.id);
-            this.configureRecognition();
+            // this.configureRecognition();
             this.getAgenda();
           });
           this.startedPresence = new Date();
@@ -1656,7 +1669,6 @@ export class MeetingComponent
     const changedMediaData = this.mediaData.find(
       (s) => s.currentStreamId === streamId
     );
-
     if (!changedMediaData || !participant) {
       return;
     }
@@ -2326,5 +2338,30 @@ export class MeetingComponent
   public showCurrentUserStream() {
     console.info('this.CurrentUserStream');
     console.info(this.currentUserStream);
+  }
+
+  public showPeer() {
+    console.info('this.peer');
+    console.info(this.peer);
+  }
+
+  public disconnect() {
+    this.peer.disconnect();
+  }
+
+  public reconnect() {
+    console.info(this.peer.disconnected);
+    const keys = Object.keys(this.peer.connections); // Map<string, BaseConnection>[]
+    keys.forEach(key => {
+      const baseConnections: BaseConnection[] = this.peer.connections[key] as BaseConnection[];
+      baseConnections.forEach(baseConnection => {
+        console.info(baseConnection.peerConnection);
+        const peerConnection: RTCPeerConnection = baseConnection.peerConnection;
+        if (peerConnection.iceConnectionState === 'disconnected' || peerConnection.connectionState === 'failed') {
+          console.info('disconnected state peer', peerConnection);
+          this.peer.call(baseConnection.peer, this.currentUserStream);
+        }
+      });
+    });
   }
 }
