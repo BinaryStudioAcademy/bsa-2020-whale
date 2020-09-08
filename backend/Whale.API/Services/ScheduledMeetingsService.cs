@@ -45,6 +45,18 @@ namespace Whale.API.Services
             return _mapper.Map<ScheduledMeetingDTO>(meeting);
         }
 
+        public async Task<IEnumerable<UserDTO>> GetParticipantsAsync(Guid uid)
+        {
+            var scheduled = await _context.ScheduledMeetings.FirstOrDefaultAsync(s => s.Id == uid);
+            if (scheduled == null)
+                throw new NotFoundException("Scheduled Meeting", uid.ToString());
+
+            var participantEmails = JsonConvert.DeserializeObject<List<string>>(scheduled.ParticipantsEmails);
+            var userParticipants = (await _userService.GetAllUsersAsync()).Where(u => participantEmails.Contains(u.Email));
+
+            return userParticipants;
+        }
+
         public async Task<IEnumerable<ScheduledDTO>> GetAllScheduledAsync(string email, int skip, int take)
         {
             var user = await _userService.GetUserByEmailAsync(email);
