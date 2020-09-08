@@ -53,6 +53,7 @@ export class ScheduleMeetingNoteComponent implements OnInit, OnDestroy {
     clearInterval(this.nowFuncId);
   }
   ngOnInit(): void {
+    this.isReccurentStopped = this.scheduled.meeting.isRecurrent;
     switch (this.scheduled.meeting.recurrence) {
       case Recurrence.EveryDay:
         this.recurrence = 'Every day';
@@ -131,9 +132,9 @@ export class ScheduleMeetingNoteComponent implements OnInit, OnDestroy {
   }
 
   public stopRecurringMeeting(): void{
-    this.meetingService.stopMeetingRecurring(this.scheduled.id).subscribe(
+    this.meetingService.stopMeetingRecurring(this.scheduled.meeting.id).subscribe(
       () => {
-        this.isReccurentStopped = true;
+        this.isReccurentStopped = false;
         this.isReccurentAvailable = false;
       }
     );

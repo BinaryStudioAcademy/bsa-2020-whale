@@ -25,11 +25,11 @@ namespace Whale.Shared.Services
         private readonly ISchedulerFactory _schedulerFactory;
         private IScheduler scheduler;
         private Guid id;
-        private IJobListener _jobListener;
-        public MeetingScheduleService(IJobFactory jobFactory, ISchedulerFactory schedulerFactory, IJobListener jobListener)
+        private ITriggerListener _triggerListener;
+        public MeetingScheduleService(IJobFactory jobFactory, ISchedulerFactory schedulerFactory, ITriggerListener triggerListener)
         {
             _jobFactory = jobFactory;
-            _jobListener = jobListener;
+            _triggerListener = triggerListener;
             _schedulerFactory = schedulerFactory;
             id = Guid.NewGuid();
         }
@@ -88,7 +88,7 @@ namespace Whale.Shared.Services
         {
             scheduler = await _schedulerFactory.GetScheduler();
             scheduler.JobFactory = _jobFactory;
-            scheduler.ListenerManager.AddJobListener(_jobListener);
+            scheduler.ListenerManager.AddTriggerListener(_triggerListener);
 
             var job = CreateRecurrentJob(jobInfo, obj);
             var trigger = CreateRecurrentTrigger(jobInfo);
