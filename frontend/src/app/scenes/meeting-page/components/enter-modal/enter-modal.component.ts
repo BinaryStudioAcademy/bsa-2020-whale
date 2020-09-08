@@ -49,16 +49,17 @@ export class EnterModalComponent
   }
 
   public onProceed(): void {
+    let selectRecognitionLanguage = this.recognitionLanguage;
     if (this.isCurrentParticipantHost) {
       switch (this.recognitionLanguage) {
         case 'Russian':
-          this.recognitionLanguage = 'ru';
+          selectRecognitionLanguage = 'ru';
           break;
         case 'Ukrainian':
-          this.recognitionLanguage = 'uk';
+          selectRecognitionLanguage = 'uk';
           break;
         default:
-          this.recognitionLanguage = 'en-US';
+          selectRecognitionLanguage = 'en-US';
       }
     }
     this.result = {
@@ -67,7 +68,7 @@ export class EnterModalComponent
       leave: this.leave,
       isAllowedVideoOnStart: this.isAllowedVideoOnStart,
       isAllowedAudioOnStart: this.isAllowedAudioOnStart,
-      recognitionLanguage: this.recognitionLanguage,
+      recognitionLanguage: selectRecognitionLanguage,
     };
     this.close();
   }
