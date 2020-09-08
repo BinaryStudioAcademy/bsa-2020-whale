@@ -1905,11 +1905,24 @@ export class MeetingComponent
   //#region media settings
   public async changeStateVideo(event: any): Promise<void> {
     this.mediaSettingsService.changeVideoDevice(event);
-    this.currentUserStream.getVideoTracks()?.forEach((track) => track.stop());
-    this.currentUserStream = await navigator.mediaDevices.getUserMedia(
+    const stream = await navigator.mediaDevices.getUserMedia(
       await this.mediaSettingsService.getMediaConstraints()
     );
-    this.handleSuccessVideo(this.currentUserStream);
+    const videoTrack = stream.getVideoTracks()[0];
+    const keys = Object.keys(this.peer.connections);
+    keys.forEach(key => {
+      const peerConnection = this.peer.connections[key];
+      peerConnection?.forEach((pc) => {
+        const sender = pc.peerConnection.getSenders().find((s) => {
+          return s.track.kind === videoTrack.kind;
+        });
+        sender.replaceTrack(videoTrack);
+      });
+    });
+    this.currentUserStream.getVideoTracks().forEach((vt) => {
+      this.currentUserStream.removeTrack(vt);
+    });
+    this.currentUserStream.addTrack(videoTrack);
     document.querySelector('video').srcObject = this.currentUserStream;
     this.isAudioSettings = false;
     this.isVideoSettings = false;
@@ -1939,11 +1952,24 @@ export class MeetingComponent
 
   public async changeInputDevice(deviceId: string): Promise<void> {
     this.mediaSettingsService.changeInputDevice(deviceId);
-    this.currentUserStream = await navigator.mediaDevices.getUserMedia(
+    const stream = await navigator.mediaDevices.getUserMedia(
       await this.mediaSettingsService.getMediaConstraints()
     );
-    this.handleSuccessAudio(this.currentUserStream);
-    this.isAudioSettings = false;
+    const audioTrack = stream.getAudioTracks()[0];
+    const keys = Object.keys(this.peer.connections);
+    keys.forEach(key => {
+      const peerConnection = this.peer.connections[key];
+      peerConnection?.forEach((pc) => {
+        const sender = pc.peerConnection.getSenders().find((s) => {
+          return s.track.kind === audioTrack.kind;
+        });
+        sender.replaceTrack(audioTrack);
+      });
+    });
+    this.currentUserStream.getAudioTracks().forEach((at) => {
+      this.currentUserStream.removeTrack(at);
+    });
+    this.currentUserStream.addTrack(audioTrack);    this.isAudioSettings = false;
     this.isVideoSettings = false;
   }
 
