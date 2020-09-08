@@ -286,7 +286,7 @@ export class MeetingComponent
   }
 
   @HostListener('document:click', ['$event.target'])
-  public onClickOutsidePopup(targetElement: ElementRef): void {
+  public onClickOutsidePopup(targetElement: Element): void {
     const isInsidePolls = this.polls?.nativeElement.contains(targetElement);
     const isInsideReactions = this.reactions?.nativeElement.contains(targetElement);
     const isInsideStatistics = this.statistics?.nativeElement.contains(targetElement);
@@ -325,7 +325,7 @@ export class MeetingComponent
 
     if (!isInsideWhiteboard &&
       targetElement !== this.whiteboardButton?.nativeElement &&
-      !targetElement.nativeElement.classList.contains('canvas-whiteboard-shape-preview-canvas')) {
+      !(targetElement.classList.contains('canvas-whiteboard-shape-preview-canvas'))) {
       this.canvasIsDisplayed = false;
     }
   }
@@ -927,6 +927,7 @@ export class MeetingComponent
 
     // when peer opened send my peer id everyone
     this.peer.on('open', (id) => this.onPeerOpen(id));
+
 
     // when got call from another peer, answer to it
     this.peer.on('call', (call) => {
