@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { auth } from 'firebase';
+import { auth } from 'firebase/app';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { UserRegistrationService } from '../services/user-registration.service';
 import { Observable, of, from } from 'rxjs';

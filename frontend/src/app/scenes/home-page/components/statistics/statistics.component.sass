@@ -1,9 +1,9 @@
 div.ui.card.width-100
-    width: 100%
+    min-width: 100% 
 
 .ui.segment
    left: 10px
-   width: 100%    
+   min-width: 100%  
 
 .ui.header
     display: flex
@@ -107,7 +107,9 @@ select:hover
     text-align: center
 
 .ui.card
+    box-sizing: border-box
     min-width: 100%
+    min-height: 200px
     padding: 20px
 
 .ui.statistics
@@ -115,12 +117,100 @@ select:hover
     justify-content: center
     align-items: flex-end
 
-.statistics-wrapper
-    display: grid
-    grid-template-columns: 1fr 1fr
-    grid-template-rows: 1fr 1fr
-
 @media only screen and (max-width: 1300px)
     .statistics-wrapper
         grid-template-columns: auto
         grid-template-rows: auto 1fr 1fr 1fr
+
+
+.rw-statistics 
+    .ui.statistics
+        position: absolute
+        top: 80px
+        left: 0%
+        right: 0%
+        opacity: 0
+        overflow: hidden
+        -webkit-animation: rotateStatistic 20s linear infinite 0s
+        -ms-animation: rotateStatistic 20s linear infinite 0s
+        animation: rotateStatistic 20s linear infinite 0s
+
+.rw-statistics .ui.statistics:nth-child(2)
+    -webkit-animation-delay: 5s
+    -ms-animation-delay: 5s
+    animation-delay: 5s
+
+.rw-statistics .ui.statistics:nth-child(3)
+    -webkit-animation-delay: 10s
+    -ms-animation-delay: 10s
+    animation-delay: 10s
+
+.rw-statistics .ui.statistics:nth-child(4)
+    -webkit-animation-delay: 15s
+    -ms-animation-delay: 15s
+    animation-delay: 15s
+
+@-webkit-keyframes rotateStatistic
+    0%
+        opacity: 0
+    1%
+        opacity: 0
+        -webkit-transform: translateY(-30px)
+    3%
+        opacity: 1
+        -webkit-transform: translateY(0px)
+    22%
+        opacity: 1
+        -webkit-transform: translateY(0px)
+    25%
+        opacity: 0
+        -webkit-transform: translateY(30px)
+    80%
+        opacity: 0
+    100%
+        opacity: 0
+
+@-ms-keyframes rotateStatistic
+    0%
+        opacity: 0
+    1%
+        opacity: 0
+        -webkit-transform: translateY(-30px)
+    3%
+        opacity: 1
+        -webkit-transform: translateY(0px)
+    22%
+        opacity: 1
+        -webkit-transform: translateY(0px)
+    25%
+        opacity: 0
+        -webkit-transform: translateY(30px)
+    80%
+        opacity: 0
+    100%
+        opacity: 0
+
+@keyframes rotateStatistic
+    0%
+        opacity: 0
+    1%
+        opacity: 0
+        -webkit-transform: translateY(-30px)
+    3%
+        opacity: 1
+        -webkit-transform: translateY(0px)
+    22%
+        opacity: 1
+        -webkit-transform: translateY(0px)
+    25%
+        opacity: 0
+        -webkit-transform: translateY(30px)
+    80%
+        opacity: 0
+    100%
+        opacity: 0
+
+.scrollable
+    max-height: 100%
+    overflow-y: auto
+    overflow-x: hidden

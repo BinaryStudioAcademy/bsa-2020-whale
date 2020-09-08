@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Timers;
 using Whale.DAL.Models.Poll;
+using Whale.DAL.Models.Question;
 using Whale.Shared.Models.Meeting;
 using Whale.Shared.Models.Participant;
 using Whale.Shared.Services;
@@ -42,6 +43,7 @@ namespace Whale.SignalR.Services
                 await _redisService.DeleteKeyAsync(roomId + nameof(Poll));
                 await _redisService.DeleteKeyAsync(meetingSettingsPrefix + roomId);
                 await _redisService.DeleteKeyAsync(roomNamePrefix + roomId);
+                await _redisService.RemoveAsync(roomId + nameof(Question));
 
                 var meetingdata = await _redisService.GetAsync<MeetingRedisData>(meetingId);
                 if (meetingdata != null)

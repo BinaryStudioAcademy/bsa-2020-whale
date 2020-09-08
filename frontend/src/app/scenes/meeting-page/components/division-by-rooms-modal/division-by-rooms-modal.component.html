@@ -62,11 +62,11 @@
           "
           class="ui vertical segment"
         >
-          <div class="ui header" *ngIf="{show: false } as showinput">
+          <div class="ui header" *ngIf="{show: false, roomName: room.name } as showinput">
             <span *ngIf="!showinput.show">{{ room.name }}</span>
             <div class="ui action input" *ngIf="showinput.show">
-              <input class="room-name-input" type="text" placeholder="Room name" [(ngModel)]="room.name">
-              <button class="ui button" (click)="showinput.show = !showinput.show; changeRoomName(room)">Save</button>
+              <input class="room-name-input" type="text" placeholder="Room name" [(ngModel)]="showinput.roomName">
+              <button class="ui button" (click)="showinput.show = !showinput.show; changeRoomName(room, showinput.roomName)">Save</button>
             </div>
             <i class="pencil alternate icon" (click)="showinput.show = !showinput.show"></i>
           </div>
