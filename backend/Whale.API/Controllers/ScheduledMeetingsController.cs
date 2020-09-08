@@ -34,14 +34,6 @@ namespace Whale.API.Controllers
             return Ok(await _scheduledMeetingService.GetAllScheduledAsync(ownerEmail, skip, take));
         }
 
-        [Authorize]
-        [HttpGet("upcomming")]
-        public async Task<ActionResult<IEnumerable<ScheduledDTO>>> GetUpcomingAsync(int skip, int take)
-        {
-            var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
-            return Ok(await _scheduledMeetingService.GetUpcomingScheduledAsync(ownerEmail, skip, take));
-        }
-
         [HttpPost]
         public async Task<ActionResult<ScheduledMeetingDTO>> CreateAsync([FromBody] ScheduledMeetingCreateDTO scheduled)
         {

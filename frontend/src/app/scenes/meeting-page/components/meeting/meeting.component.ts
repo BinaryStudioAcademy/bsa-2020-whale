@@ -321,7 +321,8 @@ export class MeetingComponent
     }
 
     if (!isInsideWhiteboard &&
-      targetElement !== this.whiteboardButton?.nativeElement) {
+      targetElement !== this.whiteboardButton?.nativeElement &&
+      !targetElement.nativeElement.classList.contains('canvas-whiteboard-shape-preview-canvas')) {
       this.canvasIsDisplayed = false;
     }
   }
