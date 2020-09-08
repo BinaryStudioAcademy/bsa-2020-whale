@@ -116,6 +116,10 @@ export class ScheduleMeetingPageComponent implements OnInit {
   }
 
   public async sendMeeting(): Promise<void> {
+    if (this.IsWhiteSpaceOnly(this.form.controls.topic.value)) {
+      this.toastr.error('Topic is required.', 'Error');
+      return;
+    }
     if (this.form.controls.saveIntoCalendar.value) {
       await this.addEventToCalendar();
     }
@@ -292,6 +296,10 @@ export class ScheduleMeetingPageComponent implements OnInit {
   }
   public agendaValid(event){
     this.agendaValidate = event;
+  }
+
+  public IsWhiteSpaceOnly(text: string): boolean {
+    return text.trim() === '' ? true : false;
   }
 }
 
