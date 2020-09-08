@@ -26,7 +26,7 @@ export class MeetingInviteComponent
   implements OnInit, MeetingInviteModalData, ScheduleMeetingInviteModalData {
   public emails: string[] = [];
   public contacts: Contact[];
-  public cachedContacts: Contact[];
+  public cachedContacts: Contact[] = [];
   public selectedContacts: Contact[] = [];
   participants: Participant[];
   isScheduled: boolean;
@@ -72,6 +72,9 @@ export class MeetingInviteComponent
               (c) =>
                 !this.participantEmails.find((e) => e === c.secondMember.email)
             );
+            this.participantEmails.forEach(email => {
+              filteredContacts = filteredContacts.filter((c) => c.secondMember.email !== email);
+            });
           } else {
             filteredContacts = response.filter(
               (c) =>
@@ -80,11 +83,6 @@ export class MeetingInviteComponent
                 )
             );
           }
-
-          this.participantEmails.forEach(email => {
-            filteredContacts = filteredContacts.filter((c) => c.secondMember.email !== email);
-          });
-
           this.contacts = Array.from(filteredContacts);
           this.cachedContacts = Array.from(filteredContacts);
           this.isContactsLoading = false;

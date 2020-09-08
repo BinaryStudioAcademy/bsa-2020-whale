@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Whale.API.Models.ScheduledMeeting;
 using Whale.API.Services;
+using Whale.Shared.Models.User;
 
 namespace Whale.API.Controllers
 {
@@ -26,20 +27,18 @@ namespace Whale.API.Controllers
             return Ok(await _scheduledMeetingService.GetAsync(Id));
         }
 
+        [HttpGet("participants/{id}")]
+        public async Task<ActionResult<IEnumerable<UserDTO>>> GetParticipantsAsync(Guid Id)
+        {
+            return Ok(await _scheduledMeetingService.GetParticipantsAsync(Id));
+        }
+
         [Authorize]
         [HttpGet("all")]
         public async Task<ActionResult<IEnumerable<ScheduledDTO>>> GetAllAsync(int skip, int take)
         {
             var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
             return Ok(await _scheduledMeetingService.GetAllScheduledAsync(ownerEmail, skip, take));
-        }
-
-        [Authorize]
-        [HttpGet("upcomming")]
-        public async Task<ActionResult<IEnumerable<ScheduledDTO>>> GetUpcomingAsync(int skip, int take)
-        {
-            var ownerEmail = HttpContext?.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
-            return Ok(await _scheduledMeetingService.GetUpcomingScheduledAsync(ownerEmail, skip, take));
         }
 
         [HttpPost]

@@ -13,17 +13,20 @@ using Whale.Shared.Exceptions;
 using Whale.Shared.Extentions;
 using Whale.Shared.Models.Meeting;
 using Whale.Shared.Models.User;
+using Whale.Shared.Services;
 
 namespace Whale.API.Services
 {
     public class MeetingHistoryService : BaseService
 	{
 		private readonly BlobStorageSettings _blobStorageSettings;
+		private readonly ElasticSearchService _elasticSearchService;
 
-		public MeetingHistoryService(WhaleDbContext context, IMapper mapper, BlobStorageSettings blobStorageSettings)
+		public MeetingHistoryService(WhaleDbContext context, IMapper mapper, BlobStorageSettings blobStorageSettings, ElasticSearchService elasticSearchService)
 			: base(context, mapper)
 		{
 			_blobStorageSettings = blobStorageSettings;
+			_elasticSearchService = elasticSearchService;
 		}
 		public async Task<IEnumerable<MeetingDTO>> GetMeetingsWithParticipantsAndPollResultsAsync(Guid userId, int skip, int take)
 		{
@@ -54,8 +57,19 @@ namespace Whale.API.Services
 				});
 
 			var meetingList = (await Task.WhenAll(meetingTasks)).ToList();
-
-			return _mapper.Map<IEnumerable<MeetingDTO>>(meetingList);
+			var meetingDtoTasks = meetingList.Select(async m =>
+			{
+				var mDto = _mapper.Map<MeetingDTO>(m);
+				var stats = await _elasticSearchService.SearchSingleAsync(userId, m.Id);
+				if (stats != null)
+				{
+					mDto.SpeechDuration = stats.SpeechTime;
+					mDto.PresenceDuration = stats.PresenceTime;
+				}
+				return mDto;
+			});
+			var meetingDtoList = (await Task.WhenAll(meetingDtoTasks)).ToList();
+			return meetingDtoList;
 		}
 
 		public async Task<IEnumerable<MeetingSpeechDTO>> GetMeetingScriptAsync(Guid meetingId)

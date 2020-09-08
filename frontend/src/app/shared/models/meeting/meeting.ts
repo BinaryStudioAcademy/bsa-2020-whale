@@ -19,7 +19,8 @@ export interface Meeting {
   recurrence: Recurrence;
   isAudioAllowed: boolean;
   isVideoAllowed: boolean;
-
+  speechDuration: number;
+  presenceDuration: number;
   participants: Participant[];
   pollResults: PollResultDto[];
 }

@@ -53,14 +53,14 @@ namespace Whale.Shared.Services
 
                     await _redisService.RemoveAsync(meetingId.ToString());
                     await _redisService.RemoveAsync(fullURL);
-                    await _redisService.RemoveAsync(shortUrl);
+                    if (shortUrl != null) await _redisService.RemoveAsync(shortUrl);
                     await _redisService.RemoveAsync($"{meetingSettingsPrefix}{meetingId}");
                     await _redisService.RemoveAsync($"{meetingSpeechPrefix}{meetingId}");
                     await _redisService.RemoveAsync(meetingId + nameof(Poll));
 
                     if (meeting.EndTime is null)
                     {
-                        meeting.EndTime = DateTimeOffset.Now;
+                        meeting.EndTime = meeting.StartTime;
                         context.Meetings.Update(meeting);
                         await context.SaveChangesAsync();
                     }
