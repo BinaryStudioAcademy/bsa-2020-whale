@@ -403,7 +403,9 @@
           </div>
         </div>
       </div>
-      <div class="catch-area">
+      <div 
+      class="catch-area"
+      *ngIf="shouldBeCatchArea">
         <div class="music-player" *ngIf="isHost">
           <input type="file" #uploadFile style="display: none;" accept=".mp3" (change)="onFileChange($event.target.files)">
           <span class="player-title"><i>Player</i></span>
@@ -501,36 +503,38 @@
         >
           </app-participant-card>
           <div
-        #cardsLayoutMenu
-        [ngClass]="pinnedCardsLayout === 0 ? 'cards-position-icons-row' : 'cards-position-icons-column'" 
-        [class.cards-position-icons-row-sticky]="pinnedCardsLayout === 0 && pinnedLayoutMenuSticky"
-        *ngIf="isCardPinned">
-        <span
-          *ngIf="pinnedCardsLayout === 0"
-          data-tooltip="To Right Column"
-          data-position="bottom right"
-        >
-          <i class="arrows alternate vertical icon"
-            (click)="setPinnedCardsLayout(1)"
-          ></i>
-        </span>
-        <span
-          *ngIf="pinnedCardsLayout === 1"
-          data-tooltip="To Top Row"
-          data-position="bottom right"
-        >
-          <i class="arrows alternate horizontal icon small-left-margin"
-            (click)="setPinnedCardsLayout(0)"
-          ></i>
-        </span>
-        <span data-tooltip="Unpin" data-position="bottom right">
-          <i 
-            class="table icon" 
-            [class.small-left-margin]="pinnedCardsLayout === 1"
-            (click)="unpinCard()"></i>
-        </span>
+          #cardsLayoutMenu
+          [ngClass]="pinnedCardsLayout === 0 ? 'cards-position-icons-row' : 'cards-position-icons-column'" 
+          [class.cards-position-icons-row-sticky]="pinnedCardsLayout === 0 && pinnedLayoutMenuSticky"
+          (mouseenter)="onPinnedModeMenuMouseEnter()"
+          (mouseleave)="onPinnedModeMenuMouseLeave()"
+          *ngIf="isCardPinned">
+            <span
+              *ngIf="pinnedCardsLayout === 0"
+              data-tooltip="To Right Column"
+              data-position="bottom right"
+            >
+              <i class="arrows alternate vertical icon"
+                (click)="setPinnedCardsLayout(1)"
+              ></i>
+            </span>
+            <span
+              *ngIf="pinnedCardsLayout === 1"
+              data-tooltip="To Top Row"
+              data-position="bottom right"
+            >
+              <i class="arrows alternate horizontal icon small-left-margin"
+                (click)="setPinnedCardsLayout(0)"
+              ></i>
+            </span>
+            <span data-tooltip="Unpin" data-position="bottom right">
+              <i 
+                class="table icon" 
+                [class.small-left-margin]="pinnedCardsLayout === 1"
+                (click)="unpinCard()"></i>
+            </span>
           </div>
-        </div>
+          </div>
       </div>
       <img
         *ngIf="(isCameraMuted && mediaData.length <= 1 && !isCardPinned) ||
