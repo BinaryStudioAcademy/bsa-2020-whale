@@ -63,7 +63,7 @@ namespace Whale.SignalR.Hubs
                 if (participant is null) throw new NotFoundException(nameof(Participant));
 
                 _connectionWithMeeting.Remove(Context.ConnectionId);
-                _connectionWithMeeting.Add(Context.ConnectionId, roomData.MeetingId);
+                _connectionWithMeeting.Add(Context.ConnectionId, connectionData.MeetingId);
                 connectionData = ConfigureConnectionData(connectionData, participant);
                 await Clients.Group(roomData.MeetingId).SendAsync("OnParticipantConnectRoom", connectionData);
                 foreach (var roomId in mainMeetingData.RoomsIds)

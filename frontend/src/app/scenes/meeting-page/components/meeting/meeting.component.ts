@@ -1340,6 +1340,8 @@ export class MeetingComponent
       this.createEnterModal().then(() => {
         this.currentStreamLoaded.emit();
 
+        this.questionService.getQuestionsByMeeting(this.meeting.id);
+
         this.meetingSignalrService
           .invoke(SignalMethods.OnUserConnect, this.connectionData)
           .subscribe(
