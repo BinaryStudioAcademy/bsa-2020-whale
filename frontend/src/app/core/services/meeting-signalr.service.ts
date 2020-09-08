@@ -102,8 +102,8 @@ export class MeetingSignalrService {
   private onParticipentMoveIntoRoom = new Subject<MeetingConnectionData>();
   public readonly onParticipentMoveIntoRoom$ = this.onParticipentMoveIntoRoom.asObservable();
 
-  private shareScreen = new Subject<string>();
-  public readonly shareScreen$ = this.shareScreen.asObservable();
+  private shareScreenStart = new Subject<string>();
+  public readonly shareScreenStart$ = this.shareScreenStart.asObservable();
 
   private onDrawingChangePermissions = new Subject<boolean>();
   public readonly onDrawingChangePermissions$ = this.onDrawingChangePermissions.asObservable();
@@ -270,11 +270,11 @@ export class MeetingSignalrService {
           this.onParticipentMoveIntoRoom.next(connectionData);
         });
 
-        this.signalHub.on('OnStartShareScreen', (streamId: string) => {
-          this.shareScreen.next(streamId);
+        this.signalHub.on('OnShareScreenStart', (streamId: string) => {
+          this.shareScreenStart.next(streamId);
         });
 
-        this.signalHub.on('OnStopShareScreen', () => {
+        this.signalHub.on('OnShareScreenStop', () => {
           this.shareScreenStop.next();
         });
 
@@ -343,8 +343,8 @@ export enum SignalMethods {
   OnErasing,
   CreateRoom,
   OnMoveIntoRoom,
-  OnStartShareScreen,
-  OnStopShareScreen,
+  OnShareScreenStart,
+  OnShareScreenStop,
   GetCreatedRooms,
   OnReaction,
   OnLeaveRoom,

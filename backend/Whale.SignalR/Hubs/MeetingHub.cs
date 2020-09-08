@@ -439,16 +439,16 @@ namespace Whale.SignalR.Hubs
             }
         }
 
-        [HubMethodName("OnStartShareScreen")]
+        [HubMethodName("OnShareScreenStart")]
         public async Task OnStartShareAsync(ShareScreenDTO share)
         {
-            await Clients.Group(share.MeetingId).SendAsync("OnStartShareScreen", share.StreamId);
+            await Clients.Group(share.MeetingId).SendAsync("OnShareScreenStart", share.StreamId);
         }
 
-        [HubMethodName("OnStopShareScreen")]
+        [HubMethodName("OnShareScreenStop")]
         public async Task OnStopShareAsync(string meetingId)
         {
-            await Clients.Group(meetingId).SendAsync("OnStopShareScreen");
+            await Clients.Group(meetingId).SendAsync("OnShareScreenStop");
         }
 
         [HubMethodName("QuestionCreate")]
