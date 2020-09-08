@@ -1334,7 +1334,6 @@ export class MeetingComponent
   private async getMeeting(link: string): Promise<void> {
     if (this.isRoom) {
       this.meeting = await this.roomService.getMeetingEntityForRoom(this.route.snapshot.params.link);
-      this.questionService.getQuestionsByMeeting(this.meeting.id);
 
       this.connectionData.meetingId = this.route.snapshot.params.link;
       this.connectionData.meetingPwd = '';
@@ -1342,6 +1341,8 @@ export class MeetingComponent
 
       this.createEnterModal().then(() => {
         this.currentStreamLoaded.emit();
+
+        this.questionService.getQuestionsByMeeting(this.meeting.id);
 
         this.meetingSignalrService
           .invoke(SignalMethods.OnUserConnect, this.connectionData)
