@@ -16,7 +16,7 @@ import { Subject } from 'rxjs';
 import { WhaleSignalService, WhaleSignalMethods } from 'app/core/services';
 import { GroupMembersVisibilityService } from 'app/core/services/group-members-visibility.service';
 import {PushNotificationsService} from '../../../core/services/push-notification.service';
-import {NotificationTypeEnum, OptionsAddContact, OptionsInviteMeeting, OptionsText} from "@shared/models";
+import {NotificationTypeEnum, OptionsAddContact, OptionsInviteMeeting, OptionsText} from '@shared/models';
 
 @Component({
   selector: 'app-page-header',
