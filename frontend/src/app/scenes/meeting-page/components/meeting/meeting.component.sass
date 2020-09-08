@@ -1,16 +1,15 @@
 .notification
-    width: 235px
-    height: 42px
-    background-color: #8b8b8b
+    max-width: 235px
+    padding: 8px
     position: absolute
     left: 7px
     top: 7px
-    opacity: 0.7
-    border-radius: 5px
+    background-color: #8b8b8b
     text-align: center
     font-size: 18px
-    padding-top: 8px
     color: white
+    opacity: 0.7
+    border-radius: 5px
     z-index: 1
 
 .bg-white
@@ -64,7 +63,7 @@
 .invite-tooltip[data-tooltip]:after
     font-size: .8em
 
-.users
+.users-container
     padding: 5px
     background-color: #ffffff
     display: flex
@@ -91,8 +90,9 @@
     justify-content: flex-end
     
 .participant-card
-    width: 50%
-    max-width: 560px
+    display: flex
+    justify-content: center
+    align-items: center
     padding: 5px
 
 .participant-card-small
@@ -102,7 +102,8 @@
 .participant-fullscreen
     width: 100%
     height: 100%
-    object-fit: contain
+    object-fit: cover
+    object-position: center
 
 .hidden
     z-index: -1
@@ -162,11 +163,6 @@ i.big.icon:hover
     opacity: 1
     cursor: pointer
 
-i.big.icon.clipboard, i.big.icon.chart, i.big.copy.icon, .big.paint.brush.icon
-    margin-left: 3px
-
-i.big.icon.wechat
-    margin-left: 2px
 
 .angle.up.icon:hover,
 .big.share.square.icon:hover,
@@ -195,12 +191,6 @@ i.big.icon.wechat
     &::-webkit-scrollbar-track
         background: rgba(0,0,0,.1)
 
-.participants-button-container
-    display: inline-block
-
-.relative-container
-    position: relative
-
 .participants-container
     display: flex
     flex-direction: column
@@ -218,7 +208,6 @@ i.big.icon.wechat
     -moz-box-shadow: 1px 1px 5px 0px #4e4e4ebf
     box-shadow: 1px 1px 5px 0px #4e4e4ebf
     z-index: 2
-    
 
 .ui.divided.list
     width: fit-content
@@ -264,10 +253,6 @@ div div.participant:hover
     margin-bottom: auto
     font-weight: 400
 
-.users-icon-fix
-    display: inline
-    background: none
-
 .display-flex
     display: flex
 
@@ -300,8 +285,6 @@ i.icon:hover
 .block
     margin: 10px 10px 10px 0px
 
-.users-icon-fix.block
-    padding-top: 15px
 
 // fullscreen
 .tools
@@ -389,8 +372,52 @@ div:moz-full-screen
     font-weight: bold
     cursor: pointer
 
-.delete-poll-icon:hover
+.delete-poll-icon:hover 
     font-size: 1.3em
+
+.music-player
+    position: absolute
+    width: 164px
+    background-color: #242424de
+    z-index: 9999
+    top: -25px
+    border-radius: 3px
+    left: -webkit-calc(50% - 54px)
+    left: -moz-calc(50% - 54px)
+    left: calc(50% - 54px)
+    transition: 1s
+
+.player-title
+    color: white
+    padding: 0px 8px 0px 8px
+    font-size: 1.1em
+    user-select: none
+    -webkit-touch-callout: none
+    -webkit-user-select: none
+    -khtml-user-select: none
+    -moz-user-select: none
+    -ms-user-select: none
+
+.catch-area
+    width: 100%
+    height: 4%
+    border-style: none
+    background-color: transparent
+    z-index: 9999
+    top: 0px
+    position: absolute
+
+.catch-area:hover
+    .music-player
+        transition: 1s
+        top: 3px
+
+.disabled-icon
+    pointer-events: none
+
+.player
+    color: white
+    margin: 0px 5px 0px 5px 
 
 // canvas
 .canvas
@@ -480,16 +507,8 @@ div:moz-full-screen
         -color: #212121
 
 .pinned-reaction
-    position: absolute
+    padding-left: 30px
     font-size: 40px
-
-.pinned-reaction-row
-    top: 220px
-    right: 20px
-
-.pinned-reaction-column
-    top: 20px
-    right: 260px
 
 .border-pulse
     animation: border-pulse 2s infinite
@@ -549,9 +568,11 @@ div:moz-full-screen
     resize: none
     border: none
     background-color: white
+
 .sendMessage:active
     outline: none
     border: none
+
 .sendMessage
     border: none
     background: white
@@ -579,6 +600,7 @@ div:moz-full-screen
 
 .small-cards-wrapper-column
     display: flex
+    max-height: 88%
     flex-direction: column-reverse
     padding: 3px
     align-self: self-start
@@ -631,16 +653,17 @@ div:moz-full-screen
     
 .participant-name-wrapper
     display: flex
+    background-color: rgba(180, 180, 180, .4)
+    padding: 5px 10px
+    border-radius: 5px
     i
         padding-right: 5px
 
 .pinned-participant-info
+    display: flex
     position: absolute
     bottom: 70px
     left: 20px
-    background-color: rgba(180, 180, 180, .4)
-    padding: 5px 10px
-    border-radius: 5px
     cursor: default !important
 
 .left-align
@@ -659,7 +682,7 @@ i.icon.waiting-icon:hover
 
 .agenda-container
     position: absolute
-    bottom: 11%
+    bottom: 63px
     right: 30%
     max-height: 80%
     z-index: 0
@@ -667,7 +690,6 @@ i.icon.waiting-icon:hover
 .qa-anonymous-checkbox
     margin-left: 16px
     margin-right: auto
-    margin-top: 10px
     margin-bottom: 5px
 
 .default-cursor
@@ -681,3 +703,6 @@ i.icon.waiting-icon:hover
     color: white !important
     background-color: #0E6EB8
     border-radius: 5px
+
+.receiver-select-container
+    margin-top: 20px

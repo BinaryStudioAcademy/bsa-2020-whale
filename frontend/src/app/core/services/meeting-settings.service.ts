@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { MeetingSettings, Meeting } from '../../shared/models';
+import { MeetingSettings, Meeting, Recurrence } from '../../shared/models';
 import { MeetingSignalrService, SignalMethods } from './meeting-signalr.service';
 import { AuthService } from '../auth/auth.service';
 import { UpdateSettings } from '@shared/models/meeting/update-settings';
@@ -16,6 +16,7 @@ export class MeetingSettingsService {
     isAllowedToChooseRoom: false,
     isAudioDisabled: false,
     recognitionLanguage: '',
+    recurrence: Recurrence.Never
   } as MeetingSettings;
 
   public getSettings(): MeetingSettings {

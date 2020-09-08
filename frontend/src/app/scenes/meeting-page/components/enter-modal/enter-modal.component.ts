@@ -37,13 +37,13 @@ export class EnterModalComponent
       ? true
       : this.isAllowedAudioOnStart;
     if (this.isCurrentParticipantHost){
-      this.isAllowedVideoOnStart = this.meetingSettingService.getSettings().isVideoDisabled;
-      this.isAllowedAudioOnStart = this.meetingSettingService.getSettings().isAudioDisabled;
+      this.isAllowedVideoOnStart = !this.meetingSettingService.getSettings().isVideoDisabled;
+      this.isAllowedAudioOnStart = !this.meetingSettingService.getSettings().isAudioDisabled;
       switch (this.recognitionLanguage) {
         case 'ru':
           this.recognitionLanguage = 'Russian';
           break;
-        case 'ua':
+        case 'uk':
           this.recognitionLanguage = 'Ukrainian';
           break;
         default:
@@ -96,16 +96,17 @@ export class EnterModalComponent
   }
 
   public onProceed(): void {
+    let selectRecognitionLanguage = this.recognitionLanguage;
     if (this.isCurrentParticipantHost) {
       switch (this.recognitionLanguage) {
         case 'Russian':
-          this.recognitionLanguage = 'ru';
+          selectRecognitionLanguage = 'ru';
           break;
         case 'Ukrainian':
-          this.recognitionLanguage = 'ua';
+          selectRecognitionLanguage = 'uk';
           break;
         default:
-          this.recognitionLanguage = 'en-US';
+          selectRecognitionLanguage = 'en-US';
       }
     }
     this.result = {
@@ -114,7 +115,7 @@ export class EnterModalComponent
       leave: this.leave,
       isAllowedVideoOnStart: this.isAllowedVideoOnStart,
       isAllowedAudioOnStart: this.isAllowedAudioOnStart,
-      recognitionLanguage: this.recognitionLanguage,
+      recognitionLanguage: selectRecognitionLanguage,
     };
     this.close();
   }

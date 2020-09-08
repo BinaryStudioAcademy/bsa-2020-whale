@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Whale.DAL.Models.Question
+﻿namespace Whale.DAL.Models.Question
 {
-	public enum QuestionStatus
+    public enum QuestionStatus
 	{
 		Pending,
 		Answering,

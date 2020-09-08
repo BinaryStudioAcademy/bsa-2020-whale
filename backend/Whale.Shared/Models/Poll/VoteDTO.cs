@@ -1,4 +1,5 @@
 ﻿using System;
+
 namespace Whale.Shared.Models.Poll
 {
 	public class VoteDTO

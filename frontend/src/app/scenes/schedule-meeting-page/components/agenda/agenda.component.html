@@ -1,7 +1,12 @@
 <form class="ui labels" [formGroup]="form">
   <div class="ui label" (click)="onSubmit()">
+    <div class="name-container">
     <div class="ui input">
-      <input type="text" [(ngModel)]="name" placeholder="Topic name" mode="name" formControlName="name" (change)="onSubmit()" />
+      <input required type="text" [(ngModel)]="name" placeholder="Topic name" mode="name" formControlName="name" (change)="onSubmit()"/>
+    </div>
+    <span class="error" *ngIf="form.controls['name'].invalid && form.controls['name']?.touched && form.controls['name'].touched">
+      Required name
+    </span>
     </div>
 
     <div class="field start-input">
@@ -11,6 +16,7 @@
         theme="dp-material"
         [config]="timeConfig"
         formControlName="time"
+        (onChange)="onSubmit()"
       ></dp-date-picker>
       <span data-tooltip="Remove topic" data-position="top right">
       <i class="icon close" (click)="removeTag($event)"></i></span>

@@ -2,17 +2,17 @@
 {
     public class SlackCommand
     {
-        public string text { get; set; }
-        public string channel_id { get; set; }
-        public string user_name { get; set; }
-        public string token { get; set; }
-        public string team_id { get; set; }
-        public string team_domain { get; set; }
-        public string channel_name { get; set; }
-        public string user_id { get; set; }
-        public string api_app_id { get; set; }
-        public string response_url { get; set; }
-        public string trigger_id { get; set; }
-        public string command { get; set; }
+        public string Text { get; set; }
+        public string Channel_id { get; set; }
+        public string User_name { get; set; }
+        public string Token { get; set; }
+        public string Team_id { get; set; }
+        public string Team_domain { get; set; }
+        public string Channel_name { get; set; }
+        public string User_id { get; set; }
+        public string Api_app_id { get; set; }
+        public string Response_url { get; set; }
+        public string Trigger_id { get; set; }
+        public string Command { get; set; }
     }
 }

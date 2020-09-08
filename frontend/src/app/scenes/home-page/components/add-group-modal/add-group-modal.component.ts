@@ -95,7 +95,7 @@ export class AddGroupModalComponent extends SimpleModalComponent<null, Group> {
           })
           .subscribe((user) => {
             if (user !== undefined) {
-              this.toastr.success(`Users added successfuly`);
+              this.toastr.success(`Users added successfully`);
             }
           });
       },

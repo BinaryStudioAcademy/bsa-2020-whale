@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using System;
+﻿using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -8,7 +7,7 @@ namespace Whale.API.Services
 {
     public class HttpService
     {
-        private HttpClient _httpClient;
+        private readonly HttpClient _httpClient;
         private readonly string _baseUrl;
 
         public HttpService(HttpClient httpClient, string baseUrl)
@@ -53,6 +52,14 @@ namespace Whale.API.Services
         {
             var response = await _httpClient.PostAsJsonAsync($"{_baseUrl}/{requestUrl}", body);
             if (response.StatusCode != HttpStatusCode.OK && response.StatusCode != HttpStatusCode.Created)
+                throw new Exception($"{response.StatusCode}: {await response.Content.ReadAsStringAsync()}");
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        public async Task<string> PutStringAsync<T>(string requestUrl, T body)
+        {
+            var response = await _httpClient.PutAsJsonAsync($"{_baseUrl}/{requestUrl}", body);
+            if (response.StatusCode != HttpStatusCode.OK)
                 throw new Exception($"{response.StatusCode}: {await response.Content.ReadAsStringAsync()}");
             return await response.Content.ReadAsStringAsync();
         }

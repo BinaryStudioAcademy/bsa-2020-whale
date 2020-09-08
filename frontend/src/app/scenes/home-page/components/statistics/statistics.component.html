@@ -1,0 +1,204 @@
+<div
+  class="ui container segment scrollable"
+  #scrollable
+>
+    <div class="ui header">
+        <h2 class="center aligned header">Statistics</h2>
+        <div
+        class="close-icon-container"
+        data-tooltip="Close"
+        data-position="left center"
+        >
+        <i id="history-close" class="large close icon" (click)="close()"></i>
+        </div>
+    </div>
+    <div *ngIf="allTimeStatistics; else noCallsText">
+      <div class="ui card">
+        <h3 class="text-center">During all time</h3>
+        <div class="rw-statistics">
+          <div class="ui small statistics">
+            <div class="ui statistic">
+              <div class="label">
+                Number of calls
+              </div>
+              <div class="value">
+                {{ allTimeStatistics?.docCount.value }}
+              </div>
+            </div>
+          </div>
+          <div class="ui small statistics">
+            <div class="statistic">
+              <div class="value">
+                {{ valueDateTickFormatting(allTimeStatistics?.minDuration.value) }}
+              </div>
+              <div class="label">
+                Min
+              </div>
+            </div>
+            <div class="statistic">
+              <div class="label">
+                Call duration
+              </div>
+              <div class="value">
+                {{ valueDateTickFormatting(allTimeStatistics?.avgDuration.value) }}
+              </div>
+              <div class="label">
+                Average
+              </div>
+            </div>
+            <div class="statistic">
+              <div class="value">
+                {{ valueDateTickFormatting(allTimeStatistics?.maxDuration.value) }}
+              </div>
+              <div class="label">
+                Max
+              </div>
+            </div>
+          </div>
+          <div class="ui small statistics">
+            <div class="statistic">
+              <div class="value">
+                {{ valueDateTickFormatting(allTimeStatistics?.minPresence.value) }}
+              </div>
+              <div class="label">
+                Min
+              </div>
+            </div>
+            <div class="statistic">
+              <div class="label">
+                Call presence duration
+              </div>
+              <div class="value">
+                {{ valueDateTickFormatting(allTimeStatistics?.avgPresence.value) }}
+              </div>
+              <div class="label">
+                Average
+              </div>
+            </div>
+            <div class="statistic">
+              <div class="value">
+                {{ valueDateTickFormatting(allTimeStatistics?.maxPresence.value) }}
+              </div>
+              <div class="label">
+                Max
+              </div>
+            </div>
+          </div>
+          <div class="ui small statistics">
+            <div class="statistic">
+              <div class="value">
+                {{ valueDateTickFormatting(allTimeStatistics?.minSpeech.value) }}
+              </div>
+              <div class="label">
+                Min
+              </div>
+            </div>
+            <div class="statistic">
+              <div class="label">
+                Call speech duration
+              </div>
+              <div class="value">
+                {{ valueDateTickFormatting(allTimeStatistics?.avgSpeech.value) }}
+              </div>
+              <div class="label">
+                Average
+              </div>
+            </div>
+            <div class="statistic">
+              <div class="value">
+                {{ valueDateTickFormatting(allTimeStatistics?.maxSpeech.value) }}
+              </div>
+              <div class="label">
+                Max
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ui card">
+        <h3 class="text-center">Histogram</h3>
+        <form class="ui form" [formGroup]="form">
+          <div class="ui row-date">
+            <div class="dates-input">
+              <span>From:</span>
+              <dp-date-picker
+                [config]="config"
+                theme="dp-material"
+                formControlName="startDate"
+              ></dp-date-picker>
+              <span>To:</span>
+              <dp-date-picker
+                [config]="config"
+                theme="dp-material"
+                formControlName="endDate"
+              ></dp-date-picker>
+            </div>
+
+            <button
+              id="daterange-change"
+              class="ui button primary"
+              [disabled]="!form.valid"
+              (click)="submit()"
+            >
+              Update
+            </button>
+          </div>
+        </form>
+
+        <div class="ui row">
+          <span>Statistic field:</span>
+          <div class="custom-select ui compact menu">
+            <select
+              [(ngModel)]="statisticField"
+              class="select"
+              (ngModelChange)="changeField($event)"
+            >
+              <option
+                *ngFor="let f of fields | keys"
+                [value]=+f.key
+                >{{ f?.value }}</option
+              >
+            </select>
+          </div>
+        </div>
+
+        <div class="chart-wrapper" *ngIf="chartData; else noDataText">
+          <ngx-charts-line-chart
+            [results]="chartData"
+            [xAxis]="true"
+            [yAxis]="true"
+            [legend]="true"
+            [xAxisTickFormatting]="dateTickFormatting"
+            [yAxisTickFormatting]="statisticField !== 3 ? valueDateTickFormatting : valueTickFormatting"
+            [xScaleMin]="minDate"
+            [xScaleMax]="maxDate"
+            [rotateXAxisTicks]="true"
+            [timeline]="true">
+            <ng-template #tooltipTemplate let-model="model">
+              <h4>{{ dateTickFormatting(model.name) }}</h4>
+              <div class="tooltip-model">
+                <span>{{ model.series }}:</span>
+                <span class="last">{{ statisticField !== 3 ? valueDateTickFormatting(model.value) : valueTickFormatting(model.value) }}</span>
+              </div>    
+            </ng-template>
+            <ng-template #seriesTooltipTemplate let-model="model">
+              <h4>{{ dateTickFormatting(model[0].name) }}</h4>
+              <div class="tooltip-models-wrapper">
+                <div *ngFor="let m of model" class="tooltip-model">
+                  <span><i class="tooltip-label-color" [style.background-color]="m.color"></i></span>
+                  <span>{{ m.series }}:</span>
+                  <span class="last">{{ statisticField !== 3 ? valueDateTickFormatting(m.value) : valueTickFormatting(m.value) }}</span>
+                </div>     
+              </div>    
+            </ng-template>
+          </ngx-charts-line-chart>
+        </div>
+        <ng-template #noDataText>
+          <h3 class="text-center">You had no calls during specified period</h3>
+        </ng-template>
+      </div>
+    </div>
+    <ng-template #noCallsText>
+      <h3 class="text-center">You have no calls yet</h3>
+    </ng-template>
+</div>

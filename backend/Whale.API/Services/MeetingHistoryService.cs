@@ -2,32 +2,33 @@
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Whale.API.Services.Abstract;
 using Whale.DAL;
 using Whale.DAL.Models;
-using Whale.DAL.Models.Poll;
 using Whale.DAL.Settings;
 using Whale.Shared.Exceptions;
 using Whale.Shared.Extentions;
 using Whale.Shared.Models.Meeting;
 using Whale.Shared.Models.User;
+using Whale.Shared.Services;
 
 namespace Whale.API.Services
 {
-	public class MeetingHistoryService : BaseService
+    public class MeetingHistoryService : BaseService
 	{
 		private readonly BlobStorageSettings _blobStorageSettings;
+		private readonly ElasticSearchService _elasticSearchService;
 
-		public MeetingHistoryService(WhaleDbContext context, IMapper mapper, BlobStorageSettings blobStorageSettings)
+		public MeetingHistoryService(WhaleDbContext context, IMapper mapper, BlobStorageSettings blobStorageSettings, ElasticSearchService elasticSearchService)
 			: base(context, mapper)
 		{
 			_blobStorageSettings = blobStorageSettings;
+			_elasticSearchService = elasticSearchService;
 		}
-		public async Task<IEnumerable<MeetingDTO>> GetMeetingsWithParticipantsAndPollResults(Guid userId, int skip, int take)
+		public async Task<IEnumerable<MeetingDTO>> GetMeetingsWithParticipantsAndPollResultsAsync(Guid userId, int skip, int take)
 		{
 			var meetings = _context.Participants
 				.Include(p => p.Meeting)
@@ -56,14 +57,27 @@ namespace Whale.API.Services
 				});
 
 			var meetingList = (await Task.WhenAll(meetingTasks)).ToList();
-
-			return _mapper.Map<IEnumerable<MeetingDTO>>(meetingList);
+			var meetingDtoTasks = meetingList.Select(async m =>
+			{
+				var mDto = _mapper.Map<MeetingDTO>(m);
+				var stats = await _elasticSearchService.SearchSingleAsync(userId, m.Id);
+				if (stats != null)
+				{
+					mDto.SpeechDuration = stats.SpeechTime;
+					mDto.PresenceDuration = stats.PresenceTime;
+				}
+				return mDto;
+			});
+			var meetingDtoList = (await Task.WhenAll(meetingDtoTasks)).ToList();
+			return meetingDtoList;
 		}
-		public async Task<IEnumerable<MeetingSpeechDTO>> GetMeetingScript(Guid meetingId)
+
+		public async Task<IEnumerable<MeetingSpeechDTO>> GetMeetingScriptAsync(Guid meetingId)
         {
 			var scriptJson = await _context.MeetingScripts.FirstOrDefaultAsync(m => m.MeetingId == meetingId);
 			if (scriptJson is null)
 				throw new NotFoundException("MeetingScripts", meetingId.ToString());
+
 			var script = JsonConvert.DeserializeObject<IEnumerable<MeetingSpeech>>(scriptJson.Script);
 			var scriptTasks = script.OrderBy(m => m.SpeechDate).Join(_context.Users, m => m.UserId, u => u.Id,
 				async (m, u) => new MeetingSpeechDTO

@@ -1,10 +1,13 @@
-<spiner *ngIf="isMeetingLoading" size="'massive'"></spiner>
+<!-- <button (click)="showConnectedStreams()">connectedStreams</button>
+<button (click)="showPeerConnections()">peer.connections</button>
+<button (click)="showMediaData()">mediaData</button>
+<button (click)="showCurrentUserStream()">currentUserStream</button>
+<button (click)="showPeer()">peer</button>
+<button (click)="disconnect()">disconnect</button>
+<button (click)="reconnect()">reconnect</button> -->
+<app-spiner *ngIf="isMeetingLoading" size="massive"></app-spiner>
 <div *ngIf="isWaitingForRecord" class="notification">
   <p>Waiting record...</p>
-</div>
-
-<div *ngIf="isSomeoneRecordingScreen" class="notification">
-  <p>Conference is recording</p>
 </div>
 
 <div #mainArea class="bg-white">
@@ -22,13 +25,13 @@
         <i
           id="meeting-draggable-mute"
           *ngIf="!isMicrophoneMuted"
-          class="big microphone icon"
+          class="big microphone icon block"
           (click)="toggleMicrophone()"
         ></i>
         <i
           id="meeting-draggable-mute"
           *ngIf="isMicrophoneMuted"
-          class="big slash microphone icon"
+          class="big slash microphone icon block"
           (click)="toggleMicrophone()"
         ></i>
       </span>
@@ -37,7 +40,7 @@
         data-tooltip="Disabled by the Host"
         data-position="top left"
       >
-        <i class="big slash microphone icon"></i>
+        <i class="big slash microphone icon block"></i>
       </span>
       <span
         *ngIf="meeting?.isVideoAllowed || currentParticipant?.role === 1"
@@ -47,13 +50,13 @@
         <i
           id="meeting-draggable-camera"
           *ngIf="!isCameraMuted"
-          class="big video icon big-left-margin"
+          class="big video icon block"
           (click)="toggleCamera()"
         ></i>
         <i
           id="meeting-draggable-camera"
           *ngIf="isCameraMuted"
-          class="big eye slash icon big-left-margin"
+          class="big eye slash icon block"
           (click)="toggleCamera()"
         ></i>
       </span>
@@ -62,27 +65,29 @@
         data-tooltip="Disabled by the Host"
         data-position="top left"
       >
-        <i class="big eye slash icon big-left-margin"></i>
+        <i class="big eye slash icon block"></i>
       </span>
       <span data-tooltip="Participants" data-position="top left">
         <i
           id="meeting-draggable-participants"
-          class="users icon big users-icon-fix block"
+          class="users icon big block"
           (click)="isShowParticipants = !isShowParticipants"
         ></i>
       </span>
       <span data-tooltip="Polls">
         <i
+          #pollsButtonFullscreen
           id="meeting-draggable-poll"
           (click)="pollService.onPollIconClick()"
-          class="big clipboard list icon"
+          class="big clipboard list icon block"
         ></i>
       </span>
       <span data-tooltip="Statistics" data-position="top right">
         <i
+          #statisticsButton
           id="meeting-draggable-statistics"
           (click)="onStatisticsIconClick()"
-          class="big chart bar icon"
+          class="big chart bar icon block"
         ></i>
       </span>
       <span data-tooltip="Chat" data-position="top right">
@@ -94,15 +99,9 @@
       </span>
       <span data-tooltip="Add Reactions" data-position="top right">
         <i
+          #reactionsButtonFullscreen
           (click)="onReactionsIconClick()"
-          class="big thumbs up large icon"
-        ></i>
-      </span>
-      <span data-tooltip="Quit fullscreen" data-position="top right">
-        <i
-          id="meeting-draggable-fullscrean"
-          (click)="closeFullscreen()"
-          class="big compress icon block"
+          class="big thumbs up large icon block"
         ></i>
       </span>
       <span data-tooltip="Show Self View" data-position="top right">
@@ -111,7 +110,24 @@
           (click)="createParticipantCard(currentParticipant, true)"
           (click)="isShowCurrentParticipantCard = true"
           *ngIf="!isShowCurrentParticipantCard"
-          class="big user plus icon big-left-margin"
+          class="big user plus icon block"
+        ></i>
+      </span>
+      <span
+        data-tooltip="Plan Meeting"
+        data-position="top right"
+      >
+        <i
+          #agendaButton
+          class="big list alternate icon"
+          (click)="onAgendaClick()"
+        ></i>
+      </span>
+      <span data-tooltip="Quit fullscreen" data-position="top right">
+        <i
+          id="meeting-draggable-fullscrean"
+          (click)="closeFullscreen()"
+          class="big compress icon block big-left-margin"
         ></i>
       </span>
     </div>
@@ -151,13 +167,15 @@
       </div>
     </div>
     <div class="main-content">
+      <div *ngIf="isSomeoneRecordingScreen" class="notification">
+        <p>The conference is being recorded</p>
+      </div>    
       <div class="options">
         <div class="ui options__buttons">
           <div class="inner-block">
             <span
               *ngIf="
-                !isScreenRecording &&
-                (meeting?.isAudioAllowed || currentParticipant?.role === 1)
+                meeting?.isAudioAllowed || currentParticipant?.role === 1
               "
               data-tooltip="Toggle Microphone"
               data-position="top left"
@@ -191,8 +209,7 @@
             </span>
             <span
               *ngIf="
-                !isScreenRecording &&
-                (meeting?.isVideoAllowed || currentParticipant?.role === 1)
+                meeting?.isVideoAllowed || currentParticipant?.role === 1
               "
               data-tooltip="Toggle Webcam"
             >
@@ -232,24 +249,22 @@
               data-position="top left"
             >
               <i
+                #settingsButton
                 id="meeting-settings"
                 (click)="onMeetingSettingClick()"
                 class="big cogs icon"
               ></i>
             </span>
-            <div class="participants-button-container">
-              <div
-                class="relative-container"
+            <span
                 data-tooltip="Participants"
                 data-position="top left"
               >
                 <i
                   id="meeting-options-participants"
-                  class="users icon big users-icon-fix"
+                  class="big users icon small-left-margin"
                   (click)="isShowParticipants = !isShowParticipants"
                 ></i>
-              </div>
-            </div>
+            </span>
             <span
               *ngIf="!isScreenRecording"
               data-tooltip="Start Recording"
@@ -275,7 +290,7 @@
             <span data-tooltip="Share Screen" data-position="top left">
               <i
                 id="meeting-options-share"
-                class="big share square icon big-left-margin"
+                class="big share square icon"
                 (click)="shareScreen()"
                 *ngIf="!isSharing"
               ></i>
@@ -289,6 +304,7 @@
             </span>
             <span data-tooltip="Polls">
               <i
+                #pollsButton
                 id="meeting-options-poll"
                 (click)="onPollIconClick()"
                 class="big clipboard list icon"
@@ -296,19 +312,20 @@
             ></span>
             <span data-tooltip="Statistics" *ngIf="!isRoom">
               <i
+                #statisticsButtonFullscreen
                 id="meeting-options-statistics"
-                (click)="onStatisticsIconClick()"
+                (click)="onStatisticsIconClick(); $event.stopPropagation()"
                 class="big chart bar icon"
               ></i
             ></span>
-            <span data-tooltip="Copy Link" data-position="top right">
+            <span data-tooltip="Copy Link">
               <i
                 id="meeting-options-copy"
                 (click)="onCopyIconClick()"
                 class="big copy icon"
               ></i>
             </span>
-            <span data-tooltip="Chat" data-position="top right">
+            <span data-tooltip="Chat">
               <i
                 id="meeting-options-chat"
                 (click)="showChat()"
@@ -316,7 +333,7 @@
                   pulse: isNewMsg,
                   bluePulse: questionService.isNewQuestion
                 }"
-                class="big wechat icon big-left-margin"
+                class="big wechat icon"
               ></i>
             </span>
             <span
@@ -324,10 +341,11 @@
               data-position="top right"
               [ngClass]="{ pulse: checkDrawing() }"
             >
-              <i (click)="showCanvas()" class="big paint brush icon"></i>
+              <i #whiteboardButton (click)="showCanvas()" class="big paint brush icon"></i>
             </span>
             <span data-tooltip="Add Reactions" data-position="top right">
               <i
+                #reactionsButton
                 (click)="onReactionsIconClick()"
                 class="big thumbs up large icon"
               >
@@ -340,15 +358,30 @@
             >
               <i
                 (click)="openRoomsModal()"
-                class="big user th large icon big-left-margin"
+                class="big user th large icon"
               >
               </i>
             </span>
-            <span data-tooltip="Plan Meeting">
+            <span
+              data-tooltip="Plan Meeting"
+              data-position="top right"
+            >
               <i
+                #agendaButtonFullscreen
                 class="big list alternate icon"
                 (click)="onAgendaClick()"
-                [ngClass]="{pulse: isTopicEnd}"
+              ></i>
+            </span>
+            <span 
+              *ngIf="!isShowCurrentParticipantCard"
+              data-tooltip="Show Self View"
+              data-position="top right"
+            >
+              <i
+                id="meeting-options-create"
+                (click)="createParticipantCard(currentParticipant, true)"
+                (click)="isShowCurrentParticipantCard = true"
+                class="big user plus icon"
               ></i>
             </span>
             <span data-tooltip="Fullscreen" data-position="top right">
@@ -358,83 +391,84 @@
                 class="big expand icon big-left-margin"
               ></i>
             </span>
-            <span data-tooltip="Show Self View" data-position="top right">
-              <i
-                id="meeting-options-create"
-                *ngIf="!isShowCurrentParticipantCard"
-                (click)="createParticipantCard(currentParticipant, true)"
-                (click)="isShowCurrentParticipantCard = true"
-                class="big user plus icon big-left-margin"
-              ></i>
-            </span>
-            </div>
-            <div>
-              <button
-                id="meeting-options-leave"
-                class="ui red button"
-                (click)="leave()"
-              >
-                Leave
-              </button>
-            </div>
+          </div>
+          <div>
+            <button
+              id="meeting-options-leave"
+              class="ui red button"
+              (click)="leave()"
+            >
+              Leave
+            </button>
           </div>
         </div>
-        <div
-          #whiteboard
-          class="canvas"
-          *ngIf="canvasIsDisplayed"
-          ngDraggable
-          [handle]="draggableHeader"
-        >
-          <div #draggableHeader class="whiteboard-header">
-            <div class="whiteboard-title">Whiteboard {{ whiteboardDisable }}</div>
-          </div>
-          <div class="whiteboard-buttons">
-            <i
-              *ngIf="!isWhiteboardFullScreen"
-              (click)="whiteboardFullscreen(); $event.stopPropagation()"
-              class="expand icon"
-            ></i>
-            <i
-              *ngIf="isWhiteboardFullScreen"
-              (click)="whiteboardFullscreen(); $event.stopPropagation()"
-              class="compress icon"
-            ></i>
-            <i (click)="showCanvas()" class="times icon"></i>
-          </div>
-          <div class="board" *ngIf="!meeting.isWhiteboard || isHost">
-            <canvas-whiteboard
-              #canvasWhiteboard
-              [options]="canvasOptions"
-              (onBatchUpdate)="onCanvasDraw($event)"
-              (onClear)="onCanvasClear()"
-            >
-            </canvas-whiteboard>
-          </div>
-          <div class="board" *ngIf="meeting.isWhiteboard && !isHost">
-            <canvas-whiteboard
-              #canvasWhiteboard
-              [options]="canvasOptionsDisable"
-              (onBatchUpdate)="onCanvasDraw($event)"
-              (onClear)="onCanvasClear()"
-            >
-            </canvas-whiteboard>
-          </div>
+      </div>
+      <div 
+      class="catch-area"
+      *ngIf="shouldBeCatchArea && isHost">
+        <div class="music-player" *ngIf="isHost">
+          <input type="file" #uploadFile style="display: none;" accept=".mp3" (change)="onFileChange($event.target.files)">
+          <span class="player-title"><i>Player</i></span>
+          <i class="player folder open icon" (click)="uploadMp3($event)"></i>
+          <i class="player play icon" (click)="playMusic()" [ngClass]="{'disabled-icon': !isMusicUploaded}"></i>
+          <i class="player pause icon" (click)="pauseMusic()" [ngClass]="{'disabled-icon': !isMusicUploaded}"></i>
+          <i class="player stop icon" (click)="turnOffMusic()" [ngClass]="{'disabled-icon': !isMusicUploaded}"></i>
         </div>
-
-        <div
-          [ngClass]="isCardPinned ? 'users-slider' : 'users'"
-          [class.users-slider-row]="isCardPinned && pinnedCardsLayout === 0"
-          [class.users-slider-column]="isCardPinned && pinnedCardsLayout === 1"
-          *ngIf="
-            (mediaData.length > 1 ||
-            (mediaData.length === 1 &&
-              mediaData[0].id !== currentParticipant.id) ||
-            (mediaData.length === 1 && isCardPinned)) &&
-            !isSharing
-          "
-        >
-
+      </div>
+      <div
+        #whiteboard
+        class="canvas"
+        *ngIf="canvasIsDisplayed"
+        ngDraggable
+        [handle]="draggableHeader"
+      >
+        <div #draggableHeader class="whiteboard-header">
+          <div class="whiteboard-title">Whiteboard {{ whiteboardDisable }}</div>
+        </div>
+        <div class="whiteboard-buttons">
+          <i
+            *ngIf="!isWhiteboardFullScreen"
+            (click)="whiteboardFullscreen(); $event.stopPropagation()"
+            class="expand icon"
+          ></i>
+          <i
+            *ngIf="isWhiteboardFullScreen"
+            (click)="whiteboardFullscreen(); $event.stopPropagation()"
+            class="compress icon"
+          ></i>
+          <i (click)="showCanvas()" class="times icon"></i>
+        </div>
+        <div class="board" *ngIf="!meeting.isWhiteboard || isHost">
+          <canvas-whiteboard
+            #canvasWhiteboard
+            [options]="canvasOptions"
+            (onBatchUpdate)="onCanvasDraw($event)"
+            (onClear)="onCanvasClear()"
+          >
+          </canvas-whiteboard>
+        </div>
+        <div class="board" *ngIf="meeting.isWhiteboard && !isHost">
+          <canvas-whiteboard
+            #canvasWhiteboard
+            [options]="canvasOptionsDisable"
+            (onBatchUpdate)="onCanvasDraw($event)"
+            (onClear)="onCanvasClear()"
+          >
+          </canvas-whiteboard>
+        </div>
+        <div></div>
+      </div>
+      <div
+        [ngClass]="isCardPinned ? 'users-slider' : 'users-container'"
+        [class.users-slider-row]="isCardPinned && pinnedCardsLayout === 0"
+        [class.users-slider-column]="isCardPinned && pinnedCardsLayout === 1"
+        *ngIf="
+          (mediaData.length > 1 ||
+          (mediaData.length === 1 &&
+            mediaData[0].id !== currentParticipant.id) ||
+          (mediaData.length === 1 && isCardPinned))
+        "
+      >
         <div
           #cardsLayout
           (mouseenter)="onCardsLayoutMouseEnter()"
@@ -444,59 +478,63 @@
         >
           <div class="fake-margin"></div>
           <app-participant-card
-            [ngClass]="
-              isCardPinned ? 'participant-card-small' : 'participant-card'
-            "
-            *ngFor="let data of mediaData"
-            (hideViewEvent)="hideViewEventHandler($event)"
-            (toggleMicrophoneEvent)="
-              currentParticipant.id === $event ? toggleMicrophone() : ''
-            "
-            (toggleCameraEvent)="
-              currentParticipant.id === $event ? toggleCamera() : ''
-            "
-            (switchMediaPermissionAsHostEvent)="
-              switchParticipantMediaAsHost($event)
-            "
-            (pinVideoEvent)="pinCard($event)"
-            [data]="data"
-            [meetingHolder]="currentParticipant"
-            [meetingId]="meeting.id"
-          >
-        </app-participant-card>
-        <div
+          #participantCard
+          [ngClass]="
+            isCardPinned ? 'participant-card-small' : 'participant-card'
+          "
+          *ngFor="let data of mediaData"
+          (hideViewEvent)="hideViewEventHandler($event)"
+          (toggleMicrophoneEvent)="
+            currentParticipant.id === $event ? toggleMicrophone() : ''
+          "
+          (toggleCameraEvent)="
+            currentParticipant.id === $event ? toggleCamera() : ''
+          "
+          (switchMediaPermissionAsHostEvent)="
+            switchParticipantMediaAsHost($event)
+          "
+          (pinVideoEvent)="pinCard($event)"
+          [data]="data"
+          [meetingHolder]="currentParticipant"
+          [meetingId]="meeting.id"
+          [isAnyCardPinned]="isCardPinned"
+          [pinnedLayout]="pinnedCardsLayout"
+        >
+          </app-participant-card>
+          <div
           #cardsLayoutMenu
           [ngClass]="pinnedCardsLayout === 0 ? 'cards-position-icons-row' : 'cards-position-icons-column'" 
           [class.cards-position-icons-row-sticky]="pinnedCardsLayout === 0 && pinnedLayoutMenuSticky"
+          (mouseenter)="onPinnedModeMenuMouseEnter()"
+          (mouseleave)="onPinnedModeMenuMouseLeave()"
           *ngIf="isCardPinned">
-          <span
-            *ngIf="pinnedCardsLayout === 0"
-            data-tooltip="To Right Column"
-            data-position="bottom right"
-          >
-            <i class="arrows alternate vertical icon"
-              (click)="setPinnedCardsLayout(1)"
-            ></i>
-          </span>
-          <span
-            *ngIf="pinnedCardsLayout === 1"
-            data-tooltip="To Top Row"
-            data-position="bottom right"
-          >
-            <i class="arrows alternate horizontal icon small-left-margin"
-              (click)="setPinnedCardsLayout(0)"
-            ></i>
-          </span>
-          <span data-tooltip="Unpin" data-position="bottom right">
-            <i 
-              class="table icon" 
-              [class.small-left-margin]="pinnedCardsLayout === 1"
-              (click)="unpinCard()"></i>
-          </span>
-        </div>
+            <span
+              *ngIf="pinnedCardsLayout === 0"
+              data-tooltip="To Right Column"
+              data-position="bottom right"
+            >
+              <i class="arrows alternate vertical icon"
+                (click)="setPinnedCardsLayout(1)"
+              ></i>
+            </span>
+            <span
+              *ngIf="pinnedCardsLayout === 1"
+              data-tooltip="To Top Row"
+              data-position="bottom right"
+            >
+              <i class="arrows alternate horizontal icon small-left-margin"
+                (click)="setPinnedCardsLayout(0)"
+              ></i>
+            </span>
+            <span data-tooltip="Unpin" data-position="bottom right">
+              <i 
+                class="table icon" 
+                [class.small-left-margin]="pinnedCardsLayout === 1"
+                (click)="unpinCard()"></i>
+            </span>
+          </div>
+          </div>
       </div>
-      </div>
-
       <img
         *ngIf="(isCameraMuted && mediaData.length <= 1 && !isCardPinned) ||
           (isCardPinned && !isPinnedVideoActive)"
@@ -504,31 +542,24 @@
         class="big-avatar"
         [class.big-avatar-pinned]="isCardPinned"
       />
-
       <video
         #currentVideo
         autoplay="autoplay"
         class="participant-fullscreen"
         [hidden]="
           ((mediaData.length > 1 ||
-            (mediaData.length === 1 &&
-              mediaData[0].id !== currentParticipant.id) ||
-            isCameraMuted) &&
+          (mediaData.length === 1 &&
+          mediaData[0].id !== currentParticipant.id) ||
+          isCameraMuted) &&
           !isCardPinned) || (isCardPinned && !isPinnedVideoActive)
         "
         [muted]="!isCardPinned || pinnedParticipant.streamId === currentParticipant.streamId"
       ></video>
 
-      <div 
-        class="pinned-reaction" 
-        [ngClass]="pinnedCardsLayout === 0 ? 'pinned-reaction-row' : 'pinned-reaction-column'"
-        *ngIf="pinnedReaction"
-      >
-        {{ pinnedReaction }}
-      </div>
-
-      <div class="pinned-participant-info" *ngIf="isCardPinned && pinnedParticipant.streamId !== currentParticipant.streamId">
-        <div class="participant-name-wrapper">
+      <div class="pinned-participant-info">
+        <div
+        class="participant-name-wrapper" 
+        *ngIf="isCardPinned && pinnedParticipant.streamId !== currentParticipant.streamId">
           <i
             *ngIf="isPinnedAudioAllowed || pinnedParticipant.role === 1"
             class="microphone icon default-cursor"
@@ -555,6 +586,12 @@
             {{ pinnedParticipant?.user?.secondName }}
           </p>
         </div>
+        <div 
+        class="pinned-reaction" 
+        *ngIf="pinnedReaction"
+        >
+          {{ pinnedReaction }}
+        </div>
       </div>
 
       <div class="settings" *ngIf="isVideoSettings && !isCameraMuted">
@@ -571,7 +608,6 @@
         ></app-output-settings>
       </div>
     </div>
-
     <div *ngIf="isShowChat" class="ui chat card">
       <div class="ui buttons">
         <button
@@ -636,7 +672,7 @@
         </div>
       </div>
       <div class="ui form vertically-aligned">
-        <div *ngIf="isChat" class="ui right labeled input">
+        <div *ngIf="isChat" class="ui right labeled input receiver-select-container">
           <label for="receiver" class="ui label">Send To:</label>
           <select
             class="ui compact selection dropdown"
@@ -697,17 +733,14 @@ Enter+Shift for new line."
         </div>
       </div>
     </div>
-
-    <div class="poll-create-container" *ngIf="isShowStatistics">
+    <div #statistics class="poll-create-container" *ngIf="isShowStatistics">
       <app-meeting-statistics
         [statistic]="meetingStatistics"
       ></app-meeting-statistics>
     </div>
-
-    <div class="poll-create-container" *ngIf="isShowReactions">
+    <div #reactions class="poll-create-container" *ngIf="isShowReactions">
       <app-reactions (reaction)="onReaction($event)"></app-reactions>
     </div>
-
     <div
       class="ui poll-create-container overflow-scroll segment"
       *ngIf="pollService.isPollCreating"
@@ -723,8 +756,8 @@ Enter+Shift for new line."
         "
       ></app-poll-create>
     </div>
-
     <div
+      #polls
       class="ui poll-create-container overflow-scroll segment"
       *ngIf="pollService.isShowPoll"
     >
@@ -785,10 +818,11 @@ Enter+Shift for new line."
         </div>
       </div>
     </div>
-    <div class="agenda-container">
-      <app-agenda (topicEnd)="topicEnd($event)" *ngIf="isPlanning" [meetingId]="meeting.id"></app-agenda>
-    </div>
+      <div #agenda class="agenda-container" *ngIf="isPlanning">
+        <app-agenda [agenda]="topicList" ></app-agenda>
+      </div>
     <div
+      #settings
       class="ui meeting-setting-container overflow-scroll segment"
       *ngIf="isShowMeetingSettings"
     >

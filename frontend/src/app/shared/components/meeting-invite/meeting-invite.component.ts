@@ -26,7 +26,7 @@ export class MeetingInviteComponent
   implements OnInit, MeetingInviteModalData, ScheduleMeetingInviteModalData {
   public emails: string[] = [];
   public contacts: Contact[];
-  public cachedContacts: Contact[];
+  public cachedContacts: Contact[] = [];
   public selectedContacts: Contact[] = [];
   participants: Participant[];
   isScheduled: boolean;
@@ -42,7 +42,10 @@ export class MeetingInviteComponent
   senderId: string;
   inviteLink: string;
 
-  constructor(private httpService: HttpService, private toastr: ToastrService) {
+  constructor(
+    private httpService: HttpService,
+    private toastr: ToastrService,
+    ) {
     super();
     this.form = new FormGroup({
       email: new FormControl(''),
@@ -69,6 +72,9 @@ export class MeetingInviteComponent
               (c) =>
                 !this.participantEmails.find((e) => e === c.secondMember.email)
             );
+            this.participantEmails.forEach(email => {
+              filteredContacts = filteredContacts.filter((c) => c.secondMember.email !== email);
+            });
           } else {
             filteredContacts = response.filter(
               (c) =>
@@ -98,7 +104,7 @@ export class MeetingInviteComponent
     if (valid) {
       const emailValue = this.form.controls.email.value.toLowerCase();
       const isParticipant =
-        this.participants.find((p) => p.user.email === emailValue) !==
+        this.participants?.find((p) => p.user.email === emailValue) !==
         undefined;
       if (isParticipant) {
         this.toastr.show(`${emailValue} is already participant of meeting.`);

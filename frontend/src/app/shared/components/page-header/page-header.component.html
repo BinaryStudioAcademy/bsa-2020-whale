@@ -36,7 +36,7 @@
     (click)="showSettingsMenu(); $event.stopPropagation()"
     class="user-pic-item item message shared"
   >
-    <app-spiner *ngIf="isUserLoadig" [size]="'small'"></app-spiner>
+    <app-spiner *ngIf="isUserLoadig" size="small"></app-spiner>
     <img
       class="ui tiny avatar image user-pic"
       src="{{ loggedInUser?.avatarUrl }}"

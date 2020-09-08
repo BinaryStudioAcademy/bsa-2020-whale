@@ -19,6 +19,10 @@ import { EditGroupInfoModalComponent } from './components/edit-group-info-modal/
 import { UpdateGroupImageModalComponent } from './components/update-group-image-modal/update-group-image-modal.component';
 import { UpcomingMeetingsComponent } from './components/upcoming-meetings/upcoming-meetings.component';
 import { ScheduleMeetingNoteComponent } from './components/upcoming-meetings/schedule-meeting-note/schedule-meeting-note.component';
+import { StatisticsComponent } from './components/statistics/statistics.component';
+import { DpDatePickerModule } from 'ng2-date-picker';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 @NgModule({
   declarations: [
@@ -36,6 +40,7 @@ import { ScheduleMeetingNoteComponent } from './components/upcoming-meetings/sch
     UpdateGroupImageModalComponent,
     UpcomingMeetingsComponent,
     ScheduleMeetingNoteComponent,
+    StatisticsComponent,
   ],
   imports: [
     CommonModule,
@@ -44,6 +49,9 @@ import { ScheduleMeetingNoteComponent } from './components/upcoming-meetings/sch
     InfiniteScrollModule,
     ReactiveFormsModule,
     ImageCropperModule,
+    DpDatePickerModule,
+    BrowserAnimationsModule,
+    NgxChartsModule
   ],
   entryComponents: [CallModalComponent, GroupCallModalComponent],
 })

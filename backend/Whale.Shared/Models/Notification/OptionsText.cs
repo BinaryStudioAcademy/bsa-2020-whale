@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Whale.API.Models.Notification
+﻿namespace Whale.API.Models.Notification
 {
     public class OptionsText
     {

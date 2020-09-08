@@ -8,7 +8,6 @@ namespace Whale.Shared.Services
 {
     public class RedisService
     {
-
         private readonly string _redisHost;
         private ConnectionMultiplexer _redis;
 
@@ -18,22 +17,13 @@ namespace Whale.Shared.Services
         }
         public async Task ConnectAsync()
         {
-                var configString = $"{_redisHost}";
-                _redis = await ConnectionMultiplexer.ConnectAsync(configString);
+            var configString = $"{_redisHost}";
+            _redis = await ConnectionMultiplexer.ConnectAsync(configString);
         }
         public void Connect()
         {
-            try
-            {
-                var configString = $"{_redisHost}";
-                _redis = ConnectionMultiplexer.Connect(configString);
-            }
-            catch (RedisConnectionException err)
-            {
-                //Log.Error(err.ToString());
-                throw err;
-            }
-            //Log.Debug("Connected to Redis");
+            var configString = $"{_redisHost}";
+            _redis = ConnectionMultiplexer.Connect(configString);
         }
 
         public void Set<T>(string key, T value)
@@ -48,13 +38,13 @@ namespace Whale.Shared.Services
             return value.IsNullOrEmpty ? default : JsonConvert.DeserializeObject<T>(value);
         }
 
-        public async Task AddToSet<T>(string setKey, T value)
+        public async Task AddToSetAsync<T>(string setKey, T value)
         {
             var db = _redis.GetDatabase();
             await db.SetAddAsync(setKey, JsonConvert.SerializeObject(value));
         }
 
-        public async Task<IEnumerable<T>> GetSetMembers<T>(string setKey)
+        public async Task<IEnumerable<T>> GetSetMembersAsync<T>(string setKey)
         {
             var db = _redis.GetDatabase();
             RedisValue[] values = await db.SetMembersAsync(setKey);
@@ -63,13 +53,13 @@ namespace Whale.Shared.Services
             return JsonConvert.DeserializeObject<IEnumerable<T>>(json);
         }
 
-        public async Task DeleteSetMember<T>(string setKey, T setMember)
+        public async Task DeleteSetMemberAsync<T>(string setKey, T setMember)
         {
             var db = _redis.GetDatabase();
             await db.SetRemoveAsync(setKey, JsonConvert.SerializeObject(setMember));
         }
 
-        public async Task DeleteKey(string key)
+        public async Task DeleteKeyAsync(string key)
         {
             var db = _redis.GetDatabase();
             await db.KeyDeleteAsync(key);
@@ -79,7 +69,6 @@ namespace Whale.Shared.Services
         {
             var db = _redis.GetDatabase();
             await db.StringSetAsync(key, JsonConvert.SerializeObject(value));
-
         }
         public async Task<T> GetAsync<T>(string key)
         {
@@ -94,13 +83,13 @@ namespace Whale.Shared.Services
             await db.KeyDeleteAsync(key);
         }
 
-        public async Task AddToList<T>(string setKey, T value)
+        public async Task AddToListAsync<T>(string setKey, T value)
         {
             var db = _redis.GetDatabase();
             await db.ListRightPushAsync(setKey, JsonConvert.SerializeObject(value));
         }
 
-        public async Task<string> GetAllListJson(string setKey)
+        public async Task<string> GetAllListJsonAsync(string setKey)
         {
             var db = _redis.GetDatabase();
             RedisValue[] values = await db.ListRangeAsync(setKey, 0, -1);

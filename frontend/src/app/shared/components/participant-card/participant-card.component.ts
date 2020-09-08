@@ -18,6 +18,7 @@ import {
   Participant,
   ReactionsEnum,
   CardMediaData,
+  CardsLayout,
 } from '@shared/models';
 import { MediaSettingsService } from 'app/core/services';
 
@@ -30,6 +31,8 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
   @Input() data: MediaData;
   @Input() meetingHolder: Participant;
   @Input() meetingId: string;
+  @Input() isAnyCardPinned: boolean;
+  @Input() pinnedLayout: CardsLayout;
   @Output() pinVideoEvent = new EventEmitter<string>();
   @Output() hideViewEvent = new EventEmitter<string>();
   @Output() stopVideoEvent = new EventEmitter<string>();
@@ -48,6 +51,7 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
   public reactionDelay: Observable<number>;
 
   private video: HTMLVideoElement;
+  private audio: HTMLAudioElement;
   private participantContainer: HTMLElement;
   private participantName: HTMLElement;
   private unsubscribe$ = new Subject<void>();
@@ -63,6 +67,7 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
     this.handleActionsPopup();
 
     this.video.srcObject = this.data.stream;
+    this.audio.srcObject = this.data.stream;
     if (
       this.mediaSettingsService.getSettings().IsMirrorVideo &&
       this.data.isCurrentUser
@@ -158,6 +163,7 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
 
   private initCardElements(): void {
     this.video = this.elRef.nativeElement.querySelector('video');
+    this.audio = this.elRef.nativeElement.querySelector('audio');
     this.participantName = this.elRef.nativeElement.querySelector('.header');
     this.participantContainer = this.elRef.nativeElement.querySelector(
       '.image'
@@ -168,7 +174,7 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
   }
 
   private updateData(): void {
-    this.participantName.textContent = `${this.dynamicData.userFirstName} ${
+    this.participantName.textContent = `${this.dynamicData.userFirstName ? this.dynamicData.userFirstName : ''} ${
       this.dynamicData.userSecondName ? this.dynamicData.userSecondName : ''
     }`.trim();
 
@@ -187,7 +193,7 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
           this.actionsIcon,
           this.actionsPopupContent,
           {
-            placement: 'right',
+            placement: this.isAnyCardPinned && this.pinnedLayout === CardsLayout.TopRow ? 'bottom' : 'right',
             modifiers: [flip],
           }
         );

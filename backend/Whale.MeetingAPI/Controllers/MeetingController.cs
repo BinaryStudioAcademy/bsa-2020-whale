@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Globalization;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -9,6 +8,7 @@ using Whale.Shared.Jobs;
 using Whale.Shared.Models;
 using Whale.Shared.Models.Meeting;
 using Whale.Shared.Services;
+using Whale.Shared.Models.ElasticModels.Statistics;
 
 namespace Whale.API.Controllers
 {
@@ -20,7 +20,10 @@ namespace Whale.API.Controllers
         private readonly MeetingScheduleService _meetingScheduleService;
         private readonly NotificationsService _notifications;
 
-        public MeetingController(MeetingService meetingService, MeetingScheduleService meetingScheduleService, NotificationsService notifications)
+        public MeetingController(
+            MeetingService meetingService,
+            MeetingScheduleService meetingScheduleService,
+            NotificationsService notifications)
         {
             _meetingService = meetingService;
             _meetingScheduleService = meetingScheduleService;
@@ -28,72 +31,117 @@ namespace Whale.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<MeetingLinkDTO>> CreateMeeting(MeetingCreateDTO meetingDto)
+        public async Task<ActionResult<MeetingLinkDTO>> CreateMeetingAsync(MeetingCreateDTO meetingDto)
         {
-            return Ok(await _meetingService.CreateMeeting(meetingDto));
+            return Ok(await _meetingService.CreateMeetingAsync(meetingDto));
+        }
+
+        [HttpGet("scheduled/stop/{id}")]
+        public async Task<ActionResult<bool>> StopMeetingScheduling(Guid id)
+        {
+            await _meetingScheduleService.StopAsync();
+            await _meetingService.CancelRecurrenceAsync(id);
+            return Ok(true);
+        }
+
+        [HttpPut("addParticipants")]
+        public async Task<ActionResult<string>> AddParticipants(MeetingUpdateParticipantsDTO dto)
+        {
+            var link = await _meetingService.AddParticipants(dto);
+
+            return Ok(link);
         }
 
         [HttpPost("scheduled")]
-        public async Task<ActionResult<string>> CreateMeetingScheduled(MeetingCreateDTO meetingDto)
+        public async Task<ActionResult<string>> CreateMeetingScheduledAsync(MeetingCreateDTO meetingDto)
         {
-            var meetingAndLink = await _meetingService.RegisterScheduledMeeting(meetingDto);
-            var jobInfo = new JobInfo(typeof(ScheduledMeetingJob), meetingDto.StartTime);
-            var obj = JsonConvert.SerializeObject(meetingAndLink.Meeting);
-            await _meetingScheduleService.Start(jobInfo, obj);
-
-            foreach (var email in meetingDto.ParticipantsEmails)
+            var meetingAndLink = await _meetingService.RegisterScheduledMeetingAsync(meetingDto);
+            if (meetingDto.Recurrence != JobRecurrenceEnum.Never)
             {
-                if(meetingDto.CreatorEmail != email)
-                await _notifications.AddTextNotification(email, $"{meetingDto.CreatorEmail} invites you to a meeting on {meetingDto.StartTime.AddHours(3).ToString("f", new CultureInfo("us-EN"))}");
+                var meetingAndParticipants = new MeetingAndParticipants
+                {
+                    Meeting = meetingAndLink.Meeting,
+                    CreatorEmail = meetingDto.CreatorEmail,
+                    ParticipantsEmails = meetingDto.ParticipantsEmails
+                };
+                var job = new RecurrentJobInfo(typeof(RecurrentScheduledMeetingJob), meetingDto.StartTime, meetingDto.Recurrence, meetingAndLink.Meeting.Id);
+                var obj = JsonConvert.SerializeObject(meetingAndParticipants);
+                await _meetingScheduleService.StartRecurrent(job, obj);
+                foreach (var email in meetingDto.ParticipantsEmails)
+                {
+                    if (meetingDto.CreatorEmail != email)
+                    {
+                        await _notifications.AddTextNotification(email,
+                            $"{meetingDto.CreatorEmail} invites you to a meeting on {meetingDto.StartTime.AddHours(3).ToString("f", new CultureInfo("us-EN"))}");
+                    }
+                }
+                return Ok(meetingAndLink.Link);
             }
+            else
+            {
+                var jobInfo = new JobInfo(typeof(ScheduledMeetingJob), meetingDto.StartTime);
+                var obj = JsonConvert.SerializeObject(meetingAndLink.Meeting);
+                await _meetingScheduleService.StartAsync(jobInfo, obj);
 
+                foreach (var email in meetingDto.ParticipantsEmails)
+                {
+                    if (meetingDto.CreatorEmail != email)
+                        await _notifications.AddTextNotification(email, $"{meetingDto.CreatorEmail} invites you to a meeting on {meetingDto.StartTime.AddHours(3).ToString("f", new CultureInfo("us-EN"))}");
+                }
+            }
             return Ok(meetingAndLink.Link);
+
         }
 
         [HttpGet]
-        public async Task<ActionResult<MeetingDTO>> ConnectToMeeting(Guid id, string pwd, string email)
+        public async Task<ActionResult<MeetingDTO>> ConnectToMeetingAsync(Guid id, string pwd, string email)
         {
-            return Ok(await _meetingService.ConnectToMeeting(new MeetingLinkDTO { Id = id, Password = pwd}, email));
+            return Ok(await _meetingService.ConnectToMeetingAsync(new MeetingLinkDTO { Id = id, Password = pwd }, email));
         }
 
         [HttpGet("shortInvite/{inviteLink}")]
-        public async Task<ActionResult<string>> GetFullMeetingLink(string inviteLink)
+        public async Task<ActionResult<string>> GetFullMeetingLinkAsync(string inviteLink)
         {
-            var meetingLink = await _meetingService.GetFullInviteLink(inviteLink);
-
-            return Ok(meetingLink);
+            return Ok(await _meetingService.GetFullInviteLinkAsync(inviteLink));
         }
 
         [HttpGet("shortenLink")]
-        public async Task<ActionResult<string>> GetShortURL(string id, string pwd)
+        public async Task<ActionResult<string>> GetShortURLAsync(string id, string pwd)
         {
-            string shortLink = await _meetingService.GetShortInviteLink(id, pwd);
-            return Ok(shortLink);
+            return Ok(await _meetingService.GetShortInviteLinkAsync(id, pwd));
         }
 
         [HttpGet("end")]
-        public async Task<OkResult> SaveMeetingEndTime(Guid meetingId)
+        public async Task<OkResult> SaveMeetingEndTimeAsync(Guid meetingId)
         {
-            await _meetingService.EndMeeting(meetingId);
+            await _meetingService.EndMeetingAsync(meetingId);
             return Ok();
         }
 
         [HttpPut("updateSettings")]
-        public async Task<ActionResult> UpdateMeetingSettings(UpdateSettingsDTO updateSettingsDTO)
+        public async Task<ActionResult> UpdateMeetingSettingsAsync(UpdateSettingsDTO updateSettingsDTO)
         {
-            await _meetingService.UpdateMeetingSettings(updateSettingsDTO);
+            await _meetingService.UpdateMeetingSettingsAsync(updateSettingsDTO);
             return Ok();
         }
+
         [HttpGet("agenda/{meetingId}")]
-        public async Task<ActionResult<List<AgendaPointDTO>>> GetAgenda(string meetingId)
+        public ActionResult<List<AgendaPointDTO>> GetAgenda(string meetingId)
         {
-            List<AgendaPointDTO> agendaPoints = await _meetingService.GetAgendaPoints(meetingId);//_httpService.GetAsync<List<AgendaPointDTO>>($"meeting/agenda/{meetingId}");
-            return Ok(agendaPoints);
+            return Ok(_meetingService.GetAgendaPoints(meetingId));
         }
+
         [HttpPut("agenda")]
-        public async Task<ActionResult> UpdateTopic(AgendaPointDTO topic)
+        public async Task<ActionResult> UpdateTopicAsync(AgendaPointDTO topic)
         {
             await _meetingService.UpdateTopic(topic);
+            return Ok();
+        }
+
+        [HttpPut("statistics")]
+        public async Task<ActionResult> UpdateMeetingStatistics(UpdateStatistics statistics)
+        {
+            await _meetingService.UpdateMeetingStatistic(statistics);
             return Ok();
         }
     }

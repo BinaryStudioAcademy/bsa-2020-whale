@@ -21,7 +21,9 @@
           Duration
         </div>
         <div class="ten wide column">
-          {{ stringifyDuration(calculateDuration()) }}
+          <span>Call: {{ msToTime(calculateMeetingDuration()) }} </span>
+          <span>Presence: {{ msToTime(meeting?.presenceDuration) }} </span>
+          <span>Speech: {{ msToTime(meeting?.speechDuration) }} </span>
         </div>
       </div>
       <div class="row">
@@ -103,7 +105,7 @@
               areScriptVisible ? "Hide script" : "Show script"
             }}
           </button>
-          <app-spiner *ngIf="isScriptLoading" [size]="'small'"></app-spiner>
+          <app-spiner *ngIf="isScriptLoading" size="small"></app-spiner>
           <div class="ui list" *ngIf="areScriptVisible">
             <div class="item" *ngIf="!script?.length">
               <div class="content">
@@ -112,12 +114,12 @@
                 </div>
               </div>
             </div>
-            <div class="item" *ngFor="let replica of script">
+            <div class="item replica" *ngFor="let replica of script">
               <img
                 class="ui mini circular image"
                 src="{{ replica.user.avatarUrl }}"
               />
-              <div class="content">
+              <div class="content replica">
                 <div class="ui sub header">
                   {{
                     replica.user.secondName
@@ -127,7 +129,7 @@
                       : replica.user.firstName
                   }}
                 </div>
-                {{ replica.speechDate | date: "HH:mm" }}
+                <span class="date">{{ replica.speechDate | date: "HH:mm" }}</span>
                 {{replica.message}}
               </div>
             </div>

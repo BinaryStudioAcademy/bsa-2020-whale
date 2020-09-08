@@ -12,3 +12,4 @@ export * from './user';
 export * from './room';
 export * from './reaction';
 export * from './scheduled-meeting';
+export * from './elastick-statistics';

@@ -2,7 +2,7 @@
   <div class="ui chat-header feed">
     <div class="event chat-label">
       <div class="label">
-        <img src="{{ contactSelected.secondMember?.avatarUrl }}" />
+        <img src="{{ contactSelected.secondMember?.avatarUrl }}" class="ui avatar img fixed-size-35px" />
       </div>
       <div class="content">
         <div class="user-info">
@@ -48,7 +48,7 @@
     </div>
   </div>
   <div #chatWindow class="ui chat-inner feed">
-    <app-spiner *ngIf="isMessagesLoading" [size]="'medium'"></app-spiner>
+    <app-spiner *ngIf="isMessagesLoading" size="medium"></app-spiner>
     <div
       *ngIf="messages.length == 0 && !isMessagesLoading"
       class="ui vertically-aligned no-message"

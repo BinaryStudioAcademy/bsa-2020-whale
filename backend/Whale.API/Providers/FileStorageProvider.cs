@@ -3,10 +3,8 @@ using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using MimeTypes;
 using System;
-using System.IO;
 using System.Threading.Tasks;
 using Whale.DAL.Settings;
-
 
 namespace Whale.API.Providers
 {
@@ -42,6 +40,33 @@ namespace Whale.API.Providers
 
             CloudBlockBlob blockBlob = container.GetBlockBlobReference(fileName);
             blockBlob.Properties.ContentType = file.ContentType;
+
+            using var stream = file.OpenReadStream();
+            await blockBlob.UploadFromStreamAsync(stream);
+            stream.Close();
+
+            return blockBlob.Uri.AbsoluteUri;
+        }
+
+        public async Task<string> UploadAudioFileAsync(IFormFile file)
+        {
+            string contentType = file.ContentType.Split('/')[0];
+
+            var container = _blobClient.GetContainerReference(_settings.AudioContainerName);
+            await SetPublicContainerPermissionsAsync(container);
+
+            string fileName;
+            try
+            {
+                fileName = contentType + '_' + Guid.NewGuid().ToString() + MimeTypeMap.GetExtension(file.ContentType);
+            }
+            catch
+            {
+                fileName = contentType + '_' + Guid.NewGuid().ToString();
+            }
+
+            CloudBlockBlob blockBlob = container.GetBlockBlobReference(fileName);
+            blockBlob.Properties.ContentType = "audio/mpeg";
 
             using var stream = file.OpenReadStream();
             await blockBlob.UploadFromStreamAsync(stream);

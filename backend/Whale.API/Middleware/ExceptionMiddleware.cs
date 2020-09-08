@@ -30,8 +30,8 @@ namespace Whale.API.Middleware
         private Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             context.Response.ContentType = "application/json";
-            if (exception is BaseCustomException)
-                context.Response.StatusCode = (exception as BaseCustomException)._httpError;
+            if (exception is BaseCustomException ex)
+                context.Response.StatusCode = ex._httpError;
             else
                 context.Response.StatusCode = 500;
 
