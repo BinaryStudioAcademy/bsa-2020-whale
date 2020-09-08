@@ -1,5 +1,6 @@
 <div
-  class="ui container segment"
+  class="ui container segment scrollable"
+  #scrollable
 >
     <div class="ui header">
         <h2 class="center aligned header">Statistics</h2>
@@ -14,7 +15,7 @@
     <div *ngIf="allTimeStatistics; else noCallsText">
       <div class="ui card">
         <h3 class="text-center">During all time</h3>
-        <div class="statistics-wrapper">
+        <div class="rw-statistics">
           <div class="ui small statistics">
             <div class="ui statistic">
               <div class="label">
@@ -25,7 +26,7 @@
               </div>
             </div>
           </div>
-          <div class="ui tiny statistics">
+          <div class="ui small statistics">
             <div class="statistic">
               <div class="value">
                 {{ valueDateTickFormatting(allTimeStatistics?.minDuration.value) }}
@@ -54,7 +55,7 @@
               </div>
             </div>
           </div>
-          <div class="ui tiny statistics">
+          <div class="ui small statistics">
             <div class="statistic">
               <div class="value">
                 {{ valueDateTickFormatting(allTimeStatistics?.minPresence.value) }}
@@ -83,7 +84,7 @@
               </div>
             </div>
           </div>
-          <div class="ui tiny statistics">
+          <div class="ui small statistics">
             <div class="statistic">
               <div class="value">
                 {{ valueDateTickFormatting(allTimeStatistics?.minSpeech.value) }}
@@ -171,14 +172,13 @@
             [yAxisTickFormatting]="statisticField !== 3 ? valueDateTickFormatting : valueTickFormatting"
             [xScaleMin]="minDate"
             [xScaleMax]="maxDate"
-            [roundDomains]="true"
             [rotateXAxisTicks]="true"
-            [autoScale]="false">
+            [timeline]="true">
             <ng-template #tooltipTemplate let-model="model">
               <h4>{{ dateTickFormatting(model.name) }}</h4>
               <div class="tooltip-model">
                 <span>{{ model.series }}:</span>
-                <span class="last">{{ valueDateTickFormatting(model.value) }}</span>
+                <span class="last">{{ statisticField !== 3 ? valueDateTickFormatting(model.value) : valueTickFormatting(model.value) }}</span>
               </div>    
             </ng-template>
             <ng-template #seriesTooltipTemplate let-model="model">
@@ -187,7 +187,7 @@
                 <div *ngFor="let m of model" class="tooltip-model">
                   <span><i class="tooltip-label-color" [style.background-color]="m.color"></i></span>
                   <span>{{ m.series }}:</span>
-                  <span class="last">{{ valueDateTickFormatting(m.value) }}</span>
+                  <span class="last">{{ statisticField !== 3 ? valueDateTickFormatting(m.value) : valueTickFormatting(m.value) }}</span>
                 </div>     
               </div>    
             </ng-template>
