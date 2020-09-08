@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Whale.API.Models.ScheduledMeeting;
 using Whale.API.Services;
+using Whale.Shared.Models.User;
 
 namespace Whale.API.Controllers
 {
@@ -24,6 +25,12 @@ namespace Whale.API.Controllers
         public async Task<ActionResult<ScheduledMeetingDTO>> GetAsync(Guid Id)
         {
             return Ok(await _scheduledMeetingService.GetAsync(Id));
+        }
+
+        [HttpGet("participants/{id}")]
+        public async Task<ActionResult<IEnumerable<UserDTO>>> GetParticipantsAsync(Guid Id)
+        {
+            return Ok(await _scheduledMeetingService.GetParticipantsAsync(Id));
         }
 
         [Authorize]

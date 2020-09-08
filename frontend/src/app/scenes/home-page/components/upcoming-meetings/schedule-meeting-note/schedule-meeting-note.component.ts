@@ -157,7 +157,11 @@ export class ScheduleMeetingNoteComponent implements OnInit, OnDestroy {
             startTime: this.scheduled.meeting.startTime
           } as MeetingUpdateParticipants)
           .subscribe(() => {
-            this.toastr.success('Added').onHidden.subscribe(() => location.reload());
+            this.httpService.getRequest<User[]>(`${this.route}/participants/${this.scheduled.id}`)
+              .subscribe((resp) => {
+                this.scheduled.participants = resp;
+                this.toastr.success('Added');
+              });
           });
         }
       });
