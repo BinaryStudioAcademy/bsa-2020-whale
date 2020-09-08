@@ -19,7 +19,7 @@ import {
   ScheduleMeetingInviteModalData,
 } from '@shared/components/meeting-invite/meeting-invite.component';
 import { SimpleModalService } from 'ngx-simple-modal';
-import {MeetingTypeEnum} from "@shared/Enums/MeetingTypeEnum";
+import {MeetingTypeEnum} from '@shared/Enums/MeetingTypeEnum';
 
 @Component({
   selector: 'app-schedule-meeting-page',
