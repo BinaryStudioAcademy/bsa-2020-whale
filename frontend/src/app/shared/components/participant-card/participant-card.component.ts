@@ -171,7 +171,7 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
   }
 
   private updateData(): void {
-    this.participantName.textContent = `${this.dynamicData.userFirstName} ${
+    this.participantName.textContent = `${this.dynamicData.userFirstName ? this.dynamicData.userFirstName : ''} ${
       this.dynamicData.userSecondName ? this.dynamicData.userSecondName : ''
     }`.trim();
 
