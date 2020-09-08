@@ -1969,7 +1969,8 @@ export class MeetingComponent
     this.currentUserStream.getAudioTracks().forEach((at) => {
       this.currentUserStream.removeTrack(at);
     });
-    this.currentUserStream.addTrack(audioTrack);    this.isAudioSettings = false;
+    this.currentUserStream.addTrack(audioTrack);
+    this.isAudioSettings = false;
     this.isVideoSettings = false;
   }
 
