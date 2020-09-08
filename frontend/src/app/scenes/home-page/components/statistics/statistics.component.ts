@@ -104,7 +104,7 @@ constructor(
             name: 'Max call duration',
             series: this.statistics.map((s) => {
               return {
-                name: new Date(s.date.valueAsString),
+                name: moment(s.date.valueAsString).toDate(),
                 value: s.maxDuration.value
               };
             })
@@ -113,7 +113,7 @@ constructor(
             name: 'Average call duration',
             series: this.statistics.map((s) => {
               return {
-                name: new Date(s.date.valueAsString),
+                name: moment(s.date.valueAsString).toDate(),
                 value: s.avgDuration.value
               };
             })
@@ -122,7 +122,7 @@ constructor(
             name: 'Min call duration',
             series: this.statistics.map((s) => {
               return {
-                name: new Date(s.date.valueAsString),
+                name: moment(s.date.valueAsString).toDate(),
                 value: s.minDuration.value
               };
             })
@@ -136,7 +136,7 @@ constructor(
             name: 'Max presence duration',
             series: this.statistics.map((s) => {
               return {
-                name: new Date(s.date.valueAsString),
+                name: moment(s.date.valueAsString).toDate(),
                 value: s.maxPresence.value
               };
             })
@@ -145,7 +145,7 @@ constructor(
             name: 'Average presence duration',
             series: this.statistics.map((s) => {
               return {
-                name: new Date(s.date.valueAsString),
+                name: moment(s.date.valueAsString).toDate(),
                 value: s.avgPresence.value
               };
             })
@@ -154,7 +154,7 @@ constructor(
             name: 'Min presence duration',
             series: this.statistics.map((s) => {
               return {
-                name: new Date(s.date.valueAsString),
+                name: moment(s.date.valueAsString).toDate(),
                 value: s.minPresence.value
               };
             })
@@ -168,7 +168,7 @@ constructor(
             name: 'Max speech duration',
             series: this.statistics.map((s) => {
               return {
-                name: new Date(s.date.valueAsString),
+                name: moment(s.date.valueAsString).toDate(),
                 value: s.maxSpeech.value
               };
             })
@@ -177,7 +177,7 @@ constructor(
             name: 'Average speech duration',
             series: this.statistics.map((s) => {
               return {
-                name: new Date(s.date.valueAsString),
+                name: moment(s.date.valueAsString).toDate(),
                 value: s.avgSpeech.value
               };
             })
@@ -186,7 +186,7 @@ constructor(
             name: 'Min speech duration',
             series: this.statistics.map((s) => {
               return {
-                name: new Date(s.date.valueAsString),
+                name: moment(s.date.valueAsString).toDate(),
                 value: s.minSpeech.value
               };
             })
@@ -200,7 +200,7 @@ constructor(
             name: 'Number of calls',
             series: this.statistics.map((s) => {
               return {
-                name: new Date(s.date.valueAsString),
+                name: moment(s.date.valueAsString).toDate(),
                 value: s.docCount.value
               };
             })
@@ -256,9 +256,9 @@ constructor(
   }
 
   valueDateTickFormatting(val: number): string {
-    if (this.statisticField === StatisticFields.Count){
-      return val.toString();
-    }
+    // if (this.statisticField === StatisticFields.Count){
+    //   return val.toString();
+    // }
     function pad(num: number, size: number): string {
       const s = '000000000' + num;
       return s.substr(s.length - size);
