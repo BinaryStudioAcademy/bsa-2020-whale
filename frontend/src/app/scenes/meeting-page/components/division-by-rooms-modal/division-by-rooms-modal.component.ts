@@ -160,10 +160,11 @@ export class DivisionByRoomsModalComponent
     });
   }
 
-  public changeRoomName(room: RoomDTO): void {
-    if (room.name.trim() === ''){
-      room.name = 'Room';
+  public changeRoomName(room: RoomDTO, name: string): void {
+    if (name.trim() === ''){
       this.toastr.warning('You cannot create room without name');
+      return;
     }
+    room.name = name;
   }
 }
