@@ -935,8 +935,6 @@ export class MeetingComponent
           this.mediaData = this.mediaData.filter(md => md.id !== participant.id);
           this.connectedStreams.push(stream);
 
-          
-
           this.createParticipantCard(participant);
         }
         this.connectedPeers.set(call.peer, stream);
@@ -1518,7 +1516,7 @@ export class MeetingComponent
     participant: Participant,
     shouldPrepend = false
   ): void {
-    
+
     const stream =
       participant.streamId === this.currentParticipant.streamId
         ? this.currentUserStream
@@ -2352,8 +2350,6 @@ export class MeetingComponent
           this.connectedStreams = this.connectedStreams.filter(str => str.id !== participant.streamId);
           this.mediaData = this.mediaData.filter(md => md.id !== participant.id);
           this.connectedStreams.push(stream);
-
-          
 
           this.createParticipantCard(participant);
         }
