@@ -256,9 +256,6 @@ constructor(
   }
 
   valueDateTickFormatting(val: number): string {
-    // if (this.statisticField === StatisticFields.Count){
-    //   return val.toString();
-    // }
     function pad(num: number, size: number): string {
       const s = '000000000' + num;
       return s.substr(s.length - size);

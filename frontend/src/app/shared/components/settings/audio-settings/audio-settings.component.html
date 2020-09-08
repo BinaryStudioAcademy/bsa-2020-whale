@@ -3,7 +3,7 @@
     <h4 class="ui header">Choose microphone</h4>
     <div
       class="item content"
-      (click)="onClick.emit(d.deviceId)"
+      (click)="clickEmited.emit(d.deviceId)"
       *ngFor="let d of inputAudioDevices"
       [ngClass]="isActive(d) ? 'active item' : 'item'"
     >

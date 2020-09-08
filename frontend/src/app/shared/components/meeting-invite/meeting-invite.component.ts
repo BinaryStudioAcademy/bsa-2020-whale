@@ -26,7 +26,7 @@ export class MeetingInviteComponent
   implements OnInit, MeetingInviteModalData, ScheduleMeetingInviteModalData {
   public emails: string[] = [];
   public contacts: Contact[];
-  public cachedContacts: Contact[];
+  public cachedContacts: Contact[] = [];
   public selectedContacts: Contact[] = [];
   participants: Participant[];
   isScheduled: boolean;
