@@ -190,15 +190,15 @@ export class MeetingComponent
   uploadedFile: FileList = null;
   musicFile: HTMLAudioElement;
   audioUrl: string;
-  isMusicUploaded: boolean = false;
-  
+  isMusicUploaded = false;
+
   public reactionDelay: Observable<number>;
   startedSpeak: Date = null;
   startedPresence: Date = null;
   speechDuration = 0;
   topicList: PointAgenda[] = [];
   updateStatisticsTaskId: any;
-  
+
   @ViewChild('uploadFile') fileInput: ElementRef;
   @ViewChild('currentVideo') private currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
@@ -1334,6 +1334,7 @@ export class MeetingComponent
   private async getMeeting(link: string): Promise<void> {
     if (this.isRoom) {
       this.meeting = await this.roomService.getMeetingEntityForRoom(this.route.snapshot.params.link);
+      this.questionService.getQuestionsByMeeting(this.meeting.id);
 
       this.connectionData.meetingId = this.route.snapshot.params.link;
       this.connectionData.meetingPwd = '';
@@ -1932,7 +1933,7 @@ export class MeetingComponent
     const source = ctx.createMediaElementSource(this.musicFile);
     source.connect(streamDestination);
     const stream = streamDestination.stream;
-    
+
     const keys = Object.keys(this.peer.connections);
     const peerConnection = this.peer.connections[keys[0]];
     const audioTrack = stream.getAudioTracks()[0];
@@ -1945,8 +1946,9 @@ export class MeetingComponent
   }
 
   pauseMusic(): void {
-    if (this.musicFile && !this.musicFile.paused)
+    if (this.musicFile && !this.musicFile.paused) {
       this.musicFile.pause();
+    }
   }
 
   async turnOffMusic(): Promise<void> {
@@ -1966,7 +1968,7 @@ export class MeetingComponent
       this.musicFile.load();
       this.isMusicUploaded = true;
     });
-    }   
+    }
   }
 
   //#region media settings

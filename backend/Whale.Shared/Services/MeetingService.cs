@@ -22,7 +22,7 @@ using Microsoft.Extensions.Configuration;
 using shortid.Configuration;
 using System.Globalization;
 using Whale.Shared.Models.ElasticModels.Statistics;
-
+using Whale.DAL.Models.Question;
 
 namespace Whale.Shared.Services
 {
@@ -412,6 +412,7 @@ namespace Whale.Shared.Services
             await _redisService.RemoveAsync(shortUrl);
             await _redisService.RemoveAsync($"{meetingSettingsPrefix}{meetingId}");
             await _redisService.RemoveAsync($"{meetingSpeechPrefix}{meetingId}");
+            await _redisService.RemoveAsync(meetingId + nameof(Question));
 
             meeting.EndTime = DateTimeOffset.Now;
             _context.Update(meeting);
