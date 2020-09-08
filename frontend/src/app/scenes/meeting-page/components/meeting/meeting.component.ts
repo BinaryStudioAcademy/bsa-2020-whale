@@ -813,11 +813,10 @@ export class MeetingComponent
           this.toastr.error('Error occured while trying to erase drawings');
         }
       );
-    this.meetingSignalrService.shareScreen$
+    this.meetingSignalrService.shareScreenStart$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (streamId) => {
-          const stream = this.connectedStreams.find((x) => x.id === streamId);
           if (this.currentParticipant.streamId === streamId)
           {
             this.isSharing = true;
@@ -1990,20 +1989,7 @@ export class MeetingComponent
       await this.mediaSettingsService.getMediaConstraints()
     );
     const videoTrack = stream.getVideoTracks()[0];
-    const keys = Object.keys(this.peer.connections);
-    keys.forEach(key => {
-      const peerConnection = this.peer.connections[key];
-      peerConnection?.forEach((pc) => {
-        const sender = pc.peerConnection.getSenders().find((s) => {
-          return s.track.kind === videoTrack.kind;
-        });
-        sender.replaceTrack(videoTrack);
-      });
-    });
-    this.currentUserStream.getVideoTracks().forEach((vt) => {
-      this.currentUserStream.removeTrack(vt);
-    });
-    this.currentUserStream.addTrack(videoTrack);
+    this.replaceVideoTrack(videoTrack);
     document.querySelector('video').srcObject = this.currentUserStream;
     this.isAudioSettings = false;
     this.isVideoSettings = false;
@@ -2176,30 +2162,34 @@ export class MeetingComponent
     this.lastTrack = this.currentUserStream.getVideoTracks()[0];
     const mediaDevices = (await navigator.mediaDevices) as any;
     const stream = await mediaDevices.getDisplayMedia();
-    await this.handleSuccessVideo(stream);
-    this.meetingSignalrService.invoke(SignalMethods.OnStartShareScreen, {
+    this.replaceVideoTrack(stream.getVideoTracks()[0]);
+    this.meetingSignalrService.invoke(SignalMethods.OnShareScreenStart, {
       streamId: this.currentUserStream.id,
       meetingId: this.meeting.id,
     });
   }
   async removeSharingVideo(): Promise<void> {
+    this.replaceVideoTrack(this.lastTrack);
+    this.meetingSignalrService.invoke(
+      SignalMethods.OnShareScreenStop,
+      this.meeting.id
+    );
+  }
+  replaceVideoTrack(track: MediaStreamTrack)
+  {
     const keys = Object.keys(this.peer.connections);
     keys.forEach(key => {
       this.peer.connections[key].forEach((pc) => {
         const sender = pc.peerConnection.getSenders().find((s) => {
-          return s.track.kind === this.lastTrack.kind;
+          return s.track.kind === track.kind;
         });
-        sender.replaceTrack(this.lastTrack);
+        sender.replaceTrack(track);
       });
     });
     this.currentUserStream.getVideoTracks().forEach((vt) => {
       this.currentUserStream.removeTrack(vt);
     });
-    this.currentUserStream.addTrack(this.lastTrack);
-    this.meetingSignalrService.invoke(
-      SignalMethods.OnStopShareScreen,
-      this.meeting.id
-    );
+    this.currentUserStream.addTrack(track);
   }
   //#endregion ShareScreen
 
