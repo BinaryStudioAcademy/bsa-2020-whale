@@ -104,7 +104,7 @@
               }}
               ({{ scheduled.participants?.length }})
             </button>
-            <div *ngIf="scheduled.creator.email === authService.currentUser.email" class="add-participants">
+            <div *ngIf="!scheduled.canceled && (scheduled.creator.email === authService.currentUser.email)" class="add-participants">
               <span
                 data-tooltip="Add participants"
                 data-position="right center"

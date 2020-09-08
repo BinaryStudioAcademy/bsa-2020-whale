@@ -825,7 +825,7 @@ export class MeetingComponent
           }
           this.pinCard(streamId);
           const user = this.meeting.participants.find(x => x.streamId === streamId).user;
-          this.toastr.success(`${user.firstName} ${user.secondName} start sharing screen`);
+          this.toastr.success(`${user.firstName ? user.firstName : ''} ${user.secondName ? user.secondName : ''} start sharing screen`);
         },
         () => {
           this.toastr.error('Error while trying to share screen');

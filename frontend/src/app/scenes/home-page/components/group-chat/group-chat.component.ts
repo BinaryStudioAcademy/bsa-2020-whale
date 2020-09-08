@@ -318,7 +318,7 @@ export class GroupChatComponent
   public deleteUserFromGroup(user: User): void {
     this.simpleModalService
       .addModal(ConfirmationModalComponent, {
-        message: `Are you sure want to delete ${user.firstName}  ${user.secondName} from the group ${this.groupSelected.label}?`,
+        message: `Are you sure want to delete ${user.firstName ? user.firstName : ''}  ${user.secondName ? user.secondName : ''} from the group ${this.groupSelected.label}?`,
       })
       .subscribe((t) => {
         if (t) {
@@ -328,7 +328,7 @@ export class GroupChatComponent
               () => {
                 this.removeUser(user.id);
                 this.toastr.info(
-                  `You successfully deleted ${user.firstName} ${user.secondName} from the group "${this.groupSelected.label}"`
+                  `You successfully deleted ${user.firstName ? user.firstName : ''} ${user.secondName ? user.secondName : ''} from the group "${this.groupSelected.label}"`
                 );
                 this.whaleSignalrService.invoke(
                   WhaleSignalMethods.OnRemovedFromGroup,

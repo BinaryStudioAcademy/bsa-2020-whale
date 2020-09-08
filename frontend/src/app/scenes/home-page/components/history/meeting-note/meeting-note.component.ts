@@ -22,37 +22,28 @@ export class MeetingNoteComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  public calculateDuration(): Duration {
+  public calculateMeetingDuration(): number | string {
     if (!this.meeting.endTime) {
-      return null;
+      return 'N/A';
     }
     const start: number = new Date(this.meeting.startTime).getTime();
     const end: number = new Date(this.meeting.endTime).getTime();
-
-    const durationMinutes: number = (end - start) / 60_000;
-    let hours = 0;
-    let minutes = 0;
-
-    hours = Math.floor(durationMinutes / 60);
-    minutes = Math.round(durationMinutes % 60);
-
-    return {
-      hours,
-      minutes,
-    };
+    return end - start;
   }
 
-  public stringifyDuration(duration: Duration): string {
-    if (!duration) {
-      return 'N/A';
+  msToTime(val: number | string): string {
+    if (typeof val === 'string'){
+      return val;
     }
-    const hourString = duration.hours === 0 ? '' : `${duration.hours} hours `;
-    const minuteString =
-      duration.minutes === 0 && duration.hours !== 0
-        ? ''
-        : `${duration.minutes} minutes`;
-
-    return hourString + minuteString;
+    let temp = Math.floor(val / 1000);
+    const hours = Math.floor(temp / 3600);
+    const hoursString = hours > 0 ? `${hours}h ` : '';
+    temp %= 3600;
+    const minutes = Math.floor(temp / 60);
+    const minutesString = minutes > 0 ? `${minutes}m ` : '';
+    const seconds = temp % 60;
+    const secondsString = seconds > 0 ? `${seconds}s` : (hours === 0 && minutes === 0 ? `${seconds}s` : '');
+    return `${hoursString}${minutesString}${secondsString}`;
   }
 
   public loadScript(): void {
