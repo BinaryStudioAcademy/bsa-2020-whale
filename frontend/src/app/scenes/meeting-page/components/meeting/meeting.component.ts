@@ -943,7 +943,7 @@ export class MeetingComponent
           (p) => p.streamId === stream.id
         );
         this.connectedStreams.push(stream);
-        console.log('937');
+        console.info('937');
         this.createParticipantCard(participant);
         this.connectedPeers.set(call.peer, stream);
       });
