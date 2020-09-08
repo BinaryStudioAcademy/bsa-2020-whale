@@ -266,22 +266,27 @@ namespace Whale.Shared.Services
 
         public async Task<MeetingLinkDTO> StartScheduledMeetingAsync(Meeting meeting)
         {
+   
             var meetingSettings = JsonConvert.DeserializeObject(meeting.Settings);
-            var scheduledMeeing = await _context.ScheduledMeetings.FirstOrDefaultAsync(e => e.MeetingId == meeting.Id);
-            await _redisService.ConnectAsync();
-            await _redisService.SetAsync(meeting.Id.ToString(), new MeetingRedisData { Password = scheduledMeeing.Password, MeetingId = meeting.Id.ToString() });
-            await _redisService.SetAsync($"{meetingSettingsPrefix}{meeting.Id}", new MeetingSettingsDTO
-            {
-                IsAudioAllowed = ((dynamic)meetingSettings).IsAudioAllowed,
-                IsVideoAllowed = ((dynamic)meetingSettings).IsVideoAllowed,
-                RecognitionLanguage = ((dynamic)meetingSettings).RecognitionLanguage,
-            });
-
-            await _redisService.SetAsync(scheduledMeeing.FullURL, scheduledMeeing.ShortURL);
-            await _redisService.SetAsync(scheduledMeeing.ShortURL, scheduledMeeing.FullURL);
-
             var scheduledMeeting = await _context.ScheduledMeetings.FirstOrDefaultAsync(e => e.MeetingId == meeting.Id);
             var user = await _context.Users.FirstOrDefaultAsync(e => e.Id == scheduledMeeting.CreatorId);
+            await _redisService.ConnectAsync();
+            await _redisService.SetAsync(meeting.Id.ToString(), new MeetingRedisData { Password = scheduledMeeting.Password, MeetingId = meeting.Id.ToString() });
+            await _redisService.SetAsync($"{meetingSettingsPrefix}{meeting.Id}", new MeetingSettingsDTO
+            {
+                MeetingHostEmail = user.Email,
+                IsAudioAllowed = ((dynamic)meetingSettings).IsAudioAllowed,
+                IsVideoAllowed = ((dynamic)meetingSettings).IsVideoAllowed,
+                IsWhiteboard = ((dynamic)meetingSettings).IsWhiteboard,
+                IsAllowedToChooseRoom = ((dynamic)meetingSettings).IsAllowedToChooseRoom,
+                IsPoll = ((dynamic)meetingSettings).IsPoll,
+                RecognitionLanguage = ((dynamic)meetingSettings).RecognitionLanguage
+            });
+
+            await _redisService.SetAsync(scheduledMeeting.FullURL, scheduledMeeting.ShortURL);
+            await _redisService.SetAsync(scheduledMeeting.ShortURL, scheduledMeeting.FullURL);
+
+            
             await _participantService.CreateParticipantAsync(new ParticipantCreateDTO
             {
                 Role = ParticipantRole.Host,
@@ -291,7 +296,7 @@ namespace Whale.Shared.Services
 
             var participantEmails = JsonConvert.DeserializeObject<List<string>>(scheduledMeeting.ParticipantsEmails);
 
-            var link = $"{BaseUrl}/redirection/{scheduledMeeing.ShortURL}";
+            var link = $"{BaseUrl}/redirection/{scheduledMeeting.ShortURL}";
 
             foreach (var email in participantEmails)
             {
@@ -302,9 +307,9 @@ namespace Whale.Shared.Services
                 await _notifications.InviteMeetingNotification(user.Email, email, link);
             }
 
-            _meetingCleanerService.DeleteMeetingIfNoOneEnter(meeting.Id, scheduledMeeing.FullURL, scheduledMeeing.ShortURL);
+            _meetingCleanerService.DeleteMeetingIfNoOneEnter(meeting.Id, scheduledMeeting.FullURL, scheduledMeeting.ShortURL);
 
-            return new MeetingLinkDTO { Id = meeting.Id, Password = scheduledMeeing.Password };
+            return new MeetingLinkDTO { Id = meeting.Id, Password = scheduledMeeting.Password };
         }
 
         public async Task<IEnumerable<Meeting>> GetScheduledMeetinsAsync()
