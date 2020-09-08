@@ -53,8 +53,6 @@ export class ScheduleMeetingNoteComponent implements OnInit, OnDestroy {
     clearInterval(this.nowFuncId);
   }
   ngOnInit(): void {
-   
-
     switch (this.scheduled.meeting.recurrence) {
       case Recurrence.EveryDay:
         this.recurrence = 'Every day';
