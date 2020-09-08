@@ -44,14 +44,14 @@
           <div class="ten wide column">
             {{ recurrence }}
             <button 
-            *ngIf = "isReccurentStopped"
+            *ngIf = "isReccurentAvailable"
             class="ui basic button stopp"
             (click)="stopRecurringMeeting()"
             >
             Stop recurring
             </button>
             <span 
-            *ngIf = "!isReccurentStopped"
+            *ngIf = "isReccurentStopped"
             >
             (stopped)
             </span>
