@@ -45,7 +45,7 @@ export class UpcomingMeetingsComponent implements OnInit {
       .set('take', `${this.take}`);
 
     this.isUpcomingLoading = true;
-    this.httpService.getRequest<ScheduledMeeting[]>(`${this.route}/upcomming`, params).subscribe(
+    this.httpService.getRequest<ScheduledMeeting[]>(`${this.route}/all`, params).subscribe(
       (response) => {
         if (response.length === 0 && this.meetings.length === 0) {
           this.isUpcomingMeetingEmpty = true;
