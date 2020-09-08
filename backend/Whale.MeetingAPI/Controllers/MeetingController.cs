@@ -40,6 +40,7 @@ namespace Whale.API.Controllers
         public async Task<ActionResult<bool>> StopMeetingScheduling(Guid id)
         {
             await _meetingScheduleService.StopAsync();
+            await _meetingService.CancelRecurrenceAsync(id);
             return Ok(true);
         }
 

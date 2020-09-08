@@ -319,8 +319,14 @@ namespace Whale.Shared.Services
                 .Where(e => e.IsScheduled && e.Id == id)
                 .FirstOrDefaultAsync();
         }
-
-        public async Task UpdateMeetingSettingsAsync(UpdateSettingsDTO updateSettingsDTO)
+        public async Task CancelRecurrenceAsync(Guid meetingId)
+        {
+            var meeting = await _context.Meetings.FirstOrDefaultAsync(m => m.Id == meetingId);
+            meeting.IsRecurrent = false;
+            _context.Meetings.Update(meeting);
+            await _context.SaveChangesAsync();
+        }
+            public async Task UpdateMeetingSettingsAsync(UpdateSettingsDTO updateSettingsDTO)
         {
             await _redisService.ConnectAsync();
 
