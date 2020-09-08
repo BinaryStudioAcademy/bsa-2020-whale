@@ -21,7 +21,9 @@
           Duration
         </div>
         <div class="ten wide column">
-          {{ stringifyDuration(calculateDuration()) }}
+          <span>Call: {{ msToTime(calculateMeetingDuration()) }} </span>
+          <span>Presence: {{ msToTime(meeting?.presenceDuration) }} </span>
+          <span>Speech: {{ msToTime(meeting?.speechDuration) }} </span>
         </div>
       </div>
       <div class="row">
