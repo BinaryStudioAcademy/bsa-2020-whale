@@ -170,6 +170,7 @@ export class MeetingComponent
   public pinnedVolume = 0;
   public pollService: PollService;
   public receiveingDrawings = false;
+  public shouldBeCatchArea = true;
   public isHost = false;
   public isRoom = false;
   public isMoveToRoom = false;
@@ -1752,6 +1753,14 @@ export class MeetingComponent
   public onCardsLayoutMouseEnter(): void {
     this.pinnedLayoutMenuSticky =
       window.innerWidth <= this.cardsLayout.nativeElement.offsetWidth + 40;
+  }
+
+  public onPinnedModeMenuMouseEnter(): void {
+    this.shouldBeCatchArea = false;
+  }
+
+  public onPinnedModeMenuMouseLeave(): void {
+    this.shouldBeCatchArea = true;
   }
 
   private onPinnedReaction(reaction: ReactionsEnum): void {
