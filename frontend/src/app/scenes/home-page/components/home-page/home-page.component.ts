@@ -276,7 +276,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
         if (newGroup !== undefined) {
           this.addGroup(newGroup);
           this.toastr.success('Group created successfully');
-          this.pushNotificationService.Send('Group created successfully');
         }
       });
   }
@@ -313,13 +312,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
               if (response.status === 204) {
                 this.toastr.info(
                   `${selectedGroup.label} deleted successfully`
-                );
-                this.pushNotificationService.SendAsObservable(`Group "${selectedGroup.label}" deleted successfully`).subscribe(
-                  (res) => { if (res.event.type === 'click') {
-                    // You can do anything else here
-                    res.notification.close();
-                  }
-                  }
                 );
                 this.removeGroup(selectedGroup.id);
                 if (!this.groups.length) {
