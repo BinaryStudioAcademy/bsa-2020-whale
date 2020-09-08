@@ -496,7 +496,8 @@
           [data]="data"
           [meetingHolder]="currentParticipant"
           [meetingId]="meeting.id"
-          [isPinnedTopRowMode]="isCardPinned && pinnedCardsLayout === 0"
+          [isAnyCardPinned]="isCardPinned"
+          [pinnedLayout]="pinnedCardsLayout"
         >
           </app-participant-card>
           <div

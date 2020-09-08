@@ -18,6 +18,7 @@ import {
   Participant,
   ReactionsEnum,
   CardMediaData,
+  CardsLayout,
 } from '@shared/models';
 import { MediaSettingsService } from 'app/core/services';
 
@@ -30,7 +31,8 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
   @Input() data: MediaData;
   @Input() meetingHolder: Participant;
   @Input() meetingId: string;
-  @Input() isPinnedTopRowMode: boolean;
+  @Input() isAnyCardPinned: boolean;
+  @Input() pinnedLayout: CardsLayout;
   @Output() pinVideoEvent = new EventEmitter<string>();
   @Output() hideViewEvent = new EventEmitter<string>();
   @Output() stopVideoEvent = new EventEmitter<string>();
@@ -191,7 +193,7 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
           this.actionsIcon,
           this.actionsPopupContent,
           {
-            placement: this.isPinnedTopRowMode ? 'bottom' : 'right',
+            placement: this.isAnyCardPinned && this.pinnedLayout === CardsLayout.TopRow ? 'bottom' : 'right',
             modifiers: [flip],
           }
         );
