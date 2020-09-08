@@ -15,7 +15,7 @@ import { threadId } from 'worker_threads';
 export class AgendaComponent implements OnInit {
   constructor() {
   }
-  @Input() agenda: PointAgenda[] = [];
+  @Input() agenda: PointAgenda[];
   cachedTopics: PointAgenda[] = [];
   ngOnInit(): void {
   }

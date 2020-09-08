@@ -111,15 +111,15 @@
         ></i>
       </span>
       <span
-      data-tooltip="Plan Meeting"
-      data-position="top right"
-    >
-      <i
-        #agendaButton
-        class="big list alternate icon"
-        (click)="onAgendaClick()"
-      ></i>
-    </span>
+        data-tooltip="Plan Meeting"
+        data-position="top right"
+      >
+        <i
+          #agendaButton
+          class="big list alternate icon"
+          (click)="onAgendaClick()"
+        ></i>
+      </span>
       <span data-tooltip="Quit fullscreen" data-position="top right">
         <i
           id="meeting-draggable-fullscrean"
@@ -364,7 +364,7 @@
               data-position="top right"
             >
               <i
-                #agendaButton
+                #agendaButtonFullscreen
                 class="big list alternate icon"
                 (click)="onAgendaClick()"
               ></i>
@@ -810,9 +810,9 @@ Enter+Shift for new line."
         </div>
       </div>
     </div>
-    <div #agenda class="agenda-container">
-      <app-agenda [agenda]="topicList" *ngIf="isPlanning"></app-agenda>
-    </div>
+      <div #agenda class="agenda-container" *ngIf="isPlanning">
+        <app-agenda [agenda]="topicList" ></app-agenda>
+      </div>
     <div
       #settings
       class="ui meeting-setting-container overflow-scroll segment"

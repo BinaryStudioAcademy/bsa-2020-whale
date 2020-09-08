@@ -227,6 +227,7 @@ export class MeetingComponent
   @ViewChild('settingsButton') settingsButton: ElementRef;
   @ViewChild('agenda') agenda: ElementRef;
   @ViewChild('agendaButton') agendaButton: ElementRef;
+  @ViewChild('agendaButtonFullscreen') agendaButtonFullscreen: ElementRef;
   @ViewChild('whiteboard') whiteboard: ElementRef;
   @ViewChild('whiteboardButton') whiteboardButton: ElementRef;
 
@@ -316,7 +317,8 @@ export class MeetingComponent
     }
 
     if (!isInsideAgenda &&
-      targetElement !== this.agendaButton?.nativeElement) {
+      targetElement !== this.agendaButton?.nativeElement &&
+      targetElement !== this.agendaButtonFullscreen?.nativeElement) {
       this.isPlanning = false;
     }
 
