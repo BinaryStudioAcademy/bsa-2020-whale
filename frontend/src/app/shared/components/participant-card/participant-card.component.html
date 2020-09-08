@@ -7,13 +7,18 @@
     <video
       class="video"
       autoplay
+      [muted]="'muted'"
+    ></video>
+    <!-- <video
+      class="video"
+      autoplay
       [ngClass]="{
         visible: dynamicData.isVideoActive,
         hidden: !dynamicData.isVideoActive,
         'small-video': data.isSmallCard
       }"
       [muted]="'muted'"
-    ></video>
+    ></video> -->
     <audio autoplay [muted]="data.isCurrentUser ? 'muted' : ''">
 
     </audio>
