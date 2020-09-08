@@ -48,6 +48,14 @@ namespace Whale.Shared.Services
             }
         }
 
+        public async Task<MeetingUserStatistics> SearchSingleAsync(Guid userId, Guid meetingId)
+        {
+            var indexName = $"{indexPrefix}{userId.ToString()}";
+            var id = $"{userId.ToString()}{meetingId.ToString()}";
+            var getResponse = await _elasticClient.GetAsync<MeetingUserStatistics>(id, r => r.Index(indexName));
+            return getResponse.Source;
+        }
+
         public async Task<IEnumerable<DateHistogramBucket>> SearchStatistics(string email, DateTime startDate, DateTime endDate)
         {
             var user = await _userService.GetUserByEmailAsync(email);
