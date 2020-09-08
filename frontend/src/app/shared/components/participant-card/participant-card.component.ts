@@ -30,6 +30,7 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
   @Input() data: MediaData;
   @Input() meetingHolder: Participant;
   @Input() meetingId: string;
+  @Input() isPinnedTopRowMode: boolean;
   @Output() pinVideoEvent = new EventEmitter<string>();
   @Output() hideViewEvent = new EventEmitter<string>();
   @Output() stopVideoEvent = new EventEmitter<string>();
@@ -190,7 +191,7 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
           this.actionsIcon,
           this.actionsPopupContent,
           {
-            placement: 'right',
+            placement: this.isPinnedTopRowMode ? 'bottom' : 'right',
             modifiers: [flip],
           }
         );
