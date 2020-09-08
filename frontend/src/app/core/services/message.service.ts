@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Contact, DirectMessage, GroupMessage } from '@shared/models';
-import { User } from 'firebase';
+import { User } from 'firebase/app';
 import { Subject, from, Observable, ReplaySubject } from 'rxjs';
 import { HubConnection } from '@aspnet/signalr';
 import { SignalRService } from '.';

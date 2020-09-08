@@ -6,7 +6,7 @@ import { filter, takeUntil, first } from 'rxjs/operators';
 import { Call } from '@shared/models/call/call';
 import { GroupCall } from '@shared/models/call/group-call';
 import { environment } from '@env';
-import { User } from 'firebase';
+import { User } from 'firebase/app';
 import { Title } from '@angular/platform-browser';
 import {
   WhaleSignalService,
