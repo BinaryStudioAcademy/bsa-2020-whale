@@ -157,8 +157,10 @@ export class ScheduleMeetingNoteComponent implements OnInit, OnDestroy {
         participantEmails: alreadyInvited,
         isScheduled: true,
       } as ScheduleMeetingInviteModalData)
-      .subscribe((participantEmails) => {
-        if ((participantEmails as string[]).length > 0) {
+      .subscribe((emails) => {
+        const participantEmails = emails as string[];
+
+        if (participantEmails.length > 0) {
           this.meetingService
           .addParticipants({
             id: this.scheduled.id,
@@ -170,7 +172,32 @@ export class ScheduleMeetingNoteComponent implements OnInit, OnDestroy {
             this.httpService.getRequest<User[]>(`${this.route}/participants/${this.scheduled.id}`)
               .subscribe((resp) => {
                 this.scheduled.participants = resp;
-                this.toastr.success('Added');
+
+                const newParticipants = resp.filter(u => participantEmails.includes(u.email));
+
+                let notificationText = '';
+
+                if (newParticipants.length === 1) {
+                  notificationText = `${newParticipants[0].firstName}
+                                      ${newParticipants[0].secondName} added to the meeting.`;
+                }
+                else if (newParticipants.length === 2) {
+                  notificationText = `${newParticipants[0].firstName}
+                                      ${newParticipants[0].secondName} and ${newParticipants[1].firstName}
+                                      ${newParticipants[1].secondName} added to the meeting.`;
+                }
+                else if (newParticipants.length === 3) {
+                  notificationText = `${newParticipants[0].firstName}
+                                      ${newParticipants[0].secondName}, ${newParticipants[1].firstName}
+                                      ${newParticipants[1].secondName} and ${newParticipants.length - 2} more user added to the meeting.`;
+                }
+                else {
+                  notificationText = `${newParticipants[0].firstName}
+                                      ${newParticipants[0].secondName}, ${newParticipants[1].firstName}
+                                      ${newParticipants[1].secondName} and ${newParticipants.length - 2} more users added to the meeting.`;
+                }
+
+                this.toastr.success(notificationText);
               });
           });
         }
