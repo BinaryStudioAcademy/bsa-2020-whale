@@ -226,7 +226,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
                       'You were added to ' + newGroup.label + ' group'
                     );
                     this.addGroup(newGroup);
-                    this.messageService.joinGroup(newGroup.id);
                   });
 
                 this.whaleSignalrService.removeGroup$
@@ -547,6 +546,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
     if (newGroup) {
       this.removeContact(newGroup.id);
       this.groups.push(newGroup);
+      this.messageService.joinGroup(newGroup.id);
       this.groupsVisibility = true;
     }
   }
