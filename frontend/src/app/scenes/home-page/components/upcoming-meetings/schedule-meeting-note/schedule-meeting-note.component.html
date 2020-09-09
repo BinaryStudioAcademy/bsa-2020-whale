@@ -41,7 +41,8 @@
           <div class="column first">
             Recurred
           </div>
-          <div class="ten wide column">
+          <div class="ten wide column"
+          [class.text-not-active]="scheduled.canceled">
             {{ recurrence }}
             <button 
             *ngIf = "isReccurentAvailable"

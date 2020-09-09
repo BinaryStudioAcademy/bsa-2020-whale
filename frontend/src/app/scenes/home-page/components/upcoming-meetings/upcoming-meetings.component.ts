@@ -3,6 +3,7 @@ import { ScheduledMeeting } from '@shared/models';
 import { HttpService } from 'app/core/services';
 import { HttpParams } from '@angular/common/http';
 import { environment } from '@env';
+import { max } from 'rxjs/operators';
 
 
 @Component({
@@ -45,7 +46,7 @@ export class UpcomingMeetingsComponent implements OnInit {
       .set('take', `${this.take}`);
 
     this.isUpcomingLoading = true;
-    this.httpService.getRequest<ScheduledMeeting[]>(`${this.route}/all`, params).subscribe(
+    this.httpService.getRequest<ScheduledMeeting[]>(`${this.route}/upcoming`, params).subscribe(
       (response) => {
         if (response.length === 0 && this.meetings.length === 0) {
           this.isUpcomingMeetingEmpty = true;
