@@ -237,7 +237,7 @@
             <span data-tooltip="Settings">
               <i
                 class="angle up icon"
-                *ngIf="!isCameraMuted"
+                *ngIf="!isCameraMuted && !isSharing"
                 (click)="showVideoSettings()"
               ></i>
             </span>
