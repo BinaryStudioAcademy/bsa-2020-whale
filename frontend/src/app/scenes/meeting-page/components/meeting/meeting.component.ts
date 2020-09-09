@@ -298,7 +298,8 @@ export class MeetingComponent
       targetElement !== this.pollsButton?.nativeElement &&
       targetElement !== this.pollsButtonFullscreen?.nativeElement &&
       targetElement.nodeName !== 'BUTTON' &&
-      targetElement.nodeName !== 'I') {
+      targetElement.nodeName !== 'I' &&
+      targetElement.nodeName !== 'SPAN') {
       this.pollService.isShowPollContainer = false;
     }
 
