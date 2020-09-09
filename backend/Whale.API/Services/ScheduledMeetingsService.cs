@@ -57,7 +57,7 @@ namespace Whale.API.Services
             return userParticipants;
         }
 
-        public async Task<IEnumerable<ScheduledDTO>> GetAllScheduledAsync(string email, int skip, int take)
+        public async Task<IEnumerable<ScheduledDTO>> GetUpcomingScheduledAsync(string email, int skip, int take)
         {
             var user = await _userService.GetUserByEmailAsync(email);
             if (user == null)
@@ -67,12 +67,14 @@ namespace Whale.API.Services
             var scheduledDTOList = new List<ScheduledDTO>();
             foreach (var scheduled in scheduledList)
             {
-                var creator = scheduled.CreatorId == user.Id ? user : await _userService.GetUserAsync(scheduled.CreatorId);
                 var meeting = await _context.Meetings.FirstOrDefaultAsync(m => m.Id == scheduled.MeetingId);
-                if (meeting.EndTime != null)
+                if (meeting.StartTime < DateTime.Now.AddHours(-1) || meeting.EndTime > meeting.StartTime)
+                {
                     continue;
+                }
                 var participantEmails = JsonConvert.DeserializeObject<List<string>>(scheduled.ParticipantsEmails);
                 var userParticipants = (await _userService.GetAllUsersAsync()).Where(u => participantEmails.Contains(u.Email));
+                var creator = scheduled.CreatorId == user.Id ? user : await _userService.GetUserAsync(scheduled.CreatorId);
                 var settings = JsonConvert.DeserializeObject<MeetingSettingsDTO>(meeting.Settings);
                 var meetingDTO =  new MeetingDTO
                 {
@@ -103,6 +105,7 @@ namespace Whale.API.Services
                     Canceled = scheduled.Canceled
                 });
             }
+
             return scheduledDTOList
                 .OrderBy(s => s.Meeting.StartTime)
                 .Skip(skip)
