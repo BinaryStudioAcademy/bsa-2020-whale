@@ -68,11 +68,11 @@ namespace Whale.Shared.Services
                         IsAccepted = c.IsAccepted,
                     };
                     var userData = GetConnectionData(contact.FirstMember.Id);
-                    contact.FirstMember.ConnectionId = userData.ConnectionId;
-                    contact.FirstMember.IsSpeaking = userData.IsSpeaking;
+                    contact.FirstMember.ConnectionId = userData?.ConnectionId;
+                    contact.FirstMember.IsSpeaking = userData?.IsSpeaking ?? false;
                     userData = GetConnectionData(contact.SecondMember.Id);
-                    contact.SecondMember.ConnectionId = userData.ConnectionId;
-                    contact.SecondMember.IsSpeaking = userData.IsSpeaking;
+                    contact.SecondMember.ConnectionId = userData?.ConnectionId;
+                    contact.SecondMember.IsSpeaking = userData?.IsSpeaking ?? false;
                     contact.UnreadMessageCount = _context.UnreadMessageIds
                     .Where(um => um.ReceiverId == contact.FirstMemberId && _context.DirectMessages
                         .Any(dm => dm.Id == um.MessageId && dm.AuthorId == contact.SecondMemberId))
@@ -113,11 +113,11 @@ namespace Whale.Shared.Services
                         IsAccepted = c.IsAccepted,
                     };
                     var userData = GetConnectionData(contact.FirstMember.Id);
-                    contact.FirstMember.ConnectionId = userData.ConnectionId;
-                    contact.FirstMember.IsSpeaking = userData.IsSpeaking;
+                    contact.FirstMember.ConnectionId = userData?.ConnectionId;
+                    contact.FirstMember.IsSpeaking = userData?.IsSpeaking ?? false;
                     userData = GetConnectionData(contact.SecondMember.Id);
-                    contact.SecondMember.ConnectionId = userData.ConnectionId;
-                    contact.SecondMember.IsSpeaking = userData.IsSpeaking;
+                    contact.SecondMember.ConnectionId = userData?.ConnectionId;
+                    contact.SecondMember.IsSpeaking = userData?.IsSpeaking ?? false;
                     return contact;
                 });
         }
@@ -148,11 +148,11 @@ namespace Whale.Shared.Services
                 IsAccepted = contact.IsAccepted,
             };
             var userData = GetConnectionData(contact.FirstMember.Id);
-            dtoContact.FirstMember.ConnectionId = userData.ConnectionId;
-            dtoContact.FirstMember.IsSpeaking = userData.IsSpeaking;
+            dtoContact.FirstMember.ConnectionId = userData?.ConnectionId;
+            dtoContact.FirstMember.IsSpeaking = userData?.IsSpeaking ?? false;
             userData = GetConnectionData(contact.SecondMember.Id);
-            dtoContact.SecondMember.ConnectionId = userData.ConnectionId;
-            dtoContact.SecondMember.IsSpeaking = userData.IsSpeaking;
+            dtoContact.SecondMember.ConnectionId = userData?.ConnectionId;
+            dtoContact.SecondMember.IsSpeaking = userData?.IsSpeaking ?? false;
 
             return dtoContact;
         }

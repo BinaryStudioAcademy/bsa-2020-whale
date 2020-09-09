@@ -41,8 +41,8 @@ namespace Whale.Shared.Services
             {
                 var user = _mapper.Map<UserDTO>(u);
                 var userData = GetConnectionData(user.Id);
-                user.ConnectionId = userData.ConnectionId;
-                user.IsSpeaking = userData.IsSpeaking;
+                user.ConnectionId = userData?.ConnectionId;
+                user.IsSpeaking = userData?.IsSpeaking ?? false;
                 return user;
             });
         }
@@ -58,8 +58,8 @@ namespace Whale.Shared.Services
 
             var userDto = _mapper.Map<UserDTO>(user);
             var userData = GetConnectionData(user.Id);
-            userDto.ConnectionId = userData.ConnectionId;
-            userDto.IsSpeaking = userData.IsSpeaking;
+            userDto.ConnectionId = userData?.ConnectionId;
+            userDto.IsSpeaking = userData?.IsSpeaking ?? false;
             return userDto;
         }
 
@@ -72,8 +72,8 @@ namespace Whale.Shared.Services
 
             var userDto = _mapper.Map<UserDTO>(user);
             var userData = GetConnectionData(user.Id);
-            userDto.ConnectionId = userData.ConnectionId;
-            userDto.IsSpeaking = userData.IsSpeaking;
+            userDto.ConnectionId = userData?.ConnectionId;
+            userDto.IsSpeaking = userData?.IsSpeaking ?? false;
             return userDto;
         }
 
