@@ -38,7 +38,6 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     weekDayFormat: 'dd',
     firstDayOfWeek: 'mo',
     showNearMonthDays: false,
-    min: moment({hour: 0, minute: 0, seconds: 0}).add(-6, 'days'),
     max: moment({hour: 0, minute: 0, seconds: 0}),
     monthBtnCssClassCallback: (month) => 'ng2-date-picker-button',
     dayBtnCssClassCallback: (day) => 'ng2-date-picker-button',
@@ -305,15 +304,6 @@ constructor(
     } else{
       this.startDate = val;
     }
-    this.configEnd = {
-      weekDayFormat: 'dd',
-      firstDayOfWeek: 'mo',
-      showNearMonthDays: false,
-      min: this.startDate.add(1, 'days'),
-      max: moment({hour: 0, minute: 0, seconds: 0}),
-      monthBtnCssClassCallback: (month) => 'ng2-date-picker-button',
-      dayBtnCssClassCallback: (day) => 'ng2-date-picker-button',
-    };
   }
 
   changeEndDate(val: Moment): void {
@@ -322,14 +312,6 @@ constructor(
     } else{
       this.endDate = val;
     }
-    this.configStart = {
-      weekDayFormat: 'dd',
-      firstDayOfWeek: 'mo',
-      showNearMonthDays: false,
-      max: this.endDate.add(-1, 'days'),
-      monthBtnCssClassCallback: (month) => 'ng2-date-picker-button',
-      dayBtnCssClassCallback: (day) => 'ng2-date-picker-button',
-    };
   }
 
   public close(): void {
