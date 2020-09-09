@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Timers;
 using Whale.DAL.Models.Poll;
 using Whale.DAL.Models.Question;
@@ -54,6 +55,30 @@ namespace Whale.SignalR.Services
             };
 
             timer.Start();
+        }
+
+        public async Task CloseAllRooms(string meetingLink, IEnumerable<string> roomIds, string meetingId)
+        {
+            await _redisService.ConnectAsync();
+
+            foreach (string roomId in roomIds)
+            {
+                await _meetingHub.Clients.Group(roomId).SendAsync("OnRoomClosed", meetingLink);
+                await _redisService.DeleteKeyAsync(roomId);
+                await _redisService.DeleteKeyAsync(roomId + nameof(Poll));
+                await _redisService.DeleteKeyAsync(meetingSettingsPrefix + roomId);
+                await _redisService.DeleteKeyAsync(roomNamePrefix + roomId);
+                await _redisService.RemoveAsync(roomId + nameof(Question));
+            }
+
+            await _meetingHub.Clients.Group(meetingId).SendAsync("OnRoomClosed", meetingLink);     
+
+            var meetingdata = await _redisService.GetAsync<MeetingRedisData>(meetingId);
+            if (meetingdata != null)
+            {
+                meetingdata.RoomsIds = new List<string>();
+                await _redisService.SetAsync(meetingId, meetingdata);
+            }
         }
     }
 }
