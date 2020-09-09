@@ -80,6 +80,8 @@ namespace Whale.API.Services
                 {
                     Id = meeting.Id,
                     Settings = meeting.Settings,
+                    Topic = meeting.Topic,
+                    Description = meeting.Description,
                     StartTime = meeting.StartTime,
                     EndTime = meeting.EndTime,
                     AnonymousCount = meeting.AnonymousCount,
