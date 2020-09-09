@@ -63,55 +63,34 @@ namespace Whale.API.Services
             if (user == null)
                 throw new NotFoundException("User", email);
 
-            var scheduledList = _context.ScheduledMeetings.Where(s => s.CreatorId == user.Id || s.ParticipantsEmails.Contains(user.Email)).ToList();
+            var scheduledList = _context.ScheduledMeetings
+                .Where(s => s.CreatorId == user.Id || s.ParticipantsEmails.Contains(user.Email))
+                .Include(s => s.Meeting)
+                .Where(s => s.Meeting.StartTime >= DateTimeOffset.Now.AddHours(-1) && s.Meeting.EndTime == null)
+                .OrderBy(s => s.Meeting.StartTime)
+                .Skip(skip)
+                .Take(take)
+                .Include(s => s.Creator)
+                .ToList();
             var scheduledDTOList = new List<ScheduledDTO>();
             foreach (var scheduled in scheduledList)
             {
-                var meeting = await _context.Meetings.FirstOrDefaultAsync(m => m.Id == scheduled.MeetingId);
-                if (meeting.StartTime < DateTime.Now.AddHours(-1) || meeting.EndTime > meeting.StartTime)
-                {
-                    continue;
-                }
                 var participantEmails = JsonConvert.DeserializeObject<List<string>>(scheduled.ParticipantsEmails);
                 var userParticipants = (await _userService.GetAllUsersAsync()).Where(u => participantEmails.Contains(u.Email));
-                var creator = scheduled.CreatorId == user.Id ? user : await _userService.GetUserAsync(scheduled.CreatorId);
-                var settings = JsonConvert.DeserializeObject<MeetingSettingsDTO>(meeting.Settings);
-                var meetingDTO =  new MeetingDTO
-                {
-                    Id = meeting.Id,
-                    Settings = meeting.Settings,
-                    Topic = meeting.Topic,
-                    Description = meeting.Description,
-                    StartTime = meeting.StartTime,
-                    EndTime = meeting.EndTime,
-                    AnonymousCount = meeting.AnonymousCount,
-                    IsScheduled = meeting.IsScheduled,
-                    IsRecurrent = meeting.IsRecurrent,
-                    IsVideoAllowed = settings.IsVideoAllowed,
-                    IsAudioAllowed = settings.IsAudioAllowed,
-                    IsWhiteboard = settings.IsWhiteboard,
-                    IsPoll = settings.IsPoll,
-                    IsAllowedToChooseRoom = settings.IsAllowedToChooseRoom,
-                    RecognitionLanguage = settings.RecognitionLanguage,
-                    Recurrence = settings.Recurrence,
-                    Participants = _mapper.Map<IEnumerable<ParticipantDTO>>(meeting.Participants),
-                    PollResults = _mapper.Map<IEnumerable<PollResultDTO>>(meeting.PollResults)
-                };
+                var settings = JsonConvert.DeserializeObject<MeetingSettingsDTO>(scheduled.Meeting.Settings);
+                var meetingDTO = _mapper.Map<MeetingDTO>(scheduled.Meeting);
                 scheduledDTOList.Add(new ScheduledDTO
                 {
                     Id = scheduled.Id,
                     Meeting = meetingDTO,
-                    Creator = creator,
+                    Creator = _mapper.Map<UserDTO>(scheduled.Creator),
                     Participants = userParticipants.ToList(),
                     Link = scheduled.ShortURL,
                     Canceled = scheduled.Canceled
                 });
             }
 
-            return scheduledDTOList
-                .OrderBy(s => s.Meeting.StartTime)
-                .Skip(skip)
-                .Take(take);
+            return scheduledDTOList;
         }
 
         public async Task<ScheduledMeetingDTO> PostAsync(ScheduledMeetingCreateDTO scheduledMeeting)
