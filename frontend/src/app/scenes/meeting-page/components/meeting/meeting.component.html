@@ -406,6 +406,7 @@
       </div>
       <div 
       class="catch-area"
+      [class.shorter-area]="pinnedCardsLayout === 1 && isCardPinned"
       *ngIf="shouldBeCatchArea && isHost">
         <div class="music-player" *ngIf="isHost">
           <input type="file" #uploadFile style="display: none;" accept=".mp3" (change)="onFileChange($event.target.files)">
