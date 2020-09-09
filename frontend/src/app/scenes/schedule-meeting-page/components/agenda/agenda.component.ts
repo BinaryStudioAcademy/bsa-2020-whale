@@ -8,7 +8,7 @@ import { PointAgenda } from '@shared/models/agenda/agenda';
   templateUrl: './agenda.component.html',
   styleUrls: ['./agenda.component.sass'],
 })
-export class AgendaComponent implements OnInit, AfterViewInit {
+export class AgendaComponent implements OnInit {
   today: Date = new Date();
   public form: FormGroup;
   public timeConfig: IDatePickerConfig = {
@@ -19,7 +19,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   @Input() point: PointAgenda;
   @Output() tagRemoved = new EventEmitter<PointAgenda>();
   @Output() agendaValid = new EventEmitter<boolean>();
-  constructor(private cdr: ChangeDetectorRef) {
+  constructor() {
     const today: Date = new Date();
     this.form = new FormGroup({
       time: new FormControl(`${today.getHours() + 1}:30`),
