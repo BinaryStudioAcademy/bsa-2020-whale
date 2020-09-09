@@ -215,7 +215,7 @@ export class MeetingComponent
   >;
   @ViewChild('checkTopic') checkTopic: ElementRef<HTMLInputElement>;
 
-  @ViewChild('polls') polls: ElementRef;
+  @ViewChild('polls') polls: ElementRef<HTMLDivElement>;
   @ViewChild('pollsButton') pollsButton: ElementRef;
   @ViewChild('pollsButtonFullscreen') pollsButtonFullscreen: ElementRef;
   @ViewChild('reactions') reactions: ElementRef;
@@ -296,8 +296,10 @@ export class MeetingComponent
 
     if (!isInsidePolls &&
       targetElement !== this.pollsButton?.nativeElement &&
-      targetElement !== this.pollsButtonFullscreen?.nativeElement) {
-      this.pollService.isShowPoll = false;
+      targetElement !== this.pollsButtonFullscreen?.nativeElement &&
+      targetElement.nodeName !== 'BUTTON' &&
+      targetElement.nodeName !== 'I') {
+      this.pollService.isShowPollContainer = false;
     }
 
     if (!isInsideReactions &&
@@ -1166,13 +1168,13 @@ export class MeetingComponent
   }
   public onMeetingSettingClick(): void {
     this.isShowStatistics = false;
-    this.pollService.isShowPoll = false;
+    this.pollService.isShowPollContainer = false;
     this.isShowMeetingSettings = !this.isShowMeetingSettings;
   }
 
   public onStatisticsIconClick(): void {
     this.isShowReactions = false;
-    this.pollService.isShowPoll = false;
+    this.pollService.isShowPollContainer = false;
     this.isShowMeetingSettings = false;
     this.pollService.isPollCreating = false;
     this.pollService.isShowPollResults = false;
@@ -1193,7 +1195,7 @@ export class MeetingComponent
   }
 
   public onReactionsIconClick(): void {
-    this.pollService.isShowPoll = false;
+    this.pollService.isShowPollContainer = false;
     this.pollService.isPollCreating = false;
     this.pollService.isShowPollResults = false;
     this.isShowStatistics = false;

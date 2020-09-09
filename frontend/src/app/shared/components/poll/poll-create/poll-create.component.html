@@ -1,6 +1,11 @@
 <div class="ui segment">
   <app-spiner *ngIf="isLoading" size="medium"></app-spiner>
-  <h3>Poll</h3>
+  <div class="poll-create-header">
+    <div class="return-back-icon">
+      <i class="ui icon reply" (click)="closePollCreate()"></i>
+    </div>
+    <div class="header-text">Poll</div>
+  </div>
   <form class="ui form" [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="field">
       <label>Title</label>
