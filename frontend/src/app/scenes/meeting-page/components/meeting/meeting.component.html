@@ -654,6 +654,7 @@
               <div *ngFor="let row of splitMessage(message?.message)">
                 {{ row }}
               </div>
+              <a *ngIf="message.attachmentUrl" target="_blank" href="{{message.attachmentUrl}}">Тыц</a>
             </div>
           </div>
         </div>
@@ -720,10 +721,20 @@ Enter+Shift for new line."
             required
           >
           </textarea>
+          <i
+            *ngIf="!this.questionService.areQuestionsOpened && !isAttachment"
+            class="paperclip link icon blue attachment"
+            (click)="addAttachment($event)"
+          ></i>
+          <i
+            *ngIf="!this.questionService.areQuestionsOpened && isAttachment"
+            class="trash link icon blue attachment"
+            (click)="onFileDettach()"
+          ></i>
           <button
             class="sendMessage"
             (click)="sendMessage()"
-            [disabled]="msgText === ''"
+            [disabled]="msgText === '' && !this.isAttachment"
           >
             <i
               id="meeting-sendmessage"
@@ -731,6 +742,7 @@ Enter+Shift for new line."
               class="paper plane link icon blue"
             ></i>
           </button>
+          <input type="file" #attachFile style="display: none;" (change)="onFileAttach($event.target.files)">
         </div>
       </div>
     </div>

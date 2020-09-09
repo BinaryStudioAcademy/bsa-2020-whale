@@ -4,6 +4,7 @@ using Microsoft.Azure.Storage.Blob;
 using MimeTypes;
 using System;
 using System.Threading.Tasks;
+using Whale.API.Models;
 using Whale.DAL.Settings;
 
 namespace Whale.API.Providers
@@ -21,11 +22,26 @@ namespace Whale.API.Providers
             _blobClient = storageAccount.CreateCloudBlobClient();
         }
 
-        public async Task<string> UploadFileAsync(IFormFile file)
+        public async Task<string> UploadFileAsync(IFormFile file, FileTypeEnum type)
         {
             string contentType = file.ContentType.Split('/')[0];
 
-            var container = _blobClient.GetContainerReference(_settings.ImageContainerName);
+            CloudBlobContainer container = null;
+            switch (type)
+            {
+                case FileTypeEnum.Audio:
+                    container = _blobClient.GetContainerReference(_settings.AudioContainerName);
+                    break;
+                case FileTypeEnum.Image:
+                    container = _blobClient.GetContainerReference(_settings.ImageContainerName);
+                    break;
+                case FileTypeEnum.Video:
+                    container = _blobClient.GetContainerReference(_settings.VideoContainerName);
+                    break;
+                case FileTypeEnum.Attachment:
+                    container = _blobClient.GetContainerReference(_settings.AttachmentContainerName);
+                    break;
+            }
             await SetPublicContainerPermissionsAsync(container);
 
             string fileName;

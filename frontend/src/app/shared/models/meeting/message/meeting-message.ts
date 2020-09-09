@@ -7,4 +7,5 @@ export interface MeetingMessage {
   meetingId: string;
   message: string;
   sentDate: Date;
+  attachmentUrl: string;
 }
