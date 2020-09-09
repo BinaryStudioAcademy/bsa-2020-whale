@@ -15,6 +15,8 @@ import { NotificationService } from 'app/core/services/notification.service';
 import { Subject } from 'rxjs';
 import { WhaleSignalService, WhaleSignalMethods } from 'app/core/services';
 import { GroupMembersVisibilityService } from 'app/core/services/group-members-visibility.service';
+import {PushNotificationsService} from '../../../core/services/push-notification.service';
+import {NotificationTypeEnum, OptionsAddContact, OptionsInviteMeeting, OptionsText} from '@shared/models';
 
 @Component({
   selector: 'app-page-header',
@@ -31,6 +33,7 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
   settingsMenuVisible = false;
   isNotificationsVisible = false;
   loggedInUser: User;
+  message: string;
 
   public notificationsList: Notification[];
 
@@ -41,7 +44,10 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
     private notificationService: NotificationService,
     private whaleSignalrService: WhaleSignalService,
     private groupMembersVisibility: GroupMembersVisibilityService,
-  ) {}
+    private pushNotificationService: PushNotificationsService
+  ) {
+    this.pushNotificationService.requestPermission();
+    }
 
   public showNotificationsMenu(): void {
     if (this.notificationsList.length) {
@@ -99,6 +105,9 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
   getNotifications(): void {
     this.notificationService.GetNotifications().subscribe((notifications) => {
       this.notificationsList = notifications;
+      notifications.forEach( (item) => {
+        this.sendPushNotification(item);
+      });
     });
   }
 
@@ -107,6 +116,7 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((newNotification) => {
         this.notificationsList.push(newNotification);
+        this.sendPushNotification(newNotification);
       });
 
     this.whaleSignalrService.updateNotify$
@@ -158,5 +168,61 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
 
   onOpenGroupChat(groupId: string): void {
     this.openGroupChatClicked.emit(groupId);
+  }
+
+  sendPushNotification(notification: Notification): void {
+    if (
+      notification.notificationType ===
+      NotificationTypeEnum.TextNotification
+    ) {
+      this.message = (JSON.parse(
+        notification.options
+      ) as OptionsText).message;
+      this.pushNotificationService.Send(this.message);
+      return;
+    }
+    if (
+      notification.notificationType ===
+      NotificationTypeEnum.AddContactNotification
+    ) {
+      const contactEmail = (JSON.parse(
+        notification.options
+      ) as OptionsAddContact).contactEmail;
+      this.pushNotificationService.Send(`${contactEmail} wants add you to contacts.`);
+      return;
+    }
+    if (
+      notification.notificationType ===
+      NotificationTypeEnum.MeetingInviteNotification
+    ) {
+      const contactEmail = (JSON.parse(
+        notification.options
+      ) as OptionsInviteMeeting).contactEmail;
+      this.pushNotificationService.Send(`${contactEmail} invites you to meeting.`);
+      return;
+    }
+    if (
+      notification.notificationType === NotificationTypeEnum.UnreadMessage
+    ) {
+      const unreadMessageOptions = JSON.parse(notification.options);
+      const count = unreadMessageOptions.unreadMessageIds.length;
+      this.message =
+        count <= 1
+          ? `Unread message from ${unreadMessageOptions.senderName}.`
+          : `${count} unread messages from ${unreadMessageOptions.senderName}.`;
+      this.pushNotificationService.Send(this.message);
+    }
+    if (
+      notification.notificationType ===
+      NotificationTypeEnum.UnreadGroupMessage
+    ) {
+      const unreadGroupMessageOptions = JSON.parse(notification.options);
+      const count = unreadGroupMessageOptions.unreadGroupMessages.length;
+      this.message =
+        count <= 1
+          ? `Unread message from "${unreadGroupMessageOptions.groupName}" group.`
+          : `${count} unread messages from "${unreadGroupMessageOptions.groupName}".`;
+      this.pushNotificationService.Send(this.message);
+    }
   }
 }
