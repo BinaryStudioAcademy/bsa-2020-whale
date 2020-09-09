@@ -58,6 +58,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
 
   startDate: Moment;
   endDate: Moment;
+  isLoading = true;
 
 constructor(
     private statisticsService: StatisticsService,
@@ -88,8 +89,12 @@ constructor(
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(resp => {
         this.allTimeStatistics = resp.body;
+        this.isLoading = false;
       },
-      (error) => (this.allTimeStatistics = null));
+      (error) => {
+        this.allTimeStatistics = null;
+        this.isLoading = false;
+      });
   }
 
   getStatistics(startDate: Date, endDate: Date): void {
