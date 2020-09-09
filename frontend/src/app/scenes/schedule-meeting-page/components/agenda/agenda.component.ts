@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ChangeDetectorRef, AfterViewInit } from '@angular/core';
 import { IDatePickerConfig } from 'ng2-date-picker/date-picker/date-picker-config.model';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { PointAgenda } from '@shared/models/agenda/agenda';

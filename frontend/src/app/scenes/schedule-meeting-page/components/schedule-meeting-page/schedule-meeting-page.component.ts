@@ -344,6 +344,10 @@ export class ScheduleMeetingPageComponent implements OnInit {
       this.agendaValidate = true;
       return;
     }
+    if (this.pointList.some(x => this.IsWhiteSpaceOnly(x.name))){
+      this.agendaValidate = false;
+      return;
+    }
     this.agendaValidate = event;
   }
 
