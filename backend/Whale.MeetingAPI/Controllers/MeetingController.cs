@@ -145,10 +145,10 @@ namespace Whale.API.Controllers
             return Ok();
         }
 
-        [HttpPost("randomStatistics/{toDate}")]
-        public async Task<ActionResult> GenerateRandomStatistics(string toDate)
+        [HttpPost("randomStatistics/{fromDate}/{toDate}")]
+        public async Task<ActionResult> GenerateRandomStatistics(string fromDate, string toDate)
         {
-            await _meetingService.GenerateRandomStatistics(toDate);
+            await _meetingService.GenerateRandomStatistics(fromDate, toDate);
             return Ok();
         }
     }

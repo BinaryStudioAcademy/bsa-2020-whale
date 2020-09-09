@@ -464,11 +464,12 @@ namespace Whale.Shared.Services
             await _elasticSearchService.SaveSingleAsync(statistics);
         }
 
-        public async Task GenerateRandomStatistics(string toDate)
-        {
-            var date = DateTimeOffset.Parse(toDate);
+        public async Task GenerateRandomStatistics(string fromDate, string toDate)
+        {   
+            var from = DateTimeOffset.Parse(fromDate);
+            var to = DateTimeOffset.Parse(toDate);
             var random = new Random();
-            var meetings = _context.Meetings.Where(m => m.EndTime.HasValue && m.EndTime < date).ToList();
+            var meetings = _context.Meetings.Where(m => m.EndTime.HasValue && m.EndTime >= from && m.EndTime <= to).ToList();
             foreach(var m in meetings)
             {
                 var participants = _context.Participants.Where(p => p.MeetingId == m.Id).ToList();
