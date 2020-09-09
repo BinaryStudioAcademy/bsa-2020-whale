@@ -14,6 +14,7 @@ import {
   Group,
   CallDecline,
   GroupCallDecline,
+  Meeting,
 } from '@shared/models';
 
 @Injectable({
@@ -81,6 +82,9 @@ export class WhaleSignalService {
 
   private updatedGroup = new Subject<Group>();
   public updatedGroup$ = this.updatedGroup.asObservable();
+
+  private onMeetingEnd = new Subject<string>();
+  public onMeetingEnd$ = this.onMeetingEnd.asObservable();
 
   constructor(hubService: SignalRService) {
     from(hubService.registerHub(environment.signalrUrl, 'whale'))
@@ -177,6 +181,10 @@ export class WhaleSignalService {
 
         this.signalHub.on('OnGroupUpdate', (group: Group) => {
           this.updatedGroup.next(group);
+        });
+
+        this.signalHub.on('OnMeetingEnd', (meeting) => {
+          this.onMeetingEnd.next(meeting);
         });
       });
   }

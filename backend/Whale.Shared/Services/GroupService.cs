@@ -111,7 +111,6 @@ namespace Whale.Shared.Services
                 throw new NotFoundException("User in group", updateGroup.CreatorEmail);
 
             var isAdminChanged = group.CreatorEmail != updateGroup.CreatorEmail;
-            Console.WriteLine("check" + isAdminChanged);
 
             group.CreatorEmail = updateGroup.CreatorEmail;
             group.Label = updateGroup.Label;

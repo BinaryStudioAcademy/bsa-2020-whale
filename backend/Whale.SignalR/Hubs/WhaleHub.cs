@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +9,7 @@ using Whale.DAL.Models;
 using Whale.Shared.Models.Contact;
 using Whale.Shared.Models.Group;
 using Whale.Shared.Models.Group.GroupUser;
+using Whale.Shared.Models.Meeting;
 using Whale.Shared.Models.Notification;
 using Whale.Shared.Models.User;
 using Whale.Shared.Services;
@@ -234,6 +236,12 @@ namespace Whale.SignalR.Hubs
                 await Clients.Client(connection).SendAsync("OnRemovedFromGroup", group.Id);
                 await Groups.RemoveFromGroupAsync(connection, userGroup.GroupId.ToString());
             }
+        }
+
+        [HubMethodName("SignalMeetingEnd")]
+        public async Task OnMeetingEnd(string userEmail, string meeting)
+        {
+            await Clients.Group(userEmail).SendAsync("OnMeetingEnd", meeting);
         }
     }
 }

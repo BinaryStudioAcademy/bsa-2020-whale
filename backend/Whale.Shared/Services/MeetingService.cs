@@ -23,6 +23,8 @@ using shortid.Configuration;
 using System.Globalization;
 using Whale.Shared.Models.ElasticModels.Statistics;
 using Whale.DAL.Models.Question;
+using Microsoft.AspNetCore.SignalR.Client;
+using Newtonsoft.Json.Serialization;
 
 namespace Whale.Shared.Services
 {
@@ -72,7 +74,6 @@ namespace Whale.Shared.Services
         {
             await _redisService.ConnectAsync();
             var redisDTO = await _redisService.GetAsync<MeetingRedisData>(linkDTO.Id.ToString());
-            Console.WriteLine($"MeetingId: {linkDTO.Id}\nrdisDTO: {redisDTO is null}");
             if (redisDTO?.Password != linkDTO.Password)
                 throw new InvalidCredentialsException();
 
@@ -394,8 +395,8 @@ namespace Whale.Shared.Services
 
         public async Task EndMeetingAsync(Guid meetingId)
         {
-            var meeting = await _context.Meetings.FirstOrDefaultAsync(m => m.Id == meetingId);
-            meeting.Participants = await _context.Participants.Where(p => p.MeetingId == meeting.Id).ToListAsync();
+            var meeting = await _context.Meetings.Include(m => m.PollResults).FirstOrDefaultAsync(m => m.Id == meetingId);
+            meeting.Participants = await _context.Participants.Include(p => p.User).Where(p => p.MeetingId == meeting.Id).ToListAsync();
 
             if (meeting == null)
             {
@@ -430,6 +431,9 @@ namespace Whale.Shared.Services
 
             await _context.SaveChangesAsync();
             await _notifications.UpdateInviteMeetingNotifications(shortUrl);
+
+            signalMeetingEnd(meeting);
+
             foreach (var p in meeting.Participants)
             {
                 var statistics = new MeetingUserStatistics
@@ -440,6 +444,35 @@ namespace Whale.Shared.Services
                     EndDate = (DateTimeOffset)meeting.EndTime,
                 };
                 await _elasticSearchService.SaveSingleAsync(statistics);
+            }
+        }
+
+        public async void signalMeetingEnd(Meeting meeting)
+        {
+            foreach (var participant in meeting.Participants) {
+                var meetingDto = _mapper.Map<MeetingDTO>(meeting);
+
+                var stats = await _elasticSearchService.SearchSingleAsync(participant.User.Id, meeting.Id);
+                if (stats != null)
+                {
+                    meetingDto.SpeechDuration = stats.SpeechTime;
+                    meetingDto.PresenceDuration = stats.PresenceTime;
+                }
+
+                var jsonStringMeeting = JsonConvert.SerializeObject(
+                    meetingDto,
+                    Formatting.Indented,
+                    new JsonSerializerSettings
+                    {
+                        ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
+                        ContractResolver = new CamelCasePropertyNamesContractResolver()
+                    });
+
+                var hubConnection = await _signalrService.ConnectHubAsync("whale");
+                await hubConnection.InvokeAsync(
+                    "SignalMeetingEnd",
+                    participant.User.Email,
+                    jsonStringMeeting);
             }
         }
 
