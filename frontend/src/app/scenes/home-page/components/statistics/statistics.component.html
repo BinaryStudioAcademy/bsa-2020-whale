@@ -122,15 +122,17 @@
             <div class="dates-input">
               <span>From:</span>
               <dp-date-picker
-                [config]="config"
+                [config]="configStart"
                 theme="dp-material"
                 formControlName="startDate"
+                (ngModelChange)="changeStartDate($event)"
               ></dp-date-picker>
               <span>To:</span>
               <dp-date-picker
-                [config]="config"
+                [config]="configEnd"
                 theme="dp-material"
                 formControlName="endDate"
+                (ngModelChange)="changeEndDate($event)"
               ></dp-date-picker>
             </div>
 
@@ -173,7 +175,8 @@
             [xScaleMin]="minDate"
             [xScaleMax]="maxDate"
             [rotateXAxisTicks]="true"
-            [timeline]="true">
+            [timeline]="true"
+            [roundDomains]="true">
             <ng-template #tooltipTemplate let-model="model">
               <h4>{{ dateTickFormatting(model.name) }}</h4>
               <div class="tooltip-model">

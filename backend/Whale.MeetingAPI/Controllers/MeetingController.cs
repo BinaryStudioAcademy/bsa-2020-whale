@@ -144,5 +144,12 @@ namespace Whale.API.Controllers
             await _meetingService.UpdateMeetingStatistic(statistics);
             return Ok();
         }
+
+        [HttpPost("randomStatistics/{toDate}")]
+        public async Task<ActionResult> GenerateRandomStatistics(string toDate)
+        {
+            await _meetingService.GenerateRandomStatistics(toDate);
+            return Ok();
+        }
     }
 }

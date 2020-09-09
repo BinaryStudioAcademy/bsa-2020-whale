@@ -444,7 +444,7 @@ namespace Whale.Shared.Services
         }
 
 
-          public async Task UpdateMeetingStatistic(UpdateStatistics update)
+        public async Task UpdateMeetingStatistic(UpdateStatistics update)
         {
             var user = await _userService.GetUserByEmailAsync(update.Email);
             if (user == null) throw new NotFoundException("User", update.Email);
@@ -462,6 +462,35 @@ namespace Whale.Shared.Services
                 SpeechTime = update.SpeechTime
             };
             await _elasticSearchService.SaveSingleAsync(statistics);
+        }
+
+        public async Task GenerateRandomStatistics(string toDate)
+        {
+            var date = DateTimeOffset.Parse(toDate);
+            var random = new Random();
+            var meetings = _context.Meetings.Where(m => m.EndTime.HasValue && m.EndTime < date).ToList();
+            foreach(var m in meetings)
+            {
+                var participants = _context.Participants.Where(p => p.MeetingId == m.Id).ToList();
+                var duration = ((DateTimeOffset)m.EndTime).Subtract(m.StartTime).TotalMilliseconds;
+                if (duration < 43200000)
+                {
+                    foreach (var p in participants)
+                    {
+                        var statistics = new MeetingUserStatistics
+                        {
+                            Id = $"{p.UserId.ToString()}{m.Id.ToString()}",
+                            UserId = p.UserId,
+                            StartDate = m.StartTime,
+                            EndDate = (DateTimeOffset)m.EndTime,
+                            DurationTime = (long)duration,
+                            PresenceTime = (long)(random.NextDouble() * (duration*0.95 - duration*0.4) + duration * 0.4),
+                            SpeechTime = (long)(random.NextDouble() * duration * 0.6)
+                        };
+                        await _elasticSearchService.IndexSingleAsync(statistics);
+                    }
+                }
+            }
         }
 
         public async Task<string> GetShortInviteLinkAsync(string id, string pwd)
