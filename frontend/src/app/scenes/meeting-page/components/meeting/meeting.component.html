@@ -213,12 +213,13 @@
               "
               data-tooltip="Toggle Webcam"
             >
+            <button class="share-camera"[disabled]="isSharing"                 
+            (click)="toggleCamera()">
               <i
                 id="meeting-options-camera"
                 *ngIf="!isCameraMuted"
                 class="big video icon big-left-margin"
-                (click)="toggleCamera()"
-              ></i>
+              ></i></button>
               <i
                 id="meeting-options-camera"
                 *ngIf="isCameraMuted"
@@ -236,7 +237,7 @@
             <span data-tooltip="Settings">
               <i
                 class="angle up icon"
-                *ngIf="!isCameraMuted"
+                *ngIf="!isCameraMuted && !isSharing"
                 (click)="showVideoSettings()"
               ></i>
             </span>
