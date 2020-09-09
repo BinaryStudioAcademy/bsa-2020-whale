@@ -67,8 +67,12 @@ namespace Whale.Shared.Services
                         PinnedMessage = _mapper.Map<DirectMessageDTO>(c.PinnedMessage),
                         IsAccepted = c.IsAccepted,
                     };
-                    contact.FirstMember.ConnectionId = GetConnectionId(contact.FirstMember.Id);
-                    contact.SecondMember.ConnectionId = GetConnectionId(contact.SecondMember.Id);
+                    var userData = GetConnectionData(contact.FirstMember.Id);
+                    contact.FirstMember.ConnectionId = userData.ConnectionId;
+                    contact.FirstMember.IsSpeaking = userData.IsSpeaking;
+                    userData = GetConnectionData(contact.SecondMember.Id);
+                    contact.SecondMember.ConnectionId = userData.ConnectionId;
+                    contact.SecondMember.IsSpeaking = userData.IsSpeaking;
                     contact.UnreadMessageCount = _context.UnreadMessageIds
                     .Where(um => um.ReceiverId == contact.FirstMemberId && _context.DirectMessages
                         .Any(dm => dm.Id == um.MessageId && dm.AuthorId == contact.SecondMemberId))
@@ -108,8 +112,12 @@ namespace Whale.Shared.Services
                         PinnedMessage = _mapper.Map<DirectMessageDTO>(c.PinnedMessage),
                         IsAccepted = c.IsAccepted,
                     };
-                    contact.FirstMember.ConnectionId = GetConnectionId(contact.FirstMember.Id);
-                    contact.SecondMember.ConnectionId = GetConnectionId(contact.SecondMember.Id);
+                    var userData = GetConnectionData(contact.FirstMember.Id);
+                    contact.FirstMember.ConnectionId = userData.ConnectionId;
+                    contact.FirstMember.IsSpeaking = userData.IsSpeaking;
+                    userData = GetConnectionData(contact.SecondMember.Id);
+                    contact.SecondMember.ConnectionId = userData.ConnectionId;
+                    contact.SecondMember.IsSpeaking = userData.IsSpeaking;
                     return contact;
                 });
         }
@@ -139,8 +147,12 @@ namespace Whale.Shared.Services
                 PinnedMessage = _mapper.Map<DirectMessageDTO>(contact.PinnedMessage),
                 IsAccepted = contact.IsAccepted,
             };
-            dtoContact.FirstMember.ConnectionId = GetConnectionId(contact.FirstMember.Id);
-            dtoContact.SecondMember.ConnectionId = GetConnectionId(contact.SecondMember.Id);
+            var userData = GetConnectionData(contact.FirstMember.Id);
+            dtoContact.FirstMember.ConnectionId = userData.ConnectionId;
+            dtoContact.FirstMember.IsSpeaking = userData.IsSpeaking;
+            userData = GetConnectionData(contact.SecondMember.Id);
+            dtoContact.SecondMember.ConnectionId = userData.ConnectionId;
+            dtoContact.SecondMember.IsSpeaking = userData.IsSpeaking;
 
             return dtoContact;
         }
@@ -252,14 +264,14 @@ namespace Whale.Shared.Services
             return await GetContactAsync(contact.Id, ownerEmail);
         }
 
-        private string GetConnectionId(Guid userId)
+        private UserOnlineDTO GetConnectionData(Guid userId)
         {
             _redisService.Connect();
             try
             {
                 var onlineUsers = _redisService.Get<ICollection<UserOnlineDTO>>(onlineUsersKey);
                 var userOnline = onlineUsers.FirstOrDefault(u => u.Id == userId);
-                return userOnline?.ConnectionId;
+                return userOnline;
             }
             catch (Exception)
             {
