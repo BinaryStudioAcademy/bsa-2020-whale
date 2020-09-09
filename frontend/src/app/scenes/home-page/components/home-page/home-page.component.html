@@ -91,15 +91,27 @@
             >
               {{ contact?.unreadMessageCount }}
             </div>
-            <div
-              data-tooltip="Online"
-              data-position="left center"
-              class="icon-wrapper"
-            >
-              <i
-                *ngIf="contact?.secondMember.connectionId"
-                class="circle small icon"
-              ></i>
+            <div class="icons-wrapper">
+              <div
+                data-tooltip="Is speaking"
+                data-position="left center"
+                class="icon-wrapper"
+              >
+                <i
+                  *ngIf="contact?.secondMember.isSpeaking"
+                  class="video small icon"
+                ></i>
+              </div>
+              <div
+                data-tooltip="Online"
+                data-position="left center"
+                class="icon-wrapper"
+              >
+                <i
+                  *ngIf="contact?.secondMember.connectionId"
+                  class="circle small icon"
+                ></i>
+              </div>
             </div>
           </div>
         </div>
@@ -117,49 +129,53 @@
       </a>
       <div
         [ngClass]="renderClass(groups)"
-        class="contacts-container groups user-list ui middle selection list"
+        class="contacts-container groups"
         [hidden]="!groupsVisibility"
       >
-        <div *ngFor="let group of groups" >
-          <a
+        <div
+          *ngFor="let group of groups"
+          class="user-list ui middle aligned selection list"
+        >
+          <div
             id="home-group"
             [ngClass]="
-              isGroupActive(group) ? 'active item group' : 'item group'
+              isGroupActive(group) ? 'active item contact' : 'item contact'
             "
             (click)="onGroupClick(group)"
           >
             <img
               *ngIf="isImageHere(group)"
-              class="ui avatar image group"
+              class="ui avatar image"
               src="{{ group.photoUrl }}"
             />
             <img
               *ngIf="!isImageHere(group)"
-              class="ui avatar image group"
+              class="ui avatar image"
               src="assets/img/user-group-icon.png"
             />
-
-            <div
-              data-tooltip="Delete group"
-              data-position="left center"
-              class="icon-wrapper__group"
-            >
-              <i
-                *ngIf="group.creatorEmail == loggedInUser?.email"
-                class="trash alternate outline icon"
-                (click)="deleteGroup(group); $event.stopPropagation()"
-              ></i>
-            </div>
-            <div class="description group-description">
+            <div class="description">
               {{ group.label }}
             </div>
             <div
               *ngIf="group?.unreadMessageCount > 0"
-              class="ui circular label group"
+              class="ui circular label"
             >
               {{ group?.unreadMessageCount }}
             </div>
-          </a>
+            <div class="icons-wrapper">
+              <div
+                data-tooltip="Delete group"
+                data-position="left center"
+                class="icon-wrapper"
+              >
+                <i
+                  *ngIf="group.creatorEmail == loggedInUser?.email"
+                  class="trash alternate outline icon"
+                  (click)="deleteGroup(group); $event.stopPropagation()"
+                ></i>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

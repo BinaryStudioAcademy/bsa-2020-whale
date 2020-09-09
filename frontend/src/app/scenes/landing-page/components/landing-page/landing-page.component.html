@@ -8,18 +8,7 @@
       />
     </div>
     <div class="right menu">
-      <div class="item" *ngIf="auth.isSignedIn">
-        <a
-          id="landing-home"
-          class="ui primary button"
-          (click)="redirectToHome()"
-          >Profile</a
-        >
-      </div>
-      <div class="item" *ngIf="auth.isSignedIn">
-        <a id="landing-logout" class="ui button" (click)="logOut()">Log Out</a>
-      </div>
-      <div class="item" *ngIf="!auth.isSignedIn">
+      <div class="item">
         <a id="landing-login" class="ui primary button" (click)="logIn()"
           >Log In</a
         >
@@ -44,17 +33,8 @@
             id="landing-main-login"
             class="ui big primary button"
             (click)="logIn()"
-            *ngIf="!auth.isSignedIn"
           >
             <span>Sign up for free</span>
-          </button>
-          <button
-            id="landing-main-home"
-            class="ui big primary button"
-            (click)="redirectToHome()"
-            *ngIf="auth.isSignedIn"
-          >
-            <span>Go to homepage</span>
           </button>
         </div>
       </div>
@@ -85,18 +65,17 @@
         </div>
       </div>
       <div class="ui column center aligned">
-        <img class="icon" src="assets/img/noise-reduction-icon.png" />
-        <h2>Noise reduction</h2>
+        <i class="massive paint brush icon"></i>
+        <h2>Whiteboard</h2>
         <div>
-          No one will notice if you’re taking a walk in a windy park during a
-          meeting
+          White surface for making nonpermanent markings
         </div>
       </div>
       <div class="ui column center aligned">
-        <img class="icon" src="assets/img/custom-background-icon.png" />
-        <h2>Custom backgrounds</h2>
+        <i class="massive clipboard list icon"></i>
+        <h2>Polls</h2>
         <div>
-          Background replacement to look professional even during BBQ party
+          Ask meeting participants their opinion about a subject
         </div>
       </div>
     </div>

@@ -30,6 +30,7 @@ namespace Whale.SignalR.Hubs
         private readonly UserService _userService;
         private readonly RoomService _roomService;
         private readonly MeetingHttpService _meetingHttpService;
+        private readonly WhaleService _whaleService;
         private static readonly Dictionary<string, string> _connectionWithMeeting = new Dictionary<string, string>();
 
         public MeetingHub(MeetingService meetingService,
@@ -37,7 +38,8 @@ namespace Whale.SignalR.Hubs
             RedisService redisService,
             UserService userService,
             RoomService roomService,
-            MeetingHttpService meetingHttpService)
+            MeetingHttpService meetingHttpService,
+            WhaleService whaleService)
         {
             _meetingService = meetingService;
             _participantService = participantService;
@@ -45,6 +47,7 @@ namespace Whale.SignalR.Hubs
             _userService = userService;
             _roomService = roomService;
             _meetingHttpService = meetingHttpService;
+            _whaleService = whaleService;
         }
 
         [HubMethodName("OnUserConnect")]
@@ -99,9 +102,9 @@ namespace Whale.SignalR.Hubs
             }
 
             await _redisService.SetAsync(connectionData.MeetingId, meetingData);
-
             await Clients.Group(connectionData.MeetingId).SendAsync("OnUserConnect", connectionData);
             await Clients.Caller.SendAsync("OnParticipantConnect", meetingData.Participants);
+            await _whaleService.UpdateUserState(participant.User.Id, true);
         }
 
         public async override Task OnDisconnectedAsync(Exception exception)
@@ -118,6 +121,8 @@ namespace Whale.SignalR.Hubs
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, meetingId);
             await Clients.Group(meetingId).SendAsync("OnParticipantDisconnected", disconnectedParticipant);
             await _redisService.SetAsync(meetingId, meetingData);
+
+            await _whaleService.UpdateUserState(disconnectedParticipant.User.Id, false);
 
             if (meetingData.IsRoom)
             {
@@ -152,6 +157,7 @@ namespace Whale.SignalR.Hubs
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, connectionData.MeetingId);
             await Clients.Group(connectionData.MeetingId).SendAsync("OnParticipantLeft", connectionData);
             await _redisService.SetAsync(connectionData.MeetingId, meetingData);
+            await _whaleService.UpdateUserState(disconnectedParticipant.User.Id, false);
 
             if (meetingData.IsRoom)
             {

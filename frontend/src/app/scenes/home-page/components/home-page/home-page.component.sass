@@ -11,7 +11,6 @@
 
 .trash.alternate.outline.icon
     padding-right: 24px
-    padding-top: 7px
     color: #151515
     margin-left: 5px
 
@@ -70,14 +69,18 @@
     overflow: hidden
     overflow-y: auto
     overflow-y: overlay
-    .icon-wrapper
-        display: inline-block   
-        width: 15px
+    .icons-wrapper
+        display: flex
+        width: 30px
         float: right
         margin-right: 25px
         margin-left: auto
-        .circle.icon
-            color: #2bac76
+        .icon-wrapper
+            margin-left: 5px
+            .circle.icon
+                color: #2bac76
+            .video.icon
+                color: #ff4242
 .one-height
     min-height: 3.3em
 .two-height
@@ -195,22 +198,5 @@ div.item.contact
     align-items: center !important
     flex-wrap: nowrap !important
 
-.icon-wrapper__group
-    display: inline-block   
-    width: 15px
-    float: right
-    margin-right: 14px
-    margin-left: auto
-
-.ui.circular.label.group
-    margin-left: 10px
-    margin-top: auto
-    margin-bottom: auto
-    float: none !important
 .ui.menu .item
     line-height: 1.2
-
-.ui.avatar.image.group
-    margin-bottom: 8px
-.description.group-description
-    margin-top: 10px

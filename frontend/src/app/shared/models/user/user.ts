@@ -10,4 +10,5 @@ export interface User {
   email: string;
   phone?: string;
   connectionId: string;
+  isSpeaking: boolean;
 }

@@ -178,23 +178,23 @@ export class ScheduleMeetingNoteComponent implements OnInit, OnDestroy {
                 let notificationText = '';
 
                 if (newParticipants.length === 1) {
-                  notificationText = `${newParticipants[0].firstName}
-                                      ${newParticipants[0].secondName} added to the meeting.`;
+                  notificationText = `${newParticipants[0].firstName ? newParticipants[0].firstName : ''}
+                                      ${newParticipants[0].secondName ? newParticipants[0].secondName : ''} added to the meeting.`;
                 }
                 else if (newParticipants.length === 2) {
-                  notificationText = `${newParticipants[0].firstName}
-                                      ${newParticipants[0].secondName} and ${newParticipants[1].firstName}
-                                      ${newParticipants[1].secondName} added to the meeting.`;
+                  notificationText = `${newParticipants[0].firstName ? newParticipants[0].firstName : ''}
+                                      ${newParticipants[0].secondName ? newParticipants[0].secondName : ''} and ${newParticipants[1].firstName ? newParticipants[1].firstName : ''}
+                                      ${newParticipants[1].secondName ? newParticipants[1].secondName : ''} added to the meeting.`;
                 }
                 else if (newParticipants.length === 3) {
-                  notificationText = `${newParticipants[0].firstName}
-                                      ${newParticipants[0].secondName}, ${newParticipants[1].firstName}
-                                      ${newParticipants[1].secondName} and ${newParticipants.length - 2} more user added to the meeting.`;
+                  notificationText = `${newParticipants[0].firstName ? newParticipants[0].firstName : ''}
+                                      ${newParticipants[0].secondName ? newParticipants[0].secondName : ''}, ${newParticipants[1].firstName ? newParticipants[1].firstName : ''}
+                                      ${newParticipants[1].secondName ? newParticipants[1].secondName : ''} and ${newParticipants.length - 2} more user added to the meeting.`;
                 }
                 else {
-                  notificationText = `${newParticipants[0].firstName}
-                                      ${newParticipants[0].secondName}, ${newParticipants[1].firstName}
-                                      ${newParticipants[1].secondName} and ${newParticipants.length - 2} more users added to the meeting.`;
+                  notificationText = `${newParticipants[0].firstName ? newParticipants[0].firstName : ''}
+                                      ${newParticipants[0].secondName ? newParticipants[0].secondName : ''}, ${newParticipants[1].firstName ? newParticipants[1].firstName : ''}
+                                      ${newParticipants[1].secondName ? newParticipants[1].secondName : ''} and ${newParticipants.length - 2} more users added to the meeting.`;
                 }
 
                 this.toastr.success(notificationText);

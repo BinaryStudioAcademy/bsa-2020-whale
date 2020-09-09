@@ -16,6 +16,13 @@
             </span>
           </div>
           <div
+            *ngIf="contactSelected?.secondMember.isSpeaking"
+            data-tooltip="On a call"
+            data-position="bottom center"
+          >
+            <i class="video small icon"></i>
+          </div>
+          <div
             *ngIf="contactSelected?.secondMember.connectionId"
             data-tooltip="Online"
             data-position="bottom center"

@@ -23,7 +23,7 @@ export const environment = {
     debug: 1,
     config: {
       iceServers: [
-        // { urls: 'stun:bsa2020-whale-webrtc.westeurope.cloudapp.azure.com:5349' },
+        { urls: 'stun:bsa2020-whale-webrtc.westeurope.cloudapp.azure.com:5349' },
         {
           urls: 'turn:bsa2020-whale-webrtc.westeurope.cloudapp.azure.com:5349',
           username: 'bsa2020whale',
