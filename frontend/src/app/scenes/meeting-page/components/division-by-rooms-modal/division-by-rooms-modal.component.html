@@ -1,9 +1,12 @@
 <div class="ui dimmer modals page visible active">
   <div class="ui small modal visible active">
     <div class="ui header">
-      <div>
         <h2>Rooms</h2>
-      </div>
+        <button
+          *ngIf="roomService.isDividedIntoRooms"
+          class="ui inverted secondary button"
+          (click)="closeRoomsPrematurely()"
+        >Return all</button>
     </div>
     <div
       class="content"

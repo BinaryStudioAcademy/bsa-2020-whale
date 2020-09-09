@@ -7,6 +7,7 @@ import {
   ParticipantRole,
   RoomCreate,
   Meeting,
+  RoomClose,
 } from '@shared/models';
 
 @Injectable({
@@ -243,5 +244,15 @@ export class RoomService {
       arrs.push(arrCopy.splice(0, size));
     }
     return arrs;
+  }
+
+  public closeRoomsPrematurely() {
+    const roomClose: RoomClose = {
+      roomIds: this.roomsIds,
+      meetingId: this.originalMeetingId,
+      meetingLink: this.originalMeetingUrl
+    };
+
+    this.meetingSignalrService.invoke(SignalMethods.OnCloseRoomsPrematurely, roomClose);
   }
 }
