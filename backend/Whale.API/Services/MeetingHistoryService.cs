@@ -32,7 +32,7 @@ namespace Whale.API.Services
 		{
 			var meetings = _context.Participants
 				.Include(p => p.Meeting)
-				.Where(p => p.UserId == userId && p.Meeting.EndTime != null)
+				.Where(p => p.UserId == userId && p.Meeting.EndTime != null && p.Meeting.EndTime != p.Meeting.StartTime)
 				.Select(p => p.Meeting)
 				.OrderByDescending(m => m.StartTime)
 				.Skip(skip)
@@ -53,23 +53,18 @@ namespace Whale.API.Services
 				.Select(async m =>
 				{
 					m.Participants = await m.Participants.LoadAvatarsAsync(_blobStorageSettings, p => p.User);
-					return m;
+					var mDto = _mapper.Map<MeetingDTO>(m);
+					var stats = await _elasticSearchService.SearchSingleAsync(userId, m.Id);
+					if (stats != null)
+					{
+						mDto.SpeechDuration = stats.SpeechTime;
+						mDto.PresenceDuration = stats.PresenceTime;
+					}
+					return mDto;
 				});
 
 			var meetingList = (await Task.WhenAll(meetingTasks)).ToList();
-			var meetingDtoTasks = meetingList.Select(async m =>
-			{
-				var mDto = _mapper.Map<MeetingDTO>(m);
-				var stats = await _elasticSearchService.SearchSingleAsync(userId, m.Id);
-				if (stats != null)
-				{
-					mDto.SpeechDuration = stats.SpeechTime;
-					mDto.PresenceDuration = stats.PresenceTime;
-				}
-				return mDto;
-			});
-			var meetingDtoList = (await Task.WhenAll(meetingDtoTasks)).ToList();
-			return meetingDtoList;
+			return meetingList;
 		}
 
 		public async Task<IEnumerable<MeetingSpeechDTO>> GetMeetingScriptAsync(Guid meetingId)

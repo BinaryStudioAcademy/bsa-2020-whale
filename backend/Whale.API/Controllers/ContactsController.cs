@@ -27,8 +27,6 @@ namespace Whale.API.Controllers
         {
             var email = HttpContext?.User.Claims
                 .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            Console.WriteLine("email");
-            Console.WriteLine(email);
             var contacts = await _contactsService.GetAllContactsAsync(email);
             if (contacts == null) return NotFound();
 
