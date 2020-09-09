@@ -584,7 +584,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   public onOpenChat(id: string): void {
-    const contact = this.contacts.find((c) => (c.id = id));
+    const contact = this.contacts.find((c) => (c.id === id));
     this.onContactClick(contact);
   }
   public onOpenGroupChat(id: string): void {
