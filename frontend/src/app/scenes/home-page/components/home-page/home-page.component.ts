@@ -173,6 +173,17 @@ export class HomePageComponent implements OnInit, OnDestroy {
                     }
                   );
 
+                this.whaleSignalrService.signalUserUpdated$
+                  .pipe(takeUntil(this.unsubscribe$))
+                  .subscribe(
+                    (onlineUser) => {
+                      this.userConnected(onlineUser);
+                    },
+                    (err) => {
+                      this.toastr.error(err.Message);
+                    }
+                  );
+
                 this.whaleSignalrService.signalUserDisconected$
                   .pipe(takeUntil(this.unsubscribe$))
                   .subscribe(
@@ -250,6 +261,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
     );
     if (index >= 0) {
       this.contacts[index].secondMember.connectionId = onlineUser.connectionId;
+      this.contacts[index].secondMember.isSpeaking = onlineUser.isSpeaking;
     }
   }
 
@@ -259,6 +271,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
     );
     if (index >= 0) {
       this.contacts[index].secondMember.connectionId = null;
+      this.contacts[index].secondMember.isSpeaking = false;
     }
   }
 
@@ -266,6 +279,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
     const index = this.contacts.findIndex((c) => c.secondMember?.id === userId);
     if (index >= 0) {
       this.contacts[index].secondMember.connectionId = null;
+      this.contacts[index].secondMember.isSpeaking = false;
     }
   }
 

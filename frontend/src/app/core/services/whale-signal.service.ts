@@ -25,6 +25,9 @@ export class WhaleSignalService {
   private signalUserConected = new Subject<UserOnline>();
   public signalUserConected$ = this.signalUserConected.asObservable();
 
+  private signalUserUpdated = new Subject<UserOnline>();
+  public signalUserUpdated$ = this.signalUserUpdated.asObservable();
+
   private signalUserDisconected = new Subject<string>();
   public signalUserDisconected$ = this.signalUserDisconected.asObservable();
 
@@ -89,6 +92,10 @@ export class WhaleSignalService {
       .subscribe(() => {
         this.signalHub.on('OnUserConnect', (userOnline: UserOnline) => {
           this.signalUserConected.next(userOnline);
+        });
+
+        this.signalHub.on('OnUpdateUserState', (userOnline: UserOnline) => {
+          this.signalUserUpdated.next(userOnline);
         });
 
         this.signalHub.on('OnUserDisconnect', (userEmail: string) => {

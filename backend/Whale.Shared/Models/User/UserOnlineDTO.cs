@@ -6,5 +6,6 @@ namespace Whale.Shared.Models.User
     {
         public Guid Id { get; set; }
         public string ConnectionId { get; set; }
+        public bool IsSpeaking { get; set; }
     }
 }

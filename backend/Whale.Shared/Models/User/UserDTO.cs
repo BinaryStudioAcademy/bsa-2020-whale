@@ -14,5 +14,6 @@ namespace Whale.Shared.Models.User
         public string Email { get; set; }
         public string Phone { get; set; }
         public string ConnectionId { get; set; }
+        public bool IsSpeaking { get; set; }
     }
 }

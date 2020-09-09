@@ -40,7 +40,9 @@ namespace Whale.Shared.Services
             return users.Select(u =>
             {
                 var user = _mapper.Map<UserDTO>(u);
-                user.ConnectionId = GetConnectionId(u.Id);
+                var userData = GetConnectionData(user.Id);
+                user.ConnectionId = userData?.ConnectionId;
+                user.IsSpeaking = userData?.IsSpeaking ?? false;
                 return user;
             });
         }
@@ -55,7 +57,9 @@ namespace Whale.Shared.Services
             await user.LoadAvatarAsync(_blobStorageSettings);
 
             var userDto = _mapper.Map<UserDTO>(user);
-            userDto.ConnectionId = GetConnectionId(user.Id);
+            var userData = GetConnectionData(user.Id);
+            userDto.ConnectionId = userData?.ConnectionId;
+            userDto.IsSpeaking = userData?.IsSpeaking ?? false;
             return userDto;
         }
 
@@ -67,7 +71,9 @@ namespace Whale.Shared.Services
             await user.LoadAvatarAsync(_blobStorageSettings);
 
             var userDto = _mapper.Map<UserDTO>(user);
-            userDto.ConnectionId = GetConnectionId(user.Id);
+            var userData = GetConnectionData(user.Id);
+            userDto.ConnectionId = userData?.ConnectionId;
+            userDto.IsSpeaking = userData?.IsSpeaking ?? false;
             return userDto;
         }
 
@@ -138,14 +144,14 @@ namespace Whale.Shared.Services
             return true;
         }
 
-        private string GetConnectionId(Guid userId)
+        private UserOnlineDTO GetConnectionData(Guid userId)
         {
             _redisService.Connect();
             try
             {
                 var onlineUsers = _redisService.Get<ICollection<UserOnlineDTO>>(onlineUsersKey);
                 var userOnline = onlineUsers.FirstOrDefault(u => u.Id == userId);
-                return userOnline?.ConnectionId;
+                return userOnline;
             }
             catch (Exception)
             {

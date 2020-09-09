@@ -91,15 +91,27 @@
             >
               {{ contact?.unreadMessageCount }}
             </div>
-            <div
-              data-tooltip="Online"
-              data-position="left center"
-              class="icon-wrapper"
-            >
-              <i
-                *ngIf="contact?.secondMember.connectionId"
-                class="circle small icon"
-              ></i>
+            <div class="icons-wrapper">
+              <div
+                data-tooltip="Is speaking"
+                data-position="left center"
+                class="icon-wrapper"
+              >
+                <i
+                  *ngIf="contact?.secondMember.isSpeaking"
+                  class="video small icon"
+                ></i>
+              </div>
+              <div
+                data-tooltip="Online"
+                data-position="left center"
+                class="icon-wrapper"
+              >
+                <i
+                  *ngIf="contact?.secondMember.connectionId"
+                  class="circle small icon"
+                ></i>
+              </div>
             </div>
           </div>
         </div>

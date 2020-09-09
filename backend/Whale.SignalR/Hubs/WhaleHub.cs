@@ -9,6 +9,7 @@ using Whale.Shared.Models.Contact;
 using Whale.Shared.Models.Group;
 using Whale.Shared.Models.Group.GroupUser;
 using Whale.Shared.Models.Notification;
+using Whale.Shared.Models.User;
 using Whale.Shared.Services;
 using Whale.SignalR.Models.Call;
 
@@ -43,6 +44,12 @@ namespace Whale.SignalR.Hubs
             await Groups.AddToGroupAsync(Context.ConnectionId, WhaleService.OnlineUsersKey);
             var userOnline = await _whaleService.UserConnectAsync(userEmail, Context.ConnectionId);
             await Clients.GroupExcept(WhaleService.OnlineUsersKey, Context.ConnectionId).SendAsync("OnUserConnect", userOnline);
+        }
+
+        [HubMethodName("OnUpdateUserState")]
+        public async Task UpdateUserState(UserOnlineDTO userOnline)
+        {
+            await Clients.GroupExcept(WhaleService.OnlineUsersKey, Context.ConnectionId).SendAsync("OnUpdateUserState", userOnline);
         }
 
         [HubMethodName("OnUserDisconnect")]
