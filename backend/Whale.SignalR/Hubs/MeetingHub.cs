@@ -425,13 +425,25 @@ namespace Whale.SignalR.Hubs
         {
             await _redisService.ConnectAsync();
             var meetingData = await _redisService.GetAsync<MeetingRedisData>(connectionData.MeetingId);
-            var disconnectedParticipant = meetingData?.Participants?.FirstOrDefault(p => p.User.Email == connectionData.UserEmail);
-            meetingData.Participants.Remove(disconnectedParticipant);
+            if (meetingData != null)
+            {
+                var disconnectedParticipant = meetingData?.Participants?.FirstOrDefault(p => p.User.Email == connectionData.UserEmail);
+                meetingData.Participants.Remove(disconnectedParticipant);
+                connectionData.Participant = disconnectedParticipant;
+                await _redisService.SetAsync(connectionData.MeetingId, meetingData);
+            }
 
-            connectionData.Participant = disconnectedParticipant;
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, connectionData.MeetingId);
             await Clients.Group(connectionData.MeetingId).SendAsync("OnParticipantLeft", connectionData);
-            await _redisService.SetAsync(connectionData.MeetingId, meetingData);
+        }
+
+        [HubMethodName("OnCloseRoomsPrematurely")]
+        public async Task CloseRoomsPrematurely(RoomsCloseDTO closeData)
+        {
+            await _roomService.CloseAllRooms(
+                closeData.MeetingLink, 
+                closeData.RoomIds, 
+                closeData.MeetingId.ToString());
         }
 
         private async Task DeleteMeetingAsync(string meetingId)

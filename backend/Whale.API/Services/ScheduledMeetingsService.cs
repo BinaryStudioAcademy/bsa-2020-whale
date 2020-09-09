@@ -78,7 +78,25 @@ namespace Whale.API.Services
                 var participantEmails = JsonConvert.DeserializeObject<List<string>>(scheduled.ParticipantsEmails);
                 var userParticipants = (await _userService.GetAllUsersAsync()).Where(u => participantEmails.Contains(u.Email));
                 var settings = JsonConvert.DeserializeObject<MeetingSettingsDTO>(scheduled.Meeting.Settings);
-                var meetingDTO = _mapper.Map<MeetingDTO>(scheduled.Meeting);
+                var meetingDTO = new MeetingDTO
+                {
+                    Id = scheduled.Meeting.Id,
+                    Settings = scheduled.Meeting.Settings,
+                    StartTime = scheduled.Meeting.StartTime,
+                    EndTime = scheduled.Meeting.EndTime,
+                    AnonymousCount = scheduled.Meeting.AnonymousCount,
+                    IsScheduled = scheduled.Meeting.IsScheduled,
+                    IsRecurrent = scheduled.Meeting.IsRecurrent,
+                    IsVideoAllowed = settings.IsVideoAllowed,
+                    IsAudioAllowed = settings.IsAudioAllowed,
+                    IsWhiteboard = settings.IsWhiteboard,
+                    IsPoll = settings.IsPoll,
+                    IsAllowedToChooseRoom = settings.IsAllowedToChooseRoom,
+                    RecognitionLanguage = settings.RecognitionLanguage,
+                    Recurrence = settings.Recurrence,
+                    Participants = _mapper.Map<IEnumerable<ParticipantDTO>>(scheduled.Meeting.Participants),
+                    PollResults = _mapper.Map<IEnumerable<PollResultDTO>>(scheduled.Meeting.PollResults)
+                };
                 scheduledDTOList.Add(new ScheduledDTO
                 {
                     Id = scheduled.Id,

@@ -546,6 +546,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
     if (newGroup) {
       this.removeContact(newGroup.id);
       this.groups.push(newGroup);
+      this.messageService.joinGroup(newGroup.id);
       this.groupsVisibility = true;
     }
   }

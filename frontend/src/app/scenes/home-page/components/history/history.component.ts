@@ -7,6 +7,7 @@ import {
   HostListener,
   ViewChild,
   ElementRef,
+  OnDestroy,
 } from '@angular/core';
 import { User } from '@shared/models/user/user';
 import { Meeting } from '@shared/models/meeting/meeting';
@@ -15,14 +16,18 @@ import { environment } from '@env';
 import { HttpParams } from '@angular/common/http';
 import { timeStamp } from 'console';
 import { ThrowStmt } from '@angular/compiler';
+import { WhaleSignalService } from 'app/core/services';
+import { takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-history',
   templateUrl: './history.component.html',
   styleUrls: ['./history.component.sass'],
 })
-export class HistoryComponent implements OnInit {
+export class HistoryComponent implements OnInit, OnDestroy {
   public route = environment.apiUrl + '/meetingHistory';
+  private unsubscribe$ = new Subject<void>();
 
   @Input() user: User;
   @Output() historyClose: EventEmitter<void> = new EventEmitter<void>();
@@ -37,10 +42,24 @@ export class HistoryComponent implements OnInit {
   public requestSent = false;
   public allDataLoaded = false;
 
-  constructor(private httpService: HttpService) {}
+  constructor(
+    private httpService: HttpService,
+    private whaleSignalRService: WhaleSignalService
+  ) {}
 
   ngOnInit(): void {
     this.getSomeMeetings();
+    this.whaleSignalRService.onMeetingEnd$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe((meeting) => {
+        const meetingObj = JSON.parse(meeting) as Meeting;
+        this.meetings.unshift(meetingObj);
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
 
   public onScroll(): void {

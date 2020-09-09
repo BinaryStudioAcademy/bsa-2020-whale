@@ -356,4 +356,5 @@ export enum SignalMethods {
   OnOutTime,
   OnSnoozeTopic,
   OnEndedTopic,
+  OnCloseRoomsPrematurely
 }

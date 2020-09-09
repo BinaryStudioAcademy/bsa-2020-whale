@@ -1966,7 +1966,7 @@ export class MeetingComponent
   }
 
   async turnOffMusic(): Promise<void> {
-    this.musicFile.pause();
+    this.musicFile?.pause();
     this.musicFile = null;
     this.uploadedFile = null;
     this.isMusicUploaded = false;

@@ -38,6 +38,12 @@ namespace Whale.Shared.Services
             await _elasticClient.IndexAsync(record, i => i.Index(indexName));
         }
 
+        public async Task IndexSingleAsync(MeetingUserStatistics record)
+        {
+            var indexName = $"{indexPrefix}{record.UserId.ToString()}";
+            await _elasticClient.IndexAsync(record, i => i.Index(indexName));
+        }
+
         public async Task SaveRangeAsync(IEnumerable<MeetingUserStatistics> records)
         {
             var first = records.FirstOrDefault();

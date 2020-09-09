@@ -167,4 +167,8 @@ export class DivisionByRoomsModalComponent
     }
     room.name = name;
   }
+
+  public closeRoomsPrematurely() {
+    this.roomService.closeRoomsPrematurely();
+  }
 }

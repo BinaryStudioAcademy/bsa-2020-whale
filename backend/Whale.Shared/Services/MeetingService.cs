@@ -23,6 +23,8 @@ using shortid.Configuration;
 using System.Globalization;
 using Whale.Shared.Models.ElasticModels.Statistics;
 using Whale.DAL.Models.Question;
+using Microsoft.AspNetCore.SignalR.Client;
+using Newtonsoft.Json.Serialization;
 
 namespace Whale.Shared.Services
 {
@@ -72,7 +74,6 @@ namespace Whale.Shared.Services
         {
             await _redisService.ConnectAsync();
             var redisDTO = await _redisService.GetAsync<MeetingRedisData>(linkDTO.Id.ToString());
-            Console.WriteLine($"MeetingId: {linkDTO.Id}\nrdisDTO: {redisDTO is null}");
             if (redisDTO?.Password != linkDTO.Password)
                 throw new InvalidCredentialsException();
 
@@ -394,8 +395,8 @@ namespace Whale.Shared.Services
 
         public async Task EndMeetingAsync(Guid meetingId)
         {
-            var meeting = await _context.Meetings.FirstOrDefaultAsync(m => m.Id == meetingId);
-            meeting.Participants = await _context.Participants.Where(p => p.MeetingId == meeting.Id).ToListAsync();
+            var meeting = await _context.Meetings.Include(m => m.PollResults).FirstOrDefaultAsync(m => m.Id == meetingId);
+            meeting.Participants = await _context.Participants.Include(p => p.User).Where(p => p.MeetingId == meeting.Id).ToListAsync();
 
             if (meeting == null)
             {
@@ -430,6 +431,9 @@ namespace Whale.Shared.Services
 
             await _context.SaveChangesAsync();
             await _notifications.UpdateInviteMeetingNotifications(shortUrl);
+
+            signalMeetingEnd(meeting);
+
             foreach (var p in meeting.Participants)
             {
                 var statistics = new MeetingUserStatistics
@@ -443,8 +447,37 @@ namespace Whale.Shared.Services
             }
         }
 
+        public async void signalMeetingEnd(Meeting meeting)
+        {
+            foreach (var participant in meeting.Participants) {
+                var meetingDto = _mapper.Map<MeetingDTO>(meeting);
 
-          public async Task UpdateMeetingStatistic(UpdateStatistics update)
+                var stats = await _elasticSearchService.SearchSingleAsync(participant.User.Id, meeting.Id);
+                if (stats != null)
+                {
+                    meetingDto.SpeechDuration = stats.SpeechTime;
+                    meetingDto.PresenceDuration = stats.PresenceTime;
+                }
+
+                var jsonStringMeeting = JsonConvert.SerializeObject(
+                    meetingDto,
+                    Formatting.Indented,
+                    new JsonSerializerSettings
+                    {
+                        ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
+                        ContractResolver = new CamelCasePropertyNamesContractResolver()
+                    });
+
+                var hubConnection = await _signalrService.ConnectHubAsync("whale");
+                await hubConnection.InvokeAsync(
+                    "SignalMeetingEnd",
+                    participant.User.Email,
+                    jsonStringMeeting);
+            }
+        }
+
+
+        public async Task UpdateMeetingStatistic(UpdateStatistics update)
         {
             var user = await _userService.GetUserByEmailAsync(update.Email);
             if (user == null) throw new NotFoundException("User", update.Email);
@@ -462,6 +495,36 @@ namespace Whale.Shared.Services
                 SpeechTime = update.SpeechTime
             };
             await _elasticSearchService.SaveSingleAsync(statistics);
+        }
+
+        public async Task GenerateRandomStatistics(string fromDate, string toDate)
+        {   
+            var from = DateTimeOffset.Parse(fromDate);
+            var to = DateTimeOffset.Parse(toDate);
+            var random = new Random();
+            var meetings = _context.Meetings.Where(m => m.EndTime.HasValue && m.EndTime >= from && m.EndTime <= to).ToList();
+            foreach(var m in meetings)
+            {
+                var participants = _context.Participants.Where(p => p.MeetingId == m.Id).ToList();
+                var duration = ((DateTimeOffset)m.EndTime).Subtract(m.StartTime).TotalMilliseconds;
+                if (duration < 43200000)
+                {
+                    foreach (var p in participants)
+                    {
+                        var statistics = new MeetingUserStatistics
+                        {
+                            Id = $"{p.UserId.ToString()}{m.Id.ToString()}",
+                            UserId = p.UserId,
+                            StartDate = m.StartTime,
+                            EndDate = (DateTimeOffset)m.EndTime,
+                            DurationTime = (long)duration,
+                            PresenceTime = (long)(random.NextDouble() * (duration*0.95 - duration*0.4) + duration * 0.4),
+                            SpeechTime = (long)(random.NextDouble() * duration * 0.6)
+                        };
+                        await _elasticSearchService.IndexSingleAsync(statistics);
+                    }
+                }
+            }
         }
 
         public async Task<string> GetShortInviteLinkAsync(string id, string pwd)

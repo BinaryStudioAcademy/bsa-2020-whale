@@ -5,7 +5,7 @@ import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { IDatePickerConfig } from 'ng2-date-picker';
 import { FormGroup, FormControl } from '@angular/forms';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 
 enum StatisticFields {
   Call,
@@ -25,10 +25,20 @@ export class StatisticsComponent implements OnInit, OnDestroy {
 
   public fields = StatisticFields;
 
-  config: IDatePickerConfig = {
+  configStart: IDatePickerConfig = {
     weekDayFormat: 'dd',
     firstDayOfWeek: 'mo',
     showNearMonthDays: false,
+    max: moment({hour: 0, minute: 0, seconds: 0}).add(-1, 'days'),
+    monthBtnCssClassCallback: (month) => 'ng2-date-picker-button',
+    dayBtnCssClassCallback: (day) => 'ng2-date-picker-button',
+  };
+
+  configEnd: IDatePickerConfig = {
+    weekDayFormat: 'dd',
+    firstDayOfWeek: 'mo',
+    showNearMonthDays: false,
+    max: moment({hour: 0, minute: 0, seconds: 0}),
     monthBtnCssClassCallback: (month) => 'ng2-date-picker-button',
     dayBtnCssClassCallback: (day) => 'ng2-date-picker-button',
   };
@@ -45,11 +55,17 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   maxDate: Date;
   dateTicks: Date[];
 
+  startDate: Moment;
+  endDate: Moment;
+  isLoading = true;
+
 constructor(
     private statisticsService: StatisticsService,
   ) {
     const endDate = moment({hour: 0, minute: 0, seconds: 0});
+    this.endDate = moment(endDate);
     const startDate = moment({hour: 0, minute: 0, seconds: 0}).add(-7, 'days');
+    this.startDate = moment(startDate);
     this.form = new FormGroup({
       startDate: new FormControl(startDate),
       endDate: new FormControl(endDate),
@@ -72,8 +88,12 @@ constructor(
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(resp => {
         this.allTimeStatistics = resp.body;
+        this.isLoading = false;
       },
-      (error) => (this.allTimeStatistics = null));
+      (error) => {
+        this.allTimeStatistics = null;
+        this.isLoading = false;
+      });
   }
 
   getStatistics(startDate: Date, endDate: Date): void {
@@ -276,6 +296,22 @@ constructor(
 
   valueTickFormatting(val: number): string{
     return val.toString();
+  }
+
+  changeStartDate(val: Moment): void {
+    if (val === undefined){
+      this.form.controls.startDate.setValue(this.startDate);
+    } else{
+      this.startDate = val;
+    }
+  }
+
+  changeEndDate(val: Moment): void {
+    if (val === undefined){
+      this.form.controls.endDate.setValue(this.endDate);
+    } else{
+      this.endDate = val;
+    }
   }
 
   public close(): void {
