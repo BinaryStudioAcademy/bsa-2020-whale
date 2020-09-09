@@ -15,19 +15,50 @@ button.ng2-date-picker-button
     position: relative
 
 .canvas_whiteboard_buttons
-    position: absolute
-    margin-left: auto
-    margin-right: auto
-    left: 0
-    right: 0
-    text-align: center
-    width: fit-content
+    text-align: left
+    border-bottom: 1.5px solid #e0e0e0
+    width: 100%
+    background-color: #f1f1f1
+    font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif
     
 .canvas_whiteboard_button
     padding-top: 0px !important
     padding-bottom: 0px !important
     margin-top: 0px !important
     margin-bottom: 3px !important
+
+.canvas_whiteboard_button-save
+    position: absolute
+    background-color: #333
+    color: white
+    top: 10px
+    right: 1.5%
+    width: 70px
+    height: 28px
+
+.canvas_whiteboard_button-clear
+    position: absolute
+    background-color: #333
+    color: white
+    top: 10px
+    right: 17%
+    width: 70px
+    height: 28px
+    @media screen and (max-width: 1000px)
+        right: 20%
+
+.canvas_whiteboard_button-save:hover
+    background-color: black
+
+.canvas_whiteboard_button-clear:hover
+    background-color: black
+
+.selected-color-preview
+    border: 0.5px solid black
+
+.canvas-whiteboard-shape-selector-selected-preview.ng-star-inserted
+    padding-left: 5px
+    font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif
 
 img.ui.avatar.fixed-size-35px
     width: 35px
