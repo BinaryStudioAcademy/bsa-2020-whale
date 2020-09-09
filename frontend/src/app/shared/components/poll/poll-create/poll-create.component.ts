@@ -14,6 +14,7 @@ import { PollDto } from '@shared/models/poll/poll-dto';
 export class PollCreateComponent implements OnInit {
   @Input() meetingId: string;
   @Output() pollCreated = new EventEmitter<PollDto>();
+  @Output() pollCreateClosed = new EventEmitter<void>();
 
   public isLoading = false;
 
@@ -45,6 +46,10 @@ export class PollCreateComponent implements OnInit {
 
   removeOption(event: MouseEvent): void {
     this.options.removeAt(Number((event.target as HTMLSpanElement).id));
+  }
+
+  closePollCreate(): void {
+    this.pollCreateClosed.emit();
   }
 
   ngOnInit(): void {}

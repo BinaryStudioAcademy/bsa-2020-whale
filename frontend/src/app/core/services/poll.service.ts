@@ -24,8 +24,9 @@ export class PollService {
   public polls: PollDto[] = [];
   public pollResults: PollResultDto[] = [];
 
+  public isShowPollContainer = false;
   public isPollCreating = false;
-  public isShowPoll = false;
+  public isShowPoll = true;
   public isShowPollResults = false;
 
   constructor(
@@ -88,11 +89,12 @@ export class PollService {
     this.meetingSignalrService.invoke(SignalMethods.OnPollCreated, pollData);
 
     this.isPollCreating = false;
+    this.isShowPoll = true;
   }
 
   public onPollReceived(poll: PollDto): void {
     this.polls.unshift(poll);
-    this.isShowPoll = true;
+    this.isShowPollContainer = true;
   }
 
   public onPollAnswered(poll: PollDto): void {
@@ -133,8 +135,7 @@ export class PollService {
   }
 
   public onPollIconClick(): void {
-    this.isPollCreating = false;
-    this.isShowPoll = !this.isShowPoll;
+    this.isShowPollContainer = !this.isShowPollContainer;
   }
 
   public onNewPollClick(): void {
@@ -165,5 +166,10 @@ export class PollService {
       // spinner
       this.toastr.success('Poll deleted', 'Success');
     });
+  }
+
+  public onPollCreateClosed() {
+    this.isPollCreating = false;
+    this.isShowPoll = true;
   }
 }
