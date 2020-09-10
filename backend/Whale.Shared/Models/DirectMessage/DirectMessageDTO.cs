@@ -14,5 +14,6 @@ namespace Whale.Shared.Models.DirectMessage
         public DateTimeOffset CreatedAt { get; set; }
         public string Message { get; set; }
         public bool Attachment { get; set; }
+        public string AttachmentUrl { get; set; }
     }
 }

@@ -8,6 +8,7 @@ namespace Whale.DAL.Settings
         public string ImageContainerName { get; set; }
         public string VideoContainerName { get; set; }
         public string AudioContainerName { get; set; }
+        public string AttachmentContainerName { get; set; }
         public IList<string> AllowedOrigins { get; set; }
     }
 }

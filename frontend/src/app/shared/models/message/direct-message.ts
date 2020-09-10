@@ -10,4 +10,5 @@ export interface DirectMessage {
   createdAt: Date;
   message: string;
   attachment: boolean;
+  attachmentUrl: string;
 }

@@ -14,5 +14,6 @@ namespace Whale.DAL.Models
         [Required]
         public string Message { get; set; }
         public bool Attachment { get; set; }
+        public string AttachmentUrl { get; set; }
     }
 }

@@ -3,4 +3,5 @@ export interface MeetingMessageCreate {
   receiverEmail: string;
   meetingId: string;
   message: string;
+  attachmentUrl: string;
 }

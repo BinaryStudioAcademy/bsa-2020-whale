@@ -21,7 +21,7 @@ namespace Whale.API.Controllers
         public async Task<ActionResult<string>> Save()
         {
             var file = Request.Form.Files[0];
-            return Ok(await _storageProvider.UploadFileAsync(file));
+            return Ok(await _storageProvider.UploadFileAsync(file, Models.FileTypeEnum.Image));
         }
 
         [HttpPost]
@@ -30,6 +30,15 @@ namespace Whale.API.Controllers
         {
             var file = Request.Form.Files[0];
             return Ok(await _storageProvider.UploadAudioFileAsync(file));
+        }
+
+        [HttpPost]
+        [RequestSizeLimit(500_000_000)]
+        [Route("save/attachment")]
+        public async Task<ActionResult<string>> SaveAttachment()
+        {
+            var file = Request.Form.Files[0];
+            return Ok(await _storageProvider.UploadFileAsync(file, Models.FileTypeEnum.Attachment));
         }
     }
 }
