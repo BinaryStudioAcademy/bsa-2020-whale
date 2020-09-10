@@ -33,9 +33,17 @@ export class AgendaComponent implements OnInit {
   onSubmit() {
     this.point.name = this.form.controls.name.value;
     this.point.startTime = this.form.controls.time.value;
-    this.agendaValid.emit(this.form.valid);
+    this.agendaValid.emit(this.form.valid && this.timeValid());
   }
   removeTag(point): void {
     this.tagRemoved.emit(point);
+  }
+  timeValid(){
+    const userTimeString = this.form.get('time').value as string;
+    const userTimeParts = userTimeString.split(':');
+    const userDate = new Date();
+    userDate.setHours(Number(userTimeParts[0]));
+    userDate.setMinutes(Number(userTimeParts[1]));
+    return userDate > new Date();
   }
 }
