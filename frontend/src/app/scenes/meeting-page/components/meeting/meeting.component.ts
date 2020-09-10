@@ -1888,6 +1888,7 @@ export class MeetingComponent
   onFileAttach(list: FileList): void {
     this.isAttachment = true;
     this.attachedFile = list;
+    this.sendMessage();
   }
 
   //#endregion chat
