@@ -301,10 +301,9 @@ export class MeetingComponent
 
     if (!isInsidePolls &&
       targetElement !== this.pollsButton?.nativeElement &&
-      targetElement !== this.pollsButtonFullscreen?.nativeElement &&
-      targetElement.nodeName !== 'BUTTON' &&
-      targetElement.nodeName !== 'I' &&
-      targetElement.nodeName !== 'SPAN') {
+      targetElement !== this.pollsButtonFullscreen?.nativeElement
+      && !(targetElement.classList.contains('poll-action'))
+      ) {
       this.pollService.isShowPollContainer = false;
     }
 
@@ -1028,7 +1027,8 @@ export class MeetingComponent
         );
       }
     }
-
+    this.updateMeetingStatistics();
+    clearInterval(this.updateStatisticsTaskId);
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
     this.turnOffMusic();
