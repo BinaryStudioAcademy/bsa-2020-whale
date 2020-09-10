@@ -258,7 +258,8 @@
             <app-agenda
               [point]="a"
               (tagRemoved)="removeTag($event)"
-              (agendaValid)="agendaValid($event)"              
+              (agendaValid)="agendaValid($event)"
+              [startTimeMeeting]="form.controls.time.value"              
             >
             </app-agenda>
           </div>

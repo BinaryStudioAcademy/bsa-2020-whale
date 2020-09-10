@@ -257,7 +257,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
   userConnected(onlineUser: UserOnline): void {
     const index = this.contacts.findIndex(
-      (c) => c.secondMember?.id === onlineUser.id
+      (c) => c.secondMember?.id === onlineUser?.id
     );
     if (index >= 0) {
       this.contacts[index].secondMember.connectionId = onlineUser.connectionId;

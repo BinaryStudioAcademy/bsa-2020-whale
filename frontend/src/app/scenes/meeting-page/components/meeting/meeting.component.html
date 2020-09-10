@@ -169,8 +169,8 @@
     </div>
     <div class="main-content">
       <div *ngIf="isSomeoneRecordingScreen" class="notification">
-        <p>The conference is being recorded</p>
-      </div>
+        <p>The conference is recording</p>
+      </div>   
       <div class="options">
         <div class="ui options__buttons">
           <div class="inner-block">
@@ -542,8 +542,8 @@
           </div>
       </div>
       <img
-        *ngIf="(isCameraMuted && mediaData.length <= 1 && !isCardPinned) ||
-          (isCardPinned && !isPinnedVideoActive)"
+        *ngIf="((isCameraMuted && mediaData.length <= 1 && !isCardPinned ) ||
+          (isCardPinned && !isPinnedVideoActive)) && isShowCurrentParticipantCard"
         [src]="isCardPinned ? pinnedParticipant?.user?.avatarUrl : currentParticipant?.user?.avatarUrl"
         class="big-avatar"
         [class.big-avatar-pinned]="isCardPinned"
@@ -778,7 +778,7 @@ Enter+Shift for new line."
           id="meeting-poll-new"
           *ngIf="!meeting.isPoll || isHost"
           (click)="pollService.onNewPollClick()"
-          class="ui button"
+          class="ui button poll-action"
           id="new-poll-btn"
         >
           New poll
@@ -800,7 +800,7 @@ Enter+Shift for new line."
             <span
               id="meeting-poll-delete"
               *ngIf="isHost"
-              class="delete-poll-icon"
+              class="delete-poll-icon poll-action"
               (click)="pollService.onDeletePollIconClick(pollx)"
             >
               &times;
@@ -820,7 +820,7 @@ Enter+Shift for new line."
             <span
               id="meeting-poll-result"
               *ngIf="currentParticipant.role == 1"
-              class="delete-poll-icon"
+              class="delete-poll-icon poll-action"
               (click)="
                 pollService.onDeletePollResultIconClick(pollxResult, meeting.id)
               "

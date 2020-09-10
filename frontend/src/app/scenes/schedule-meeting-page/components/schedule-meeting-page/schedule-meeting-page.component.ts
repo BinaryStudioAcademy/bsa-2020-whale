@@ -74,7 +74,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
       description: new FormControl(),
       date: new FormControl(this.createStringFromDate(new Date()), [Validators.required]),
       time: new FormControl(
-        `${new Date().getHours() + 1}:${new Date().getMinutes() + 10 - (minutes % 10)}`, [Validators.required]
+        `${new Date().getHours() === 23 ? '00' : new Date().getHours() + 1}:${30}`, [Validators.required]
       ),
       durationHours: new FormControl(1),
       durationMinutes: new FormControl(30),
