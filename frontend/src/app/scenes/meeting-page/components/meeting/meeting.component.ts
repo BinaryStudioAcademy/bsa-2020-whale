@@ -1006,6 +1006,8 @@ export class MeetingComponent
     this.currentUserStream?.getTracks().forEach((track) => track.stop());
     this.updateMeetingStatistics();
     clearInterval(this.updateStatisticsTaskId);
+    this.meter?.stopListening();
+    this.meter?.disconnect();
     this.questionService.areQuestionsOpened = false;
     this.questionService.questions = [];
 
@@ -1109,6 +1111,8 @@ export class MeetingComponent
         track.enabled = enable;
         track.stop();
       });
+      this.meter?.stopListening();
+      this.meter?.disconnect();
       return;
     }
 
@@ -1278,8 +1282,6 @@ export class MeetingComponent
     // this is made to remove eventListener for other routes
     window.onbeforeunload = () => { };
     this.stopRecognition();
-    this.meter?.stopListening();
-    this.meter?.disconnect();
     this.router.navigate(['/home']);
   }
 
@@ -1414,8 +1416,6 @@ export class MeetingComponent
   private leaveUnConnected(): void {
     this.currentUserStream?.getTracks()?.forEach((track) => track.stop());
     this.destroyPeer();
-    this.meter?.stopListening();
-    this.meter?.disconnect();
     this.router.navigate(['/home']);
   }
 
@@ -1592,30 +1592,6 @@ export class MeetingComponent
         }
         newMediaData.volume = Math.sqrt(total / inputDataLength) * 100;
       };
-    } else {
-      this.browserMediaDevice.getAudioInputList().then((res) => {
-        const device = res.find(
-          (d) =>
-            d.deviceId === stream.getAudioTracks()[0].getSettings().deviceId
-        ) as MediaDeviceInfo;
-        this.meter.connect(device);
-        this.meter.on(
-          'sample',
-          (dB, percent, value) => {
-            newMediaData.volume = dB + 100;
-            if (newMediaData.volume > 1 && !this.isMicrophoneMuted) {
-              if (this.startedSpeak != null) {
-                this.speechDuration += new Date().getTime() - this.startedSpeak.getTime();
-              }
-              this.startedSpeak = new Date();
-            }
-            else {
-              this.startedSpeak = null;
-            }
-          }
-        );
-        this.meter.listen();
-      });
     }
 
     shouldPrepend
@@ -1628,9 +1604,42 @@ export class MeetingComponent
         this.meeting.participants.find((p) => p.streamId === stream.id)
           ?.activeConnectionId
       );
+    } else {
+      this.meterStartListen();
     }
 
     this.setOutputDevice();
+  }
+
+  meterStartListen(): void {
+    if (this.currentUserStream.getAudioTracks().some(at => at.enabled) && this.mediaData.length > 0){
+      this.browserMediaDevice.getAudioInputList().then((res) => {
+        const device = res.find(
+          (d) =>
+            d.deviceId === this.currentUserStream.getAudioTracks()[0].getSettings().deviceId
+        ) as MediaDeviceInfo;
+        const currentMediaData = this.mediaData.find(m => m.currentStreamId === this.currentUserStream.id);
+        if (currentMediaData != null){
+          this.meter.connect(device);
+          this.meter.on(
+            'sample',
+            (dB, percent, value) => {
+              currentMediaData.volume = dB + 100;
+              if (currentMediaData.volume > 1 && !this.isMicrophoneMuted) {
+                if (this.startedSpeak != null) {
+                  this.speechDuration += new Date().getTime() - this.startedSpeak.getTime();
+                }
+                this.startedSpeak = new Date();
+              }
+              else {
+                this.startedSpeak = null;
+              }
+            }
+          );
+          this.meter.listen();
+        }
+      });
+    }
   }
 
   public switchParticipantMediaAsHost(data: CardMediaData): void {
@@ -2104,6 +2113,7 @@ export class MeetingComponent
       this.currentUserStream.removeTrack(at);
     });
     this.currentUserStream.addTrack(audioTrack);
+    this.meterStartListen();
   }
 
   public async changeOutputDevice(deviceId: string): Promise<void> {
