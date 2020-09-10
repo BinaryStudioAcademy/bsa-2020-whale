@@ -775,7 +775,7 @@ Enter+Shift for new line."
           id="meeting-poll-new"
           *ngIf="!meeting.isPoll || isHost"
           (click)="pollService.onNewPollClick()"
-          class="ui button"
+          class="ui button poll-action"
           id="new-poll-btn"
         >
           New poll
@@ -797,7 +797,7 @@ Enter+Shift for new line."
             <span
               id="meeting-poll-delete"
               *ngIf="isHost"
-              class="delete-poll-icon"
+              class="delete-poll-icon poll-action"
               (click)="pollService.onDeletePollIconClick(pollx)"
             >
               &times;
@@ -817,7 +817,7 @@ Enter+Shift for new line."
             <span
               id="meeting-poll-result"
               *ngIf="currentParticipant.role == 1"
-              class="delete-poll-icon"
+              class="delete-poll-icon poll-action"
               (click)="
                 pollService.onDeletePollResultIconClick(pollxResult, meeting.id)
               "
