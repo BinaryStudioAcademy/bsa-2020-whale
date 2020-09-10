@@ -85,6 +85,8 @@ namespace Whale.API.Services
                         var meetingDTO = new MeetingDTO
                         {
                             Id = s.Meeting.Id,
+                            Topic = s.Meeting.Topic,
+                            Description = s.Meeting.Description,
                             Settings = s.Meeting.Settings,
                             StartTime = s.Meeting.StartTime,
                             EndTime = s.Meeting.EndTime,
