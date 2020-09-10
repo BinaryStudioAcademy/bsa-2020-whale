@@ -16,7 +16,7 @@
       <app-spiner size="huge"></app-spiner>
     </div>
     <div *ngIf="!isLoading">
-      <div *ngIf="allTimeStatistics; else noCallsText" class="full-width">
+      <div *ngIf="allTimeStatistics; else noCallsText">
         <div class="ui card">
           <h3 class="text-center">During all time</h3>
           <div class="rw-statistics">
@@ -126,14 +126,14 @@
               <div class="dates-input">
                 <span>From:</span>
                 <dp-date-picker
-                  [config]="configStart"
+                  [config]="config"
                   theme="dp-material"
                   formControlName="startDate"
                   (ngModelChange)="changeStartDate($event)"
                 ></dp-date-picker>
                 <span>To:</span>
                 <dp-date-picker
-                  [config]="configEnd"
+                  [config]="config"
                   theme="dp-material"
                   formControlName="endDate"
                   (ngModelChange)="changeEndDate($event)"
@@ -180,7 +180,8 @@
               [xScaleMax]="maxDate"
               [rotateXAxisTicks]="true"
               [roundDomains]="true"
-              [xAxisTicks]="xAxisTicks">
+              [xAxisTicks]="xAxisTicks"
+              [timeline]="true">
               <ng-template #tooltipTemplate let-model="model">
                 <h4>{{ dateTickFormatting(model.name) }}</h4>
                 <div class="tooltip-model">
