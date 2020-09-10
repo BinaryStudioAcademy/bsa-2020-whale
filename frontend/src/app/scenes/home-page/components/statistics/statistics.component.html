@@ -12,11 +12,11 @@
         <i id="history-close" class="large close icon" (click)="close()"></i>
         </div>
     </div>
-    <div *ngIf="isLoading" class="relative">
+    <div *ngIf="isLoading">
       <app-spiner size="huge"></app-spiner>
     </div>
     <div *ngIf="!isLoading">
-      <div *ngIf="allTimeStatistics; else noCallsText">
+      <div *ngIf="allTimeStatistics; else noCallsText" class="full-width">
         <div class="ui card">
           <h3 class="text-center">During all time</h3>
           <div class="rw-statistics">
@@ -179,8 +179,8 @@
               [xScaleMin]="minDate"
               [xScaleMax]="maxDate"
               [rotateXAxisTicks]="true"
-              [timeline]="true"
-              [roundDomains]="true">
+              [roundDomains]="true"
+              [xAxisTicks]="xAxisTicks">
               <ng-template #tooltipTemplate let-model="model">
                 <h4>{{ dateTickFormatting(model.name) }}</h4>
                 <div class="tooltip-model">

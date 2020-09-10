@@ -53,11 +53,11 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   statisticField = StatisticFields.Call;
   minDate: Date;
   maxDate: Date;
-  dateTicks: Date[];
 
   startDate: Moment;
   endDate: Moment;
   isLoading = true;
+  xAxisTicks: Date[] = [new Date()];
 
 constructor(
     private statisticsService: StatisticsService,
@@ -242,10 +242,11 @@ constructor(
     const endDate = moment(this.form.controls.endDate.value).add(1, 'days').add(-1, 'seconds').toDate();
     this.minDate = moment(this.form.controls.startDate.value).add(-6, 'hours').toDate();
     this.maxDate = moment(this.form.controls.endDate.value).add(6, 'hours').toDate();
+    this.calculateTicks();
     let isOutOfRange = true;
-    if (this.chartData != null) {
-      const startCachedDate = this.chartData[0].series.name;
-      const endCachedDate = new Date(this.chartData[this.chartData.length - 1].series.name);
+    if (this.statistics != null && this.statistics.length > 0) {
+      const startCachedDate = new Date(this.statistics[0].date.valueAsString);
+      const endCachedDate = new Date(this.statistics[this.statistics.length - 1].date.valueAsString);
       endCachedDate.setDate(endCachedDate.getDate() + 1);
       if (startDate >= startCachedDate && endDate <= endCachedDate){
         isOutOfRange = false;
@@ -257,17 +258,19 @@ constructor(
   }
 
   calculateTicks(){
-    this.minDate = moment(this.form.controls.startDate.value).add(-6, 'hours').toDate();
-    this.maxDate = moment(this.form.controls.endDate.value).add(6, 'hours').toDate();
     let startMoment = moment(this.form.controls.startDate.value);
     const endMoment = moment(this.form.controls.endDate.value);
-    const diffDays = startMoment.diff(endMoment, 'days');
+    const diffDays = endMoment.diff(startMoment, 'days');
     const step = (Math.ceil(diffDays / 10));
-    this.dateTicks = [];
-    while (startMoment <= endMoment){
-      this.dateTicks.push(startMoment.toDate());
+    const ticks = [startMoment.toDate()];
+    do {
+      if (step === 0){
+        break;
+      }
       startMoment = startMoment.add(step, 'days');
-    }
+      ticks.push(startMoment.toDate());
+    } while (startMoment <= endMoment);
+    this.xAxisTicks = [... ticks];
   }
 
   dateTickFormatting(val: Date): string {
