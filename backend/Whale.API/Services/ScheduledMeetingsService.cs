@@ -63,7 +63,7 @@ namespace Whale.API.Services
             if (user == null)
                 throw new NotFoundException("User", email);
 
-            var scheduledList = _context.ScheduledMeetings
+            var scheduledList = await _context.ScheduledMeetings
                 .Where(s => s.CreatorId == user.Id || s.ParticipantsEmails.Contains(user.Email))
                 .Include(s => s.Meeting)
                 .Where(s => s.Meeting.StartTime >= DateTimeOffset.Now.AddHours(-1) && s.Meeting.EndTime == null)
@@ -71,43 +71,49 @@ namespace Whale.API.Services
                 .Skip(skip)
                 .Take(take)
                 .Include(s => s.Creator)
-                .ToList();
-            var scheduledDTOList = new List<ScheduledDTO>();
-            foreach (var scheduled in scheduledList)
-            {
-                var participantEmails = JsonConvert.DeserializeObject<List<string>>(scheduled.ParticipantsEmails);
-                var userParticipants = (await _userService.GetAllUsersAsync()).Where(u => participantEmails.Contains(u.Email));
-                var settings = JsonConvert.DeserializeObject<MeetingSettingsDTO>(scheduled.Meeting.Settings);
-                var meetingDTO = new MeetingDTO
-                {
-                    Id = scheduled.Meeting.Id,
-                    Settings = scheduled.Meeting.Settings,
-                    StartTime = scheduled.Meeting.StartTime,
-                    EndTime = scheduled.Meeting.EndTime,
-                    AnonymousCount = scheduled.Meeting.AnonymousCount,
-                    IsScheduled = scheduled.Meeting.IsScheduled,
-                    IsRecurrent = scheduled.Meeting.IsRecurrent,
-                    IsVideoAllowed = settings.IsVideoAllowed,
-                    IsAudioAllowed = settings.IsAudioAllowed,
-                    IsWhiteboard = settings.IsWhiteboard,
-                    IsPoll = settings.IsPoll,
-                    IsAllowedToChooseRoom = settings.IsAllowedToChooseRoom,
-                    RecognitionLanguage = settings.RecognitionLanguage,
-                    Recurrence = settings.Recurrence,
-                    Participants = _mapper.Map<IEnumerable<ParticipantDTO>>(scheduled.Meeting.Participants),
-                    PollResults = _mapper.Map<IEnumerable<PollResultDTO>>(scheduled.Meeting.PollResults)
-                };
-                scheduledDTOList.Add(new ScheduledDTO
-                {
-                    Id = scheduled.Id,
-                    Meeting = meetingDTO,
-                    Creator = _mapper.Map<UserDTO>(scheduled.Creator),
-                    Participants = userParticipants.ToList(),
-                    Link = scheduled.ShortURL,
-                    Canceled = scheduled.Canceled
-                });
-            }
+                .ToListAsync();
 
+            var allUsers = await _context.Users.ToListAsync();
+
+            var scheduleListTasks = scheduledList.AsParallel().Select(async s =>
+                {
+                    return await Task.Run(() =>
+                    {
+                        var participantEmails = JsonConvert.DeserializeObject<List<string>>(s.ParticipantsEmails);
+                        var userParticipants = _mapper.Map<IEnumerable<UserDTO>>(allUsers.Where(u => participantEmails.Contains(u.Email)));
+                        var settings = JsonConvert.DeserializeObject<MeetingSettingsDTO>(s.Meeting.Settings);
+                        var meetingDTO = new MeetingDTO
+                        {
+                            Id = s.Meeting.Id,
+                            Settings = s.Meeting.Settings,
+                            StartTime = s.Meeting.StartTime,
+                            EndTime = s.Meeting.EndTime,
+                            AnonymousCount = s.Meeting.AnonymousCount,
+                            IsScheduled = s.Meeting.IsScheduled,
+                            IsRecurrent = s.Meeting.IsRecurrent,
+                            IsVideoAllowed = settings.IsVideoAllowed,
+                            IsAudioAllowed = settings.IsAudioAllowed,
+                            IsWhiteboard = settings.IsWhiteboard,
+                            IsPoll = settings.IsPoll,
+                            IsAllowedToChooseRoom = settings.IsAllowedToChooseRoom,
+                            RecognitionLanguage = settings.RecognitionLanguage,
+                            Recurrence = settings.Recurrence,
+                            Participants = _mapper.Map<IEnumerable<ParticipantDTO>>(s.Meeting.Participants),
+                            PollResults = _mapper.Map<IEnumerable<PollResultDTO>>(s.Meeting.PollResults)
+                        };
+                        return new ScheduledDTO
+                        {
+                            Id = s.Id,
+                            Meeting = meetingDTO,
+                            Creator = _mapper.Map<UserDTO>(s.Creator),
+                            Participants = userParticipants.ToList(),
+                            Link = s.ShortURL,
+                            Canceled = s.Canceled
+                        };
+                    });
+                });
+
+            var scheduledDTOList = await Task.WhenAll(scheduleListTasks);
             return scheduledDTOList;
         }
 
