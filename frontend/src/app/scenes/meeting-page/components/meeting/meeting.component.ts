@@ -2210,6 +2210,15 @@ export class MeetingComponent
       streamId: this.currentUserStream.id,
       meetingId: this.meeting.id,
     });
+    this.meetingSignalrService.invoke(SignalMethods.OnMediaStateChanged, {
+      meetingId: this.meeting.id,
+      streamId: this.currentUserStream.id,
+      receiverConnectionId: '',
+      isAudioAllowed: this.meeting.isAudioAllowed,
+      isVideoAllowed: this.meeting.isVideoAllowed,
+      isAudioActive: !this.isMicrophoneMuted,
+      isVideoActive: true,
+    } as MediaState);
   }
   async removeSharingVideo(): Promise<void> {
     this.replaceVideoTrack(this.lastTrack);
@@ -2217,6 +2226,15 @@ export class MeetingComponent
       SignalMethods.OnShareScreenStop,
       this.meeting.id
     );
+    this.meetingSignalrService.invoke(SignalMethods.OnMediaStateChanged, {
+      meetingId: this.meeting.id,
+      streamId: this.currentUserStream.id,
+      receiverConnectionId: '',
+      isAudioAllowed: this.meeting.isAudioAllowed,
+      isVideoAllowed: this.meeting.isVideoAllowed,
+      isAudioActive: !this.isMicrophoneMuted,
+      isVideoActive: !this.isCameraMuted,
+    } as MediaState);
   }
   replaceVideoTrack(track: MediaStreamTrack)
   {
