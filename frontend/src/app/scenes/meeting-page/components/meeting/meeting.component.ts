@@ -1004,7 +1004,8 @@ export class MeetingComponent
     this.simpleModalService.removeAll();
     this.destroyPeer();
     this.currentUserStream?.getTracks().forEach((track) => track.stop());
-
+    this.updateMeetingStatistics();
+    clearInterval(this.updateStatisticsTaskId);
     this.questionService.areQuestionsOpened = false;
     this.questionService.questions = [];
 
@@ -1277,10 +1278,8 @@ export class MeetingComponent
     // this is made to remove eventListener for other routes
     window.onbeforeunload = () => { };
     this.stopRecognition();
-    this.meter.stopListening();
-    this.meter.disconnect();
-    this.updateMeetingStatistics();
-    clearInterval(this.updateStatisticsTaskId);
+    this.meter?.stopListening();
+    this.meter?.disconnect();
     this.router.navigate(['/home']);
   }
 
@@ -1368,7 +1367,10 @@ export class MeetingComponent
           email: this.authService.currentUser.email,
         } as GetMessages);
       });
-
+      this.startedPresence = new Date();
+      this.updateStatisticsTaskId = setInterval(() => {
+        this.updateMeetingStatistics();
+      }, 60000);
       return;
     }
 
@@ -1412,10 +1414,8 @@ export class MeetingComponent
   private leaveUnConnected(): void {
     this.currentUserStream?.getTracks()?.forEach((track) => track.stop());
     this.destroyPeer();
-    this.meter.stopListening();
-    this.meter.disconnect();
-    this.updateMeetingStatistics();
-    clearInterval(this.updateStatisticsTaskId);
+    this.meter?.stopListening();
+    this.meter?.disconnect();
     this.router.navigate(['/home']);
   }
 
@@ -2367,8 +2367,12 @@ export class MeetingComponent
     if (this.startedPresence != null) {
       presence = new Date().getTime() - this.startedPresence.getTime();
     }
+    let id = this.meeting.id;
+    if (this.isRoom){
+      id = this.roomService.originalMeetingId;
+    }
     this.meetingService.updateMeetingStatistics({
-      meetingId: this.meeting.id,
+      meetingId: id,
       speechTime: this.speechDuration,
       presenceTime: presence
     })
