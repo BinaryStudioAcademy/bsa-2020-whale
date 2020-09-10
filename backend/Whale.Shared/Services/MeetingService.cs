@@ -102,6 +102,7 @@ namespace Whale.Shared.Services
             meetingDTO.IsAllowedToChooseRoom = meetingSettings.IsAllowedToChooseRoom;
             meetingDTO.Recurrence = meetingSettings.Recurrence;
             meetingDTO.RecognitionLanguage = meetingSettings.RecognitionLanguage;
+            meetingDTO.SelectMusic = meetingSettings.SelectMusic;
 
             return meetingDTO;
         }
@@ -129,7 +130,8 @@ namespace Whale.Shared.Services
                 IsWhiteboard = meetingDTO.IsWhiteboard,
                 IsAllowedToChooseRoom = meetingDTO.IsAllowedToChooseRoom,
                 IsPoll = meetingDTO.IsPoll,
-                RecognitionLanguage = meetingDTO.RecognitionLanguage
+                RecognitionLanguage = meetingDTO.RecognitionLanguage,
+                SelectMusic = meetingDTO.SelectMusic
             });
 
             var shortURL = ShortId.Generate(new GenerationOptions
@@ -188,7 +190,8 @@ namespace Whale.Shared.Services
                 meetingDTO.IsPoll,
                 meetingDTO.IsWhiteboard,
                 meetingDTO.RecognitionLanguage,
-                meetingDTO.Recurrence
+                meetingDTO.Recurrence,
+                meetingDTO.SelectMusic
             });
             await _context.Meetings.AddAsync(meeting);
             var user = await _context.Users.FirstOrDefaultAsync(e => e.Email == meetingDTO.CreatorEmail);
@@ -281,7 +284,8 @@ namespace Whale.Shared.Services
                 IsWhiteboard = ((dynamic)meetingSettings).IsWhiteboard,
                 IsAllowedToChooseRoom = ((dynamic)meetingSettings).IsAllowedToChooseRoom,
                 IsPoll = ((dynamic)meetingSettings).IsPoll,
-                RecognitionLanguage = ((dynamic)meetingSettings).RecognitionLanguage
+                RecognitionLanguage = ((dynamic)meetingSettings).RecognitionLanguage,
+                SelectMusic = ((dynamic)meetingSettings).SelectMusic
             });
 
             await _redisService.SetAsync(scheduledMeeting.FullURL, scheduledMeeting.ShortURL);
@@ -351,6 +355,7 @@ namespace Whale.Shared.Services
             meetingSettings.IsVideoAllowed = !updateSettingsDTO.IsVideoDisabled;
             meetingSettings.IsAllowedToChooseRoom = updateSettingsDTO.IsAllowedToChooseRoom;
             meetingSettings.RecognitionLanguage = updateSettingsDTO.RecognitionLanguage;
+            meetingSettings.SelectMusic = updateSettingsDTO.SelectMusic;
 
             await _redisService.SetAsync($"{meetingSettingsPrefix}{updateSettingsDTO.MeetingId}", meetingSettings);
         }

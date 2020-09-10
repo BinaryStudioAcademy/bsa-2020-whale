@@ -8,4 +8,5 @@ export interface MeetingSettings {
   isAllowedToChooseRoom: boolean;
   recognitionLanguage: string;
   recurrence: Recurrence;
+  selectMusic: string;
 }

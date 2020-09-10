@@ -12,6 +12,7 @@
 
 <div #mainArea class="bg-white">
   <div class="content display-flex">
+    <audio *ngIf="playAudio" src="{{selectMusic}}" autoplay loop></audio>
     <div class="tools" ngDraggable [handle]="handleHand">
       <div #handleHand class="drag-icon">
         <i class="ellipsis vertical icon"></i>
@@ -169,7 +170,7 @@
     <div class="main-content">
       <div *ngIf="isSomeoneRecordingScreen" class="notification">
         <p>The conference is being recorded</p>
-      </div>    
+      </div>
       <div class="options">
         <div class="ui options__buttons">
           <div class="inner-block">
@@ -213,7 +214,7 @@
               "
               data-tooltip="Toggle Webcam"
             >
-            <button class="share-camera"[disabled]="isSharing"                 
+            <button class="share-camera"[disabled]="isSharing"
             (click)="toggleCamera()">
               <i
                 id="meeting-options-camera"
@@ -373,7 +374,7 @@
                 (click)="onAgendaClick()"
               ></i>
             </span>
-            <span 
+            <span
               *ngIf="!isShowCurrentParticipantCard"
               data-tooltip="Show Self View"
               data-position="top right"
@@ -404,11 +405,11 @@
           </div>
         </div>
       </div>
-      <div 
+      <div
       class="catch-area"
       [class.shorter-area]="pinnedCardsLayout === 1 && isCardPinned"
       *ngIf="shouldBeCatchArea && isHost">
-        <div class="music-player" *ngIf="isHost">
+        <div class="music-player" *ngIf="isHost && !playAudio">
           <input type="file" #uploadFile style="display: none;" accept=".mp3" (change)="onFileChange($event.target.files)">
           <span class="player-title"><i>Player</i></span>
           <i class="player folder open icon" (click)="uploadMp3($event)"></i>
@@ -505,7 +506,7 @@
           </app-participant-card>
           <div
           #cardsLayoutMenu
-          [ngClass]="pinnedCardsLayout === 0 ? 'cards-position-icons-row' : 'cards-position-icons-column'" 
+          [ngClass]="pinnedCardsLayout === 0 ? 'cards-position-icons-row' : 'cards-position-icons-column'"
           [class.cards-position-icons-row-sticky]="pinnedCardsLayout === 0 && pinnedLayoutMenuSticky"
           (mouseenter)="onPinnedModeMenuMouseEnter()"
           (mouseleave)="onPinnedModeMenuMouseLeave()"
@@ -529,8 +530,8 @@
               ></i>
             </span>
             <span data-tooltip="Unpin" data-position="bottom right">
-              <i 
-                class="table icon" 
+              <i
+                class="table icon"
                 [class.small-left-margin]="pinnedCardsLayout === 1"
                 (click)="unpinCard()"></i>
             </span>
@@ -560,7 +561,7 @@
 
       <div class="pinned-participant-info">
         <div
-        class="participant-name-wrapper" 
+        class="participant-name-wrapper"
         *ngIf="isCardPinned && pinnedParticipant.streamId !== currentParticipant.streamId">
           <i
             *ngIf="isPinnedAudioAllowed || pinnedParticipant.role === 1"
@@ -583,13 +584,13 @@
           >
             <i class="eye slash icon default-cursor"></i>
           </span>
-          <p class="header" [class.inverted-text]="pinnedParticipant.role === 1">  
+          <p class="header" [class.inverted-text]="pinnedParticipant.role === 1">
             {{ pinnedParticipant?.user?.firstName }}
             {{ pinnedParticipant?.user?.secondName }}
           </p>
         </div>
-        <div 
-        class="pinned-reaction" 
+        <div
+        class="pinned-reaction"
         *ngIf="pinnedReaction"
         >
           {{ pinnedReaction }}
@@ -828,8 +829,8 @@ Enter+Shift for new line."
         </div>
       </div>
     </div>
-    
-   
+
+
       <div #agenda class="agenda-container" *ngIf="isPlanning">
         <app-agenda [agenda]="topicList" ></app-agenda>
       </div>

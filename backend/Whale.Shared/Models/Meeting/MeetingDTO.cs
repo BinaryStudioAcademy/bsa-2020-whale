@@ -27,6 +27,7 @@ namespace Whale.Shared.Models.Meeting
         public string RecognitionLanguage { get; set; }
         public long SpeechDuration { get; set; }
         public long PresenceDuration { get; set; }
+        public string SelectMusic { get; set; }
 
         public IEnumerable<ParticipantDTO> Participants { get; set; }
         public IEnumerable<PollResultDTO> PollResults { get; set; }

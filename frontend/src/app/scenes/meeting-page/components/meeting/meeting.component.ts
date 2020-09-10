@@ -194,6 +194,8 @@ export class MeetingComponent
   musicFile: HTMLAudioElement;
   audioUrl: string;
   isMusicUploaded = false;
+  public selectMusic: string;
+  public playAudio: boolean;
 
   public reactionDelay: Observable<number>;
   startedSpeak: Date = null;
@@ -1376,6 +1378,8 @@ export class MeetingComponent
       .subscribe(
         (resp) => {
           this.meeting = resp.body;
+          this.selectMusic = this.meeting.selectMusic;
+          this.playAudio = true;
           this.roomService.originalMeetingUrl = this.route.snapshot.params.link;
           this.roomService.originalMeetingId = this.meeting.id;
           this.createEnterModal().then(() => {
@@ -1456,6 +1460,14 @@ export class MeetingComponent
       this.toggleMicrophone(true);
     }
 
+    if (modalResult.selectMusic && isCurrentParticipantHost) {
+      this.selectMusic = modalResult.selectMusic;
+      this.playAudio = true;
+    }else if (!modalResult.selectMusic && isCurrentParticipantHost) {
+      this.selectMusic = '';
+      this.playAudio = false;
+    }
+
     this.meeting.isAudioAllowed = modalResult.isAllowedAudioOnStart;
     this.meeting.isVideoAllowed = modalResult.isAllowedVideoOnStart;
     this.meeting.recognitionLanguage = modalResult.recognitionLanguage;
@@ -1472,7 +1484,8 @@ export class MeetingComponent
           isVideoDisabled: !this.meeting.isVideoAllowed,
           isPoll: this.meeting.isPoll,
           isAllowedToChooseRoom: this.meeting.isAllowedToChooseRoom,
-          recognitionLanguage: this.meeting.recognitionLanguage
+          recognitionLanguage: this.meeting.recognitionLanguage,
+          selectMusic: this.selectMusic
         })
         .pipe(takeUntil(this.unsubscribe$))
         .subscribe(() => {

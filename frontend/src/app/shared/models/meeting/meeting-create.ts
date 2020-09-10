@@ -19,4 +19,5 @@ export interface MeetingCreate {
   participantsEmails: string[];
   agendaPoints?: PointAgenda[];
   recognitionLanguage: string;
+  selectMusic: string;
 }
