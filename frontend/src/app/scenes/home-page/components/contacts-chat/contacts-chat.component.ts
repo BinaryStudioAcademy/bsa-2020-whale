@@ -11,6 +11,7 @@ import {
   AfterViewInit,
   QueryList,
   ElementRef,
+  ViewChild,
 } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { DirectMessage } from '@shared/models/message/direct-message';
@@ -25,7 +26,7 @@ import { takeUntil, take, first } from 'rxjs/operators';
 import { HttpResponse, HttpParams } from '@angular/common/http';
 import { SimpleModalService } from 'ngx-simple-modal';
 import { CallModalComponent } from '../call-modal/call-modal.component';
-import { ContactService } from 'app/core/services';
+import { ContactService, BlobService } from 'app/core/services';
 import { ConfirmationModalComponent } from '@shared/components/confirmation-modal/confirmation-modal.component';
 import { MessageService } from 'app/core/services/message.service';
 
@@ -45,6 +46,7 @@ export class ContactsChatComponent
     ElementRef<HTMLDivElement>
   >;
   @ViewChildren('chatWindow') chatBlock: QueryList<ElementRef<HTMLDivElement>>;
+  @ViewChild('attachFile') attachFileInput: ElementRef;
 
   public intersectionObserver: IntersectionObserver;
   chatElement: any;
@@ -58,13 +60,16 @@ export class ContactsChatComponent
     authorId: '',
     createdAt: new Date(),
     attachment: false,
+    attachmentUrl: '',
   };
 
   isMessagesLoading = true;
   isFirstLoad = true;
+  public isAttachment = false;
 
   private receivedMessages = new ReplaySubject<void>();
   public receivedMessages$ = this.receivedMessages.asObservable();
+  attachedFile: FileList = null;
 
   private unsubscribe$ = new Subject<void>();
 
@@ -74,7 +79,8 @@ export class ContactsChatComponent
     private toastr: ToastrService,
     private simpleModalService: SimpleModalService,
     private contactService: ContactService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private blobService: BlobService,
   ) {}
 
   ngOnInit(): void {
@@ -154,9 +160,15 @@ export class ContactsChatComponent
     }
   }
 
-  sendMessage(): void {
-    if (this.newMessage.message.trim().length === 0) {
+  async sendMessage(): Promise<void> {
+    if (this.newMessage.message.trim().length === 0 && !this.isAttachment) {
       return;
+    }
+    let attachUrl = '';
+    if (this.isAttachment) {
+      const blob = new Blob([this.attachedFile[0]], {type: this.attachedFile[0].type});
+      const response = await this.blobService.postBlobUploadAttachment(blob).pipe(first()).toPromise();
+      attachUrl = response;
     }
 
     const newMessage: DirectMessage = {
@@ -164,9 +176,11 @@ export class ContactsChatComponent
       authorId: this.contactSelected.firstMemberId,
       createdAt: new Date(),
       message: this.newMessage.message,
-      attachment: false,
+      attachment: this.isAttachment,
       author: this.loggedInUser,
+      attachmentUrl: attachUrl,
     };
+    this.onFileDettach();
 
     this.newMessage.message = '';
     this.messages.push(newMessage);
@@ -268,5 +282,22 @@ export class ContactsChatComponent
       .subscribe(() => {
         this.messageRead.emit(messageId);
       });
+  }
+
+  addAttachment(event: Event): void {
+    event.preventDefault();
+    (this.attachFileInput.nativeElement as HTMLElement).click();
+  }
+
+  onFileDettach(): void {
+    this.isAttachment = false;
+    this.attachedFile = undefined;
+    (this.attachFileInput.nativeElement as HTMLInputElement).value = '';
+  }
+
+  onFileAttach(list: FileList): void {
+    this.isAttachment = true;
+    this.attachedFile = list;
+    this.sendMessage();
   }
 }

@@ -1804,7 +1804,7 @@ export class MeetingComponent
     }
     if (!this.questionService.areQuestionsOpened) {
       let attachUrl = '';
-      if (this.isAttachment ) {
+      if (this.isAttachment) {
         const blob = new Blob([this.attachedFile[0]], {type: this.attachedFile[0].type});
         const response = await this.blobService.postBlobUploadAttachment(blob).pipe(first()).toPromise();
         attachUrl = response;

@@ -10,4 +10,5 @@ export interface GroupMessage {
   createdAt: Date;
   message: string;
   attachment: boolean;
+  attachmentUrl: string;
 }
