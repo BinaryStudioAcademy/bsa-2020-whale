@@ -2094,10 +2094,6 @@ export class MeetingComponent
   }
 
   private async handleSuccessAudio(stream: MediaStream): Promise<void> {
-    const audio = document.querySelector('audio');
-    if (audio) {
-      audio.srcObject = stream;
-    }
     const audioTrack = stream.getAudioTracks()[0];
     const keys = Object.keys(this.peer.connections);
     keys.forEach(key => {
