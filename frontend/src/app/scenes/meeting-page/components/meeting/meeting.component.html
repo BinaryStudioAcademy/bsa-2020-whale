@@ -416,6 +416,9 @@
           <i class="player play icon" (click)="playMusic()" [ngClass]="{'disabled-icon': !isMusicUploaded}"></i>
           <i class="player pause icon" (click)="pauseMusic()" [ngClass]="{'disabled-icon': !isMusicUploaded}"></i>
           <i class="player stop icon" (click)="turnOffMusic()" [ngClass]="{'disabled-icon': !isMusicUploaded}"></i>
+          <div class="mp3-track-name">
+            <div class="music-ticker">{{musicTrackName}}</div>
+          </div>
         </div>
       </div>
       <div

@@ -1971,6 +1971,7 @@ export class MeetingComponent
   }
 
   async onFileChange(event: any): Promise<void> {
+    this.turnOffMusic();
     this.uploadedFile = event;
     this.uploadAudioFile();
   }
@@ -1988,15 +1989,16 @@ export class MeetingComponent
     source.connect(streamDestination);
     const stream = streamDestination.stream;
 
-    const keys = Object.keys(this.peer.connections);
-    const peerConnection = this.peer.connections[keys[0]];
-    const audioTrack = stream.getAudioTracks()[0];
-    peerConnection.forEach((pc) => {
-      const sender = pc.peerConnection.getSenders().find((s) => {
-        return s.track.kind === audioTrack.kind;
-      });
-      sender.replaceTrack(audioTrack);
-    });
+    // const keys = Object.keys(this.peer.connections);
+    // const peerConnection = this.peer.connections[keys[0]];
+    // const audioTrack = stream.getAudioTracks()[0];
+    // peerConnection.forEach((pc) => {
+    //   const sender = pc.peerConnection.getSenders().find((s) => {
+    //     return s.track.kind === audioTrack.kind;
+    //   });
+    //   sender.replaceTrack(audioTrack);
+    // });
+    this.handleSuccessAudio(stream);
   }
 
   pauseMusic(): void {
@@ -2005,23 +2007,28 @@ export class MeetingComponent
     }
   }
 
-  async turnOffMusic(): Promise<void> {
+  turnOffMusic(): void {
     this.musicFile?.pause();
     this.musicFile = null;
     this.uploadedFile = null;
     this.isMusicUploaded = false;
+    this.musicTrackName = '';
   }
+
+musicTrackName: string = '';
+// selectedMusicTrackName: string;
 
   public uploadAudioFile(): void {
     if (this.uploadedFile[0]) {
       const blob = new Blob([this.uploadedFile[0]], {type: 'audio/mpeg'});
       this.blobService.postBlobUploadAudio(blob).subscribe((resp) => {
-      this.audioUrl = resp;
-      this.musicFile = new Audio();
-      this.musicFile.src = this.audioUrl;
-      this.musicFile.load();
-      this.isMusicUploaded = true;
-    });
+        this.audioUrl = resp;
+        this.musicFile = new Audio();
+        this.musicFile.src = this.audioUrl;
+        this.musicFile.load();
+        this.isMusicUploaded = true;
+        this.musicTrackName = this.uploadedFile[0].name;
+      });
     }
   }
 
