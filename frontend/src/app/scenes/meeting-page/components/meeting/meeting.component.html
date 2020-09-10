@@ -539,8 +539,8 @@
           </div>
       </div>
       <img
-        *ngIf="(isCameraMuted && mediaData.length <= 1 && !isCardPinned) ||
-          (isCardPinned && !isPinnedVideoActive)"
+        *ngIf="((isCameraMuted && mediaData.length <= 1 && !isCardPinned ) ||
+          (isCardPinned && !isPinnedVideoActive)) && isShowCurrentParticipantCard"
         [src]="isCardPinned ? pinnedParticipant?.user?.avatarUrl : currentParticipant?.user?.avatarUrl"
         class="big-avatar"
         [class.big-avatar-pinned]="isCardPinned"
