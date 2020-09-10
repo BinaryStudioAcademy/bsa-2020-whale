@@ -25,16 +25,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
 
   public fields = StatisticFields;
 
-  configStart: IDatePickerConfig = {
-    weekDayFormat: 'dd',
-    firstDayOfWeek: 'mo',
-    showNearMonthDays: false,
-    max: moment({hour: 0, minute: 0, seconds: 0}).add(-1, 'days'),
-    monthBtnCssClassCallback: (month) => 'ng2-date-picker-button',
-    dayBtnCssClassCallback: (day) => 'ng2-date-picker-button',
-  };
-
-  configEnd: IDatePickerConfig = {
+  config: IDatePickerConfig = {
     weekDayFormat: 'dd',
     firstDayOfWeek: 'mo',
     showNearMonthDays: false,
