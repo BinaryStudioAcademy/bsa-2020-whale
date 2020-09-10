@@ -379,7 +379,7 @@ div:moz-full-screen
 
 .music-player
     position: absolute
-    width: 164px
+    width: 300px
     background-color: #242424de
     z-index: 9999
     top: -25px
@@ -388,6 +388,50 @@ div:moz-full-screen
     left: -moz-calc(50% - 54px)
     left: calc(50% - 54px)
     transition: 1s
+
+.mp3-track-name
+    width: 120px
+    position: fixed
+    overflow: hidden
+    box-sizing: content-box
+    display: inline
+    margin-left: 5px
+
+.music-ticker 
+    color: white
+    display: inline-block
+    font-style: italic
+    font-size: 0.9em
+    white-space: nowrap
+    box-sizing: content-box
+    -webkit-animation-iteration-count: infinite
+    animation-iteration-count: infinite
+    -webkit-animation-timing-function: linear
+    animation-timing-function: linear
+    -webkit-animation-name: ticker
+    animation-name: ticker
+    -webkit-animation-delay: 2s
+    animation-delay: 2s
+    -webkit-animation-duration: 7s
+    animation-duration: 7s
+
+@-webkit-keyframes ticker
+    0%
+        -webkit-transform: translate3d(100%, 0, 0)
+        transform: translate3d(100%, 0, 0)
+        visibility: visible
+    100%
+        -webkit-transform: translate3d(-100%, 0, 0)
+        transform: translate3d(-100%, 0, 0)
+
+@keyframes ticker
+    0%
+        -webkit-transform: translate3d(100%, 0, 0)
+        transform: translate3d(100%, 0, 0)
+        visibility: visible
+    100%
+        -webkit-transform: translate3d(-100%, 0, 0)
+        transform: translate3d(-100%, 0, 0)
 
 .player-title
     color: white

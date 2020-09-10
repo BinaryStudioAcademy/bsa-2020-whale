@@ -25,6 +25,7 @@ using Whale.Shared.Models.ElasticModels.Statistics;
 using Whale.DAL.Models.Question;
 using Microsoft.AspNetCore.SignalR.Client;
 using Newtonsoft.Json.Serialization;
+using System.Diagnostics;
 
 namespace Whale.Shared.Services
 {
@@ -217,6 +218,7 @@ namespace Whale.Shared.Services
 
             using (var client = new HttpClient())
             {
+                client.Timeout = TimeSpan.FromSeconds(30);
                 var meetingInvite = new ScheduledMeetingInvite
                 {
                     MeetingLink = fullURL,
@@ -224,8 +226,15 @@ namespace Whale.Shared.Services
                     ReceiverEmails = meetingDTO.ParticipantsEmails
                 };
                 (meetingInvite.ReceiverEmails as List<string>)?.Add(user.Email);
-                _=Task.Run(async () => await client.PostAsync(whaleAPIurl + "/email/scheduled",
-                    new StringContent(JsonConvert.SerializeObject(meetingInvite), Encoding.UTF8, "application/json")));
+                try
+                {
+                    await client.PostAsync(whaleAPIurl + "/email/scheduled", 
+                        new StringContent(JsonConvert.SerializeObject(meetingInvite), Encoding.UTF8, "application/json"));
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine(e);
+                }
             }
 
             await _redisService.ConnectAsync();
@@ -255,12 +264,21 @@ namespace Whale.Shared.Services
             await _context.SaveChangesAsync();
             using (var client = new HttpClient())
             {
+                client.Timeout = TimeSpan.FromSeconds(30);
                 var meetingInvite = new ScheduledMeetingInvite
                 {
                     MeetingLink = fullURL,
                     MeetingId = meetingDTO.Meeting.Id,
                 };
-                client.PostAsync("http://localhost:4201/api/email/scheduled", new StringContent(JsonConvert.SerializeObject(meetingInvite), Encoding.UTF8, "application/json"));
+                try
+                {
+                    client.PostAsync(whaleAPIurl + "/email/scheduled",
+                        new StringContent(JsonConvert.SerializeObject(meetingInvite), Encoding.UTF8, "application/json"));
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine(e);
+                }
             }
             await _redisService.ConnectAsync();
             await _redisService.SetAsync(shortURL, "not-active");
