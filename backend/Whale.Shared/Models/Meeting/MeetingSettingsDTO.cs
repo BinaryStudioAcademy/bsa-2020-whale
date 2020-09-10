@@ -12,5 +12,6 @@ namespace Whale.Shared.Models.Meeting
         public bool IsPoll { get; set; }
         public JobRecurrenceEnum Recurrence { get; set; }
         public string RecognitionLanguage { get; set; }
+        public string SelectMusic { get; set; }
     }
 }

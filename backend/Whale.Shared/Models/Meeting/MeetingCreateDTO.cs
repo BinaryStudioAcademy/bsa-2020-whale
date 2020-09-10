@@ -21,6 +21,7 @@ namespace Whale.Shared.Models.Meeting
         public bool IsAllowedToChooseRoom { get; set; }
         public string RecognitionLanguage { get; set; }
         public string CreatorEmail { get; set; }
+        public string SelectMusic { get; set; }
         public List<string> ParticipantsEmails { get; set; }
         public List<AgendaPointDTO> AgendaPoints { get; set; }
     }

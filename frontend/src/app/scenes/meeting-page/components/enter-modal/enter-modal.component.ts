@@ -22,6 +22,7 @@ export class EnterModalComponent
   public microphone: boolean;
   public recognitionLanguage: string;
   public meetingTypeLabel: string;
+  public selectMusic: string;
   public switchMeetingTypeLabel: boolean;
   public meetingType = MeetingTypeEnum[1];
   private leave = false;
@@ -61,36 +62,42 @@ export class EnterModalComponent
           this.isAllowedVideoOnStart = true;
           this.meetingType = MeetingTypeEnum[1];
           this.meetingTypeLabel = 'Simple (audio on for all, video on for all, music off)';
+          this.selectMusic = '';
           break;
         case 2:
           this.isAllowedAudioOnStart = true;
           this.isAllowedVideoOnStart = true;
           this.meetingType = MeetingTypeEnum[2];
           this.meetingTypeLabel = 'Party (audio on for all, video on for all, music on)';
+          this.selectMusic = 'assets/audio/party.mp3';
           break;
         case 3:
           this.isAllowedAudioOnStart = false;
           this.isAllowedVideoOnStart = true;
           this.meetingType = MeetingTypeEnum[3];
           this.meetingTypeLabel = 'Training (audio on only for host, video on for all, music on)';
+          this.selectMusic = 'assets/audio/training.mp3';
           break;
         case 4:
           this.isAllowedAudioOnStart = false;
           this.isAllowedVideoOnStart = true;
           this.meetingType = MeetingTypeEnum[4];
           this.meetingTypeLabel = 'Lesson (audio on only for host, video on for all, music off)';
+          this.selectMusic = '';
           break;
         case 5:
           this.isAllowedAudioOnStart = false;
           this.isAllowedVideoOnStart = false;
           this.meetingType = MeetingTypeEnum[5];
           this.meetingTypeLabel = 'Conference (audio on only for host, video on for host)';
+          this.selectMusic = '';
           break;
         default:
           this.isAllowedAudioOnStart = true;
           this.isAllowedVideoOnStart = true;
           this.meetingType = MeetingTypeEnum[1];
           this.meetingTypeLabel = 'Simple (audio on for all, video on for all, music off)';
+          this.selectMusic = '';
       }
     }
   }
@@ -116,6 +123,7 @@ export class EnterModalComponent
       isAllowedVideoOnStart: this.isAllowedVideoOnStart,
       isAllowedAudioOnStart: this.isAllowedAudioOnStart,
       recognitionLanguage: selectRecognitionLanguage,
+      selectMusic: this.selectMusic,
     };
     this.close();
   }
@@ -140,4 +148,5 @@ export interface EnterMeetingModalOutputData {
   isAllowedVideoOnStart: boolean;
   isAllowedAudioOnStart: boolean;
   recognitionLanguage: string;
+  selectMusic: string;
 }
