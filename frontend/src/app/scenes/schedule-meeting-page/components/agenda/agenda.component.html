@@ -18,6 +18,10 @@
         formControlName="time"
         (onChange)="onSubmit()"
       ></dp-date-picker>
+              <span *ngIf="!timeValid()"
+              class="error">
+                Time is earlier than present time.
+              </span>
       <span data-tooltip="Remove topic" data-position="top right">
       <i class="icon close" (click)="removeTag($event)"></i></span>
     </div>

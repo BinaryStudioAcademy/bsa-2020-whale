@@ -164,6 +164,9 @@ export class ParticipantCardComponent implements OnInit, OnDestroy {
   private initCardElements(): void {
     this.video = this.elRef.nativeElement.querySelector('video');
     this.audio = this.elRef.nativeElement.querySelector('audio');
+    if (this.data.isCurrentUser) {
+      this.audio.muted = true;
+    }
     this.participantName = this.elRef.nativeElement.querySelector('.header');
     this.participantContainer = this.elRef.nativeElement.querySelector(
       '.image'

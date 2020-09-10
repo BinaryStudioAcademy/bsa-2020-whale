@@ -55,6 +55,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
   public meetingType = MeetingTypeEnum[1];
   public meetingTypeLabel: string;
   public switchMeetingTypeLabel: boolean;
+  public selectMusic: string;
   point: PointAgenda;
   agendaValidate = true;
   constructor(
@@ -73,7 +74,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
       description: new FormControl(),
       date: new FormControl(this.createStringFromDate(new Date()), [Validators.required]),
       time: new FormControl(
-        `${new Date().getHours() + 1}:${new Date().getMinutes() + 10 - (minutes % 10)}`, [Validators.required]
+        `${new Date().getHours() === 23 ? '00' : new Date().getHours() + 1}:${30}`, [Validators.required]
       ),
       durationHours: new FormControl(1),
       durationMinutes: new FormControl(30),
@@ -192,6 +193,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
             participantsEmails: participantEmails as string[],
             agendaPoints: this.pointList,
             recognitionLanguage: meetingLanguage,
+            selectMusic: this.selectMusic,
           } as MeetingCreate)
           .pipe(takeUntil(this.unsubscribe$))
           .subscribe((resp) => {
@@ -308,36 +310,42 @@ export class ScheduleMeetingPageComponent implements OnInit {
           this.form.controls.isDisableVideo.setValue(true);
           this.meetingType = MeetingTypeEnum[1];
           this.meetingTypeLabel = 'Simple (audio on for all, video on for all, music off)';
+          this.selectMusic = '';
           break;
         case 2:
           this.form.controls.isDisableAudio.setValue(true);
           this.form.controls.isDisableVideo.setValue(true);
           this.meetingType = MeetingTypeEnum[2];
           this.meetingTypeLabel = 'Party (audio on for all, video on for all, music on)';
+          this.selectMusic = 'assets/audio/party.mp3';
           break;
         case 3:
           this.form.controls.isDisableAudio.setValue(false);
           this.form.controls.isDisableVideo.setValue(true);
           this.meetingType = MeetingTypeEnum[3];
           this.meetingTypeLabel = 'Training (audio on only for host, video on for all, music on)';
+          this.selectMusic = 'assets/audio/training.mp3';
           break;
         case 4:
           this.form.controls.isDisableAudio.setValue(false);
           this.form.controls.isDisableVideo.setValue(true);
           this.meetingType = MeetingTypeEnum[4];
           this.meetingTypeLabel = 'Lesson (audio on only for host, video on for all, music off)';
+          this.selectMusic = '';
           break;
         case 5:
           this.form.controls.isDisableAudio.setValue(false);
           this.form.controls.isDisableVideo.setValue(false);
           this.meetingType = MeetingTypeEnum[5];
           this.meetingTypeLabel = 'Conference (audio on only for host, video on for host)';
+          this.selectMusic = '';
           break;
         default:
           this.form.controls.isDisableAudio.setValue(true);
           this.form.controls.isDisableVideo.setValue(true);
           this.meetingType = MeetingTypeEnum[1];
           this.meetingTypeLabel = 'Simple (audio on for all, video on for all, music off)';
+          this.selectMusic = '';
       }
   }
   public agendaValid(event) {

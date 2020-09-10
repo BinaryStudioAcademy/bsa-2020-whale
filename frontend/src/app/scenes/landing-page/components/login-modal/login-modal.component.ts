@@ -1,8 +1,6 @@
 import { Component } from '@angular/core';
 import { AuthService } from 'app/core/auth/auth.service';
 import { SimpleModalComponent } from 'ngx-simple-modal';
-import { Route } from '@angular/compiler/src/core';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login-modal',
@@ -10,22 +8,20 @@ import { Router } from '@angular/router';
   styleUrls: ['./login-modal.component.sass'],
 })
 export class LoginModalComponent extends SimpleModalComponent<null, boolean> {
-  constructor(public auth: AuthService, private router: Router) {
+  constructor(public auth: AuthService) {
     super();
   }
 
   public facebookLogin(): void {
     this.auth.signInWithFacebook().then((status) => {
       this.result = status;
-      this.router.navigate(['/home']);
-      this.close();
+      setTimeout(() => this.close(), 200);
     });
   }
 
   public googleLogin(): void {
     this.auth.signInWithGoogle().then((status) => {
       this.result = status;
-      // this.router.navigate(['/home']);
       setTimeout(() => this.close(), 200);
     });
   }

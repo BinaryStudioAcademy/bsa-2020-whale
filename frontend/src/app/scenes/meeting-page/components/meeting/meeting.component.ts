@@ -194,6 +194,8 @@ export class MeetingComponent
   musicFile: HTMLAudioElement;
   audioUrl: string;
   isMusicUploaded = false;
+  public selectMusic: string;
+  public playAudio: boolean;
 
   public reactionDelay: Observable<number>;
   startedSpeak: Date = null;
@@ -299,10 +301,9 @@ export class MeetingComponent
 
     if (!isInsidePolls &&
       targetElement !== this.pollsButton?.nativeElement &&
-      targetElement !== this.pollsButtonFullscreen?.nativeElement &&
-      targetElement.nodeName !== 'BUTTON' &&
-      targetElement.nodeName !== 'I' &&
-      targetElement.nodeName !== 'SPAN') {
+      targetElement !== this.pollsButtonFullscreen?.nativeElement
+      && !(targetElement.classList.contains('poll-action'))
+      ) {
       this.pollService.isShowPollContainer = false;
     }
 
@@ -1003,7 +1004,8 @@ export class MeetingComponent
     this.simpleModalService.removeAll();
     this.destroyPeer();
     this.currentUserStream?.getTracks().forEach((track) => track.stop());
-
+    this.updateMeetingStatistics();
+    clearInterval(this.updateStatisticsTaskId);
     this.questionService.areQuestionsOpened = false;
     this.questionService.questions = [];
 
@@ -1026,7 +1028,8 @@ export class MeetingComponent
         );
       }
     }
-
+    this.updateMeetingStatistics();
+    clearInterval(this.updateStatisticsTaskId);
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
     this.turnOffMusic();
@@ -1275,10 +1278,8 @@ export class MeetingComponent
     // this is made to remove eventListener for other routes
     window.onbeforeunload = () => { };
     this.stopRecognition();
-    this.meter.stopListening();
-    this.meter.disconnect();
-    this.updateMeetingStatistics();
-    clearInterval(this.updateStatisticsTaskId);
+    this.meter?.stopListening();
+    this.meter?.disconnect();
     this.router.navigate(['/home']);
   }
 
@@ -1366,7 +1367,10 @@ export class MeetingComponent
           email: this.authService.currentUser.email,
         } as GetMessages);
       });
-
+      this.startedPresence = new Date();
+      this.updateStatisticsTaskId = setInterval(() => {
+        this.updateMeetingStatistics();
+      }, 60000);
       return;
     }
 
@@ -1376,6 +1380,8 @@ export class MeetingComponent
       .subscribe(
         (resp) => {
           this.meeting = resp.body;
+          this.selectMusic = this.meeting.selectMusic;
+          this.playAudio = true;
           this.roomService.originalMeetingUrl = this.route.snapshot.params.link;
           this.roomService.originalMeetingId = this.meeting.id;
           this.createEnterModal().then(() => {
@@ -1408,10 +1414,8 @@ export class MeetingComponent
   private leaveUnConnected(): void {
     this.currentUserStream?.getTracks()?.forEach((track) => track.stop());
     this.destroyPeer();
-    this.meter.stopListening();
-    this.meter.disconnect();
-    this.updateMeetingStatistics();
-    clearInterval(this.updateStatisticsTaskId);
+    this.meter?.stopListening();
+    this.meter?.disconnect();
     this.router.navigate(['/home']);
   }
 
@@ -1456,6 +1460,14 @@ export class MeetingComponent
       this.toggleMicrophone(true);
     }
 
+    if (modalResult.selectMusic && isCurrentParticipantHost) {
+      this.selectMusic = modalResult.selectMusic;
+      this.playAudio = true;
+    }else if (!modalResult.selectMusic && isCurrentParticipantHost) {
+      this.selectMusic = '';
+      this.playAudio = false;
+    }
+
     this.meeting.isAudioAllowed = modalResult.isAllowedAudioOnStart;
     this.meeting.isVideoAllowed = modalResult.isAllowedVideoOnStart;
     this.meeting.recognitionLanguage = modalResult.recognitionLanguage;
@@ -1472,7 +1484,8 @@ export class MeetingComponent
           isVideoDisabled: !this.meeting.isVideoAllowed,
           isPoll: this.meeting.isPoll,
           isAllowedToChooseRoom: this.meeting.isAllowedToChooseRoom,
-          recognitionLanguage: this.meeting.recognitionLanguage
+          recognitionLanguage: this.meeting.recognitionLanguage,
+          selectMusic: this.selectMusic
         })
         .pipe(takeUntil(this.unsubscribe$))
         .subscribe(() => {
@@ -2197,6 +2210,15 @@ export class MeetingComponent
       streamId: this.currentUserStream.id,
       meetingId: this.meeting.id,
     });
+    this.meetingSignalrService.invoke(SignalMethods.OnMediaStateChanged, {
+      meetingId: this.meeting.id,
+      streamId: this.currentUserStream.id,
+      receiverConnectionId: '',
+      isAudioAllowed: this.meeting.isAudioAllowed,
+      isVideoAllowed: this.meeting.isVideoAllowed,
+      isAudioActive: !this.isMicrophoneMuted,
+      isVideoActive: true,
+    } as MediaState);
   }
   async removeSharingVideo(): Promise<void> {
     this.replaceVideoTrack(this.lastTrack);
@@ -2204,6 +2226,15 @@ export class MeetingComponent
       SignalMethods.OnShareScreenStop,
       this.meeting.id
     );
+    this.meetingSignalrService.invoke(SignalMethods.OnMediaStateChanged, {
+      meetingId: this.meeting.id,
+      streamId: this.currentUserStream.id,
+      receiverConnectionId: '',
+      isAudioAllowed: this.meeting.isAudioAllowed,
+      isVideoAllowed: this.meeting.isVideoAllowed,
+      isAudioActive: !this.isMicrophoneMuted,
+      isVideoActive: !this.isCameraMuted,
+    } as MediaState);
   }
   replaceVideoTrack(track: MediaStreamTrack)
   {
@@ -2354,8 +2385,12 @@ export class MeetingComponent
     if (this.startedPresence != null) {
       presence = new Date().getTime() - this.startedPresence.getTime();
     }
+    let id = this.meeting.id;
+    if (this.isRoom){
+      id = this.roomService.originalMeetingId;
+    }
     this.meetingService.updateMeetingStatistics({
-      meetingId: this.meeting.id,
+      meetingId: id,
       speechTime: this.speechDuration,
       presenceTime: presence
     })
