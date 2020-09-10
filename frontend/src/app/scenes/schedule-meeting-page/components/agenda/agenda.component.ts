@@ -19,6 +19,7 @@ export class AgendaComponent implements OnInit {
   @Input() point: PointAgenda;
   @Output() tagRemoved = new EventEmitter<PointAgenda>();
   @Output() agendaValid = new EventEmitter<boolean>();
+  @Input() startTimeMeeting: Date;
   constructor() {
     const today: Date = new Date();
     this.form = new FormGroup({
@@ -44,6 +45,11 @@ export class AgendaComponent implements OnInit {
     const userDate = new Date();
     userDate.setHours(Number(userTimeParts[0]));
     userDate.setMinutes(Number(userTimeParts[1]));
-    return userDate > new Date();
+    const startMeeting = new Date();
+    const meetingTimeString = this.startTimeMeeting.toString();
+    const meetingTime = meetingTimeString.split(':');
+    startMeeting.setHours(Number(meetingTime[0]));
+    startMeeting.setMinutes(Number(meetingTime[1]));
+    return userDate > startMeeting;
   }
 }
