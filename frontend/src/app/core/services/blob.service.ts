@@ -83,4 +83,14 @@ export class BlobService {
       responseType: 'text',
     });
   }
+
+  public postBlobUploadAttachment(blob: Blob): Observable<string> {
+    const formData = new FormData();
+
+    formData.append('chat-attachment', blob, 'attachment');
+
+    return this.http.post(`${this.baseUrl}/storage/save/attachment`, formData, {
+      responseType: 'text',
+    });
+  }
 }

@@ -91,12 +91,18 @@
           <div *ngFor="let row of splitMessage(message?.message)">
             {{ row }}
           </div>
+          <a *ngIf="message.attachment" target="_blank" href="{{message.attachmentUrl}}">
+            <button class="mini ui button">
+              Open Attachment
+            </button>
+          </a>
         </div>
       </div>
     </div>
   </div>
   <div class="forma">
     <form class="ui form vertically-aligned" #chatForm="ngForm">
+      <app-spiner *ngIf="isAttachment" size="medium"></app-spiner>
       <div class="field">
         <textarea
           (keydown.enter)="onEnterKeyPress($event, chatForm.valid)"
@@ -122,6 +128,13 @@
       >
         Send <i class="paper plane outline icon"></i>
       </button>
+      <button
+        class="ui button tiny send"
+        (click)="addAttachment($event)"
+      >
+        File <i class="paperclip icon"></i>
+      </button>
+      <input type="file" #attachFile style="display: none;" (change)="onFileAttach($event.target.files)">
     </form>
   </div>
 </div>

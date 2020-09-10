@@ -256,7 +256,7 @@
           <h5>Agenda</h5>
           <div class="agenda" *ngFor="let a of pointList">
             <app-agenda
-              [point]="point"
+              [point]="a"
               (tagRemoved)="removeTag($event)"
               (agendaValid)="agendaValid($event)"              
             >

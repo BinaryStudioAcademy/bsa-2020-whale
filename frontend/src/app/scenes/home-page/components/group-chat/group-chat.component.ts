@@ -63,6 +63,7 @@ export class GroupChatComponent
   @Output() chat: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() groupUpdated: EventEmitter<Group> = new EventEmitter<Group>();
   @ViewChildren('chatWindow') chatBlock: QueryList<ElementRef<HTMLElement>>;
+  @ViewChild('attachFile') attachFileInput: ElementRef;
 
   @Output() messageRead = new EventEmitter<string>();
 
@@ -84,6 +85,8 @@ export class GroupChatComponent
   };
   groupMembers: User[] = [];
   isMessagesLoading = true;
+  public isAttachment = false;
+  attachedFile: FileList = null;
 
   newMessage: GroupMessage = {
     groupId: '',
@@ -91,6 +94,7 @@ export class GroupChatComponent
     authorId: '',
     createdAt: new Date(),
     attachment: false,
+    attachmentUrl: '',
   };
   constructor(
     private whaleSignalrService: WhaleSignalService,
@@ -213,9 +217,16 @@ export class GroupChatComponent
     }
   }
 
-  sendMessage(): void {
-    if (this.newMessage.message.trim().length === 0) {
+  async sendMessage(): Promise<void> {
+    if (this.newMessage.message.trim().length === 0 && !this.isAttachment) {
       return;
+    }
+
+    let attachUrl = '';
+    if (this.isAttachment) {
+      const blob = new Blob([this.attachedFile[0]], {type: this.attachedFile[0].type});
+      const response = await this.blobService.postBlobUploadAttachment(blob).pipe(first()).toPromise();
+      attachUrl = response;
     }
 
     const newMessage: GroupMessage = {
@@ -223,10 +234,11 @@ export class GroupChatComponent
       authorId: this.loggedInUser.id,
       createdAt: new Date(),
       message: this.newMessage.message,
-      attachment: false,
+      attachment: this.isAttachment,
       author: this.loggedInUser,
+      attachmentUrl: attachUrl,
     };
-
+    this.onFileDettach();
     this.newMessage.message = '';
     this.messages.push(newMessage);
     this.chatBlock.changes.pipe(first()).subscribe(() => {
@@ -423,5 +435,22 @@ export class GroupChatComponent
       .subscribe(() => {
         this.messageRead.emit(msgId);
       });
+  }
+
+  addAttachment(event: Event): void {
+    event.preventDefault();
+    (this.attachFileInput.nativeElement as HTMLElement).click();
+  }
+
+  onFileDettach(): void {
+    this.isAttachment = false;
+    this.attachedFile = undefined;
+    (this.attachFileInput.nativeElement as HTMLInputElement).value = '';
+  }
+
+  onFileAttach(list: FileList): void {
+    this.isAttachment = true;
+    this.attachedFile = list;
+    this.sendMessage();
   }
 }

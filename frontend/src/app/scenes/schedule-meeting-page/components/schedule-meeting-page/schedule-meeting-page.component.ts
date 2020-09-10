@@ -41,9 +41,8 @@ export class ScheduleMeetingPageComponent implements OnInit {
     format: 'HH:mm',
     showTwentyFourHours: true,
     minutesInterval: 1,
-    min: `${new Date().getHours()}:${new Date().getMinutes()}`,
   };
-  public pointList: PointAgenda[] = [{ name: '', startTime: new Date() }];
+  public pointList: PointAgenda[] = [{ name: 'start', startTime: new Date() }];
   public isPasswordCheckboxChecked = true;
   public form: FormGroup;
   private unsubscribe$ = new Subject<void>();
@@ -116,7 +115,9 @@ export class ScheduleMeetingPageComponent implements OnInit {
     const userDate = new Date(Number(userDateParts[2]), Number(userDateParts[1]) - 1, Number(userDateParts[0]));
     userDate.setHours(Number(userTimeParts[0]));
     userDate.setMinutes(Number(userTimeParts[1]));
-
+    if (userDate.getDate > todayDate.getDate){
+      return true;
+    }
     return userDate > todayDate;
   }
 

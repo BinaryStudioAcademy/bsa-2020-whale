@@ -188,7 +188,9 @@ export class MeetingComponent
   public IsWhiteboard = false;
   public IsPoll = false;
   public isSomeoneRecordingScreen = false;
+  public isAttachment = false;
   uploadedFile: FileList = null;
+  attachedFile: FileList = null;
   musicFile: HTMLAudioElement;
   audioUrl: string;
   isMusicUploaded = false;
@@ -203,6 +205,7 @@ export class MeetingComponent
   updateStatisticsTaskId: any;
 
   @ViewChild('uploadFile') fileInput: ElementRef;
+  @ViewChild('attachFile') attachFileInput: ElementRef;
   @ViewChild('currentVideo') private currentVideo: ElementRef;
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
     HTMLElement
@@ -1808,17 +1811,24 @@ export class MeetingComponent
     }
   }
 
-  public sendMessage(): void {
-    if (this.msgText.trim().length === 0) {
+  public async sendMessage(): Promise<void> {
+    if (this.msgText.trim().length === 0 && !this.isAttachment) {
       return;
     }
-
     if (!this.questionService.areQuestionsOpened) {
+      let attachUrl = '';
+      if (this.isAttachment) {
+        const blob = new Blob([this.attachedFile[0]], {type: this.attachedFile[0].type});
+        const response = await this.blobService.postBlobUploadAttachment(blob).pipe(first()).toPromise();
+        attachUrl = response;
+        this.onFileDettach();
+      }
       this.meetingSignalrService.invoke(SignalMethods.OnSendMessage, {
         authorEmail: this.authService.currentUser.email,
         meetingId: this.meeting.id,
         message: this.msgText,
         receiverEmail: this.msgReceiverEmail,
+        attachmentUrl: attachUrl,
       } as MeetingMessageCreate);
     } else {
       this.questionService.sendQuestionCreate(this.meeting.id, this.msgText);
@@ -1875,6 +1885,23 @@ export class MeetingComponent
     ) {
       this.newMsgFrom.push(msg.author.email);
     }
+  }
+
+  addAttachment(event: Event): void {
+    event.preventDefault();
+    (this.attachFileInput.nativeElement as HTMLElement).click();
+  }
+
+  onFileDettach(): void {
+    this.isAttachment = false;
+    this.attachedFile = undefined;
+    (this.attachFileInput.nativeElement as HTMLInputElement).value = '';
+  }
+
+  onFileAttach(list: FileList): void {
+    this.isAttachment = true;
+    this.attachedFile = list;
+    this.sendMessage();
   }
 
   //#endregion chat

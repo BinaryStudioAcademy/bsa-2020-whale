@@ -656,6 +656,11 @@
               <div *ngFor="let row of splitMessage(message?.message)">
                 {{ row }}
               </div>
+              <a *ngIf="message.attachmentUrl" target="_blank" href="{{message.attachmentUrl}}">
+                <button class="mini ui button">
+                  Open Attachment
+                </button>
+              </a>
             </div>
           </div>
         </div>
@@ -713,6 +718,7 @@
         </div>
 
         <div class="ui icon input">
+          <app-spiner *ngIf="isAttachment" size="small"></app-spiner>
           <textarea
             (keydown.enter)="onEnterKeyPress($event)"
             rows="1"
@@ -722,6 +728,11 @@ Enter+Shift for new line."
             required
           >
           </textarea>
+          <i
+            *ngIf="!this.questionService.areQuestionsOpened && !isAttachment"
+            class="paperclip link icon blue attachment"
+            (click)="addAttachment($event)"
+          ></i>
           <button
             class="sendMessage"
             (click)="sendMessage()"
@@ -733,6 +744,7 @@ Enter+Shift for new line."
               class="paper plane link icon blue"
             ></i>
           </button>
+          <input type="file" #attachFile style="display: none;" (change)="onFileAttach($event.target.files)">
         </div>
       </div>
     </div>
