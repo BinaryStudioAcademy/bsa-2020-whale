@@ -61,7 +61,7 @@
         <label>Option {{ i + 1 }}:</label>
         <span
           *ngIf="i > 1"
-          class="close-icon"
+          class="close-icon poll-action"
           id="{{ i }}"
           (click)="removeOption($event)"
           >&times;</span
@@ -88,7 +88,7 @@
 
     <button
       type="button"
-      class="ui button answers-button"
+      class="ui button answers-button poll-action"
       (click)="addOption()"
     >
       Add option
