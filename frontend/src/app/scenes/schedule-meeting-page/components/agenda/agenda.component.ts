@@ -25,6 +25,7 @@ export class AgendaComponent implements OnInit {
       time: new FormControl(`${today.getHours() + 1}:30`),
       name: new FormControl('', Validators.required),
     });
+    setInterval(() => this.onSubmit(), 1000);
   }
   public name = '';
   public startTime = new Date();

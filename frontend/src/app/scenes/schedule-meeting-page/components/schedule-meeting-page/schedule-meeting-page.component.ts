@@ -43,7 +43,7 @@ export class ScheduleMeetingPageComponent implements OnInit {
     minutesInterval: 1,
     min: `${new Date().getHours()}:${new Date().getMinutes()}`,
   };
-  public pointList: PointAgenda[] = [{ name: '', startTime: new Date() }];
+  public pointList: PointAgenda[] = [{ name: 'start', startTime: new Date() }];
   public isPasswordCheckboxChecked = true;
   public form: FormGroup;
   private unsubscribe$ = new Subject<void>();

@@ -1,10 +1,10 @@
 <form class="ui labels" [formGroup]="form">
   <div class="ui label" (click)="onSubmit()">
     <div class="name-container">
-    <div class="ui input">
-      <input required type="text" pattern=".*\S+.*" [(ngModel)]="name" placeholder="Topic name" mode="name" formControlName="name" (change)="onSubmit()"/>
+    <div class="ui input" >
+      <input required type="text" pattern=".*\S+.*" [(ngModel)]="name" placeholder="Topic name" mode="name" formControlName="name" (onChange)="onSubmit()"/>
     </div>
-    <span class="error" *ngIf="form.controls['name'].invalid && form.controls['name']?.touched && form.controls['name'].touched">
+    <span class="error" *ngIf="form.controls['name'].invalid && form.controls['name']?.touched">
       Required name
     </span>
     </div>
