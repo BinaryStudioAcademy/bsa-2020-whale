@@ -409,7 +409,7 @@
       class="catch-area"
       [class.shorter-area]="pinnedCardsLayout === 1 && isCardPinned"
       *ngIf="shouldBeCatchArea && isHost">
-        <div class="music-player" *ngIf="isHost && !playAudio">
+        <div class="music-player" *ngIf="isHost && playAudio">
           <input type="file" #uploadFile style="display: none;" accept=".mp3" (change)="onFileChange($event.target.files)">
           <span class="player-title"><i>Player</i></span>
           <i class="player folder open icon" (click)="uploadMp3($event)"></i>
