@@ -16,7 +16,7 @@
       <app-spiner size="huge"></app-spiner>
     </div>
     <div *ngIf="!isLoading">
-      <div *ngIf="allTimeStatistics; else noCallsText">
+      <div *ngIf="allTimeStatistics && allTimeStatistics?.docCount > 0; else noCallsText">
         <div class="ui card">
           <h3 class="text-center">During all time</h3>
           <div class="rw-statistics">
@@ -26,14 +26,14 @@
                   Number of calls
                 </div>
                 <div class="value">
-                  {{ allTimeStatistics?.docCount.value }}
+                  {{ allTimeStatistics?.docCount?.value }}
                 </div>
               </div>
             </div>
             <div class="ui small statistics">
               <div class="statistic">
                 <div class="value">
-                  {{ valueDateTickFormatting(allTimeStatistics?.minDuration.value) }}
+                  {{ valueDateTickFormatting(allTimeStatistics?.minDuration?.value) }}
                 </div>
                 <div class="label">
                   Min
@@ -44,7 +44,7 @@
                   Call duration
                 </div>
                 <div class="value">
-                  {{ valueDateTickFormatting(allTimeStatistics?.avgDuration.value) }}
+                  {{ valueDateTickFormatting(allTimeStatistics?.avgDuration?.value) }}
                 </div>
                 <div class="label">
                   Average
@@ -52,7 +52,7 @@
               </div>
               <div class="statistic">
                 <div class="value">
-                  {{ valueDateTickFormatting(allTimeStatistics?.maxDuration.value) }}
+                  {{ valueDateTickFormatting(allTimeStatistics?.maxDuration?.value) }}
                 </div>
                 <div class="label">
                   Max
@@ -62,7 +62,7 @@
             <div class="ui small statistics">
               <div class="statistic">
                 <div class="value">
-                  {{ valueDateTickFormatting(allTimeStatistics?.minPresence.value) }}
+                  {{ valueDateTickFormatting(allTimeStatistics?.minPresence?.value) }}
                 </div>
                 <div class="label">
                   Min
@@ -73,7 +73,7 @@
                   Call presence duration
                 </div>
                 <div class="value">
-                  {{ valueDateTickFormatting(allTimeStatistics?.avgPresence.value) }}
+                  {{ valueDateTickFormatting(allTimeStatistics?.avgPresence?.value) }}
                 </div>
                 <div class="label">
                   Average
@@ -81,7 +81,7 @@
               </div>
               <div class="statistic">
                 <div class="value">
-                  {{ valueDateTickFormatting(allTimeStatistics?.maxPresence.value) }}
+                  {{ valueDateTickFormatting(allTimeStatistics?.maxPresence?.value) }}
                 </div>
                 <div class="label">
                   Max
@@ -91,7 +91,7 @@
             <div class="ui small statistics">
               <div class="statistic">
                 <div class="value">
-                  {{ valueDateTickFormatting(allTimeStatistics?.minSpeech.value) }}
+                  {{ valueDateTickFormatting(allTimeStatistics?.minSpeech?.value) }}
                 </div>
                 <div class="label">
                   Min
@@ -102,7 +102,7 @@
                   Call speech duration
                 </div>
                 <div class="value">
-                  {{ valueDateTickFormatting(allTimeStatistics?.avgSpeech.value) }}
+                  {{ valueDateTickFormatting(allTimeStatistics?.avgSpeech?.value) }}
                 </div>
                 <div class="label">
                   Average
@@ -110,7 +110,7 @@
               </div>
               <div class="statistic">
                 <div class="value">
-                  {{ valueDateTickFormatting(allTimeStatistics?.maxSpeech.value) }}
+                  {{ valueDateTickFormatting(allTimeStatistics?.maxSpeech?.value) }}
                 </div>
                 <div class="label">
                   Max
