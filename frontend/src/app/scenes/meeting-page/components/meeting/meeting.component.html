@@ -5,6 +5,7 @@
 <button (click)="showPeer()">peer</button>
 <button (click)="disconnect()">disconnect</button>
 <button (click)="reconnect()">reconnect</button> -->
+<audio #player src="{{selectMusic}}" autoplay loop></audio>
 <app-spiner *ngIf="isMeetingLoading" size="massive"></app-spiner>
 <div *ngIf="isWaitingForRecord" class="notification">
   <p>Waiting record...</p>
@@ -12,7 +13,6 @@
 
 <div #mainArea class="bg-white">
   <div class="content display-flex">
-    <audio *ngIf="playAudio" src="{{selectMusic}}" autoplay loop></audio>
     <div class="tools" ngDraggable [handle]="handleHand">
       <div #handleHand class="drag-icon">
         <i class="ellipsis vertical icon"></i>
@@ -170,7 +170,7 @@
     <div class="main-content">
       <div *ngIf="isSomeoneRecordingScreen" class="notification">
         <p>The conference is recording</p>
-      </div>   
+      </div>
       <div class="options">
         <div class="ui options__buttons">
           <div class="inner-block">

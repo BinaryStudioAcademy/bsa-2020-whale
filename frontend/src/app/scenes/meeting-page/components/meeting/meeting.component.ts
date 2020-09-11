@@ -195,7 +195,7 @@ export class MeetingComponent
   audioUrl: string;
   isMusicUploaded = false;
   public selectMusic: string;
-  public playAudio: boolean;
+  public playAudio = true;
 
   public reactionDelay: Observable<number>;
   startedSpeak: Date = null;
@@ -207,6 +207,8 @@ export class MeetingComponent
   @ViewChild('uploadFile') fileInput: ElementRef;
   @ViewChild('attachFile') attachFileInput: ElementRef;
   @ViewChild('currentVideo') private currentVideo: ElementRef;
+  @ViewChild('player', { static: true }) player: ElementRef;
+
   @ViewChild('mainArea', { static: false }) private mainArea: ElementRef<
     HTMLElement
   >;
@@ -972,9 +974,7 @@ export class MeetingComponent
       }
       this.setOutputDevice();
     });
-
     this.pinnedCardsLayout = +localStorage.getItem('pinned-cards-layout') ?? CardsLayout.TopRow;
-
     this.participantCards.changes.subscribe(
       () => {
         if (this.isCardPinned) {
@@ -995,6 +995,7 @@ export class MeetingComponent
     if (this.isShowChat) {
       this.chatElement = this.chatBlock.first?.nativeElement;
     }
+    this.player.nativeElement.volume = 0.3;
   }
 
   public ngOnDestroy(): void {
@@ -1444,6 +1445,8 @@ export class MeetingComponent
         isAllowedAudioOnStart: this.meeting.isAudioAllowed,
         isAllowedVideoOnStart: this.meeting.isVideoAllowed,
         recognitionLanguage: this.meeting.recognitionLanguage,
+        selectMusic: this.selectMusic,
+        meetingType: this.meeting.meetingType,
       })
       .toPromise();
 
@@ -1463,9 +1466,10 @@ export class MeetingComponent
     if (modalResult.selectMusic && isCurrentParticipantHost) {
       this.selectMusic = modalResult.selectMusic;
       this.playAudio = true;
+      this.player.nativeElement.volume = 0.3;
     }else if (!modalResult.selectMusic && isCurrentParticipantHost) {
       this.selectMusic = '';
-      this.playAudio = false;
+      this.player.nativeElement.pause();
     }
 
     this.meeting.isAudioAllowed = modalResult.isAllowedAudioOnStart;

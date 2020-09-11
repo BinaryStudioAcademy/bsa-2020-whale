@@ -20,4 +20,5 @@ export interface MeetingCreate {
   agendaPoints?: PointAgenda[];
   recognitionLanguage: string;
   selectMusic: string;
+  meetingType: string;
 }

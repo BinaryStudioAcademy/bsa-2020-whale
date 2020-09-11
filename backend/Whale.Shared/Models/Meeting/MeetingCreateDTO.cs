@@ -22,6 +22,7 @@ namespace Whale.Shared.Models.Meeting
         public string RecognitionLanguage { get; set; }
         public string CreatorEmail { get; set; }
         public string SelectMusic { get; set; }
+        public string MeetingType { get; set; }
         public List<string> ParticipantsEmails { get; set; }
         public List<AgendaPointDTO> AgendaPoints { get; set; }
     }
