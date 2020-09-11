@@ -2002,17 +2002,8 @@ export class MeetingComponent
     const source = ctx.createMediaElementSource(this.musicFile);
     source.connect(streamDestination);
     const stream = streamDestination.stream;
-
-    // const keys = Object.keys(this.peer.connections);
-    // const peerConnection = this.peer.connections[keys[0]];
-    // const audioTrack = stream.getAudioTracks()[0];
-    // peerConnection.forEach((pc) => {
-    //   const sender = pc.peerConnection.getSenders().find((s) => {
-    //     return s.track.kind === audioTrack.kind;
-    //   });
-    //   sender.replaceTrack(audioTrack);
-    // });
-    this.handleSuccessAudio(stream);
+    const audioTrack = stream.getAudioTracks()[0];
+    this.currentUserStream.addTrack(audioTrack);
   }
 
   pauseMusic(): void {
@@ -2028,8 +2019,6 @@ export class MeetingComponent
     this.isMusicUploaded = false;
     this.musicTrackName = '';
   }
-
-// selectedMusicTrackName: string;
 
   public uploadAudioFile(): void {
     if (this.uploadedFile[0]) {
