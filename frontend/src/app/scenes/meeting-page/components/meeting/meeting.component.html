@@ -221,12 +221,13 @@
                 *ngIf="!isCameraMuted"
                 class="big video icon big-left-margin"
               ></i></button>
+              <button class="share-camera"[disabled]="isSharing"
+            (click)="toggleCamera()">
               <i
                 id="meeting-options-camera"
                 *ngIf="isCameraMuted"
                 class="big eye slash icon big-left-margin"
-                (click)="toggleCamera()"
-              ></i>
+              ></i></button>
             </span>
             <span
               *ngIf="!meeting?.isVideoAllowed && currentParticipant?.role !== 1"
