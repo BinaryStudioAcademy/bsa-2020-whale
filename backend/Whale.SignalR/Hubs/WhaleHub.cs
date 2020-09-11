@@ -120,10 +120,14 @@ namespace Whale.SignalR.Hubs
         {
             var group = await _groupsService.GetGroupAsync(groupId);
             var groupUsers = await _groupsService.GetAllUsersInGroupAsync(group.Id);
+
             foreach (var usr in groupUsers)
             {
                 var connections = await _whaleService.GetConnectionsAsync(usr.Id);
-                await Clients.Client(connections.LastOrDefault()).SendAsync("OnTakeGroupCall");
+                foreach (var connection in connections)
+                {
+                    await Clients.Client(connection).SendAsync("OnTakeGroupCall");
+                }
             }
         }
 
