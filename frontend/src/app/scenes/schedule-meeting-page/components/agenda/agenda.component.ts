@@ -50,6 +50,6 @@ export class AgendaComponent implements OnInit {
     const meetingTime = meetingTimeString.split(':');
     startMeeting.setHours(Number(meetingTime[0]));
     startMeeting.setMinutes(Number(meetingTime[1]));
-    return userDate > startMeeting;
+    return userDate >= startMeeting;
   }
 }
