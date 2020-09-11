@@ -203,6 +203,7 @@ export class MeetingComponent
   speechDuration = 0;
   topicList: PointAgenda[] = [];
   updateStatisticsTaskId: any;
+  musicTrackName = '';
 
   @ViewChild('uploadFile') fileInput: ElementRef;
   @ViewChild('attachFile') attachFileInput: ElementRef;
@@ -2024,7 +2025,6 @@ export class MeetingComponent
     this.musicTrackName = '';
   }
 
-musicTrackName: string = '';
 // selectedMusicTrackName: string;
 
   public uploadAudioFile(): void {
