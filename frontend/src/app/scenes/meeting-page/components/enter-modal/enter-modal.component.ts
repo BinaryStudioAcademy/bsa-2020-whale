@@ -37,10 +37,12 @@ export class EnterModalComponent
     this.microphone = this.isCurrentParticipantHost
       ? true
       : this.isAllowedAudioOnStart;
-    if (this.isCurrentParticipantHost && this.meetingType === null){
-      this.isAllowedVideoOnStart = !this.meetingSettingService.getSettings().isVideoDisabled;
-      this.isAllowedAudioOnStart = !this.meetingSettingService.getSettings().isAudioDisabled;
-      this.meetingType = MeetingTypeEnum[1];
+    if (this.isCurrentParticipantHost){
+      if (!this.meetingType) {
+        this.isAllowedVideoOnStart = !this.meetingSettingService.getSettings().isVideoDisabled;
+        this.isAllowedAudioOnStart = !this.meetingSettingService.getSettings().isAudioDisabled;
+        this.meetingType = MeetingTypeEnum[1];
+      }
       switch (this.recognitionLanguage) {
         case 'ru':
           this.recognitionLanguage = 'Russian';
