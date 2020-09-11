@@ -104,6 +104,7 @@ namespace Whale.Shared.Services
             meetingDTO.Recurrence = meetingSettings.Recurrence;
             meetingDTO.RecognitionLanguage = meetingSettings.RecognitionLanguage;
             meetingDTO.SelectMusic = meetingSettings.SelectMusic;
+            meetingDTO.MeetingType = meetingSettings.MeetingType;
 
             return meetingDTO;
         }
@@ -132,7 +133,8 @@ namespace Whale.Shared.Services
                 IsAllowedToChooseRoom = meetingDTO.IsAllowedToChooseRoom,
                 IsPoll = meetingDTO.IsPoll,
                 RecognitionLanguage = meetingDTO.RecognitionLanguage,
-                SelectMusic = meetingDTO.SelectMusic
+                SelectMusic = meetingDTO.SelectMusic,
+                MeetingType = meetingDTO.MeetingType
             });
 
             var shortURL = ShortId.Generate(new GenerationOptions
@@ -192,7 +194,8 @@ namespace Whale.Shared.Services
                 meetingDTO.IsWhiteboard,
                 meetingDTO.RecognitionLanguage,
                 meetingDTO.Recurrence,
-                meetingDTO.SelectMusic
+                meetingDTO.SelectMusic,
+                meetingDTO.MeetingType
             });
             await _context.Meetings.AddAsync(meeting);
             var user = await _context.Users.FirstOrDefaultAsync(e => e.Email == meetingDTO.CreatorEmail);
@@ -303,7 +306,8 @@ namespace Whale.Shared.Services
                 IsAllowedToChooseRoom = ((dynamic)meetingSettings).IsAllowedToChooseRoom,
                 IsPoll = ((dynamic)meetingSettings).IsPoll,
                 RecognitionLanguage = ((dynamic)meetingSettings).RecognitionLanguage,
-                SelectMusic = ((dynamic)meetingSettings).SelectMusic
+                SelectMusic = ((dynamic)meetingSettings).SelectMusic,
+                MeetingType = ((dynamic)meetingSettings).MeetingType
             });
 
             await _redisService.SetAsync(scheduledMeeting.FullURL, scheduledMeeting.ShortURL);

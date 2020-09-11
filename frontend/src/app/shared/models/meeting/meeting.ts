@@ -16,6 +16,7 @@ export interface Meeting {
   isPoll: boolean;
   isAllowedToChooseRoom: boolean;
   recognitionLanguage: string;
+  meetingType: string;
   selectMusic: string;
   recurrence: Recurrence;
   isAudioAllowed: boolean;

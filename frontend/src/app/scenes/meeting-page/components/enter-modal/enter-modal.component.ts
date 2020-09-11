@@ -24,7 +24,7 @@ export class EnterModalComponent
   public meetingTypeLabel: string;
   public selectMusic: string;
   public switchMeetingTypeLabel: boolean;
-  public meetingType = MeetingTypeEnum[1];
+  public meetingType: string;
   private leave = false;
 
   constructor(private meetingSettingService: MeetingSettingsService) {
@@ -37,9 +37,10 @@ export class EnterModalComponent
     this.microphone = this.isCurrentParticipantHost
       ? true
       : this.isAllowedAudioOnStart;
-    if (this.isCurrentParticipantHost){
+    if (this.isCurrentParticipantHost && this.meetingType === null){
       this.isAllowedVideoOnStart = !this.meetingSettingService.getSettings().isVideoDisabled;
       this.isAllowedAudioOnStart = !this.meetingSettingService.getSettings().isAudioDisabled;
+      this.meetingType = MeetingTypeEnum[1];
       switch (this.recognitionLanguage) {
         case 'ru':
           this.recognitionLanguage = 'Russian';
@@ -139,6 +140,8 @@ export interface EnterMeetingModalInputData {
   isAllowedVideoOnStart: boolean;
   isAllowedAudioOnStart: boolean;
   recognitionLanguage: string;
+  selectMusic: string;
+  meetingType: string;
 }
 
 export interface EnterMeetingModalOutputData {
