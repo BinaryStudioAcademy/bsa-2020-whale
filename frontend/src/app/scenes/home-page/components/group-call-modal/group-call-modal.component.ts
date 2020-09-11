@@ -66,6 +66,8 @@ export class GroupCallModalComponent extends SimpleModalComponent<Group, null>
             settings: '',
             startTime: new Date(),
             anonymousCount: 0,
+            isAudioAllowed: true,
+            isVideoAllowed: true,
             isScheduled: false,
             isRecurrent: false,
             creatorEmail: this.callCreator.email,
